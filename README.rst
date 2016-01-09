@@ -4,9 +4,12 @@ Gseapy
 Gseapy is a python wrapper for **GESA**. 
 
 `Gene Set Enrichment Analysis <http://software.broadinstitute.org/gsea/index.jsp>`_ (GSEA) is a computational method that determines whether an a priori defined set of genes shows statistically significant, concordant differences between two biological states (e.g. phenotypes). 
+
+
 However, the R version of GSEA had not been updated since 2006. 
 Although the best choice of GSEA is the desktop Java version, this version did not provide means to 
 modify plots, like legends, ticks......
+
 
 Gseapy is aim to become a python wrapper of GSEA. It is used for convenient GO 
 enrichments and produce **publishable quality figures** from python. For use in ``python`` projects.
