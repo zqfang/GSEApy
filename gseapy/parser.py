@@ -18,13 +18,13 @@ def gsea_cls_parser(cls_path):
 
 
 def gsea_edb_parser(results_path,index = 0,):
-   '''
-   paramter
-   -----------
-   results_path:
-   index:
+    '''
+    paramter
+    -----------
+    results_path:
+    index:
    
-   '''
+    '''
 
     
     soup = BeautifulSoup(open(results_path),features='xml')
