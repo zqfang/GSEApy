@@ -4,6 +4,8 @@
 import argparse
 import os
 import sys
+import matplotlib as mpl
+
 
 
 
@@ -62,6 +64,8 @@ def main():
 
     os.system('mkdir '+ args.out)
    
+    #do not show the figure
+    mpl.use('Agg')
     
     
     #extract sample names from .cls file
