@@ -1,0 +1,15 @@
+README.rst
+setup.py
+gseapy/__init__.py
+gseapy/__main__.py
+gseapy/algorithm.py
+gseapy/gsea.py
+gseapy/gsea_plot.py
+gseapy/parser.py
+gseapy.egg-info/PKG-INFO
+gseapy.egg-info/SOURCES.txt
+gseapy.egg-info/dependency_links.txt
+gseapy.egg-info/entry_points.txt
+gseapy.egg-info/not-zip-safe
+gseapy.egg-info/requires.txt
+gseapy.egg-info/top_level.txt
