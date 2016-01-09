@@ -1,12 +1,12 @@
 Gseapy
 ========
 
-Gseapy is a python wrapper of GESA developed by Broad Institute. 
+Gseapy is a python wrapper for GESA, which was developed by Broad Institute. 
 However, the R version of GSEA had not been updated since 2006. 
-Although the best choice of GSEA is its desktop Java version, it's not easy to generate a publishable 
-figure by the desktop version.
+Although the best choice of GSEA is the desktop Java version, this version did not provide means to 
+modify plots, like legends, ticks......
 
-Gseapy is aim to become a python wrapper of GSEA. It is usd for convenient GO 
+Gseapy is aim to become a python wrapper of GSEA. It is used for convenient GO 
 enrichments and produce **publishable quality figures** from python. For use in ``python`` projects.
 
 
@@ -76,6 +76,7 @@ Run GSEAPY
 
 
 
+
 For help:
 
 .. code:: shell
@@ -83,7 +84,7 @@ For help:
    $ gseapy --help 
 
 
-For commandline useage:
+For commandline usage:
 
 .. code:: shell
   
