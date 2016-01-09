@@ -88,9 +88,9 @@ For help:
    optional arguments:
   -h, --help            show this help message and exit
   -i FILE, --InDir FILE
-                        the GSEA desktop output dir that you want to reproduce
+                        the GSEA desktop results directroy that you want to reproduce
                         the figure
-  -o OUT, --outDir OUT  the output directory
+  -o OUT, --outDir OUT  the gseapy output directory
   --version             show program's version number and exit
 
 
