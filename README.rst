@@ -52,7 +52,11 @@ Installation
 
    $ pip install gseapy
 
+| You may instead want to use the development version from Github, by running
 
+.. code:: shell
+
+   $ pip install git+git://github.com/BioNinja/gseapy.git#egg=gseapy
 
 Dependency
 --------------
