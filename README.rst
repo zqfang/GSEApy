@@ -82,6 +82,17 @@ For help:
 .. code:: shell
    
    $ gseapy --help 
+   
+   usage: gseapy [-h] [-i FILE] [-o OUT] [--version]
+
+   optional arguments:
+  -h, --help            show this help message and exit
+  -i FILE, --InDir FILE
+                        the GSEA desktop output dir that you want to reproduce
+                        the figure
+  -o OUT, --outDir OUT  the output directory
+  --version             show program's version number and exit
+
 
 
 For commandline usage:
