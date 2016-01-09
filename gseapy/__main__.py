@@ -7,11 +7,6 @@ import sys
 
 
 
-import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
-
-
 from bs4 import BeautifulSoup
 from .parser import gsea_edb_parser,gsea_rank_metric,gsea_gmt_parser,gsea_cls_parser
 

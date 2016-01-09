@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+
+
 def gsea_plot(rank_metric,enrich_term,es_profile,hit_ind, nes,pval,fdr,RES,
               phenoPos= None, phenoNeg= None,figsize =(6.5,6),**kwarg):
     '''

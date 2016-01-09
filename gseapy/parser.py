@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 
-
+from bs4 import BeautifulSoup
+import pandas as pd
 
 
 def gsea_cls_parser(cls_path):
@@ -10,7 +11,7 @@ def gsea_cls_parser(cls_path):
     '''
     
     with open(cls_path) as cls:
-        sample_name = cls.readlines()[1].split("_")
+        sample_name = cls.readlines()[1].strip('\n').split(" ")
     phenoPos = sample_name[1]
     phenoNeg = sample_name[2]
     return phenoPos,phenoNeg
