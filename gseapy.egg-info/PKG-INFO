@@ -1,6 +1,6 @@
 Metadata-Version: 1.1
 Name: gseapy
-Version: 0.2.2
+Version: 0.2.4
 Summary: Python wrapper around Gene Set Enrichment Analysis tool
 Home-page: https://github.com/BioNinja/gseapy
 Author: Zhuoqing Fang
@@ -144,9 +144,9 @@ Description: Gseapy
                               RES, phenoPos,phenoNeg, figsize=(6.5,6))
               fig.savefig('./'+enrich_term+'.png',format='png',dpi=300,)
         
-Keywords: GO,Gene Ontology,Biology,Enrichment,Bioinformatics,Computational Biology,library
+Keywords: GO,Gene Ontology,Biology,Enrichment,Bioinformatics,Computational Biology
 Platform: UNKNOWN
-Classifier: Development Status :: 4 - Beta
+Classifier: Development Status :: 5 - Production/Stable
 Classifier: Intended Audience :: Science/Research
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Programming Language :: Python :: 3.5

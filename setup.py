@@ -8,11 +8,11 @@ def readme():
         return f.read()
 
 setup(name='gseapy',
-      version='0.2.2',
+      version='0.2.4',
       description='Python wrapper around Gene Set Enrichment Analysis tool',
       long_description=readme(),
       classifiers=[
-          'Development Status :: 4 - Beta',
+          'Development Status :: 5 - Production/Stable',
           'Intended Audience :: Science/Research',
           'License :: OSI Approved :: MIT License',
           'Programming Language :: Python :: 3.5',
@@ -20,8 +20,7 @@ setup(name='gseapy',
           'Topic :: Scientific/Engineering :: Bio-Informatics',
           'Topic :: Software Development :: Libraries'],
       keywords= ['GO', 'Gene Ontology', 'Biology', 'Enrichment',
-          'Bioinformatics', 'Computational Biology',
-          'library',],
+          'Bioinformatics', 'Computational Biology',],
       url='https://github.com/BioNinja/gseapy',
       author='Zhuoqing Fang',
       author_email='fangzhuoqing@sibs.ac.cn',
