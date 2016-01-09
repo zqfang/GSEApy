@@ -31,9 +31,9 @@ def main():
     # parse command line args
     parser = argparse.ArgumentParser(description="Python wrapper of Gene Set Enrichment Analysis tool")
     parser.add_argument("-i","--InDir", action="store", dest="file",
-                        help="the GSEA desktop output dir that you want to reproduce the figure ")
+                        help="the GSEA desktop results directroy that you want to reproduce the figure ")
     parser.add_argument("-o","--outDir",action="store",default="foo",dest="out",\
-                     help="the output directory")
+                     help="the gsea output directory")
     parser.add_argument("--version",action="version",version="%(prog)s {}".format(__version__))
     
     args = parser.parse_args()
