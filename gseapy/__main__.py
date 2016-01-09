@@ -9,6 +9,9 @@ import matplotlib as mpl
 
 
 
+
+
+
 from bs4 import BeautifulSoup
 from .parser import gsea_edb_parser,gsea_rank_metric,gsea_gmt_parser,gsea_cls_parser
 
@@ -64,8 +67,7 @@ def main():
 
     os.system('mkdir '+ args.out)
    
-    #do not show the figure
-    mpl.use('Agg')
+
     
     
     #extract sample names from .cls file
@@ -102,4 +104,6 @@ def main():
     print("Congratulations! The job is done!")
 
 if __name__ == "__main__":
+    #do not show the figure
+    mpl.use('Agg')
     main()
