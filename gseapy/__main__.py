@@ -6,7 +6,7 @@ import os
 import sys
 import matplotlib as mpl
 
-
+mpl.use('Pdf')
 
 
 
@@ -99,11 +99,11 @@ def main():
         #plotting
         fig = gsea_plot(rank_metric, enrich_term,es_profile,hit_ind,nes,pval,fdr,
                         RES, phenoPos,phenoNeg,figsize=(6.5,6))
-        fig.savefig(args.out+'/'+enrich_term+'.png',format='png',dpi=300,)
+        fig.savefig(args.out+'/'+enrich_term+'.pdf',format='pdf',dpi=300,)
     
     print("Congratulations! The job is done!")
 
 if __name__ == "__main__":
     #do not show the figure
-    mpl.use('Agg')
+    #mpl.use('Pdf')
     main()
