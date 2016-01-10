@@ -48,12 +48,12 @@ def gsea_edb_parser(results_path,index = 0,):
     nes = term.get('NES')
     pval = term.get('NP')
     fdr =  term.get('FDR')
-    fwer = term.get('FWER')
+    #fwer = term.get('FWER')
    
    
-   
-    index_range = len(tag)-1
-    print("Index range: "+"0 - "+ str(index_range))
+    
+    #index_range = len(tag)-1
+    print("Enriched Gene set is: ", enrich_term)
     return enrich_term,es_profile,hit_ind, nes,pval,fdr,rank_es
     
 
