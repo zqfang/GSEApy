@@ -10,12 +10,17 @@ Download-URL: https://github.com/BioNinja/gseapy
 Description: Gseapy
         ========
         
-        Gseapy is a python wrapper of GESA developed by Broad Institute. 
-        However, the R version of GSEA had not been updated since 2006. 
-        Although the best choice of GSEA is its desktop Java version, it's not easy to generate a publishable 
-        figure by the desktop version.
+        Gseapy is a python wrapper for **GESA**. 
         
-        Gseapy is aim to become a python wrapper of GSEA. It is usd for convenient GO 
+        `Gene Set Enrichment Analysis <http://software.broadinstitute.org/gsea/index.jsp>`_ (GSEA) is a computational method that determines whether an a priori defined set of genes shows statistically significant, concordant differences between two biological states (e.g. phenotypes). 
+        
+        
+        However, the R version of GSEA had not been updated since 2006. 
+        Although the best choice of GSEA is the desktop Java version, this version did not provide means to 
+        modify plots, like legends, ticks......
+        
+        
+        Gseapy is aim to become a python wrapper of GSEA. It is used for convenient GO 
         enrichments and produce **publishable quality figures** from python. For use in ``python`` projects.
         
         
@@ -85,14 +90,26 @@ Description: Gseapy
         
         
         
+        
         For help:
         
         .. code:: shell
            
            $ gseapy --help 
+           
+           usage: gseapy [-h] [-i FILE] [-o OUT] [--version]
+        
+           optional arguments:
+          -h, --help            show this help message and exit
+          -i FILE, --InDir FILE
+                                the GSEA desktop results directroy that you want to reproduce
+                                the figure
+          -o OUT, --outDir OUT  the gseapy output directory
+          --version             show program's version number and exit
         
         
-        For commandline useage:
+        
+        For commandline usage:
         
         .. code:: shell
           
