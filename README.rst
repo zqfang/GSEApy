@@ -104,7 +104,7 @@ For help:
 
   --figsize width height
                         The figsize need two argment to define. Default:
-                        [6.5,6]
+                        6.5 6
 
   --version             show program's version number and exit
 
