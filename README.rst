@@ -92,21 +92,21 @@ For help:
 
    optional arguments:
 
-  -h, --help            show this help message and exit
+    -h, --help            show this help message and exit
 
-  -i  , --inDir         The GSEA desktop results directroy that you want to
-                        reproduce the figure
+    -i  , --inDir         The GSEA desktop results directroy that you want to
+                          reproduce the figure
  
-  -o  , --outDir        The gseapy output directory
+    -o  , --outDir        The gseapy output directory
 
-  -w  , --weight        Weighted_score type of rank_metrics.Choose from (0, 1,
-                        1.5, 2),default: 1
+    -w  , --weight        Weighted_score type of rank_metrics.Choose from (0, 1,
+                          1.5, 2),default: 1
 
-  --figsize width height
-                        The figsize need two argment to define. Default:
-                        6.5 6
+    --figsize width height
+                          The figsize keyword argument need two parameter to define.
+                          Default: 6.5 6
 
-  --version             show program's version number and exit
+    --version             show program's version number and exit
 
 
 
