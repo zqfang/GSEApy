@@ -21,7 +21,7 @@ from .gsea_plot import gsea_plot
 import glob
 
 
-__version__ = '0.2.4'
+__version__ = '0.2.5'
 __author__ = 'Zhuoqing Fang'
 
 def main():
@@ -35,10 +35,10 @@ def main():
     parser.add_argument("-o","--outDir",action="store",default="gseapy_out",dest="out", required=True,
                        metavar=' ',help="The gseapy output directory")
     parser.add_argument("-w","--weight",action='store',dest='weight',default= 1, type= float,metavar=' ',
-                        help='Weighted_score type of rank_metrics.Choose from (0, 1, 1.5, 2)',)
+                        help='Weighted_score type of rank_metrics.Choose from (0, 1, 1.5, 2),default: 1',)
     parser.add_argument("--figsize",action='store',nargs=2,dest='figsize',
                         metavar=('width', 'height'),type=float,default=[6.5,6],
-                        help="The figsize need two argment and defined by --figsize width height") 
+                        help="The figsize need two argment to define. Default: [6.5,6]") 
     parser.add_argument("--version",action="version",version="%(prog)s "+__version__)
     
     
