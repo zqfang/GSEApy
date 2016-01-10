@@ -31,21 +31,22 @@ def main():
     # parse command line args
     parser = argparse.ArgumentParser(prog='gseapy', description="Python wrapper of Gene Set Enrichment Analysis tool")
     parser.add_argument("-i","--inDir", action="store", dest="file", required=True, metavar=' ',
-                        help="the GSEA desktop results directroy that you want to reproduce the figure ")
+                        help="The GSEA desktop results directroy that you want to reproduce the figure ")
     parser.add_argument("-o","--outDir",action="store",default="gseapy_out",dest="out", required=True,
-                       metavar=' ',help="the gseapy output directory")
-    parser.add_argument("-w","--weighted",action='store',dest='weight',default= 1, type= float,
-                        choices=(0,1,1.5,2), help='Weighted_score type of rank_metrics.',)
+                       metavar=' ',help="The gseapy output directory")
+    parser.add_argument("-w","--weight",action='store',dest='weight',default= 1, type= float,metavar=' ',
+                        help='Weighted_score type of rank_metrics.Choose from (0, 1, 1.5, 2)',)
     parser.add_argument("--figsize",action='store',nargs=2,dest='figsize',
                         metavar=('width', 'height'),type=float,default=[6.5,6],
-                        help="the figsize need two argment and defined by --figsize width height") 
-    parser.add_argument("--version",action="version",version="%(prog)s {}".format(__version__))
+                        help="The figsize need two argment and defined by --figsize width height") 
+    parser.add_argument("--version",action="version",version="%(prog)s "+__version__)
+    
     
     args = parser.parse_args()
-
+    
     print("Input_directroy        = ", args.file)
     print("Output_directory       = ", args.out)
-    print("weighted_score_type    = ", args.weight )
+    print("Weighted_score_type    = ", args.weight )
     print("Figsize                = ", args.figsize)
     
     
@@ -56,8 +57,9 @@ def main():
     if not os.path.exists(args.file) :
         print("Input_Directory doesn't exist, please check your file path!")
         sys.exit(1)    
-    
-   
+    if args.weight not in [0,1,1.5,2]:
+        print("error: argument -w/--weighted: invalid choice: %s (choose from 0, 1, 1.5, 2)"%(args.weight))
+        sys.exit(1) 
     
     print("parsing files.......")
     
