@@ -58,7 +58,7 @@ def main():
         print("Input_Directory doesn't exist, please check your file path!")
         sys.exit(1)    
     if args.weight not in [0,1,1.5,2]:
-        print("error: argument -w/--weighted: invalid choice: %s (choose from 0, 1, 1.5, 2)"%(args.weight))
+        print("error: argument -w/--weight: invalid choice: %s (choose from 0, 1, 1.5, 2)"%(args.weight))
         sys.exit(1) 
     
     print("parsing files.......")
