@@ -71,10 +71,17 @@ Installation
 
 Dependency
 --------------
+* Python 2.7 or 3.3+
 
-Numpy, pandas, matplotlib, beautifulsoup4
+Mandatory
+~~~~~~~~~
 
+* Numpy 
+* Pandas 
+* Matplotlib
+* Beautifulsoup4
 
+You may also need **lxml, html5lib**, if you could not parse xml files. 
 
 
    
