@@ -8,7 +8,7 @@ is a computational method that determines whether an a priori defined set of gen
 statistically significant, concordant differences between two biological states (e.g. phenotypes). 
 
 The full ``GSEA`` is far too extensive to describe here; see
-`GSEA  <http://software.broadinstitute.org/gsea/index.jsp>`_ documentation for more information.
+`GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ documentation for more information.
 
 
 However, the R version of GSEA had not been updated since 2006. 
