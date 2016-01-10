@@ -88,15 +88,26 @@ For help:
    
    $ gseapy --help 
    
-   usage: gseapy [-h] [-i FILE] [-o OUT] [--version]
+   usage: gseapy [-h] -i   -o   [-w ] [--figsize width height] [--version]
 
    optional arguments:
+
   -h, --help            show this help message and exit
-  -i FILE, --InDir FILE
-                        the GSEA desktop results directroy that you want to reproduce
-                        the figure
-  -o OUT, --outDir OUT  the gseapy output directory
+
+  -i  , --inDir         The GSEA desktop results directroy that you want to
+                        reproduce the figure
+ 
+  -o  , --outDir        The gseapy output directory
+
+  -w  , --weight        Weighted_score type of rank_metrics.Choose from (0, 1,
+                        1.5, 2),default: 1
+
+  --figsize width height
+                        The figsize need two argment to define. Default:
+                        [6.5,6]
+
   --version             show program's version number and exit
+
 
 
 
