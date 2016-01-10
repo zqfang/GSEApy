@@ -117,6 +117,8 @@ For commandline usage:
   
   $ gseapy -i path/to/gsea_edb_file_location -o gesapy_out
 
+  # example
+  $ gseapy -i data -o test
 
 
 
