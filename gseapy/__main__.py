@@ -29,17 +29,24 @@ def main():
     
 
     # parse command line args
-    parser = argparse.ArgumentParser(description="Python wrapper of Gene Set Enrichment Analysis tool")
-    parser.add_argument("-i","--InDir", action="store", dest="file",
+    parser = argparse.ArgumentParser(prog='gseapy', description="Python wrapper of Gene Set Enrichment Analysis tool")
+    parser.add_argument("-i","--inDir", action="store", dest="file", required=True, metavar=' ',
                         help="the GSEA desktop results directroy that you want to reproduce the figure ")
-    parser.add_argument("-o","--outDir",action="store",default="foo",dest="out",\
-                     help="the gsea output directory")
+    parser.add_argument("-o","--outDir",action="store",default="gseapy_out",dest="out", required=True,
+                       metavar=' ',help="the gseapy output directory")
+    parser.add_argument("-w","--weighted",action='store',dest='weight',default= 1, type= float,
+                        choices=(0,1,1.5,2), help='Weighted_score type of rank_metrics.',)
+    parser.add_argument("--figsize",action='store',nargs=2,dest='figsize',
+                        metavar=('width', 'height'),type=float,default=[6.5,6],
+                        help="the figsize need two argment and defined by --figsize width height") 
     parser.add_argument("--version",action="version",version="%(prog)s {}".format(__version__))
     
     args = parser.parse_args()
 
-    print("Input_directroy        =", args.file)
-    print("Output_directory      =", args.out)
+    print("Input_directroy        = ", args.file)
+    print("Output_directory       = ", args.out)
+    print("weighted_score_type    = ", args.weight )
+    print("Figsize                = ", args.figsize)
     
     
 
@@ -93,12 +100,12 @@ def main():
         gene_list = rank_metric['gene_name']
 
         #calculate enrichment score    
-        RES = enrichment_score(gene_list = gene_list, gene_set = gene_set, weighted_score_type = 1, 
+        RES = enrichment_score(gene_list = gene_list, gene_set = gene_set, weighted_score_type = args.weight, 
                                correl_vector = correl_vector)
 
         #plotting
         fig = gsea_plot(rank_metric, enrich_term,es_profile,hit_ind,nes,pval,fdr,
-                        RES, phenoPos,phenoNeg,figsize=(6.5,6))
+                        RES, phenoPos,phenoNeg,figsize= args.figsize)
         fig.savefig(args.out+'/'+enrich_term+'.pdf',format='pdf',dpi=300,)
     
     print("Congratulations! The job is done!")
