@@ -1,3 +1,1 @@
 #
-
-from .gsea import gsea
