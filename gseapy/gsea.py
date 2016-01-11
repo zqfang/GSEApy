@@ -13,17 +13,17 @@ from .gsea_plot import gsea_plot
 
 import glob
 
-__version__ = '0.2.4'
 
-def main():
+
+def gsea(indir,outdir,weight=1,figsize=[6.5,6]):
     """The main routine."""
         
     #parsing files.......
     
-    results_path = glob.glob('*/edb/results.edb')[0]
-    rank_path =  glob.glob('*/edb/*.rnk')[0]
-    gene_set_path =  glob.glob('*/edb/gene_sets.gmt')[0]
-    cls_path = glob.glob('*/edb/*.cls')[0]
+    results_path = glob.glob(indir+'*/edb/results.edb')[0]
+    rank_path =  glob.glob(indir+'*/edb/*.rnk')[0]
+    gene_set_path =  glob.glob(indir+'*/edb/gene_sets.gmt')[0]
+    cls_path = glob.glob(indir+'*/edb/*.cls')[0]
     file_list = [results_path ,rank_path,gene_set_path,cls_path]  
     
     for file in file_list: 
@@ -41,7 +41,7 @@ def main():
     #extract each enriment term in the results.edb files and plot.
     database = BeautifulSoup(open(results_path),features='xml')
     length = len(database.findAll('DTG'))
-    
+    os.system("mkdir "+ outdir)
     for idx in range(length):
         #extract statistical resutls from results.edb file
         enrich_term,es_profile,hit_ind, nes,pval,fdr,rank_es = gsea_edb_parser( results_path,index=idx)
@@ -56,15 +56,15 @@ def main():
         gene_list = rank_metric['gene_name']
 
         #calculate enrichment score    
-        RES = enrichment_score(gene_list = gene_list, gene_set = gene_set, weighted_score_type = 1, 
+        RES = enrichment_score(gene_list = gene_list, gene_set = gene_set, weighted_score_type = weight, 
                                correl_vector = correl_vector)
 
 
 
         #plotting
         fig = gsea_plot(rank_metric, enrich_term,es_profile,hit_ind,nes,pval,
-                        fdr, RES, phenoPos,phenoNeg,figsize=(6.5,6))
-        fig.savefig('./'+enrich_term+'.png',format='png',dpi=300,)
+                        fdr, RES, phenoPos,phenoNeg,figsize=figsize)
+        fig.savefig(outdir+'/'+enrich_term+'.png',format='png',dpi=300,)
 
 if __name__ == "__main__":
-    main()
+    gsea()
