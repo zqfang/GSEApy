@@ -93,6 +93,12 @@ Run GSEAPY
 | For more details,see below. 
 
 
+Gseapy Outputs
+-----------------
+
+**GSEA plots in PDF formats.**
+
+You can modify ``GSEA`` plots easily in .pdf files. Please Enjoy.
 
 
 For help:
