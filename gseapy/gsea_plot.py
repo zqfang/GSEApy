@@ -34,9 +34,6 @@ def gsea_plot(rank_metric,enrich_term,es_profile,hit_ind, nes,pval,fdr,RES,
 
     
     # center color map at midpoint = 0
-
-
-
     norm = _MidpointNormalize(midpoint=0)
 
     #dataFrame of ranked matrix scores
@@ -58,6 +55,9 @@ def gsea_plot(rank_metric,enrich_term,es_profile,hit_ind, nes,pval,fdr,RES,
     
     im_matrix = rank_metric.ix[:,1:].T
 
+    #in most case, we will have mangy plots, so do not display plots
+    #It's also convinient to run this script on command line.         
+    plt.ioff()
     
     #GSEA Plots
     gs = plt.GridSpec(16,1)
@@ -80,8 +80,8 @@ def gsea_plot(rank_metric,enrich_term,es_profile,hit_ind, nes,pval,fdr,RES,
          transform=trans1)    
     ax1.set_xlabel("Rank in Ordered Dataset",fontsize=14)
     ax1.spines['top'].set_visible(False)
-    ax1.tick_params(axis='both', which='both', bottom='off', top='off', right='off', left='off')
-    #ax1.locator_params(axis='y',nbins=4)
+    ax1.tick_params(axis='both', which='both', top='off', right='off', left='off')
+    ax1.locator_params(axis='y',nbins=5)
     
     ax1.yaxis.set_major_formatter(plt.FuncFormatter(lambda tick_loc,tick_num :  '{:.1f}'.format(tick_loc, tick_num) ))
     
@@ -119,7 +119,7 @@ def gsea_plot(rank_metric,enrich_term,es_profile,hit_ind, nes,pval,fdr,RES,
     ax4.hlines(0,0,1,linewidth=.5,transform=trans4,color='grey')
     ax4.set_ylabel("Enrichment score (ES)",fontsize=14)
     ax4.set_xlim(min(x),max(x))
-    ax4.tick_params(axis='both', which='both', bottom='off', top='off', labelbottom='off', right='off', left='off')
+    ax4.tick_params(axis='both', which='both', bottom='off', top='off', labelbottom='off', right='off')
     ax4.locator_params(axis='y',nbins=5)
     # FuncFormatter need two argment, I don't know why. this lambda function used to format yaxis tick labels.
     ax4.yaxis.set_major_formatter(plt.FuncFormatter(lambda tick_loc,tick_num :  '{:.1f}'.format(tick_loc)) )
@@ -128,6 +128,6 @@ def gsea_plot(rank_metric,enrich_term,es_profile,hit_ind, nes,pval,fdr,RES,
     fig.suptitle(enrich_term,fontsize=16)
     fig.subplots_adjust(hspace=0)
     #fig.tight_layout()
-    plt.show()
+
     return fig
     

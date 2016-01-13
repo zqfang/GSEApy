@@ -15,8 +15,8 @@ import glob
 
 
 
-def gsea(indir,outdir,weight=1,figsize=[6.5,6]):
-    """The main routine."""
+def gsea(indir,outdir,weight=1,figsize=[6.5,6],format='pdf',):
+    """The main fuction to run inside python."""
         
     #parsing files.......
     
@@ -64,7 +64,8 @@ def gsea(indir,outdir,weight=1,figsize=[6.5,6]):
         #plotting
         fig = gsea_plot(rank_metric, enrich_term,es_profile,hit_ind,nes,pval,
                         fdr, RES, phenoPos,phenoNeg,figsize=figsize)
-        fig.savefig(outdir+'/'+enrich_term+'.png',format='png',dpi=300,)
+    
+        fig.savefig(outdir+'/'+enrich_term+'./'+format,dpi=300,)
 
 if __name__ == "__main__":
     gsea()

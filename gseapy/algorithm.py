@@ -2,15 +2,20 @@
 import numpy as np
 
 def enrichment_score(gene_list, gene_set, weighted_score_type = 1, correl_vector = None):
+    '''
+    this is the most important function of GSEApy. It has the same algorithm with GSEA.
     
-    # correl_vector is rank_metric['rank'].values
-    # gene_list is rank_metric['gene_name']
-    # gene_set is gene_sets in gmt file, please used gsea_gmt_parser to get gene_set.
-    # weighted_sore_type: 0, 1, 1.5, 2. It's indentical to gsea's weighted_sore_method. defalut: 1.
+    paramter
+    -----------------
+    correl_vector:                  rank_metric['rank'].values
+    gene_list:                      rank_metric['gene_name']
+    gene_set:                       gene_sets in gmt file, please used gsea_gmt_parser to get gene_set.
+    weighted_sore_type:             0, 1, 1.5, 2. It's indentical to gsea's weighted_sore_method. defalut: 1.
     
+    '''
     
     #Test whether each element of a 1-D array is also present in a second array
-    # use astype covert bool to intergers.
+    #use astype covert bool to intergers  
     tag_indicator = np.in1d(gene_list,gene_set).astype(int)  # notice that the sign is 0 (no tag) or 1 (tag)
     no_tag_indicator = 1 - tag_indicator
      

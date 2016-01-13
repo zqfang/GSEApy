@@ -4,9 +4,7 @@
 import argparse
 import os
 import sys
-import matplotlib as mpl
 
-mpl.use('Pdf')
 
 
 
@@ -88,6 +86,9 @@ def main():
     
     
     print("Generate Plots......Please wait.....")
+    
+    
+    
     for idx in range(length):
         #extract statistical resutls from results.edb file
         enrich_term,es_profile,hit_ind, nes,pval,fdr,rank_es = gsea_edb_parser( results_path,index=idx)

@@ -20,9 +20,13 @@ def gsea_cls_parser(cls_path):
 
 def gsea_edb_parser(results_path,index = 0,):
     '''
+    parse results.edb files.
+            
     paramter
     -----------
+    
     results_path:
+    
     index:
    
     '''
