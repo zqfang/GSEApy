@@ -1,6 +1,6 @@
 Metadata-Version: 1.1
 Name: gseapy
-Version: 0.2.6
+Version: 0.2.7
 Summary: Python wrapper around Gene Set Enrichment Analysis tool
 Home-page: https://github.com/BioNinja/gseapy
 Author: Zhuoqing Fang

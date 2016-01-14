@@ -19,7 +19,7 @@ from .gsea_plot import gsea_plot
 import glob
 
 
-__version__ = '0.2.6'
+__version__ = '0.2.7'
 __author__ = 'Zhuoqing Fang'
 
 def main():
