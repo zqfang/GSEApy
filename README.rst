@@ -1,4 +1,4 @@
-Gseapy
+GSEAPY
 ========
 
 Gseapy is a python wrapper for **GESA**. 
