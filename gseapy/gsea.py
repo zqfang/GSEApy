@@ -65,7 +65,7 @@ def gsea(indir,outdir,weight=1,figsize=[6.5,6],format='pdf',):
         fig = gsea_plot(rank_metric, enrich_term,es_profile,hit_ind,nes,pval,
                         fdr, RES, phenoPos,phenoNeg,figsize=figsize)
     
-        fig.savefig(outdir+'/'+enrich_term+'./'+format,dpi=300,)
+        fig.savefig(outdir+'/'+enrich_term+'.'+format,dpi=300,)
 
 if __name__ == "__main__":
     gsea()
