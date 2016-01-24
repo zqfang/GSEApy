@@ -37,6 +37,8 @@ def main():
     parser.add_argument("--figsize",action='store',nargs=2,dest='figsize',
                         metavar=('width', 'height'),type=float,default=[6.5,6],
                         help="The figsize keyword argument need two parameter to define. Default: [6.5,6]") 
+    parser.add_argument("--format",action="store",default="pdf",dest="format", 
+                       metavar=' ',help="The matplotlib figure format. Default: pdf")    
     parser.add_argument("--version",action="version",version="%(prog)s "+__version__)
     
     
@@ -109,7 +111,7 @@ def main():
         #plotting
         fig = gsea_plot(rank_metric, enrich_term,es_profile,hit_ind,nes,pval,fdr,
                         RES, phenoPos,phenoNeg,figsize= args.figsize)
-        fig.savefig(args.out+'/'+enrich_term+'.pdf',format='pdf',dpi=300,)
+        fig.savefig('{a}/{b}.{c}'.format(a=args.out,b=enrich_term,c=args.format),dpi=300,)
     
     print("Congratulations! The job is done!")
 

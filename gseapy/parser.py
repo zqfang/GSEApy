@@ -5,9 +5,11 @@ from bs4 import BeautifulSoup
 import pandas as pd
 
 
+
 def gsea_cls_parser(cls_path):
     '''
-    extact sample name
+    extact class(sample) name
+    :param cls_path: location of GSEA-P .cls file
     '''
     
     with open(cls_path) as cls:
@@ -22,12 +24,10 @@ def gsea_edb_parser(results_path,index = 0,):
     '''
     parse results.edb files.
             
-    paramter
-    -----------
+
     
-    results_path:
-    
-    index:
+    :param results_path: location of GSEA-P results.gmt file
+    :param index: gene_sets_length.
    
     '''
 
@@ -63,7 +63,9 @@ def gsea_edb_parser(results_path,index = 0,):
 
 def gsea_rank_metric(rank_path):
     '''
-    parser rank_metric file
+    parse rank_metric file
+    
+    :param rank_path: location of GSEA-P .rnk file
     '''
     
     
@@ -75,7 +77,9 @@ def gsea_rank_metric(rank_path):
     
 def gsea_gmt_parser(gene_set_path):
     '''
-    parser gene set file
+    parser gene sets file
+    
+    :param gene_sets_path: location of GSEA-P .gmt file
     '''
     
     
