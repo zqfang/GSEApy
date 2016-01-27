@@ -31,14 +31,14 @@ def main():
     parser.add_argument("-i","--inDir", action="store", dest="file", required=True, metavar=' ',
                         help="The GSEA desktop results directroy that you want to reproduce the figure ")
     parser.add_argument("-o","--outDir",action="store",default="gseapy_out",dest="out", required=True,
-                       metavar=' ',help="The gseapy output directory")
-    parser.add_argument("-w","--weight",action='store',dest='weight',default= 1, type= float,metavar=' ',
+                       metavar='',help="The gseapy output directory")
+    parser.add_argument("-w","--weight",action='store',dest='weight',default= 1, type= float,metavar='',
                         help='Weighted_score type of rank_metrics.Choose from (0, 1, 1.5, 2),default: 1',)
     parser.add_argument("--figsize",action='store',nargs=2,dest='figsize',
                         metavar=('width', 'height'),type=float,default=[6.5,6],
                         help="The figsize keyword argument need two parameter to define. Default: [6.5,6]") 
     parser.add_argument("--format",action="store",default="pdf",dest="format", 
-                       metavar=' ',help="The matplotlib figure format. Default: pdf")    
+                       metavar='',help="The matplotlib figure format. Default: pdf")    
     parser.add_argument("--version",action="version",version="%(prog)s "+__version__)
     
     
@@ -80,7 +80,7 @@ def main():
     
     
     #extract sample names from .cls file
-    phenoPos,phenoNeg = gsea_cls_parser(cls_path)  
+    phenoPos,phenoNeg,classes = gsea_cls_parser(cls_path)  
     
     #extract each enriment term in the results.edb files and plot.
     database = BeautifulSoup(open(results_path),features='xml')

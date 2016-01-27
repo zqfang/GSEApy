@@ -14,9 +14,11 @@ def gsea_cls_parser(cls_path):
     
     with open(cls_path) as cls:
         sample_name = cls.readlines()[1].strip('\n').split(" ")
+        classes = cls.readlines()[2].strip('\n').split(" ")
     phenoPos = sample_name[1]
     phenoNeg = sample_name[2]
-    return phenoPos,phenoNeg
+    
+    return phenoPos,phenoNeg,classes
 
 
 

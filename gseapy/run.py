@@ -5,12 +5,14 @@ Created on Tue Jan 19 12:07:06 2016
 @author: Bioninja
 """
 
-from .parser import gsea_rank_metric,gsea_gmt_parser
-from .algorithm import gsea_compute
+from .parser import gsea_rank_metric,gsea_gmt_parser,gsea_cls_parser
+from .algorithm import gsea_compute,ranking_metric
+
+import pandas as pd
 
 
-def run(data, gene_sets, min_size= 15, max_size=1000, min_part=0.1,
-     permutation_n=1000, permutation_type="gene_set", ranking_metric=None):
+def run(data, gene_sets,cls, min_size= 15, max_size=1000, permutation_n=1000, weighted_score_type=1,
+        permutation_type="gene_set", method='log2_ratio_of_classes',ascending=False,rank_metric=None):
     """ Run Gene Set Enrichment Analysis.
 
     :param data.Table data: Gene expression data.  
@@ -44,16 +46,21 @@ def run(data, gene_sets, min_size= 15, max_size=1000, min_part=0.1,
     assert len(data) > 1
     assert permutation_type in ["phenotype", "gene_set"]
     
-    if ranking_metric is not None:
-        rankings = ranking_metric
-        
-    rankings = gsea_rank_metric("./gseapy/data/edb/gsea_data.gsea_data.rnk")
-    gmt = gsea_gmt_parser("./gseapy/data/edb/gene_sets.gmt")
-    
-    
-    #ES, RES = enrichment_score()
-    results = gsea_compute(gene_list = rankings['gene_name'],rankings = rankings['rank'].values,
-                    n=100,gmt = gmt, weighted_score_type=1,permutation_type='gene_set',expression_data=None)
+    data = pd.read_table(data)
+    classes = gsea_cls_parser(cls)[2]
+    gmt = gsea_gmt_parser(gene_sets)
+    gmt.sort()
+    #Ecompute ES, NES, pval, FDR, RES
+    if rank_metric is None:
+        dat = ranking_metric(data,method= method,classes = classes ,ascending=ascending)
+        results,hit_ind,RES = gsea_compute(data = dat, gene_list = None,rankings = None,
+                    n=permutation_n,gmt = gmt, weighted_score_type=weighted_score_type,
+                    permutation_type=permutation_type)
+    else:
+        dat = pd.read_table(rank_metric)
+        results,hit_ind,RES = gsea_compute(data = None, gene_list = rank_metric['gene_name'],rankings = rank_metric['rank'].values,
+                                           n=permutation_n,gmt = gmt, weighted_score_type=weighted_score_type,
+                                           permutation_type=permutation_type)
     
     res = {}
 
@@ -61,11 +68,11 @@ def run(data, gene_sets, min_size= 15, max_size=1000, min_part=0.1,
         rdict = {}
         rdict['es'] = gseale[0]
         rdict['nes'] = gseale[1]
-        rdict['p'] = gseale[2]
+        rdict['pval'] = gseale[2]
         rdict['fdr'] = gseale[3]
         rdict['size'] = len(gmt[gs])
-        #rdict['matched_size'] = len(gs)
-        #rdict['genes'] = subset
+        #rdict['matched_size'] = len(gseale[5])
+        #rdict['genes'] = rankings.ix[gseale[5],'gene_name']
         res[gs] = rdict
 
-        return res
+    return res, hit_ind, RES

@@ -3,10 +3,10 @@
 
 from __future__ import absolute_import, print_function,division
 from functools import reduce
-
+from .parser import gsea_cls_parser
 import time
 import numpy as np
-import pandas as pd
+import sys
 import random
 
 
@@ -39,6 +39,7 @@ def enrichment_score(gene_list, gene_set, weighted_score_type = 1, correl_vector
     #use .astype to covert bool to intergers  
     tag_indicator = np.in1d(gene_list,gene_set).astype(int)  # notice that the sign is 0 (no tag) or 1 (tag)
     no_tag_indicator = 1 - tag_indicator
+    hit_ind = np.nonzero(tag_indicator)
      
     
     #compute ES score, the code below is identical to gsea enrichment_score method.
@@ -59,7 +60,7 @@ def enrichment_score(gene_list, gene_set, weighted_score_type = 1, correl_vector
     
     #print("The length of ES is", len(RES))
     
-    return (max_ES if abs(max_ES) > abs(min_ES) else min_ES, RES)
+    return (max_ES if abs(max_ES) > abs(min_ES) else min_ES, hit_ind, RES)
  
 
 def shuffle_list(gene_list, rand=random.Random(0)):
@@ -69,39 +70,26 @@ def shuffle_list(gene_list, rand=random.Random(0)):
     :gene_list: rank_metric['gene_name'].values
     """
     
-    l2 = gene_list.values.copy()
+    l2 = gene_list.copy()
     rand.shuffle(l2)
 
     return l2
         
+         
     
-def shuffle_class(df,n):
+    
+    
+def ranking_metric(df, method='log2_ratio_of_classes',classes = None,ascending=False):
     """
-    a function to shuffle rows and columns
+     the main function to rank a expression table.
     
-    :param df:
-    :return: dataframe
-    """
-    
-    df2 = df.T.copy()
-    for _ in range(n):    
-        df2.apply(np.random.shuffle,axis=0)
-    return df2.T       
-    
-    
-    
-def ranking_metric(df, method='log2_ratio_of_classes'):
-    """
-    :param df: gene_expression DataFrame.
-    
-    
-    
+    :param df: gene_expression DataFrame.    
     :param method:
      1. signal_to_noise 
          You must have at least three samples for each phenotype to use this metric.
          The larger the signal-to-noise ratio, the larger the differences of the means (scaled by the standard deviations);
          that is, the more distinct the gene expression is in each phenotype and the more the gene acts as a “class marker.” 
-     2. t-test
+     2. t_test
          uses the difference of means scaled by the standard deviation and number of samples. 
          Note: You must have at least three samples for each phenotype to use this metric.
          The larger the tTest ratio, the more distinct the gene expression is in each phenotype 
@@ -114,13 +102,44 @@ def ranking_metric(df, method='log2_ratio_of_classes'):
          uses the log2 ratio of class means to calculate fold change for natural scale data.
          This is the recommended statistic for calculating fold change for natural scale data.
           
-     
-    :return: returns correlation to class of each variable.
+    :param classes: a list of phenotype labels.
+    :param ascending:  bool or list of bool. Sort ascending vs. descending.
+    :param cls_path: only use when classes is not None.
+ 
+   :return: returns correlation to class of each variable.
              same format with .rnk file. gene_name in first coloum, correlation
              in second column.
     """ 
     
-    #To be complete
+    
+    df2 = df.select_dtypes(include=['float64']).T  + 0.001 #select numbers in DataFrame      
+    pheon = set(classes)
+    A = pheon[0]
+    B = pheon[1]
+        
+    df2['class'] = classes
+    df_mean= df2.groupby('class').mean().T
+    df_std = df2.groupby('class').std().T
+    
+    if method == 'signal_to_noise':
+        df3 = (df_mean[A] - df_mean[B])/(df_std[A] + df_std[B])
+    elif method == 't_test':
+        df3 = (df_mean[A] - df_mean[B])/ np.sqrt(df_std[A]**2/len(df_std)+df_std[B]**2/len(df_std) )
+    elif method == 'ratio_of_classes':
+        df3 = df_mean[A] / df_mean[B]
+    elif method == 'Diff_of_classes':
+        df3  = df_mean[A] - df_mean[B]
+    elif method == 'log2_ratio_of_classes':
+        df3  =  np.log2(df_mean[A] / df_mean[B])
+    else:
+        print("Please provide correct method name!!!")        
+        sys.exit()
+    df3.sort_values(ascending=ascending,inplace=True)
+    df3 = df3.to_frame().reset_index()
+    df3.columns = ['gene_name','rank']
+    df3['rank2'] = df3['rank']
+
+    return df3
     
 def gsea_pval(es, esnull):
     """
@@ -132,75 +151,69 @@ def gsea_pval(es, esnull):
     
     try:
         if es < 0:
-            return float(len([ a for a in esnull if a <= es ]))/ \
-                len([ a for a in esnull if a < 0])    
+            return float(len([ a for a in esnull if a <= es ]))/len([ a for a in esnull if a < 0])    
         else: 
-            return float(len([ a for a in esnull if a >= es ]))/ \
-                len([ a for a in esnull if a >= 0])
+            return float(len([ a for a in esnull if a >= es ]))/len([ a for a in esnull if a >= 0])
     except:
         return 1.0
 
-
-
-
-def ordered_pointers_corr(correl_vector ):
-    """
-    Return a list of integers: indexes in original
-    lcor. Elements in the list are ordered by
-    their lcor[i] value. Higher correlations first.
-    """
-    ordered = [ (i,a) for i,a in enumerate(correl_vector) ] #original pos + correlation
-    ordered.sort(key=lambda x: -x[1]) #sort by correlation, descending
-    index = [ i[0] for i in ordered] #contains positions in the original list
-    
-    return index
     
     
-def gsea_compute(gene_list, rankings, gmt, n, weighted_score_type=1,permutation_type='gene_set',expression_data=None):
+def gsea_compute(data=None, gene_list, rankings, gmt, n = 1000, weighted_score_type=1,permutation_type='gene_set',method):
     """
     compute enrichment scores and enrichment nulls. 
     
     :param gene_list: rank_metric['gene_name']
     :param rankings: correl_vector, ranking_metric['rank']
-    :param subsets: all gene sets in .gmt file. need gmt_parser() results 
+    :param gmt: all gene sets in .gmt file. need to call gsea_gmt_parser() to get results. 
     :param n: permutation number. default: 1000
+    :method: ranking_metric method. see above.
     :param weighted_score_type: default:1
     """
     enrichment_scores = []
+    rank_ES = []
+    hit_ind = []
     w = weighted_score_type
     subsets = gmt.keys()
+    subsets.sort()
+    dat = data.T.copy()
+        
+
+
     for subset in subsets:
-        es = enrichment_score(gene_list = gene_list, gene_set=gmt.get(subset), 
-                              weighted_score_type = w, correl_vector = rankings)[0]
+        es,ind,RES = enrichment_score(gene_list = gene_list, gene_set=gmt.get(subset), 
+                              weighted_score_type = w, correl_vector = rankings)
         enrichment_scores.append(es)
+        rank_ES.append(RES)
+        hit_ind.append(ind)
     
     
 
     enrichment_nulls = [ [] for a in range(len(subsets)) ]
     
-    index = ordered_pointers_corr(rankings)
+
     for i in range(n):
         if permutation_type == "phenotype":
-            d2 = shuffle_class(expression_data,n=2000+i) #fixed permutation
-            r2 = ranking_metric(d2)
+               
+            dat.apply(np.random.shuffle,axis=0) #permutation classes
+            dat2 = dat.T
+            r2 = ranking_metric(dat2,method = method )
             ranking2=r2['rank']
             gene_list2=r2['gene_name']
-        else:
-           
-            index2 = shuffle_list(index, random.Random(2000+i))        
-            gene_list2 = gene_list[index2]
-            ranking2 = rankings[index2]
+        else:           
+            gene_list2 = shuffle_list(gene_list, random.Random(2000+i)) #permutation genes.                   
+            ranking2 = rankings
+            
        
         
         for si,subset in enumerate(subsets):
-            esn = enrichment_score(gene_list = gene_list2, gene_set=gmt.get(subset), 
-                              weighted_score_type = w, correl_vector = ranking2)[0]            
-            
+            esn = enrichment_score(gene_list = gene_list2, gene_set= gmt.get(subset), 
+                              weighted_score_type = w, correl_vector = ranking2)[0]                        
             enrichment_nulls[si].append(esn)
 
         
 
-    return gsea_significance(enrichment_scores, enrichment_nulls)
+    return gsea_significance(enrichment_scores, enrichment_nulls),hit_ind,RES
 
 
 def gsea_significance(enrichment_scores, enrichment_nulls):
@@ -212,7 +225,7 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
     
 
     tb1 = time.time()
-    print("Start to compute enrichment socres..........................",tb1)
+    #print("Start to compute enrichment socres..........................",tb1)
     enrichmentPVals = []
     nEnrichmentScores = []
     nEnrichmentNulls = []
@@ -323,5 +336,5 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
     
     print("Statistial testing finished.", time.time() - tb1)
 
-    return zip(enrichment_scores, nEnrichmentScores, enrichmentPVals, fdrs)
+    return enrichment_scores, nEnrichmentScores, enrichmentPVals, fdrs
 
