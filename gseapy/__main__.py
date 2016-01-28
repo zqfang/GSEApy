@@ -19,8 +19,7 @@ from .gsea_plot import gsea_plot
 import glob
 
 
-__version__ = '0.2.8'
-__author__ = 'Zhuoqing Fang'
+__version__ = '0.3.0'
 
 def main():
     """The main routine."""
@@ -43,14 +42,7 @@ def main():
     
     
     args = parser.parse_args()
-    
-    print("Input_directroy        = ", args.file)
-    print("Output_directory       = ", args.out)
-    print("Weighted_score_type    = ", args.weight )
-    print("Figsize                = ", args.figsize)
-    
-    
-
+        
     file_name = args.file
     
     # checking flies and parameters.
@@ -93,7 +85,7 @@ def main():
     
     for idx in range(length):
         #extract statistical resutls from results.edb file
-        enrich_term,es_profile,hit_ind, nes,pval,fdr,rank_es = gsea_edb_parser( results_path,index=idx)
+        enrich_term,hit_ind, nes,pval,fdr,rank_es = gsea_edb_parser( results_path,index=idx)
 
         #obtain rank_metrics
         rank_metric = gsea_rank_metric(rank_path)
@@ -109,13 +101,11 @@ def main():
                                correl_vector = correl_vector)
 
         #plotting
-        fig = gsea_plot(rank_metric, enrich_term,es_profile,hit_ind,nes,pval,fdr,
+        fig = gsea_plot(rank_metric, enrich_term,hit_ind,nes,pval,fdr,
                         RES, phenoPos,phenoNeg,figsize= args.figsize)
         fig.savefig('{a}/{b}.{c}'.format(a=args.out,b=enrich_term,c=args.format),dpi=300,)
     
     print("Congratulations! The job is done!")
 
 if __name__ == "__main__":
-    #do not show the figure
-    #mpl.use('Pdf')
     main()

@@ -3,14 +3,21 @@
 
 from __future__ import absolute_import, print_function,division
 from functools import reduce
-from .parser import gsea_cls_parser
+
 import time
 import numpy as np
 import sys
 import random
 
 
+def preprocess(df):
 
+
+    df.drop_duplicates(inplace=True)
+    df.dropna(how='all',inplace=True)
+    df2 = df.select_dtypes(include=['float64'])  + 0.001 #select numbers in DataFrame      
+    
+    return df2
 
 
 def enrichment_score(gene_list, gene_set, weighted_score_type = 1, correl_vector = None):
@@ -37,9 +44,9 @@ def enrichment_score(gene_list, gene_set, weighted_score_type = 1, correl_vector
     #Test whether each element of a 1-D array is also present in a second array
     #It's more intuitived here than orginal enrichment_score source code.
     #use .astype to covert bool to intergers  
-    tag_indicator = np.in1d(gene_list,gene_set).astype(int)  # notice that the sign is 0 (no tag) or 1 (tag)
+    tag_indicator = np.in1d(gene_list,gene_set,assume_unique=True).astype(int)  # notice that the sign is 0 (no tag) or 1 (tag)
     no_tag_indicator = 1 - tag_indicator
-    hit_ind = np.nonzero(tag_indicator)
+    hit_ind = np.flatnonzero(tag_indicator).tolist()
      
     
     #compute ES score, the code below is identical to gsea enrichment_score method.
@@ -60,7 +67,7 @@ def enrichment_score(gene_list, gene_set, weighted_score_type = 1, correl_vector
     
     #print("The length of ES is", len(RES))
     
-    return (max_ES if abs(max_ES) > abs(min_ES) else min_ES, hit_ind, RES)
+    return (max_ES if abs(max_ES) > abs(min_ES) else min_ES, hit_ind.tolist(), RES.tolist())
  
 
 def shuffle_list(gene_list, rand=random.Random(0)):
@@ -73,13 +80,12 @@ def shuffle_list(gene_list, rand=random.Random(0)):
     l2 = gene_list.copy()
     rand.shuffle(l2)
 
-    return l2
-        
+    return l2        
          
     
     
     
-def ranking_metric(df, method='log2_ratio_of_classes',classes = None,ascending=False):
+def ranking_metric(df, method,classes,ascending):
     """
      the main function to rank a expression table.
     
@@ -111,12 +117,10 @@ def ranking_metric(df, method='log2_ratio_of_classes',classes = None,ascending=F
              in second column.
     """ 
     
-    
-    df2 = df.select_dtypes(include=['float64']).T  + 0.001 #select numbers in DataFrame      
-    pheon = set(classes)
+    pheon = list(set(classes))
     A = pheon[0]
     B = pheon[1]
-        
+    df2 = df.T   
     df2['class'] = classes
     df_mean= df2.groupby('class').mean().T
     df_std = df2.groupby('class').std().T
@@ -159,50 +163,58 @@ def gsea_pval(es, esnull):
 
     
     
-def gsea_compute(data=None, gene_list, rankings, gmt, n = 1000, weighted_score_type=1,permutation_type='gene_set',method):
+def gsea_compute(data, gmt, n, weighted_score_type,permutation_type,method,classes,ascending):
     """
     compute enrichment scores and enrichment nulls. 
     
-    :param gene_list: rank_metric['gene_name']
-    :param rankings: correl_vector, ranking_metric['rank']
+
     :param gmt: all gene sets in .gmt file. need to call gsea_gmt_parser() to get results. 
     :param n: permutation number. default: 1000
     :method: ranking_metric method. see above.
     :param weighted_score_type: default:1
     """
     enrichment_scores = []
+
+    w = weighted_score_type
+    subsets = sorted(gmt.keys())
+    
+    dat = data.copy()
+    r2 = ranking_metric(dat,method = method,classes=classes, ascending= ascending)
+    ranking=r2['rank'].values
+    gene_list=r2['gene_name']
+        
+    tb1 = time.time()
+    print("Start to compute enrichment socres..........................",tb1)
     rank_ES = []
     hit_ind = []
-    w = weighted_score_type
-    subsets = gmt.keys()
-    subsets.sort()
-    dat = data.T.copy()
-        
-
-
+    
     for subset in subsets:
         es,ind,RES = enrichment_score(gene_list = gene_list, gene_set=gmt.get(subset), 
-                              weighted_score_type = w, correl_vector = rankings)
+                              weighted_score_type = w, correl_vector = ranking)
         enrichment_scores.append(es)
         rank_ES.append(RES)
         hit_ind.append(ind)
     
     
-
+    print("Star to compute esnulls.....................")
     enrichment_nulls = [ [] for a in range(len(subsets)) ]
     
 
     for i in range(n):
         if permutation_type == "phenotype":
-               
-            dat.apply(np.random.shuffle,axis=0) #permutation classes
-            dat2 = dat.T
-            r2 = ranking_metric(dat2,method = method )
+            dat2 = dat.T   
+            dat2.apply(np.random.shuffle,axis=0) #permutation classes
+            r2 = ranking_metric(dat2.T,method = method,classes=classes,ascending= ascending )
             ranking2=r2['rank']
-            gene_list2=r2['gene_name']
-        else:           
-            gene_list2 = shuffle_list(gene_list, random.Random(2000+i)) #permutation genes.                   
-            ranking2 = rankings
+            gene_list2=r2['gene_name'].values
+        else:
+            
+            #gene_list.apply(np.random.shuffle,axis=0) #permutation genes
+            #r2 = ranking_metric(dat,method = method, classes=classes,ascending= ascending)
+            gene_list2 = shuffle_list(gene_list,random.Random(2000+i))
+            ranking2=ranking
+            #gene_list2=gene_list
+
             
        
         
@@ -213,7 +225,7 @@ def gsea_compute(data=None, gene_list, rankings, gmt, n = 1000, weighted_score_t
 
         
 
-    return gsea_significance(enrichment_scores, enrichment_nulls),hit_ind,RES
+    return gsea_significance(enrichment_scores, enrichment_nulls),hit_ind,rank_ES, subsets
 
 
 def gsea_significance(enrichment_scores, enrichment_nulls):
@@ -221,11 +233,8 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
     Computing p-vals, normalized ES, FDR
     """
     
-
+    print("Start to compute pvals..........................",time.time())
     
-
-    tb1 = time.time()
-    #print("Start to compute enrichment socres..........................",tb1)
     enrichmentPVals = []
     nEnrichmentScores = []
     nEnrichmentNulls = []
@@ -233,7 +242,7 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
     for i in range(len(enrichment_scores)):
         es = enrichment_scores[i]
         enrNull = enrichment_nulls[i]
-        #print es, enrNull
+       
 
         enrichmentPVals.append(gsea_pval(es, enrNull))
 
@@ -241,19 +250,15 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
         #the positive and negative scores by divident by the mean of the 
         #ES(S,pi)
 
-        #print es, enrNull
-
         def normalize(s):
             try:
                 if s == 0:
                     return 0.0
                 if s >= 0:
-                    meanPos = np.mean([a for a in enrNull if a >= 0])
-                    #print s, meanPos
+                    meanPos = np.mean([a for a in enrNull if a >= 0])                   
                     return s/meanPos
                 else:
-                    meanNeg = np.mean([a for a in enrNull if a < 0])
-                    #print s, meanNeg
+                    meanNeg = np.mean([a for a in enrNull if a < 0])                    
                     return -s/meanNeg
             except:
                 return 0.0 #return if according mean value is uncalculable
@@ -266,7 +271,7 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
         nEnrichmentNulls.append(nenrNull)
  
 
-    print("Enrichment Score computing finished............. ", time.time() - tb1)
+    print("start to comput FDRs............. ", time.time())
 
     #FDR computation
     #create a histogram of all NES(S,pi) over all S and pi
@@ -302,8 +307,6 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
     nvals = np.array(sorted(vals))
     nnes = np.array(sorted(nEnrichmentScores))
 
-    #print("LEN VALS", len(vals), len(nEnrichmentScores))
-
     fdrs = []
 
 
@@ -334,7 +337,7 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
         except:
             fdrs.append(1000000000.0)
     
-    print("Statistial testing finished.", time.time() - tb1)
+    print("Statistial testing finished.", time.time())
 
-    return enrichment_scores, nEnrichmentScores, enrichmentPVals, fdrs
+    return zip(enrichment_scores, nEnrichmentScores, enrichmentPVals, fdrs)
 

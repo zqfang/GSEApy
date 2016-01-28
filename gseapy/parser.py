@@ -3,7 +3,7 @@
 
 from bs4 import BeautifulSoup
 import pandas as pd
-
+import sys
 
 
 def gsea_cls_parser(cls_path):
@@ -13,8 +13,9 @@ def gsea_cls_parser(cls_path):
     '''
     
     with open(cls_path) as cls:
-        sample_name = cls.readlines()[1].strip('\n').split(" ")
-        classes = cls.readlines()[2].strip('\n').split(" ")
+        file = cls.readlines()
+    sample_name = file[1].strip('\n').split(" ")        
+    classes = file[2].strip('\n').split(" ")
     phenoPos = sample_name[1]
     phenoNeg = sample_name[2]
     
@@ -60,7 +61,7 @@ def gsea_edb_parser(results_path,index = 0,):
     
     #index_range = len(tag)-1
     print("Enriched Gene set is: ", enrich_term)
-    return enrich_term,es_profile,hit_ind, nes,pval,fdr,rank_es
+    return enrich_term,hit_ind, nes,pval,fdr,rank_es
     
 
 def gsea_rank_metric(rank_path):
@@ -77,7 +78,7 @@ def gsea_rank_metric(rank_path):
      
     return rank_metric
     
-def gsea_gmt_parser(gene_set_path):
+def gsea_gmt_parser(gene_sets_path, min_size =15, max_size = 1000):
     '''
     parser gene sets file
     
@@ -85,9 +86,19 @@ def gsea_gmt_parser(gene_set_path):
     '''
     
     
-    with open(gene_set_path) as gene_sets:
-        gene_set_dict = { line.rstrip("\n").split("\t")[0]:  
+    with open(gene_sets_path) as gene_sets:
+        gene_sets_dict = { line.rstrip("\n").split("\t")[0]:  
                           line.rstrip("\n").split("\t")[2:] 
                           for line in gene_sets.readlines()}
-    return gene_set_dict
+    
+    
+    #filtering dict
+    if sys.version_info[0] == 3 :
+        gene_sets_filter =  {k: v for k, v in gene_sets_dict.items() if len(v) >= min_size and len(v) <= max_size}
+    elif sys.version_info[0] == 2:
+        gene_sets_filter =  {k: v for k, v in gene_sets_dict.iteritems() if len(v) >= min_size and len(v) <= max_size}
+    else:
+        print("system failure. Please Provide correct input files")
+        sys.exit(1)
+    return gene_sets_filter
     
