@@ -67,23 +67,16 @@ def prepare_argparser ():
     return argparser
 
 def add_output_option ( parser ):
-    parser.add_argument("-o", "--outdir", dest = "outdir", type = str, default = 'gseapy_out',metavar='',action="store",
+    parser.add_argument("-o", "--outdir", dest = "outdir", type = str, default = 'gseapy_out',
+                        metavar='',action="store",
                         help = "The gseapy output directory. Default: the current working directory")
 
     parser.add_argument( "-f", "--format", dest = "format", type = str, metavar='',action="store",
                               choices = ("pdf", "png", "jpeg", "eps"),default = "pdf",
-                              help = "Format of output figures, choose from {'pdf', 'png', 'jpeg', 'eps'}" ) 
+                              help = "Format of output figures, choose from {'pdf', 'png', 'jpeg', 'eps'}. Default: 'pdf'." ) 
     parser.add_argument("--figsize",action='store',nargs=2,dest='figsize',
                         metavar=('width', 'height'),type=float,default=[6.5,6],
                         help="The figsize keyword argument need two parameter to define. Default: [6.5,6]") 
-
-def add_output_group ( parser, required = True ):
-    output_group = parser.add_mutually_exclusive_group( required = required )
-    output_group.add_argument( "-o", "--ofile", dest = "ofile", type = str,
-                               help = "Output file name. Mutually exclusive with --o-prefix." )
-    output_group.add_argument( "--o-prefix", dest = "oprefix", type = str,
-                               help = "Output file prefix. Mutually exclusive with -o/--ofile." )
-
 
 
 def add_call_parser( subparsers ):
@@ -96,12 +89,12 @@ def add_call_parser( subparsers ):
     group_input.add_argument( "-i", "--indata", dest = "data",  action="store",type = str, required = True, 
                               help = "Expression table of phenotypes. Expected a txt file.Same with GSEA." )
     group_input.add_argument( "-c", "--cls", dest = "cls",  action="store", type = str, required = True,
-                                    help = "cls files. same with GSEA.")
+                                    help = ".cls files. Same with GSEA.")
     group_input.add_argument( "-g", "--gmt", dest = "gmt",  action="store", type = str, required = True,
-                              help = "Gene Sets in gmt format. same with GSEA." )
+                              help = "Gene Sets in gmt format. Same with GSEA." )
     group_input.add_argument( "-p", "--permutation-type",  action="store",dest = "type", type = str,metavar='',
                               choices = ("gene_set", "phnotype"),default = "gene_set",
-                              help = "Gene Sets in gmt format. same with GSEA, choose from {'gene_set', 'phenotype'}")
+                              help = "Gene Sets in gmt format. Same with GSEA, choose from {'gene_set', 'phenotype'}")
 
     # group for output files
     group_output = argparser_call.add_argument_group( "Output arguments" )
@@ -109,22 +102,25 @@ def add_call_parser( subparsers ):
        
      # group for General options.
     group_opt = argparser_call.add_argument_group( "GSEA advance arguments" )
-    group_opt.add_argument( "--min_size",  dest = "mins",  action="store",type = int, default =15,metavar='',
-                                help = "Min size of gene sets. Default: 15")
-    group_opt.add_argument( "--max_size", dest = "maxs",  action="store",type = int, default = 1000,metavar='',
-                                help = "Max size of gene sets. Default: 1000")
-    group_opt.add_argument( "-n", "--permutation_n", dest = "n",  action="store",type = int, default = 1000, metavar='',
-                                help = "permutation number. Default: 1000" )
+    group_opt.add_argument( "--min-size",  dest = "mins",  action="store",type = int, default =15,metavar='',
+                            help = "Min size of gene sets. Default: 15")
+    group_opt.add_argument( "--max-size", dest = "maxs",  action="store",type = int, default = 1000,metavar='',
+                            help = "Max size of gene sets. Default: 1000")
+    group_opt.add_argument( "-n", "--permu-number", dest = "n",  action="store",type = int, default = 1000, metavar='',
+                            help = "Permutation number. Default: 1000" )
     group_opt.add_argument("-w","--weight",action='store',dest='weight',default= 1, type= float,metavar='',
-                        help='Weighted_score type of rank_metrics.Choose from {0, 1, 1.5, 2},default: 1',)
+                            help='Weighted_score type of rank_metrics.Choose from {0, 1, 1.5, 2},default: 1',)
 
     group_opt.add_argument( "-m", "--method",  action="store",dest = "method", type = str, metavar='',
-                              choices = ("signal_to_noise", "t_test", "ratio_of_classes", "diff_of_classes","log2_ratio_of_classes"),default = "log2_ratio_of_classes",
-                              help = "methods to calculate correlations of ranking metrics", )   
+                            choices = ("signal_to_noise", "t_test", "ratio_of_classes", "diff_of_classes","log2_ratio_of_classes"),
+                            default = "log2_ratio_of_classes",
+                            help = "Methods to calculate correlations of ranking metrics. \
+                            Choose from {'signal_to_noise', 't_test', 'ratio_of_classes', 'diff_of_classes','log2_ratio_of_classes'}.\
+                            Default: 'log2_ratio_of_classes'" )   
     group_opt.add_argument("-a","--ascending",action='store_true',dest='ascending',default= False ,
-                        help='Rank metrice acendings. True or False. Default: False.')
+                            help='Rank metrice sorting order. If the -a flag was chosen, then ascending == True. Default: False.')
 
-    #add_output_group( argparser_call )
+    
      
     return
 
@@ -132,17 +128,19 @@ def add_call_parser( subparsers ):
 def add_plot_parser( subparsers ):
     """Add function 'plot' argument parsers.
     """    
-    argparser_plot = subparsers.add_parser( "replot",help = "Reproduce GSEA desktop figures." )
+    argparser_replot = subparsers.add_parser( "replot",help = "Reproduce GSEA desktop figures." )
 
-    argparser_plot.add_argument("-i","--indir", action="store", dest="indir", required=True, metavar='',
-                        help="The GSEA desktop results directroy that you want to reproduce the figure ")
-    argparser_plot.add_argument("-w","--weight",action='store',dest='weight',default= 1, type= float,metavar='',
-                        help='Weighted_score type of rank_metrics.Choose from (0, 1, 1.5, 2),default: 1',)
+    argparser_replot = subparsers.add_parser( "replot",help = "Reproduce GSEA desktop figures." )
     
+    group_replot = argparser_replot.add_argument_group( "Positional arguments" )
 
-    add_output_option( argparser_plot)
-    #add_output_group( argparser_plot )
-
+    group_replot.add_argument("-i","--indir", action="store", dest="indir", required=True, metavar='',
+                        help="The GSEA desktop results directroy that you want to reproduce the figure ")
+    
+    add_output_option( group_replot)
+    
+    group_replot.add_argument("-w","--weight",action='store',dest='weight',default= 1, type= float,metavar='',
+                        help='Weighted_score type of rank_metrics.Choose from (0, 1, 1.5, 2),default: 1',)
     return
 
 
