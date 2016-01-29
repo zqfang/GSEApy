@@ -25,7 +25,7 @@ enrichments and produce **publishable quality figures** from python. For use in 
 
 #. Reproduce the GSEA plot from GSEA desktop version.
 
-#. Statistical testing module which will be the same as ``GSEA``.
+#. Statistical testing module which is identicalto ``GSEA`` Desktop version.
 
 #. Enhancement of ``GSEA`` will be considered. If you would like to contribute, please @BioNinja on ``Github``. 
 
@@ -101,7 +101,7 @@ Run GSEAPY
 
 
 
-To see GSEAPY subcommands.
+To see GSEAPY sub-commands.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. code:: shell
    
@@ -114,13 +114,15 @@ To see GSEAPY subcommands.
     positional arguments:
       {call,replot}
         call       Main GSEAPY Function: run GSEAPY instead of GSEA.
-        plot       Reproduce GSEA desktop figures.
+        replot       Reproduce GSEA desktop figures.
 
     optional arguments:
       -h, --help   show this help message and exit
       --version    show program's version number and exit
 
-    For command line options of each command, type: test.py COMMAND -h
+
+
+For command line options of each command, type: gseapy COMMAND -h
 
 
 The ``replot`` module
