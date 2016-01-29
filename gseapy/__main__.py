@@ -40,7 +40,7 @@ def main():
         from .gsea import run
                 
         run(args.data, args.gmt,args.cls, args.mins, args.maxs, args.n, args.weight,
-            args.type, args.method,args.ascending, args.outdir,args.figsize)
+            args.type, args.method,args.ascending, args.outdir,args.figsize, args.format)
 
 
 def prepare_argparser ():

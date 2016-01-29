@@ -67,7 +67,7 @@ def replot(indir,outdir,weight=1,figsize=[6.5,6],format='pdf',):
 
 
 def run(data, gene_sets,cls, min_size, max_size, permutation_n, weighted_score_type,
-        permutation_type, method,ascending, outdir,figsize=[6.5,6]):
+        permutation_type, method,ascending, outdir,figsize=[6.5,6],format):
     """ Run Gene Set Enrichment Analysis.
 
     :param data: Gene expression data table.  
@@ -118,14 +118,12 @@ def run(data, gene_sets,cls, min_size, max_size, permutation_n, weighted_score_t
         rdict['matched_size'] = len(ind)
         rdict['rank_ES'] = RES
         rdict['genes'] = dat.iloc[ind].index.tolist()
-        res[gs] = rdict
-           
+        res[gs] = rdict           
         #plotting
-
         fig = gsea_plot(rank_metric = dat2, enrich_term = gs,hit_ind = ind,nes = gseale[1],pval= gseale[2],
                         fdr = gseale[3], RES = RES, phenoPos =phenoA ,phenoNeg = phenoB,figsize=figsize)
         
-        fig.savefig('{a}/{b}.{c}'.format(a= outdir,b= gs,c= 'pdf'),dpi=300,)
+        fig.savefig('{a}/{b}.{c}'.format(a= outdir,b= gs,c= format),dpi=300,)
     
     
     
