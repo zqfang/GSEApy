@@ -1,156 +1,119 @@
+#! python
+# -*- coding: utf-8 -*-
 
-
+import argparse
 import os
 import sys
-import argparse as ap
 
 
-# ------------------------------------
-# Main function
-# ------------------------------------
 
-__version__ = '0.3.0'
+
+
+
+from bs4 import BeautifulSoup
+from .parser import gsea_edb_parser,gsea_rank_metric,gsea_gmt_parser,gsea_cls_parser
+
+from .algorithm import enrichment_score
+from .gsea_plot import gsea_plot
+
+import glob
+
+
+__version__ = '0.2.8'
+__author__ = 'Zhuoqing Fang'
 
 def main():
-    """The Main function/pipeline for GSEAPY.
+    """The main routine."""
     
-    """
-    # Parse options...
-    argparser = prepare_argparser()
-    args = argparser.parse_args()
 
-    if args.outdir:
-        # use a output directory to store GSEAPY output
-        if not os.path.exists( args.outdir ):
-            try:
-                os.makedirs( args.outdir )
-            except:
-                sys.exit( "Output directory (%s) could not be created. Terminating program." % args.outdir )
-
-    subcommand  = args.subcommand_name
-
-    if subcommand == "replot":
-        # reproduce plots using GSEAPY
-        from .gsea import replot               
-
-        replot(args.indir,args.outdir,args.weight,args.figsize,args.format,) 
-    
-    elif subcommand == "call":
-        # compute using GSEAPY
-        from .gsea import run
-                
-        run(args.data, args.gmt,args.cls, args.min_size, args.max_size, args.n, args.weight,
-            args.type, args.method,args.ascending, args.outdir,args.figsize)
-
-
-def prepare_argparser ():
-    """Prepare argparser object. New options will be added in this
-    function first.
-    
-    """
-    description = "%(prog)s -- GSEAPY for Gene Set Enrichment Analysis"
-    epilog = "For command line options of each command, type: %(prog)s COMMAND -h"
-
-    # top-level parser
-    argparser = ap.ArgumentParser( description = description, epilog = epilog )
-    argparser.add_argument("--version", action="version", version="%(prog)s "+ __version__)
-    subparsers = argparser.add_subparsers( dest = 'subcommand_name' ) #help="sub-command help")
-    
-    # command for 'call'
-    add_call_parser( subparsers )
-
-    
-    # command for 'plot'
-    add_plot_parser( subparsers )
-    
-    
-    return argparser
-
-def add_output_option ( parser ):
-    parser.add_argument("-o", "--outdir", dest = "outdir", type = str, default = 'gseapy_out',metavar='',action="store",
-                        help = "The gseapy output directory. Default: the current working directory")
-
-    parser.add_argument( "-f", "--format", dest = "format", type = str, metavar='',action="store",
-                              choices = ("pdf", "png", "jpeg", "eps"),default = "pdf",
-                              help = "Format of output figures, choose from {'pdf', 'png', 'jpeg', 'eps'}" ) 
+    # parse command line args
+    parser = argparse.ArgumentParser(prog='gseapy', description="Python wrapper of Gene Set Enrichment Analysis tool")
+    parser.add_argument("-i","--inDir", action="store", dest="file", required=True, metavar=' ',
+                        help="The GSEA desktop results directroy that you want to reproduce the figure ")
+    parser.add_argument("-o","--outDir",action="store",default="gseapy_out",dest="out", required=True,
+                       metavar=' ',help="The gseapy output directory")
+    parser.add_argument("-w","--weight",action='store',dest='weight',default= 1, type= float,metavar=' ',
+                        help='Weighted_score type of rank_metrics.Choose from (0, 1, 1.5, 2),default: 1',)
     parser.add_argument("--figsize",action='store',nargs=2,dest='figsize',
                         metavar=('width', 'height'),type=float,default=[6.5,6],
                         help="The figsize keyword argument need two parameter to define. Default: [6.5,6]") 
-
-def add_output_group ( parser, required = True ):
-    output_group = parser.add_mutually_exclusive_group( required = required )
-    output_group.add_argument( "-o", "--ofile", dest = "ofile", type = str,
-                               help = "Output file name. Mutually exclusive with --o-prefix." )
-    output_group.add_argument( "--o-prefix", dest = "oprefix", type = str,
-                               help = "Output file prefix. Mutually exclusive with -o/--ofile." )
-
-
-
-def add_call_parser( subparsers ):
-    """Add main function 'call' argument parsers.
-    """
-    argparser_call = subparsers.add_parser("call", help="Main GSEAPY Function: run GSEAPY instead of GSEA.")
+    parser.add_argument("--version",action="version",version="%(prog)s "+__version__)
     
-    # group for input files
-    group_input = argparser_call.add_argument_group( "Input files arguments" )
-    group_input.add_argument( "-i", "--indata", dest = "data",  action="store",type = str, required = True, 
-                              help = "Expression table of phenotypes. Expected a txt file.Same with GSEA." )
-    group_input.add_argument( "-c", "--cls", dest = "cls",  action="store", type = str, required = True,
-                                    help = "cls files. same with GSEA.")
-    group_input.add_argument( "-g", "--gmt", dest = "gmt",  action="store", type = str, required = True,
-                              help = "Gene Sets in gmt format. same with GSEA." )
-    group_input.add_argument( "-p", "--permutation-type",  action="store",dest = "type", type = str,metavar='',
-                              choices = ("gene_set", "phnotype"),default = "gene_set",
-                              help = "Gene Sets in gmt format. same with GSEA, choose from {'gene_set', 'phenotype'}")
-
-    # group for output files
-    group_output = argparser_call.add_argument_group( "Output arguments" )
-    add_output_option( group_output )    
-       
-     # group for General options.
-    group_opt = argparser_call.add_argument_group( "GSEA advance arguments" )
-    group_opt.add_argument( "--min_size",  dest = "mins",  action="store",type = int, default =15,metavar='',
-                                help = "Min size of gene sets. Default: 15")
-    group_opt.add_argument( "--max_size", dest = "maxs",  action="store",type = int, default = 1000,metavar='',
-                                help = "Max size of gene sets. Default: 1000")
-    group_opt.add_argument( "-n", "--permutation_n", dest = "n",  action="store",type = int, default = 1000, metavar='',
-                                help = "permutation number. Default: 1000" )
-    group_opt.add_argument("-w","--weight",action='store',dest='weight',default= 1, type= float,metavar='',
-                        help='Weighted_score type of rank_metrics.Choose from {0, 1, 1.5, 2},default: 1',)
-
-    group_opt.add_argument( "-m", "--method",  action="store",dest = "method", type = str, metavar='',
-                              choices = ("signal_to_noise", "t_test", "ratio_of_classes", "diff_of_classes","log2_ratio_of_classes"),default = "log2_ratio_of_classes",
-                              help = "methods to calculate correlations of ranking metrics", )   
-    group_opt.add_argument("-a","--ascending",action='store_true',dest='ascending',default= False ,
-                        help='Rank metrice acendings. True or False. Default: False.')
-
-    #add_output_group( argparser_call )
-     
-    return
-
-
-def add_plot_parser( subparsers ):
-    """Add function 'plot' argument parsers.
-    """    
-    argparser_plot = subparsers.add_parser( "replot",help = "Reproduce GSEA desktop figures." )
-
-    argparser_plot.add_argument("-i","--indir", action="store", dest="indir", required=True, metavar='',
-                        help="The GSEA desktop results directroy that you want to reproduce the figure ")
-    argparser_plot.add_argument("-w","--weight",action='store',dest='weight',default= 1, type= float,metavar='',
-                        help='Weighted_score type of rank_metrics.Choose from (0, 1, 1.5, 2),default: 1',)
+    
+    args = parser.parse_args()
+    
+    print("Input_directroy        = ", args.file)
+    print("Output_directory       = ", args.out)
+    print("Weighted_score_type    = ", args.weight )
+    print("Figsize                = ", args.figsize)
+    
     
 
-    add_output_option( argparser_plot)
-    #add_output_group( argparser_plot )
+    file_name = args.file
+    
+    # checking flies and parameters.
+    if not os.path.exists(args.file) :
+        print("Input_Directory doesn't exist, please check your file path!")
+        sys.exit(1)    
+    if args.weight not in [0,1,1.5,2]:
+        print("error: argument -w/--weight: invalid choice: %s (choose from 0, 1, 1.5, 2)"%(args.weight))
+        sys.exit(1) 
+    
+    print("parsing files.......")
+    
+    results_path = glob.glob(file_name+'*/edb/results.edb')[0]
+    rank_path =  glob.glob(file_name+'*/edb/*.rnk')[0]
+    gene_set_path =  glob.glob(file_name+'*/edb/gene_sets.gmt')[0]
+    cls_path = glob.glob(file_name+'*/edb/*.cls')[0]
+    file_list = [results_path ,rank_path,gene_set_path,cls_path]  
+    
+    for file in file_list: 
+        if not os.path.isfile(file):
+            print("Incorrect Input %s !" %file)
+            sys.exit(1)
 
-    return
+    os.system('mkdir '+ args.out)
+   
 
+    
+    
+    #extract sample names from .cls file
+    phenoPos,phenoNeg = gsea_cls_parser(cls_path)  
+    
+    #extract each enriment term in the results.edb files and plot.
+    database = BeautifulSoup(open(results_path),features='xml')
+    length = len(database.findAll('DTG'))
+    
+    
+    print("Generate Plots......Please wait.....")
+    
+    
+    
+    for idx in range(length):
+        #extract statistical resutls from results.edb file
+        enrich_term,es_profile,hit_ind, nes,pval,fdr,rank_es = gsea_edb_parser( results_path,index=idx)
 
+        #obtain rank_metrics
+        rank_metric = gsea_rank_metric(rank_path)
+        correl_vector =  rank_metric['rank'].values
 
+        #obtain gene sets
+        gene_set_dict = gsea_gmt_parser(gene_set_path)
+        gene_set = gene_set_dict.get(enrich_term)
+        gene_list = rank_metric['gene_name']
 
-if __name__ == '__main__':
-    try:
-        main()
-    except KeyboardInterrupt:
-        sys.stderr.write("User interrupted me! ;-) Bye!\n")
-        sys.exit(0)
+        #calculate enrichment score    
+        RES = enrichment_score(gene_list = gene_list, gene_set = gene_set, weighted_score_type = args.weight, 
+                               correl_vector = correl_vector)
+
+        #plotting
+        fig = gsea_plot(rank_metric, enrich_term,es_profile,hit_ind,nes,pval,fdr,
+                        RES, phenoPos,phenoNeg,figsize= args.figsize)
+        fig.savefig(args.out+'/'+enrich_term+'.pdf',format='pdf',dpi=300,)
+    
+    print("Congratulations! The job is done!")
+
+if __name__ == "__main__":
+    #do not show the figure
+    #mpl.use('Pdf')
+    main()
