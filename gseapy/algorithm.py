@@ -11,32 +11,36 @@ import random
 
 
 def preprocess(df):
+    """pre-processed the data frame.
+       new filtering methods will be implement here.
+    """
 
-
-    df.drop_duplicates(inplace=True)
+    df = df.index.drop_duplicates(keep='first') #drop duplicate gene_names.
     df.dropna(how='all',inplace=True)
-    df2 = df.select_dtypes(include=['float64'])  + 0.001 #select numbers in DataFrame      
+    df2 = df.select_dtypes(include=['float64'])  + 0.0001 #select numbers in DataFrame      
     
     return df2
 
 
 def enrichment_score(gene_list, gene_set, weighted_score_type = 1, correl_vector = None):
     '''
-    this is the most important function of GSEApy. It has the same algorithm with GSEA.
+    This is the most important function of GSEAPY. It has the same algorithm with GSEA.
     
     :param gene_list:       The ordered gene list 
                             gene_name_list, rank_metric['gene_name']
 
     :param gene_set:        gene_sets in gmt file, please used gsea_gmt_parser to get gene_set.
                              
-    :param weighted_score_type: A vector with the coorelations (e.g. signal to noise scores) corresponding to the genes in the gene list.
-                                 It's indentical to gsea's weighted_sore_method. options: 0(classic),1,1.5,2. default:1.
-    :param correl_vector:   A vector with the coorelations (e.g. signal to noise scores) corresponding to the genes in the gene list.
-                            or rankings, rank_metric['rank'].values
+    :param weighted_score_type: A vector with the coorelations (e.g. signal to noise scores) 
+                                corresponding to the genes in the gene list.
+                                It's indentical to gsea's weighted_sore_method. options: 0(classic),1,1.5,2. default:1.
+    :param correl_vector:   A vector with the coorelations (e.g. signal to noise scores) corresponding to the genes in 
+                            the gene list. Or rankings, rank_metric['rank'].values
     
     
     :return: 
     |ES: Enrichment score (real number between -1 and +1) 
+    |hit_index: index of a gene in gene_list, if gene included in gene_set.
     |RES: Numerical vector containing the running enrichment score for all locations in the gene list .
              
     '''
@@ -87,7 +91,7 @@ def shuffle_list(gene_list, rand=random.Random(0)):
     
 def ranking_metric(df, method,classes,ascending):
     """
-     the main function to rank a expression table.
+     The main function to rank a expression table.
     
     :param df: gene_expression DataFrame.    
     :param method:
@@ -170,8 +174,10 @@ def gsea_compute(data, gmt, n, weighted_score_type,permutation_type,method,class
 
     :param gmt: all gene sets in .gmt file. need to call gsea_gmt_parser() to get results. 
     :param n: permutation number. default: 1000
-    :method: ranking_metric method. see above.
+    :param method: ranking_metric method. see above.
+    :param classes: a list of phenotype labels.
     :param weighted_score_type: default:1
+    :param ascending: sorting order of rankings. Default: False.
     """
     enrichment_scores = []
 
