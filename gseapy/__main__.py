@@ -39,7 +39,7 @@ def main():
         # compute using GSEAPY
         from .gsea import run
                 
-        run(args.data, args.gmt,args.cls, args.min_size, args.max_size, args.n, args.weight,
+        run(args.data, args.gmt,args.cls, args.mins, args.maxs, args.n, args.weight,
             args.type, args.method,args.ascending, args.outdir,args.figsize)
 
 
@@ -118,7 +118,7 @@ def add_call_parser( subparsers ):
                             Choose from {'signal_to_noise', 't_test', 'ratio_of_classes', 'diff_of_classes','log2_ratio_of_classes'}.\
                             Default: 'log2_ratio_of_classes'" )   
     group_opt.add_argument("-a","--ascending",action='store_true',dest='ascending',default= False ,
-                            help='Rank metrice sorting order. If the -a flag was chosen, then ascending == True. Default: False.')
+                            help='Rank metrice sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
 
     
      
