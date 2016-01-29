@@ -149,24 +149,7 @@ def ranking_metric(df, method,classes,ascending):
     df3['rank2'] = df3['rank']
 
     return df3
-    
-def gsea_pval(es, esnull):
-    """
-    From article (PNAS):
-    estimate nominal p-value for S from esnull by using the positive
-    or negative portion of the distribution corresponding to the sign 
-    of the observed ES(S).
-    """
-    
-    try:
-        if es < 0:
-            return float(len([ a for a in esnull if a <= es ]))/len([ a for a in esnull if a < 0])    
-        else: 
-            return float(len([ a for a in esnull if a >= es ]))/len([ a for a in esnull if a >= 0])
-    except:
-        return 1.0
-
-    
+        
     
 def gsea_compute(data, gmt, n, weighted_score_type,permutation_type,method,classes,ascending):
     """
@@ -237,6 +220,22 @@ def gsea_compute(data, gmt, n, weighted_score_type,permutation_type,method,class
     return gsea_significance(enrichment_scores, enrichment_nulls),hit_ind,rank_ES, subsets
 
 
+def gsea_pval(es, esnull):
+    """
+    From article (PNAS):
+    estimate nominal p-value for S from esnull by using the positive
+    or negative portion of the distribution corresponding to the sign 
+    of the observed ES(S).
+    """
+    
+    try:
+        if es < 0:
+            return float(len([ a for a in esnull if a <= es ]))/len([ a for a in esnull if a < 0])    
+        else: 
+            return float(len([ a for a in esnull if a >= es ]))/len([ a for a in esnull if a >= 0])
+    except:
+        return 1.0
+
 def gsea_significance(enrichment_scores, enrichment_nulls):
     """
     Computing p-vals, normalized ES, FDR
@@ -280,7 +279,7 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
         nEnrichmentNulls.append(nenrNull)
  
 
-    print("start to comput FDRs..........................", time.ctime())
+    print("start to compute fdrs.........................", time.ctime())
 
     #FDR computation
     #create a histogram of all NES(S,pi) over all S and pi
