@@ -25,7 +25,7 @@ enrichments and produce **publishable quality figures** from python. For use in 
 
 #. Reproduce the GSEA plot from GSEA desktop version.
 
-#. Statistical testing module which will be the same as ``GSEA``.
+#. Statistical testing module which is identicalto ``GSEA`` Desktop version.
 
 #. Enhancement of ``GSEA`` will be considered. If you would like to contribute, please @BioNinja on ``Github``. 
 
