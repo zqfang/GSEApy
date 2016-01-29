@@ -101,7 +101,7 @@ Run GSEAPY
 
 
 
-To see GSEAPY subcommands.
+To see GSEAPY sub-commands.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. code:: shell
    
