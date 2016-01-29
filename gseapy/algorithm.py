@@ -131,7 +131,7 @@ def ranking_metric(df, method,classes,ascending):
         df3 = (df_mean[A] - df_mean[B])/ np.sqrt(df_std[A]**2/len(df_std)+df_std[B]**2/len(df_std) )
     elif method == 'ratio_of_classes':
         df3 = df_mean[A] / df_mean[B]
-    elif method == 'Diff_of_classes':
+    elif method == 'diff_of_classes':
         df3  = df_mean[A] - df_mean[B]
     elif method == 'log2_ratio_of_classes':
         df3  =  np.log2(df_mean[A] / df_mean[B])
