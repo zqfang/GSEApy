@@ -225,7 +225,7 @@ Run gseapy inside python:
 
    # calculate es, nes, pval,fdrs, and produce figures using gseapy.
    gseapy.run(data = expression.txt, gene_sets,cls, min_size, max_size, permutation_n, weighted_score_type,
-             permutation_type, method,ascending = False, outdir='test,figsize,format = 'png')
+             permutation_type, method,ascending = False, outdir='test',figsize,format = 'png')
 
 
 
