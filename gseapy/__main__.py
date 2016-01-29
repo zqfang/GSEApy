@@ -94,13 +94,13 @@ def add_call_parser( subparsers ):
     
     # group for input files
     group_input = argparser_call.add_argument_group( "Input files arguments" )
-    group_input.add_argument( "-i", "--indata", dest = "data",  action="store",type = str, required = True, 
+    group_input.add_argument( "-d", "--datab", dest = "data",  action="store",type = str, required = True, 
                               help = "Expression table of phenotypes. Expected a txt file.Same with GSEA." )
     group_input.add_argument( "-c", "--cls", dest = "cls",  action="store", type = str, required = True,
                                     help = ".cls files. Same with GSEA.")
     group_input.add_argument( "-g", "--gmt", dest = "gmt",  action="store", type = str, required = True,
                               help = "Gene Sets in gmt format. Same with GSEA." )
-    group_input.add_argument( "-p", "--permutation-type",  action="store",dest = "type", type = str,metavar='',
+    group_input.add_argument( "-p", "--permu-type",  action="store",dest = "type", type = str,metavar='',
                               choices = ("gene_set", "phnotype"),default = "gene_set",
                               help = "Gene Sets in gmt format. Same with GSEA, choose from {'gene_set', 'phenotype'}")
 
@@ -114,7 +114,7 @@ def add_call_parser( subparsers ):
                             help = "Min size of gene sets. Default: 15")
     group_opt.add_argument( "--max-size", dest = "maxs",  action="store",type = int, default = 1000,metavar='',
                             help = "Max size of gene sets. Default: 1000")
-    group_opt.add_argument( "-n", "--permu-number", dest = "n",  action="store",type = int, default = 1000, metavar='',
+    group_opt.add_argument( "-n", "--permu-num", dest = "n",  action="store",type = int, default = 1000, metavar='',
                             help = "Permutation number. Default: 1000" )
     group_opt.add_argument("-w","--weight",action='store',dest='weight',default= 1, type= float,metavar='',
                             help='Weighted_score type of rank_metrics.Choose from {0, 1, 1.5, 2},default: 1',)
