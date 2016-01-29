@@ -98,9 +98,11 @@ Run GSEAPY
 | For more details,see below. 
 
 
-For help:
-~~~~~~~~~~
 
+
+
+To see GSEAPY subcommands.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. code:: shell
    
    $ gseapy --help 
@@ -121,9 +123,12 @@ For help:
     For command line options of each command, type: test.py COMMAND -h
 
 
+The ``replot`` module
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 .. code:: shell
 
-   $ gseapy plot -h
+   $ gseapy replot -h
 
    usage: gseapy replot [-h] -i  [-w] [-o] [-f] [--figsize width height]
 
@@ -141,6 +146,10 @@ For help:
                             The figsize keyword argument need two parameter to
                             define. Default: [6.5,6]
 
+
+
+The ``call`` module
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: shell
 
