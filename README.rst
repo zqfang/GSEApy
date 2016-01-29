@@ -16,7 +16,7 @@ Although the best choice of GSEA is the desktop Java version, this version did n
 modify plots, like legends, ticks......
 
 
-Gseapy is aim to become a python wrapper of GSEA. It is used for convenient GO 
+GSEAPY is aim to become a python wrapper of GSEA. It is used for convenient GO 
 enrichments and produce **publishable quality figures** from python. For use in ``python`` projects.
 
 
@@ -206,6 +206,7 @@ Run gseapy inside python:
 ..code:: python
 
   import gseapy
+
   gseapy.run(data, gene_sets,cls, min_size, max_size, permutation_n, weighted_score_type,
              permutation_type, method,ascending, outdir,figsize)
    
