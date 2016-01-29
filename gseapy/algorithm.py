@@ -15,7 +15,8 @@ def preprocess(df):
        new filtering methods will be implement here.
     """
 
-    df = df.index.drop_duplicates(keep='first') #drop duplicate gene_names.
+    ids = df.index.drop_duplicates(keep='first') #drop duplicate gene_names.
+    df = df.loc[ids]
     df.dropna(how='all',inplace=True)
     df2 = df.select_dtypes(include=['float64'])  + 0.0001 #select numbers in DataFrame      
     
@@ -71,7 +72,7 @@ def enrichment_score(gene_list, gene_set, weighted_score_type = 1, correl_vector
     
     #print("The length of ES is", len(RES))
     
-    return (max_ES if abs(max_ES) > abs(min_ES) else min_ES, hit_ind.tolist(), RES.tolist())
+    return max_ES if abs(max_ES) > abs(min_ES) else min_ES, hit_ind, RES
  
 
 def shuffle_list(gene_list, rand=random.Random(0)):
@@ -189,8 +190,9 @@ def gsea_compute(data, gmt, n, weighted_score_type,permutation_type,method,class
     ranking=r2['rank'].values
     gene_list=r2['gene_name']
         
-    tb1 = time.time()
-    print("Start to compute enrichment socres..........................",tb1)
+
+    print("Start to compute enrichment socres............",time.ctime())
+
     rank_ES = []
     hit_ind = []
     
@@ -202,7 +204,8 @@ def gsea_compute(data, gmt, n, weighted_score_type,permutation_type,method,class
         hit_ind.append(ind)
     
     
-    print("Star to compute esnulls.....................")
+    print("Star to compute esnulls.......................",time.ctime())
+
     enrichment_nulls = [ [] for a in range(len(subsets)) ]
     
 
@@ -239,7 +242,7 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
     Computing p-vals, normalized ES, FDR
     """
     
-    print("Start to compute pvals..........................",time.time())
+    print("Start to compute pvals........................",time.ctime())
     
     enrichmentPVals = []
     nEnrichmentScores = []
@@ -277,7 +280,7 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
         nEnrichmentNulls.append(nenrNull)
  
 
-    print("start to comput FDRs............. ", time.time())
+    print("start to comput FDRs..........................", time.ctime())
 
     #FDR computation
     #create a histogram of all NES(S,pi) over all S and pi
@@ -342,8 +345,8 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
             fdrs.append(top/down)
         except:
             fdrs.append(1000000000.0)
-    
-    print("Statistial testing finished.", time.time())
+
+    print("Statistial testing finished...................", time.ctime())
 
     return zip(enrichment_scores, nEnrichmentScores, enrichmentPVals, fdrs)
 
