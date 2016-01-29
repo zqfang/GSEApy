@@ -70,24 +70,18 @@ def run(data, gene_sets,cls, min_size, max_size, permutation_n, weighted_score_t
         permutation_type, method,ascending, outdir,figsize=[6.5,6]):
     """ Run Gene Set Enrichment Analysis.
 
-    :param data.Table data: Gene expression data.  
-    :paramg GSEA gene_sets: Gene sets. e.g. gmt files  
-    
-.
-    :param permutation_n: Number of permutations for significance computation. Default: 100.
-    :param str permutation_type: Permutation type, "phenotype" (default) for 
-        phenotypes, "gene_set" for genes.
+    :param data: Gene expression data table.  
+    :paramg gene_sets: Gene sets file. e.g. gmt files. Same input with GSEA.
+    :param permutation_n: Number of permutations for significance computation. Default: 1000.
+    :param permutation_type: Permutation type, "phenotype" (default) for phenotypes, "gene_set" for genes.
     :param int min_size:
-    :param int max_size: Minimum and maximum allowed number of genes from
-        gene set also the data set. Defaults: 15 and 1000.
-
-    :param float min_part: Minimum fraction of genes from the gene set
-        also in the data set. Default: 0.1.
-
-    :param permutation_type: 
+    :param int max_size: Minimum and maximum allowed number of genes from gene set also the data set. 
+                         Defaults: 15 and 1000.
+    :param weighted_score_type: default:1
+    :param ascending: sorting order of rankings. Default: False.
+    :param outdir: results output directory.
+    :param figsize: matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
     
-    :param ranking_metric:
-
     :return: | a dictionary where key is a gene set and values are:
         | { es: enrichment score, 
         | nes: normalized enrichment score, 
