@@ -34,7 +34,7 @@ def replot(indir,outdir,weight=1,figsize=[6.5,6],format='pdf',):
     
     
     #extract sample names from .cls file
-    phenoPos,phenoNeg = gsea_cls_parser(cls_path)  
+    phenoPos,phenoNeg,classes = gsea_cls_parser(cls_path)  
     
     #extract each enriment term in the results.edb files and plot.
     database = BeautifulSoup(open(results_path),features='xml')
@@ -43,7 +43,7 @@ def replot(indir,outdir,weight=1,figsize=[6.5,6],format='pdf',):
     for idx in range(length):
         #extract statistical resutls from results.edb file
         enrich_term,hit_ind, nes,pval,fdr,rank_es = gsea_edb_parser( results_path,index=idx)
-
+        
         #obtain rank_metrics
         rank_metric = gsea_rank_metric(rank_path)
         correl_vector =  rank_metric['rank'].values
@@ -55,7 +55,7 @@ def replot(indir,outdir,weight=1,figsize=[6.5,6],format='pdf',):
 
         #calculate enrichment score    
         RES = enrichment_score(gene_list = gene_list, gene_set = gene_set, weighted_score_type = weight, 
-                               correl_vector = correl_vector)
+                               correl_vector = correl_vector)[2]
 
 
 
@@ -67,7 +67,7 @@ def replot(indir,outdir,weight=1,figsize=[6.5,6],format='pdf',):
 
 
 def run(data, gene_sets,cls, min_size, max_size, permutation_n, weighted_score_type,
-        permutation_type, method,ascending, outdir,figsize=[6.5,6],format):
+        permutation_type, method,ascending, outdir,figsize,format):
     """ Run Gene Set Enrichment Analysis.
 
     :param data: Gene expression data table.  

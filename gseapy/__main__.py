@@ -33,14 +33,14 @@ def main():
         # reproduce plots using GSEAPY
         from .gsea import replot               
 
-        replot(args.indir,args.outdir,args.weight,args.figsize,args.format,) 
+        replot(indir=args.indir,outdir=args.outdir,weight=args.weight,figsize=args.figsize,format=args.format,) 
     
     elif subcommand == "call":
         # compute using GSEAPY
         from .gsea import run
                 
         run(args.data, args.gmt,args.cls, args.mins, args.maxs, args.n, args.weight,
-            args.type, args.method,args.ascending, args.outdir,args.figsize, args.format)
+            args.type, args.method,args.ascending, args.outdir,args.figsize,args.format,)
 
 
 def prepare_argparser ():
@@ -77,6 +77,14 @@ def add_output_option ( parser ):
     parser.add_argument("--figsize",action='store',nargs=2,dest='figsize',
                         metavar=('width', 'height'),type=float,default=[6.5,6],
                         help="The figsize keyword argument need two parameter to define. Default: [6.5,6]") 
+
+def add_output_group ( parser, required = True ):
+    output_group = parser.add_mutually_exclusive_group( required = required )
+    output_group.add_argument( "--ofile", dest = "ofile", type = str,
+                               help = "Output file name. Mutually exclusive with --o-prefix." )
+    output_group.add_argument( "--o-prefix", dest = "oprefix", type = str,
+                               help = "Output file prefix. Mutually exclusive with -o/--ofile." )
+
 
 
 def add_call_parser( subparsers ):
@@ -129,18 +137,16 @@ def add_plot_parser( subparsers ):
     """Add function 'plot' argument parsers.
     """    
     argparser_replot = subparsers.add_parser( "replot",help = "Reproduce GSEA desktop figures." )
-
-    argparser_replot = subparsers.add_parser( "replot",help = "Reproduce GSEA desktop figures." )
     
     group_replot = argparser_replot.add_argument_group( "Positional arguments" )
 
     group_replot.add_argument("-i","--indir", action="store", dest="indir", required=True, metavar='',
                         help="The GSEA desktop results directroy that you want to reproduce the figure ")
-    
     add_output_option( group_replot)
-    
+    #add_output_group( argparser_plot )
     group_replot.add_argument("-w","--weight",action='store',dest='weight',default= 1, type= float,metavar='',
                         help='Weighted_score type of rank_metrics.Choose from (0, 1, 1.5, 2),default: 1',)
+       
     return
 
 

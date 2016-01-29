@@ -78,7 +78,7 @@ def gsea_rank_metric(rank_path):
      
     return rank_metric
     
-def gsea_gmt_parser(gene_sets_path, min_size =15, max_size = 1000):
+def gsea_gmt_parser(gene_sets_path, min_size = 3, max_size = 1000):
     '''
     parser gene sets file
     
