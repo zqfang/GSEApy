@@ -114,7 +114,7 @@ To see GSEAPY sub-commands.
     positional arguments:
       {call,replot}
         call       Main GSEAPY Function: run GSEAPY instead of GSEA.
-        replot       Reproduce GSEA desktop figures.
+        replot     Reproduce GSEA desktop figures.
 
     optional arguments:
       -h, --help   show this help message and exit
@@ -136,17 +136,19 @@ The ``replot`` module
 
     optional arguments:
       -h, --help            show this help message and exit
+
+    Positional arguments:
       -i , --indir          The GSEA desktop results directroy that you want to
                             reproduce the figure
-      -w , --weight         Weighted_score type of rank_metrics.Choose from (0, 1,
-                            1.5, 2),default: 1
       -o , --outdir         The gseapy output directory. Default: the current
                             working directory
       -f , --format         Format of output figures, choose from {'pdf', 'png',
-                            'jpeg', 'eps'}
+                            'jpeg', 'eps'}. Default: 'pdf'.
       --figsize width height
                             The figsize keyword argument need two parameter to
-                            define. Default: [6.5,6]
+                            define. Default: [6.5, 6]
+      -w , --weight         Weighted_score type of rank_metrics.Choose from (0, 1,
+                            1.5, 2),default: 1
 
 
 
@@ -157,41 +159,45 @@ The ``call`` module
 
    $ gseapy call -h
 
-    usage: gseapy call [-h] -i DATA -c CLS -g GMT [-p] [-o] [-f]
-                    [--figsize width height] [--min_size] [--max_size] [-n]
-                    [-w] [-m] [-a]
-
+    usage: test.py call [-h] -i DATA -c CLS -g GMT [-p] [-o] [-f]
+                        [--figsize width height] [--min-size] [--max-size] [-n]
+                        [-w] [-m] [-a]
+    
     optional arguments:
       -h, --help            show this help message and exit
-
+        
     Input files arguments:
-      -i DATA, --indata DATA
+      -d DATA, --datab DATA
                             Expression table of phenotypes. Expected a txt
                             file.Same with GSEA.
-      -c CLS, --cls CLS     cls files. same with GSEA.
-      -g GMT, --gmt GMT     Gene Sets in gmt format. same with GSEA.
-      -p , --permutation-type
-                            Gene Sets in gmt format. same with GSEA, choose from
+      -c CLS, --cls CLS     .cls files. Same with GSEA.
+      -g GMT, --gmt GMT     Gene Sets in gmt format. Same with GSEA.
+      -p , --permu-type
+                            Gene Sets in gmt format. Same with GSEA, choose from
                             {'gene_set', 'phenotype'}
     
     Output arguments:
       -o , --outdir         The gseapy output directory. Default: the current
                             working directory
       -f , --format         Format of output figures, choose from {'pdf', 'png',
-                            'jpeg', 'eps'}
+                            'jpeg', 'eps'}. Default: 'pdf'.
       --figsize width height
                             The figsize keyword argument need two parameter to
                             define. Default: [6.5,6]
     
     GSEA advance arguments:
-      --min_size            Min size of gene sets. Default: 15
-      --max_size            Max size of gene sets. Default: 1000
-      -n , --permutation_n
-                            permutation number. Default: 1000
+      --min-size            Min size of gene sets. Default: 15
+      --max-size            Max size of gene sets. Default: 1000
+      -n , --permu-num      Permutation number. Default: 1000
       -w , --weight         Weighted_score type of rank_metrics.Choose from {0, 1,
                             1.5, 2},default: 1
-      -m , --method         methods to calculate correlations of ranking metrics
-      -a, --ascending       Rank metrice acendings. True or False. Default: False.
+      -m , --method         Methods to calculate correlations of ranking metrics.
+                            Choose from {'signal_to_noise', 't_test',
+                            'ratio_of_classes',
+                            'diff_of_classes','log2_ratio_of_classes'}. Default:
+                            'log2_ratio_of_classes'
+      -a, --ascending       Rank metrice sorting order. If the -a flag was chosen,
+                            then ascending equals to True. Default: False.
 
 
 
