@@ -92,15 +92,17 @@ Run GSEAPY
 
 | Gseapy has two subcommands: ``replot``, ``call``.
 | ``replot`` command will parse the GSEA desktop output directory. 
-| ``call'' command will compute es,nes,pval,fdr and generates plots.
+| ``call`` command will compute es,nes,pval,fdr and generates plots.
 
 
 | For more details,see below. 
 
 
-For help:
-~~~~~~~~~~
 
+
+
+To see GSEAPY subcommands.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. code:: shell
    
    $ gseapy --help 
@@ -121,8 +123,12 @@ For help:
     For command line options of each command, type: test.py COMMAND -h
 
 
+The ``replot`` module
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 .. code:: shell
-   $ gseapy plot -h
+
+   $ gseapy replot -h
 
    usage: gseapy replot [-h] -i  [-w] [-o] [-f] [--figsize width height]
 
@@ -141,7 +147,12 @@ For help:
                             define. Default: [6.5,6]
 
 
+
+The ``call`` module
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 .. code:: shell
+
    $ gseapy call -h
 
     usage: gseapy call [-h] -i DATA -c CLS -g GMT [-p] [-o] [-f]
@@ -201,12 +212,16 @@ Run gseapy inside python:
 .. code:: python
   
    import gseapy
+   # reproduce plots from GSEA ouput
    gseapy.replot('data','test')
 
-..code:: python
-
-  import gseapy
-
-  gseapy.run(data, gene_sets,cls, min_size, max_size, permutation_n, weighted_score_type,
+   # calculate es, nes, pval,fdrs, and produce figures using gseapy.
+   gseapy.run(data, gene_sets,cls, min_size, max_size, permutation_n, weighted_score_type,
              permutation_type, method,ascending, outdir,figsize)
+
+
+
+
+
+
    
