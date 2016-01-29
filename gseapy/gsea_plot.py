@@ -23,7 +23,7 @@ class _MidpointNormalize(Normalize):
 
 
 
-def gsea_plot(rank_metric,enrich_term,hit_ind, nes,pval,fdr,RES,
+def gsea_plot(rank_metric,enrich_term,es_profile,hit_ind, nes,pval,fdr,RES,
               phenoPos= None, phenoNeg= None,figsize =(6.5,6),**kwarg):
     '''
     This is the main function for reproducing the gsea plot.
