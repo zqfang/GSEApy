@@ -114,7 +114,7 @@ To see GSEAPY sub-commands.
     positional arguments:
       {call,replot}
         call       Main GSEAPY Function: run GSEAPY instead of GSEA.
-        plot       Reproduce GSEA desktop figures.
+        replot       Reproduce GSEA desktop figures.
 
     optional arguments:
       -h, --help   show this help message and exit
