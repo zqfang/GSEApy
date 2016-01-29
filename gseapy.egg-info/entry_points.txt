@@ -1,3 +1,0 @@
-[console_scripts]
-gseapy = gseapy.__main__:main
-

@@ -8,11 +8,11 @@ def readme():
         return f.read()
 
 setup(name='gseapy',
-      version='0.2.8',
+      version='0.3.0',
       description='Python wrapper around Gene Set Enrichment Analysis tool',
       long_description=readme(),
       classifiers=[
-          'Development Status :: 5 - Production/Stable',
+          'Development Status :: 4 - Beta',
           'Intended Audience :: Science/Research',
           'License :: OSI Approved :: MIT License',
           'Programming Language :: Python :: 3.5',
