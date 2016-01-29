@@ -120,7 +120,9 @@ To see GSEAPY subcommands.
       -h, --help   show this help message and exit
       --version    show program's version number and exit
 
-    For command line options of each command, type: test.py COMMAND -h
+
+
+For command line options of each command, type: gseapy COMMAND -h
 
 
 The ``replot`` module
