@@ -132,7 +132,7 @@ The ``replot`` module
 
    $ gseapy replot -h
 
-   usage: gseapy replot [-h] -i  [-w] [-o] [-f] [--figsize width height]
+   usage: gseapy replot [-h] -i [-o] [-f] [--figsize width height] [-w]
 
     optional arguments:
       -h, --help            show this help message and exit
@@ -159,7 +159,7 @@ The ``call`` module
 
    $ gseapy call -h
 
-    usage: test.py call [-h] -i DATA -c CLS -g GMT [-p] [-o] [-f]
+    usage: gseapy call [-h] -i DATA -c CLS -g GMT [-p] [-o] [-f]
                         [--figsize width height] [--min-size] [--max-size] [-n]
                         [-w] [-m] [-a]
     
