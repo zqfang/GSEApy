@@ -113,6 +113,10 @@ and gene_sets file in gmt format.
 
   # example
   $ gseapy replot -i ./Gsea.reports -o test
+  
+  
+  # computing using gseapy call module
+  $ gseapy call -d exptable.txt -c test.cls -g test.gmt
 
 
 
@@ -133,8 +137,10 @@ Run gseapy inside python:
 
 
 
-To see GSEAPY sub-commands.
+Advanced Usage of GSEAPY
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+To see gseapy subcommands
+
 .. code:: shell
    
    $ gseapy --help 
@@ -151,6 +157,7 @@ To see GSEAPY sub-commands.
     optional arguments:
       -h, --help   show this help message and exit
       --version    show program's version number and exit
+
 
 
 
