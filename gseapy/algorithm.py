@@ -6,26 +6,23 @@ from functools import reduce
 
 import time
 import numpy as np
-import pandas as pd
 import sys
 import random
 
 
-def preprocess(data):
+def preprocess(df):
     """pre-processed the data frame.
        new filtering methods will be implement here.
-    """
-    df = pd.read_table(data,index_col=0)
+    """    
     
-    assert len(df) > 1
-    
-    ids = df.index.drop_duplicates(keep='first') #drop duplicate gene_names.    
-    df = df.loc[ids]
-    df.dropna(how='all',inplace=True)
+    df.drop_duplicates(subset=df.columns[0],inplace=True) #drop duplicate gene_names.    
+    df.set_index(keys=df.columns[0],inplace=True)
+    df.dropna(how='all',inplace=True)                     #drop rows with all NAs
     df2 = df.select_dtypes(include=['float64'])  + 0.0001 #select numbers in DataFrame      
     
     return df2
 
+    
 
 def enrichment_score(gene_list, gene_set, weighted_score_type = 1, correl_vector = None):
     '''
@@ -193,8 +190,8 @@ def gsea_compute(data, gmt, n, weighted_score_type,permutation_type,method,pheno
         hit_ind.append(ind)
     
     
-    print("Star to compute esnulls.......................",time.ctime())
-    print("This will take a while if you have a large gene sets.")
+    print("Start to compute esnulls......................",time.ctime())
+    print("......This step might take a while to run. Be patient.")
 
     enrichment_nulls = [ [] for a in range(len(subsets)) ]
     

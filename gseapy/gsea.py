@@ -7,7 +7,7 @@ import sys
 
 from bs4 import BeautifulSoup
 from .parser import gsea_edb_parser,gsea_rank_metric,gsea_gmt_parser,gsea_cls_parser
-from .algorithm import enrichment_score,gsea_compute,preprocess,ranking_metric
+from .algorithm import enrichment_score,gsea_compute,preprocess,ranking_metric,geneset_filter
 from .gsea_plot import gsea_plot
 
 import glob
@@ -92,15 +92,21 @@ def run(data, gene_sets,cls, min_size, max_size, permutation_n, weighted_score_t
         | genes: gene names from the data set }
 
     """
-    
     assert permutation_type in ["phenotype", "gene_set"]
-
-    dat = preprocess(data)
+    df = pd.read_table(data)
+    
+    assert len(df) > 1   
+    assert permutation_type in ["phenotype", "gene_set"]
+    #select correct expression genes and values.
+    dat = preprocess(df)
     
     phenoPos, phenoNeg, classes = gsea_cls_parser(cls)
-    gmt = gsea_gmt_parser(gene_sets, min_size = min_size, max_size = max_size)
+    gmt = gsea_gmt_parser(gene_sets, min_size = min_size, max_size = max_size,)
+    
     dat2 = ranking_metric(df = dat,method= method,phenoPos=phenoPos,phenoNeg=phenoNeg,classes = classes ,ascending=ascending)
-
+    
+    gmt = gsea_gmt_parser(gene_sets, min_size = min_size, max_size = max_size,gene_list=dat2['gene_name'])
+    
     #compute ES, NES, pval, FDR, RES
     results,hit_ind,rank_ES, subsets = gsea_compute(data = dat, n=permutation_n,gmt = gmt, weighted_score_type=weighted_score_type,
                     permutation_type=permutation_type,method=method,phenoPos=phenoPos,phenoNeg=phenoNeg,classes = classes,ascending=ascending)
@@ -128,7 +134,7 @@ def run(data, gene_sets,cls, min_size, max_size, permutation_n, weighted_score_t
 
     res_df =pd.DataFrame.from_dict(res,orient='index')
     res_df.index.name = 'Enrich_terms'
-    res_df.to_csv(res_df)
+    res_df.to_csv('{a}/{b}.csv'.format(a= outdir,b='gseapy_reports' ))
     
     
     return res
