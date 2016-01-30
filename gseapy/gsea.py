@@ -104,7 +104,7 @@ def run(data, gene_sets,cls, min_size, max_size, permutation_n, weighted_score_t
     #ranking metrics calculation.    
     dat2 = ranking_metric(df = dat,method= method,phenoPos=phenoPos,phenoNeg=phenoNeg,classes = classes ,ascending=ascending)
     #filtering out gene sets and build gene sets dictionary
-    gmt = gsea_gmt_parser(gene_sets, min_size = min_size, max_size = max_size,gene_list=dat2['gene_name'])
+    gmt = gsea_gmt_parser(gene_sets, min_size = min_size, max_size = max_size,gene_list=dat2['gene_name'].values)
     
     #compute ES, NES, pval, FDR, RES
     results,hit_ind,rank_ES, subsets = gsea_compute(data = dat, n=permutation_n,gmt = gmt, weighted_score_type=weighted_score_type,

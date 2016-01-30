@@ -103,7 +103,7 @@ def gsea_gmt_parser(gmt_path, min_size = 3, max_size = 1000, gene_list=None):
         sys.exit(1)
     
     
-    if gene_list != None:
+    if gene_list is not None:
         subsets = sorted(genesets_filter.keys())             
         for subset in subsets:            
             tag_indicator = np.in1d(gene_list,genesets_filter.get(subset),assume_unique=True)
