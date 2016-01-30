@@ -75,7 +75,7 @@ def enrichment_score(gene_list, gene_set, weighted_score_type = 1, correl_vector
     
     #print("The length of ES is", len(RES))
     
-    return max_ES if abs(max_ES) > abs(min_ES) else min_ES, hit_ind, RES
+    return max_ES if abs(max_ES) > abs(min_ES) else min_ES, hit_ind, RES.tolist()
  
 
 def shuffle_list(gene_list, rand=random.Random(0)):
