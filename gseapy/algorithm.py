@@ -6,16 +6,20 @@ from functools import reduce
 
 import time
 import numpy as np
+import pandas as pd
 import sys
 import random
 
 
-def preprocess(df):
+def preprocess(data):
     """pre-processed the data frame.
        new filtering methods will be implement here.
     """
-
-    ids = df.index.drop_duplicates(keep='first') #drop duplicate gene_names.
+    df = pd.read_table(data,index_col=0)
+    
+    assert len(df) > 1
+    
+    ids = df.index.drop_duplicates(keep='first') #drop duplicate gene_names.    
     df = df.loc[ids]
     df.dropna(how='all',inplace=True)
     df2 = df.select_dtypes(include=['float64'])  + 0.0001 #select numbers in DataFrame      
@@ -60,9 +64,8 @@ def enrichment_score(gene_list, gene_set, weighted_score_type = 1, correl_vector
     Nmiss =  N - Nhint 
     if (weighted_score_type == 0 ): 
         correl_vector = np.repeat(1, N)
-  
-    alpha = weighted_score_type
-    correl_vector = np.abs(correl_vector**alpha)
+    else:
+        correl_vector = np.abs(correl_vector**weighted_score_type)
     sum_correl_tag = np.sum(correl_vector[tag_indicator.astype(bool)])
     norm_tag =  1.0/sum_correl_tag
     norm_no_tag = 1.0/Nmiss
@@ -90,7 +93,7 @@ def shuffle_list(gene_list, rand=random.Random(0)):
     
     
     
-def ranking_metric(df, method,classes,ascending):
+def ranking_metric(df, method,phenoPos,phenoNeg,classes,ascending):
     """
      The main function to rank a expression table.
     
@@ -112,8 +115,9 @@ def ranking_metric(df, method,classes,ascending):
      5. log2_ratio_of_classes 
          uses the log2 ratio of class means to calculate fold change for natural scale data.
          This is the recommended statistic for calculating fold change for natural scale data.
-          
-    :param classes: a list of phenotype labels.
+    :param phenoPos: one of lables of phenotype's names 
+    :param phenoNeg: one of lable of phenotype's names     
+    :param classes: a list of phenotype labels, to specify which column of dataframe belongs to what catogry of phenotype.
     :param ascending:  bool or list of bool. Sort ascending vs. descending.
     :param cls_path: only use when classes is not None.
  
@@ -122,44 +126,46 @@ def ranking_metric(df, method,classes,ascending):
              in second column.
     """ 
     
-    pheon = list(set(classes))
-    A = pheon[0]
-    B = pheon[1]
+    
+    A = phenoPos
+    B = phenoNeg
     df2 = df.T   
     df2['class'] = classes
     df_mean= df2.groupby('class').mean().T
     df_std = df2.groupby('class').std().T
     
     if method == 'signal_to_noise':
-        df3 = (df_mean[A] - df_mean[B])/(df_std[A] + df_std[B])
+        sr = (df_mean[A] - df_mean[B])/(df_std[A] + df_std[B])
     elif method == 't_test':
-        df3 = (df_mean[A] - df_mean[B])/ np.sqrt(df_std[A]**2/len(df_std)+df_std[B]**2/len(df_std) )
+        sr = (df_mean[A] - df_mean[B])/ np.sqrt(df_std[A]**2/len(df_std)+df_std[B]**2/len(df_std) )
     elif method == 'ratio_of_classes':
-        df3 = df_mean[A] / df_mean[B]
+        sr = df_mean[A] / df_mean[B]
     elif method == 'diff_of_classes':
-        df3  = df_mean[A] - df_mean[B]
+        sr  = df_mean[A] - df_mean[B]
     elif method == 'log2_ratio_of_classes':
-        df3  =  np.log2(df_mean[A] / df_mean[B])
+        sr  =  np.log2(df_mean[A] / df_mean[B])
     else:
         print("Please provide correct method name!!!")        
         sys.exit()
-    df3.sort_values(ascending=ascending,inplace=True)
-    df3 = df3.to_frame().reset_index()
+    sr.sort_values(ascending=ascending,inplace=True)
+    df3 = sr.to_frame().reset_index()
     df3.columns = ['gene_name','rank']
     df3['rank2'] = df3['rank']
 
     return df3
         
     
-def gsea_compute(data, gmt, n, weighted_score_type,permutation_type,method,classes,ascending):
+def gsea_compute(data, gmt, n, weighted_score_type,permutation_type,method,phenoPos,phenoNeg,classes,ascending):
     """
     compute enrichment scores and enrichment nulls. 
     
-
+    :param data: prepreocessed expression dataframe.
     :param gmt: all gene sets in .gmt file. need to call gsea_gmt_parser() to get results. 
     :param n: permutation number. default: 1000
     :param method: ranking_metric method. see above.
-    :param classes: a list of phenotype labels.
+    :param phenoPos: one of lables of phenotype's names 
+    :param phenoNeg: one of lable of phenotype's names     
+    :param classes: a list of phenotype labels, to specify which column of dataframe belongs to what catogry of phenotype.
     :param weighted_score_type: default:1
     :param ascending: sorting order of rankings. Default: False.
     """
@@ -169,7 +175,7 @@ def gsea_compute(data, gmt, n, weighted_score_type,permutation_type,method,class
     subsets = sorted(gmt.keys())
     
     dat = data.copy()
-    r2 = ranking_metric(dat,method = method,classes=classes, ascending= ascending)
+    r2 = ranking_metric(df=dat,method = method,phenoPos=phenoPos,phenoNeg=phenoNeg,classes=classes, ascending= ascending)
     ranking=r2['rank'].values
     gene_list=r2['gene_name']
         
@@ -196,20 +202,17 @@ def gsea_compute(data, gmt, n, weighted_score_type,permutation_type,method,class
         if permutation_type == "phenotype":
             dat2 = dat.T   
             dat2.apply(np.random.shuffle,axis=0) #permutation classes
-            r2 = ranking_metric(dat2.T,method = method,classes=classes,ascending= ascending )
+            r2 = ranking_metric(df=dat2.T,method = method,phenoPos=phenoPos,phenoNeg=phenoNeg,classes=classes,ascending= ascending )
             ranking2=r2['rank']
             gene_list2=r2['gene_name'].values
         else:
             
             #gene_list.apply(np.random.shuffle,axis=0) #permutation genes
-            #r2 = ranking_metric(dat,method = method, classes=classes,ascending= ascending)
+            #r2 = ranking_metric(df=dat,method = method, classes=classes,ascending= ascending)
             gene_list2 = shuffle_list(gene_list,random.Random(2000+i))
             ranking2=ranking
             #gene_list2=gene_list
-
             
-       
-        
         for si,subset in enumerate(subsets):
             esn = enrichment_score(gene_list = gene_list2, gene_set= gmt.get(subset), 
                               weighted_score_type = w, correl_vector = ranking2)[0]                        
