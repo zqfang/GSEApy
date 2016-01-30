@@ -18,7 +18,7 @@ modify plots, like legends, ticks......
 
 GSEAPY is  used for convenient GO enrichments and produce **publishable quality figures** from python. 
 
-GSEAPY could be used for **RNA-seq. ChIP-seq, Microarry** data.
+GSEAPY could be used for **RNA-seq, ChIP-seq, Microarry** data.
 
 
 
