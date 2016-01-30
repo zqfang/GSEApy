@@ -194,6 +194,7 @@ def gsea_compute(data, gmt, n, weighted_score_type,permutation_type,method,pheno
     
     
     print("Star to compute esnulls.......................",time.ctime())
+    print("This will take a while if you have a large gene sets.")
 
     enrichment_nulls = [ [] for a in range(len(subsets)) ]
     

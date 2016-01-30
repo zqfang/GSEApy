@@ -11,6 +11,7 @@ from .algorithm import enrichment_score,gsea_compute,preprocess,ranking_metric
 from .gsea_plot import gsea_plot
 
 import glob
+import pandas as pd
 
 def replot(indir,outdir,weight=1,figsize=[6.5,6],format='pdf',):
     """The main fuction to run inside python."""
@@ -124,7 +125,10 @@ def run(data, gene_sets,cls, min_size, max_size, permutation_n, weighted_score_t
                         fdr = gseale[3], RES = RES, phenoPos =phenoPos ,phenoNeg = phenoNeg,figsize=figsize)
         
         fig.savefig('{a}/{b}.{c}'.format(a= outdir,b= gs,c= format),dpi=300,)
-    
+
+    res_df =pd.DataFrame.from_dict(res,orient='index')
+    res_df.index.name = 'Enrich_terms'
+    res_df.to_csv(res_df)
     
     
     return res
