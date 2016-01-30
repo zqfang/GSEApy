@@ -104,17 +104,15 @@ def gsea_gmt_parser(gmt_path, min_size = 3, max_size = 1000, gene_list=None):
     
     
     if gene_list != None:
-        subsets = sorted(genesets_filter.keys())  
-        keys_new = []    
+        subsets = sorted(genesets_filter.keys())             
         for subset in subsets:            
             tag_indicator = np.in1d(gene_list,genesets_filter.get(subset),assume_unique=True)
             tag_len = np.sum(tag_indicator)      
-            if tag_len <= min_size and tag_len >= max_size:    
-                keys_new.append(subset)
+            if tag_len <= min_size and tag_len >= max_size:                    
                 del genesets_filter[subset]
      #some_dict = {key: value for key, value in some_dict.items() if value != value_to_remove}
-    print("{a} gene_sets have been filtered out for max_size = {b} and min_size = {c}".format(a=len(keys_new),
-          b=max_size,c=min_size))
+    filsets_num = len(genesets_dict) - len(genesets_filter)
+    print("{a} gene_sets have been filtered out for max_size = {b} and min_size = {c}".format(a=filsets_num,b=max_size,c=min_size))
           
     return genesets_filter
     
