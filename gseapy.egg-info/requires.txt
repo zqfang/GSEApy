@@ -1,0 +1,4 @@
+numpy>=1.6.0
+pandas>=0.16
+matplotlib>=1.4.3
+beautifulsoup4>=4.4.1
