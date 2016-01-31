@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
-
+import time
 
 
 from bs4 import BeautifulSoup
@@ -110,7 +110,8 @@ def run(data, gene_sets,cls, min_size, max_size, permutation_n, weighted_score_t
     results,hit_ind,rank_ES, subsets = gsea_compute(data = dat, n=permutation_n,gmt = gmt, weighted_score_type=weighted_score_type,
                     permutation_type=permutation_type,method=method,phenoPos=phenoPos,phenoNeg=phenoNeg,classes = classes,ascending=ascending)
    
-   
+    print("Start to generate gseapy reports, and produce figures...",time.ctime())
+    
     res = {}
     for gs, gseale,ind,RES in zip(subsets,list(results),hit_ind,rank_ES):        
         rdict ={}       
@@ -134,7 +135,7 @@ def run(data, gene_sets,cls, min_size, max_size, permutation_n, weighted_score_t
     res_df =pd.DataFrame.from_dict(res,orient='index')
     res_df.index.name = 'Enrich_terms'
     res_df.to_csv('{a}/{b}.csv'.format(a= outdir,b='gseapy_reports' ))
-    
-    
+    print("Start to compute enrichment socres............",time.ctime())
+    print("...Congratulations. GSEAPY run successfully!!!\n...The Job is Done, See You Again............")
     return res
 
