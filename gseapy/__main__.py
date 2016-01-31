@@ -19,14 +19,6 @@ def main():
     argparser = prepare_argparser()
     args = argparser.parse_args()
 
-    if args.outdir:
-        # use a output directory to store GSEAPY output
-        if not os.path.exists( args.outdir ):
-            try:
-                os.makedirs( args.outdir )
-            except:
-                sys.exit( "Output directory (%s) could not be created. Terminating program." % args.outdir )
-
     subcommand  = args.subcommand_name
 
     if subcommand == "replot":

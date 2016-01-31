@@ -2,8 +2,9 @@
 
 from __future__ import absolute_import, print_function
 from bs4 import BeautifulSoup
-import pandas as pd
-import numpy as np
+from numpy import in1d
+from pandas import read_table
+
 import sys
 
 
@@ -73,7 +74,7 @@ def gsea_rank_metric(rank_path):
     '''
     
     
-    rank_metric = pd.read_table(rank_path,header=None)
+    rank_metric = read_table(rank_path,header=None)
     rank_metric.columns = ['gene_name','rank']
     rank_metric['rank2'] = rank_metric['rank']
      
@@ -106,8 +107,8 @@ def gsea_gmt_parser(gmt_path, min_size = 3, max_size = 5000, gene_list=None):
     if gene_list is not None:
         subsets = sorted(genesets_filter.keys())             
         for subset in subsets:            
-            tag_indicator = np.in1d(gene_list,genesets_filter.get(subset),assume_unique=True)
-            tag_len = np.sum(tag_indicator)      
+            tag_indicator = in1d(gene_list,genesets_filter.get(subset),assume_unique=True)
+            tag_len = sum(tag_indicator)      
             if tag_len <= min_size and tag_len >= max_size:                    
                 del genesets_filter[subset]
      #some_dict = {key: value for key, value in some_dict.items() if value != value_to_remove}
