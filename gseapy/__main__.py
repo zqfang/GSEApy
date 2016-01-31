@@ -48,7 +48,7 @@ def prepare_argparser ():
     function first.
     
     """
-    description = "%(prog)s -- GSEAPY for Gene Set Enrichment Analysis"
+    description = "%(prog)s -- Gene Set Enrichment Analysis in Python"
     epilog = "For command line options of each command, type: %(prog)s COMMAND -h"
 
     # top-level parser
@@ -69,7 +69,7 @@ def prepare_argparser ():
 def add_output_option ( parser ):
     parser.add_argument("-o", "--outdir", dest = "outdir", type = str, default = 'gseapy_out',
                         metavar='',action="store",
-                        help = "The gseapy output directory. Default: the current working directory")
+                        help = "The GSEAPY output directory. Default: the current working directory")
 
     parser.add_argument( "-f", "--format", dest = "format", type = str, metavar='',action="store",
                               choices = ("pdf", "png", "jpeg", "eps"),default = "pdf",
@@ -95,29 +95,29 @@ def add_call_parser( subparsers ):
     # group for input files
     group_input = argparser_call.add_argument_group( "Input files arguments" )
     group_input.add_argument( "-d", "--datab", dest = "data",  action="store",type = str, required = True, 
-                              help = "Expression table of phenotypes. Expected a txt file.Same with GSEA." )
+                              help = "Input gene expression Affymetrix dataset file in txt format.Same with GSEA." )
     group_input.add_argument( "-c", "--cls", dest = "cls",  action="store", type = str, required = True,
-                                    help = ".cls files. Same with GSEA.")
+                                    help = "Input class vector (phenotype) file in CLS format. Same with GSEA.")
     group_input.add_argument( "-g", "--gmt", dest = "gmt",  action="store", type = str, required = True,
-                              help = "Gene Sets in gmt format. Same with GSEA." )
+                              help = "Gene set database in GMT format. Same with GSEA." )
     group_input.add_argument( "-p", "--permu-type",  action="store",dest = "type", type = str,metavar='',
-                              choices = ("gene_set", "phnotype"),default = "gene_set",
-                              help = "Gene Sets in gmt format. Same with GSEA, choose from {'gene_set', 'phenotype'}")
+                              choices = ("gene_set", "phenotype"),default = "gene_set",
+                              help = "Permutation type. Same with GSEA, choose from {'gene_set', 'phenotype'}")
 
     # group for output files
     group_output = argparser_call.add_argument_group( "Output arguments" )
     add_output_option( group_output )    
        
      # group for General options.
-    group_opt = argparser_call.add_argument_group( "GSEA advance arguments" )
+    group_opt = argparser_call.add_argument_group( "GSEA advanced arguments" )
     group_opt.add_argument( "--min-size",  dest = "mins",  action="store",type = int, default =15,metavar='',
-                            help = "Min size of gene sets. Default: 15")
+                            help = "Min size of input genes presented in Gene Sets. Default: 15")
     group_opt.add_argument( "--max-size", dest = "maxs",  action="store",type = int, default = 1000,metavar='',
-                            help = "Max size of gene sets. Default: 1000")
+                            help = "Max size of input genes presented in Gene Sets. Default: 1000")
     group_opt.add_argument( "-n", "--permu-num", dest = "n",  action="store",type = int, default = 1000, metavar='',
-                            help = "Permutation number. Default: 1000" )
+                            help = "Number of random permutations. For calculating esnulls. Default: 1000" )
     group_opt.add_argument("-w","--weight",action='store',dest='weight',default= 1, type= float,metavar='',
-                            help='Weighted_score type of rank_metrics.Choose from {0, 1, 1.5, 2},default: 1',)
+                            help='Weighted_score of rank_metrics.For weighting input genes. Choose from {0, 1, 1.5, 2},default: 1',)
 
     group_opt.add_argument( "-m", "--method",  action="store",dest = "method", type = str, metavar='',
                             choices = ("signal_to_noise", "t_test", "ratio_of_classes", "diff_of_classes","log2_ratio_of_classes"),
@@ -126,7 +126,7 @@ def add_call_parser( subparsers ):
                             Choose from {'signal_to_noise', 't_test', 'ratio_of_classes', 'diff_of_classes','log2_ratio_of_classes'}.\
                             Default: 'log2_ratio_of_classes'" )   
     group_opt.add_argument("-a","--ascending",action='store_true',dest='ascending',default= False ,
-                            help='Rank metrice sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
+                            help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
 
     
      
@@ -145,7 +145,7 @@ def add_plot_parser( subparsers ):
     add_output_option( group_replot)
     #add_output_group( argparser_plot )
     group_replot.add_argument("-w","--weight",action='store',dest='weight',default= 1, type= float,metavar='',
-                        help='Weighted_score type of rank_metrics.Choose from (0, 1, 1.5, 2),default: 1',)
+                        help='Weighted_score of rank_metrics. Please Use the same value in GSEA. Choose from (0, 1, 1.5, 2),default: 1',)
        
     return
 
