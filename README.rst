@@ -125,7 +125,7 @@ See `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Ma
 
 
 
-.. code:: shell
+.. code:: bash
   
   $ gseapy replot -i path/to/GSEA_resutls_folder -o gesapy_out
 
@@ -159,7 +159,7 @@ Advanced Usage of GSEAPY
 -----------------------------------------
 To see gseapy subcommands
 
-.. code:: shell
+.. code:: bash
    
    $ gseapy --help 
    
@@ -185,7 +185,7 @@ For command line options of each command, type: gseapy COMMAND -h
 The ``replot`` Command
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: shell
+.. code:: bash
 
    $ gseapy replot -h
 
@@ -212,7 +212,7 @@ The ``replot`` Command
 The ``call`` Command
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: shell
+.. code:: bash
 
    $ gseapy call -h
 
