@@ -13,7 +13,7 @@ from .gsea_plot import gsea_plot
 import glob
 import pandas as pd
 
-def replot(indir,outdir,weight=1,figsize=[6.5,6],format='pdf',):
+def replot(indir,outdir,weight=1,figsize=[6.5,6],format='pdf',min_size = 3, max_size = 5000,):
     """The main fuction to run inside python."""
         
     #parsing files.......
@@ -42,14 +42,14 @@ def replot(indir,outdir,weight=1,figsize=[6.5,6],format='pdf',):
     os.system("mkdir "+ outdir)
     for idx in range(length):
         #extract statistical resutls from results.edb file
-        enrich_term,hit_ind, nes,pval,fdr,rank_es = gsea_edb_parser( results_path,index=idx)
+        enrich_term,hit_ind, nes,pval,fdr= gsea_edb_parser( results_path,index=idx)
         
         #obtain rank_metrics
         rank_metric = gsea_rank_metric(rank_path)
         correl_vector =  rank_metric['rank'].values
 
         #obtain gene sets
-        gene_set_dict = gsea_gmt_parser(gene_set_path)
+        gene_set_dict = gsea_gmt_parser(gene_set_path,min_size = min_size, max_size = max_size)
         gene_set = gene_set_dict.get(enrich_term)
         gene_list = rank_metric['gene_name']
 
@@ -64,6 +64,8 @@ def replot(indir,outdir,weight=1,figsize=[6.5,6],format='pdf',):
                         fdr, RES, phenoPos,phenoNeg,figsize=figsize)
     
         fig.savefig('{a}/{b}.{c}'.format(a=outdir,b=enrich_term,c=format),dpi=300,)
+        
+    print("Congratulations! Your plots have been reproduced successfully!")
 
 
 def run(data, gene_sets,cls, min_size, max_size, permutation_n, weighted_score_type,
@@ -134,8 +136,11 @@ def run(data, gene_sets,cls, min_size, max_size, permutation_n, weighted_score_t
 
     res_df =pd.DataFrame.from_dict(res,orient='index')
     res_df.index.name = 'Enrich_terms'
+    res_df.sort_values(by='fdr',inplace=True)
     res_df.to_csv('{a}/{b}.csv'.format(a= outdir,b='gseapy_reports' ))
-    print("Start to compute enrichment socres............",time.ctime())
-    print("...Congratulations. GSEAPY run successfully!!!\n...The Job is done.......................")
-    return res
+    
+    print(res_df.head(10))
+    print("...Congratulations. GSEAPY run successfully!!!\n...The Job is done...........................")
+    
+    return res_df
 

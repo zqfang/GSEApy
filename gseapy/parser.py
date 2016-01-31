@@ -47,12 +47,12 @@ def gsea_edb_parser(results_path,index = 0,):
     
     enrich_term = term.get('GENESET').split("#")[1]
     es_profile = term.get('ES_PROFILE').split(" ")
-    rank_es = term.get('RND_ES').split(" ")
+    #rank_es = term.get('RND_ES').split(" ")
     hit_ind =term.get('HIT_INDICES').split(" ")
 
     es_profile = [float(i) for i in es_profile ]
     hit_ind = [float(i) for i in hit_ind ]
-    rank_es = [float(i) for i in rank_es ]
+    #rank_es = [float(i) for i in rank_es ]
     nes = term.get('NES')
     pval = term.get('NP')
     fdr =  term.get('FDR')
@@ -62,7 +62,7 @@ def gsea_edb_parser(results_path,index = 0,):
     
     #index_range = len(tag)-1
     print("Enriched Gene set is: ", enrich_term)
-    return enrich_term,hit_ind, nes,pval,fdr,rank_es
+    return enrich_term,hit_ind, nes,pval,fdr
     
 
 def gsea_rank_metric(rank_path):
@@ -79,7 +79,7 @@ def gsea_rank_metric(rank_path):
      
     return rank_metric
     
-def gsea_gmt_parser(gmt_path, min_size = 3, max_size = 1000, gene_list=None):
+def gsea_gmt_parser(gmt_path, min_size = 3, max_size = 5000, gene_list=None):
     '''
     parser gene sets file
     
