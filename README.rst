@@ -1,4 +1,4 @@
-GSEAPY
+GSEAPY: Gene Set Enrichment Analysis in Python
 ========
 
 GSEAPY is a python wrapper for **GESA**. 
