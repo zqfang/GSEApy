@@ -22,7 +22,7 @@ install:
   - pip install pep8==1.5  # Later versions get stricter...
   - pip install https://github.com/dcramer/pyflakes/tarball/master
   - pip install .
-  - cp testing/matplotlibrc .
+
 
 before_install:
   - sudo apt-get update -yq
