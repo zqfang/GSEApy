@@ -1,0 +1,55 @@
+language: python
+
+env:
+  - PYTHON=2.7 DEPS=modern
+  - PYTHON=2.7 DEPS=minimal
+  - PYTHON=3.4 DEPS=modern
+  - PYTHON=3.5 DEPS=modern
+
+install:
+  - conda update conda --yes
+  - conda create -n testenv --yes pip python=$PYTHON
+  - conda update conda --yes
+  - source activate testenv
+  - if [ ${PYTHON:0:1} == "2" ];
+    then conda install --yes imaging; else
+    pip install pillow;
+    fi
+  - conda install --yes --file testing/deps_${DEPS}_${PYTHON}.txt
+  - conda install ipython-notebook=2 --yes
+  #- pip install sphinx numpydoc sphinx_bootstrap_theme runipy
+  #- sudo apt-get install pandoc
+  - pip install pep8==1.5  # Later versions get stricter...
+  - pip install https://github.com/dcramer/pyflakes/tarball/master
+  - pip install .
+  - cp testing/matplotlibrc .
+
+before_install:
+  - sudo apt-get update -yq
+  - sudo sh -c "echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | debconf-set-selections"
+  - sudo apt-get install msttcorefonts -qq
+
+  # http://conda.pydata.org/docs/travis.html#the-travis-yml-file
+  - wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda info -a
+
+before_script:
+  - if [ ${PYTHON:0:1} == "2" ]; then
+    make lint;
+    fi
+  #- if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then
+  #  cd doc;
+  #  make notebooks html;
+  #  cd ..;
+  #  fi
+
+script:
+  - if [ $DEPS == 'modern' ];
+    then nosetests --with-doctest;
+    else nosetests;
+    fi
