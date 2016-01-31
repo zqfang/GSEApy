@@ -136,6 +136,6 @@ def run(data, gene_sets,cls, min_size, max_size, permutation_n, weighted_score_t
     res_df.index.name = 'Enrich_terms'
     res_df.to_csv('{a}/{b}.csv'.format(a= outdir,b='gseapy_reports' ))
     print("Start to compute enrichment socres............",time.ctime())
-    print("...Congratulations. GSEAPY run successfully!!!\n...The Job is Done, See You Again............")
+    print("...Congratulations. GSEAPY run successfully!!!\n...The Job is done.......................")
     return res
 
