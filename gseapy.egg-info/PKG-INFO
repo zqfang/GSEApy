@@ -175,7 +175,7 @@ Description: GSEAPY
            
             usage: gseapy [-h] [--version] {call,replot} ...
         
-            gseapy -- GSEAPY for Gene Set Enrichment Analysis
+            gseapy -- Gene Set Enrichment Analysis in Python
         
             positional arguments:
               {call,replot}
@@ -214,8 +214,8 @@ Description: GSEAPY
               --figsize width height
                                     The figsize keyword argument need two parameter to
                                     define. Default: [6.5, 6]
-              -w , --weight         Weighted_score type of rank_metrics.Choose from (0, 1,
-                                    1.5, 2),default: 1
+              -w , --weight         Weighted_score of rank_metric. Please use the same 
+                                    value in GSEA. Choose from (0, 1, 1.5, 2),default: 1
         
         
         
@@ -235,16 +235,16 @@ Description: GSEAPY
                 
             Input files arguments:
               -d DATA, --datab DATA
-                                    Expression table of phenotypes. Expected a txt
-                                    file.Same with GSEA.
-              -c CLS, --cls CLS     .cls files. Same with GSEA.
-              -g GMT, --gmt GMT     Gene Sets in gmt format. Same with GSEA.
-              -p , --permu-type
-                                    Gene Sets in gmt format. Same with GSEA, choose from
+                                    Input gene expression Affymetrix dataset file in txt
+                                    format.Same with GSEA.
+              -c CLS, --cls CLS     Input class vector (phenotype) file in CLS format.
+                                    Same with GSEA.
+              -g GMT, --gmt GMT     Gene set database in GMT format. Same with GSEA.
+              -p , --permu-type     Permutation type. Same with GSEA, choose from
                                     {'gene_set', 'phenotype'}
             
             Output arguments:
-              -o , --outdir         The gseapy output directory. Default: the current
+              -o , --outdir         The GSEAPY output directory. Default: the current
                                     working directory
               -f , --format         Format of output figures, choose from {'pdf', 'png',
                                     'jpeg', 'eps'}. Default: 'pdf'.
@@ -252,25 +252,23 @@ Description: GSEAPY
                                     The figsize keyword argument need two parameter to
                                     define. Default: [6.5,6]
             
-            GSEA advance arguments:
-              --min-size            Min size of gene sets. Default: 15
-              --max-size            Max size of gene sets. Default: 1000
-              -n , --permu-num      Permutation number. Default: 1000
-              -w , --weight         Weighted_score type of rank_metrics.Choose from {0, 1,
-                                    1.5, 2},default: 1
+            GSEA advanced arguments:
+              --min-size            Min size of input genes presented in Gene Sets.
+                                    Default: 15
+              --max-size            Max size of input genes presented in Gene Sets.
+                                    Default: 1000
+              -n , --permu-num      Number of random permutations. For calculating
+                                    esnulls. Default: 1000
+              -w , --weight         Weighted_score of rank_metrics.For weighting input
+                                    genes. Choose from {0, 1, 1.5, 2},default: 1
               -m , --method         Methods to calculate correlations of ranking metrics.
                                     Choose from {'signal_to_noise', 't_test',
                                     'ratio_of_classes',
                                     'diff_of_classes','log2_ratio_of_classes'}. Default:
                                     'log2_ratio_of_classes'
-              -a, --ascending       Rank metrice sorting order. If the -a flag was chosen,
+              -a, --ascending       Rank metric sorting order. If the -a flag was chosen,
                                     then ascending equals to True. Default: False.
-        
-        
-        
             
-        
-        
         
         
         

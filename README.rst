@@ -20,12 +20,12 @@ Why GSEAPY
 
 For Gene Enrichment Analysis, ``GSEA`` is still the one of best choice.  
 
-However, When you have large number of expression tables, or ``GO`` terms to enrich,
- ``GSEA`` desktop version is inconvinient, what's more, the R version of GSEA has not been updated since 2006. 
-What's worse, ``GSEA`` desktop Java version do not provide means to modify plots, 
+However, When you have large number of expression tables, or ``GO`` terms to enrich, ``GSEA`` desktop
+version is inconvinient. What's more, the R version of GSEA has not been updated since 2006. 
+What's worse, ``GSEA`` desktop version do not provide means to modify plots, 
 like legends, ticks......
 
-As a researcher of life science, I want a modern ``GSEA``. It can produce pubilishable 
+As a researcher of life science, I want a modern ``GSEA`` with lastest features. It can produce pubilishable 
 figures, and do many jobs at the same time without using mouse to select differrent data table,
 differrent gene sets repeatly. 
 
@@ -36,11 +36,11 @@ differrent gene sets repeatly.
 Features of GSEAPY
 ------------------------------------------------------
 
-#. GSEAPY could reproduce the GSEA figures using GSEA desktop Java version results.
+#. GSEAPY could reproduce the GSEA figures using GSEA desktop version results.
 
 #. GSEAPY could be used directly to perform enrichment anlysis. All parameters are same with ``GSEA``
 
-#. GSEAPY is written in ``python``, using the same algorithm of ``GSEA`` Desktop Java version.
+#. GSEAPY is written in ``python``, using the same algorithm of ``GSEA`` Desktop version.
 
 #. GSEAPY produce figures in pdf format by default, which are ready for publishing and easy to modifiy.
 
@@ -48,9 +48,9 @@ Features of GSEAPY
 
 
 
-GSEA desktop JAVA version output: 
+GSEA desktop version output: 
 -------------------------------------------------
-This is an example of GSEA desktop Java application output
+This is an example of GSEA desktop application output
 
 .. figure:: GSEA_OCT4_KD.png
 
@@ -118,10 +118,10 @@ Run GSEAPY
 For command line usage:
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``replot`` module reproduce GSEA desktop Java version results. The only input for GSEAPY is the location to GSEA results.
+The ``replot`` module reproduce GSEA desktop version results. The only input for GSEAPY is the location to GSEA results.
 
 The ``call`` module produce GSEAPY results. The input requries a txt file( FPKM, Expected Counts, TPM, et.al), a cls file,
-and gene_sets file in gmt format. The input files' formats are identical to ``GSEA`` desktop Java version. 
+and gene_sets file in gmt format. The input files' formats are identical to ``GSEA`` desktop version. 
 See `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ documentation for more information.
 
 
