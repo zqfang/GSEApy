@@ -111,6 +111,7 @@ def gsea_gmt_parser(gmt_path, min_size = 3, max_size = 5000, gene_list=None):
             if tag_len <= min_size and tag_len >= max_size:                    
                 del genesets_filter[subset]
      #some_dict = {key: value for key, value in some_dict.items() if value != value_to_remove}
+     #use np.intersect1d() may be faster???    
     filsets_num = len(genesets_dict) - len(genesets_filter)
     print("{a} gene_sets have been filtered out for max_size = {b} and min_size = {c}".format(a=filsets_num,b=max_size,c=min_size))
           
