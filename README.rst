@@ -1,9 +1,10 @@
-GSEAPY: Gene Set Enrichment Analysis in Python
+GSEAPY
 ========
 
-GSEAPY is a python wrapper for **GESA**. 
+GSEAPY: Gene Set Enrichment Analysis in Python.
 
-GSEAPY is used for convenient GO enrichments and produce **publishable quality figures** from python. 
+GSEAPY is a python wrapper for **GESA**.It's used for convenient GO enrichments
+and produce **publishable quality figures** from python. 
 
 GSEAPY could be used for **RNA-seq, ChIP-seq, Microarry** data.
 
