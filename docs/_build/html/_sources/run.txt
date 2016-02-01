@@ -7,7 +7,7 @@ GSEAPY Running Documentation
 
 
 For command line usage:
-~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------
 
 The ``replot`` module reproduce GSEA desktop version results. The only input for GSEAPY is the location to GSEA results.
 
@@ -31,7 +31,7 @@ See `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Ma
 
 
 Run gseapy inside python:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------
 
 .. code:: python
 
@@ -54,10 +54,12 @@ This will import the following:
              outdir='test',figsize = (6.5,6),format = 'png')
 
 
-To See help information of GSEAPY
------------------------------------------
 
-1. To see gseapy subcommands
+			 
+To See help information of GSEAPY
+--------------------------------------
+
+1. gseapy subcommands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. code:: bash
    
@@ -160,8 +162,11 @@ For command line options of each command, type: gseapy COMMAND -h
                             then ascending equals to True. Default: False.
 
 
+
+							
+							
 Module APIs 
-----------------------
+---------------------
 
 
 .. autofunction:: replot()
@@ -176,7 +181,7 @@ Module APIs
 
 
 Algorithms
-~~~~~~~~~~~~~~~~~
+-------------------------
 
 
 .. automodule:: gseapy.algorithm

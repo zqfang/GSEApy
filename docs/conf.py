@@ -31,7 +31,9 @@ sys.path.insert(0, os.path.abspath('..'))
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
+    'sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.autosummary', 'sphinx.ext.todo',
+    'sphinx.ext.coverage', 'sphinx.ext.pngmath', 'sphinx.ext.ifconfig',
+    'sphinx.ext.viewcode', 'matplotlib.sphinxext.plot_directive',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -111,15 +113,15 @@ todo_include_todos = False
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'haiku'
-# haiku,'alabaster'
+html_theme = 'sphinx_rtd_theme'
+# haiku,'alabaster','sphinx_rtd_theme'
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #html_theme_options = {}
 
 # Add any paths that contain custom themes here, relative to this directory.
-#html_theme_path = []
+html_theme_path = []
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -256,7 +258,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     (master_doc, 'gseapy', 'GSEAPY Documentation',
-     [author], 1)
+     ['Zhuoqing Fang'], 1)
 ]
 
 # If true, show URL addresses after external links.

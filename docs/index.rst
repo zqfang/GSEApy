@@ -65,7 +65,7 @@ GSEA desktop version output:
 -------------------------------------------------
 This is an example of GSEA desktop application output
 
-.. figure:: https://github.com/BioNinja/gseapy/blob/master/GSEA_OCT4_KD.png
+.. figure:: GSEA_OCT4_KD.png
 
 
 
@@ -74,7 +74,7 @@ GSEAPY output
 -----------------------------------------------
 Using the same algorithm by ``GSEA``, GSEAPY reproduce the example above.
 
-.. figure:: https://github.com/BioNinja/gseapy/blob/master/gseapy_OCT4_KD.png
+.. figure:: gseapy_OCT4_KD.png
 
    
    
@@ -136,7 +136,9 @@ Contents:
 
 .. toctree::
    :maxdepth: 2
-
+   
+   index.rst
+   run.rst
 
 
 Indices and tables
