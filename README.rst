@@ -3,6 +3,15 @@ GSEAPY
 
 GSEAPY: Gene Set Enrichment Analysis in Python.
 
+.. image:: https://badge.fury.io/py/gseapy.svg
+    :target: https://badge.fury.io/py/gseapy
+.. image:: https://travis-ci.org/BioNinja/gseapy.svg?branch=master
+    :target: https://travis-ci.org/BioNinja/gseapy
+
+.. image:: https://img.shields.io/github/license/mashape/apistatus.svg
+
+
+
 GSEAPY is a python wrapper for **GESA**.It's used for convenient GO enrichments
 and produce **publishable quality figures** from python. GSEAPY could be used for **RNA-seq, ChIP-seq, Microarry** data.
 
@@ -51,7 +60,7 @@ GSEA desktop version output:
 -------------------------------------------------
 This is an example of GSEA desktop application output
 
-.. figure:: GSEA_OCT4_KD.png
+.. figure:: https://github.com/BioNinja/gseapy/blob/master/GSEA_OCT4_KD.png
 
 
 
@@ -60,7 +69,7 @@ GSEAPY output
 -----------------------------------------------
 Using the same algorithm by ``GSEA``, GSEAPY reproduce the example above.
 
-.. figure:: gseapy_OCT4_KD.png
+.. figure:: https://github.com/BioNinja/gseapy/blob/master/gseapy_OCT4_KD.png
 
    
    
