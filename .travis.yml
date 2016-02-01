@@ -33,15 +33,6 @@ before_install:
   - conda update -q conda
   - conda info -a
 
-before_script:
-  - if [ ${PYTHON:0:1} == "2" ]; then
-    make lint;
-    fi
-  #- if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then
-  #  cd doc;
-  #  make notebooks html;
-  #  cd ..;
-  #  fi
 
 script:
   - if [ $DEPS == 'modern' ];
