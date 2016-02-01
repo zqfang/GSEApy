@@ -95,6 +95,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#to-see-help-information-of-gseapy">To See help information of GSEAPY</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-apis">Module APIs</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-gseapy.algorithm">Algorithms</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-gseapy.parser">Parsers</a></li>
 </ul>
 </li>
 </ul>
@@ -113,6 +114,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-apis">Module APIs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-gseapy.algorithm">Algorithms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-gseapy.parser">Parsers</a></li>
 </ul>
 </li>
 </ul>
@@ -186,12 +188,15 @@ $ gseapy call -d exptable.txt -c test.cls -g test.gmt
 <p>This will import the following:</p>
 <ul class="simple">
 <li>The <a class="reference internal" href="#gseapy.replot" title="gseapy.replot"><code class="xref py py-func docutils literal"><span class="pre">replot()</span></code></a> function to reproduce GSEA desktop results</li>
-<li>The <a class="reference internal" href="#gseapy.run" title="gseapy.run"><code class="xref py py-func docutils literal"><span class="pre">run()</span></code></a> function to computing es,nes,pval,fdr,and generate plots <em>de novo</em>.</li>
 </ul>
 <div class="code python highlight-python"><div class="highlight"><pre><span class="c"># An example to reproduce figures using replot module.</span>
 <span class="n">gseapy</span><span class="o">.</span><span class="n">replot</span><span class="p">(</span><span class="s">&#39;./Gsea.reports&#39;</span><span class="p">,</span><span class="s">&#39;test&#39;</span><span class="p">)</span>
-
-<span class="c"># calculate es, nes, pval,fdrs, and produce figures using gseapy.</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>The <a class="reference internal" href="#gseapy.run" title="gseapy.run"><code class="xref py py-func docutils literal"><span class="pre">run()</span></code></a> function to computing es,nes,pval,fdr,and generate plots <em>de novo</em>.</li>
+</ul>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># An example to calculate es, nes, pval,fdrs, and produce figures using gseapy.</span>
 <span class="n">gseapy</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">expression</span><span class="o">.</span><span class="n">txt</span><span class="p">,</span> <span class="n">gene_sets</span> <span class="o">=</span> <span class="n">gene_sets</span><span class="o">.</span><span class="n">gmt</span><span class="p">,</span><span class="n">cls</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">cls</span><span class="p">,</span>
           <span class="n">min_size</span> <span class="o">=</span> <span class="mi">15</span><span class="p">,</span> <span class="n">max_size</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">permutation_n</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">weighted_score_type</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
           <span class="n">permutation_type</span> <span class="o">=</span> <span class="s">&#39;gene_set&#39;</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="s">&#39;log2_ratio_of_classes&#39;</span><span class="p">,</span><span class="n">ascending</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
@@ -505,7 +510,7 @@ correlation in second column.</p>
 
 <dl class="function">
 <dt id="gseapy.algorithm.shuffle_list">
-<code class="descclassname">gseapy.algorithm.</code><code class="descname">shuffle_list</code><span class="sig-paren">(</span><em>gene_list</em>, <em>rand=&lt;random.Random object at 0x0000022911F63FF8&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#shuffle_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.shuffle_list" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.algorithm.</code><code class="descname">shuffle_list</code><span class="sig-paren">(</span><em>gene_list</em>, <em>rand=&lt;random.Random object at 0x0000018178FAB7A8&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#shuffle_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.shuffle_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a copy of a shuffled input gene_list.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -518,6 +523,92 @@ correlation in second column.</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a ranodm shuffled list.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-gseapy.parser">
+<span id="parsers"></span><h2>Parsers<a class="headerlink" href="#module-gseapy.parser" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="gseapy.parser.gsea_cls_parser">
+<code class="descclassname">gseapy.parser.</code><code class="descname">gsea_cls_parser</code><span class="sig-paren">(</span><em>cls</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/parser.html#gsea_cls_parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.parser.gsea_cls_parser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extact class(phenotype) name from .cls file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cls</strong> &#8211; the location of GSEA-P .cls file.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">phenotype name and a list of class vector.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="gseapy.parser.gsea_edb_parser">
+<code class="descclassname">gseapy.parser.</code><code class="descname">gsea_edb_parser</code><span class="sig-paren">(</span><em>results_path</em>, <em>index=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/parser.html#gsea_edb_parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.parser.gsea_edb_parser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse results.edb file stored under <strong>edb</strong> file folder.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>results_path</strong> &#8211; location of GSEA Desktop results.</li>
+<li><strong>index</strong> &#8211; gene_set index of gmt database, used for iterating items.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">enrichment_term, hit_index,nes, pval, fdr.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="gseapy.parser.gsea_gmt_parser">
+<code class="descclassname">gseapy.parser.</code><code class="descname">gsea_gmt_parser</code><span class="sig-paren">(</span><em>gmt</em>, <em>min_size=3</em>, <em>max_size=5000</em>, <em>gene_list=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/parser.html#gsea_gmt_parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.parser.gsea_gmt_parser" title="Permalink to this definition">¶</a></dt>
+<dd><p>parser gene_sets.gmt(gene set database) file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>gmt</strong> &#8211; Location of gene_sets.gmt file.</li>
+<li><strong>min_size</strong> &#8211; Minimum allowed number of genes from gene set also the data set. Default: 3.</li>
+<li><strong>max_size</strong> &#8211; Maximum allowed number of genes from gene set also the data set. Default: 5000.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Gene_list:</th><td class="field-body"><p class="first">Used for filtering gene set. Only used this argument for <code class="xref py py-func docutils literal"><span class="pre">run()</span></code> method.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Return a new filtered gene set database dictionary.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>DO NOT</strong> filtering gene sets, when use <code class="xref py py-func docutils literal"><span class="pre">replot()</span></code>. Because <code class="docutils literal"><span class="pre">GSEA</span></code> Desktop have already
+do this for you.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gseapy.parser.gsea_rank_metric">
+<code class="descclassname">gseapy.parser.</code><code class="descname">gsea_rank_metric</code><span class="sig-paren">(</span><em>rnk</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/parser.html#gsea_rank_metric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.parser.gsea_rank_metric" title="Permalink to this definition">¶</a></dt>
+<dd><p>parse .rnk file. This file contains ranking correlation vector and gene names or ids.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>rnk</strong> &#8211; location of GSEA-P .rnk file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a pandas DataFrame with 3 columns names are:<div class="highlight-python"><div class="highlight"><pre>&#39;gene_name&#39;,&#39;rank&#39;,rank2&#39;
+</pre></div>
+</div>
 </td>
 </tr>
 </tbody>

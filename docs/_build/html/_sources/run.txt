@@ -41,14 +41,19 @@ Run gseapy inside python:
 This will import the following:
 
 * The :func:`replot` function to reproduce GSEA desktop results
-* The :func:`run` function to computing es,nes,pval,fdr,and generate plots *de novo*.
 
 .. code:: python
 
    # An example to reproduce figures using replot module.
    gseapy.replot('./Gsea.reports','test')
 
-   # calculate es, nes, pval,fdrs, and produce figures using gseapy.
+
+
+* The :func:`run` function to computing es,nes,pval,fdr,and generate plots *de novo*.
+
+.. code:: python
+
+   # An example to calculate es, nes, pval,fdrs, and produce figures using gseapy.
    gseapy.run(data = expression.txt, gene_sets = gene_sets.gmt,cls = test.cls, 
              min_size = 15, max_size = 1000, permutation_n = 1000, weighted_score_type = 1,
              permutation_type = 'gene_set', method = 'log2_ratio_of_classes',ascending = False, 
@@ -188,4 +193,10 @@ Algorithms
 .. automodule:: gseapy.algorithm
    :members:
 
+
+Parsers
+--------------------------
+
+.. automodule:: gseapy.parser
+   :members:
 

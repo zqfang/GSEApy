@@ -8,13 +8,14 @@ from pandas import read_table
 import sys
 
 
-def gsea_cls_parser(cls_path):
-    '''
-    extact class(sample) name
-    :param cls_path: location of GSEA-P .cls file
-    '''
+def gsea_cls_parser(cls):
+    """Extact class(phenotype) name from .cls file.
     
-    with open(cls_path) as cls:
+    :param cls: the location of GSEA-P .cls file.
+    :return: phenotype name and a list of class vector. 
+    """
+    
+    with open(cls) as cls:
         file = cls.readlines()
     sample_name = file[1].strip('\n').split(" ")        
     classes = file[2].strip('\n').split(" ")
@@ -26,15 +27,13 @@ def gsea_cls_parser(cls_path):
 
 
 def gsea_edb_parser(results_path,index = 0,):
-    '''
-    parse results.edb files.
-            
+    """Parse results.edb file stored under **edb** file folder.            
 
-    
-    :param results_path: location of GSEA-P results.gmt file
-    :param index: gene_sets_length.
+    :param results_path: location of GSEA Desktop results.
+    :param index: gene_set index of gmt database, used for iterating items.
    
-    '''
+    :return: enrichment_term, hit_index,nes, pval, fdr.
+    """
 
     
     soup = BeautifulSoup(open(results_path),features='xml')
@@ -66,32 +65,42 @@ def gsea_edb_parser(results_path,index = 0,):
     return enrich_term,hit_ind, nes,pval,fdr
     
 
-def gsea_rank_metric(rank_path):
-    '''
-    parse rank_metric file
+def gsea_rank_metric(rnk):
+    """parse .rnk file. This file contains ranking correlation vector and gene names or ids. 
     
-    :param rank_path: location of GSEA-P .rnk file
-    '''
+    :param rnk: location of GSEA-P .rnk file
+    :return: a pandas DataFrame with 3 columns names are::
+             
+                 'gene_name','rank',rank2'
+                 
+    """
     
     
-    rank_metric = read_table(rank_path,header=None)
+    rank_metric = read_table(rnk,header=None)
     rank_metric.columns = ['gene_name','rank']
     rank_metric['rank2'] = rank_metric['rank']
      
     return rank_metric
     
-def gsea_gmt_parser(gmt_path, min_size = 3, max_size = 5000, gene_list=None):
-    '''
-    parser gene sets file
+def gsea_gmt_parser(gmt, min_size = 3, max_size = 5000, gene_list=None):
+    """parser gene_sets.gmt(gene set database) file. 
     
-    :param gmt_path: location of GSEA-P .gmt file
-    '''
+    :param gmt: Location of gene_sets.gmt file.
+    :param min_size: Minimum allowed number of genes from gene set also the data set. Default: 3. 
+    :param max_size: Maximum allowed number of genes from gene set also the data set. Default: 5000.
+    :gene_list: Used for filtering gene set. Only used this argument for :func:`run` method.
+    :return: Return a new filtered gene set database dictionary. 
+
+    **DO NOT** filtering gene sets, when use :func:`replot`. Because ``GSEA`` Desktop have already
+    do this for you.
+            
+    """
     
     
-    with open(gmt_path) as gmt:
+    with open(gmt) as genesets:
         genesets_dict = { line.rstrip("\n").split("\t")[0]:  
                           line.rstrip("\n").split("\t")[2:] 
-                          for line in gmt.readlines()}
+                          for line in genesets.readlines()}
     
     
     #filtering dict

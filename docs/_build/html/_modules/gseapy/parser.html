@@ -1,0 +1,321 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>gseapy.parser &mdash; GSEAPY 0.3.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="GSEAPY 0.3.1 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> GSEAPY
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Welcome to GSEAPY&#8217;s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html#indices-and-tables">Indices and tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../run.html">How to Use GSEAPY</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">GSEAPY</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>gseapy.parser</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for gseapy.parser</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">in1d</span>
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">read_table</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+
+
+<div class="viewcode-block" id="gsea_cls_parser"><a class="viewcode-back" href="../../run.html#gseapy.parser.gsea_cls_parser">[docs]</a><span class="k">def</span> <span class="nf">gsea_cls_parser</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Extact class(phenotype) name from .cls file.</span>
+<span class="sd">    </span>
+<span class="sd">    :param cls: the location of GSEA-P .cls file.</span>
+<span class="sd">    :return: phenotype name and a list of class vector. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span> <span class="k">as</span> <span class="n">cls</span><span class="p">:</span>
+        <span class="nb">file</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+    <span class="n">sample_name</span> <span class="o">=</span> <span class="nb">file</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">)</span>        
+    <span class="n">classes</span> <span class="o">=</span> <span class="nb">file</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">)</span>
+    <span class="n">phenoPos</span> <span class="o">=</span> <span class="n">sample_name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">phenoNeg</span> <span class="o">=</span> <span class="n">sample_name</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    
+    <span class="k">return</span> <span class="n">phenoPos</span><span class="p">,</span><span class="n">phenoNeg</span><span class="p">,</span><span class="n">classes</span>
+
+
+</div>
+<div class="viewcode-block" id="gsea_edb_parser"><a class="viewcode-back" href="../../run.html#gseapy.parser.gsea_edb_parser">[docs]</a><span class="k">def</span> <span class="nf">gsea_edb_parser</span><span class="p">(</span><span class="n">results_path</span><span class="p">,</span><span class="n">index</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,):</span>
+    <span class="sd">&quot;&quot;&quot;Parse results.edb file stored under **edb** file folder.            </span>
+
+<span class="sd">    :param results_path: location of GSEA Desktop results.</span>
+<span class="sd">    :param index: gene_set index of gmt database, used for iterating items.</span>
+<span class="sd">   </span>
+<span class="sd">    :return: enrichment_term, hit_index,nes, pval, fdr.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    
+    <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">results_path</span><span class="p">),</span><span class="n">features</span><span class="o">=</span><span class="s">&#39;xml&#39;</span><span class="p">)</span>
+    <span class="n">tag</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">findAll</span><span class="p">(</span><span class="s">&#39;DTG&#39;</span><span class="p">)</span>
+   
+    <span class="n">term</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">tag</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+    <span class="c"># dict_keys([&#39;RANKED_LIST&#39;, &#39;GENESET&#39;, &#39;FWER&#39;, &#39;ES_PROFILE&#39;, </span>
+    <span class="c"># &#39;HIT_INDICES&#39;, &#39;ES&#39;, &#39;NES&#39;, &#39;TEMPLATE&#39;, &#39;RND_ES&#39;, &#39;RANK_SCORE_AT_ES&#39;,</span>
+    <span class="c">#&#39;NP&#39;, &#39;RANK_AT_ES&#39;, &#39;FDR&#39;])</span>
+      
+    
+    <span class="n">enrich_term</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;GENESET&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;#&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">es_profile</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;ES_PROFILE&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">)</span>
+    <span class="c">#rank_es = term.get(&#39;RND_ES&#39;).split(&quot; &quot;)</span>
+    <span class="n">hit_ind</span> <span class="o">=</span><span class="n">term</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;HIT_INDICES&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">)</span>
+
+    <span class="n">es_profile</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">es_profile</span> <span class="p">]</span>
+    <span class="n">hit_ind</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">hit_ind</span> <span class="p">]</span>
+    <span class="c">#rank_es = [float(i) for i in rank_es ]</span>
+    <span class="n">nes</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;NES&#39;</span><span class="p">)</span>
+    <span class="n">pval</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;NP&#39;</span><span class="p">)</span>
+    <span class="n">fdr</span> <span class="o">=</span>  <span class="n">term</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;FDR&#39;</span><span class="p">)</span>
+    <span class="c">#fwer = term.get(&#39;FWER&#39;)</span>
+   
+   
+    
+    <span class="c">#index_range = len(tag)-1</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">&quot;Enriched Gene set is: &quot;</span><span class="p">,</span> <span class="n">enrich_term</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">enrich_term</span><span class="p">,</span><span class="n">hit_ind</span><span class="p">,</span> <span class="n">nes</span><span class="p">,</span><span class="n">pval</span><span class="p">,</span><span class="n">fdr</span>
+    
+</div>
+<div class="viewcode-block" id="gsea_rank_metric"><a class="viewcode-back" href="../../run.html#gseapy.parser.gsea_rank_metric">[docs]</a><span class="k">def</span> <span class="nf">gsea_rank_metric</span><span class="p">(</span><span class="n">rnk</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;parse .rnk file. This file contains ranking correlation vector and gene names or ids. </span>
+<span class="sd">    </span>
+<span class="sd">    :param rnk: location of GSEA-P .rnk file</span>
+<span class="sd">    :return: a pandas DataFrame with 3 columns names are::</span>
+<span class="sd">             </span>
+<span class="sd">                 &#39;gene_name&#39;,&#39;rank&#39;,rank2&#39;</span>
+<span class="sd">                 </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    
+    <span class="n">rank_metric</span> <span class="o">=</span> <span class="n">read_table</span><span class="p">(</span><span class="n">rnk</span><span class="p">,</span><span class="n">header</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+    <span class="n">rank_metric</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;gene_name&#39;</span><span class="p">,</span><span class="s">&#39;rank&#39;</span><span class="p">]</span>
+    <span class="n">rank_metric</span><span class="p">[</span><span class="s">&#39;rank2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rank_metric</span><span class="p">[</span><span class="s">&#39;rank&#39;</span><span class="p">]</span>
+     
+    <span class="k">return</span> <span class="n">rank_metric</span>
+    </div>
+<div class="viewcode-block" id="gsea_gmt_parser"><a class="viewcode-back" href="../../run.html#gseapy.parser.gsea_gmt_parser">[docs]</a><span class="k">def</span> <span class="nf">gsea_gmt_parser</span><span class="p">(</span><span class="n">gmt</span><span class="p">,</span> <span class="n">min_size</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">max_size</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span> <span class="n">gene_list</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;parser gene_sets.gmt(gene set database) file. </span>
+<span class="sd">    </span>
+<span class="sd">    :param gmt: Location of gene_sets.gmt file.</span>
+<span class="sd">    :param min_size: Minimum allowed number of genes from gene set also the data set. Default: 3. </span>
+<span class="sd">    :param max_size: Maximum allowed number of genes from gene set also the data set. Default: 5000.</span>
+<span class="sd">    :gene_list: Used for filtering gene set. Only used this argument for :func:`run` method.</span>
+<span class="sd">    :return: Return a new filtered gene set database dictionary. </span>
+
+<span class="sd">    **DO NOT** filtering gene sets, when use :func:`replot`. Because ``GSEA`` Desktop have already</span>
+<span class="sd">    do this for you.</span>
+<span class="sd">            </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">gmt</span><span class="p">)</span> <span class="k">as</span> <span class="n">genesets</span><span class="p">:</span>
+        <span class="n">genesets_dict</span> <span class="o">=</span> <span class="p">{</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>  
+                          <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span> 
+                          <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">genesets</span><span class="o">.</span><span class="n">readlines</span><span class="p">()}</span>
+    
+    
+    <span class="c">#filtering dict</span>
+    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span> <span class="p">:</span>
+        <span class="n">genesets_filter</span> <span class="o">=</span>  <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">genesets_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">min_size</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">max_size</span><span class="p">}</span>
+    <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">genesets_filter</span> <span class="o">=</span>  <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">genesets_dict</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">min_size</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">max_size</span><span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;system failure. Please Provide correct input files&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    
+    
+    <span class="k">if</span> <span class="n">gene_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">subsets</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">genesets_filter</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>             
+        <span class="k">for</span> <span class="n">subset</span> <span class="ow">in</span> <span class="n">subsets</span><span class="p">:</span>            
+            <span class="n">tag_indicator</span> <span class="o">=</span> <span class="n">in1d</span><span class="p">(</span><span class="n">gene_list</span><span class="p">,</span><span class="n">genesets_filter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subset</span><span class="p">),</span><span class="n">assume_unique</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">tag_len</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">tag_indicator</span><span class="p">)</span>      
+            <span class="k">if</span> <span class="n">tag_len</span> <span class="o">&lt;=</span> <span class="n">min_size</span> <span class="ow">and</span> <span class="n">tag_len</span> <span class="o">&gt;=</span> <span class="n">max_size</span><span class="p">:</span>                    
+                <span class="k">del</span> <span class="n">genesets_filter</span><span class="p">[</span><span class="n">subset</span><span class="p">]</span>
+     <span class="c">#some_dict = {key: value for key, value in some_dict.items() if value != value_to_remove}</span>
+     <span class="c">#use np.intersect1d() may be faster???    </span>
+    <span class="n">filsets_num</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">genesets_dict</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">genesets_filter</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">&quot;{a} gene_sets have been filtered out for max_size = {b} and min_size = {c}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">filsets_num</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="n">max_size</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="n">min_size</span><span class="p">))</span>
+          
+    <span class="k">return</span> <span class="n">genesets_filter</span>
+    </div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Zhuoqing Fang.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.3.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
