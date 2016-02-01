@@ -9,7 +9,7 @@ def readme():
 
 setup(name='gseapy',
       version='0.3.0',
-      description='Python wrapper around Gene Set Enrichment Analysis tool',
+      description='Gene Set Enrichment Analysis in Python',
       long_description=readme(),
       classifiers=[
           'Development Status :: 4 - Beta',
@@ -28,7 +28,7 @@ setup(name='gseapy',
       packages=['gseapy'],
       
       install_requires=[
-          'numpy>=1.6.0',
+          'numpy>=1.8.0',
           'pandas>=0.16',
           'matplotlib>=1.4.3',
           'beautifulsoup4>=4.4.1',],
