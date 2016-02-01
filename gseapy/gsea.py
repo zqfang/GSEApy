@@ -99,16 +99,17 @@ def run(data, gene_sets,cls, min_size, max_size, permutation_n, weighted_score_t
     :param outdir: results output directory.
     :param figsize: matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
     
-    :return: | a dictionary stored in a csv file where key is a gene set and values are:
-        | { es: enrichment score, 
-        | nes: normalized enrichment score, 
-        | p: P-value, 
-        | fdr: FDR, 
-        | size: gene set size,
-        | matched_size: genes matched to the data, 
-        | genes: gene names from the data set }
-        | and generate new ``GSEA``plots.
+    :return: Generate ``GSEA`` plots and store a dictionary into csv file,
+             where dictionary key is a gene set and values are::
 
+                 | {es: enrichment score, 
+                 |  nes: normalized enrichment score, 
+                 |  p: P-value, 
+                 |  fdr: FDR, 
+                 |  size: gene set size,
+                 |  matched_size: genes matched to the data, 
+                 |  genes: gene names from the data set}
+    
     """
     assert permutation_type in ["phenotype", "gene_set"]
     df = pd.read_table(data)

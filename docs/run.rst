@@ -1,6 +1,7 @@
 .. _run:
 
-GSEAPY Running Documentation
+
+How to Use GSEAPY
 =====================================
 
 .. module:: gseapy
@@ -40,7 +41,7 @@ Run gseapy inside python:
 This will import the following:
 
 * The :func:`replot` function to reproduce GSEA desktop results
-* The :func:`run` function to computing es,nes,pval,fdr,and generate plots *de nove*.
+* The :func:`run` function to computing es,nes,pval,fdr,and generate plots *de novo*.
 
 .. code:: python
 

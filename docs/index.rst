@@ -86,27 +86,31 @@ Using the same algorithm by ``GSEA``, GSEAPY reproduce the example above.
 
 
 
+
+
 Installation
-------------
+----------------
 
 | Install gseapy package from pypi and download 
 
-.. code:: shell
+.. code:: bash
 
    $ pip install gseapy
 
 | You may instead want to use the development version from Github, by running
 
-.. code:: shell
+.. code:: bash
 
    $ pip install git+git://github.com/BioNinja/gseapy.git#egg=gseapy
+
 
 Dependency
 --------------
 * Python 2.7 or 3.3+
 
+
 Mandatory
-~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 * Numpy 
 * Pandas 
@@ -122,9 +126,9 @@ Run GSEAPY
 
 | GSEAPY has two subcommands: ``replot``, ``call``.
 
-| ``replot`` command will parse the GSEA desktop results directory(the path contains edb file folder). 
+| The ``replot`` command will parse the GSEA desktop results directory(the path contains edb file folder). 
 
-| ``call`` command will compute es,nes,pval,fdr and generates plots, *de novo*.
+| The ``call`` command will compute es,nes,pval,fdr and generates plots, *de novo*.
 
 
 | For more information to use this library,see the :ref:`run`. 
@@ -132,13 +136,19 @@ Run GSEAPY
 
 
 
-Contents:
+
+
+
+
+
 
 .. toctree::
    :maxdepth: 2
-   
+   :hidden:
+
    index.rst
    run.rst
+
 
 
 Indices and tables

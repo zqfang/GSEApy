@@ -83,7 +83,7 @@
                 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../index.html">Welcome to GSEAPY&#8217;s documentation!</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../index.html#indices-and-tables">Indices and tables</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../run.html">GSEAPY Running Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../run.html">How to Use GSEAPY</a></li>
 </ul>
 
             
@@ -154,7 +154,7 @@
 
     
 </div>
-<div class="viewcode-block" id="enrichment_score"><a class="viewcode-back" href="../../run.html#gseapy.algorithm.enrichment_score">[docs]</a><span class="k">def</span> <span class="nf">enrichment_score</span><span class="p">(</span><span class="n">gene_list</span><span class="p">,</span> <span class="n">gene_set</span><span class="p">,</span> <span class="n">weighted_score</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">correl_vector</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="enrichment_score"><a class="viewcode-back" href="../../run.html#gseapy.algorithm.enrichment_score">[docs]</a><span class="k">def</span> <span class="nf">enrichment_score</span><span class="p">(</span><span class="n">gene_list</span><span class="p">,</span> <span class="n">gene_set</span><span class="p">,</span> <span class="n">weighted_score_type</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">correl_vector</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    This is the most important function of GSEAPY. It has the same algorithm with GSEA.</span>
 <span class="sd">    </span>
@@ -163,7 +163,7 @@
 
 <span class="sd">    :param gene_set:        gene_sets in gmt file, please used gsea_gmt_parser to get gene_set.</span>
 <span class="sd">                             </span>
-<span class="sd">    :param weighted_score:  It&#39;s indentical to gsea&#39;s weighted_score method. weighting by the correlation </span>
+<span class="sd">    :param weighted_score_type:  It&#39;s indentical to gsea&#39;s weighted_score method. weighting by the correlation </span>
 <span class="sd">                            is a very reasonable choice that allows significant gene sets with less than perfect coherence. </span>
 <span class="sd">                            options: 0(classic),1,1.5,2. default:1. if one is interested in penalizing sets for lack of </span>
 <span class="sd">                            coherence or to discover sets with any type of nonrandom distribution of tags, a value p &lt; 1 </span>
@@ -197,10 +197,10 @@
     <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">gene_list</span><span class="p">)</span> 
     <span class="n">Nhint</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">tag_indicator</span><span class="p">)</span>
     <span class="n">Nmiss</span> <span class="o">=</span>  <span class="n">N</span> <span class="o">-</span> <span class="n">Nhint</span> 
-    <span class="k">if</span> <span class="p">(</span><span class="n">weighted_score</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">):</span> 
+    <span class="k">if</span> <span class="p">(</span><span class="n">weighted_score_type</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">):</span> 
         <span class="n">correl_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">correl_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">correl_vector</span><span class="o">**</span><span class="n">weighted_score</span><span class="p">)</span>
+        <span class="n">correl_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">correl_vector</span><span class="o">**</span><span class="n">weighted_score_type</span><span class="p">)</span>
     <span class="n">sum_correl_tag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">correl_vector</span><span class="p">[</span><span class="n">tag_indicator</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)])</span>
     <span class="n">norm_tag</span> <span class="o">=</span>  <span class="mf">1.0</span><span class="o">/</span><span class="n">sum_correl_tag</span>
     <span class="n">norm_no_tag</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="n">Nmiss</span>
@@ -218,7 +218,7 @@
 <span class="sd">    Returns a copy of a shuffled input gene_list.</span>
 <span class="sd">    </span>
 <span class="sd">    :param gene_list: rank_metric[&#39;gene_name&#39;].values</span>
-<span class="sd">    :parm rand: random seed. Use random.Random(0) if you like.</span>
+<span class="sd">    :param rand: random seed. Use random.Random(0) if you like.</span>
 <span class="sd">    :return: a ranodm shuffled list.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
@@ -231,35 +231,49 @@
     
     </div>
 <div class="viewcode-block" id="ranking_metric"><a class="viewcode-back" href="../../run.html#gseapy.algorithm.ranking_metric">[docs]</a><span class="k">def</span> <span class="nf">ranking_metric</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span><span class="n">phenoPos</span><span class="p">,</span><span class="n">phenoNeg</span><span class="p">,</span><span class="n">classes</span><span class="p">,</span><span class="n">ascending</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The main function to rank a expression table.</span>
+    <span class="sd">&quot;&quot;&quot;The main function to rank an expression table.</span>
 <span class="sd">    </span>
-<span class="sd">    :param df: gene_expression DataFrame.    </span>
-<span class="sd">    :param method:</span>
-<span class="sd">                    1. signal_to_noise </span>
-<span class="sd">                        You must have at least three samples for each phenotype to use this metric.</span>
-<span class="sd">                        The larger the signal-to-noise ratio, the larger the differences of the means (scaled by the standard deviations);</span>
-<span class="sd">                        that is, the more distinct the gene expression is in each phenotype and the more the gene acts as a “class marker.” </span>
-<span class="sd">                    2. t_test</span>
-<span class="sd">                        uses the difference of means scaled by the standard deviation and number of samples. </span>
-<span class="sd">                        Note: You must have at least three samples for each phenotype to use this metric.</span>
-<span class="sd">                        The larger the tTest ratio, the more distinct the gene expression is in each phenotype </span>
-<span class="sd">                        and the more the gene acts as a “class marker.”</span>
-<span class="sd">                    3. ratio_of_classes (also referred to as fold change) </span>
-<span class="sd">                        uses the ratio of class means to calculate fold change for natural scale data.</span>
-<span class="sd">                    4. diff_of_classes </span>
-<span class="sd">                        uses the difference of class means to calculate fold change for log scale data</span>
-<span class="sd">                    5. log2_ratio_of_classes </span>
-<span class="sd">                        uses the log2 ratio of class means to calculate fold change for natural scale data.</span>
-<span class="sd">                        This is the recommended statistic for calculating fold change for natural scale data.</span>
-<span class="sd">    :param phenoPos: one of lables of phenotype&#39;s names </span>
-<span class="sd">    :param phenoNeg: one of lable of phenotype&#39;s names     </span>
-<span class="sd">    :param classes: a list of phenotype labels, to specify which column of dataframe belongs to what catogry of phenotype.</span>
-<span class="sd">    :param ascending:  bool or list of bool. Sort ascending vs. descending.</span>
+<span class="sd">   :param df:      gene_expression DataFrame.    </span>
+<span class="sd">   :param method:  The method used to calculate a correlation or ranking. Default: &#39;log2_ratio_of_classes&#39;.</span>
+<span class="sd">                   Others methods are:</span>
+<span class="sd">   </span>
+<span class="sd">                   1. &#39;signal_to_noise&#39; </span>
+<span class="sd">      </span>
+<span class="sd">                      You must have at least three samples for each phenotype to use this metric.</span>
+<span class="sd">                      The larger the signal-to-noise ratio, the larger the differences of the means (scaled by the standard deviations);</span>
+<span class="sd">                      that is, the more distinct the gene expression is in each phenotype and the more the gene acts as a “class marker.” </span>
 <span class="sd">    </span>
+<span class="sd">                   2. &#39;t_test&#39;</span>
+<span class="sd">      </span>
+<span class="sd">                      Uses the difference of means scaled by the standard deviation and number of samples. </span>
+<span class="sd">                      Note: You must have at least three samples for each phenotype to use this metric.</span>
+<span class="sd">                      The larger the tTest ratio, the more distinct the gene expression is in each phenotype </span>
+<span class="sd">                      and the more the gene acts as a “class marker.”</span>
+<span class="sd">    </span>
+<span class="sd">                   3. &#39;ratio_of_classes&#39; (also referred to as fold change).</span>
+<span class="sd">      </span>
+<span class="sd">                      Uses the ratio of class means to calculate fold change for natural scale data.</span>
+<span class="sd">    </span>
+<span class="sd">                   4. &#39;diff_of_classes&#39; </span>
+<span class="sd">      </span>
+<span class="sd">                      Uses the difference of class means to calculate fold change for log scale data</span>
+<span class="sd">    </span>
+<span class="sd">                   5. &#39;log2_ratio_of_classes&#39; </span>
+<span class="sd">      </span>
+<span class="sd">                      Uses the log2 ratio of class means to calculate fold change for natural scale data.</span>
+<span class="sd">                      This is the recommended statistic for calculating fold change for natural scale data.</span>
+<span class="sd">   </span>
+<span class="sd">   </span>
+<span class="sd">   </span>
+<span class="sd">   </span>
+<span class="sd">   :param phenoPos: one of lables of phenotype&#39;s names.</span>
+<span class="sd">   :param phenoNeg: one of lable of phenotype&#39;s names.   </span>
+<span class="sd">   :param classes:  a list of phenotype labels, to specify which column of dataframe belongs to what catogry of phenotype.</span>
+<span class="sd">   :param ascending:  bool or list of bool. Sort ascending vs. descending.</span>
+<span class="sd">   :return: returns correlation to class of each variable. same format with .rnk file. gene_name in first coloum,</span>
+<span class="sd">            correlation in second column.</span>
+<span class="sd">         </span>
 <span class="sd"> </span>
-<span class="sd">   :return: returns correlation to class of each variable.</span>
-<span class="sd">             same format with .rnk file. gene_name in first coloum, correlation</span>
-<span class="sd">             in second column.</span>
 <span class="sd">    &quot;&quot;&quot;</span> 
     
     
