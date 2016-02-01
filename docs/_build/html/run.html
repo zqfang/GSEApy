@@ -252,7 +252,7 @@ Because gmt file has already been filter.</li>
 <span id="algorithms"></span><h2>Algorithms<a class="headerlink" href="#module-gseapy.algorithm" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="gseapy.algorithm.enrichment_score">
-<code class="descclassname">gseapy.algorithm.</code><code class="descname">enrichment_score</code><span class="sig-paren">(</span><em>gene_list</em>, <em>gene_set</em>, <em>weighted_score_type=1</em>, <em>correl_vector=None</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.algorithm.enrichment_score" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.algorithm.</code><code class="descname">enrichment_score</code><span class="sig-paren">(</span><em>gene_list</em>, <em>gene_set</em>, <em>weighted_score=1</em>, <em>correl_vector=None</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.algorithm.enrichment_score" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is the most important function of GSEAPY. It has the same algorithm with GSEA.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -262,10 +262,15 @@ Because gmt file has already been filter.</li>
 <li><strong>gene_list</strong> &#8211; The ordered gene list 
 gene_name_list, rank_metric[&#8216;gene_name&#8217;]</li>
 <li><strong>gene_set</strong> &#8211; gene_sets in gmt file, please used gsea_gmt_parser to get gene_set.</li>
-<li><strong>weighted_score_type</strong> &#8211; A vector with the coorelations (e.g. signal to noise scores) 
-corresponding to the genes in the gene list.
-It&#8217;s indentical to gsea&#8217;s weighted_sore_method. options: 0(classic),1,1.5,2. default:1.</li>
-<li><strong>correl_vector</strong> &#8211; A vector with the coorelations (e.g. signal to noise scores) corresponding to the genes in 
+<li><strong>weighted_score</strong> &#8211; It&#8217;s indentical to gsea&#8217;s weighted_score method. weighting by the correlation 
+is a very reasonable choice that allows significant gene sets with less than perfect coherence. 
+options: 0(classic),1,1.5,2. default:1. if one is interested in penalizing sets for lack of 
+coherence or to discover sets with any type of nonrandom distribution of tags, a value p &lt; 1 
+might be appropriate. On the other hand, if one uses sets with largenumber of genes and only 
+a small subset of those is expected to be coherent, then one could consider using p &gt; 1. 
+Our recommendation is to use p = 1 and use other settings only if you are very experienced 
+with the method and its behavior.</li>
+<li><strong>correl_vector</strong> &#8211; A vector with the correlations (e.g. signal to noise scores) corresponding to the genes in 
 the gene list. Or rankings, rank_metric[&#8216;rank&#8217;].values</li>
 </ul>
 </td>
@@ -415,7 +420,7 @@ in second column.</td>
 
 <dl class="function">
 <dt id="gseapy.algorithm.shuffle_list">
-<code class="descclassname">gseapy.algorithm.</code><code class="descname">shuffle_list</code><span class="sig-paren">(</span><em>gene_list</em>, <em>rand=&lt;random.Random object at 0x0000025326928C68&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.algorithm.shuffle_list" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.algorithm.</code><code class="descname">shuffle_list</code><span class="sig-paren">(</span><em>gene_list</em>, <em>rand=&lt;random.Random object at 0x00000223063FD538&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.algorithm.shuffle_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a copy of a shuffled input gene_list.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />

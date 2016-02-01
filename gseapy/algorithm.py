@@ -23,7 +23,7 @@ def preprocess(df):
 
     
 
-def enrichment_score(gene_list, gene_set, weighted_score_type = 1, correl_vector = None):
+def enrichment_score(gene_list, gene_set, weighted_score = 1, correl_vector = None):
     '''
     This is the most important function of GSEAPY. It has the same algorithm with GSEA.
     
@@ -32,10 +32,16 @@ def enrichment_score(gene_list, gene_set, weighted_score_type = 1, correl_vector
 
     :param gene_set:        gene_sets in gmt file, please used gsea_gmt_parser to get gene_set.
                              
-    :param weighted_score_type: A vector with the coorelations (e.g. signal to noise scores) 
-                                corresponding to the genes in the gene list.
-                                It's indentical to gsea's weighted_sore_method. options: 0(classic),1,1.5,2. default:1.
-    :param correl_vector:   A vector with the coorelations (e.g. signal to noise scores) corresponding to the genes in 
+    :param weighted_score:  It's indentical to gsea's weighted_score method. weighting by the correlation 
+                            is a very reasonable choice that allows significant gene sets with less than perfect coherence. 
+                            options: 0(classic),1,1.5,2. default:1. if one is interested in penalizing sets for lack of 
+                            coherence or to discover sets with any type of nonrandom distribution of tags, a value p < 1 
+                            might be appropriate. On the other hand, if one uses sets with largenumber of genes and only 
+                            a small subset of those is expected to be coherent, then one could consider using p > 1. 
+                            Our recommendation is to use p = 1 and use other settings only if you are very experienced 
+                            with the method and its behavior.
+                             
+    :param correl_vector:   A vector with the correlations (e.g. signal to noise scores) corresponding to the genes in 
                             the gene list. Or rankings, rank_metric['rank'].values
     
     
@@ -60,10 +66,10 @@ def enrichment_score(gene_list, gene_set, weighted_score_type = 1, correl_vector
     N = len(gene_list) 
     Nhint = np.sum(tag_indicator)
     Nmiss =  N - Nhint 
-    if (weighted_score_type == 0 ): 
+    if (weighted_score == 0 ): 
         correl_vector = np.repeat(1, N)
     else:
-        correl_vector = np.abs(correl_vector**weighted_score_type)
+        correl_vector = np.abs(correl_vector**weighted_score)
     sum_correl_tag = np.sum(correl_vector[tag_indicator.astype(bool)])
     norm_tag =  1.0/sum_correl_tag
     norm_no_tag = 1.0/Nmiss
