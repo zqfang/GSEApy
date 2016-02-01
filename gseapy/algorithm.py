@@ -11,8 +11,7 @@ import random
 
 
 def preprocess(df):
-    """pre-processed the data frame.
-       new filtering methods will be implement here.
+    """pre-processed the data frame.new filtering methods will be implement here.
     """    
     
     df.drop_duplicates(subset=df.columns[0],inplace=True) #drop duplicate gene_names.    
@@ -41,9 +40,11 @@ def enrichment_score(gene_list, gene_set, weighted_score_type = 1, correl_vector
     
     
     :return: 
-    |ES: Enrichment score (real number between -1 and +1) 
-    |hit_index: index of a gene in gene_list, if gene included in gene_set.
-    |RES: Numerical vector containing the running enrichment score for all locations in the gene list .
+     ES: Enrichment score (real number between -1 and +1) 
+     
+     hit_index: index of a gene in gene_list, if gene included in gene_set.
+     
+     RES: Numerical vector containing the running enrichment score for all locations in the gene list .
              
     '''
     
@@ -79,7 +80,9 @@ def shuffle_list(gene_list, rand=random.Random(0)):
     """
     Returns a copy of a shuffled input gene_list.
     
-    :gene_list: rank_metric['gene_name'].values
+    :param gene_list: rank_metric['gene_name'].values
+    :parm rand: random seed. Use random.Random(0) if you like.
+    :return: a ranodm shuffled list.
     """
     
     l2 = gene_list.copy()
@@ -91,32 +94,31 @@ def shuffle_list(gene_list, rand=random.Random(0)):
     
     
 def ranking_metric(df, method,phenoPos,phenoNeg,classes,ascending):
-    """
-     The main function to rank a expression table.
+    """The main function to rank a expression table.
     
     :param df: gene_expression DataFrame.    
     :param method:
-     1. signal_to_noise 
-         You must have at least three samples for each phenotype to use this metric.
-         The larger the signal-to-noise ratio, the larger the differences of the means (scaled by the standard deviations);
-         that is, the more distinct the gene expression is in each phenotype and the more the gene acts as a “class marker.” 
-     2. t_test
-         uses the difference of means scaled by the standard deviation and number of samples. 
-         Note: You must have at least three samples for each phenotype to use this metric.
-         The larger the tTest ratio, the more distinct the gene expression is in each phenotype 
-         and the more the gene acts as a “class marker.”
-     3. ratio_of_classes (also referred to as fold change) 
-         uses the ratio of class means to calculate fold change for natural scale data.
-     4. Diff_of_classes 
-         uses the difference of class means to calculate fold change for log scale data
-     5. log2_ratio_of_classes 
-         uses the log2 ratio of class means to calculate fold change for natural scale data.
-         This is the recommended statistic for calculating fold change for natural scale data.
+                    1. signal_to_noise 
+                        You must have at least three samples for each phenotype to use this metric.
+                        The larger the signal-to-noise ratio, the larger the differences of the means (scaled by the standard deviations);
+                        that is, the more distinct the gene expression is in each phenotype and the more the gene acts as a “class marker.” 
+                    2. t_test
+                        uses the difference of means scaled by the standard deviation and number of samples. 
+                        Note: You must have at least three samples for each phenotype to use this metric.
+                        The larger the tTest ratio, the more distinct the gene expression is in each phenotype 
+                        and the more the gene acts as a “class marker.”
+                    3. ratio_of_classes (also referred to as fold change) 
+                        uses the ratio of class means to calculate fold change for natural scale data.
+                    4. diff_of_classes 
+                        uses the difference of class means to calculate fold change for log scale data
+                    5. log2_ratio_of_classes 
+                        uses the log2 ratio of class means to calculate fold change for natural scale data.
+                        This is the recommended statistic for calculating fold change for natural scale data.
     :param phenoPos: one of lables of phenotype's names 
     :param phenoNeg: one of lable of phenotype's names     
     :param classes: a list of phenotype labels, to specify which column of dataframe belongs to what catogry of phenotype.
     :param ascending:  bool or list of bool. Sort ascending vs. descending.
-    :param cls_path: only use when classes is not None.
+    
  
    :return: returns correlation to class of each variable.
              same format with .rnk file. gene_name in first coloum, correlation
@@ -153,18 +155,25 @@ def ranking_metric(df, method,phenoPos,phenoNeg,classes,ascending):
         
     
 def gsea_compute(data, gmt, n, weighted_score_type,permutation_type,method,phenoPos,phenoNeg,classes,ascending):
-    """
-    compute enrichment scores and enrichment nulls. 
+    """compute enrichment scores and enrichment nulls. 
     
     :param data: prepreocessed expression dataframe.
     :param gmt: all gene sets in .gmt file. need to call gsea_gmt_parser() to get results. 
-    :param n: permutation number. default: 1000
+    :param n: permutation number. default: 1000.
     :param method: ranking_metric method. see above.
-    :param phenoPos: one of lables of phenotype's names 
-    :param phenoNeg: one of lable of phenotype's names     
+    :param phenoPos: one of lables of phenotype's names. 
+    :param phenoNeg: one of lable of phenotype's names.     
     :param classes: a list of phenotype labels, to specify which column of dataframe belongs to what catogry of phenotype.
     :param weighted_score_type: default:1
     :param ascending: sorting order of rankings. Default: False.
+    
+    :return: 
+      zipped results of es, nes, pval, fdr. Used for generating reportes and plotting.
+    
+      a nested list of hit indexs of input gene_list. Used for plotting.
+    
+      a nested list of ranked enrichment score of each input gene_sets. Used for plotting.
+    
     """
     enrichment_scores = []
 
@@ -223,6 +232,8 @@ def gsea_compute(data, gmt, n, weighted_score_type,permutation_type,method,pheno
 
 def gsea_pval(es, esnull):
     """
+    compute nominal p-value.
+    
     From article (PNAS):
     estimate nominal p-value for S from esnull by using the positive
     or negative portion of the distribution corresponding to the sign 
@@ -239,7 +250,7 @@ def gsea_pval(es, esnull):
 
 def gsea_significance(enrichment_scores, enrichment_nulls):
     """
-    Computing p-vals, normalized ES, FDR
+    Computing p-vals, normalized ES, FDRs.
     """
     
     print("Start to compute pvals........................",time.ctime())

@@ -14,7 +14,22 @@ import glob
 import pandas as pd
 
 def replot(indir,outdir,weight=1,figsize=[6.5,6],format='pdf',min_size = 3, max_size = 5000,):
-    """The main fuction to run inside python."""
+    """The main fuction to run inside python.
+          
+    :param indir: GSEA desktop results directory. In the sub folder, you must contain edb file foder.    
+    :param outdir: Output directory.
+    :param weight: weighted score type. choose from {0,1,1.5,2}. Default: 1.
+    :param figsize: matplotlib output figure figsize. Defult: [6.5,6].
+    :param format: matplotlib output figure format. Default: 'pdf'.
+    :param min_size: min size of input genes presented in Gene Sets. Default: 3.
+    :param max_size: max size of input genes presented in Gene Sets. Default: 5000.
+                     you will not encourage to use min_size, or max_size argment in :func:`replot` function.
+                     Because gmt file has already been filter.
+    
+    :return: Generate new figures with seleted figure format. Default: 'pdf'.
+    
+    
+    """
         
     #parsing files.......
     
@@ -73,18 +88,18 @@ def run(data, gene_sets,cls, min_size, max_size, permutation_n, weighted_score_t
     """ Run Gene Set Enrichment Analysis.
 
     :param data: Gene expression data table.  
-    :paramg gene_sets: Gene sets file. e.g. gmt files. Same input with GSEA.
+    :param gene_sets: Gene sets file. e.g. gmt files. Same input with GSEA.
     :param permutation_n: Number of permutations for significance computation. Default: 1000.
     :param permutation_type: Permutation type, "phenotype" (default) for phenotypes, "gene_set" for genes.
-    :param int min_size:
-    :param int max_size: Minimum and maximum allowed number of genes from gene set also the data set. 
-                         Defaults: 15 and 1000.
-    :param weighted_score_type: default:1
+    :param int min_size: Minimum allowed number of genes from gene set also the data set. Defaut: 15.
+    :param int max_size: Maximum allowed number of genes from gene set also the data set. Defaults: 15 and 1000.
+    :param weighted_score_type: refer to :func:`algorithm.enrichment_socre`. Default:1.
+    :param method: ranking metric method, refer to :func:`algorithm.ranking_metric`.
     :param ascending: sorting order of rankings. Default: False.
     :param outdir: results output directory.
     :param figsize: matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
     
-    :return: | a dictionary where key is a gene set and values are:
+    :return: | a dictionary stored in a csv file where key is a gene set and values are:
         | { es: enrichment score, 
         | nes: normalized enrichment score, 
         | p: P-value, 
@@ -92,6 +107,7 @@ def run(data, gene_sets,cls, min_size, max_size, permutation_n, weighted_score_t
         | size: gene set size,
         | matched_size: genes matched to the data, 
         | genes: gene names from the data set }
+        | and generate new ``GSEA``plots.
 
     """
     assert permutation_type in ["phenotype", "gene_set"]

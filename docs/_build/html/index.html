@@ -1,0 +1,171 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Welcome to GSEAPY’s documentation! &mdash; GSEAPY 0.3.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.3.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="GSEAPY 0.3.1 documentation" href="#" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="#">
+          <span>GSEAPY 0.3.1 documentation</span></a></h1>
+        <h2 class="heading"><span>Welcome to GSEAPY’s documentation!</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        <a class="uplink" href="#">Contents</a>
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="welcome-to-gseapy-s-documentation">
+<h1>Welcome to GSEAPY&#8217;s documentation!<a class="headerlink" href="#welcome-to-gseapy-s-documentation" title="Permalink to this headline">¶</a></h1>
+<p>GSEAPY: Gene Set Enrichment Analysis in Python.</p>
+<a class="reference external image-reference" href="https://badge.fury.io/py/gseapy"><img src="https://badge.fury.io/py/gseapy.svg" /></a>
+<a class="reference external image-reference" href="https://travis-ci.org/BioNinja/gseapy"><img alt="https://travis-ci.org/BioNinja/gseapy.svg?branch=master" src="https://travis-ci.org/BioNinja/gseapy.svg?branch=master" /></a>
+<img src="https://img.shields.io/github/license/mashape/apistatus.svg" /><p>GSEAPY is a python wrapper for <strong>GESA</strong>.It&#8217;s used for convenient GO enrichments
+and produce <strong>publishable quality figures</strong> from python. GSEAPY could be used for <strong>RNA-seq, ChIP-seq, Microarry</strong> data.</p>
+<p><a class="reference external" href="http://software.broadinstitute.org/gsea/index.jsp">Gene Set Enrichment Analysis</a> (GSEA)
+is a computational method that determines whether an a priori defined set of genes shows
+statistically significant, concordant differences between two biological states (e.g. phenotypes).</p>
+<p>The full <code class="docutils literal"><span class="pre">GSEA</span></code> is far too extensive to describe here; see
+<a class="reference external" href="http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page">GSEA</a> documentation for more information.</p>
+<div class="section" id="why-gseapy">
+<h2>Why GSEAPY<a class="headerlink" href="#why-gseapy" title="Permalink to this headline">¶</a></h2>
+<p>For Gene Enrichment Analysis, <code class="docutils literal"><span class="pre">GSEA</span></code> is still the one of best choice.</p>
+<p>However, When you have large number of expression tables, or <code class="docutils literal"><span class="pre">GO</span></code> terms to enrich, <code class="docutils literal"><span class="pre">GSEA</span></code> desktop
+version is inconvinient. What&#8217;s more, the R version of GSEA has not been updated since 2006.
+What&#8217;s worse, <code class="docutils literal"><span class="pre">GSEA</span></code> desktop version do not provide means to modify plots,
+like legends, ticks......</p>
+<p>As a researcher of life science, I want a modern <code class="docutils literal"><span class="pre">GSEA</span></code> with lastest features. It can produce pubilishable
+figures, and do many jobs at the same time without using mouse to select differrent data table,
+differrent gene sets repeatly.</p>
+</div>
+<div class="section" id="features-of-gseapy">
+<h2>Features of GSEAPY<a class="headerlink" href="#features-of-gseapy" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>GSEAPY could reproduce the GSEA figures using GSEA desktop version results.</li>
+<li>GSEAPY could be used directly to perform enrichment anlysis. All parameters are same with <code class="docutils literal"><span class="pre">GSEA</span></code></li>
+<li>GSEAPY is written in <code class="docutils literal"><span class="pre">python</span></code>, using the same algorithm of <code class="docutils literal"><span class="pre">GSEA</span></code> Desktop version.</li>
+<li>GSEAPY produce figures in pdf format by default, which are ready for publishing and easy to modifiy.</li>
+<li>GSEAPY Enhancement will be considered. If you would like to contribute, please &#64;BioNinja on <code class="docutils literal"><span class="pre">Github</span></code>.</li>
+</ol>
+</div>
+<div class="section" id="gsea-desktop-version-output">
+<h2>GSEA desktop version output:<a class="headerlink" href="#gsea-desktop-version-output" title="Permalink to this headline">¶</a></h2>
+<p>This is an example of GSEA desktop application output</p>
+<div class="figure">
+<img alt="https://github.com/BioNinja/gseapy/blob/master/GSEA_OCT4_KD.png" src="https://github.com/BioNinja/gseapy/blob/master/GSEA_OCT4_KD.png" />
+</div>
+</div>
+<div class="section" id="gseapy-output">
+<h2>GSEAPY output<a class="headerlink" href="#gseapy-output" title="Permalink to this headline">¶</a></h2>
+<p>Using the same algorithm by <code class="docutils literal"><span class="pre">GSEA</span></code>, GSEAPY reproduce the example above.</p>
+<div class="figure" id="id1">
+<img alt="https://github.com/BioNinja/gseapy/blob/master/gseapy_OCT4_KD.png" src="https://github.com/BioNinja/gseapy/blob/master/gseapy_OCT4_KD.png" />
+<p class="caption"><span class="caption-text">Generated by GSEAPY</span></p>
+<div class="legend">
+<p><strong>GSEAPY figures are PDF formats by default.</strong> Other matplotlib figures formats are supported, too.</p>
+<p>You can modify <code class="docutils literal"><span class="pre">GSEA</span></code> plots easily in .pdf files. Please Enjoy.</p>
+</div>
+</div>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">Install gseapy package from pypi and download</div>
+</div>
+<div class="code shell highlight-python"><div class="highlight"><pre>$ pip install gseapy
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">You may instead want to use the development version from Github, by running</div>
+</div>
+<div class="code shell highlight-python"><div class="highlight"><pre>$ pip install git+git://github.com/BioNinja/gseapy.git#egg=gseapy
+</pre></div>
+</div>
+</div>
+<div class="section" id="dependency">
+<h2>Dependency<a class="headerlink" href="#dependency" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Python 2.7 or 3.3+</li>
+</ul>
+<div class="section" id="mandatory">
+<h3>Mandatory<a class="headerlink" href="#mandatory" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Numpy</li>
+<li>Pandas</li>
+<li>Matplotlib</li>
+<li>Beautifulsoup4</li>
+</ul>
+<p>You may also need <strong>lxml, html5lib</strong>, if you could not parse xml files.</p>
+</div>
+</div>
+<div class="section" id="run-gseapy">
+<h2>Run GSEAPY<a class="headerlink" href="#run-gseapy" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">GSEAPY has two subcommands: <code class="docutils literal"><span class="pre">replot</span></code>, <code class="docutils literal"><span class="pre">call</span></code>.</div>
+</div>
+<div class="line-block">
+<div class="line"><code class="docutils literal"><span class="pre">replot</span></code> command will parse the GSEA desktop results directory(the path contains edb file folder).</div>
+</div>
+<div class="line-block">
+<div class="line"><code class="docutils literal"><span class="pre">call</span></code> command will compute es,nes,pval,fdr and generates plots, <em>de novo</em>.</div>
+</div>
+<div class="line-block">
+<div class="line">For more information to use this library,see the <a class="reference internal" href="run.html#run"><span>GSEAPY Running Documentation</span></a>.</div>
+</div>
+<p>Contents:</p>
+<div class="toctree-wrapper compound">
+<ul class="simple">
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span>Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span>Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span>Search Page</span></a></li>
+</ul>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        <a class="uplink" href="#">Contents</a>
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Zhuoqing Fang.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>
