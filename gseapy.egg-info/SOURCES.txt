@@ -1,3 +1,5 @@
+LICENSE.txt
+MANIFEST.in
 README.rst
 setup.py
 gseapy/__init__.py
