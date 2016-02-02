@@ -11,10 +11,13 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
 
 .. image:: https://img.shields.io/github/license/mashape/apistatus.svg
 
+.. image:: https://readthedocs.org/projects/gseapy/badge/?version=latest
+    :target: http://gseapy.readthedocs.org/en/latest/?badge=latest
+    :alt: Documentation Status
 
-.. note::
+
     
-    The main documentation for GSEAPY can be found at https://pythonhosted.org/gseapy
+The main documentation for GSEAPY can be found at https://pythonhosted.org/gseapy
 
 GSEAPY is a python wrapper for **GESA**.It's used for convenient GO enrichments
 and produce **publishable quality figures** from python. GSEAPY could be used for **RNA-seq, ChIP-seq, Microarry** data.
