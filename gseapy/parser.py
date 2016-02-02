@@ -11,7 +11,7 @@ import sys
 def gsea_cls_parser(cls):
     """Extact class(phenotype) name from .cls file.
     
-    :param cls: the location of GSEA-P .cls file.
+    :param cls: the .cls file where located inside edb folder.
     :return: phenotype name and a list of class vector. 
     """
     
@@ -29,7 +29,7 @@ def gsea_cls_parser(cls):
 def gsea_edb_parser(results_path,index = 0,):
     """Parse results.edb file stored under **edb** file folder.            
 
-    :param results_path: location of GSEA Desktop results.
+    :param results_path: the .results file where lcoated inside edb folder.
     :param index: gene_set index of gmt database, used for iterating items.
    
     :return: enrichment_term, hit_index,nes, pval, fdr.
@@ -66,9 +66,9 @@ def gsea_edb_parser(results_path,index = 0,):
     
 
 def gsea_rank_metric(rnk):
-    """parse .rnk file. This file contains ranking correlation vector and gene names or ids. 
+    """Parse .rnk file. This file contains ranking correlation vector and gene names or ids. 
     
-    :param rnk: location of GSEA-P .rnk file
+    :param rnk: the .rnk file where located inside the edb folder.
     :return: a pandas DataFrame with 3 columns names are::
              
                  'gene_name','rank',rank2'
@@ -83,15 +83,15 @@ def gsea_rank_metric(rnk):
     return rank_metric
     
 def gsea_gmt_parser(gmt, min_size = 3, max_size = 5000, gene_list=None):
-    """parser gene_sets.gmt(gene set database) file. 
+    """Parse gene_sets.gmt(gene set database) file. 
     
-    :param gmt: Location of gene_sets.gmt file.
+    :param gmt: the gene_sets.gmt file where loacated inside edb folder.
     :param min_size: Minimum allowed number of genes from gene set also the data set. Default: 3. 
     :param max_size: Maximum allowed number of genes from gene set also the data set. Default: 5000.
-    :gene_list: Used for filtering gene set. Only used this argument for :func:`run` method.
+    :param gene_list: Used for filtering gene set. Only used this argument for :func:`run` method.
     :return: Return a new filtered gene set database dictionary. 
 
-    **DO NOT** filtering gene sets, when use :func:`replot`. Because ``GSEA`` Desktop have already
+    **DO NOT** filter gene sets, when use :func:`replot`. Because ``GSEA`` Desktop have already
     do this for you.
             
     """

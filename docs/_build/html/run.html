@@ -31,7 +31,7 @@
 
   
     <link rel="top" title="GSEAPY 0.3.1 documentation" href="index.html"/>
-        <link rel="prev" title="How to Use GSEAPY" href=""/> 
+        <link rel="prev" title="Welcome to GSEAPY’s documentation!" href="introduction.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -81,28 +81,7 @@
             
             
                 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Welcome to GSEAPY&#8217;s documentation!</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="index.html#why-gseapy">Why GSEAPY</a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#features-of-gseapy">Features of GSEAPY</a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#gsea-desktop-version-output">GSEA desktop version output:</a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#gseapy-output">GSEAPY output</a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#installation">Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#dependency">Dependency</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="index.html#run-gseapy">Run GSEAPY</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="">How to Use GSEAPY</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#for-command-line-usage">For command line usage:</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#run-gseapy-inside-python">Run gseapy inside python:</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#to-see-help-information-of-gseapy">To See help information of GSEAPY</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-apis">Module APIs</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-gseapy.algorithm">Algorithms</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-gseapy.parser">Parsers</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="index.html#indices-and-tables">Indices and tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Welcome to GSEAPY&#8217;s documentation!</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">How to Use GSEAPY</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#for-command-line-usage">For command line usage:</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#run-gseapy-inside-python">Run gseapy inside python:</a></li>
@@ -510,7 +489,7 @@ correlation in second column.</p>
 
 <dl class="function">
 <dt id="gseapy.algorithm.shuffle_list">
-<code class="descclassname">gseapy.algorithm.</code><code class="descname">shuffle_list</code><span class="sig-paren">(</span><em>gene_list</em>, <em>rand=&lt;random.Random object at 0x0000018178FAB7A8&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#shuffle_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.shuffle_list" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.algorithm.</code><code class="descname">shuffle_list</code><span class="sig-paren">(</span><em>gene_list</em>, <em>rand=&lt;random.Random object at 0x00000277A741CC38&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#shuffle_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.shuffle_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a copy of a shuffled input gene_list.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -540,7 +519,7 @@ correlation in second column.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cls</strong> &#8211; the location of GSEA-P .cls file.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cls</strong> &#8211; the .cls file where located inside edb folder.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">phenotype name and a list of class vector.</td>
 </tr>
@@ -557,7 +536,7 @@ correlation in second column.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>results_path</strong> &#8211; location of GSEA Desktop results.</li>
+<li><strong>results_path</strong> &#8211; the .results file where lcoated inside edb folder.</li>
 <li><strong>index</strong> &#8211; gene_set index of gmt database, used for iterating items.</li>
 </ul>
 </td>
@@ -572,39 +551,37 @@ correlation in second column.</p>
 <dl class="function">
 <dt id="gseapy.parser.gsea_gmt_parser">
 <code class="descclassname">gseapy.parser.</code><code class="descname">gsea_gmt_parser</code><span class="sig-paren">(</span><em>gmt</em>, <em>min_size=3</em>, <em>max_size=5000</em>, <em>gene_list=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/parser.html#gsea_gmt_parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.parser.gsea_gmt_parser" title="Permalink to this definition">¶</a></dt>
-<dd><p>parser gene_sets.gmt(gene set database) file.</p>
+<dd><p>Parse gene_sets.gmt(gene set database) file.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>gmt</strong> &#8211; Location of gene_sets.gmt file.</li>
+<li><strong>gmt</strong> &#8211; the gene_sets.gmt file where loacated inside edb folder.</li>
 <li><strong>min_size</strong> &#8211; Minimum allowed number of genes from gene set also the data set. Default: 3.</li>
 <li><strong>max_size</strong> &#8211; Maximum allowed number of genes from gene set also the data set. Default: 5000.</li>
+<li><strong>gene_list</strong> &#8211; Used for filtering gene set. Only used this argument for <code class="xref py py-func docutils literal"><span class="pre">run()</span></code> method.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Gene_list:</th><td class="field-body"><p class="first">Used for filtering gene set. Only used this argument for <code class="xref py py-func docutils literal"><span class="pre">run()</span></code> method.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Return a new filtered gene set database dictionary.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Return a new filtered gene set database dictionary.</p>
 </td>
 </tr>
 </tbody>
 </table>
-<p><strong>DO NOT</strong> filtering gene sets, when use <code class="xref py py-func docutils literal"><span class="pre">replot()</span></code>. Because <code class="docutils literal"><span class="pre">GSEA</span></code> Desktop have already
+<p><strong>DO NOT</strong> filter gene sets, when use <code class="xref py py-func docutils literal"><span class="pre">replot()</span></code>. Because <code class="docutils literal"><span class="pre">GSEA</span></code> Desktop have already
 do this for you.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="gseapy.parser.gsea_rank_metric">
 <code class="descclassname">gseapy.parser.</code><code class="descname">gsea_rank_metric</code><span class="sig-paren">(</span><em>rnk</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/parser.html#gsea_rank_metric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.parser.gsea_rank_metric" title="Permalink to this definition">¶</a></dt>
-<dd><p>parse .rnk file. This file contains ranking correlation vector and gene names or ids.</p>
+<dd><p>Parse .rnk file. This file contains ranking correlation vector and gene names or ids.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>rnk</strong> &#8211; location of GSEA-P .rnk file</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>rnk</strong> &#8211; the .rnk file where located inside the edb folder.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a pandas DataFrame with 3 columns names are:<div class="highlight-python"><div class="highlight"><pre>&#39;gene_name&#39;,&#39;rank&#39;,rank2&#39;
 </pre></div>
@@ -626,7 +603,7 @@ do this for you.</p>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
       
-        <a href="" class="btn btn-neutral" title="How to Use GSEAPY" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="introduction.html" class="btn btn-neutral" title="Welcome to GSEAPY’s documentation!" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

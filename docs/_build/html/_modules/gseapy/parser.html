@@ -81,8 +81,7 @@
             
             
                 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../index.html">Welcome to GSEAPY&#8217;s documentation!</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../index.html#indices-and-tables">Indices and tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Welcome to GSEAPY&#8217;s documentation!</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../run.html">How to Use GSEAPY</a></li>
 </ul>
 
@@ -142,7 +141,7 @@
 <div class="viewcode-block" id="gsea_cls_parser"><a class="viewcode-back" href="../../run.html#gseapy.parser.gsea_cls_parser">[docs]</a><span class="k">def</span> <span class="nf">gsea_cls_parser</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Extact class(phenotype) name from .cls file.</span>
 <span class="sd">    </span>
-<span class="sd">    :param cls: the location of GSEA-P .cls file.</span>
+<span class="sd">    :param cls: the .cls file where located inside edb folder.</span>
 <span class="sd">    :return: phenotype name and a list of class vector. </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
@@ -160,7 +159,7 @@
 <div class="viewcode-block" id="gsea_edb_parser"><a class="viewcode-back" href="../../run.html#gseapy.parser.gsea_edb_parser">[docs]</a><span class="k">def</span> <span class="nf">gsea_edb_parser</span><span class="p">(</span><span class="n">results_path</span><span class="p">,</span><span class="n">index</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,):</span>
     <span class="sd">&quot;&quot;&quot;Parse results.edb file stored under **edb** file folder.            </span>
 
-<span class="sd">    :param results_path: location of GSEA Desktop results.</span>
+<span class="sd">    :param results_path: the .results file where lcoated inside edb folder.</span>
 <span class="sd">    :param index: gene_set index of gmt database, used for iterating items.</span>
 <span class="sd">   </span>
 <span class="sd">    :return: enrichment_term, hit_index,nes, pval, fdr.</span>
@@ -197,9 +196,9 @@
     
 </div>
 <div class="viewcode-block" id="gsea_rank_metric"><a class="viewcode-back" href="../../run.html#gseapy.parser.gsea_rank_metric">[docs]</a><span class="k">def</span> <span class="nf">gsea_rank_metric</span><span class="p">(</span><span class="n">rnk</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;parse .rnk file. This file contains ranking correlation vector and gene names or ids. </span>
+    <span class="sd">&quot;&quot;&quot;Parse .rnk file. This file contains ranking correlation vector and gene names or ids. </span>
 <span class="sd">    </span>
-<span class="sd">    :param rnk: location of GSEA-P .rnk file</span>
+<span class="sd">    :param rnk: the .rnk file where located inside the edb folder.</span>
 <span class="sd">    :return: a pandas DataFrame with 3 columns names are::</span>
 <span class="sd">             </span>
 <span class="sd">                 &#39;gene_name&#39;,&#39;rank&#39;,rank2&#39;</span>
@@ -214,15 +213,15 @@
     <span class="k">return</span> <span class="n">rank_metric</span>
     </div>
 <div class="viewcode-block" id="gsea_gmt_parser"><a class="viewcode-back" href="../../run.html#gseapy.parser.gsea_gmt_parser">[docs]</a><span class="k">def</span> <span class="nf">gsea_gmt_parser</span><span class="p">(</span><span class="n">gmt</span><span class="p">,</span> <span class="n">min_size</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">max_size</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span> <span class="n">gene_list</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;parser gene_sets.gmt(gene set database) file. </span>
+    <span class="sd">&quot;&quot;&quot;Parse gene_sets.gmt(gene set database) file. </span>
 <span class="sd">    </span>
-<span class="sd">    :param gmt: Location of gene_sets.gmt file.</span>
+<span class="sd">    :param gmt: the gene_sets.gmt file where loacated inside edb folder.</span>
 <span class="sd">    :param min_size: Minimum allowed number of genes from gene set also the data set. Default: 3. </span>
 <span class="sd">    :param max_size: Maximum allowed number of genes from gene set also the data set. Default: 5000.</span>
-<span class="sd">    :gene_list: Used for filtering gene set. Only used this argument for :func:`run` method.</span>
+<span class="sd">    :param gene_list: Used for filtering gene set. Only used this argument for :func:`run` method.</span>
 <span class="sd">    :return: Return a new filtered gene set database dictionary. </span>
 
-<span class="sd">    **DO NOT** filtering gene sets, when use :func:`replot`. Because ``GSEA`` Desktop have already</span>
+<span class="sd">    **DO NOT** filter gene sets, when use :func:`replot`. Because ``GSEA`` Desktop have already</span>
 <span class="sd">    do this for you.</span>
 <span class="sd">            </span>
 <span class="sd">    &quot;&quot;&quot;</span>

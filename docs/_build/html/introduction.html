@@ -1,0 +1,311 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Welcome to GSEAPY’s documentation! &mdash; GSEAPY 0.3.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="GSEAPY 0.3.1 documentation" href="index.html"/>
+        <link rel="next" title="How to Use GSEAPY" href="run.html"/>
+        <link rel="prev" title="Welcome to GSEAPY’s documentation!" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> GSEAPY
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">Welcome to GSEAPY&#8217;s documentation!</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#why-gseapy">Why GSEAPY</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#features-of-gseapy">Features of GSEAPY</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gsea-desktop-version-output">GSEA desktop version output:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gseapy-output">GSEAPY output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dependency">Dependency</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mandatory">Mandatory</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#run-gseapy">Run GSEAPY</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="run.html">How to Use GSEAPY</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">GSEAPY</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Welcome to GSEAPY&#8217;s documentation!</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/introduction.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="welcome-to-gseapy-s-documentation">
+<h1>Welcome to GSEAPY&#8217;s documentation!<a class="headerlink" href="#welcome-to-gseapy-s-documentation" title="Permalink to this headline">¶</a></h1>
+<p>GSEAPY: Gene Set Enrichment Analysis in Python.</p>
+<a class="reference external image-reference" href="https://badge.fury.io/py/gseapy"><img src="https://badge.fury.io/py/gseapy.svg" /></a>
+<a class="reference external image-reference" href="https://travis-ci.org/BioNinja/gseapy"><img alt="https://travis-ci.org/BioNinja/gseapy.svg?branch=master" src="https://travis-ci.org/BioNinja/gseapy.svg?branch=master" /></a>
+<img src="https://img.shields.io/github/license/mashape/apistatus.svg" /><p>GSEAPY is a python wrapper for <strong>GESA</strong>.It&#8217;s used for convenient GO enrichments
+and produce <strong>publishable quality figures</strong> from python. GSEAPY could be used for <strong>RNA-seq, ChIP-seq, Microarry</strong> data.</p>
+<p><a class="reference external" href="http://software.broadinstitute.org/gsea/index.jsp">Gene Set Enrichment Analysis</a> (GSEA)
+is a computational method that determines whether an a priori defined set of genes shows
+statistically significant, concordant differences between two biological states (e.g. phenotypes).</p>
+<p>The full <code class="docutils literal"><span class="pre">GSEA</span></code> is far too extensive to describe here; see
+<a class="reference external" href="http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page">GSEA</a> documentation for more information.</p>
+<div class="section" id="why-gseapy">
+<h2>Why GSEAPY<a class="headerlink" href="#why-gseapy" title="Permalink to this headline">¶</a></h2>
+<p>For Gene Enrichment Analysis, <code class="docutils literal"><span class="pre">GSEA</span></code> is still the one of best choice.</p>
+<p>However, When you have large number of expression tables, or <code class="docutils literal"><span class="pre">GO</span></code> terms to enrich, <code class="docutils literal"><span class="pre">GSEA</span></code> desktop
+version is inconvinient. What&#8217;s more, the R version of GSEA has not been updated since 2006.
+What&#8217;s worse, <code class="docutils literal"><span class="pre">GSEA</span></code> desktop version do not provide means to modify plots,
+like legends, ticks......</p>
+<p>As a researcher of life science, I want a modern <code class="docutils literal"><span class="pre">GSEA</span></code> with lastest features. It can produce pubilishable
+figures, and do many jobs at the same time without using mouse to select differrent data table,
+differrent gene sets repeatly.</p>
+</div>
+<div class="section" id="features-of-gseapy">
+<h2>Features of GSEAPY<a class="headerlink" href="#features-of-gseapy" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>GSEAPY could reproduce the GSEA figures using GSEA desktop version results.</li>
+<li>GSEAPY could be used directly to perform enrichment anlysis. All parameters are same with <code class="docutils literal"><span class="pre">GSEA</span></code></li>
+<li>GSEAPY is written in <code class="docutils literal"><span class="pre">python</span></code>, using the same algorithm of <code class="docutils literal"><span class="pre">GSEA</span></code> Desktop version.</li>
+<li>GSEAPY produce figures in pdf format by default, which are ready for publishing and easy to modifiy.</li>
+<li>GSEAPY Enhancement will be considered. If you would like to contribute, please &#64;BioNinja on <code class="docutils literal"><span class="pre">Github</span></code>.</li>
+</ol>
+</div>
+<div class="section" id="gsea-desktop-version-output">
+<h2>GSEA desktop version output:<a class="headerlink" href="#gsea-desktop-version-output" title="Permalink to this headline">¶</a></h2>
+<p>This is an example of GSEA desktop application output</p>
+<div class="figure">
+<img alt="_images/GSEA_OCT4_KD.png" src="_images/GSEA_OCT4_KD.png" />
+</div>
+</div>
+<div class="section" id="gseapy-output">
+<h2>GSEAPY output<a class="headerlink" href="#gseapy-output" title="Permalink to this headline">¶</a></h2>
+<p>Using the same algorithm by <code class="docutils literal"><span class="pre">GSEA</span></code>, GSEAPY reproduce the example above.</p>
+<div class="figure" id="id1">
+<img alt="_images/gseapy_OCT4_KD.png" src="_images/gseapy_OCT4_KD.png" />
+<p class="caption"><span class="caption-text">Generated by GSEAPY</span></p>
+<div class="legend">
+<p><strong>GSEAPY figures are PDF formats by default.</strong> Other matplotlib figures formats are supported, too.</p>
+<p>You can modify <code class="docutils literal"><span class="pre">GSEA</span></code> plots easily in .pdf files. Please Enjoy.</p>
+</div>
+</div>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">Install gseapy package from pypi and download</div>
+</div>
+<div class="code bash highlight-python"><div class="highlight"><pre>$ pip install gseapy
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">You may instead want to use the development version from Github, by running</div>
+</div>
+<div class="code bash highlight-python"><div class="highlight"><pre>$ pip install git+git://github.com/BioNinja/gseapy.git#egg=gseapy
+</pre></div>
+</div>
+</div>
+<div class="section" id="dependency">
+<h2>Dependency<a class="headerlink" href="#dependency" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Python 2.7 or 3.3+</li>
+</ul>
+<div class="section" id="mandatory">
+<h3>Mandatory<a class="headerlink" href="#mandatory" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Numpy</li>
+<li>Pandas</li>
+<li>Matplotlib</li>
+<li>Beautifulsoup4</li>
+</ul>
+<p>You may also need <strong>lxml, html5lib</strong>, if you could not parse xml files.</p>
+</div>
+</div>
+<div class="section" id="run-gseapy">
+<h2>Run GSEAPY<a class="headerlink" href="#run-gseapy" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">GSEAPY has two subcommands: <code class="docutils literal"><span class="pre">replot</span></code>, <code class="docutils literal"><span class="pre">call</span></code>.</div>
+</div>
+<div class="line-block">
+<div class="line">The <code class="docutils literal"><span class="pre">replot</span></code> command will parse the GSEA desktop results directory(the path contains edb file folder).</div>
+</div>
+<div class="line-block">
+<div class="line">The <code class="docutils literal"><span class="pre">call</span></code> command will compute es,nes,pval,fdr and generates plots, <em>de novo</em>.</div>
+</div>
+<div class="line-block">
+<div class="line">For more information to use this library,see the <a class="reference internal" href="run.html#run"><span>How to Use GSEAPY</span></a>.</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="run.html" class="btn btn-neutral float-right" title="How to Use GSEAPY" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Welcome to GSEAPY’s documentation!" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Zhuoqing Fang.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.3.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
