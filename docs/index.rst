@@ -35,12 +35,7 @@ The full ``GSEA`` is far too extensive to describe here; see
 
 
 .. toctree::
-<<<<<<< HEAD
     :maxdepth: 3
-=======
-   :maxdepth: 3
->>>>>>> origin/master
-
    
     introduction.rst
     run.rst
