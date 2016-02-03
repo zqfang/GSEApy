@@ -11,22 +11,29 @@ For command line usage:
 
 The ``replot`` module reproduce GSEA desktop version results. The only input for GSEAPY is the location to GSEA results.
 
-The ``call`` module produce GSEAPY results. The input requries a txt file( FPKM, Expected Counts, TPM, et.al), a cls file,
-and gene_sets file in gmt format. The input files' formats are identical to ``GSEA`` desktop version. 
-See `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ documentation for more information.
+.. code:: bash
+  
+    $ gseapy replot -i path/to/GSEA_resutls_folder -o gesapy_out
 
+    # An example to reproduce figures using replot module.
+    $ gseapy replot -i ./gsea -o gseapy_out
+
+
+
+The ``call`` module produce GSEAPY results. 
+
+The input requries a txt file( FPKM, Expected Counts, TPM, et.al), a cls file,
+and gene_sets file in gmt format.
 
 
 .. code:: bash
-  
-  $ gseapy replot -i path/to/GSEA_resutls_folder -o gesapy_out
+    
+    # an example to compute using gseapy call module
+    $ gseapy call -d gsea_data.txt -c test.cls -g gene_sets.gmt
 
-  # An example to reproduce figures using replot module.
-  $ gseapy replot -i ./Gsea.reports -o test
-  
-  
-  # an example to compute using gseapy call module
-  $ gseapy call -d exptable.txt -c test.cls -g test.gmt
+
+The input files' formats are identical to ``GSEA`` desktop version. 
+See :ref:`example` for details, or, see `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ documentation for more information.
 
 
 
@@ -44,7 +51,7 @@ This will import the following:
 .. code:: python
 
    # An example to reproduce figures using replot module.
-   gseapy.replot('./Gsea.reports','test')
+   gseapy.replot('gsea','gseapy_out')
 
 
 
@@ -53,10 +60,10 @@ This will import the following:
 .. code:: python
 
    # An example to calculate es, nes, pval,fdrs, and produce figures using gseapy.
-   gseapy.run(data = expression.txt, gene_sets = gene_sets.gmt,cls = test.cls, 
+   gseapy.run(data = gsea_dat.txt, gene_sets = gene_sets.gmt,cls = test.cls, 
              min_size = 15, max_size = 1000, permutation_n = 1000, weighted_score_type = 1,
              permutation_type = 'gene_set', method = 'log2_ratio_of_classes',ascending = False, 
-             outdir='test',figsize = (6.5,6),format = 'png')
+             outdir='gseapy_out',figsize = (6.5,6),format = 'png')
 
 
 

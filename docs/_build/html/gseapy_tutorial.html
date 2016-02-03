@@ -1,0 +1,380 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>A Protocol to walk through GSEAPY &mdash; GSEAPY 0.3.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="GSEAPY 0.3.1 documentation" href="index.html"/>
+        <link rel="prev" title="How to Use GSEAPY" href="run.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> GSEAPY
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Welcome to GSEAPY&#8217;s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="run.html">How to Use GSEAPY</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">A Protocol to walk through GSEAPY</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#use-call-command-or-run">Use <code class="docutils literal"><span class="pre">call</span></code> command, or <code class="docutils literal"><span class="pre">run()</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prepare-an-tabular-text-file-of-gene-expression-like-this">1. Prepare an tabular text file of gene expression like this:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#an-cls-file-is-also-expected">2. An cls file is also expected.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gene-sets-file-in-gmt-format">3. Gene_sets file in gmt format.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run-gseapy-inside-python">4. Run gseapy inside python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#command-line">5. Command line</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#use-replot-or-replot">Use <code class="docutils literal"><span class="pre">replot</span></code>, or <code class="docutils literal"><span class="pre">replot()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">GSEAPY</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>A Protocol to walk through GSEAPY</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/gseapy_tutorial.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="a-protocol-to-walk-through-gseapy">
+<span id="example"></span><h1>A Protocol to walk through GSEAPY<a class="headerlink" href="#a-protocol-to-walk-through-gseapy" title="Permalink to this headline">¶</a></h1>
+<p>As a biological reseacher, I like protocols, so as other reseachers, too.</p>
+<p>Here is an short tutorial to walk you through gseapy.</p>
+<p>In order to run gseapy successfully, install gseapy use pip.</p>
+<div class="code bash highlight-python"><div class="highlight"><pre>pip install gseapy
+</pre></div>
+</div>
+<div class="section" id="use-call-command-or-run">
+<h2>Use <code class="docutils literal"><span class="pre">call</span></code> command, or <code class="xref py py-func docutils literal"><span class="pre">run()</span></code><a class="headerlink" href="#use-call-command-or-run" title="Permalink to this headline">¶</a></h2>
+<p>Follow the steps blow.</p>
+<p>One thing you should know is that the gseapy input files are totally the same as
+<code class="docutils literal"><span class="pre">GSEA</span></code> desktop requried. You can use these files below to run <code class="docutils literal"><span class="pre">GSEA</span></code> desktop, too.</p>
+<div class="section" id="prepare-an-tabular-text-file-of-gene-expression-like-this">
+<h3>1. Prepare an tabular text file of gene expression like this:<a class="headerlink" href="#prepare-an-tabular-text-file-of-gene-expression-like-this" title="Permalink to this headline">¶</a></h3>
+<p><strong>RNA-seq,ChIP-seq, Microarry data</strong> are all supported.</p>
+<p>Here is to see what the structure of expression table looks like, you don&#8217;t have to run
+commands below:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s">&#39;./test/gsea_data.txt&#39;</span><span class="p">)</span>
+<span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Gene_Symbol</th>
+      <th>ACD2</th>
+      <th>BCD2</th>
+      <th>CCD2</th>
+      <th>APYD2</th>
+      <th>BPYD2</th>
+      <th>CPYD2</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>SCARA3</td>
+      <td>6.287</td>
+      <td>6.821</td>
+      <td>6.005</td>
+      <td>2.525</td>
+      <td>1.911</td>
+      <td>1.500</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>POU5F1</td>
+      <td>11.168</td>
+      <td>11.983</td>
+      <td>10.469</td>
+      <td>7.795</td>
+      <td>7.911</td>
+      <td>6.174</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>CTLA2B</td>
+      <td>4.362</td>
+      <td>5.708</td>
+      <td>4.633</td>
+      <td>1.493</td>
+      <td>0.000</td>
+      <td>1.369</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>CRYAB</td>
+      <td>11.339</td>
+      <td>11.662</td>
+      <td>11.714</td>
+      <td>7.698</td>
+      <td>7.928</td>
+      <td>7.779</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>PMP22</td>
+      <td>7.259</td>
+      <td>7.548</td>
+      <td>6.803</td>
+      <td>4.418</td>
+      <td>2.239</td>
+      <td>3.071</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+<div class="section" id="an-cls-file-is-also-expected">
+<h3>2. An cls file is also expected.<a class="headerlink" href="#an-cls-file-is-also-expected" title="Permalink to this headline">¶</a></h3>
+<p>This file is used to specify column attributes in step 1, just like <code class="docutils literal"><span class="pre">GSEA</span></code> asked.</p>
+<p>An example of cls file looks like below.</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;gsea/edb/C1OE.cls&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cls</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre>6 2 1
+# C1OE Vector
+C1OE C1OE C1OE Vector Vector Vector
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">The first line specify the total samples and phenotype numbers. Leave number 1 alway be 1.</div>
+<div class="line">The second line specify the phenotype class(name).</div>
+<div class="line">The third line specify column attributes in setp 1.</div>
+</div>
+</div>
+<div class="section" id="gene-sets-file-in-gmt-format">
+<h3>3. Gene_sets file in gmt format.<a class="headerlink" href="#gene-sets-file-in-gmt-format" title="Permalink to this headline">¶</a></h3>
+<p>All you need to do is to download gene set database file from <code class="docutils literal"><span class="pre">GSEA</span></code> website.</p>
+<p>If you would like to use you own gene_sets.gmts files, build such a file use excel,
+and then rename to gene_sets.gmt.</p>
+<p>An example of gmt file looks like below:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;gsea/edb/gene_sets.gmt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">gmt</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">gmt</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre>ES-SPECIFIC Arid3a_used     ACTA1   CALML4  CORO1A  DHX58   DPYS    EGR1    ESRRB   GLI2    GPX2    HCK     INHBB
+HDAC-UNIQUE     Arid3a_used 1700017B05RIK   8430427H17RIK   ABCA3   ANKRD44 ARL4A   BNC2    CLDN3
+XEN-SPECIFIC        Arid3a_used     1110036O03RIK   A130022J15RIK   B2M     B3GALNT1        CBX4    CITED1  CLU     CTSH    CYP26A1
+GATA-SPECIFIC       Arid3a_used     1200009I06RIK   5430407P10RIK   BAIAP2L1        BMP8B   CITED1  CLDN3   COBLL1  CORO1A  CRYAB   CTDSPL  DKKL1
+TS-SPECIFIC Arid3a_used     5430407P10RIK   AFAP1L1 AHNAK   ANXA2   ANXA3   ANXA5   B2M     BIK     BMP8B   CAMK1D  CBX4    CLDN3   CSRP1   DKKL1   DSC2
+</pre></div>
+</div>
+</div>
+<div class="section" id="run-gseapy-inside-python">
+<h3>4. Run gseapy inside python<a class="headerlink" href="#run-gseapy-inside-python" title="Permalink to this headline">¶</a></h3>
+<p>At least 3 files are required to run gseapy.</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">gseapy</span>
+<span class="n">gseapy</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">gsea_data</span><span class="o">.</span><span class="n">txt</span><span class="p">,</span> <span class="n">cls</span> <span class="o">=</span> <span class="n">gsea</span><span class="o">.</span><span class="n">cls</span><span class="p">,</span> <span class="n">gmt</span> <span class="o">=</span> <span class="n">gene_sets</span><span class="o">.</span><span class="n">gmt</span><span class="p">,</span> <span class="n">outdir</span> <span class="o">=</span> <span class="s">&#39;gseapy_out&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="command-line">
+<h3>5. Command line<a class="headerlink" href="#command-line" title="Permalink to this headline">¶</a></h3>
+<div class="code bash highlight-python"><div class="highlight"><pre>gseapy call -d gsea_data.txt -c test.cls -g gene_sets.gmt -o gseapy_out
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="use-replot-or-replot">
+<h2>Use <code class="docutils literal"><span class="pre">replot</span></code>, or <code class="xref py py-func docutils literal"><span class="pre">replot()</span></code><a class="headerlink" href="#use-replot-or-replot" title="Permalink to this headline">¶</a></h2>
+<p>You may also want to use <code class="xref py py-func docutils literal"><span class="pre">replot()</span></code> to reproduce <code class="docutils literal"><span class="pre">GSEA</span></code> desktop plots.</p>
+<p>The only input of <code class="xref py py-func docutils literal"><span class="pre">replot()</span></code> is the directory of <code class="docutils literal"><span class="pre">GSEA</span></code> desktop output.</p>
+<p>The input directory(e.g. gsea), must contained <strong>edb</strong> folder, gseapy need 4 data files
+inside edb folder.The gsea document tree looks like this:</p>
+<div class="highlight-python"><div class="highlight"><pre>gsea
+└─edb
+    └─test.cls
+    └─gene_sets.gmt
+    └─gsea_data.rnk
+    └─results.edb
+</pre></div>
+</div>
+<p>After this, you can start to run gseapy.</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">gseapy</span>
+<span class="n">gseapy</span><span class="o">.</span><span class="n">replot</span><span class="p">(</span><span class="n">indir</span> <span class="o">=</span><span class="s">&#39;gsea&#39;</span><span class="p">,</span><span class="n">outdir</span> <span class="o">=</span> <span class="s">&#39;gseapy_out&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you prefer to run in command line, it&#8217;s more simple.</p>
+<div class="code bash highlight-python"><div class="highlight"><pre>gseapy replot -i gsea -o gseapy_out
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">For advanced usage of library,see the <a class="reference internal" href="run.html#run"><span>How to Use GSEAPY</span></a>.</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="run.html" class="btn btn-neutral" title="How to Use GSEAPY" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Zhuoqing Fang.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.3.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

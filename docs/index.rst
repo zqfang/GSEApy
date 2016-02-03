@@ -39,12 +39,12 @@ The full ``GSEA`` is far too extensive to describe here; see
 
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 3
 
    
-   introduction.rst
-   run.rst
-
+    introduction.rst
+    run.rst
+    gseapy_tutorial
 
 
 

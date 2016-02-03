@@ -83,6 +83,7 @@
                 <ul>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Welcome to GSEAPY&#8217;s documentation!</a></li>
 <li class="toctree-l1"><a class="reference internal" href="run.html">How to Use GSEAPY</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gseapy_tutorial.html">A Protocol to walk through GSEAPY</a></li>
 </ul>
 
             
@@ -133,7 +134,8 @@
 <a class="reference external image-reference" href="https://badge.fury.io/py/gseapy"><img src="https://badge.fury.io/py/gseapy.svg" /></a>
 <a class="reference external image-reference" href="https://travis-ci.org/BioNinja/gseapy"><img alt="https://travis-ci.org/BioNinja/gseapy.svg?branch=master" src="https://travis-ci.org/BioNinja/gseapy.svg?branch=master" /></a>
 <a class="reference external image-reference" href="http://gseapy.readthedocs.org/en/latest/?badge=latest"><img alt="Documentation Status" src="https://readthedocs.org/projects/gseapy/badge/?version=latest" /></a>
-<img src="https://img.shields.io/github/license/mashape/apistatus.svg" /><p>GSEAPY is a python wrapper for <strong>GESA</strong>.It&#8217;s used for convenient GO enrichments
+<img src="https://img.shields.io/github/license/mashape/apistatus.svg" /><a class="reference external image-reference" href="http://gseapy.readthedocs.org/en/latest/?badge=latest"><img alt="Documentation Status" src="https://readthedocs.org/projects/gseapy/badge/?version=latest" /></a>
+<p>GSEAPY is a python wrapper for <strong>GESA</strong>.It&#8217;s used for convenient GO enrichments
 and produce <strong>publishable quality figures</strong> from python. GSEAPY could be used for <strong>RNA-seq, ChIP-seq, Microarry</strong> data.</p>
 <p><a class="reference external" href="http://software.broadinstitute.org/gsea/index.jsp">Gene Set Enrichment Analysis</a> (GSEA)
 is a computational method that determines whether an a priori defined set of genes shows
@@ -145,20 +147,40 @@ statistically significant, concordant differences between two biological states 
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Welcome to GSEAPY&#8217;s documentation!</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="introduction.html#why-gseapy">Why GSEAPY</a></li>
 <li class="toctree-l2"><a class="reference internal" href="introduction.html#features-of-gseapy">Features of GSEAPY</a></li>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#gsea-desktop-version-output">GSEA desktop version output:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#gsea-desktop-version-output">GSEA desktop version output</a></li>
 <li class="toctree-l2"><a class="reference internal" href="introduction.html#gseapy-output">GSEAPY output</a></li>
 <li class="toctree-l2"><a class="reference internal" href="introduction.html#installation">Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#dependency">Dependency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#dependency">Dependency</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="introduction.html#mandatory">Mandatory</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="introduction.html#run-gseapy">Run GSEAPY</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="run.html">How to Use GSEAPY</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="run.html#for-command-line-usage">For command line usage:</a></li>
 <li class="toctree-l2"><a class="reference internal" href="run.html#run-gseapy-inside-python">Run gseapy inside python:</a></li>
-<li class="toctree-l2"><a class="reference internal" href="run.html#to-see-help-information-of-gseapy">To See help information of GSEAPY</a></li>
+<li class="toctree-l2"><a class="reference internal" href="run.html#to-see-help-information-of-gseapy">To See help information of GSEAPY</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="run.html#gseapy-subcommands">1. gseapy subcommands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="run.html#the-replot-command">2. The <code class="docutils literal"><span class="pre">replot</span></code> Command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="run.html#the-call-command">3. The <code class="docutils literal"><span class="pre">call</span></code> Command</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="run.html#module-apis">Module APIs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="run.html#module-gseapy.algorithm">Algorithms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="run.html#module-gseapy.parser">Parsers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gseapy_tutorial.html">A Protocol to walk through GSEAPY</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gseapy_tutorial.html#use-call-command-or-run">Use <code class="docutils literal"><span class="pre">call</span></code> command, or <code class="docutils literal"><span class="pre">run()</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="gseapy_tutorial.html#prepare-an-tabular-text-file-of-gene-expression-like-this">1. Prepare an tabular text file of gene expression like this:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gseapy_tutorial.html#an-cls-file-is-also-expected">2. An cls file is also expected.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gseapy_tutorial.html#gene-sets-file-in-gmt-format">3. Gene_sets file in gmt format.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gseapy_tutorial.html#run-gseapy-inside-python">4. Run gseapy inside python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gseapy_tutorial.html#command-line">5. Command line</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="gseapy_tutorial.html#use-replot-or-replot">Use <code class="docutils literal"><span class="pre">replot</span></code>, or <code class="docutils literal"><span class="pre">replot()</span></code></a></li>
 </ul>
 </li>
 </ul>
