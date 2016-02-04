@@ -28,8 +28,7 @@ setup(name='gseapy',
       author='Zhuoqing Fang',
       author_email='fangzhuoqing@sibs.ac.cn',
       license='MIT',
-      packages=['gseapy'],
-      
+      packages=['gseapy'],     
       install_requires=[
           'numpy>=1.8.0',
           'pandas>=0.16',

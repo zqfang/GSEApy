@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
 from __future__ import absolute_import, print_function,division
 from functools import reduce
 
@@ -8,7 +7,6 @@ import time
 import numpy as np
 import sys
 import random
-
 
 def preprocess(df):
     """pre-processed the data frame.new filtering methods will be implement here.
@@ -21,17 +19,11 @@ def preprocess(df):
     
     return df2
 
-    
-
 def enrichment_score(gene_list, gene_set, weighted_score_type = 1, correl_vector = None):
-    '''
-    This is the most important function of GSEAPY. It has the same algorithm with GSEA.
+    """This is the most important function of GSEAPY. It has the same algorithm with GSEA.
     
-    :param gene_list:       The ordered gene list 
-                            gene_name_list, rank_metric['gene_name']
-
-    :param gene_set:        gene_sets in gmt file, please used gsea_gmt_parser to get gene_set.
-                             
+    :param gene_list:       The ordered gene list gene_name_list, rank_metric['gene_name']
+    :param gene_set:        gene_sets in gmt file, please used gsea_gmt_parser to get gene_set.                            
     :param weighted_score_type:  It's indentical to gsea's weighted_score method. weighting by the correlation 
                             is a very reasonable choice that allows significant gene sets with less than perfect coherence. 
                             options: 0(classic),1,1.5,2. default:1. if one is interested in penalizing sets for lack of 
@@ -43,16 +35,16 @@ def enrichment_score(gene_list, gene_set, weighted_score_type = 1, correl_vector
                              
     :param correl_vector:   A vector with the correlations (e.g. signal to noise scores) corresponding to the genes in 
                             the gene list. Or rankings, rank_metric['rank'].values
+       
+    :return:
     
-    
-    :return: 
      ES: Enrichment score (real number between -1 and +1) 
      
      hit_index: index of a gene in gene_list, if gene included in gene_set.
      
      RES: Numerical vector containing the running enrichment score for all locations in the gene list .
              
-    '''
+    """
     
     #Test whether each element of a 1-D array is also present in a second array
     #It's more intuitived here than orginal enrichment_score source code.
@@ -60,8 +52,7 @@ def enrichment_score(gene_list, gene_set, weighted_score_type = 1, correl_vector
     tag_indicator = np.in1d(gene_list,gene_set,assume_unique=True).astype(int)  # notice that the sign is 0 (no tag) or 1 (tag)
     no_tag_indicator = 1 - tag_indicator
     hit_ind = np.flatnonzero(tag_indicator).tolist()
-     
-    
+      
     #compute ES score, the code below is identical to gsea enrichment_score method.
     N = len(gene_list) 
     Nhint = np.sum(tag_indicator)
@@ -77,14 +68,12 @@ def enrichment_score(gene_list, gene_set, weighted_score_type = 1, correl_vector
     max_ES = max(RES)
     min_ES = min(RES)
     
-    #print("The length of ES is", len(RES))
-    
+    #print("The length of ES is", len(RES))    
     return max_ES if abs(max_ES) > abs(min_ES) else min_ES, hit_ind, RES.tolist()
  
 
 def shuffle_list(gene_list, rand=random.Random(0)):
-    """
-    Returns a copy of a shuffled input gene_list.
+    """Returns a copy of a shuffled input gene_list.
     
     :param gene_list: rank_metric['gene_name'].values
     :param rand: random seed. Use random.Random(0) if you like.
@@ -95,10 +84,7 @@ def shuffle_list(gene_list, rand=random.Random(0)):
     rand.shuffle(l2)
 
     return l2        
-         
-    
-    
-    
+             
 def ranking_metric(df, method,phenoPos,phenoNeg,classes,ascending):
     """The main function to rank an expression table.
     
@@ -132,27 +118,21 @@ def ranking_metric(df, method,phenoPos,phenoNeg,classes,ascending):
                       Uses the log2 ratio of class means to calculate fold change for natural scale data.
                       This is the recommended statistic for calculating fold change for natural scale data.
    
-   
-   
-   
+      
    :param phenoPos: one of lables of phenotype's names.
    :param phenoNeg: one of lable of phenotype's names.   
    :param classes:  a list of phenotype labels, to specify which column of dataframe belongs to what catogry of phenotype.
    :param ascending:  bool or list of bool. Sort ascending vs. descending.
    :return: returns correlation to class of each variable. same format with .rnk file. gene_name in first coloum,
-            correlation in second column.
-         
- 
+            correlation in second column.          
     """ 
-    
-    
+        
     A = phenoPos
     B = phenoNeg
     df2 = df.T   
     df2['class'] = classes
     df_mean= df2.groupby('class').mean().T
-    df_std = df2.groupby('class').std().T
-    
+    df_std = df2.groupby('class').std().T    
     if method == 'signal_to_noise':
         sr = (df_mean[A] - df_mean[B])/(df_std[A] + df_std[B])
     elif method == 't_test':
@@ -172,8 +152,7 @@ def ranking_metric(df, method,phenoPos,phenoNeg,classes,ascending):
     df3['rank2'] = df3['rank']
 
     return df3
-        
-    
+            
 def gsea_compute(data, gmt, n, weighted_score_type,permutation_type,method,phenoPos,phenoNeg,classes,ascending):
     """compute enrichment scores and enrichment nulls. 
     
@@ -196,35 +175,29 @@ def gsea_compute(data, gmt, n, weighted_score_type,permutation_type,method,pheno
     
     """
     enrichment_scores = []
-
     w = weighted_score_type
-    subsets = sorted(gmt.keys())
-    
+    subsets = sorted(gmt.keys())    
     dat = data.copy()
     r2 = ranking_metric(df=dat,method = method,phenoPos=phenoPos,phenoNeg=phenoNeg,classes=classes, ascending= ascending)
     ranking=r2['rank'].values
     gene_list=r2['gene_name']
         
-
     print("Start to compute enrichment socres............",time.ctime())
 
     rank_ES = []
-    hit_ind = []
-    
+    hit_ind = []    
     for subset in subsets:
         es,ind,RES = enrichment_score(gene_list = gene_list, gene_set=gmt.get(subset), 
                               weighted_score_type = w, correl_vector = ranking)
         enrichment_scores.append(es)
         rank_ES.append(RES)
         hit_ind.append(ind)
-    
-    
+        
     print("Start to compute esnulls......................",time.ctime())
     print("......This step might take a while to run. Be patient.")
 
     enrichment_nulls = [ [] for a in range(len(subsets)) ]
     
-
     for i in range(n):
         if permutation_type == "phenotype":
             dat2 = dat.T   
@@ -245,14 +218,10 @@ def gsea_compute(data, gmt, n, weighted_score_type,permutation_type,method,pheno
                               weighted_score_type = w, correl_vector = ranking2)[0]                        
             enrichment_nulls[si].append(esn)
 
-        
-
     return gsea_significance(enrichment_scores, enrichment_nulls),hit_ind,rank_ES, subsets
 
-
 def gsea_pval(es, esnull):
-    """
-    compute nominal p-value.
+    """Compute nominal p-value.
     
     From article (PNAS):
     estimate nominal p-value for S from esnull by using the positive
@@ -269,8 +238,7 @@ def gsea_pval(es, esnull):
         return 1.0
 
 def gsea_significance(enrichment_scores, enrichment_nulls):
-    """
-    Computing p-vals, normalized ES, FDRs.
+    """Compute p-vals, normalized ES, FDRs.
     """
     
     print("Start to compute pvals........................",time.ctime())
@@ -282,14 +250,11 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
     for i in range(len(enrichment_scores)):
         es = enrichment_scores[i]
         enrNull = enrichment_nulls[i]
-       
-
         enrichmentPVals.append(gsea_pval(es, enrNull))
 
         #normalize the ES(S,pi) and the observed ES(S), separetely rescaling
         #the positive and negative scores by divident by the mean of the 
         #ES(S,pi)
-
         def normalize(s):
             try:
                 if s == 0:
@@ -303,13 +268,10 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
             except:
                 return 0.0 #return if according mean value is uncalculable
 
-
         nes = normalize(es)
-        nEnrichmentScores.append(nes)
-        
+        nEnrichmentScores.append(nes)        
         nenrNull = [ normalize(s) for s in enrNull ]
         nEnrichmentNulls.append(nenrNull)
- 
 
     print("start to compute fdrs.........................", time.ctime())
 
@@ -328,15 +290,8 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
         else:
             return [ l[i] for i in range(0, len(l), e) ]
 
-    #vals = shorten(vals) -> this can speed up second part. is it relevant TODO?
-    """
+    vals = shorten(vals) -> this can speed up second part. is it relevant TODO?  
    
-   
-   
-   
-   
-   
-    """
     Use this null distribution to compute an FDR q value, for a given NES(S) =
     NES* >= 0. The FDR is the ratio of the percantage of all (S,pi) with
     NES(S,pi) >= 0, whose NES(S,pi) >= NES*, divided by the percentage of
@@ -346,15 +301,10 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
 
     nvals = np.array(sorted(vals))
     nnes = np.array(sorted(nEnrichmentScores))
-
     fdrs = []
 
-
     for i in range(len(enrichment_scores)):
-
         nes = nEnrichmentScores[i]
-
-
         #this could be speed up twice with the same accuracy! 
         if nes >= 0:
             allPos = int(len(vals) - np.searchsorted(nvals, 0, side="left"))
@@ -366,9 +316,6 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
             allHigherAndPos = int(np.searchsorted(nvals, nes, side="right"))
             nesPos = int(np.searchsorted(nnes, 0, side="left"))
             nesHigherAndPos = int(np.searchsorted(nnes, nes, side="right"))
-           
-
-
         try:
             top = allHigherAndPos/float(allPos) #p value
             down = nesHigherAndPos/float(nesPos)

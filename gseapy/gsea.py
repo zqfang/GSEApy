@@ -4,7 +4,6 @@ import os
 import sys
 import time
 
-
 from bs4 import BeautifulSoup
 from .parser import gsea_edb_parser,gsea_rank_metric,gsea_gmt_parser,gsea_cls_parser
 from .algorithm import enrichment_score,gsea_compute,preprocess,ranking_metric
@@ -26,28 +25,19 @@ def replot(indir,outdir,weight=1,figsize=[6.5,6],format='pdf',min_size = 3, max_
                      you will not encourage to use min_size, or max_size argment in :func:`replot` function.
                      Because gmt file has already been filter.
     
-    :return: Generate new figures with seleted figure format. Default: 'pdf'.
-    
-    
+    :return: Generate new figures with seleted figure format. Default: 'pdf'.   
     """
         
-    #parsing files.......
-    
+    #parsing files.......    
     results_path = glob.glob(indir+'*/edb/results.edb')[0]
     rank_path =  glob.glob(indir+'*/edb/*.rnk')[0]
     gene_set_path =  glob.glob(indir+'*/edb/gene_sets.gmt')[0]
     cls_path = glob.glob(indir+'*/edb/*.cls')[0]
-    file_list = [results_path ,rank_path,gene_set_path,cls_path]  
-    
+    file_list = [results_path ,rank_path,gene_set_path,cls_path]      
     for file in file_list: 
         if not os.path.isfile(file):
             print("Incorrect Input %s !" %file)
-            sys.exit(1)
-
-
-   
-    
-    
+            sys.exit(1)    
     #extract sample names from .cls file
     phenoPos,phenoNeg,classes = gsea_cls_parser(cls_path)  
     
@@ -72,16 +62,12 @@ def replot(indir,outdir,weight=1,figsize=[6.5,6],format='pdf',min_size = 3, max_
         RES = enrichment_score(gene_list = gene_list, gene_set = gene_set, weighted_score_type = weight, 
                                correl_vector = correl_vector)[2]
 
-
-
         #plotting
         fig = gsea_plot(rank_metric, enrich_term,hit_ind,nes,pval,
-                        fdr, RES, phenoPos,phenoNeg,figsize=figsize)
-    
+                        fdr, RES, phenoPos,phenoNeg,figsize=figsize)    
         fig.savefig('{a}/{b}.{c}'.format(a=outdir,b=enrich_term,c=format),dpi=300,)
         
     print("Congratulations! Your plots have been reproduced successfully!")
-
 
 def run(data, gene_sets,cls, min_size, max_size, permutation_n, weighted_score_type,
         permutation_type, method,ascending, outdir,figsize,format):
@@ -112,16 +98,18 @@ def run(data, gene_sets,cls, min_size, max_size, permutation_n, weighted_score_t
     
     """
     assert permutation_type in ["phenotype", "gene_set"]
-    df = pd.read_table(data)
-    
+    df = pd.read_table(data)    
     assert len(df) > 1   
-    assert permutation_type in ["phenotype", "gene_set"]
+    
     #select correct expression genes and values.
     dat = preprocess(df)
+    
     # phenotype labels parsing
     phenoPos, phenoNeg, classes = gsea_cls_parser(cls)
+    
     #ranking metrics calculation.    
     dat2 = ranking_metric(df = dat,method= method,phenoPos=phenoPos,phenoNeg=phenoNeg,classes = classes ,ascending=ascending)
+    
     #filtering out gene sets and build gene sets dictionary
     gmt = gsea_gmt_parser(gene_sets, min_size = min_size, max_size = max_size,gene_list=dat2['gene_name'].values)
     
@@ -143,12 +131,10 @@ def run(data, gene_sets,cls, min_size, max_size, permutation_n, weighted_score_t
         rdict['rank_ES'] = RES
         rdict['genes'] = dat.iloc[ind].index.tolist()
         res[gs] = rdict           
+
         #plotting
-        
-    
         fig = gsea_plot(rank_metric = dat2, enrich_term = gs,hit_ind = ind,nes = gseale[1],pval= gseale[2],
-                        fdr = gseale[3], RES = RES, phenoPos =phenoPos ,phenoNeg = phenoNeg,figsize=figsize)
-        
+                        fdr = gseale[3], RES = RES, phenoPos =phenoPos ,phenoNeg = phenoNeg,figsize=figsize)        
         fig.savefig('{a}/{b}.{c}'.format(a= outdir,b= gs,c= format),dpi=300,)
 
     res_df =pd.DataFrame.from_dict(res,orient='index')

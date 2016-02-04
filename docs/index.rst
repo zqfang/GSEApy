@@ -10,6 +10,7 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
 
 .. image:: https://badge.fury.io/py/gseapy.svg
     :target: https://badge.fury.io/py/gseapy
+
 .. image:: https://travis-ci.org/BioNinja/gseapy.svg?branch=master
     :target: https://travis-ci.org/BioNinja/gseapy
 

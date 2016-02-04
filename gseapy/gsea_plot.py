@@ -25,49 +25,46 @@ class _MidpointNormalize(Normalize):
 
 def gsea_plot(rank_metric,enrich_term,hit_ind, nes,pval,fdr,RES,
               phenoPos= None, phenoNeg= None,figsize =(6.5,6),**kwarg):
-    '''
-    This is the main function for reproducing the gsea plot.
+    """This is the main function for reproducing the gsea plot.
     
-    
-    '''
-
-
+    :param rank_metric: rankings, rank_metric['rank'].values.
+    :param enrich_term: gene_set name
+    :param hit_ind: hit indexs of rank_metric['gene_name'] presented in gene set S.
+    :param nes: Normalized enrichment scores.
+    :param pval: nominal p-value.
+    :param fdr: false discoveray rate.
+    :param RES: ranking enrichment scores of all genes in rank_metric['gene_name'].
+    :param phenoPos: phenotype lable, positive correlated.
+    :param phenoNeg: phenotype lable, negative correlated.
+    :param figsize: matplotlib figsize.
+    :return: fig object of gsea plot.
+    """    
     
     # center color map at midpoint = 0
     norm = _MidpointNormalize(midpoint=0)
-
-    #dataFrame of ranked matrix scores
-     
-    x = rank_metric.index.values
-   
+    
+    #dataFrame of ranked matrix scores     
+    x = rank_metric.index.values   
     #figsize = (6,6)
     phenoP_label = phenoPos + ' (Positively Correlated)'
     phenoN_label = phenoNeg + ' (Negatively Correlated)'
-
     zero_score_ind = np.abs(rank_metric['rank']).argmin()
     z_score_label =  'Zero score at ' + str(zero_score_ind)
-
     nes_label = 'NES: '+ "{:.3f}".format(float(nes))
     pval_label = 'Pval: '+ "{:.3f}".format(float(pval))
-    fdr_label = 'FDR: '+ "{:.3f}".format(float(fdr))
-
-
-    
+    fdr_label = 'FDR: '+ "{:.3f}".format(float(fdr))   
     im_matrix = rank_metric.ix[:,1:].T
 
     #in most case, we will have mangy plots, so do not display plots
     #It's also convinient to run this script on command line.         
-    plt.ioff()
-    
+    plt.ioff()    
     #GSEA Plots
     gs = plt.GridSpec(16,1)
     fig = plt.figure(figsize= figsize)
-
     #Ranked Metric Scores Plot
     ax1 =  fig.add_subplot(gs[11:])
     ax1.fill_between(x,y1= rank_metric['rank'],y2=0,color = '#C9D3DB')
-    ax1.set_ylabel("Ranked list metric",fontsize=14)
-    
+    ax1.set_ylabel("Ranked list metric",fontsize=14)    
     ax1.text(.05,.9,phenoP_label,color='red', horizontalalignment='left',verticalalignment='top',
          transform=ax1.transAxes)
     ax1.text(.95,.05,phenoN_label,color='Blue', horizontalalignment='right',verticalalignment='bottom',
@@ -77,19 +74,16 @@ def gsea_plot(rank_metric,enrich_term,hit_ind, nes,pval,fdr,RES,
     trans1 = transforms.blended_transform_factory( ax1.transData, ax1.transAxes)
     ax1.vlines(zero_score_ind,0,1,linewidth=.5,transform=trans1,linestyles='--',color='grey')
     ax1.text(zero_score_ind, 0.5, z_score_label, horizontalalignment='center',verticalalignment='center',
-         transform=trans1)    
+             transform=trans1)    
     ax1.set_xlabel("Rank in Ordered Dataset",fontsize=14)
     ax1.spines['top'].set_visible(False)
     ax1.tick_params(axis='both', which='both', top='off', right='off', left='off')
-    ax1.locator_params(axis='y',nbins=5)
-    
-    ax1.yaxis.set_major_formatter(plt.FuncFormatter(lambda tick_loc,tick_num :  '{:.1f}'.format(tick_loc, tick_num) ))
+    ax1.locator_params(axis='y',nbins=5)    
+    ax1.yaxis.set_major_formatter(plt.FuncFormatter(lambda tick_loc,tick_num :  '{:.1f}'.format(tick_loc) ))
     
     # use round method to control float number
     #ax1.yaxis.set_major_formatter(plt.FuncFormatter(lambda tick_loc,tick_num :  round(tick_loc, 1) ))
     
-
-
     #gene hits
     ax2 = fig.add_subplot(gs[8:10],sharex=ax1)
 
@@ -115,7 +109,6 @@ def gsea_plot(rank_metric,enrich_term,hit_ind, nes,pval,fdr,RES,
 
     # the y coords of this transformation are data, and the x coord are axes
     trans4 = transforms.blended_transform_factory( ax4.transAxes, ax4.transData)
-
     ax4.hlines(0,0,1,linewidth=.5,transform=trans4,color='grey')
     ax4.set_ylabel("Enrichment score (ES)",fontsize=14)
     ax4.set_xlim(min(x),max(x))

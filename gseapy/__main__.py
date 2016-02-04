@@ -11,8 +11,7 @@ import argparse as ap
 __version__ = '0.3.1'
 
 def main():
-    """The Main function/pipeline for GSEAPY.
-    
+    """The Main function/pipeline for GSEAPY.    
     """
     # Parse options...
     argparser = prepare_argparser()
@@ -24,8 +23,8 @@ def main():
         # reproduce plots using GSEAPY
         from .gsea import replot               
 
-        replot(indir=args.indir,outdir=args.outdir,weight=args.weight,figsize=args.figsize,format=args.format,) 
-    
+        replot(indir=args.indir,outdir=args.outdir,weight=args.weight,figsize=args.figsize,format=args.format,)    
+
     elif subcommand == "call":
         # compute using GSEAPY
         from .gsea import run
@@ -36,8 +35,7 @@ def main():
 
 def prepare_argparser ():
     """Prepare argparser object. New options will be added in this
-    function first.
-    
+    function first.   
     """
     description = "%(prog)s -- Gene Set Enrichment Analysis in Python"
     epilog = "For command line options of each command, type: %(prog)s COMMAND -h"
@@ -48,9 +46,7 @@ def prepare_argparser ():
     subparsers = argparser.add_subparsers( dest = 'subcommand_name' ) #help="sub-command help")
     
     # command for 'call'
-    add_call_parser( subparsers )
-
-    
+    add_call_parser( subparsers )   
     # command for 'plot'
     add_plot_parser( subparsers )
     
@@ -61,7 +57,6 @@ def add_output_option ( parser ):
     parser.add_argument("-o", "--outdir", dest = "outdir", type = str, default = 'gseapy_out',
                         metavar='',action="store",
                         help = "The GSEAPY output directory. Default: the current working directory")
-
     parser.add_argument( "-f", "--format", dest = "format", type = str, metavar='',action="store",
                               choices = ("pdf", "png", "jpeg", "eps"),default = "pdf",
                               help = "Format of output figures, choose from {'pdf', 'png', 'jpeg', 'eps'}. Default: 'pdf'." ) 
@@ -109,7 +104,6 @@ def add_call_parser( subparsers ):
                             help = "Number of random permutations. For calculating esnulls. Default: 1000" )
     group_opt.add_argument("-w","--weight",action='store',dest='weight',default= 1, type= float,metavar='',
                             help='Weighted_score of rank_metrics.For weighting input genes. Choose from {0, 1, 1.5, 2},default: 1',)
-
     group_opt.add_argument( "-m", "--method",  action="store",dest = "method", type = str, metavar='',
                             choices = ("signal_to_noise", "t_test", "ratio_of_classes", "diff_of_classes","log2_ratio_of_classes"),
                             default = "log2_ratio_of_classes",
