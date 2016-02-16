@@ -12,7 +12,7 @@ from .gsea_plot import gsea_plot
 import glob
 import pandas as pd
 
-def replot(indir,outdir,weight=1,figsize=[6.5,6],format='pdf',min_size = 3, max_size = 5000,):
+def replot(indir,outdir,weight=1,figsize=[6.5,6],format='pdf',min_size = 3, max_size = 5000):
     """The main fuction to run inside python.
           
     :param indir: GSEA desktop results directory. In the sub folder, you must contain edb file foder.    
