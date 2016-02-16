@@ -11,12 +11,11 @@ import argparse as ap
 __version__ = '0.3.1'
 
 def main():
-    """The Main function/pipeline for GSEAPY.    
-    """
+    """The Main function/pipeline for GSEAPY."""
+
     # Parse options...
     argparser = prepare_argparser()
     args = argparser.parse_args()
-
     subcommand  = args.subcommand_name
 
     if subcommand == "replot":
@@ -31,7 +30,9 @@ def main():
                 
         run(args.data, args.gmt,args.cls, args.mins, args.maxs, args.n, args.weight,
             args.type, args.method,args.ascending, args.outdir,args.figsize,args.format,)
-
+    else:
+        argparser.print_help()
+        sys.exit(0)
 
 def prepare_argparser ():
     """Prepare argparser object. New options will be added in this
@@ -48,9 +49,8 @@ def prepare_argparser ():
     # command for 'call'
     add_call_parser( subparsers )   
     # command for 'plot'
-    add_plot_parser( subparsers )
-    
-    
+    add_plot_parser( subparsers )   
+
     return argparser
 
 def add_output_option ( parser ):
@@ -74,8 +74,8 @@ def add_output_group ( parser, required = True ):
 
 
 def add_call_parser( subparsers ):
-    """Add main function 'call' argument parsers.
-    """
+    """Add main function 'call' argument parsers."""
+    
     argparser_call = subparsers.add_parser("call", help="Main GSEAPY Function: run GSEAPY instead of GSEA.")
     
     # group for input files
@@ -112,15 +112,13 @@ def add_call_parser( subparsers ):
                             Default: 'log2_ratio_of_classes'" )   
     group_opt.add_argument("-a","--ascending",action='store_true',dest='ascending',default= False ,
                             help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
-
-    
      
     return
 
 
 def add_plot_parser( subparsers ):
-    """Add function 'plot' argument parsers.
-    """    
+    """Add function 'plot' argument parsers."""
+    
     argparser_replot = subparsers.add_parser( "replot",help = "Reproduce GSEA desktop figures." )
     
     group_replot = argparser_replot.add_argument_group( "Positional arguments" )
@@ -133,9 +131,6 @@ def add_plot_parser( subparsers ):
                         help='Weighted_score of rank_metrics. Please Use the same value in GSEA. Choose from (0, 1, 1.5, 2),default: 1',)
        
     return
-
-
-
 
 if __name__ == '__main__':
     try:
