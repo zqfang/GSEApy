@@ -129,12 +129,11 @@
            <div itemprop="articleBody">
             
   <h1>Source code for gseapy.gsea</h1><div class="highlight"><pre>
-<span class="c">#! python</span>
-<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="ch">#! python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">time</span>
-
 
 <span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span>
 <span class="kn">from</span> <span class="nn">.parser</span> <span class="kn">import</span> <span class="n">gsea_edb_parser</span><span class="p">,</span><span class="n">gsea_rank_metric</span><span class="p">,</span><span class="n">gsea_gmt_parser</span><span class="p">,</span><span class="n">gsea_cls_parser</span>
@@ -144,7 +143,7 @@
 <span class="kn">import</span> <span class="nn">glob</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
 
-<div class="viewcode-block" id="replot"><a class="viewcode-back" href="../../run.html#gseapy.replot">[docs]</a><span class="k">def</span> <span class="nf">replot</span><span class="p">(</span><span class="n">indir</span><span class="p">,</span><span class="n">outdir</span><span class="p">,</span><span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mf">6.5</span><span class="p">,</span><span class="mi">6</span><span class="p">],</span><span class="n">format</span><span class="o">=</span><span class="s">&#39;pdf&#39;</span><span class="p">,</span><span class="n">min_size</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">max_size</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,):</span>
+<div class="viewcode-block" id="replot"><a class="viewcode-back" href="../../run.html#gseapy.replot">[docs]</a><span class="k">def</span> <span class="nf">replot</span><span class="p">(</span><span class="n">indir</span><span class="p">,</span><span class="n">outdir</span><span class="p">,</span><span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mf">6.5</span><span class="p">,</span><span class="mi">6</span><span class="p">],</span><span class="n">format</span><span class="o">=</span><span class="s1">&#39;pdf&#39;</span><span class="p">,</span><span class="n">min_size</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">max_size</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;The main fuction to run inside python.</span>
 <span class="sd">          </span>
 <span class="sd">    :param indir: GSEA desktop results directory. In the sub folder, you must contain edb file foder.    </span>
@@ -157,62 +156,49 @@
 <span class="sd">                     you will not encourage to use min_size, or max_size argment in :func:`replot` function.</span>
 <span class="sd">                     Because gmt file has already been filter.</span>
 <span class="sd">    </span>
-<span class="sd">    :return: Generate new figures with seleted figure format. Default: &#39;pdf&#39;.</span>
-<span class="sd">    </span>
-<span class="sd">    </span>
+<span class="sd">    :return: Generate new figures with seleted figure format. Default: &#39;pdf&#39;.   </span>
 <span class="sd">    &quot;&quot;&quot;</span>
         
-    <span class="c">#parsing files.......</span>
-    
-    <span class="n">results_path</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">indir</span><span class="o">+</span><span class="s">&#39;*/edb/results.edb&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">rank_path</span> <span class="o">=</span>  <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">indir</span><span class="o">+</span><span class="s">&#39;*/edb/*.rnk&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">gene_set_path</span> <span class="o">=</span>  <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">indir</span><span class="o">+</span><span class="s">&#39;*/edb/gene_sets.gmt&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">cls_path</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">indir</span><span class="o">+</span><span class="s">&#39;*/edb/*.cls&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">file_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">results_path</span> <span class="p">,</span><span class="n">rank_path</span><span class="p">,</span><span class="n">gene_set_path</span><span class="p">,</span><span class="n">cls_path</span><span class="p">]</span>  
-    
+    <span class="c1">#parsing files.......    </span>
+    <span class="n">results_path</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">indir</span><span class="o">+</span><span class="s1">&#39;*/edb/results.edb&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">rank_path</span> <span class="o">=</span>  <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">indir</span><span class="o">+</span><span class="s1">&#39;*/edb/*.rnk&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">gene_set_path</span> <span class="o">=</span>  <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">indir</span><span class="o">+</span><span class="s1">&#39;*/edb/gene_sets.gmt&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">cls_path</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">indir</span><span class="o">+</span><span class="s1">&#39;*/edb/*.cls&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">file_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">results_path</span> <span class="p">,</span><span class="n">rank_path</span><span class="p">,</span><span class="n">gene_set_path</span><span class="p">,</span><span class="n">cls_path</span><span class="p">]</span>      
     <span class="k">for</span> <span class="nb">file</span> <span class="ow">in</span> <span class="n">file_list</span><span class="p">:</span> 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="nb">file</span><span class="p">):</span>
-            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Incorrect Input </span><span class="si">%s</span><span class="s"> !&quot;</span> <span class="o">%</span><span class="nb">file</span><span class="p">)</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-
-
-   
-    
-    
-    <span class="c">#extract sample names from .cls file</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Incorrect Input </span><span class="si">%s</span><span class="s2"> !&quot;</span> <span class="o">%</span><span class="nb">file</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>    
+    <span class="c1">#extract sample names from .cls file</span>
     <span class="n">phenoPos</span><span class="p">,</span><span class="n">phenoNeg</span><span class="p">,</span><span class="n">classes</span> <span class="o">=</span> <span class="n">gsea_cls_parser</span><span class="p">(</span><span class="n">cls_path</span><span class="p">)</span>  
     
-    <span class="c">#extract each enriment term in the results.edb files and plot.</span>
-    <span class="n">database</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">results_path</span><span class="p">),</span><span class="n">features</span><span class="o">=</span><span class="s">&#39;xml&#39;</span><span class="p">)</span>
-    <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">database</span><span class="o">.</span><span class="n">findAll</span><span class="p">(</span><span class="s">&#39;DTG&#39;</span><span class="p">))</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s">&quot;mkdir &quot;</span><span class="o">+</span> <span class="n">outdir</span><span class="p">)</span>
+    <span class="c1">#extract each enriment term in the results.edb files and plot.</span>
+    <span class="n">database</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">results_path</span><span class="p">),</span><span class="n">features</span><span class="o">=</span><span class="s1">&#39;xml&#39;</span><span class="p">)</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">database</span><span class="o">.</span><span class="n">findAll</span><span class="p">(</span><span class="s1">&#39;DTG&#39;</span><span class="p">))</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;mkdir &quot;</span><span class="o">+</span> <span class="n">outdir</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">length</span><span class="p">):</span>
-        <span class="c">#extract statistical resutls from results.edb file</span>
+        <span class="c1">#extract statistical resutls from results.edb file</span>
         <span class="n">enrich_term</span><span class="p">,</span><span class="n">hit_ind</span><span class="p">,</span> <span class="n">nes</span><span class="p">,</span><span class="n">pval</span><span class="p">,</span><span class="n">fdr</span><span class="o">=</span> <span class="n">gsea_edb_parser</span><span class="p">(</span> <span class="n">results_path</span><span class="p">,</span><span class="n">index</span><span class="o">=</span><span class="n">idx</span><span class="p">)</span>
         
-        <span class="c">#obtain rank_metrics</span>
+        <span class="c1">#obtain rank_metrics</span>
         <span class="n">rank_metric</span> <span class="o">=</span> <span class="n">gsea_rank_metric</span><span class="p">(</span><span class="n">rank_path</span><span class="p">)</span>
-        <span class="n">correl_vector</span> <span class="o">=</span>  <span class="n">rank_metric</span><span class="p">[</span><span class="s">&#39;rank&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">correl_vector</span> <span class="o">=</span>  <span class="n">rank_metric</span><span class="p">[</span><span class="s1">&#39;rank&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
 
-        <span class="c">#obtain gene sets</span>
+        <span class="c1">#obtain gene sets</span>
         <span class="n">gene_set_dict</span> <span class="o">=</span> <span class="n">gsea_gmt_parser</span><span class="p">(</span><span class="n">gene_set_path</span><span class="p">,</span><span class="n">min_size</span> <span class="o">=</span> <span class="n">min_size</span><span class="p">,</span> <span class="n">max_size</span> <span class="o">=</span> <span class="n">max_size</span><span class="p">)</span>
         <span class="n">gene_set</span> <span class="o">=</span> <span class="n">gene_set_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">enrich_term</span><span class="p">)</span>
-        <span class="n">gene_list</span> <span class="o">=</span> <span class="n">rank_metric</span><span class="p">[</span><span class="s">&#39;gene_name&#39;</span><span class="p">]</span>
+        <span class="n">gene_list</span> <span class="o">=</span> <span class="n">rank_metric</span><span class="p">[</span><span class="s1">&#39;gene_name&#39;</span><span class="p">]</span>
 
-        <span class="c">#calculate enrichment score    </span>
+        <span class="c1">#calculate enrichment score    </span>
         <span class="n">RES</span> <span class="o">=</span> <span class="n">enrichment_score</span><span class="p">(</span><span class="n">gene_list</span> <span class="o">=</span> <span class="n">gene_list</span><span class="p">,</span> <span class="n">gene_set</span> <span class="o">=</span> <span class="n">gene_set</span><span class="p">,</span> <span class="n">weighted_score_type</span> <span class="o">=</span> <span class="n">weight</span><span class="p">,</span> 
                                <span class="n">correl_vector</span> <span class="o">=</span> <span class="n">correl_vector</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span>
 
-
-
-        <span class="c">#plotting</span>
+        <span class="c1">#plotting</span>
         <span class="n">fig</span> <span class="o">=</span> <span class="n">gsea_plot</span><span class="p">(</span><span class="n">rank_metric</span><span class="p">,</span> <span class="n">enrich_term</span><span class="p">,</span><span class="n">hit_ind</span><span class="p">,</span><span class="n">nes</span><span class="p">,</span><span class="n">pval</span><span class="p">,</span>
-                        <span class="n">fdr</span><span class="p">,</span> <span class="n">RES</span><span class="p">,</span> <span class="n">phenoPos</span><span class="p">,</span><span class="n">phenoNeg</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
-    
-        <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s">&#39;{a}/{b}.{c}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">outdir</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="n">enrich_term</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="n">format</span><span class="p">),</span><span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,)</span>
+                        <span class="n">fdr</span><span class="p">,</span> <span class="n">RES</span><span class="p">,</span> <span class="n">phenoPos</span><span class="p">,</span><span class="n">phenoNeg</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>    
+        <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;{a}/{b}.{c}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">outdir</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="n">enrich_term</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="n">format</span><span class="p">),</span><span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,)</span>
         
-    <span class="k">print</span><span class="p">(</span><span class="s">&quot;Congratulations! Your plots have been reproduced successfully!&quot;</span><span class="p">)</span>
-
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Congratulations! Your plots have been reproduced successfully!&quot;</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="run"><a class="viewcode-back" href="../../run.html#gseapy.run">[docs]</a><span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">gene_sets</span><span class="p">,</span><span class="n">cls</span><span class="p">,</span> <span class="n">min_size</span><span class="p">,</span> <span class="n">max_size</span><span class="p">,</span> <span class="n">permutation_n</span><span class="p">,</span> <span class="n">weighted_score_type</span><span class="p">,</span>
         <span class="n">permutation_type</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span><span class="n">ascending</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span><span class="n">figsize</span><span class="p">,</span><span class="n">format</span><span class="p">):</span>
@@ -242,53 +228,53 @@
 <span class="sd">                 |  genes: gene names from the data set}</span>
 <span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">assert</span> <span class="n">permutation_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;phenotype&quot;</span><span class="p">,</span> <span class="s">&quot;gene_set&quot;</span><span class="p">]</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-    
+    <span class="k">assert</span> <span class="n">permutation_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;phenotype&quot;</span><span class="p">,</span> <span class="s2">&quot;gene_set&quot;</span><span class="p">]</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>    
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>   
-    <span class="k">assert</span> <span class="n">permutation_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;phenotype&quot;</span><span class="p">,</span> <span class="s">&quot;gene_set&quot;</span><span class="p">]</span>
-    <span class="c">#select correct expression genes and values.</span>
-    <span class="n">dat</span> <span class="o">=</span> <span class="n">preprocess</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
-    <span class="c"># phenotype labels parsing</span>
-    <span class="n">phenoPos</span><span class="p">,</span> <span class="n">phenoNeg</span><span class="p">,</span> <span class="n">classes</span> <span class="o">=</span> <span class="n">gsea_cls_parser</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span>
-    <span class="c">#ranking metrics calculation.    </span>
-    <span class="n">dat2</span> <span class="o">=</span> <span class="n">ranking_metric</span><span class="p">(</span><span class="n">df</span> <span class="o">=</span> <span class="n">dat</span><span class="p">,</span><span class="n">method</span><span class="o">=</span> <span class="n">method</span><span class="p">,</span><span class="n">phenoPos</span><span class="o">=</span><span class="n">phenoPos</span><span class="p">,</span><span class="n">phenoNeg</span><span class="o">=</span><span class="n">phenoNeg</span><span class="p">,</span><span class="n">classes</span> <span class="o">=</span> <span class="n">classes</span> <span class="p">,</span><span class="n">ascending</span><span class="o">=</span><span class="n">ascending</span><span class="p">)</span>
-    <span class="c">#filtering out gene sets and build gene sets dictionary</span>
-    <span class="n">gmt</span> <span class="o">=</span> <span class="n">gsea_gmt_parser</span><span class="p">(</span><span class="n">gene_sets</span><span class="p">,</span> <span class="n">min_size</span> <span class="o">=</span> <span class="n">min_size</span><span class="p">,</span> <span class="n">max_size</span> <span class="o">=</span> <span class="n">max_size</span><span class="p">,</span><span class="n">gene_list</span><span class="o">=</span><span class="n">dat2</span><span class="p">[</span><span class="s">&#39;gene_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
     
-    <span class="c">#compute ES, NES, pval, FDR, RES</span>
+    <span class="c1">#select correct expression genes and values.</span>
+    <span class="n">dat</span> <span class="o">=</span> <span class="n">preprocess</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    
+    <span class="c1"># phenotype labels parsing</span>
+    <span class="n">phenoPos</span><span class="p">,</span> <span class="n">phenoNeg</span><span class="p">,</span> <span class="n">classes</span> <span class="o">=</span> <span class="n">gsea_cls_parser</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span>
+    
+    <span class="c1">#ranking metrics calculation.    </span>
+    <span class="n">dat2</span> <span class="o">=</span> <span class="n">ranking_metric</span><span class="p">(</span><span class="n">df</span> <span class="o">=</span> <span class="n">dat</span><span class="p">,</span><span class="n">method</span><span class="o">=</span> <span class="n">method</span><span class="p">,</span><span class="n">phenoPos</span><span class="o">=</span><span class="n">phenoPos</span><span class="p">,</span><span class="n">phenoNeg</span><span class="o">=</span><span class="n">phenoNeg</span><span class="p">,</span><span class="n">classes</span> <span class="o">=</span> <span class="n">classes</span> <span class="p">,</span><span class="n">ascending</span><span class="o">=</span><span class="n">ascending</span><span class="p">)</span>
+    
+    <span class="c1">#filtering out gene sets and build gene sets dictionary</span>
+    <span class="n">gmt</span> <span class="o">=</span> <span class="n">gsea_gmt_parser</span><span class="p">(</span><span class="n">gene_sets</span><span class="p">,</span> <span class="n">min_size</span> <span class="o">=</span> <span class="n">min_size</span><span class="p">,</span> <span class="n">max_size</span> <span class="o">=</span> <span class="n">max_size</span><span class="p">,</span><span class="n">gene_list</span><span class="o">=</span><span class="n">dat2</span><span class="p">[</span><span class="s1">&#39;gene_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+    
+    <span class="c1">#compute ES, NES, pval, FDR, RES</span>
     <span class="n">results</span><span class="p">,</span><span class="n">hit_ind</span><span class="p">,</span><span class="n">rank_ES</span><span class="p">,</span> <span class="n">subsets</span> <span class="o">=</span> <span class="n">gsea_compute</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">dat</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">permutation_n</span><span class="p">,</span><span class="n">gmt</span> <span class="o">=</span> <span class="n">gmt</span><span class="p">,</span> <span class="n">weighted_score_type</span><span class="o">=</span><span class="n">weighted_score_type</span><span class="p">,</span>
                     <span class="n">permutation_type</span><span class="o">=</span><span class="n">permutation_type</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span><span class="n">phenoPos</span><span class="o">=</span><span class="n">phenoPos</span><span class="p">,</span><span class="n">phenoNeg</span><span class="o">=</span><span class="n">phenoNeg</span><span class="p">,</span><span class="n">classes</span> <span class="o">=</span> <span class="n">classes</span><span class="p">,</span><span class="n">ascending</span><span class="o">=</span><span class="n">ascending</span><span class="p">)</span>
    
-    <span class="k">print</span><span class="p">(</span><span class="s">&quot;Start to generate gseapy reports, and produce figures...&quot;</span><span class="p">,</span><span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">())</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Start to generate gseapy reports, and produce figures...&quot;</span><span class="p">,</span><span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">())</span>
     
     <span class="n">res</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">gs</span><span class="p">,</span> <span class="n">gseale</span><span class="p">,</span><span class="n">ind</span><span class="p">,</span><span class="n">RES</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">subsets</span><span class="p">,</span><span class="nb">list</span><span class="p">(</span><span class="n">results</span><span class="p">),</span><span class="n">hit_ind</span><span class="p">,</span><span class="n">rank_ES</span><span class="p">):</span>        
         <span class="n">rdict</span> <span class="o">=</span><span class="p">{}</span>       
-        <span class="n">rdict</span><span class="p">[</span><span class="s">&#39;es&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gseale</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">rdict</span><span class="p">[</span><span class="s">&#39;nes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gseale</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">rdict</span><span class="p">[</span><span class="s">&#39;pval&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gseale</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-        <span class="n">rdict</span><span class="p">[</span><span class="s">&#39;fdr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gseale</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
-        <span class="n">rdict</span><span class="p">[</span><span class="s">&#39;size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">gmt</span><span class="p">[</span><span class="n">gs</span><span class="p">])</span>
-        <span class="n">rdict</span><span class="p">[</span><span class="s">&#39;matched_size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
-        <span class="n">rdict</span><span class="p">[</span><span class="s">&#39;rank_ES&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">RES</span>
-        <span class="n">rdict</span><span class="p">[</span><span class="s">&#39;genes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">rdict</span><span class="p">[</span><span class="s1">&#39;es&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gseale</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">rdict</span><span class="p">[</span><span class="s1">&#39;nes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gseale</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">rdict</span><span class="p">[</span><span class="s1">&#39;pval&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gseale</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">rdict</span><span class="p">[</span><span class="s1">&#39;fdr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gseale</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">rdict</span><span class="p">[</span><span class="s1">&#39;size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">gmt</span><span class="p">[</span><span class="n">gs</span><span class="p">])</span>
+        <span class="n">rdict</span><span class="p">[</span><span class="s1">&#39;matched_size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+        <span class="n">rdict</span><span class="p">[</span><span class="s1">&#39;rank_ES&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">RES</span>
+        <span class="n">rdict</span><span class="p">[</span><span class="s1">&#39;genes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="n">res</span><span class="p">[</span><span class="n">gs</span><span class="p">]</span> <span class="o">=</span> <span class="n">rdict</span>           
-        <span class="c">#plotting</span>
-        
-    
-        <span class="n">fig</span> <span class="o">=</span> <span class="n">gsea_plot</span><span class="p">(</span><span class="n">rank_metric</span> <span class="o">=</span> <span class="n">dat2</span><span class="p">,</span> <span class="n">enrich_term</span> <span class="o">=</span> <span class="n">gs</span><span class="p">,</span><span class="n">hit_ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">,</span><span class="n">nes</span> <span class="o">=</span> <span class="n">gseale</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">pval</span><span class="o">=</span> <span class="n">gseale</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-                        <span class="n">fdr</span> <span class="o">=</span> <span class="n">gseale</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">RES</span> <span class="o">=</span> <span class="n">RES</span><span class="p">,</span> <span class="n">phenoPos</span> <span class="o">=</span><span class="n">phenoPos</span> <span class="p">,</span><span class="n">phenoNeg</span> <span class="o">=</span> <span class="n">phenoNeg</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
-        
-        <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s">&#39;{a}/{b}.{c}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="o">=</span> <span class="n">outdir</span><span class="p">,</span><span class="n">b</span><span class="o">=</span> <span class="n">gs</span><span class="p">,</span><span class="n">c</span><span class="o">=</span> <span class="n">format</span><span class="p">),</span><span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,)</span>
 
-    <span class="n">res_df</span> <span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">res</span><span class="p">,</span><span class="n">orient</span><span class="o">=</span><span class="s">&#39;index&#39;</span><span class="p">)</span>
-    <span class="n">res_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#39;Enrich_terms&#39;</span>
-    <span class="n">res_df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s">&#39;fdr&#39;</span><span class="p">,</span><span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-    <span class="n">res_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s">&#39;{a}/{b}.csv&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="o">=</span> <span class="n">outdir</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="s">&#39;gseapy_reports&#39;</span> <span class="p">))</span>
+        <span class="c1">#plotting</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">gsea_plot</span><span class="p">(</span><span class="n">rank_metric</span> <span class="o">=</span> <span class="n">dat2</span><span class="p">,</span> <span class="n">enrich_term</span> <span class="o">=</span> <span class="n">gs</span><span class="p">,</span><span class="n">hit_ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">,</span><span class="n">nes</span> <span class="o">=</span> <span class="n">gseale</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">pval</span><span class="o">=</span> <span class="n">gseale</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                        <span class="n">fdr</span> <span class="o">=</span> <span class="n">gseale</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">RES</span> <span class="o">=</span> <span class="n">RES</span><span class="p">,</span> <span class="n">phenoPos</span> <span class="o">=</span><span class="n">phenoPos</span> <span class="p">,</span><span class="n">phenoNeg</span> <span class="o">=</span> <span class="n">phenoNeg</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>        
+        <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;{a}/{b}.{c}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="o">=</span> <span class="n">outdir</span><span class="p">,</span><span class="n">b</span><span class="o">=</span> <span class="n">gs</span><span class="p">,</span><span class="n">c</span><span class="o">=</span> <span class="n">format</span><span class="p">),</span><span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,)</span>
+
+    <span class="n">res_df</span> <span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">res</span><span class="p">,</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">)</span>
+    <span class="n">res_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Enrich_terms&#39;</span>
+    <span class="n">res_df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;fdr&#39;</span><span class="p">,</span><span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">res_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;{a}/{b}.csv&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="o">=</span> <span class="n">outdir</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="s1">&#39;gseapy_reports&#39;</span> <span class="p">))</span>
     
     <span class="k">print</span><span class="p">(</span><span class="n">res_df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
-    <span class="k">print</span><span class="p">(</span><span class="s">&quot;...Congratulations. GSEAPY run successfully!!!</span><span class="se">\n</span><span class="s">...The Job is done...........................&quot;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;...Congratulations. GSEAPY run successfully!!!</span><span class="se">\n</span><span class="s2">...The Job is done...........................&quot;</span><span class="p">)</span>
     
     <span class="k">return</span> <span class="n">res_df</span>
 </pre></div></div>

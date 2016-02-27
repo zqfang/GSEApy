@@ -31,7 +31,7 @@
 
   
     <link rel="top" title="GSEAPY 0.3.1 documentation" href="index.html"/>
-        <link rel="next" title="A Protocol to use GSEAPY" href="gseapy_tutorial.html"/>
+        <link rel="next" title="A Protocol to walk through GSEAPY" href="gseapy_tutorial.html"/>
         <link rel="prev" title="Welcome to GSEAPY’s documentation!" href="introduction.html"/> 
 
   
@@ -97,7 +97,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-gseapy.parser">Parsers</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="gseapy_tutorial.html">A Protocol to use GSEAPY</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gseapy_tutorial.html">A Protocol to walk through GSEAPY</a></li>
 </ul>
 
             
@@ -161,7 +161,7 @@ $ gseapy call -d gsea_data.txt -c test.cls -g gene_sets.gmt
 </pre></div>
 </div>
 <p>The input files&#8217; formats are identical to <code class="docutils literal"><span class="pre">GSEA</span></code> desktop version.
-See <a class="reference internal" href="gseapy_tutorial.html#example"><span>A Protocol to use GSEAPY</span></a> for details, or, see <a class="reference external" href="http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page">GSEA</a> documentation for more information.</p>
+See <a class="reference internal" href="gseapy_tutorial.html#example"><span>A Protocol to walk through GSEAPY</span></a> for details, or, see <a class="reference external" href="http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page">GSEA</a> documentation for more information.</p>
 </div>
 <div class="section" id="run-gseapy-inside-python">
 <h2>Run gseapy inside python:<a class="headerlink" href="#run-gseapy-inside-python" title="Permalink to this headline">¶</a></h2>
@@ -172,18 +172,18 @@ See <a class="reference internal" href="gseapy_tutorial.html#example"><span>A Pr
 <ul class="simple">
 <li>The <a class="reference internal" href="#gseapy.replot" title="gseapy.replot"><code class="xref py py-func docutils literal"><span class="pre">replot()</span></code></a> function to reproduce GSEA desktop results</li>
 </ul>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># An example to reproduce figures using replot module.</span>
-<span class="n">gseapy</span><span class="o">.</span><span class="n">replot</span><span class="p">(</span><span class="s">&#39;gsea&#39;</span><span class="p">,</span><span class="s">&#39;gseapy_out&#39;</span><span class="p">)</span>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="c1"># An example to reproduce figures using replot module.</span>
+<span class="n">gseapy</span><span class="o">.</span><span class="n">replot</span><span class="p">(</span><span class="s1">&#39;gsea&#39;</span><span class="p">,</span><span class="s1">&#39;gseapy_out&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <ul class="simple">
 <li>The <a class="reference internal" href="#gseapy.run" title="gseapy.run"><code class="xref py py-func docutils literal"><span class="pre">run()</span></code></a> function to computing es,nes,pval,fdr,and generate plots <em>de novo</em>.</li>
 </ul>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="c"># An example to calculate es, nes, pval,fdrs, and produce figures using gseapy.</span>
+<div class="code python highlight-python"><div class="highlight"><pre><span class="c1"># An example to calculate es, nes, pval,fdrs, and produce figures using gseapy.</span>
 <span class="n">gseapy</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">gsea_dat</span><span class="o">.</span><span class="n">txt</span><span class="p">,</span> <span class="n">gene_sets</span> <span class="o">=</span> <span class="n">gene_sets</span><span class="o">.</span><span class="n">gmt</span><span class="p">,</span><span class="n">cls</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">cls</span><span class="p">,</span>
           <span class="n">min_size</span> <span class="o">=</span> <span class="mi">15</span><span class="p">,</span> <span class="n">max_size</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">permutation_n</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">weighted_score_type</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-          <span class="n">permutation_type</span> <span class="o">=</span> <span class="s">&#39;gene_set&#39;</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="s">&#39;log2_ratio_of_classes&#39;</span><span class="p">,</span><span class="n">ascending</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
-          <span class="n">outdir</span><span class="o">=</span><span class="s">&#39;gseapy_out&#39;</span><span class="p">,</span><span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mf">6.5</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span><span class="n">format</span> <span class="o">=</span> <span class="s">&#39;png&#39;</span><span class="p">)</span>
+          <span class="n">permutation_type</span> <span class="o">=</span> <span class="s1">&#39;gene_set&#39;</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;log2_ratio_of_classes&#39;</span><span class="p">,</span><span class="n">ascending</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+          <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;gseapy_out&#39;</span><span class="p">,</span><span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mf">6.5</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span><span class="n">format</span> <span class="o">=</span> <span class="s1">&#39;png&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -366,8 +366,7 @@ where dictionary key is a gene set and values are:</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>gene_list</strong> &#8211; The ordered gene list 
-gene_name_list, rank_metric[&#8216;gene_name&#8217;]</li>
+<li><strong>gene_list</strong> &#8211; The ordered gene list gene_name_list, rank_metric[&#8216;gene_name&#8217;]</li>
 <li><strong>gene_set</strong> &#8211; gene_sets in gmt file, please used gsea_gmt_parser to get gene_set.</li>
 <li><strong>weighted_score_type</strong> &#8211; It&#8217;s indentical to gsea&#8217;s weighted_score method. weighting by the correlation 
 is a very reasonable choice that allows significant gene sets with less than perfect coherence. 
@@ -426,7 +425,7 @@ the gene list. Or rankings, rank_metric[&#8216;rank&#8217;].values</li>
 <dl class="function">
 <dt id="gseapy.algorithm.gsea_pval">
 <code class="descclassname">gseapy.algorithm.</code><code class="descname">gsea_pval</code><span class="sig-paren">(</span><em>es</em>, <em>esnull</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#gsea_pval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.gsea_pval" title="Permalink to this definition">¶</a></dt>
-<dd><p>compute nominal p-value.</p>
+<dd><p>Compute nominal p-value.</p>
 <p>From article (PNAS):
 estimate nominal p-value for S from esnull by using the positive
 or negative portion of the distribution corresponding to the sign 
@@ -436,7 +435,7 @@ of the observed ES(S).</p>
 <dl class="function">
 <dt id="gseapy.algorithm.gsea_significance">
 <code class="descclassname">gseapy.algorithm.</code><code class="descname">gsea_significance</code><span class="sig-paren">(</span><em>enrichment_scores</em>, <em>enrichment_nulls</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#gsea_significance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.gsea_significance" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computing p-vals, normalized ES, FDRs.</p>
+<dd><p>Compute p-vals, normalized ES, FDRs.</p>
 </dd></dl>
 
 <dl class="function">
@@ -493,7 +492,7 @@ correlation in second column.</p>
 
 <dl class="function">
 <dt id="gseapy.algorithm.shuffle_list">
-<code class="descclassname">gseapy.algorithm.</code><code class="descname">shuffle_list</code><span class="sig-paren">(</span><em>gene_list</em>, <em>rand=&lt;random.Random object at 0x00000181FB630108&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#shuffle_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.shuffle_list" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.algorithm.</code><code class="descname">shuffle_list</code><span class="sig-paren">(</span><em>gene_list</em>, <em>rand=&lt;random.Random object at 0x00000264779EA758&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#shuffle_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.shuffle_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a copy of a shuffled input gene_list.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -606,7 +605,7 @@ do this for you.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="gseapy_tutorial.html" class="btn btn-neutral float-right" title="A Protocol to use GSEAPY" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="gseapy_tutorial.html" class="btn btn-neutral float-right" title="A Protocol to walk through GSEAPY" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="introduction.html" class="btn btn-neutral" title="Welcome to GSEAPY’s documentation!" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>

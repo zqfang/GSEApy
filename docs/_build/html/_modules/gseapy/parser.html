@@ -129,7 +129,7 @@
            <div itemprop="articleBody">
             
   <h1>Source code for gseapy.parser</h1><div class="highlight"><pre>
-<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
 <span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span>
@@ -148,51 +148,40 @@
     
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span> <span class="k">as</span> <span class="n">cls</span><span class="p">:</span>
         <span class="nb">file</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
-    <span class="n">sample_name</span> <span class="o">=</span> <span class="nb">file</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">)</span>        
-    <span class="n">classes</span> <span class="o">=</span> <span class="nb">file</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">)</span>
+    <span class="n">sample_name</span> <span class="o">=</span> <span class="nb">file</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>        
+    <span class="n">classes</span> <span class="o">=</span> <span class="nb">file</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
     <span class="n">phenoPos</span> <span class="o">=</span> <span class="n">sample_name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">phenoNeg</span> <span class="o">=</span> <span class="n">sample_name</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
     
     <span class="k">return</span> <span class="n">phenoPos</span><span class="p">,</span><span class="n">phenoNeg</span><span class="p">,</span><span class="n">classes</span>
-
-
 </div>
 <div class="viewcode-block" id="gsea_edb_parser"><a class="viewcode-back" href="../../run.html#gseapy.parser.gsea_edb_parser">[docs]</a><span class="k">def</span> <span class="nf">gsea_edb_parser</span><span class="p">(</span><span class="n">results_path</span><span class="p">,</span><span class="n">index</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,):</span>
     <span class="sd">&quot;&quot;&quot;Parse results.edb file stored under **edb** file folder.            </span>
 
 <span class="sd">    :param results_path: the .results file where lcoated inside edb folder.</span>
-<span class="sd">    :param index: gene_set index of gmt database, used for iterating items.</span>
-<span class="sd">   </span>
+<span class="sd">    :param index: gene_set index of gmt database, used for iterating items.   </span>
 <span class="sd">    :return: enrichment_term, hit_index,nes, pval, fdr.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     
-    <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">results_path</span><span class="p">),</span><span class="n">features</span><span class="o">=</span><span class="s">&#39;xml&#39;</span><span class="p">)</span>
-    <span class="n">tag</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">findAll</span><span class="p">(</span><span class="s">&#39;DTG&#39;</span><span class="p">)</span>
-   
+    <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">results_path</span><span class="p">),</span><span class="n">features</span><span class="o">=</span><span class="s1">&#39;xml&#39;</span><span class="p">)</span>
+    <span class="n">tag</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">findAll</span><span class="p">(</span><span class="s1">&#39;DTG&#39;</span><span class="p">)</span>   
     <span class="n">term</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">tag</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
-    <span class="c"># dict_keys([&#39;RANKED_LIST&#39;, &#39;GENESET&#39;, &#39;FWER&#39;, &#39;ES_PROFILE&#39;, </span>
-    <span class="c"># &#39;HIT_INDICES&#39;, &#39;ES&#39;, &#39;NES&#39;, &#39;TEMPLATE&#39;, &#39;RND_ES&#39;, &#39;RANK_SCORE_AT_ES&#39;,</span>
-    <span class="c">#&#39;NP&#39;, &#39;RANK_AT_ES&#39;, &#39;FDR&#39;])</span>
-      
-    
-    <span class="n">enrich_term</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;GENESET&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;#&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">es_profile</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;ES_PROFILE&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">)</span>
-    <span class="c">#rank_es = term.get(&#39;RND_ES&#39;).split(&quot; &quot;)</span>
-    <span class="n">hit_ind</span> <span class="o">=</span><span class="n">term</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;HIT_INDICES&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">)</span>
-
+    <span class="c1"># dict_keys([&#39;RANKED_LIST&#39;, &#39;GENESET&#39;, &#39;FWER&#39;, &#39;ES_PROFILE&#39;, </span>
+    <span class="c1"># &#39;HIT_INDICES&#39;, &#39;ES&#39;, &#39;NES&#39;, &#39;TEMPLATE&#39;, &#39;RND_ES&#39;, &#39;RANK_SCORE_AT_ES&#39;,</span>
+    <span class="c1">#&#39;NP&#39;, &#39;RANK_AT_ES&#39;, &#39;FDR&#39;])         </span>
+    <span class="n">enrich_term</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;GENESET&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">es_profile</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ES_PROFILE&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+    <span class="c1">#rank_es = term.get(&#39;RND_ES&#39;).split(&quot; &quot;)</span>
+    <span class="n">hit_ind</span> <span class="o">=</span><span class="n">term</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;HIT_INDICES&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
     <span class="n">es_profile</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">es_profile</span> <span class="p">]</span>
     <span class="n">hit_ind</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">hit_ind</span> <span class="p">]</span>
-    <span class="c">#rank_es = [float(i) for i in rank_es ]</span>
-    <span class="n">nes</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;NES&#39;</span><span class="p">)</span>
-    <span class="n">pval</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;NP&#39;</span><span class="p">)</span>
-    <span class="n">fdr</span> <span class="o">=</span>  <span class="n">term</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;FDR&#39;</span><span class="p">)</span>
-    <span class="c">#fwer = term.get(&#39;FWER&#39;)</span>
-   
-   
-    
-    <span class="c">#index_range = len(tag)-1</span>
-    <span class="k">print</span><span class="p">(</span><span class="s">&quot;Enriched Gene set is: &quot;</span><span class="p">,</span> <span class="n">enrich_term</span><span class="p">)</span>
+    <span class="c1">#rank_es = [float(i) for i in rank_es ]</span>
+    <span class="n">nes</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;NES&#39;</span><span class="p">)</span>
+    <span class="n">pval</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;NP&#39;</span><span class="p">)</span>
+    <span class="n">fdr</span> <span class="o">=</span>  <span class="n">term</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;FDR&#39;</span><span class="p">)</span>
+    <span class="c1">#fwer = term.get(&#39;FWER&#39;)   </span>
+    <span class="c1">#index_range = len(tag)-1</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Enriched Gene set is: &quot;</span><span class="p">,</span> <span class="n">enrich_term</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">enrich_term</span><span class="p">,</span><span class="n">hit_ind</span><span class="p">,</span> <span class="n">nes</span><span class="p">,</span><span class="n">pval</span><span class="p">,</span><span class="n">fdr</span>
     
 </div>
@@ -206,10 +195,9 @@
 <span class="sd">                 </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
-    
     <span class="n">rank_metric</span> <span class="o">=</span> <span class="n">read_table</span><span class="p">(</span><span class="n">rnk</span><span class="p">,</span><span class="n">header</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
-    <span class="n">rank_metric</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;gene_name&#39;</span><span class="p">,</span><span class="s">&#39;rank&#39;</span><span class="p">]</span>
-    <span class="n">rank_metric</span><span class="p">[</span><span class="s">&#39;rank2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rank_metric</span><span class="p">[</span><span class="s">&#39;rank&#39;</span><span class="p">]</span>
+    <span class="n">rank_metric</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;gene_name&#39;</span><span class="p">,</span><span class="s1">&#39;rank&#39;</span><span class="p">]</span>
+    <span class="n">rank_metric</span><span class="p">[</span><span class="s1">&#39;rank2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rank_metric</span><span class="p">[</span><span class="s1">&#39;rank&#39;</span><span class="p">]</span>
      
     <span class="k">return</span> <span class="n">rank_metric</span>
     </div>
@@ -226,24 +214,19 @@
 <span class="sd">    do this for you.</span>
 <span class="sd">            </span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
-    
+       
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">gmt</span><span class="p">)</span> <span class="k">as</span> <span class="n">genesets</span><span class="p">:</span>
-        <span class="n">genesets_dict</span> <span class="o">=</span> <span class="p">{</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>  
-                          <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span> 
-                          <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">genesets</span><span class="o">.</span><span class="n">readlines</span><span class="p">()}</span>
-    
-    
-    <span class="c">#filtering dict</span>
+        <span class="n">genesets_dict</span> <span class="o">=</span> <span class="p">{</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>  
+                          <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span> 
+                          <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">genesets</span><span class="o">.</span><span class="n">readlines</span><span class="p">()}</span>    
+    <span class="c1">#filtering dict</span>
     <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span> <span class="p">:</span>
         <span class="n">genesets_filter</span> <span class="o">=</span>  <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">genesets_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">min_size</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">max_size</span><span class="p">}</span>
     <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
         <span class="n">genesets_filter</span> <span class="o">=</span>  <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">genesets_dict</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">min_size</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">max_size</span><span class="p">}</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">print</span><span class="p">(</span><span class="s">&quot;system failure. Please Provide correct input files&quot;</span><span class="p">)</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-    
-    
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;system failure. Please Provide correct input files&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>    
     <span class="k">if</span> <span class="n">gene_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">subsets</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">genesets_filter</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>             
         <span class="k">for</span> <span class="n">subset</span> <span class="ow">in</span> <span class="n">subsets</span><span class="p">:</span>            
@@ -251,10 +234,10 @@
             <span class="n">tag_len</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">tag_indicator</span><span class="p">)</span>      
             <span class="k">if</span> <span class="n">tag_len</span> <span class="o">&lt;=</span> <span class="n">min_size</span> <span class="ow">and</span> <span class="n">tag_len</span> <span class="o">&gt;=</span> <span class="n">max_size</span><span class="p">:</span>                    
                 <span class="k">del</span> <span class="n">genesets_filter</span><span class="p">[</span><span class="n">subset</span><span class="p">]</span>
-     <span class="c">#some_dict = {key: value for key, value in some_dict.items() if value != value_to_remove}</span>
-     <span class="c">#use np.intersect1d() may be faster???    </span>
+     <span class="c1">#some_dict = {key: value for key, value in some_dict.items() if value != value_to_remove}</span>
+     <span class="c1">#use np.intersect1d() may be faster???    </span>
     <span class="n">filsets_num</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">genesets_dict</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">genesets_filter</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="s">&quot;{a} gene_sets have been filtered out for max_size = {b} and min_size = {c}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">filsets_num</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="n">max_size</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="n">min_size</span><span class="p">))</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;{a} gene_sets have been filtered out for max_size = {b} and min_size = {c}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">filsets_num</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="n">max_size</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="n">min_size</span><span class="p">))</span>
           
     <span class="k">return</span> <span class="n">genesets_filter</span>
     </div>
