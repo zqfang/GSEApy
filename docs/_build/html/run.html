@@ -163,8 +163,7 @@ $ gseapy call -d gsea_data.txt -c test.cls -g gene_sets.gmt
 </div>
 <p>The <code class="docutils literal"><span class="pre">prerank</span></code> module input expects a pre-ranked gene list dataset with correlation values, which in .rnk format,
 and gene_sets file in gmt format.  <code class="docutils literal"><span class="pre">prerank</span></code> module is an API to <cite>GSEA</cite> pre-rank tools.</p>
-<div class="code bash highlight-python"><div class="highlight"><pre><span></span><span class="c1"># using prerank tool</span>
-<span class="n">gseapy</span><span class="o">.</span><span class="n">prerank</span><span class="p">(</span><span class="n">rnk</span><span class="o">=</span><span class="n">gsea_data</span><span class="o">.</span><span class="n">rnk</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span><span class="n">gene_sets</span><span class="o">.</span><span class="n">gmt</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
+<div class="code bash highlight-python"><div class="highlight"><pre><span></span>$ gseapy prerank -r gsea_data.rnk -g gene_sets.gmt -o test
 </pre></div>
 </div>
 <p>The input files&#8217; formats are identical to <code class="docutils literal"><span class="pre">GSEA</span></code> desktop version.
@@ -462,7 +461,7 @@ where dictionary key is a gene set and values are:</p>
 <span id="algorithms"></span><h2>Algorithms<a class="headerlink" href="#module-gseapy.algorithm" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="gseapy.algorithm.enrichment_score">
-<code class="descclassname">gseapy.algorithm.</code><code class="descname">enrichment_score</code><span class="sig-paren">(</span><em>gene_list</em>, <em>gene_set</em>, <em>weighted_score_type=1</em>, <em>correl_vector=None</em>, <em>esnull=False</em>, <em>rs=&lt;mtrand.RandomState object at 0x0000016C3C046B70&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#enrichment_score"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.enrichment_score" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.algorithm.</code><code class="descname">enrichment_score</code><span class="sig-paren">(</span><em>gene_list</em>, <em>gene_set</em>, <em>weighted_score_type=1</em>, <em>correl_vector=None</em>, <em>esnull=False</em>, <em>rs=&lt;mtrand.RandomState object at 0x000002CB056782B0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#enrichment_score"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.enrichment_score" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is the most important function of GSEAPY. It has the same algorithm with GSEA.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -600,7 +599,7 @@ correlation in second column.</p>
 
 <dl class="function">
 <dt id="gseapy.algorithm.shuffle_list">
-<code class="descclassname">gseapy.algorithm.</code><code class="descname">shuffle_list</code><span class="sig-paren">(</span><em>gene_list</em>, <em>rand=&lt;mtrand.RandomState object at 0x0000016C3C046BA8&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#shuffle_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.shuffle_list" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.algorithm.</code><code class="descname">shuffle_list</code><span class="sig-paren">(</span><em>gene_list</em>, <em>rand=&lt;mtrand.RandomState object at 0x000002CB056782E8&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#shuffle_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.shuffle_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a copy of a shuffled input gene_list.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />

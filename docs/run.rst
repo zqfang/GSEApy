@@ -39,8 +39,7 @@ and gene_sets file in gmt format.  ``prerank`` module is an API to `GSEA` pre-ra
 
 .. code:: bash
 
-    # using prerank tool
-    gseapy.prerank(rnk=gsea_data.rnk, gene_sets=gene_sets.gmt, outdir='test')
+    $ gseapy prerank -r gsea_data.rnk -g gene_sets.gmt -o test
 
 
 The input files' formats are identical to ``GSEA`` desktop version. 
