@@ -191,7 +191,7 @@ At least 3 files are required to run gseapy.
     gseapy call -d gsea_data.txt -c test.cls -g gene_sets.gmt -o gseapy_out
 
 
-Use ``prerank``, or :func:`prerank`
+Use ``prerank`` Command, or :func:`prerank`
 ===============================================================
 
 If you would like to use a pre-ranked gene list to run GSEAPY, ``prerank`` module expects
@@ -204,21 +204,20 @@ After this, you can start to run gseapy.
  
     gseapy prerank -r gsea_data.rnk -g gene_sets.gmt -o test
 
-Or run inside python
 
-..code:: python
+Or run inside python.
+
+
+
+.. code:: python
 
     import gseapy
-    # using prerank tool
     gseapy.prerank(rnk=gsea_data.rnk, gene_sets=gene_sets.gmt, outdir='test')
 
 
 
 
-
-
-
-Use ``replot``, or :func:`replot`
+Use ``replot`` Command, or :func:`replot`
 ===============================================================
 
 You may also want to use :func:`replot()` to reproduce ``GSEA`` desktop plots.

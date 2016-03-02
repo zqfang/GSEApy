@@ -92,8 +92,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#command-line">5. Command line</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#use-prerank-or-prerank">Use <code class="docutils literal"><span class="pre">prerank</span></code>, or <code class="docutils literal"><span class="pre">prerank()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#use-replot-or-replot">Use <code class="docutils literal"><span class="pre">replot</span></code>, or <code class="docutils literal"><span class="pre">replot()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#use-prerank-command-or-prerank">Use <code class="docutils literal"><span class="pre">prerank</span></code> Command, or <code class="docutils literal"><span class="pre">prerank()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#use-replot-command-or-replot">Use <code class="docutils literal"><span class="pre">replot</span></code> Command, or <code class="docutils literal"><span class="pre">replot()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -283,8 +283,8 @@ TS-SPECIFIC Arid3a_used     5430407P10RIK   AFAP1L1 AHNAK   ANXA2   ANXA3   ANXA
 </div>
 </div>
 </div>
-<div class="section" id="use-prerank-or-prerank">
-<h2>Use <code class="docutils literal"><span class="pre">prerank</span></code>, or <code class="xref py py-func docutils literal"><span class="pre">prerank()</span></code><a class="headerlink" href="#use-prerank-or-prerank" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="use-prerank-command-or-prerank">
+<h2>Use <code class="docutils literal"><span class="pre">prerank</span></code> Command, or <code class="xref py py-func docutils literal"><span class="pre">prerank()</span></code><a class="headerlink" href="#use-prerank-command-or-prerank" title="Permalink to this headline">¶</a></h2>
 <p>If you would like to use a pre-ranked gene list to run GSEAPY, <code class="docutils literal"><span class="pre">prerank</span></code> module expects
 a pre-ranked gene list dataset with correlation values, which in .rnk format,
 and gene_sets file in gmt format.  <code class="docutils literal"><span class="pre">prerank</span></code> module the same API to <cite>GSEA</cite> pre-rank tools.</p>
@@ -292,15 +292,14 @@ and gene_sets file in gmt format.  <code class="docutils literal"><span class="p
 <div class="code bash highlight-python"><div class="highlight"><pre><span></span>gseapy prerank -r gsea_data.rnk -g gene_sets.gmt -o test
 </pre></div>
 </div>
-<p>Or run inside python</p>
-<p>..code:: python</p>
-<blockquote>
-<div>import gseapy
-# using prerank tool
-gseapy.prerank(rnk=gsea_data.rnk, gene_sets=gene_sets.gmt, outdir=&#8217;test&#8217;)</div></blockquote>
+<p>Or run inside python.</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gseapy</span>
+<span class="n">gseapy</span><span class="o">.</span><span class="n">prerank</span><span class="p">(</span><span class="n">rnk</span><span class="o">=</span><span class="n">gsea_data</span><span class="o">.</span><span class="n">rnk</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span><span class="n">gene_sets</span><span class="o">.</span><span class="n">gmt</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
+</pre></div>
 </div>
-<div class="section" id="use-replot-or-replot">
-<h2>Use <code class="docutils literal"><span class="pre">replot</span></code>, or <code class="xref py py-func docutils literal"><span class="pre">replot()</span></code><a class="headerlink" href="#use-replot-or-replot" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="use-replot-command-or-replot">
+<h2>Use <code class="docutils literal"><span class="pre">replot</span></code> Command, or <code class="xref py py-func docutils literal"><span class="pre">replot()</span></code><a class="headerlink" href="#use-replot-command-or-replot" title="Permalink to this headline">¶</a></h2>
 <p>You may also want to use <code class="xref py py-func docutils literal"><span class="pre">replot()</span></code> to reproduce <code class="docutils literal"><span class="pre">GSEA</span></code> desktop plots.</p>
 <p>The only input of <code class="xref py py-func docutils literal"><span class="pre">replot()</span></code> is the directory of <code class="docutils literal"><span class="pre">GSEA</span></code> desktop output.</p>
 <p>The input directory(e.g. gsea), must contained <strong>edb</strong> folder, gseapy need 4 data files

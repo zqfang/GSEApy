@@ -286,7 +286,7 @@ The ``call`` Command
                             'log2_ratio_of_classes'
       -a, --ascending       Rank metric sorting order. If the -a flag was chosen,
                             then ascending equals to True. Default: False.
-       -s , --seed           Number of random seed. Default: 2000   
+       -s , --seed           Number of random seed. Default: None   
 
 
 The ``prerank`` Command
@@ -330,6 +330,6 @@ The ``prerank`` Command
                             genes. Choose from {0, 1, 1.5, 2},default: 1
       -a, --ascending       Rank metric sorting order. If the -a flag was chosen,
                             then ascending equals to True. Default: False.
-      -s , --seed           Number of random seed. Default: 2000
+      -s , --seed           Number of random seed. Default: None
     
    
