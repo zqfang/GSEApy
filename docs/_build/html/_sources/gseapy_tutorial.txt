@@ -16,7 +16,7 @@ In order to run gseapy successfully, install gseapy use pip.
 
 
 
-Use ``call`` command, or :func:`run`
+Use ``call`` command, or :func:`call`
 ================================================
 
 Follow the steps blow.
