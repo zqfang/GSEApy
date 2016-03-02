@@ -180,7 +180,7 @@ At least 3 files are required to run gseapy.
 .. code:: python
 
     import gseapy
-    gseapy.run(data = gsea_data.txt, cls = gsea.cls, gmt = gene_sets.gmt, outdir = 'gseapy_out')
+    gseapy.call(data=gsea_data.txt, cls=gsea.cls, gmt=gene_sets.gmt, outdir='gseapy_out')
 
 
 5. Command line 
@@ -189,6 +189,32 @@ At least 3 files are required to run gseapy.
 .. code:: bash
 
     gseapy call -d gsea_data.txt -c test.cls -g gene_sets.gmt -o gseapy_out
+
+
+Use ``prerank``, or :func:`prerank`
+===============================================================
+
+If you would like to use a pre-ranked gene list to run GSEAPY, ``prerank`` module expects
+a pre-ranked gene list dataset with correlation values, which in .rnk format,
+and gene_sets file in gmt format.  ``prerank`` module the same API to `GSEA` pre-rank tools.
+
+After this, you can start to run gseapy.
+
+.. code:: bash
+ 
+    gseapy prerank -r gsea_data.rnk -g gene_sets.gmt -o test
+
+Or run inside python
+
+..code:: python
+
+    import gseapy
+    # using prerank tool
+    gseapy.prerank(rnk=gsea_data.rnk, gene_sets=gene_sets.gmt, outdir='test')
+
+
+
+
 
 
 
@@ -214,7 +240,7 @@ After this, you can start to run gseapy.
 .. code:: python
 
     import gseapy
-    gseapy.replot(indir ='gsea',outdir = 'gseapy_out')
+    gseapy.replot(indir ='gsea', outdir = 'gseapy_out')
 
 
 If you prefer to run in command line, it's more simple.

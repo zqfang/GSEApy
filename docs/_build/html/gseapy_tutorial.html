@@ -92,6 +92,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#command-line">5. Command line</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#use-prerank-or-prerank">Use <code class="docutils literal"><span class="pre">prerank</span></code>, or <code class="docutils literal"><span class="pre">prerank()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#use-replot-or-replot">Use <code class="docutils literal"><span class="pre">replot</span></code>, or <code class="docutils literal"><span class="pre">replot()</span></code></a></li>
 </ul>
 </li>
@@ -144,7 +145,7 @@
 <p>As a biological reseacher, I like protocols, so as other reseachers, too.</p>
 <p>Here is an short tutorial to walk you through gseapy.</p>
 <p>In order to run gseapy successfully, install gseapy use pip.</p>
-<div class="code bash highlight-python"><div class="highlight"><pre>pip install gseapy
+<div class="code bash highlight-python"><div class="highlight"><pre><span></span>pip install gseapy
 </pre></div>
 </div>
 <div class="section" id="use-call-command-or-run">
@@ -157,7 +158,7 @@
 <p><strong>RNA-seq,ChIP-seq, Microarry data</strong> are all supported.</p>
 <p>Here is to see what the structure of expression table looks like, you don&#8217;t have to run
 commands below:</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<div class="code python highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s1">&#39;./test/gsea_data.txt&#39;</span><span class="p">)</span>
 <span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
@@ -234,11 +235,11 @@ commands below:</p>
 <h3>2. An cls file is also expected.<a class="headerlink" href="#an-cls-file-is-also-expected" title="Permalink to this headline">¶</a></h3>
 <p>This file is used to specify column attributes in step 1, just like <code class="docutils literal"><span class="pre">GSEA</span></code> asked.</p>
 <p>An example of cls file looks like below.</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;gsea/edb/C1OE.cls&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cls</span><span class="p">:</span>
+<div class="code python highlight-python"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;gsea/edb/C1OE.cls&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cls</span><span class="p">:</span>
     <span class="k">print</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre>6 2 1
+<div class="highlight-python"><div class="highlight"><pre><span></span>6 2 1
 # C1OE Vector
 C1OE C1OE C1OE Vector Vector Vector
 </pre></div>
@@ -255,11 +256,11 @@ C1OE C1OE C1OE Vector Vector Vector
 <p>If you would like to use you own gene_sets.gmts files, build such a file use excel,
 and then rename to gene_sets.gmt.</p>
 <p>An example of gmt file looks like below:</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;gsea/edb/gene_sets.gmt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">gmt</span><span class="p">:</span>
+<div class="code python highlight-python"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;gsea/edb/gene_sets.gmt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">gmt</span><span class="p">:</span>
     <span class="k">print</span><span class="p">(</span><span class="n">gmt</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre>ES-SPECIFIC Arid3a_used     ACTA1   CALML4  CORO1A  DHX58   DPYS    EGR1    ESRRB   GLI2    GPX2    HCK     INHBB
+<div class="highlight-python"><div class="highlight"><pre><span></span>ES-SPECIFIC Arid3a_used     ACTA1   CALML4  CORO1A  DHX58   DPYS    EGR1    ESRRB   GLI2    GPX2    HCK     INHBB
 HDAC-UNIQUE     Arid3a_used 1700017B05RIK   8430427H17RIK   ABCA3   ANKRD44 ARL4A   BNC2    CLDN3
 XEN-SPECIFIC        Arid3a_used     1110036O03RIK   A130022J15RIK   B2M     B3GALNT1        CBX4    CITED1  CLU     CTSH    CYP26A1
 GATA-SPECIFIC       Arid3a_used     1200009I06RIK   5430407P10RIK   BAIAP2L1        BMP8B   CITED1  CLDN3   COBLL1  CORO1A  CRYAB   CTDSPL  DKKL1
@@ -270,17 +271,33 @@ TS-SPECIFIC Arid3a_used     5430407P10RIK   AFAP1L1 AHNAK   ANXA2   ANXA3   ANXA
 <div class="section" id="run-gseapy-inside-python">
 <h3>4. Run gseapy inside python<a class="headerlink" href="#run-gseapy-inside-python" title="Permalink to this headline">¶</a></h3>
 <p>At least 3 files are required to run gseapy.</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">gseapy</span>
-<span class="n">gseapy</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">gsea_data</span><span class="o">.</span><span class="n">txt</span><span class="p">,</span> <span class="n">cls</span> <span class="o">=</span> <span class="n">gsea</span><span class="o">.</span><span class="n">cls</span><span class="p">,</span> <span class="n">gmt</span> <span class="o">=</span> <span class="n">gene_sets</span><span class="o">.</span><span class="n">gmt</span><span class="p">,</span> <span class="n">outdir</span> <span class="o">=</span> <span class="s1">&#39;gseapy_out&#39;</span><span class="p">)</span>
+<div class="code python highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gseapy</span>
+<span class="n">gseapy</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gsea_data</span><span class="o">.</span><span class="n">txt</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">gsea</span><span class="o">.</span><span class="n">cls</span><span class="p">,</span> <span class="n">gmt</span><span class="o">=</span><span class="n">gene_sets</span><span class="o">.</span><span class="n">gmt</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;gseapy_out&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="command-line">
 <h3>5. Command line<a class="headerlink" href="#command-line" title="Permalink to this headline">¶</a></h3>
-<div class="code bash highlight-python"><div class="highlight"><pre>gseapy call -d gsea_data.txt -c test.cls -g gene_sets.gmt -o gseapy_out
+<div class="code bash highlight-python"><div class="highlight"><pre><span></span>gseapy call -d gsea_data.txt -c test.cls -g gene_sets.gmt -o gseapy_out
 </pre></div>
 </div>
 </div>
+</div>
+<div class="section" id="use-prerank-or-prerank">
+<h2>Use <code class="docutils literal"><span class="pre">prerank</span></code>, or <code class="xref py py-func docutils literal"><span class="pre">prerank()</span></code><a class="headerlink" href="#use-prerank-or-prerank" title="Permalink to this headline">¶</a></h2>
+<p>If you would like to use a pre-ranked gene list to run GSEAPY, <code class="docutils literal"><span class="pre">prerank</span></code> module expects
+a pre-ranked gene list dataset with correlation values, which in .rnk format,
+and gene_sets file in gmt format.  <code class="docutils literal"><span class="pre">prerank</span></code> module the same API to <cite>GSEA</cite> pre-rank tools.</p>
+<p>After this, you can start to run gseapy.</p>
+<div class="code bash highlight-python"><div class="highlight"><pre><span></span>gseapy prerank -r gsea_data.rnk -g gene_sets.gmt -o test
+</pre></div>
+</div>
+<p>Or run inside python</p>
+<p>..code:: python</p>
+<blockquote>
+<div>import gseapy
+# using prerank tool
+gseapy.prerank(rnk=gsea_data.rnk, gene_sets=gene_sets.gmt, outdir=&#8217;test&#8217;)</div></blockquote>
 </div>
 <div class="section" id="use-replot-or-replot">
 <h2>Use <code class="docutils literal"><span class="pre">replot</span></code>, or <code class="xref py py-func docutils literal"><span class="pre">replot()</span></code><a class="headerlink" href="#use-replot-or-replot" title="Permalink to this headline">¶</a></h2>
@@ -288,7 +305,7 @@ TS-SPECIFIC Arid3a_used     5430407P10RIK   AFAP1L1 AHNAK   ANXA2   ANXA3   ANXA
 <p>The only input of <code class="xref py py-func docutils literal"><span class="pre">replot()</span></code> is the directory of <code class="docutils literal"><span class="pre">GSEA</span></code> desktop output.</p>
 <p>The input directory(e.g. gsea), must contained <strong>edb</strong> folder, gseapy need 4 data files
 inside edb folder.The gsea document tree looks like this:</p>
-<div class="highlight-python"><div class="highlight"><pre>gsea
+<div class="highlight-python"><div class="highlight"><pre><span></span>gsea
 └─edb
     └─test.cls
     └─gene_sets.gmt
@@ -297,12 +314,12 @@ inside edb folder.The gsea document tree looks like this:</p>
 </pre></div>
 </div>
 <p>After this, you can start to run gseapy.</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">gseapy</span>
-<span class="n">gseapy</span><span class="o">.</span><span class="n">replot</span><span class="p">(</span><span class="n">indir</span> <span class="o">=</span><span class="s1">&#39;gsea&#39;</span><span class="p">,</span><span class="n">outdir</span> <span class="o">=</span> <span class="s1">&#39;gseapy_out&#39;</span><span class="p">)</span>
+<div class="code python highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gseapy</span>
+<span class="n">gseapy</span><span class="o">.</span><span class="n">replot</span><span class="p">(</span><span class="n">indir</span> <span class="o">=</span><span class="s1">&#39;gsea&#39;</span><span class="p">,</span> <span class="n">outdir</span> <span class="o">=</span> <span class="s1">&#39;gseapy_out&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>If you prefer to run in command line, it&#8217;s more simple.</p>
-<div class="code bash highlight-python"><div class="highlight"><pre>gseapy replot -i gsea -o gseapy_out
+<div class="code bash highlight-python"><div class="highlight"><pre><span></span>gseapy replot -i gsea -o gseapy_out
 </pre></div>
 </div>
 <div class="line-block">

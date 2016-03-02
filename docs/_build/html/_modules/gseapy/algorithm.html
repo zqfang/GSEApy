@@ -129,7 +129,7 @@
            <div itemprop="articleBody">
             
   <h1>Source code for gseapy.algorithm</h1><div class="highlight"><pre>
-<span class="c1"># -*- coding: utf-8 -*-</span>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span><span class="n">division</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="nb">reduce</span>
@@ -137,20 +137,20 @@
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">random</span>
+
 
 <div class="viewcode-block" id="preprocess"><a class="viewcode-back" href="../../run.html#gseapy.algorithm.preprocess">[docs]</a><span class="k">def</span> <span class="nf">preprocess</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;pre-processed the data frame.new filtering methods will be implement here.</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
     
-    <span class="n">df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="c1">#drop duplicate gene_names.    </span>
-    <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-    <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span><span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>                     <span class="c1">#drop rows with all NAs</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="c1">#drop duplicate gene_names.    </span>
+    <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>                     <span class="c1">#drop rows with all NAs</span>
     <span class="n">df2</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;float64&#39;</span><span class="p">])</span>  <span class="o">+</span> <span class="mf">0.0001</span> <span class="c1">#select numbers in DataFrame      </span>
     
     <span class="k">return</span> <span class="n">df2</span>
 </div>
-<div class="viewcode-block" id="enrichment_score"><a class="viewcode-back" href="../../run.html#gseapy.algorithm.enrichment_score">[docs]</a><span class="k">def</span> <span class="nf">enrichment_score</span><span class="p">(</span><span class="n">gene_list</span><span class="p">,</span> <span class="n">gene_set</span><span class="p">,</span> <span class="n">weighted_score_type</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">correl_vector</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="enrichment_score"><a class="viewcode-back" href="../../run.html#gseapy.algorithm.enrichment_score">[docs]</a><span class="k">def</span> <span class="nf">enrichment_score</span><span class="p">(</span><span class="n">gene_list</span><span class="p">,</span> <span class="n">gene_set</span><span class="p">,</span> <span class="n">weighted_score_type</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">correl_vector</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">esnull</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">rs</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">()):</span>
     <span class="sd">&quot;&quot;&quot;This is the most important function of GSEAPY. It has the same algorithm with GSEA.</span>
 <span class="sd">    </span>
 <span class="sd">    :param gene_list:       The ordered gene list gene_name_list, rank_metric[&#39;gene_name&#39;]</span>
@@ -166,6 +166,9 @@
 <span class="sd">                             </span>
 <span class="sd">    :param correl_vector:   A vector with the correlations (e.g. signal to noise scores) corresponding to the genes in </span>
 <span class="sd">                            the gene list. Or rankings, rank_metric[&#39;rank&#39;].values</span>
+<span class="sd">    :param esnull:          Only used this paramter when computing esnuall for statistial testing. set the esnull value</span>
+<span class="sd">                            equal to the permutation number.</span>
+<span class="sd">    :param rs:              Random state for initialize gene list shuffling. Default: np.random.RandomState(seed=None)</span>
 <span class="sd">       </span>
 <span class="sd">    :return:</span>
 <span class="sd">    </span>
@@ -180,8 +183,9 @@
     <span class="c1">#Test whether each element of a 1-D array is also present in a second array</span>
     <span class="c1">#It&#39;s more intuitived here than orginal enrichment_score source code.</span>
     <span class="c1">#use .astype to covert bool to intergers  </span>
-    <span class="n">tag_indicator</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">gene_list</span><span class="p">,</span><span class="n">gene_set</span><span class="p">,</span><span class="n">assume_unique</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>  <span class="c1"># notice that the sign is 0 (no tag) or 1 (tag)</span>
+    <span class="n">tag_indicator</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">gene_list</span><span class="p">,</span> <span class="n">gene_set</span><span class="p">,</span> <span class="n">assume_unique</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>  <span class="c1"># notice that the sign is 0 (no tag) or 1 (tag)</span>
     <span class="n">no_tag_indicator</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">tag_indicator</span>
+    <span class="c1">#get indices of tag_indicator</span>
     <span class="n">hit_ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="n">tag_indicator</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
       
     <span class="c1">#compute ES score, the code below is identical to gsea enrichment_score method.</span>
@@ -192,18 +196,29 @@
         <span class="n">correl_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">correl_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">correl_vector</span><span class="o">**</span><span class="n">weighted_score_type</span><span class="p">)</span>
+        
     <span class="n">sum_correl_tag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">correl_vector</span><span class="p">[</span><span class="n">tag_indicator</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)])</span>
     <span class="n">norm_tag</span> <span class="o">=</span>  <span class="mf">1.0</span><span class="o">/</span><span class="n">sum_correl_tag</span>
     <span class="n">norm_no_tag</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="n">Nmiss</span>
-    <span class="n">RES</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">tag_indicator</span> <span class="o">*</span> <span class="n">correl_vector</span> <span class="o">*</span> <span class="n">norm_tag</span> <span class="o">-</span> <span class="n">no_tag_indicator</span> <span class="o">*</span> <span class="n">norm_no_tag</span><span class="p">)</span>      
-    <span class="n">max_ES</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">RES</span><span class="p">)</span>
-    <span class="n">min_ES</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">RES</span><span class="p">)</span>
     
-    <span class="c1">#print(&quot;The length of ES is&quot;, len(RES))    </span>
-    <span class="k">return</span> <span class="n">max_ES</span> <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">max_ES</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">abs</span><span class="p">(</span><span class="n">min_ES</span><span class="p">)</span> <span class="k">else</span> <span class="n">min_ES</span><span class="p">,</span> <span class="n">hit_ind</span><span class="p">,</span> <span class="n">RES</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="c1"># if used for compute esnull, set esnull equal to permutation number, e.g. 1000</span>
+    <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span>   
+    <span class="k">if</span> <span class="n">esnull</span><span class="p">:</span>
+        <span class="n">tag_indicator</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">tag_indicator</span><span class="p">,</span> <span class="n">esnull</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">esnull</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">esnull</span><span class="p">):</span>
+            <span class="n">rs</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">tag_indicator</span><span class="p">[</span><span class="n">i</span><span class="p">,:])</span>
+        <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span>
+        
+    <span class="n">RES</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">tag_indicator</span> <span class="o">*</span> <span class="n">correl_vector</span> <span class="o">*</span> <span class="n">norm_tag</span> <span class="o">-</span> <span class="n">no_tag_indicator</span> <span class="o">*</span> <span class="n">norm_no_tag</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>      
+    <span class="n">max_ES</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">RES</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+    <span class="n">min_ES</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">RES</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+    
+    <span class="n">es</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">max_ES</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">min_ES</span><span class="p">),</span> <span class="n">max_ES</span><span class="p">,</span> <span class="n">min_ES</span><span class="p">)</span>
+   
+    <span class="k">return</span> <span class="n">es</span><span class="p">,</span> <span class="n">hit_ind</span><span class="p">,</span> <span class="n">RES</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
  
 </div>
-<div class="viewcode-block" id="shuffle_list"><a class="viewcode-back" href="../../run.html#gseapy.algorithm.shuffle_list">[docs]</a><span class="k">def</span> <span class="nf">shuffle_list</span><span class="p">(</span><span class="n">gene_list</span><span class="p">,</span> <span class="n">rand</span><span class="o">=</span><span class="n">random</span><span class="o">.</span><span class="n">Random</span><span class="p">(</span><span class="mi">0</span><span class="p">)):</span>
+<div class="viewcode-block" id="shuffle_list"><a class="viewcode-back" href="../../run.html#gseapy.algorithm.shuffle_list">[docs]</a><span class="k">def</span> <span class="nf">shuffle_list</span><span class="p">(</span><span class="n">gene_list</span><span class="p">,</span> <span class="n">rand</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="mi">0</span><span class="p">)):</span>
     <span class="sd">&quot;&quot;&quot;Returns a copy of a shuffled input gene_list.</span>
 <span class="sd">    </span>
 <span class="sd">    :param gene_list: rank_metric[&#39;gene_name&#39;].values</span>
@@ -216,7 +231,7 @@
 
     <span class="k">return</span> <span class="n">l2</span>        
              </div>
-<div class="viewcode-block" id="ranking_metric"><a class="viewcode-back" href="../../run.html#gseapy.algorithm.ranking_metric">[docs]</a><span class="k">def</span> <span class="nf">ranking_metric</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span><span class="n">phenoPos</span><span class="p">,</span><span class="n">phenoNeg</span><span class="p">,</span><span class="n">classes</span><span class="p">,</span><span class="n">ascending</span><span class="p">):</span>
+<div class="viewcode-block" id="ranking_metric"><a class="viewcode-back" href="../../run.html#gseapy.algorithm.ranking_metric">[docs]</a><span class="k">def</span> <span class="nf">ranking_metric</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">phenoPos</span><span class="p">,</span> <span class="n">phenoNeg</span><span class="p">,</span> <span class="n">classes</span><span class="p">,</span> <span class="n">ascending</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;The main function to rank an expression table.</span>
 <span class="sd">    </span>
 <span class="sd">   :param df:      gene_expression DataFrame.    </span>
@@ -277,17 +292,18 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Please provide correct method name!!!&quot;</span><span class="p">)</span>        
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
-    <span class="n">sr</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="n">ascending</span><span class="p">,</span><span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">sr</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="n">ascending</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
     <span class="n">df3</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">to_frame</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
     <span class="n">df3</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;gene_name&#39;</span><span class="p">,</span><span class="s1">&#39;rank&#39;</span><span class="p">]</span>
     <span class="n">df3</span><span class="p">[</span><span class="s1">&#39;rank2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df3</span><span class="p">[</span><span class="s1">&#39;rank&#39;</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">df3</span>
             </div>
-<div class="viewcode-block" id="gsea_compute"><a class="viewcode-back" href="../../run.html#gseapy.algorithm.gsea_compute">[docs]</a><span class="k">def</span> <span class="nf">gsea_compute</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">gmt</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">weighted_score_type</span><span class="p">,</span><span class="n">permutation_type</span><span class="p">,</span><span class="n">method</span><span class="p">,</span><span class="n">phenoPos</span><span class="p">,</span><span class="n">phenoNeg</span><span class="p">,</span><span class="n">classes</span><span class="p">,</span><span class="n">ascending</span><span class="p">):</span>
+<div class="viewcode-block" id="gsea_compute"><a class="viewcode-back" href="../../run.html#gseapy.algorithm.gsea_compute">[docs]</a><span class="k">def</span> <span class="nf">gsea_compute</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">gmt</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">weighted_score_type</span><span class="p">,</span> <span class="n">permutation_type</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span>
+                 <span class="n">phenoPos</span><span class="p">,</span> <span class="n">phenoNeg</span><span class="p">,</span> <span class="n">classes</span><span class="p">,</span> <span class="n">ascending</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">prerank</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;compute enrichment scores and enrichment nulls. </span>
 <span class="sd">    </span>
-<span class="sd">    :param data: prepreocessed expression dataframe.</span>
+<span class="sd">    :param data: prepreocessed expression dataframe or a pre-ranked file if prerank=True.</span>
 <span class="sd">    :param gmt: all gene sets in .gmt file. need to call gsea_gmt_parser() to get results. </span>
 <span class="sd">    :param n: permutation number. default: 1000.</span>
 <span class="sd">    :param method: ranking_metric method. see above.</span>
@@ -296,7 +312,9 @@
 <span class="sd">    :param classes: a list of phenotype labels, to specify which column of dataframe belongs to what catogry of phenotype.</span>
 <span class="sd">    :param weighted_score_type: default:1</span>
 <span class="sd">    :param ascending: sorting order of rankings. Default: False.</span>
-<span class="sd">    </span>
+<span class="sd">    :param seed: random seed. Default: 2000</span>
+<span class="sd">    :param prerank: if true, this function will compute using pre-ranked file passed by parameter data.</span>
+
 <span class="sd">    :return: </span>
 <span class="sd">      zipped results of es, nes, pval, fdr. Used for generating reportes and plotting.</span>
 <span class="sd">    </span>
@@ -309,7 +327,10 @@
     <span class="n">w</span> <span class="o">=</span> <span class="n">weighted_score_type</span>
     <span class="n">subsets</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">gmt</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>    
     <span class="n">dat</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="n">r2</span> <span class="o">=</span> <span class="n">ranking_metric</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">dat</span><span class="p">,</span><span class="n">method</span> <span class="o">=</span> <span class="n">method</span><span class="p">,</span><span class="n">phenoPos</span><span class="o">=</span><span class="n">phenoPos</span><span class="p">,</span><span class="n">phenoNeg</span><span class="o">=</span><span class="n">phenoNeg</span><span class="p">,</span><span class="n">classes</span><span class="o">=</span><span class="n">classes</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span> <span class="n">ascending</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">prerank</span><span class="p">:</span>
+        <span class="n">r2</span> <span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">r2</span> <span class="o">=</span> <span class="n">ranking_metric</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">dat</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">phenoPos</span><span class="o">=</span><span class="n">phenoPos</span><span class="p">,</span> <span class="n">phenoNeg</span><span class="o">=</span><span class="n">phenoNeg</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="n">classes</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="n">ascending</span><span class="p">)</span>
     <span class="n">ranking</span><span class="o">=</span><span class="n">r2</span><span class="p">[</span><span class="s1">&#39;rank&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
     <span class="n">gene_list</span><span class="o">=</span><span class="n">r2</span><span class="p">[</span><span class="s1">&#39;gene_name&#39;</span><span class="p">]</span>
         
@@ -318,8 +339,8 @@
     <span class="n">rank_ES</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">hit_ind</span> <span class="o">=</span> <span class="p">[]</span>    
     <span class="k">for</span> <span class="n">subset</span> <span class="ow">in</span> <span class="n">subsets</span><span class="p">:</span>
-        <span class="n">es</span><span class="p">,</span><span class="n">ind</span><span class="p">,</span><span class="n">RES</span> <span class="o">=</span> <span class="n">enrichment_score</span><span class="p">(</span><span class="n">gene_list</span> <span class="o">=</span> <span class="n">gene_list</span><span class="p">,</span> <span class="n">gene_set</span><span class="o">=</span><span class="n">gmt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subset</span><span class="p">),</span> 
-                              <span class="n">weighted_score_type</span> <span class="o">=</span> <span class="n">w</span><span class="p">,</span> <span class="n">correl_vector</span> <span class="o">=</span> <span class="n">ranking</span><span class="p">)</span>
+        <span class="n">es</span><span class="p">,</span><span class="n">ind</span><span class="p">,</span><span class="n">RES</span> <span class="o">=</span> <span class="n">enrichment_score</span><span class="p">(</span><span class="n">gene_list</span><span class="o">=</span><span class="n">gene_list</span><span class="p">,</span> <span class="n">gene_set</span><span class="o">=</span><span class="n">gmt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subset</span><span class="p">),</span> 
+                              <span class="n">weighted_score_type</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">correl_vector</span><span class="o">=</span><span class="n">ranking</span><span class="p">)</span>
         <span class="n">enrichment_scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">es</span><span class="p">)</span>
         <span class="n">rank_ES</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">RES</span><span class="p">)</span>
         <span class="n">hit_ind</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
@@ -328,28 +349,37 @@
     <span class="k">print</span><span class="p">(</span><span class="s2">&quot;......This step might take a while to run. Be patient.&quot;</span><span class="p">)</span>
 
     <span class="n">enrichment_nulls</span> <span class="o">=</span> <span class="p">[</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">subsets</span><span class="p">))</span> <span class="p">]</span>
+    <span class="n">rs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
     
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">permutation_type</span> <span class="o">==</span> <span class="s2">&quot;phenotype&quot;</span><span class="p">:</span>
-            <span class="n">dat2</span> <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">T</span>   
-            <span class="n">dat2</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="c1">#permutation classes</span>
-            <span class="n">r2</span> <span class="o">=</span> <span class="n">ranking_metric</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">dat2</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">method</span> <span class="o">=</span> <span class="n">method</span><span class="p">,</span><span class="n">phenoPos</span><span class="o">=</span><span class="n">phenoPos</span><span class="p">,</span><span class="n">phenoNeg</span><span class="o">=</span><span class="n">phenoNeg</span><span class="p">,</span><span class="n">classes</span><span class="o">=</span><span class="n">classes</span><span class="p">,</span><span class="n">ascending</span><span class="o">=</span> <span class="n">ascending</span> <span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">permutation_type</span> <span class="o">==</span> <span class="s2">&quot;phenotype&quot;</span><span class="p">:</span>
+        
+        <span class="n">dat2</span> <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">T</span> 
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">dat2</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">rs</span><span class="o">.</span><span class="n">shuffle</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="c1">#permutation classes</span>
+            <span class="n">r2</span> <span class="o">=</span> <span class="n">ranking_metric</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">dat2</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">phenoPos</span><span class="o">=</span><span class="n">phenoPos</span><span class="p">,</span> <span class="n">phenoNeg</span><span class="o">=</span><span class="n">phenoNeg</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="n">classes</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="n">ascending</span> <span class="p">)</span>
             <span class="n">ranking2</span><span class="o">=</span><span class="n">r2</span><span class="p">[</span><span class="s1">&#39;rank&#39;</span><span class="p">]</span>
             <span class="n">gene_list2</span><span class="o">=</span><span class="n">r2</span><span class="p">[</span><span class="s1">&#39;gene_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-        <span class="k">else</span><span class="p">:</span>
-            
-            <span class="c1">#gene_list.apply(np.random.shuffle,axis=0) #permutation genes</span>
-            <span class="c1">#r2 = ranking_metric(df=dat,method = method, classes=classes,ascending= ascending)</span>
-            <span class="n">gene_list2</span> <span class="o">=</span> <span class="n">shuffle_list</span><span class="p">(</span><span class="n">gene_list</span><span class="p">,</span><span class="n">random</span><span class="o">.</span><span class="n">Random</span><span class="p">(</span><span class="mi">2000</span><span class="o">+</span><span class="n">i</span><span class="p">))</span>
-            <span class="n">ranking2</span><span class="o">=</span><span class="n">ranking</span>
-            <span class="c1">#gene_list2=gene_list</span>
-            
+        
+    
+        <span class="c1">#for i in range(n):    </span>
+        <span class="c1">#gene_list.apply(np.random.shuffle,axis=0) #permutation genes</span>
+        <span class="c1">#r2 = ranking_metric(df=dat,method = method, classes=classes,ascending= ascending)</span>
+        <span class="c1">#gene_list2 = shuffle_list(gene_list, rs)</span>
+        <span class="c1">#ranking2=ranking           </span>
+            <span class="k">for</span> <span class="n">si</span><span class="p">,</span><span class="n">subset</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">subsets</span><span class="p">):</span>
+                <span class="n">esn</span> <span class="o">=</span> <span class="n">enrichment_score</span><span class="p">(</span><span class="n">gene_list</span><span class="o">=</span><span class="n">gene_list2</span><span class="p">,</span> <span class="n">gene_set</span><span class="o">=</span><span class="n">gmt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subset</span><span class="p">),</span> 
+                                       <span class="n">weighted_score_type</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">correl_vector</span><span class="o">=</span><span class="n">ranking2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> 
+                <span class="n">enrichment_nulls</span><span class="p">[</span><span class="n">si</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">esn</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>                       
         <span class="k">for</span> <span class="n">si</span><span class="p">,</span><span class="n">subset</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">subsets</span><span class="p">):</span>
-            <span class="n">esn</span> <span class="o">=</span> <span class="n">enrichment_score</span><span class="p">(</span><span class="n">gene_list</span> <span class="o">=</span> <span class="n">gene_list2</span><span class="p">,</span> <span class="n">gene_set</span><span class="o">=</span> <span class="n">gmt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subset</span><span class="p">),</span> 
-                              <span class="n">weighted_score_type</span> <span class="o">=</span> <span class="n">w</span><span class="p">,</span> <span class="n">correl_vector</span> <span class="o">=</span> <span class="n">ranking2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>                        
-            <span class="n">enrichment_nulls</span><span class="p">[</span><span class="n">si</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">esn</span><span class="p">)</span>
+            <span class="n">esn</span> <span class="o">=</span> <span class="n">enrichment_score</span><span class="p">(</span><span class="n">gene_list</span><span class="o">=</span><span class="n">gene_list</span><span class="p">,</span> <span class="n">gene_set</span><span class="o">=</span><span class="n">gmt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subset</span><span class="p">),</span> <span class="n">weighted_score_type</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> 
+                                   <span class="n">correl_vector</span><span class="o">=</span><span class="n">ranking</span><span class="p">,</span> <span class="n">esnull</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">rs</span><span class="o">=</span><span class="n">rs</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>                                         
+            <span class="n">enrichment_nulls</span><span class="p">[</span><span class="n">si</span><span class="p">]</span> <span class="o">=</span> <span class="n">esn</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>   
 
     <span class="k">return</span> <span class="n">gsea_significance</span><span class="p">(</span><span class="n">enrichment_scores</span><span class="p">,</span> <span class="n">enrichment_nulls</span><span class="p">),</span><span class="n">hit_ind</span><span class="p">,</span><span class="n">rank_ES</span><span class="p">,</span> <span class="n">subsets</span>
+
+
 </div>
 <div class="viewcode-block" id="gsea_pval"><a class="viewcode-back" href="../../run.html#gseapy.algorithm.gsea_pval">[docs]</a><span class="k">def</span> <span class="nf">gsea_pval</span><span class="p">(</span><span class="n">es</span><span class="p">,</span> <span class="n">esnull</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Compute nominal p-value.</span>

@@ -90,6 +90,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#gseapy-subcommands">1. gseapy subcommands</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#the-replot-command">2. The <code class="docutils literal"><span class="pre">replot</span></code> Command</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#the-call-command">3. The <code class="docutils literal"><span class="pre">call</span></code> Command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-prerank-command">4. The <code class="docutils literal"><span class="pre">prerank</span></code> Command</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-apis">Module APIs</a></li>
@@ -147,7 +148,7 @@
 <div class="section" id="for-command-line-usage">
 <h2>For command line usage:<a class="headerlink" href="#for-command-line-usage" title="Permalink to this headline">¶</a></h2>
 <p>The <code class="docutils literal"><span class="pre">replot</span></code> module reproduce GSEA desktop version results. The only input for GSEAPY is the location to GSEA results.</p>
-<div class="code bash highlight-python"><div class="highlight"><pre>$ gseapy replot -i path/to/GSEA_resutls_folder -o gesapy_out
+<div class="code bash highlight-python"><div class="highlight"><pre><span></span>$ gseapy replot -i path/to/GSEA_resutls_folder -o gesapy_out
 
 # An example to reproduce figures using replot module.
 $ gseapy replot -i ./gsea -o gseapy_out
@@ -156,8 +157,14 @@ $ gseapy replot -i ./gsea -o gseapy_out
 <p>The <code class="docutils literal"><span class="pre">call</span></code> module produce GSEAPY results.</p>
 <p>The input requries a txt file( FPKM, Expected Counts, TPM, et.al), a cls file,
 and gene_sets file in gmt format.</p>
-<div class="code bash highlight-python"><div class="highlight"><pre># an example to compute using gseapy call module
+<div class="code bash highlight-python"><div class="highlight"><pre><span></span># an example to compute using gseapy call module
 $ gseapy call -d gsea_data.txt -c test.cls -g gene_sets.gmt
+</pre></div>
+</div>
+<p>The <code class="docutils literal"><span class="pre">prerank</span></code> module input expects a pre-ranked gene list dataset with correlation values, which in .rnk format,
+and gene_sets file in gmt format.  <code class="docutils literal"><span class="pre">prerank</span></code> module is an API to <cite>GSEA</cite> pre-rank tools.</p>
+<div class="code bash highlight-python"><div class="highlight"><pre><span></span><span class="c1"># using prerank tool</span>
+<span class="n">gseapy</span><span class="o">.</span><span class="n">prerank</span><span class="p">(</span><span class="n">rnk</span><span class="o">=</span><span class="n">gsea_data</span><span class="o">.</span><span class="n">rnk</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span><span class="n">gene_sets</span><span class="o">.</span><span class="n">gmt</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The input files&#8217; formats are identical to <code class="docutils literal"><span class="pre">GSEA</span></code> desktop version.
@@ -165,25 +172,34 @@ See <a class="reference internal" href="gseapy_tutorial.html#example"><span>A Pr
 </div>
 <div class="section" id="run-gseapy-inside-python">
 <h2>Run gseapy inside python:<a class="headerlink" href="#run-gseapy-inside-python" title="Permalink to this headline">¶</a></h2>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">gseapy</span>
+<div class="code python highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gseapy</span>
 </pre></div>
 </div>
 <p>This will import the following:</p>
 <ul class="simple">
 <li>The <a class="reference internal" href="#gseapy.replot" title="gseapy.replot"><code class="xref py py-func docutils literal"><span class="pre">replot()</span></code></a> function to reproduce GSEA desktop results</li>
 </ul>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="c1"># An example to reproduce figures using replot module.</span>
+<div class="code python highlight-python"><div class="highlight"><pre><span></span><span class="c1"># An example to reproduce figures using replot module.</span>
 <span class="n">gseapy</span><span class="o">.</span><span class="n">replot</span><span class="p">(</span><span class="s1">&#39;gsea&#39;</span><span class="p">,</span><span class="s1">&#39;gseapy_out&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li>The <a class="reference internal" href="#gseapy.run" title="gseapy.run"><code class="xref py py-func docutils literal"><span class="pre">run()</span></code></a> function to computing es,nes,pval,fdr,and generate plots <em>de novo</em>.</li>
+<li>The <a class="reference internal" href="#gseapy.call" title="gseapy.call"><code class="xref py py-func docutils literal"><span class="pre">call()</span></code></a> function to computing es,nes,pval,fdr,and generate plots <em>de novo</em>.</li>
 </ul>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="c1"># An example to calculate es, nes, pval,fdrs, and produce figures using gseapy.</span>
-<span class="n">gseapy</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">gsea_dat</span><span class="o">.</span><span class="n">txt</span><span class="p">,</span> <span class="n">gene_sets</span> <span class="o">=</span> <span class="n">gene_sets</span><span class="o">.</span><span class="n">gmt</span><span class="p">,</span><span class="n">cls</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">cls</span><span class="p">,</span>
-          <span class="n">min_size</span> <span class="o">=</span> <span class="mi">15</span><span class="p">,</span> <span class="n">max_size</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">permutation_n</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">weighted_score_type</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-          <span class="n">permutation_type</span> <span class="o">=</span> <span class="s1">&#39;gene_set&#39;</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;log2_ratio_of_classes&#39;</span><span class="p">,</span><span class="n">ascending</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
-          <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;gseapy_out&#39;</span><span class="p">,</span><span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mf">6.5</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span><span class="n">format</span> <span class="o">=</span> <span class="s1">&#39;png&#39;</span><span class="p">)</span>
+<div class="code python highlight-python"><div class="highlight"><pre><span></span><span class="c1"># An example to calculate es, nes, pval,fdrs, and produce figures using gseapy.</span>
+<span class="n">gseapy</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gsea_dat</span><span class="o">.</span><span class="n">txt</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span><span class="n">gene_sets</span><span class="o">.</span><span class="n">gmt</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">test</span><span class="o">.</span><span class="n">cls</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;gseapy_out&#39;</span><span class="p">,</span>
+          <span class="n">min_size</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">permutation_n</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">weighted_score_type</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+          <span class="n">permutation_type</span> <span class="o">=</span> <span class="s1">&#39;gene_set&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;log2_ratio_of_classes&#39;</span><span class="p">,</span><span class="n">ascending</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+          <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">6.5</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>The <a class="reference internal" href="#gseapy.prerank" title="gseapy.prerank"><code class="xref py py-func docutils literal"><span class="pre">prerank()</span></code></a> function to computing es,nes,pval,fdr,and generate plots using a pre-ranked gene list.</li>
+</ul>
+<div class="code python highlight-python"><div class="highlight"><pre><span></span><span class="c1"># An example to calculate es, nes, pval,fdrs, and produce figures using gseapy.</span>
+<span class="n">gseapy</span><span class="o">.</span><span class="n">prerank</span><span class="p">(</span><span class="n">rnk</span><span class="o">=</span><span class="n">gsea_data</span><span class="o">.</span><span class="n">rnk</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span><span class="n">gene_sets</span><span class="o">.</span><span class="n">gmt</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;gseapy_out&#39;</span><span class="p">,</span> <span class="n">min_size</span> <span class="o">=</span> <span class="mi">15</span><span class="p">,</span>
+               <span class="n">max_size</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">permutation_n</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">weighted_score_type</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ascending</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+               <span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mf">6.5</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span> <span class="n">format</span> <span class="o">=</span> <span class="s1">&#39;png&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -191,7 +207,7 @@ See <a class="reference internal" href="gseapy_tutorial.html#example"><span>A Pr
 <h2>To See help information of GSEAPY<a class="headerlink" href="#to-see-help-information-of-gseapy" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="gseapy-subcommands">
 <h3>1. gseapy subcommands<a class="headerlink" href="#gseapy-subcommands" title="Permalink to this headline">¶</a></h3>
-<div class="code bash highlight-python"><div class="highlight"><pre>$ gseapy --help
+<div class="code bash highlight-python"><div class="highlight"><pre><span></span>$ gseapy --help
 
  usage: gseapy [-h] [--version] {call,replot} ...
 
@@ -211,7 +227,7 @@ See <a class="reference internal" href="gseapy_tutorial.html#example"><span>A Pr
 </div>
 <div class="section" id="the-replot-command">
 <h3>2. The <code class="docutils literal"><span class="pre">replot</span></code> Command<a class="headerlink" href="#the-replot-command" title="Permalink to this headline">¶</a></h3>
-<div class="code bash highlight-python"><div class="highlight"><pre>$ gseapy replot -h
+<div class="code bash highlight-python"><div class="highlight"><pre><span></span>$ gseapy replot -h
 
 usage: gseapy replot [-h] -i [-o] [-f] [--figsize width height] [-w]
 
@@ -235,11 +251,11 @@ usage: gseapy replot [-h] -i [-o] [-f] [--figsize width height] [-w]
 </div>
 <div class="section" id="the-call-command">
 <h3>3. The <code class="docutils literal"><span class="pre">call</span></code> Command<a class="headerlink" href="#the-call-command" title="Permalink to this headline">¶</a></h3>
-<div class="code bash highlight-python"><div class="highlight"><pre>$ gseapy call -h
+<div class="code bash highlight-python"><div class="highlight"><pre><span></span>$ gseapy call -h
 
  usage: gseapy call [-h] -i DATA -c CLS -g GMT [-p] [-o] [-f]
                      [--figsize width height] [--min-size] [--max-size] [-n]
-                     [-w] [-m] [-a]
+                     [-w] [-m] [-a] [-s]
 
  optional arguments:
    -h, --help            show this help message and exit
@@ -279,6 +295,49 @@ usage: gseapy replot [-h] -i [-o] [-f] [--figsize width height] [-w]
                          &#39;log2_ratio_of_classes&#39;
    -a, --ascending       Rank metric sorting order. If the -a flag was chosen,
                          then ascending equals to True. Default: False.
+   -s , --seed           Number of random seed. Default: 2000
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-prerank-command">
+<h3>4. The <code class="docutils literal"><span class="pre">prerank</span></code> Command<a class="headerlink" href="#the-prerank-command" title="Permalink to this headline">¶</a></h3>
+<div class="code bash highlight-python"><div class="highlight"><pre><span></span>$ gseapy prerank -h
+
+  usage: gseapy prerank       [-h] -r RNK -g GMT [-l pos neg] [-o] [-f]
+                              [--figsize width height] [--min-size]
+                              [--max-size] [-n] [-w] [-a] [-s]
+
+  optional arguments:
+    -h, --help            show this help message and exit
+
+  Input files arguments:
+    -r RNK, --rnk RNK     ranking dataset file in .rnk format.Same with GSEA.
+    -g GMT, --gmt GMT     Gene set database in GMT format. Same with GSEA.
+    -l pos neg, --label pos neg
+                          The phenotype label argument need two parameter to
+                          define. Default: [&#39;Postive&#39;,&#39;Negative&#39;]
+
+  Output arguments:
+    -o , --outdir         The GSEAPY output directory. Default: the current
+                          working directory
+    -f , --format         Format of output figures, choose from {&#39;pdf&#39;, &#39;png&#39;,
+                          &#39;jpeg&#39;, &#39;eps&#39;}. Default: &#39;pdf&#39;.
+    --figsize width height
+                          The figsize keyword argument need two parameter to
+                          define. Default: [6.5,6]
+
+  GSEA advanced arguments:
+    --min-size            Min size of input genes presented in Gene Sets.
+                          Default: 15
+    --max-size            Max size of input genes presented in Gene Sets.
+                          Default: 1000
+    -n , --permu-num      Number of random permutations. For calculating
+                          esnulls. Default: 1000
+    -w , --weight         Weighted_score of rank_metrics.For weighting input
+                          genes. Choose from {0, 1, 1.5, 2},default: 1
+    -a, --ascending       Rank metric sorting order. If the -a flag was chosen,
+                          then ascending equals to True. Default: False.
+    -s , --seed           Number of random seed. Default: 2000
 </pre></div>
 </div>
 </div>
@@ -314,8 +373,8 @@ Because gmt file has already been filter.</li>
 </dd></dl>
 
 <dl class="function">
-<dt id="gseapy.run">
-<code class="descclassname">gseapy.</code><code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/gsea.html#run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.run" title="Permalink to this definition">¶</a></dt>
+<dt id="gseapy.call">
+<code class="descclassname">gseapy.</code><code class="descname">call</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/gsea.html#call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.call" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run Gene Set Enrichment Analysis.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -333,12 +392,55 @@ Because gmt file has already been filter.</li>
 <li><strong>ascending</strong> &#8211; sorting order of rankings. Default: False.</li>
 <li><strong>outdir</strong> &#8211; results output directory.</li>
 <li><strong>figsize</strong> &#8211; matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].</li>
+<li><strong>format</strong> &#8211; matplotlib figure format. Default: pdf.</li>
+<li><strong>seed</strong> &#8211; random seed. expect an interger. Defalut:None.</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><p>Generate <code class="docutils literal"><span class="pre">GSEA</span></code> plots and store a dictionary into csv file,
 where dictionary key is a gene set and values are:</p>
-<div class="highlight-python"><div class="highlight"><pre>| {es: enrichment score, 
+<div class="highlight-python"><div class="highlight"><pre><span></span>| {es: enrichment score, 
+|  nes: normalized enrichment score, 
+|  p: P-value, 
+|  fdr: FDR, 
+|  size: gene set size,
+|  matched_size: genes matched to the data, 
+|  genes: gene names from the data set}
+</pre></div>
+</div>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="gseapy.prerank">
+<code class="descclassname">gseapy.</code><code class="descname">prerank</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/gsea.html#prerank"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.prerank" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run Gene Set Enrichment Analysis with pre-ranked correlation defined by user.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>rnk</strong> &#8211; pre-ranked correlation table, Same input with <code class="docutils literal"><span class="pre">GSEA</span></code> .rnk file.</li>
+<li><strong>gene_sets</strong> &#8211; Gene sets file. e.g. gmt files. Same input with GSEA.</li>
+<li><strong>outdir</strong> &#8211; results output directory.</li>
+<li><strong>permutation_n</strong> &#8211; Number of permutations for significance computation. Default: 1000.</li>
+<li><strong>min_size</strong> (<em>int</em>) &#8211; Minimum allowed number of genes from gene set also the data set. Defaut: 15.</li>
+<li><strong>max_size</strong> (<em>int</em>) &#8211; Maximum allowed number of genes from gene set also the data set. Defaults: 15 and 1000.</li>
+<li><strong>weighted_score_type</strong> &#8211; refer to <code class="xref py py-func docutils literal"><span class="pre">algorithm.enrichment_socre()</span></code>. Default:1.</li>
+<li><strong>ascending</strong> &#8211; sorting order of rankings. Default: False.</li>
+<li><strong>figsize</strong> &#8211; matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].</li>
+<li><strong>format</strong> &#8211; matplotlib figure format. Default: pdf.</li>
+<li><strong>seed</strong> &#8211; random seed. expect an interger. Defalut:None.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><p>Generate <code class="docutils literal"><span class="pre">GSEA</span></code> plots and store a dictionary into csv file,
+where dictionary key is a gene set and values are:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>| {es: enrichment score, 
 |  nes: normalized enrichment score, 
 |  p: P-value, 
 |  fdr: FDR, 
@@ -359,7 +461,7 @@ where dictionary key is a gene set and values are:</p>
 <span id="algorithms"></span><h2>Algorithms<a class="headerlink" href="#module-gseapy.algorithm" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="gseapy.algorithm.enrichment_score">
-<code class="descclassname">gseapy.algorithm.</code><code class="descname">enrichment_score</code><span class="sig-paren">(</span><em>gene_list</em>, <em>gene_set</em>, <em>weighted_score_type=1</em>, <em>correl_vector=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#enrichment_score"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.enrichment_score" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.algorithm.</code><code class="descname">enrichment_score</code><span class="sig-paren">(</span><em>gene_list</em>, <em>gene_set</em>, <em>weighted_score_type=1</em>, <em>correl_vector=None</em>, <em>esnull=False</em>, <em>rs=&lt;mtrand.RandomState object at 0x000001E34836AE48&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#enrichment_score"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.enrichment_score" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is the most important function of GSEAPY. It has the same algorithm with GSEA.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -378,6 +480,9 @@ Our recommendation is to use p = 1 and use other settings only if you are very e
 with the method and its behavior.</li>
 <li><strong>correl_vector</strong> &#8211; A vector with the correlations (e.g. signal to noise scores) corresponding to the genes in 
 the gene list. Or rankings, rank_metric[&#8216;rank&#8217;].values</li>
+<li><strong>esnull</strong> &#8211; Only used this paramter when computing esnuall for statistial testing. set the esnull value
+equal to the permutation number.</li>
+<li><strong>rs</strong> &#8211; Random state for initialize gene list shuffling. Default: np.random.RandomState(seed=None)</li>
 </ul>
 </td>
 </tr>
@@ -393,14 +498,14 @@ the gene list. Or rankings, rank_metric[&#8216;rank&#8217;].values</li>
 
 <dl class="function">
 <dt id="gseapy.algorithm.gsea_compute">
-<code class="descclassname">gseapy.algorithm.</code><code class="descname">gsea_compute</code><span class="sig-paren">(</span><em>data</em>, <em>gmt</em>, <em>n</em>, <em>weighted_score_type</em>, <em>permutation_type</em>, <em>method</em>, <em>phenoPos</em>, <em>phenoNeg</em>, <em>classes</em>, <em>ascending</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#gsea_compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.gsea_compute" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.algorithm.</code><code class="descname">gsea_compute</code><span class="sig-paren">(</span><em>data</em>, <em>gmt</em>, <em>n</em>, <em>weighted_score_type</em>, <em>permutation_type</em>, <em>method</em>, <em>phenoPos</em>, <em>phenoNeg</em>, <em>classes</em>, <em>ascending</em>, <em>seed=2000</em>, <em>prerank=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#gsea_compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.gsea_compute" title="Permalink to this definition">¶</a></dt>
 <dd><p>compute enrichment scores and enrichment nulls.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>data</strong> &#8211; prepreocessed expression dataframe.</li>
+<li><strong>data</strong> &#8211; prepreocessed expression dataframe or a pre-ranked file if prerank=True.</li>
 <li><strong>gmt</strong> &#8211; all gene sets in .gmt file. need to call gsea_gmt_parser() to get results.</li>
 <li><strong>n</strong> &#8211; permutation number. default: 1000.</li>
 <li><strong>method</strong> &#8211; ranking_metric method. see above.</li>
@@ -409,6 +514,8 @@ the gene list. Or rankings, rank_metric[&#8216;rank&#8217;].values</li>
 <li><strong>classes</strong> &#8211; a list of phenotype labels, to specify which column of dataframe belongs to what catogry of phenotype.</li>
 <li><strong>weighted_score_type</strong> &#8211; default:1</li>
 <li><strong>ascending</strong> &#8211; sorting order of rankings. Default: False.</li>
+<li><strong>seed</strong> &#8211; random seed. Default: 2000</li>
+<li><strong>prerank</strong> &#8211; if true, this function will compute using pre-ranked file passed by parameter data.</li>
 </ul>
 </td>
 </tr>
@@ -492,7 +599,7 @@ correlation in second column.</p>
 
 <dl class="function">
 <dt id="gseapy.algorithm.shuffle_list">
-<code class="descclassname">gseapy.algorithm.</code><code class="descname">shuffle_list</code><span class="sig-paren">(</span><em>gene_list</em>, <em>rand=&lt;random.Random object at 0x00000264779EA758&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#shuffle_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.shuffle_list" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.algorithm.</code><code class="descname">shuffle_list</code><span class="sig-paren">(</span><em>gene_list</em>, <em>rand=&lt;mtrand.RandomState object at 0x000001E3485D60B8&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#shuffle_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.shuffle_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a copy of a shuffled input gene_list.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -586,7 +693,7 @@ do this for you.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>rnk</strong> &#8211; the .rnk file where located inside the edb folder.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a pandas DataFrame with 3 columns names are:<div class="highlight-python"><div class="highlight"><pre>&#39;gene_name&#39;,&#39;rank&#39;,rank2&#39;
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a pandas DataFrame with 3 columns names are:<div class="highlight-python"><div class="highlight"><pre><span></span>&#39;gene_name&#39;,&#39;rank&#39;,rank2&#39;
 </pre></div>
 </div>
 </td>

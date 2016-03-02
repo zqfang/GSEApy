@@ -1,6 +1,7 @@
 LICENSE.txt
 MANIFEST.in
 README.rst
+requirements.txt
 setup.py
 gseapy/__init__.py
 gseapy/__main__.py
