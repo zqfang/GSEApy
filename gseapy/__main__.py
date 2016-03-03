@@ -7,7 +7,7 @@ import argparse as ap
 # Main function
 # ------------------------------------
 
-__version__ = '0.4.0'
+__version__ = '0.4.1'
 
 def main():
     """The Main function/pipeline for GSEAPY."""
@@ -29,13 +29,13 @@ def main():
         from .gsea import call
 
         call(args.data, args.gmt, args.cls, args.outdir, args.mins, args.maxs, args.n, args.weight,
-            args.type, args.method, args.ascending, args.figsize, args.format, args.seed)
+            args.type, args.method, args.ascending, args.figsize, args.format, args.graph, args.seed)
     
     elif subcommand == "prerank":
         from .gsea import prerank
         
         prerank(args.rnk, args.gmt, args.outdir, args.label[0], args.label[1], args.mins, args.maxs, args.n, args.weight,
-                args.ascending, args.figsize, args.format, args.seed)
+                args.ascending, args.figsize, args.format, args.graph, args.seed)
         
     else:
         argparser.print_help()
@@ -123,6 +123,8 @@ def add_call_parser(subparsers):
                            Default: 'log2_ratio_of_classes'")
     group_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
                            help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
+    group_opt.add_argument("-t", "--top-graph", dest = "graph", action="store", type=int, default=20, metavar='',
+                           help="Plot graphs for top sets of each phenotype. Default: 20")
     group_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=None, metavar='',
                            help="Number of random seed. Default: 2000")
 
@@ -159,6 +161,8 @@ def add_prerank_parser(subparsers):
                              help='Weighted_score of rank_metrics.For weighting input genes. Choose from {0, 1, 1.5, 2},default: 1',)
     prerank_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
                              help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
+    prerank_opt.add_argument("-t", "--top-graph", dest = "graph", action="store", type=int, default=20, metavar='',
+                             help="Plot graphs for top sets of each phenotype. Default: 20")
     prerank_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=None, metavar='',
                              help="Number of random seed. Default: 2000")
     

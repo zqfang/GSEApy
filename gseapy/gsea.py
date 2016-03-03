@@ -8,7 +8,7 @@ import time
 from .parser import gsea_edb_parser,gsea_rank_metric,gsea_gmt_parser,gsea_cls_parser
 from .algorithm import enrichment_score,gsea_compute,preprocess,ranking_metric
 from .gsea_plot import gsea_plot
-
+from collections import OrderedDict
 
 import pandas as pd
 
@@ -71,7 +71,8 @@ def replot(indir,outdir='gseapy_out', weight=1,figsize=[6.5,6], format='pdf',min
     print("Congratulations! Your plots have been reproduced successfully!")
 
 def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=1000, permutation_n=1000, weighted_score_type=1,
-        permutation_type='gene_set', method='log2_ratio_of_classes', ascending=False, figsize=[6.5,6], format='pdf', seed=None):
+        permutation_type='gene_set', method='log2_ratio_of_classes', ascending=False, figsize=[6.5,6], format='pdf', 
+        graph_num=20, seed=None):
     """ Run Gene Set Enrichment Analysis.
 
     :param data: Gene expression data table.  
@@ -86,6 +87,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=1000, 
     :param outdir: results output directory.
     :param figsize: matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
     :param format: matplotlib figure format. Default: pdf.
+    :param graph_num: plot graphs for top sets of each phenotype
     :param seed: random seed. expect an interger. Defalut:None.
     :return: Generate ``GSEA`` plots and store a dictionary into csv file,
              where dictionary key is a gene set and values are::
@@ -121,9 +123,9 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=1000, 
    
     print("Start to generate gseapy reports, and produce figures...",time.ctime())
     os.system("mkdir "+ outdir)
-    res = {}
+    res = OrderedDict()
     for gs, gseale,ind,RES in zip(subsets, list(results), hit_ind, rank_ES):        
-        rdict ={}       
+        rdict = OrderedDict()      
         rdict['es'] = gseale[0]
         rdict['nes'] = gseale[1]
         rdict['pval'] = gseale[2]
@@ -141,17 +143,19 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=1000, 
 
     res_df =pd.DataFrame.from_dict(res,orient='index')
     res_df.index.name = 'Enrich_terms'
-    res_df = res_df[['es','nes','pval','fdr','gene_set_size','matched_size','rank_ES','genes']]
+    #res_df = res_df[['es','nes','pval','fdr','gene_set_size','matched_size','rank_ES','genes']]
     res_df.sort_values(by='fdr', inplace=True)
-    res_df.to_csv('{a}/{b}.csv'.format(a=outdir, b='gseapy_reports'))
+    res_final = res_df.head(graph_num)
+    res_final.to_csv('{a}/{b}.csv'.format(a=outdir, b='gseapy_reports'), float_format ='%.7f')
     
     #print(res_df.head(10))
     print("...Congratulations. GSEAPY run successfully!!!\n...The Job is done...........................Goodbye!")
     
     return res_df
 
-def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Postive', pheno_neg='Negative', min_size=15, max_size=1000,   
-            permutation_n=1000, weighted_score_type=1, ascending=False, figsize=[6.5,6], format='pdf', seed=None):
+def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Postive', pheno_neg='Negative',
+            min_size=15, max_size=1000, permutation_n=1000, weighted_score_type=1,
+            ascending=False, figsize=[6.5,6], format='pdf',graph_num=20, seed=None):
     """ Run Gene Set Enrichment Analysis with pre-ranked correlation defined by user.
 
     :param rnk: pre-ranked correlation table, Same input with ``GSEA`` .rnk file.  
@@ -164,6 +168,7 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Postive', pheno_neg=
     :param ascending: sorting order of rankings. Default: False.
     :param figsize: matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
     :param format: matplotlib figure format. Default: pdf.
+    :param graph_num: plot graphs for top sets of each phenotype
     :param seed: random seed. expect an interger. Defalut:None.    
     :return: Generate ``GSEA`` plots and store a dictionary into csv file,
              where dictionary key is a gene set and values are::
@@ -193,9 +198,9 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Postive', pheno_neg=
    
     print("Start to generate gseapy reports, and produce figures...",time.ctime())
     os.system("mkdir "+ outdir)
-    res = {}
+    res = OrderedDict()
     for gs, gseale,ind,RES in zip(subsets, list(results), hit_ind, rank_ES):        
-        rdict ={}       
+        rdict = OrderedDict()       
         rdict['es'] = gseale[0]
         rdict['nes'] = gseale[1]
         rdict['pval'] = gseale[2]
@@ -213,9 +218,10 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Postive', pheno_neg=
 
     res_df = pd.DataFrame.from_dict(res, orient='index')
     res_df.index.name = 'Enrich_terms'
-    res_df = res_df[['es','nes','pval','fdr','gene_set_size','matched_size','rank_ES','genes']]
     res_df.sort_values(by='fdr', inplace=True)
-    res_df.to_csv('{a}/{b}.csv'.format(a=outdir, b='gseapy_reports'))
+    #res_df = res_df[['es','nes','pval','fdr','gene_set_size','matched_size','rank_ES','genes']]
+    res_final = res_df.head(graph_num)
+    res_final.to_csv('{a}/{b}.csv'.format(a=outdir, b='gseapy_reports'), float_format ='%.7f')
     #print(res_df.head(10))
     print("...Congratulations. GSEAPY run successfully!!!\n...The Job is done...........................Goodbye!")
     

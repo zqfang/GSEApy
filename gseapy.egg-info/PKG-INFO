@@ -1,6 +1,6 @@
 Metadata-Version: 1.1
 Name: gseapy
-Version: 0.4.0
+Version: 0.4.1
 Summary: Gene Set Enrichment Analysis in Python
 Home-page: https://github.com/BioNinja/gseapy
 Author: Zhuoqing Fang
@@ -295,7 +295,9 @@ Description:
                                     'log2_ratio_of_classes'
               -a, --ascending       Rank metric sorting order. If the -a flag was chosen,
                                     then ascending equals to True. Default: False.
-               -s , --seed           Number of random seed. Default: 2000   
+              -t , --top-graph      Plot graphs for top sets of each phenotype. Default:
+                                    20
+               -s , --seed           Number of random seed. Default: None   
         
         
         The ``prerank`` Command
@@ -339,7 +341,9 @@ Description:
                                     genes. Choose from {0, 1, 1.5, 2},default: 1
               -a, --ascending       Rank metric sorting order. If the -a flag was chosen,
                                     then ascending equals to True. Default: False.
-              -s , --seed           Number of random seed. Default: 2000
+              -t , --top-graph      Plot graphs for top sets of each phenotype. Default:
+                                    20
+              -s , --seed           Number of random seed. Default: None
             
            
         

@@ -71,13 +71,27 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
     norm_no_tag = 1.0/Nmiss
     
     # if used for compute esnull, set esnull equal to permutation number, e.g. 1000
-    axis = 0   
+    axis = 0
+    
     if esnull:
-        tag_indicator = np.repeat(tag_indicator, esnull).reshape(N, esnull).T
+        tag_indicator = tag_indicator.repeat(esnull).reshape(N, esnull).T
         for i in range(esnull):
-            rs.shuffle(tag_indicator[i,:])
+            rs.shuffle(tag_indicator[i])
         axis = 1
-        
+    '''
+    similar results could be obtained when computing esnull using code below, but a little slower.
+    
+    if esnull:
+        tag_null = np.empty((esnull, N))
+        i=0
+        while i < esnull:
+            rs.shuffle(tag_indicator)
+            tag_null[i] = tag_indicator
+            i +=1
+        axis = 1
+        tag_indicator = tag_null
+    '''
+    
     RES = np.cumsum(tag_indicator * correl_vector * norm_tag - no_tag_indicator * norm_no_tag, axis=axis)      
     max_ES = np.max(RES, axis=axis)
     min_ES = np.min(RES, axis=axis)
@@ -268,7 +282,11 @@ def gsea_pval(es, esnull):
         return 1.0
 
 def gsea_significance(enrichment_scores, enrichment_nulls):
-    """Compute p-vals, normalized ES, FDRs.
+    """Compute p-vals, normalized ES, adjusted FDRs.
+        
+        for a given NES(S) = NES* >= 0. The FDR is the ratio of the percantage of all (S,pi) with
+        NES(S,pi) >= 0, whose NES(S,pi) >= NES*, divided by the percentage of
+        observed S wih NES(S) >= 0, whose NES(S) >= NES*, and similarly if NES(S) = NES* <= 0.
     """
     
     print("Start to compute pvals........................",time.ctime())

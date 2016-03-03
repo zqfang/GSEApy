@@ -202,13 +202,27 @@
     <span class="n">norm_no_tag</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="n">Nmiss</span>
     
     <span class="c1"># if used for compute esnull, set esnull equal to permutation number, e.g. 1000</span>
-    <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span>   
+    <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span>
+    
     <span class="k">if</span> <span class="n">esnull</span><span class="p">:</span>
-        <span class="n">tag_indicator</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">tag_indicator</span><span class="p">,</span> <span class="n">esnull</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">esnull</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">tag_indicator</span> <span class="o">=</span> <span class="n">tag_indicator</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">esnull</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">esnull</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">esnull</span><span class="p">):</span>
-            <span class="n">rs</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">tag_indicator</span><span class="p">[</span><span class="n">i</span><span class="p">,:])</span>
+            <span class="n">rs</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">tag_indicator</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
         <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span>
-        
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    similar results could be obtained when computing esnull using code below, but a little slower.</span>
+<span class="sd">    </span>
+<span class="sd">    if esnull:</span>
+<span class="sd">        tag_null = np.empty((esnull, N))</span>
+<span class="sd">        i=0</span>
+<span class="sd">        while i &lt; esnull:</span>
+<span class="sd">            rs.shuffle(tag_indicator)</span>
+<span class="sd">            tag_null[i] = tag_indicator</span>
+<span class="sd">            i +=1</span>
+<span class="sd">        axis = 1</span>
+<span class="sd">        tag_indicator = tag_null</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
     <span class="n">RES</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">tag_indicator</span> <span class="o">*</span> <span class="n">correl_vector</span> <span class="o">*</span> <span class="n">norm_tag</span> <span class="o">-</span> <span class="n">no_tag_indicator</span> <span class="o">*</span> <span class="n">norm_no_tag</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>      
     <span class="n">max_ES</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">RES</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
     <span class="n">min_ES</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">RES</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
@@ -399,7 +413,11 @@
         <span class="k">return</span> <span class="mf">1.0</span>
 </div>
 <div class="viewcode-block" id="gsea_significance"><a class="viewcode-back" href="../../run.html#gseapy.algorithm.gsea_significance">[docs]</a><span class="k">def</span> <span class="nf">gsea_significance</span><span class="p">(</span><span class="n">enrichment_scores</span><span class="p">,</span> <span class="n">enrichment_nulls</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Compute p-vals, normalized ES, FDRs.</span>
+    <span class="sd">&quot;&quot;&quot;Compute p-vals, normalized ES, adjusted FDRs.</span>
+<span class="sd">        </span>
+<span class="sd">        for a given NES(S) = NES* &gt;= 0. The FDR is the ratio of the percantage of all (S,pi) with</span>
+<span class="sd">        NES(S,pi) &gt;= 0, whose NES(S,pi) &gt;= NES*, divided by the percentage of</span>
+<span class="sd">        observed S wih NES(S) &gt;= 0, whose NES(S) &gt;= NES*, and similarly if NES(S) = NES* &lt;= 0.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Start to compute pvals........................&quot;</span><span class="p">,</span><span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">())</span>

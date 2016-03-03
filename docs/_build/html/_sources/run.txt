@@ -191,6 +191,8 @@ For command line options of each command, type: gseapy COMMAND -h
                             'log2_ratio_of_classes'
       -a, --ascending       Rank metric sorting order. If the -a flag was chosen,
                             then ascending equals to True. Default: False.
+      -t , --top-graph      Plot graphs for top sets of each phenotype. Default:
+                            20
       -s , --seed           Number of random seed. Default: None
 
 4. The ``prerank`` Command
@@ -234,6 +236,8 @@ For command line options of each command, type: gseapy COMMAND -h
                             genes. Choose from {0, 1, 1.5, 2},default: 1
       -a, --ascending       Rank metric sorting order. If the -a flag was chosen,
                             then ascending equals to True. Default: False.
+      -t , --top-graph      Plot graphs for top sets of each phenotype. Default:
+                            20
       -s , --seed           Number of random seed. Default: None
 
 
