@@ -121,6 +121,7 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     fig.suptitle(enrich_term, fontsize=16)
     fig.subplots_adjust(hspace=0)
     #fig.tight_layout()
-
+    plt.close(fig)
+    
     return fig
     
