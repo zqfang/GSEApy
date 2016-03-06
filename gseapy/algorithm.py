@@ -98,7 +98,7 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
     
     es = np.where(np.abs(max_ES) > np.abs(min_ES), max_ES, min_ES)
    
-    return es, hit_ind, RES.tolist()
+    return es.tolist(), hit_ind, RES.tolist()
  
 
 def shuffle_list(gene_list, rand=np.random.RandomState(0)):
@@ -217,7 +217,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
     ranking=r2['rank'].values
     gene_list=r2['gene_name']
         
-    print("Start to compute enrichment socres............",time.ctime())
+    print("Start to compute enrichment socres......................", time.ctime())
 
     rank_ES = []
     hit_ind = []    
@@ -227,9 +227,9 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
         enrichment_scores.append(es)
         rank_ES.append(RES)
         hit_ind.append(ind)
-        
-    print("Start to compute esnulls......................",time.ctime())
-    print("......This step might take a while to run. Be patient.")
+           
+    print("Start to compute esnulls................................", time.ctime())
+    print("......This step might take a while to run. Be patient...")
 
     enrichment_nulls = [ [] for a in range(len(subsets)) ]
     rs = np.random.RandomState(seed)
@@ -258,7 +258,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
         for si,subset in enumerate(subsets):
             esn = enrichment_score(gene_list=gene_list, gene_set=gmt.get(subset), weighted_score_type=w, 
                                    correl_vector=ranking, esnull=n, rs=rs)[0]                                         
-            enrichment_nulls[si] = esn.tolist()   
+            enrichment_nulls[si] = esn 
 
     return gsea_significance(enrichment_scores, enrichment_nulls),hit_ind,rank_ES, subsets
 
@@ -282,14 +282,14 @@ def gsea_pval(es, esnull):
         return 1.0
 
 def gsea_significance(enrichment_scores, enrichment_nulls):
-    """Compute p-vals, normalized ES, adjusted FDRs.
+    """Compute nominal p-vals, normalized ES, FDR q value,.
         
         for a given NES(S) = NES* >= 0. The FDR is the ratio of the percantage of all (S,pi) with
         NES(S,pi) >= 0, whose NES(S,pi) >= NES*, divided by the percentage of
         observed S wih NES(S) >= 0, whose NES(S) >= NES*, and similarly if NES(S) = NES* <= 0.
     """
     
-    print("Start to compute pvals........................",time.ctime())
+    print("Start to compute pvals..................................", time.ctime())
     
     enrichmentPVals = []
     nEnrichmentScores = []
@@ -321,7 +321,7 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
         nenrNull = [ normalize(s) for s in enrNull ]
         nEnrichmentNulls.append(nenrNull)
 
-    print("start to compute fdrs.........................", time.ctime())
+    print("start to compute fdrs...................................", time.ctime())
 
     #FDR computation
     #create a histogram of all NES(S,pi) over all S and pi
@@ -372,7 +372,7 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
         except:
             fdrs.append(1000000000.0)
 
-    print("Statistial testing finished...................", time.ctime())
+    print("Statistial testing finished.............................", time.ctime())
 
     return zip(enrichment_scores, nEnrichmentScores, enrichmentPVals, fdrs)
 
