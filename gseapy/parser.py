@@ -67,7 +67,7 @@ def gsea_rank_metric(rnk):
     rank_metric = read_table(rnk,header=None)
     rank_metric.columns = ['gene_name','rank']
     rank_metric['rank2'] = rank_metric['rank']
-     
+           
     return rank_metric
     
 def gsea_gmt_parser(gmt, min_size = 3, max_size = 5000, gene_list=None):
@@ -99,14 +99,20 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 5000, gene_list=None):
     if gene_list is not None:
         subsets = sorted(genesets_filter.keys())             
         for subset in subsets:            
-            tag_indicator = in1d(gene_list,genesets_filter.get(subset),assume_unique=True)
+            tag_indicator = in1d(gene_list, genesets_filter.get(subset), assume_unique=True)
             tag_len = sum(tag_indicator)      
-            if tag_len <= min_size and tag_len >= max_size:                    
+            if tag_len <= min_size or tag_len >= max_size:                    
                 del genesets_filter[subset]
-     #some_dict = {key: value for key, value in some_dict.items() if value != value_to_remove}
-     #use np.intersect1d() may be faster???    
+            else:
+                continue
+    #some_dict = {key: value for key, value in some_dict.items() if value != value_to_remove}
+    #use np.intersect1d() may be faster???    
     filsets_num = len(genesets_dict) - len(genesets_filter)
     print("{a} gene_sets have been filtered out for max_size = {b} and min_size = {c}".format(a=filsets_num,b=max_size,c=min_size))
-          
-    return genesets_filter
+
+    if filsets_num == len(genesets_dict):
+        sys.stderr.write("No gene sets passed throught filtering condition!!!, try new paramters again!")
+        sys.exit(1)
+    else:
+        return genesets_filter
     
