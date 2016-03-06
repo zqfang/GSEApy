@@ -41,28 +41,24 @@ def replot(indir,outdir='gseapy_out', weight=1,figsize=[6.5,6], format='pdf',min
             sys.exit(1)    
     #extract sample names from .cls file
     phenoPos, phenoNeg, classes = gsea_cls_parser(cls_path)  
-    
+    #obtain gene sets
+    gene_set_dict = gsea_gmt_parser(gene_set_path, min_size=min_size, max_size=max_size)
+    #obtain rank_metrics
+    rank_metric = gsea_rank_metric(rank_path)
+    correl_vector =  rank_metric['rank'].values        
+    gene_list = rank_metric['gene_name']
     #extract each enriment term in the results.edb files and plot.
     database = BeautifulSoup(open(results_path),features='xml')
     length = len(database.findAll('DTG'))
     os.system("mkdir "+ outdir)
+
     for idx in range(length):
         #extract statistical resutls from results.edb file
         enrich_term, hit_ind, nes, pval, fdr= gsea_edb_parser(results_path, index=idx)
-        
-        #obtain rank_metrics
-        rank_metric = gsea_rank_metric(rank_path)
-        correl_vector =  rank_metric['rank'].values
-
-        #obtain gene sets
-        gene_set_dict = gsea_gmt_parser(gene_set_path, min_size=min_size, max_size=max_size)
         gene_set = gene_set_dict.get(enrich_term)
-        gene_list = rank_metric['gene_name']
-
         #calculate enrichment score    
         RES = enrichment_score(gene_list=gene_list, gene_set=gene_set, weighted_score_type=weight, 
                                correl_vector=correl_vector)[2]
-
         #plotting
         fig = gsea_plot(rank_metric, enrich_term,hit_ind, nes, pval,
                         fdr, RES, phenoPos, phenoNeg, figsize=figsize)    
@@ -119,9 +115,11 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=1000, 
     
     #compute ES, NES, pval, FDR, RES
     results,hit_ind,rank_ES, subsets = gsea_compute(data=dat, n=permutation_n,gmt=gmt, weighted_score_type=weighted_score_type,
-                    permutation_type=permutation_type, method=method, phenoPos=phenoPos, phenoNeg=phenoNeg, classes=classes, ascending=ascending, seed=seed)
+                                                    permutation_type=permutation_type, method=method,
+                                                    phenoPos=phenoPos, phenoNeg=phenoNeg, classes=classes, ascending=ascending,
+                                                    seed=seed)
    
-    print("Start to generate gseapy reports, and produce figures...",time.ctime())
+    
     os.system("mkdir "+ outdir)
     res = OrderedDict()
     for gs, gseale,ind,RES in zip(subsets, list(results), hit_ind, rank_ES):        
@@ -134,24 +132,28 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=1000, 
         rdict['matched_size'] = len(ind)
         rdict['rank_ES'] = RES
         rdict['genes'] = dat.iloc[ind].index.tolist()
+        rdict['hit_index'] = ind
         res[gs] = rdict           
-
-        #plotting
-        fig = gsea_plot(rank_metric=dat2, enrich_term=gs, hit_ind=ind, nes=gseale[1], pval=gseale[2],
-                        fdr=gseale[3], RES=RES, phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize)        
-        fig.savefig('{a}/{b}.{c}'.format(a=outdir, b=gs, c=format), dpi=300,)
-
-    res_df =pd.DataFrame.from_dict(res,orient='index')
+    
+    res_df = pd.DataFrame.from_dict(res,orient='index')
     res_df.index.name = 'Enrich_terms'
     #res_df = res_df[['es','nes','pval','fdr','gene_set_size','matched_size','rank_ES','genes']]
     res_df.sort_values(by='fdr', inplace=True)
     res_final = res_df.head(graph_num)
     res_final.to_csv('{a}/{b}.csv'.format(a=outdir, b='gseapy_reports'), float_format ='%.7f')
     
-    #print(res_df.head(10))
-    print("...Congratulations. GSEAPY run successfully!!!\n...The Job is done...........................Goodbye!")
+    print("Start to generate gseapy reports, and produce figures.......", time.ctime())
+    #Plotting
+    for gs in res_df.index.values:
+        fig = gsea_plot(rank_metric=dat2, enrich_term=gs, hit_ind=res.get(gs)['hit_index'],
+                        nes=res.get(gs)['nes'], pval=res.get(gs)['pval'], fdr=res.get(gs)['fdr'], 
+                        RES=res.get(gs)['rank_ES'], phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize)        
+        fig.savefig('{a}/{b}.{c}'.format(a=outdir, b=gs, c=format), dpi=300,)
     
-    return res_df
+    #print(res_df.head(10))
+    print("...Congratulations. GSEAPY run successfully!!!.............\n...The Job is done...........................Goodbye!")
+    
+    return 
 
 def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Postive', pheno_neg='Negative',
             min_size=15, max_size=1000, permutation_n=1000, weighted_score_type=1,
@@ -194,12 +196,12 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Postive', pheno_neg=
     #compute ES, NES, pval, FDR, RES
     results,hit_ind,rank_ES, subsets = gsea_compute(data=dat2, n=permutation_n, gmt=gmt, weighted_score_type=weighted_score_type,
                                                     permutation_type='gene_set',method=None, phenoPos=pheno_pos, phenoNeg=pheno_neg,
-                                                    classes=None, ascending=ascending,seed=seed, prerank=True)
+                                                    classes=None, ascending=ascending, seed=seed, prerank=True)
    
-    print("Start to generate gseapy reports, and produce figures...",time.ctime())
+    print("Start to generate gseapy reports, and produce figures...", time.ctime())
     os.system("mkdir "+ outdir)
     res = OrderedDict()
-    for gs, gseale,ind,RES in zip(subsets, list(results), hit_ind, rank_ES):        
+    for gs,gseale,ind,RES in zip(subsets, list(results), hit_ind, rank_ES):        
         rdict = OrderedDict()       
         rdict['es'] = gseale[0]
         rdict['nes'] = gseale[1]
@@ -209,12 +211,9 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Postive', pheno_neg=
         rdict['matched_size'] = len(ind)
         rdict['rank_ES'] = RES
         rdict['genes'] = dat2.ix[ind,'gene_name'].tolist()
+        rdict['hit_index'] = ind
         res[gs] = rdict           
 
-        #plotting
-        fig = gsea_plot(rank_metric=dat2, enrich_term=gs,hit_ind=ind,nes=gseale[1],pval= gseale[2],
-                        fdr=gseale[3], RES=RES, phenoPos=pheno_pos, phenoNeg=pheno_neg, figsize=figsize)        
-        fig.savefig('{a}/{b}.{c}'.format(a=outdir, b=gs, c=format), dpi=300,)
 
     res_df = pd.DataFrame.from_dict(res, orient='index')
     res_df.index.name = 'Enrich_terms'
@@ -222,7 +221,16 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Postive', pheno_neg=
     #res_df = res_df[['es','nes','pval','fdr','gene_set_size','matched_size','rank_ES','genes']]
     res_final = res_df.head(graph_num)
     res_final.to_csv('{a}/{b}.csv'.format(a=outdir, b='gseapy_reports'), float_format ='%.7f')
-    #print(res_df.head(10))
-    print("...Congratulations. GSEAPY run successfully!!!\n...The Job is done...........................Goodbye!")
+
+    for gs in res_df.index.values:
+        fig = gsea_plot(rank_metric=dat2, enrich_term=gs, hit_ind=res.get(gs)['hit_index'],
+                        nes=res.get(gs)['nes'], pval=res.get(gs)['pval'], fdr=res.get(gs)['fdr'], 
+                        RES=res.get(gs)['rank_ES'], phenoPos=pheno_pos, phenoNeg=pheno_neg, figsize=figsize)        
+        fig.savefig('{a}/{b}.{c}'.format(a=outdir, b=gs, c=format), dpi=300,)
+
+
+
+    print("Congratulations. GSEAPY run successfully................")
+    print("The Job is done.................................Goodbye!")
     
-    return res_df
+    return 
