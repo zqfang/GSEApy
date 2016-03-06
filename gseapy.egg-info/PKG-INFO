@@ -261,7 +261,7 @@ Description:
               -h, --help            show this help message and exit
                 
             Input files arguments:
-              -d DATA, --datab DATA
+              -d DATA, --data DATA
                                     Input gene expression Affymetrix dataset file in txt
                                     format.Same with GSEA.
               -c CLS, --cls CLS     Input class vector (phenotype) file in CLS format.
@@ -293,11 +293,11 @@ Description:
                                     'ratio_of_classes',
                                     'diff_of_classes','log2_ratio_of_classes'}. Default:
                                     'log2_ratio_of_classes'
-              -a, --ascending       Rank metric sorting order. If the -a flag was chosen,
+              -a , --ascending      Rank metric sorting order. If the -a flag was chosen,
                                     then ascending equals to True. Default: False.
               -t , --top-graph      Plot graphs for top sets of each phenotype. Default:
                                     20
-               -s , --seed           Number of random seed. Default: None   
+              -s , --seed           Number of random seed. Default: None   
         
         
         The ``prerank`` Command
@@ -339,7 +339,7 @@ Description:
                                     esnulls. Default: 1000
               -w , --weight         Weighted_score of rank_metrics.For weighting input
                                     genes. Choose from {0, 1, 1.5, 2},default: 1
-              -a, --ascending       Rank metric sorting order. If the -a flag was chosen,
+              -a , --ascending      Rank metric sorting order. If the -a flag was chosen,
                                     then ascending equals to True. Default: False.
               -t , --top-graph      Plot graphs for top sets of each phenotype. Default:
                                     20
