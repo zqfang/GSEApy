@@ -272,7 +272,7 @@ def gsea_pval(es, esnull):
     or negative portion of the distribution corresponding to the sign 
     of the observed ES(S).
     """
-    
+    '''
     try:
         if es < 0:
             return float(len([ a for a in esnull if a <= es ]))/len([ a for a in esnull if a < 0])    
@@ -280,51 +280,132 @@ def gsea_pval(es, esnull):
             return float(len([ a for a in esnull if a >= es ]))/len([ a for a in esnull if a >= 0])
     except:
         return 1.0
+    '''    
+        
+        
+    # to speed up, using numpy function to compute pval in parallel.
+    es = np.array(es)
+    esnull = np.array(esnull)
+    try:
+        condlist = [ es < 0, es > 0]
+        choicelist = [np.sum(esnull < es.reshape(len(es),1), axis=1)/ np.sum(esnull < 0, axis=1) , 
+                      np.sum(esnull >= es.reshape(len(es),1), axis=1)/ np.sum(esnull >= 0, axis=1)]
+        pval = np.select(condlist, choicelist)
+        return pval
+    except:
+        return np.repeat(1.0 ,len(es))
+    
+    
+    
+def normalize(es, esnull):
+    """normalize the ES(S,pi) and the observed ES(S), separetely rescaling
+       the positive and negative scores by divident by the mean of the ES(S,pi). """
+    
+    try:
+        if es >= 0:
+            meanPos = np.mean([a for a in esnull if a >= 0])                   
+            return es/meanPos
+        else:
+            meanNeg = np.mean([a for a in esnull if a < 0])                    
+            return -es/meanNeg
+    except:
+        return 0.0 #return if according mean value is uncalculable
+    '''    
+    esnull_meanPos = []
+    esnull_negPos = []
+    
+    
+    es = np.array(es)
+    esnull = np.array(esnull)
+
+    for enrNull in esnull:        
+        meanPos = enrNull[enrNull >= 0].mean()
+        esnull_meanPos.append(meanPos)
+                  
+        meanNeg = enrNull[enrNull < 0 ].mean()
+        esnull_meanNeg.append(meanNeg)
+    
+    pos = np.array(esnull_meanPos).reshape(len(es), 1)
+    neg = np.array(esnull_meanNeg).reshape(len(es), 1)
+
+    try:
+        condlist = [ es >= 0, es < 0]
+        choicelist = [ es/pos, -es/neg ]
+        nes = np.select(condlist, choicelist)
+        
+    except:
+        nes = np.repeat(0.0 , es.size)
+    '''      
+    
+ 
 
 def gsea_significance(enrichment_scores, enrichment_nulls):
-    """Compute nominal p-vals, normalized ES, FDR q value,.
+    """Compute nominal p-vals, normalized ES, and FDR q value.
         
-        for a given NES(S) = NES* >= 0. The FDR is the ratio of the percantage of all (S,pi) with
+        For a given NES(S) = NES* >= 0. The FDR is the ratio of the percantage of all (S,pi) with
         NES(S,pi) >= 0, whose NES(S,pi) >= NES*, divided by the percentage of
         observed S wih NES(S) >= 0, whose NES(S) >= NES*, and similarly if NES(S) = NES* <= 0.
     """
     
     print("Start to compute pvals..................................", time.ctime())
     
-    enrichmentPVals = []
-    nEnrichmentScores = []
+    #enrichmentPVals = []
+    
+    #compute pvals.
+    enrichmentPVals = gsea_pval(enrichment_scores, enrichment_nulls).tolist()
+    '''
+    #old normalize function method to caculate nesnull
+    nEnrichmentScores = []    
     nEnrichmentNulls = []
-
+    
     for i in range(len(enrichment_scores)):
         es = enrichment_scores[i]
         enrNull = enrichment_nulls[i]
-        enrichmentPVals.append(gsea_pval(es, enrNull))
+        #enrichmentPVals.append(gsea_pval(es, enrNull))
 
-        #normalize the ES(S,pi) and the observed ES(S), separetely rescaling
-        #the positive and negative scores by divident by the mean of the 
-        #ES(S,pi)
-        def normalize(s):
-            try:
-                if s == 0:
-                    return 0.0
-                if s >= 0:
-                    meanPos = np.mean([a for a in enrNull if a >= 0])                   
-                    return s/meanPos
-                else:
-                    meanNeg = np.mean([a for a in enrNull if a < 0])                    
-                    return -s/meanNeg
-            except:
-                return 0.0 #return if according mean value is uncalculable
-
-        nes = normalize(es)
+        nes = normalize(es, enrNull)
         nEnrichmentScores.append(nes)        
-        nenrNull = [ normalize(s) for s in enrNull ]
-        nEnrichmentNulls.append(nenrNull)
+        #nenrNull = [ normalize(s, enrNull) for s in enrNull ]
+        #nEnrichmentNulls.append(nenrNull)
+    '''
+    #new normalize enrichment score calculating method. this could speed up significantly.
+    esnull_meanPos = []
+    esnull_meanNeg = []
+        
+    es = np.array(enrichment_scores)
+    esnull = np.array(enrichment_nulls)
 
+    for enrNull in esnull:        
+        meanPos = enrNull[enrNull >= 0].mean()
+        esnull_meanPos.append(meanPos)
+                  
+        meanNeg = enrNull[enrNull < 0 ].mean()
+        esnull_meanNeg.append(meanNeg)
+    
+    pos = np.array(esnull_meanPos).reshape(len(es), 1)
+    neg = np.array(esnull_meanNeg).reshape(len(es), 1)
+    
+    
+    #compute normalized enrichment score and normalized esnull
+    try:
+        condlist1 = [ es >= 0, es < 0]
+        choicelist1 = [ es/esnull_meanPos, -es/esnull_meanNeg ]
+        nEnrichmentScores = np.select(condlist1, choicelist1).tolist()
+        
+        condlist2 = [ esnull >= 0, esnull < 0]
+        choicelist2 = [ esnull/pos, -esnull/neg ]                
+        nEnrichmentNulls = np.select(condlist2, choicelist2).tolist()
+        
+    except:  #return if according nes, nesnull is uncalculable
+        nEnrichmentScores = np.repeat(0.0, es.size).tolist()
+        nEnrichmentNulls = np.repeat(0.0 , es.size).reshape(esnull.shape).tolist()
+    
+            
     print("start to compute fdrs...................................", time.ctime())
 
     #FDR computation
     #create a histogram of all NES(S,pi) over all S and pi
+    #Use this null distribution to compute an FDR q value,
     vals = reduce(lambda x,y: x+y, nEnrichmentNulls, [])
 
     """
@@ -340,11 +421,6 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
 
     vals = shorten(vals) -> this can speed up second part. is it relevant TODO?  
    
-    Use this null distribution to compute an FDR q value, for a given NES(S) =
-    NES* >= 0. The FDR is the ratio of the percantage of all (S,pi) with
-    NES(S,pi) >= 0, whose NES(S,pi) >= NES*, divided by the percentage of
-    observed S wih NES(S) >= 0, whose NES(S) >= NES*, and similarly if NES(S)
-    = NES* <= 0.
     """
 
     nvals = np.array(sorted(vals))
@@ -353,7 +429,7 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
 
     for i in range(len(enrichment_scores)):
         nes = nEnrichmentScores[i]
-        #this could be speed up twice with the same accuracy! 
+        #this could be speed up twice
         if nes >= 0:
             allPos = int(len(vals) - np.searchsorted(nvals, 0, side="left"))
             allHigherAndPos = int(len(vals) - np.searchsorted(nvals, nes, side="left"))
