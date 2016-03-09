@@ -1,5 +1,7 @@
 #! python
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import, print_function, division
+
 import os
 import sys
 import time
@@ -231,6 +233,6 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Postive', pheno_neg=
 
 
     print("Congratulations. GSEAPY run successfully................")
-    print("The Job is done.................................Goodbye!")
+    print("The Job is done.................................Goodbye!", time.ctime())
     
     return 
