@@ -229,7 +229,7 @@
     
     <span class="n">es</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">max_ES</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">min_ES</span><span class="p">),</span> <span class="n">max_ES</span><span class="p">,</span> <span class="n">min_ES</span><span class="p">)</span>
    
-    <span class="k">return</span> <span class="n">es</span><span class="p">,</span> <span class="n">hit_ind</span><span class="p">,</span> <span class="n">RES</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">es</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">hit_ind</span><span class="p">,</span> <span class="n">RES</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
  
 </div>
 <div class="viewcode-block" id="shuffle_list"><a class="viewcode-back" href="../../run.html#gseapy.algorithm.shuffle_list">[docs]</a><span class="k">def</span> <span class="nf">shuffle_list</span><span class="p">(</span><span class="n">gene_list</span><span class="p">,</span> <span class="n">rand</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="mi">0</span><span class="p">)):</span>
@@ -348,7 +348,7 @@
     <span class="n">ranking</span><span class="o">=</span><span class="n">r2</span><span class="p">[</span><span class="s1">&#39;rank&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
     <span class="n">gene_list</span><span class="o">=</span><span class="n">r2</span><span class="p">[</span><span class="s1">&#39;gene_name&#39;</span><span class="p">]</span>
         
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Start to compute enrichment socres............&quot;</span><span class="p">,</span><span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">())</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Start to compute enrichment socres......................&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">())</span>
 
     <span class="n">rank_ES</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">hit_ind</span> <span class="o">=</span> <span class="p">[]</span>    
@@ -358,9 +358,9 @@
         <span class="n">enrichment_scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">es</span><span class="p">)</span>
         <span class="n">rank_ES</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">RES</span><span class="p">)</span>
         <span class="n">hit_ind</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
-        
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Start to compute esnulls......................&quot;</span><span class="p">,</span><span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">())</span>
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;......This step might take a while to run. Be patient.&quot;</span><span class="p">)</span>
+           
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Start to compute esnulls................................&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">())</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;......This step might take a while to run. Be patient...&quot;</span><span class="p">)</span>
 
     <span class="n">enrichment_nulls</span> <span class="o">=</span> <span class="p">[</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">subsets</span><span class="p">))</span> <span class="p">]</span>
     <span class="n">rs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
@@ -389,7 +389,7 @@
         <span class="k">for</span> <span class="n">si</span><span class="p">,</span><span class="n">subset</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">subsets</span><span class="p">):</span>
             <span class="n">esn</span> <span class="o">=</span> <span class="n">enrichment_score</span><span class="p">(</span><span class="n">gene_list</span><span class="o">=</span><span class="n">gene_list</span><span class="p">,</span> <span class="n">gene_set</span><span class="o">=</span><span class="n">gmt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subset</span><span class="p">),</span> <span class="n">weighted_score_type</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> 
                                    <span class="n">correl_vector</span><span class="o">=</span><span class="n">ranking</span><span class="p">,</span> <span class="n">esnull</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">rs</span><span class="o">=</span><span class="n">rs</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>                                         
-            <span class="n">enrichment_nulls</span><span class="p">[</span><span class="n">si</span><span class="p">]</span> <span class="o">=</span> <span class="n">esn</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>   
+            <span class="n">enrichment_nulls</span><span class="p">[</span><span class="n">si</span><span class="p">]</span> <span class="o">=</span> <span class="n">esn</span> 
 
     <span class="k">return</span> <span class="n">gsea_significance</span><span class="p">(</span><span class="n">enrichment_scores</span><span class="p">,</span> <span class="n">enrichment_nulls</span><span class="p">),</span><span class="n">hit_ind</span><span class="p">,</span><span class="n">rank_ES</span><span class="p">,</span> <span class="n">subsets</span>
 
@@ -403,59 +403,140 @@
 <span class="sd">    or negative portion of the distribution corresponding to the sign </span>
 <span class="sd">    of the observed ES(S).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    try:</span>
+<span class="sd">        if es &lt; 0:</span>
+<span class="sd">            return float(len([ a for a in esnull if a &lt;= es ]))/len([ a for a in esnull if a &lt; 0])    </span>
+<span class="sd">        else: </span>
+<span class="sd">            return float(len([ a for a in esnull if a &gt;= es ]))/len([ a for a in esnull if a &gt;= 0])</span>
+<span class="sd">    except:</span>
+<span class="sd">        return 1.0</span>
+<span class="sd">    &#39;&#39;&#39;</span>    
+        
+        
+    <span class="c1"># to speed up, using numpy function to compute pval in parallel.</span>
+    <span class="n">es</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">es</span><span class="p">)</span>
+    <span class="n">esnull</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">esnull</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">condlist</span> <span class="o">=</span> <span class="p">[</span> <span class="n">es</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">es</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">choicelist</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">esnull</span> <span class="o">&lt;</span> <span class="n">es</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">es</span><span class="p">),</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">esnull</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="p">,</span> 
+                      <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">esnull</span> <span class="o">&gt;=</span> <span class="n">es</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">es</span><span class="p">),</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">esnull</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span>
+        <span class="n">pval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">condlist</span><span class="p">,</span> <span class="n">choicelist</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pval</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mf">1.0</span> <span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">es</span><span class="p">))</span>
+    
+    
+    </div>
+<div class="viewcode-block" id="normalize"><a class="viewcode-back" href="../../run.html#gseapy.algorithm.normalize">[docs]</a><span class="k">def</span> <span class="nf">normalize</span><span class="p">(</span><span class="n">es</span><span class="p">,</span> <span class="n">esnull</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;normalize the ES(S,pi) and the observed ES(S), separetely rescaling</span>
+<span class="sd">       the positive and negative scores by divident by the mean of the ES(S,pi). &quot;&quot;&quot;</span>
     
     <span class="k">try</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">es</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">([</span> <span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">esnull</span> <span class="k">if</span> <span class="n">a</span> <span class="o">&lt;=</span> <span class="n">es</span> <span class="p">]))</span><span class="o">/</span><span class="nb">len</span><span class="p">([</span> <span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">esnull</span> <span class="k">if</span> <span class="n">a</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">])</span>    
-        <span class="k">else</span><span class="p">:</span> 
-            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">([</span> <span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">esnull</span> <span class="k">if</span> <span class="n">a</span> <span class="o">&gt;=</span> <span class="n">es</span> <span class="p">]))</span><span class="o">/</span><span class="nb">len</span><span class="p">([</span> <span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">esnull</span> <span class="k">if</span> <span class="n">a</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">es</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">meanPos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">esnull</span> <span class="k">if</span> <span class="n">a</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">])</span>                   
+            <span class="k">return</span> <span class="n">es</span><span class="o">/</span><span class="n">meanPos</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">meanNeg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">esnull</span> <span class="k">if</span> <span class="n">a</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">])</span>                    
+            <span class="k">return</span> <span class="o">-</span><span class="n">es</span><span class="o">/</span><span class="n">meanNeg</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="k">return</span> <span class="mf">1.0</span>
+        <span class="k">return</span> <span class="mf">0.0</span> <span class="c1">#return if according mean value is uncalculable</span>
+    <span class="sd">&#39;&#39;&#39;    </span>
+<span class="sd">    esnull_meanPos = []</span>
+<span class="sd">    esnull_negPos = []</span>
+<span class="sd">    </span>
+<span class="sd">    </span>
+<span class="sd">    es = np.array(es)</span>
+<span class="sd">    esnull = np.array(esnull)</span>
+
+<span class="sd">    for enrNull in esnull:        </span>
+<span class="sd">        meanPos = enrNull[enrNull &gt;= 0].mean()</span>
+<span class="sd">        esnull_meanPos.append(meanPos)</span>
+<span class="sd">                  </span>
+<span class="sd">        meanNeg = enrNull[enrNull &lt; 0 ].mean()</span>
+<span class="sd">        esnull_meanNeg.append(meanNeg)</span>
+<span class="sd">    </span>
+<span class="sd">    pos = np.array(esnull_meanPos).reshape(len(es), 1)</span>
+<span class="sd">    neg = np.array(esnull_meanNeg).reshape(len(es), 1)</span>
+
+<span class="sd">    try:</span>
+<span class="sd">        condlist = [ es &gt;= 0, es &lt; 0]</span>
+<span class="sd">        choicelist = [ es/pos, -es/neg ]</span>
+<span class="sd">        nes = np.select(condlist, choicelist)</span>
+<span class="sd">        </span>
+<span class="sd">    except:</span>
+<span class="sd">        nes = np.repeat(0.0 , es.size)</span>
+<span class="sd">    &#39;&#39;&#39;</span>      
+    
+ 
 </div>
 <div class="viewcode-block" id="gsea_significance"><a class="viewcode-back" href="../../run.html#gseapy.algorithm.gsea_significance">[docs]</a><span class="k">def</span> <span class="nf">gsea_significance</span><span class="p">(</span><span class="n">enrichment_scores</span><span class="p">,</span> <span class="n">enrichment_nulls</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Compute p-vals, normalized ES, adjusted FDRs.</span>
+    <span class="sd">&quot;&quot;&quot;Compute nominal p-vals, normalized ES, and FDR q value.</span>
 <span class="sd">        </span>
-<span class="sd">        for a given NES(S) = NES* &gt;= 0. The FDR is the ratio of the percantage of all (S,pi) with</span>
+<span class="sd">        For a given NES(S) = NES* &gt;= 0. The FDR is the ratio of the percantage of all (S,pi) with</span>
 <span class="sd">        NES(S,pi) &gt;= 0, whose NES(S,pi) &gt;= NES*, divided by the percentage of</span>
 <span class="sd">        observed S wih NES(S) &gt;= 0, whose NES(S) &gt;= NES*, and similarly if NES(S) = NES* &lt;= 0.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Start to compute pvals........................&quot;</span><span class="p">,</span><span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">())</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Start to compute pvals..................................&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">())</span>
     
-    <span class="n">enrichmentPVals</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">nEnrichmentScores</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">nEnrichmentNulls</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1">#enrichmentPVals = []</span>
+    
+    <span class="c1">#compute pvals.</span>
+    <span class="n">enrichmentPVals</span> <span class="o">=</span> <span class="n">gsea_pval</span><span class="p">(</span><span class="n">enrichment_scores</span><span class="p">,</span> <span class="n">enrichment_nulls</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    #old normalize function method to caculate nesnull</span>
+<span class="sd">    nEnrichmentScores = []    </span>
+<span class="sd">    nEnrichmentNulls = []</span>
+<span class="sd">    </span>
+<span class="sd">    for i in range(len(enrichment_scores)):</span>
+<span class="sd">        es = enrichment_scores[i]</span>
+<span class="sd">        enrNull = enrichment_nulls[i]</span>
+<span class="sd">        #enrichmentPVals.append(gsea_pval(es, enrNull))</span>
 
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">enrichment_scores</span><span class="p">)):</span>
-        <span class="n">es</span> <span class="o">=</span> <span class="n">enrichment_scores</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="n">enrNull</span> <span class="o">=</span> <span class="n">enrichment_nulls</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="n">enrichmentPVals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gsea_pval</span><span class="p">(</span><span class="n">es</span><span class="p">,</span> <span class="n">enrNull</span><span class="p">))</span>
+<span class="sd">        nes = normalize(es, enrNull)</span>
+<span class="sd">        nEnrichmentScores.append(nes)        </span>
+<span class="sd">        #nenrNull = [ normalize(s, enrNull) for s in enrNull ]</span>
+<span class="sd">        #nEnrichmentNulls.append(nenrNull)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1">#new normalize enrichment score calculating method. this could speed up significantly.</span>
+    <span class="n">esnull_meanPos</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">esnull_meanNeg</span> <span class="o">=</span> <span class="p">[]</span>
+        
+    <span class="n">es</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">enrichment_scores</span><span class="p">)</span>
+    <span class="n">esnull</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">enrichment_nulls</span><span class="p">)</span>
 
-        <span class="c1">#normalize the ES(S,pi) and the observed ES(S), separetely rescaling</span>
-        <span class="c1">#the positive and negative scores by divident by the mean of the </span>
-        <span class="c1">#ES(S,pi)</span>
-        <span class="k">def</span> <span class="nf">normalize</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="mf">0.0</span>
-                <span class="k">if</span> <span class="n">s</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">meanPos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">enrNull</span> <span class="k">if</span> <span class="n">a</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">])</span>                   
-                    <span class="k">return</span> <span class="n">s</span><span class="o">/</span><span class="n">meanPos</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">meanNeg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">enrNull</span> <span class="k">if</span> <span class="n">a</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">])</span>                    
-                    <span class="k">return</span> <span class="o">-</span><span class="n">s</span><span class="o">/</span><span class="n">meanNeg</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="k">return</span> <span class="mf">0.0</span> <span class="c1">#return if according mean value is uncalculable</span>
-
-        <span class="n">nes</span> <span class="o">=</span> <span class="n">normalize</span><span class="p">(</span><span class="n">es</span><span class="p">)</span>
-        <span class="n">nEnrichmentScores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nes</span><span class="p">)</span>        
-        <span class="n">nenrNull</span> <span class="o">=</span> <span class="p">[</span> <span class="n">normalize</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">enrNull</span> <span class="p">]</span>
-        <span class="n">nEnrichmentNulls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nenrNull</span><span class="p">)</span>
-
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;start to compute fdrs.........................&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">())</span>
+    <span class="k">for</span> <span class="n">enrNull</span> <span class="ow">in</span> <span class="n">esnull</span><span class="p">:</span>        
+        <span class="n">meanPos</span> <span class="o">=</span> <span class="n">enrNull</span><span class="p">[</span><span class="n">enrNull</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">esnull_meanPos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">meanPos</span><span class="p">)</span>
+                  
+        <span class="n">meanNeg</span> <span class="o">=</span> <span class="n">enrNull</span><span class="p">[</span><span class="n">enrNull</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">esnull_meanNeg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">meanNeg</span><span class="p">)</span>
+    
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">esnull_meanPos</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">es</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">neg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">esnull_meanNeg</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">es</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+    
+    
+    <span class="c1">#compute normalized enrichment score and normalized esnull</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">condlist1</span> <span class="o">=</span> <span class="p">[</span> <span class="n">es</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">es</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">choicelist1</span> <span class="o">=</span> <span class="p">[</span> <span class="n">es</span><span class="o">/</span><span class="n">esnull_meanPos</span><span class="p">,</span> <span class="o">-</span><span class="n">es</span><span class="o">/</span><span class="n">esnull_meanNeg</span> <span class="p">]</span>
+        <span class="n">nEnrichmentScores</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">condlist1</span><span class="p">,</span> <span class="n">choicelist1</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        
+        <span class="n">condlist2</span> <span class="o">=</span> <span class="p">[</span> <span class="n">esnull</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">esnull</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">choicelist2</span> <span class="o">=</span> <span class="p">[</span> <span class="n">esnull</span><span class="o">/</span><span class="n">pos</span><span class="p">,</span> <span class="o">-</span><span class="n">esnull</span><span class="o">/</span><span class="n">neg</span> <span class="p">]</span>                
+        <span class="n">nEnrichmentNulls</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">condlist2</span><span class="p">,</span> <span class="n">choicelist2</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        
+    <span class="k">except</span><span class="p">:</span>  <span class="c1">#return if according nes, nesnull is uncalculable</span>
+        <span class="n">nEnrichmentScores</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">es</span><span class="o">.</span><span class="n">size</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">nEnrichmentNulls</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mf">0.0</span> <span class="p">,</span> <span class="n">es</span><span class="o">.</span><span class="n">size</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">esnull</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    
+            
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;start to compute fdrs...................................&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">())</span>
 
     <span class="c1">#FDR computation</span>
     <span class="c1">#create a histogram of all NES(S,pi) over all S and pi</span>
+    <span class="c1">#Use this null distribution to compute an FDR q value,</span>
     <span class="n">vals</span> <span class="o">=</span> <span class="nb">reduce</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">:</span> <span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">,</span> <span class="n">nEnrichmentNulls</span><span class="p">,</span> <span class="p">[])</span>
 
     <span class="sd">&quot;&quot;&quot;</span>
@@ -471,11 +552,6 @@
 
 <span class="sd">    vals = shorten(vals) -&gt; this can speed up second part. is it relevant TODO?  </span>
 <span class="sd">   </span>
-<span class="sd">    Use this null distribution to compute an FDR q value, for a given NES(S) =</span>
-<span class="sd">    NES* &gt;= 0. The FDR is the ratio of the percantage of all (S,pi) with</span>
-<span class="sd">    NES(S,pi) &gt;= 0, whose NES(S,pi) &gt;= NES*, divided by the percentage of</span>
-<span class="sd">    observed S wih NES(S) &gt;= 0, whose NES(S) &gt;= NES*, and similarly if NES(S)</span>
-<span class="sd">    = NES* &lt;= 0.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">nvals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">vals</span><span class="p">))</span>
@@ -484,7 +560,7 @@
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">enrichment_scores</span><span class="p">)):</span>
         <span class="n">nes</span> <span class="o">=</span> <span class="n">nEnrichmentScores</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="c1">#this could be speed up twice with the same accuracy! </span>
+        <span class="c1">#this could be speed up twice</span>
         <span class="k">if</span> <span class="n">nes</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">allPos</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">nvals</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">))</span>
             <span class="n">allHigherAndPos</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">nvals</span><span class="p">,</span> <span class="n">nes</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">))</span>
@@ -503,7 +579,7 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="n">fdrs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1000000000.0</span><span class="p">)</span>
 
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Statistial testing finished...................&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">())</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Statistial testing finished.............................&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">())</span>
 
     <span class="k">return</span> <span class="nb">zip</span><span class="p">(</span><span class="n">enrichment_scores</span><span class="p">,</span> <span class="n">nEnrichmentScores</span><span class="p">,</span> <span class="n">enrichmentPVals</span><span class="p">,</span> <span class="n">fdrs</span><span class="p">)</span>
 </pre></div></div>
