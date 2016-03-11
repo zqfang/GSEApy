@@ -68,6 +68,8 @@ Features of GSEAPY
 
 #. GSEAPY produce figures in pdf format by default, which are ready for publishing and easy to modifiy.
 
+#. GSEAPY is build based on Numpy, it runs very **fast**. 
+
 #. GSEAPY Enhancement will be considered. If you would like to contribute, please @BioNinja on ``Github``. 
 
 
@@ -150,7 +152,6 @@ For command line usage:
 
 .. code:: bash
   
-  $ gseapy replot -i path/to/GSEA_resutls_folder -o gesapy_out
 
   # An example to reproduce figures using replot module.
   $ gseapy replot -i ./Gsea.reports -o test

@@ -196,7 +196,7 @@ Use ``prerank`` Command, or :func:`prerank`
 
 If you would like to use a pre-ranked gene list to run GSEAPY, ``prerank`` module expects
 a pre-ranked gene list dataset with correlation values, which in .rnk format,
-and gene_sets file in gmt format.  ``prerank`` module the same API to `GSEA` pre-rank tools.
+and gene_sets file in gmt format.  ``prerank`` module has the same API to `GSEA` pre-rank tools.
 
 After this, you can start to run gseapy.
 

@@ -54,7 +54,9 @@ Features of GSEAPY
 
 #. GSEAPY produce figures in pdf format by default, which are ready for publishing and easy to modifiy.
 
-#. GSEAPY Enhancement will be considered. If you would like to contribute, please @BioNinja on ``Github``. 
+#. GSEAPY is build based on Numpy, it runs very **fast**. 
+
+#. GSEAPY Enhancement will be considered. If you would like to contribute, please @BioNinja on ``Github``.
 
 
 

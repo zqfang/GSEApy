@@ -111,7 +111,8 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 5000, gene_list=None):
     print("{a} gene_sets have been filtered out for max_size = {b} and min_size = {c}".format(a=filsets_num,b=max_size,c=min_size))
 
     if filsets_num == len(genesets_dict):
-        sys.stderr.write("No gene sets passed throught filtering condition!!!, try new paramters again!")
+        sys.stderr.write("No gene sets passed throught filtering condition!!!, try new paramters again!",
+                         "Note: Gene names for gseapy is case sensitive." )
         sys.exit(1)
     else:
         return genesets_filter

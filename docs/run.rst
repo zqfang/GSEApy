@@ -13,8 +13,6 @@ The ``replot`` module reproduce GSEA desktop version results. The only input for
 
 .. code:: bash
   
-    $ gseapy replot -i path/to/GSEA_resutls_folder -o gesapy_out
-
     # An example to reproduce figures using replot module.
     $ gseapy replot -i ./gsea -o gseapy_out
 
@@ -157,7 +155,7 @@ For command line options of each command, type: gseapy COMMAND -h
       -h, --help            show this help message and exit
         
     Input files arguments:
-      -d DATA, --datab DATA
+      -d DATA, --data DATA
                             Input gene expression Affymetrix dataset file in txt
                             format.Same with GSEA.
       -c CLS, --cls CLS     Input class vector (phenotype) file in CLS format.
@@ -189,7 +187,7 @@ For command line options of each command, type: gseapy COMMAND -h
                             'ratio_of_classes',
                             'diff_of_classes','log2_ratio_of_classes'}. Default:
                             'log2_ratio_of_classes'
-      -a, --ascending       Rank metric sorting order. If the -a flag was chosen,
+      -a , --ascending      Rank metric sorting order. If the -a flag was chosen,
                             then ascending equals to True. Default: False.
       -t , --top-graph      Plot graphs for top sets of each phenotype. Default:
                             20
@@ -234,7 +232,7 @@ For command line options of each command, type: gseapy COMMAND -h
                             esnulls. Default: 1000
       -w , --weight         Weighted_score of rank_metrics.For weighting input
                             genes. Choose from {0, 1, 1.5, 2},default: 1
-      -a, --ascending       Rank metric sorting order. If the -a flag was chosen,
+      -a , --ascending      Rank metric sorting order. If the -a flag was chosen,
                             then ascending equals to True. Default: False.
       -t , --top-graph      Plot graphs for top sets of each phenotype. Default:
                             20
@@ -260,7 +258,7 @@ Module APIs
 
 
 
-Algorithms
+Algorithm 
 -------------------------
 
 
@@ -268,13 +266,17 @@ Algorithms
    :members:
 
 
-Parsers
+Parser 
 --------------------------
 
 .. automodule:: gseapy.parser
    :members:
 
 
-   
+Graph 
+--------------------------
+
+.. automodule:: gseapy.gsea_plot
+   :members:   
 
    

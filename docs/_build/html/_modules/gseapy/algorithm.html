@@ -314,7 +314,7 @@
     <span class="k">return</span> <span class="n">df3</span>
             </div>
 <div class="viewcode-block" id="gsea_compute"><a class="viewcode-back" href="../../run.html#gseapy.algorithm.gsea_compute">[docs]</a><span class="k">def</span> <span class="nf">gsea_compute</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">gmt</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">weighted_score_type</span><span class="p">,</span> <span class="n">permutation_type</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span>
-                 <span class="n">phenoPos</span><span class="p">,</span> <span class="n">phenoNeg</span><span class="p">,</span> <span class="n">classes</span><span class="p">,</span> <span class="n">ascending</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">prerank</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+                 <span class="n">phenoPos</span><span class="p">,</span> <span class="n">phenoNeg</span><span class="p">,</span> <span class="n">classes</span><span class="p">,</span> <span class="n">ascending</span><span class="p">,</span> <span class="n">seed</span><span class="p">,</span> <span class="n">prerank</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;compute enrichment scores and enrichment nulls. </span>
 <span class="sd">    </span>
 <span class="sd">    :param data: prepreocessed expression dataframe or a pre-ranked file if prerank=True.</span>
@@ -326,7 +326,7 @@
 <span class="sd">    :param classes: a list of phenotype labels, to specify which column of dataframe belongs to what catogry of phenotype.</span>
 <span class="sd">    :param weighted_score_type: default:1</span>
 <span class="sd">    :param ascending: sorting order of rankings. Default: False.</span>
-<span class="sd">    :param seed: random seed. Default: 2000</span>
+<span class="sd">    :param seed: random seed. Default: np.random.RandomState()</span>
 <span class="sd">    :param prerank: if true, this function will compute using pre-ranked file passed by parameter data.</span>
 
 <span class="sd">    :return: </span>

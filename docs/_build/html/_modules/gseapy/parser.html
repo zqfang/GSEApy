@@ -242,7 +242,8 @@
     <span class="k">print</span><span class="p">(</span><span class="s2">&quot;{a} gene_sets have been filtered out for max_size = {b} and min_size = {c}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">filsets_num</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="n">max_size</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="n">min_size</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">filsets_num</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">genesets_dict</span><span class="p">):</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;No gene sets passed throught filtering condition!!!, try new paramters again!&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;No gene sets passed throught filtering condition!!!, try new paramters again!&quot;</span><span class="p">,</span>
+                         <span class="s2">&quot;Note: Gene names for gseapy is case sensitive.&quot;</span> <span class="p">)</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">genesets_filter</span>
