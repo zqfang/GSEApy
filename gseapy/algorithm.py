@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import, print_function,division
+from __future__ import print_function, division
 from functools import reduce
 
 import time
@@ -258,7 +258,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
         for si,subset in enumerate(subsets):
             esn = enrichment_score(gene_list=gene_list, gene_set=gmt.get(subset), weighted_score_type=w, 
                                    correl_vector=ranking, esnull=n, rs=rs)[0]                                         
-            enrichment_nulls.append(esn) 
+            enrichment_nulls[si] = esn # esn is a list, don't need to use append method. 
 
     return gsea_significance(enrichment_scores, enrichment_nulls),hit_ind,rank_ES, subsets
 
@@ -376,7 +376,8 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
     es = np.array(enrichment_scores)
     esnull = np.array(enrichment_nulls)
 
-    for enrNull in esnull:        
+    for i in range(len(enrichment_scores)):
+        enrNull = esnull[i] #for numpy array, use index to extract array, do not use "for a in arr" method.        
         meanPos = enrNull[enrNull >= 0].mean()
         esnull_meanPos.append(meanPos)
                   
