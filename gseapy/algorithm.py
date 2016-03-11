@@ -183,7 +183,7 @@ def ranking_metric(df, method, phenoPos, phenoNeg, classes, ascending):
     return df3
             
 def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
-                 phenoPos, phenoNeg, classes, ascending, seed=2000, prerank=False):
+                 phenoPos, phenoNeg, classes, ascending, seed, prerank=False):
     """compute enrichment scores and enrichment nulls. 
     
     :param data: prepreocessed expression dataframe or a pre-ranked file if prerank=True.
@@ -195,7 +195,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
     :param classes: a list of phenotype labels, to specify which column of dataframe belongs to what catogry of phenotype.
     :param weighted_score_type: default:1
     :param ascending: sorting order of rankings. Default: False.
-    :param seed: random seed. Default: 2000
+    :param seed: random seed. Default: np.random.RandomState()
     :param prerank: if true, this function will compute using pre-ranked file passed by parameter data.
 
     :return: 
@@ -258,7 +258,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
         for si,subset in enumerate(subsets):
             esn = enrichment_score(gene_list=gene_list, gene_set=gmt.get(subset), weighted_score_type=w, 
                                    correl_vector=ranking, esnull=n, rs=rs)[0]                                         
-            enrichment_nulls[si] = esn 
+            enrichment_nulls.append(esn) 
 
     return gsea_significance(enrichment_scores, enrichment_nulls),hit_ind,rank_ES, subsets
 
@@ -287,10 +287,11 @@ def gsea_pval(es, esnull):
     es = np.array(es)
     esnull = np.array(esnull)
     try:
-        condlist = [ es < 0, es > 0]
+        condlist = [ es < 0, es >=0]
         choicelist = [np.sum(esnull < es.reshape(len(es),1), axis=1)/ np.sum(esnull < 0, axis=1) , 
                       np.sum(esnull >= es.reshape(len(es),1), axis=1)/ np.sum(esnull >= 0, axis=1)]
         pval = np.select(condlist, choicelist)
+ 
         return pval
     except:
         return np.repeat(1.0 ,len(es))
