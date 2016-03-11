@@ -123,7 +123,7 @@ def add_call_parser(subparsers):
                            Default: 'log2_ratio_of_classes'")
     group_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
                            help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
-    group_opt.add_argument("-t", "--top-graph", dest = "graph", action="store", type=int, default=20, metavar='',
+    group_opt.add_argument("-t", "--top-graphNum", dest = "graph", action="store", type=int, default=20, metavar='',
                            help="Plot graphs for top sets of each phenotype. Default: 20")
     group_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=None, metavar='',
                            help="Number of random seed. Default: 2000")
@@ -161,7 +161,7 @@ def add_prerank_parser(subparsers):
                              help='Weighted_score of rank_metrics.For weighting input genes. Choose from {0, 1, 1.5, 2},default: 1',)
     prerank_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
                              help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
-    prerank_opt.add_argument("-t", "--top-graph", dest = "graph", action="store", type=int, default=20, metavar='',
+    prerank_opt.add_argument("-t", "--top-graphNum", dest = "graph", action="store", type=int, default=20, metavar='',
                              help="Plot graphs for top sets of each phenotype. Default: 20")
     prerank_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=None, metavar='',
                              help="Number of random seed. Default: 2000")
