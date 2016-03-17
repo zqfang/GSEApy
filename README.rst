@@ -15,7 +15,7 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
     :alt: Documentation Status
 
 
-.. image:: https://img.shields.io/github/license/mashape/apistatus.svg
+.. image:: https://anaconda.org/bioninja/gseapy/badges/license.svg
 
 
 
