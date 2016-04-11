@@ -186,6 +186,12 @@ Run gseapy inside python:
 
 
 
+Bug Report
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you would like to report any bugs when you running gseapy, don't hesitate to email me: fangzhuoqing@sibs.ac.cn
+
+
 To get help of GSEAPY
 ------------------------------------
 
