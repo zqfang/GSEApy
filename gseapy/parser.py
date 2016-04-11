@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import, print_function
 from bs4 import BeautifulSoup
-from numpy import in1d
+from numpy import in1d, unique
 from pandas import read_table
 
 import sys
@@ -94,12 +94,12 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 5000, gene_list=None):
     elif sys.version_info[0] == 2:
         genesets_filter =  {k: v for k, v in genesets_dict.iteritems() if len(v) >= min_size and len(v) <= max_size}
     else:
-        print("system failure. Please Provide correct input files")
+        print("System failure. Please Provide correct input files")
         sys.exit(1)    
     if gene_list is not None:
         subsets = sorted(genesets_filter.keys())             
         for subset in subsets:            
-            tag_indicator = in1d(gene_list, genesets_filter.get(subset), assume_unique=True)
+            tag_indicator = in1d(unique(gene_list), genesets_filter.get(subset), assume_unique=True)
             tag_len = sum(tag_indicator)      
             if tag_len <= min_size or tag_len >= max_size:                    
                 del genesets_filter[subset]
@@ -108,11 +108,12 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 5000, gene_list=None):
     #some_dict = {key: value for key, value in some_dict.items() if value != value_to_remove}
     #use np.intersect1d() may be faster???    
     filsets_num = len(genesets_dict) - len(genesets_filter)
-    print("{a} gene_sets have been filtered out for max_size = {b} and min_size = {c}".format(a=filsets_num,b=max_size,c=min_size))
-
+    print("{a} gene_sets have been filtered out when max_size={b} and min_size={c}".format(a=filsets_num,b=max_size,c=min_size))
+    print("{} gene_sets used for further calculating".format(len(genesets_filter)))
+    
     if filsets_num == len(genesets_dict):
-        sys.stderr.write("No gene sets passed throught filtering condition!!!, try new paramters again!",
-                         "Note: Gene names for gseapy is case sensitive." )
+        print("No gene sets passed throught filtering condition!!!, try new paramters again!\n" +\
+              "Note: Gene names for gseapy is case sensitive." )
         sys.exit(1)
     else:
         return genesets_filter
