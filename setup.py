@@ -8,7 +8,7 @@ def readme():
         return f.read()
 
 setup(name='gseapy',
-      version='0.4.2',
+      version='0.4.3',
       description='Gene Set Enrichment Analysis in Python',
       long_description=readme(),
       classifiers=[
@@ -20,7 +20,7 @@ setup(name='gseapy',
           'Operating System :: MacOS :: MacOS X',
           'Operating System :: Microsoft :: Windows',
           'Operating System :: POSIX',
-          'Topic :: Scientific/Engineering :: Bio-Informatics',
+          'Topic :: Scientific/Engineering :: Bioinformatics',
           'Topic :: Software Development :: Libraries'],
       keywords= ['GO', 'Gene Ontology', 'Biology', 'Enrichment',
           'Bioinformatics', 'Computational Biology',],
