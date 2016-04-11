@@ -1,6 +1,6 @@
 Metadata-Version: 1.1
 Name: gseapy
-Version: 0.4.2
+Version: 0.4.3
 Summary: Gene Set Enrichment Analysis in Python
 Home-page: https://github.com/BioNinja/gseapy
 Author: Zhuoqing Fang
@@ -16,6 +16,9 @@ Description:
         .. image:: https://badge.fury.io/py/gseapy.svg
             :target: https://badge.fury.io/py/gseapy
         
+        .. image:: https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat-square
+            :target: http://bioconda.github.io
+        
         .. image:: https://travis-ci.org/BioNinja/gseapy.svg?branch=master
             :target: https://travis-ci.org/BioNinja/gseapy
         
@@ -24,7 +27,7 @@ Description:
             :alt: Documentation Status
         
         
-        .. image:: https://img.shields.io/github/license/mashape/apistatus.svg
+        .. image:: https://anaconda.org/bioninja/gseapy/badges/license.svg
         
         
         
@@ -193,160 +196,9 @@ Description:
         
         
         To get help of GSEAPY
-        -----------------------------------------
-        To see gseapy subcommands
+        ------------------------------------
         
-        .. code:: bash
-           
-           $ gseapy --help 
-           
-            usage: gseapy [-h] [--version] {call,prerank,replot} ...
-        
-            gseapy -- Gene Set Enrichment Analysis in Python
-        
-            positional arguments:
-              {call,prerank,replot}
-                call       Main GSEAPY Function: run GSEAPY instead of GSEA.
-                prerank    Using pre-ranked tool to run GSEAPY.
-                replot     Reproduce GSEA desktop figures.
-        
-            optional arguments:
-              -h, --help   show this help message and exit
-              --version    show program's version number and exit
-        
-        
-        
-        
-        For command line options of each command, type: gseapy COMMAND -h
-        
-        
-        The ``replot`` Command
-        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        
-        .. code:: bash
-        
-           $ gseapy replot -h
-        
-           usage: gseapy replot [-h] -i [-o] [-f] [--figsize width height] [-w]
-        
-            optional arguments:
-              -h, --help            show this help message and exit
-        
-            Positional arguments:
-              -i , --indir          The GSEA desktop results directroy that you want to
-                                    reproduce the figure
-              -o , --outdir         The gseapy output directory. Default: the current
-                                    working directory
-              -f , --format         Format of output figures, choose from {'pdf', 'png',
-                                    'jpeg', 'eps'}. Default: 'pdf'.
-              --figsize width height
-                                    The figsize keyword argument need two parameter to
-                                    define. Default: [6.5, 6]
-              -w , --weight         Weighted_score of rank_metric. Please use the same 
-                                    value in GSEA. Choose from (0, 1, 1.5, 2),default: 1
-        
-        
-        
-        The ``call`` Command
-        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        
-        .. code:: bash
-        
-           $ gseapy call -h
-        
-            usage: gseapy call  [-h] -i DATA -c CLS -g GMT [-p] [-o] [-f]
-                                [--figsize width height] [--min-size] [--max-size] [-n]
-                                [-w] [-m] [-a] [-s]
-            
-            optional arguments:
-              -h, --help            show this help message and exit
-                
-            Input files arguments:
-              -d DATA, --data DATA
-                                    Input gene expression Affymetrix dataset file in txt
-                                    format.Same with GSEA.
-              -c CLS, --cls CLS     Input class vector (phenotype) file in CLS format.
-                                    Same with GSEA.
-              -g GMT, --gmt GMT     Gene set database in GMT format. Same with GSEA.
-              -p , --permu-type     Permutation type. Same with GSEA, choose from
-                                    {'gene_set', 'phenotype'}
-            
-            Output arguments:
-              -o , --outdir         The GSEAPY output directory. Default: the current
-                                    working directory
-              -f , --format         Format of output figures, choose from {'pdf', 'png',
-                                    'jpeg', 'eps'}. Default: 'pdf'.
-              --figsize width height
-                                    The figsize keyword argument need two parameter to
-                                    define. Default: [6.5,6]
-            
-            GSEA advanced arguments:
-              --min-size            Min size of input genes presented in Gene Sets.
-                                    Default: 15
-              --max-size            Max size of input genes presented in Gene Sets.
-                                    Default: 1000
-              -n , --permu-num      Number of random permutations. For calculating
-                                    esnulls. Default: 1000
-              -w , --weight         Weighted_score of rank_metrics.For weighting input
-                                    genes. Choose from {0, 1, 1.5, 2},default: 1
-              -m , --method         Methods to calculate correlations of ranking metrics.
-                                    Choose from {'signal_to_noise', 't_test',
-                                    'ratio_of_classes',
-                                    'diff_of_classes','log2_ratio_of_classes'}. Default:
-                                    'log2_ratio_of_classes'
-              -a , --ascending      Rank metric sorting order. If the -a flag was chosen,
-                                    then ascending equals to True. Default: False.
-              -t , --top-graph      Plot graphs for top sets of each phenotype. Default:
-                                    20
-              -s , --seed           Number of random seed. Default: None   
-        
-        
-        The ``prerank`` Command
-        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        
-        .. code:: bash
-           
-          $ gseapy prerank -h
-            
-            usage: gseapy prerank       [-h] -r RNK -g GMT [-l pos neg] [-o] [-f]
-                                        [--figsize width height] [--min-size]
-                                        [--max-size] [-n] [-w] [-a] [-s]
-        
-            optional arguments:
-              -h, --help            show this help message and exit
-            
-            Input files arguments:
-              -r RNK, --rnk RNK     ranking dataset file in .rnk format.Same with GSEA.
-              -g GMT, --gmt GMT     Gene set database in GMT format. Same with GSEA.
-              -l pos neg, --label pos neg
-                                    The phenotype label argument need two parameter to
-                                    define. Default: ['Postive','Negative']
-            
-            Output arguments:
-              -o , --outdir         The GSEAPY output directory. Default: the current
-                                    working directory
-              -f , --format         Format of output figures, choose from {'pdf', 'png',
-                                    'jpeg', 'eps'}. Default: 'pdf'.
-              --figsize width height
-                                    The figsize keyword argument need two parameter to
-                                    define. Default: [6.5,6]
-            
-            GSEA advanced arguments:
-              --min-size            Min size of input genes presented in Gene Sets.
-                                    Default: 15
-              --max-size            Max size of input genes presented in Gene Sets.
-                                    Default: 1000
-              -n , --permu-num      Number of random permutations. For calculating
-                                    esnulls. Default: 1000
-              -w , --weight         Weighted_score of rank_metrics.For weighting input
-                                    genes. Choose from {0, 1, 1.5, 2},default: 1
-              -a , --ascending      Rank metric sorting order. If the -a flag was chosen,
-                                    then ascending equals to True. Default: False.
-              -t , --top-graph      Plot graphs for top sets of each phenotype. Default:
-                                    20
-              -s , --seed           Number of random seed. Default: None
-            
-           
+        Visit the document site at https://pythonhosted.org/gseapy
         
 Keywords: GO,Gene Ontology,Biology,Enrichment,Bioinformatics,Computational Biology
 Platform: UNKNOWN
