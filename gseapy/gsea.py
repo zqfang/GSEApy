@@ -186,18 +186,17 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Postive', pheno_neg=
                  |  genes: gene names from the data set}
     
     """
-    
-    dat2 = gsea_rank_metric(rnk)    
-    assert len(dat2) > 1   
-       
-    #ranking metrics calculation.    
+    #drop duplicates in ranking metrics.
+    dat2 = gsea_rank_metric(rnk) 
+    dat2.drop_duplicates(subset='gene_name',inplace=True,keep='first')
+    assert len(dat2) > 1            
     
     #filtering out gene sets and build gene sets dictionary
     gmt = gsea_gmt_parser(gene_sets, min_size=min_size, max_size=max_size, gene_list=dat2['gene_name'].values)
     
     #compute ES, NES, pval, FDR, RES
     results,hit_ind,rank_ES, subsets = gsea_compute(data=dat2, n=permutation_n, gmt=gmt, weighted_score_type=weighted_score_type,
-                                                    permutation_type='gene_set',method=None, phenoPos=pheno_pos, phenoNeg=pheno_neg,
+                                                    permutation_type='gene_set', method=None, phenoPos=pheno_pos, phenoNeg=pheno_neg,
                                                     classes=None, ascending=ascending, seed=seed, prerank=True)
    
     print("Start to generate gseapy reports, and produce figures...", time.ctime())
