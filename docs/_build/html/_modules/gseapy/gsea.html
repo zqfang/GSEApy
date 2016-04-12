@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>gseapy.gsea &mdash; GSEAPY 0.3.1 documentation</title>
+  <title>gseapy.gsea &mdash; GSEAPY 0.4.3 documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="GSEAPY 0.3.1 documentation" href="../../index.html"/>
+    <link rel="top" title="GSEAPY 0.4.3 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                0.3.1
+                0.4.3
               </div>
             
           
@@ -317,18 +317,17 @@
 <span class="sd">                 |  genes: gene names from the data set}</span>
 <span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
-    <span class="n">dat2</span> <span class="o">=</span> <span class="n">gsea_rank_metric</span><span class="p">(</span><span class="n">rnk</span><span class="p">)</span>    
-    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dat2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>   
-       
-    <span class="c1">#ranking metrics calculation.    </span>
+    <span class="c1">#drop duplicates in ranking metrics.</span>
+    <span class="n">dat2</span> <span class="o">=</span> <span class="n">gsea_rank_metric</span><span class="p">(</span><span class="n">rnk</span><span class="p">)</span> 
+    <span class="n">dat2</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;gene_name&#39;</span><span class="p">,</span><span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">keep</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dat2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>            
     
     <span class="c1">#filtering out gene sets and build gene sets dictionary</span>
     <span class="n">gmt</span> <span class="o">=</span> <span class="n">gsea_gmt_parser</span><span class="p">(</span><span class="n">gene_sets</span><span class="p">,</span> <span class="n">min_size</span><span class="o">=</span><span class="n">min_size</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="n">max_size</span><span class="p">,</span> <span class="n">gene_list</span><span class="o">=</span><span class="n">dat2</span><span class="p">[</span><span class="s1">&#39;gene_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
     
     <span class="c1">#compute ES, NES, pval, FDR, RES</span>
     <span class="n">results</span><span class="p">,</span><span class="n">hit_ind</span><span class="p">,</span><span class="n">rank_ES</span><span class="p">,</span> <span class="n">subsets</span> <span class="o">=</span> <span class="n">gsea_compute</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">dat2</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">permutation_n</span><span class="p">,</span> <span class="n">gmt</span><span class="o">=</span><span class="n">gmt</span><span class="p">,</span> <span class="n">weighted_score_type</span><span class="o">=</span><span class="n">weighted_score_type</span><span class="p">,</span>
-                                                    <span class="n">permutation_type</span><span class="o">=</span><span class="s1">&#39;gene_set&#39;</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">phenoPos</span><span class="o">=</span><span class="n">pheno_pos</span><span class="p">,</span> <span class="n">phenoNeg</span><span class="o">=</span><span class="n">pheno_neg</span><span class="p">,</span>
+                                                    <span class="n">permutation_type</span><span class="o">=</span><span class="s1">&#39;gene_set&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">phenoPos</span><span class="o">=</span><span class="n">pheno_pos</span><span class="p">,</span> <span class="n">phenoNeg</span><span class="o">=</span><span class="n">pheno_neg</span><span class="p">,</span>
                                                     <span class="n">classes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="n">ascending</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span> <span class="n">prerank</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
    
     <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Start to generate gseapy reports, and produce figures...&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">())</span>
@@ -400,7 +399,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'0.3.1',
+            VERSION:'0.4.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

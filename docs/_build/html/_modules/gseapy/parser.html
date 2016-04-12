@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>gseapy.parser &mdash; GSEAPY 0.3.1 documentation</title>
+  <title>gseapy.parser &mdash; GSEAPY 0.4.3 documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="GSEAPY 0.3.1 documentation" href="../../index.html"/>
+    <link rel="top" title="GSEAPY 0.4.3 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                0.3.1
+                0.4.3
               </div>
             
           
@@ -133,7 +133,7 @@
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
 <span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span>
-<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">in1d</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">in1d</span><span class="p">,</span> <span class="n">unique</span>
 <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">read_table</span>
 
 <span class="kn">import</span> <span class="nn">sys</span>
@@ -225,12 +225,12 @@
     <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
         <span class="n">genesets_filter</span> <span class="o">=</span>  <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">genesets_dict</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">min_size</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">max_size</span><span class="p">}</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;system failure. Please Provide correct input files&quot;</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;System failure. Please Provide correct input files&quot;</span><span class="p">)</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>    
     <span class="k">if</span> <span class="n">gene_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">subsets</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">genesets_filter</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>             
         <span class="k">for</span> <span class="n">subset</span> <span class="ow">in</span> <span class="n">subsets</span><span class="p">:</span>            
-            <span class="n">tag_indicator</span> <span class="o">=</span> <span class="n">in1d</span><span class="p">(</span><span class="n">gene_list</span><span class="p">,</span> <span class="n">genesets_filter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subset</span><span class="p">),</span> <span class="n">assume_unique</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">tag_indicator</span> <span class="o">=</span> <span class="n">in1d</span><span class="p">(</span><span class="n">unique</span><span class="p">(</span><span class="n">gene_list</span><span class="p">),</span> <span class="n">genesets_filter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subset</span><span class="p">),</span> <span class="n">assume_unique</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
             <span class="n">tag_len</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">tag_indicator</span><span class="p">)</span>      
             <span class="k">if</span> <span class="n">tag_len</span> <span class="o">&lt;=</span> <span class="n">min_size</span> <span class="ow">or</span> <span class="n">tag_len</span> <span class="o">&gt;=</span> <span class="n">max_size</span><span class="p">:</span>                    
                 <span class="k">del</span> <span class="n">genesets_filter</span><span class="p">[</span><span class="n">subset</span><span class="p">]</span>
@@ -239,11 +239,12 @@
     <span class="c1">#some_dict = {key: value for key, value in some_dict.items() if value != value_to_remove}</span>
     <span class="c1">#use np.intersect1d() may be faster???    </span>
     <span class="n">filsets_num</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">genesets_dict</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">genesets_filter</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;{a} gene_sets have been filtered out for max_size = {b} and min_size = {c}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">filsets_num</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="n">max_size</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="n">min_size</span><span class="p">))</span>
-
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;{a} gene_sets have been filtered out when max_size={b} and min_size={c}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">filsets_num</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="n">max_size</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="n">min_size</span><span class="p">))</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;{} gene_sets used for further calculating&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">genesets_filter</span><span class="p">)))</span>
+    
     <span class="k">if</span> <span class="n">filsets_num</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">genesets_dict</span><span class="p">):</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;No gene sets passed throught filtering condition!!!, try new paramters again!&quot;</span><span class="p">,</span>
-                         <span class="s2">&quot;Note: Gene names for gseapy is case sensitive.&quot;</span> <span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;No gene sets passed throught filtering condition!!!, try new paramters again!</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>\
+              <span class="s2">&quot;Note: Gene names for gseapy is case sensitive.&quot;</span> <span class="p">)</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">genesets_filter</span>
@@ -281,7 +282,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'0.3.1',
+            VERSION:'0.4.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

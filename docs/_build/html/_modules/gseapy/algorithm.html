@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>gseapy.algorithm &mdash; GSEAPY 0.3.1 documentation</title>
+  <title>gseapy.algorithm &mdash; GSEAPY 0.4.3 documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="GSEAPY 0.3.1 documentation" href="../../index.html"/>
+    <link rel="top" title="GSEAPY 0.4.3 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                0.3.1
+                0.4.3
               </div>
             
           
@@ -131,7 +131,7 @@
   <h1>Source code for gseapy.algorithm</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span><span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">division</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="nb">reduce</span>
 
 <span class="kn">import</span> <span class="nn">time</span>
@@ -389,7 +389,7 @@
         <span class="k">for</span> <span class="n">si</span><span class="p">,</span><span class="n">subset</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">subsets</span><span class="p">):</span>
             <span class="n">esn</span> <span class="o">=</span> <span class="n">enrichment_score</span><span class="p">(</span><span class="n">gene_list</span><span class="o">=</span><span class="n">gene_list</span><span class="p">,</span> <span class="n">gene_set</span><span class="o">=</span><span class="n">gmt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subset</span><span class="p">),</span> <span class="n">weighted_score_type</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> 
                                    <span class="n">correl_vector</span><span class="o">=</span><span class="n">ranking</span><span class="p">,</span> <span class="n">esnull</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">rs</span><span class="o">=</span><span class="n">rs</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>                                         
-            <span class="n">enrichment_nulls</span><span class="p">[</span><span class="n">si</span><span class="p">]</span> <span class="o">=</span> <span class="n">esn</span> 
+            <span class="n">enrichment_nulls</span><span class="p">[</span><span class="n">si</span><span class="p">]</span> <span class="o">=</span> <span class="n">esn</span> <span class="c1"># esn is a list, don&#39;t need to use append method. </span>
 
     <span class="k">return</span> <span class="n">gsea_significance</span><span class="p">(</span><span class="n">enrichment_scores</span><span class="p">,</span> <span class="n">enrichment_nulls</span><span class="p">),</span><span class="n">hit_ind</span><span class="p">,</span><span class="n">rank_ES</span><span class="p">,</span> <span class="n">subsets</span>
 
@@ -418,10 +418,11 @@
     <span class="n">es</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">es</span><span class="p">)</span>
     <span class="n">esnull</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">esnull</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">condlist</span> <span class="o">=</span> <span class="p">[</span> <span class="n">es</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">es</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">condlist</span> <span class="o">=</span> <span class="p">[</span> <span class="n">es</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">es</span> <span class="o">&gt;=</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">choicelist</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">esnull</span> <span class="o">&lt;</span> <span class="n">es</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">es</span><span class="p">),</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">esnull</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="p">,</span> 
                       <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">esnull</span> <span class="o">&gt;=</span> <span class="n">es</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">es</span><span class="p">),</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">esnull</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span>
         <span class="n">pval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">condlist</span><span class="p">,</span> <span class="n">choicelist</span><span class="p">)</span>
+ 
         <span class="k">return</span> <span class="n">pval</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mf">1.0</span> <span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">es</span><span class="p">))</span>
@@ -506,7 +507,8 @@
     <span class="n">es</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">enrichment_scores</span><span class="p">)</span>
     <span class="n">esnull</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">enrichment_nulls</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">enrNull</span> <span class="ow">in</span> <span class="n">esnull</span><span class="p">:</span>        
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">enrichment_scores</span><span class="p">)):</span>
+        <span class="n">enrNull</span> <span class="o">=</span> <span class="n">esnull</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="c1">#for numpy array, use index to extract array, do not use &quot;for a in arr&quot; method.        </span>
         <span class="n">meanPos</span> <span class="o">=</span> <span class="n">enrNull</span><span class="p">[</span><span class="n">enrNull</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
         <span class="n">esnull_meanPos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">meanPos</span><span class="p">)</span>
                   
@@ -615,7 +617,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'0.3.1',
+            VERSION:'0.4.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

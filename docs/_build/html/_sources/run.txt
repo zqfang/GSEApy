@@ -9,7 +9,7 @@ How to Use GSEAPY
 For command line usage:
 --------------------------------
 
-The ``replot`` module reproduce GSEA desktop version results. The only input for GSEAPY is the location to GSEA results.
+The ``replot`` module reproduce GSEA desktop version results. The only input for replot module is the location to GSEA results.
 
 .. code:: bash
   
