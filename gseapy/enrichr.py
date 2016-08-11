@@ -3,6 +3,11 @@
 # see: http://amp.pharm.mssm.edu/Enrichr/help#api for API docs
 # Usage: gseapy enrichr  <genelist> <listdesrciption> <enrichr_library> <enrichr_results>
 
+#genelist : flat file with list of genes, one gene id per row
+#listdesrciption : name of analysis
+#enrichr_library : Enrichr Library to query. 
+#enrichr_results : out put file prefix
+
 from __future__ import print_function
 
 import json
