@@ -1,12 +1,7 @@
 #!/usr/bin/env python
 # python 
 # see: http://amp.pharm.mssm.edu/Enrichr/help#api for API docs
-# Usage: gseapy enrichr  <genelist> <listdesrciption> <enrichr_library> <enrichr_results>
 
-#genelist : flat file with list of genes, one gene id per row
-#listdesrciption : name of analysis
-#enrichr_library : Enrichr Library to query. 
-#enrichr_results : out put file prefix
 
 from __future__ import print_function
 
@@ -14,118 +9,124 @@ import json
 import requests
 import sys
 
-print("Enrichr API : Start")
-print("Enrichr API : Reading Command Options")
-## get command line args
-genelist = sys.argv[1]
-listdesrciption = sys.argv[2]
-enrichr_library = sys.argv[3]
-enrichr_results = sys.argv[4]
 
-# testing
-# genelist = "gene_list.txt"
-# enrichr_library = "KEGG_2016"
-# listdesrciption = "TEST"
-# enrichr_results = "example_enrichment_KEGG_2016"
+def enrichr(gene_list, description='foo',enrichr_library, outdir):
+    """Enrichr API.
 
-## Print options
-print('Enrichr API : Input file is:', genelist)
-print('Enrichr API : Analysis name: ', listdesrciption)
-print('Enrichr API : Enrichr Library: ', enrichr_library)
-print('Enrichr API : Enrichr Results File: ', enrichr_results)
+    :param gene_list: flat file with list of genes, one gene id per row
+    :param description: name of analysis
+    :param enrich_library: Enrichr Library to query.
+    :param outdir: out put file prefix
+    
+    """
+    print("Enrichr API : Reading Command Options")
+    
+    genelist = gene_list
+    list_desrciption = description
+    enrichr_library = enrichr_library
+    enrichr_results = outdir
 
-# get gene lits
-print("Enrichr API : Reading:",genelist)
-with open(genelist) as f:
-    genes = f.read()
 
-## enrichr url
-ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/addList'
+    ## Print options
+    print('Enrichr API : Input file is:', genelist)
+    print('Enrichr API : Analysis name: ', list_desrciption)
+    print('Enrichr API : Enrichr Library: ', enrichr_library)
+    print('Enrichr API : Enrichr Results File: ', enrichr_results)
 
-# stick gene list here
-genes_str = str(genes)
+    # get gene lits
+    print("Enrichr API : Reading:",genelist)
+    with open(genelist) as f:
+        genes = f.read()
+ 
+    ## enrichr url
+    ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/addList'
 
-# name of analysis or list
-description = str(listdesrciption)
+    # stick gene list here
+    genes_str = str(genes)
 
-# payload
-payload = {
-  'list': (None, genes_str),
-  'description': (None, description)
-}
+    # genes_str = '\n'.join(genelist)
 
-# response
-print("Enrichr API : requests.post")
-response = requests.post(ENRICHR_URL, files=payload)
+    # name of analysis or list
+    description = str(list_desrciption)
 
-if not response.ok:
-  raise Exception('Error analyzing gene list')
+    # payload
+    payload = {
+      'list': (None, genes_str),
+      'description': (None, description)
+       }   
 
-job_id = json.loads(response.text)
+    # response
+    print("Enrichr API : requests.post")
+    response = requests.post(ENRICHR_URL, files=payload)
 
-print('Enrichr API : Job ID:', job_id)
+    if not response.ok:
+       raise Exception('Error analyzing gene list')
 
-################################################################################
-# View added gene list
-#
-ENRICHR_URL_A = 'http://amp.pharm.mssm.edu/Enrichr/view?userListId=%s'
+    job_id = json.loads(response.text)
 
-user_list_id = job_id['userListId']
-#print(user_list_id)
+    print('Enrichr API : Job ID:', job_id)
 
-response_gene_list = requests.get(ENRICHR_URL_A % str(user_list_id))
+    ################################################################################
+    # View added gene list
+    #
+    ENRICHR_URL_A = 'http://amp.pharm.mssm.edu/Enrichr/view?userListId=%s'
 
-if not response_gene_list.ok:
-    raise Exception('Error getting gene list')
+    user_list_id = job_id['userListId']
+    #print(user_list_id)
 
-print('Enrichr API : View added gene list:', job_id)
-added_gene_list = json.loads(response_gene_list.text)
-print(added_gene_list)
+    response_gene_list = requests.get(ENRICHR_URL_A % str(user_list_id))
 
-################################################################################
-# Get enrichment results
-#
-ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/enrich'
-query_string = '?userListId=%s&backgroundType=%s'
+    if not response_gene_list.ok:
+        raise Exception('Error getting gene list')
 
-## get id data
-user_list_id = job_id['userListId']
+    print('Enrichr API : View added gene list:', job_id)
+    added_gene_list = json.loads(response_gene_list.text)
+    print(added_gene_list)
 
-## Libraray
-gene_set_library = str(enrichr_library)
+    ################################################################################
+    # Get enrichment results
+    #
+    ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/enrich'
+    query_string = '?userListId=%s&backgroundType=%s'
 
-response = requests.get(
-    ENRICHR_URL + query_string % (str(user_list_id), gene_set_library)
- )
-if not response.ok:
-    raise Exception('Error fetching enrichment results')
+    ## get id data
+    user_list_id = job_id['userListId']
 
-print('Enrichr API : Get enrichment results: Job Id:', job_id)
-data = json.loads(response.text)
-print(data)
+    ## Libraray
+    gene_set_library = str(enrichr_library)
 
-################################################################################
-## Download file of enrichment results
-#
-ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/export'
+    response = requests.get(
+        ENRICHR_URL + query_string % (str(user_list_id), gene_set_library)
+          )
+    if not response.ok:
+        raise Exception('Error fetching enrichment results')
 
-query_string = '?userListId=%s&filename=%s&backgroundType=%s'
+    print('Enrichr API : Get enrichment results: Job Id:', job_id)
+    data = json.loads(response.text)
+    print(data)
 
-user_list_id = str(job_id['userListId'])
+    ################################################################################
+    ## Download file of enrichment results
+    #
+    ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/export'
 
-filename = enrichr_results
+    query_string = '?userListId=%s&filename=%s&backgroundType=%s'
 
-gene_set_library = str(enrichr_library)
+    user_list_id = str(job_id['userListId'])
 
-url = ENRICHR_URL + query_string % (user_list_id, filename, gene_set_library)
+    filename = enrichr_results
 
-response = requests.get(url, stream=True)
+    gene_set_library = str(enrichr_library)
 
-print('Enrichr API : Downloading file of enrichment results: Job Id:', job_id)
-with open(filename + '.txt', 'wb') as f:
-    for chunk in response.iter_content(chunk_size=1024):
-        if chunk:
-            f.write(chunk)
-################################################
-print('Enrichr API : Results written to:', enrichr_results + ".txt")
-print("Enrichr API : Done")
+    url = ENRICHR_URL + query_string % (user_list_id, filename, gene_set_library)
+
+    response = requests.get(url, stream=True)
+
+    print('Enrichr API : Downloading file of enrichment results: Job Id:', job_id)
+    with open(filename + '.txt', 'wb') as f:
+        for chunk in response.iter_content(chunk_size=1024):
+            if chunk:
+                f.write(chunk)
+    ################################################
+    print('Enrichr API : Results written to:', enrichr_results + ".txt")
+    print("Enrichr API : Done")

@@ -7,7 +7,7 @@ import argparse as ap
 # Main function
 # ------------------------------------
 
-__version__ = '0.4.3'
+__version__ = '0.5.0'
 
 def main():
     """The Main function/pipeline for GSEAPY."""
@@ -36,7 +36,11 @@ def main():
         
         prerank(args.rnk, args.gmt, args.outdir, args.label[0], args.label[1], args.mins, args.maxs, args.n, args.weight,
                 args.ascending, args.figsize, args.format, args.graph, args.seed)
-        
+    
+    elif subcommand == 'enrichr':
+        # calling enrichr API
+        from .gsea import enrichr
+        enrichr(gene_list= args.gene_list, desrciption=args.description, enrichr_library=args.library, outdir=args.ofile)    
     else:
         argparser.print_help()
         sys.exit(0)
@@ -58,6 +62,8 @@ def prepare_argparser():
     add_prerank_parser(subparsers)
     # command for 'plot'
     add_plot_parser(subparsers)
+    # command for 'enrichr'
+    add_enrichr_parser(subparsers)
 
     return argparser
 
@@ -79,7 +85,7 @@ def add_output_group(parser, required=True):
     output_group = parser.add_mutually_exclusive_group(required=required)
     output_group.add_argument("--ofile", dest="ofile", type=str,
                               help="Output file name. Mutually exclusive with --o-prefix.")
-    output_group.add_argument("--o-prefix", dest="oprefix", type=str,
+    output_group.add_argument("--o-prefix", dest="ofile", type=str,
                               help="Output file prefix. Mutually exclusive with -o/--ofile.")
 
 
@@ -181,6 +187,24 @@ def add_plot_parser(subparsers):
     #add_output_group( argparser_plot )
     group_replot.add_argument("-w", "--weight", action='store', dest='weight', default=1, type=float, metavar='',
                               help='Weighted_score of rank_metrics. Please Use the same value in GSEA. Choose from (0, 1, 1.5, 2),default: 1',)
+
+    return
+def add_enrichr_parser(subparsers):
+    """Add function 'enrichr' argument parsers."""
+    
+    argparser_enrichr = subparsers.add_parser("enrichr", help="Peform GSEA using enrichr API.")
+
+    group_enrichr = argparser_enrichr.add_argument_group("Positional arguments")
+
+    group_enrichr.add_argument("-g", "--gene-list", action="store", dest="gene_list", required=True, metavar='',
+                              help="Enrichr uses a list of Entrez gene symbols as input.  ")
+    group_enrichr.add_argument("-d", "--description", action='store', dest='description', default='foo',metavar='',
+                              help="It is recommended to enter a description for your list so that" +\n
+                                   " multiple lists can be differentiated from each other if you choose to save or share your list")
+    group_enrichr.add_argument("-l", "--library", action="store", dest="library", required=True, metavar='',
+                              help="Enrichr uses a list of Entrez gene symbols as input.  ")
+
+    add_output_group(group_enrichr)
 
     return
 
