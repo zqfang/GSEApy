@@ -4,13 +4,12 @@
 
 
 from __future__ import print_function
-
 import json
 import requests
 import sys
 
 
-def enrichr(gene_list, description='foo',enrichr_library, outdir):
+def enrichr(gene_list, description, enrichr_library, outdir):
     """Enrichr API.
 
     :param gene_list: flat file with list of genes, one gene id per row
@@ -19,7 +18,6 @@ def enrichr(gene_list, description='foo',enrichr_library, outdir):
     :param outdir: out put file prefix
     
     """
-    print("Enrichr API : Reading Command Options")
     
     genelist = gene_list
     list_desrciption = description
@@ -28,22 +26,21 @@ def enrichr(gene_list, description='foo',enrichr_library, outdir):
 
 
     ## Print options
-    print('Enrichr API : Input file is:', genelist)
+    #print('Enrichr API : Input file is:', genelist)
     print('Enrichr API : Analysis name: ', list_desrciption)
     print('Enrichr API : Enrichr Library: ', enrichr_library)
-    print('Enrichr API : Enrichr Results File: ', enrichr_results)
+    #print('Enrichr API : Enrichr Results File: ', enrichr_results)
 
     # get gene lits
-    print("Enrichr API : Reading:",genelist)
-    with open(genelist) as f:
-        genes = f.read()
+    #with open(genelist) as f:
+    #    genes = f.read()
  
     ## enrichr url
     ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/addList'
 
     # stick gene list here
-    genes_str = str(genes)
-
+    #genes_str = str(genes)
+    genes_str = genelist
     # genes_str = '\n'.join(genelist)
 
     # name of analysis or list
@@ -56,11 +53,11 @@ def enrichr(gene_list, description='foo',enrichr_library, outdir):
        }   
 
     # response
-    print("Enrichr API : requests.post")
+    #print("Enrichr API : requests.post")
     response = requests.post(ENRICHR_URL, files=payload)
 
     if not response.ok:
-       raise Exception('Error analyzing gene list')
+        raise Exception('Error analyzing gene list')
 
     job_id = json.loads(response.text)
 
@@ -81,7 +78,7 @@ def enrichr(gene_list, description='foo',enrichr_library, outdir):
 
     print('Enrichr API : View added gene list:', job_id)
     added_gene_list = json.loads(response_gene_list.text)
-    print(added_gene_list)
+    #print(added_gene_list)
 
     ################################################################################
     # Get enrichment results
@@ -103,7 +100,7 @@ def enrichr(gene_list, description='foo',enrichr_library, outdir):
 
     print('Enrichr API : Get enrichment results: Job Id:', job_id)
     data = json.loads(response.text)
-    print(data)
+    #print(data)
 
     ################################################################################
     ## Download file of enrichment results
@@ -130,3 +127,4 @@ def enrichr(gene_list, description='foo',enrichr_library, outdir):
     ################################################
     print('Enrichr API : Results written to:', enrichr_results + ".txt")
     print("Enrichr API : Done")
+
