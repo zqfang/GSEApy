@@ -7,7 +7,7 @@ from __future__ import print_function
 import json
 import requests
 import sys
-from pandas.io.common import get_filepath_or_buffer
+
 
 
 default_gene_set_libraries = [
@@ -73,16 +73,13 @@ def enrichr(gene_list, description, gene_set, outfile):
     :param outdir: out put file prefix
     
     """
-    file_or_buffer, encode, compression = get_filepath_or_buffer(gene_list)
-    genes = file_or_buffer.read()
-
-   
+    
     # get gene lits
     with open(gene_list) as f:
         genes = f.read()
-
-    #genes_str = '\n'.join(genes)
     genes_str = str(genes)
+    #genes_str = '\n'.join(genes)
+    
     # name of analysis or list
     description = str(description)
     
