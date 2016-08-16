@@ -83,7 +83,7 @@ def add_output_group(parser, required=True):
     """output group"""
 
     output_group = parser.add_mutually_exclusive_group(required=required)
-    output_group.add_argument("--ofile", dest="ofile", type=str, default='enrich_report',
+    output_group.add_argument("-o", "--ofile", dest="ofile", type=str, default='enrich_report',
                               help="Output file name. Mutually exclusive with --o-prefix.")
     output_group.add_argument("--o-prefix", dest="ofile", type=str, default='enrich_report',
                               help="Output file prefix. Mutually exclusive with -o/--ofile.")

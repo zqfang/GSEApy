@@ -75,6 +75,12 @@ Features of GSEAPY
 
 #. GSEAPY Enhancement will be considered. If you would like to contribute, please @BioNinja on ``Github``. 
 
+New Features of GSEAPY
+--------------------------------------------------------
+
+#. GSEAPY add **Enrichr** API, you could perform GO analysis on latest gene sets !!! 
+
+Enrichr is open source and freely available online at: http://amp.pharm.mssm.edu/Enrichr .
 
 
 GSEA desktop version output: 
@@ -99,6 +105,14 @@ Using the same algorithm by ``GSEA``, GSEAPY reproduce the example above.
    **GSEAPY figures are PDF formats by default.** Other matplotlib figures formats are supported, too.
 
    You can modify ``GSEA`` plots easily in .pdf files. Please Enjoy.
+
+
+
+GSEAPY ``enrichr`` module 
+-----------------------------------------------
+The powerfull module will enable you perform gene set enrichment analysis extreamly easily.
+
+.. figure:: enrichr.PNG
 
 
 
@@ -128,6 +142,7 @@ Mandatory
 * Pandas 
 * Matplotlib
 * Beautifulsoup4
+* requests(for enrichr API)
 
 You may also need **lxml, html5lib**, if you could not parse xml files. 
 
@@ -136,7 +151,7 @@ You may also need **lxml, html5lib**, if you could not parse xml files.
 Run GSEAPY
 -----------------
 
-GSEAPY has three subcommands: ``replot``, ``call``, ``prerank``.
+GSEAPY has four subcommands: ``replot``, ``call``, ``prerank``, ``enrichr``.
 
 The ``replot`` module reproduce GSEA desktop version results. The only input for GSEAPY is the location to GSEA results.
 
@@ -148,6 +163,9 @@ and gene_sets file in gmt format.  ``prerank`` module is an API to `GSEA` pre-ra
 
 All input files' formats are identical to ``GSEA`` desktop version. 
 See `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ documentation for more information.
+
+
+The ``enrichr`` module will using enrichr online tool. It will generate results in txt format.
 
 
 For command line usage:
@@ -166,7 +184,8 @@ For command line usage:
   # An example to compute using gseapy prerank module
   $ gseapy prerank -r gsea_data.rnk -g gene_sets.gmt -o test
 
-
+  # An example to use enrichr api
+  $ gseapy enrichr -l gene_list.txt -g KEGG_2016 -d pathway_enrichment -o test
 
 
 Run gseapy inside python:
@@ -183,6 +202,9 @@ Run gseapy inside python:
    
     # using prerank tool
     gseapy.prerank(rnk=gsea_data.rnk, gene_sets=gene_sets.gmt, outdir='test')
+
+    # call enrichr
+    gseapy.enrichr(gene_list='gene_list.txt', description='pathway_analysis, gene_set='KEGG_2016', outfile='test')
 
 
 
