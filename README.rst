@@ -29,8 +29,12 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
   The main documentation for GSEAPY can be found at https://pythonhosted.org/gseapy
   
 
-GSEAPY is a python wrapper for **GESA**.It's used for convenient GO enrichments
-and produce **publishable quality figures** from python. GSEAPY could be used for **RNA-seq, ChIP-seq, Microarry** data.
+GSEAPY is a python wrapper for **GESA** and **Enrichr**. 
+--------------------------------------------------------------------------------------------
+
+It's used for convenient GO enrichments and produce **publishable quality figures** from python. 
+
+GSEAPY could be used for **RNA-seq, ChIP-seq, Microarry** data.
 
 
 
@@ -57,6 +61,12 @@ figures, and do many jobs at the same time without using mouse to select differr
 differrent gene sets repeatly. 
 
 
+New Features of GSEAPY
+--------------------------------------------------------
+
+#. GSEAPY add **Enrichr** API, you could perform GO analysis on latest gene sets !!! 
+
+Enrichr is open source and freely available online at: http://amp.pharm.mssm.edu/Enrichr .
 
 
 
@@ -75,12 +85,6 @@ Features of GSEAPY
 
 #. GSEAPY Enhancement will be considered. If you would like to contribute, please @BioNinja on ``Github``. 
 
-New Features of GSEAPY
---------------------------------------------------------
-
-#. GSEAPY add **Enrichr** API, you could perform GO analysis on latest gene sets !!! 
-
-Enrichr is open source and freely available online at: http://amp.pharm.mssm.edu/Enrichr .
 
 
 GSEA desktop version output: 
@@ -185,7 +189,7 @@ For command line usage:
   $ gseapy prerank -r gsea_data.rnk -g gene_sets.gmt -o test
 
   # An example to use enrichr api
-  $ gseapy enrichr -l gene_list.txt -g KEGG_2016 -d pathway_enrichment -o test
+  $ gseapy enrichr -i gene_list.txt -g KEGG_2016 -d pathway_enrichment -o test
 
 
 Run gseapy inside python:

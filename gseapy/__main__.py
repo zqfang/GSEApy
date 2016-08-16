@@ -196,7 +196,7 @@ def add_enrichr_parser(subparsers):
 
     group_enrichr = argparser_enrichr.add_argument_group("Positional arguments")
 
-    group_enrichr.add_argument("-l", "--gene-list", action="store", dest="gene_list", required=True, metavar='',
+    group_enrichr.add_argument("-i", "--input-list", action="store", dest="gene_list", required=True, metavar='',
                               help="Enrichr uses a list of Entrez gene symbols as input.  ")
     group_enrichr.add_argument("-d", "--description", action='store', dest='description', default='foo',metavar='',
                               help="It is recommended to enter a description for your list so that" +
