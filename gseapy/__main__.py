@@ -40,7 +40,7 @@ def main():
     elif subcommand == 'enrichr':
         # calling enrichr API
         from .gsea import enrichr
-        enrichr(gene_list= args.gene_list, desrciption=args.description, enrichr_library=args.library, outdir=args.ofile)    
+        enrichr(gene_list= args.gene_list, desrciption=args.description, gene_set=args.library, outfile=args.ofile)    
     else:
         argparser.print_help()
         sys.exit(0)
@@ -83,9 +83,9 @@ def add_output_group(parser, required=True):
     """output group"""
 
     output_group = parser.add_mutually_exclusive_group(required=required)
-    output_group.add_argument("--ofile", dest="ofile", type=str,
+    output_group.add_argument("--ofile", dest="ofile", type=str, default='enrich_report',
                               help="Output file name. Mutually exclusive with --o-prefix.")
-    output_group.add_argument("--o-prefix", dest="ofile", type=str,
+    output_group.add_argument("--o-prefix", dest="ofile", type=str, default='enrich_report',
                               help="Output file prefix. Mutually exclusive with -o/--ofile.")
 
 
@@ -196,12 +196,12 @@ def add_enrichr_parser(subparsers):
 
     group_enrichr = argparser_enrichr.add_argument_group("Positional arguments")
 
-    group_enrichr.add_argument("-g", "--gene-list", action="store", dest="gene_list", required=True, metavar='',
+    group_enrichr.add_argument("-l", "--gene-list", action="store", dest="gene_list", required=True, metavar='',
                               help="Enrichr uses a list of Entrez gene symbols as input.  ")
     group_enrichr.add_argument("-d", "--description", action='store', dest='description', default='foo',metavar='',
                               help="It is recommended to enter a description for your list so that" +
                                    " multiple lists can be differentiated from each other if you choose to save or share your list")
-    group_enrichr.add_argument("-l", "--library", action="store", dest="library", required=True, metavar='',
+    group_enrichr.add_argument("-g", "--gene-sets", action="store", dest="library", required=True, metavar='',
                               help="Enrichr uses a list of Entrez gene symbols as input.  ")
 
     add_output_group(group_enrichr)

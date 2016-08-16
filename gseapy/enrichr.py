@@ -7,9 +7,64 @@ from __future__ import print_function
 import json
 import requests
 import sys
+from pandas.io.common import get_filepath_or_buffer
 
 
-def enrichr(gene_list, description, enrichr_library, outdir):
+default_gene_set_libraries = [
+    'GO_Biological_Process_2015',
+    "ChEA_2015",
+    "KEGG_2016",
+    "ESCAPE",
+    "Epigenomics_Roadmap_HM_ChIP-seq",
+    "ENCODE_TF_ChIP-seq_2015",
+    "ENCODE_Histone_Modifications_2015",
+    "OMIM_Expanded",
+    "TF-LOF_Expression_from_GEO",
+    "Single_Gene_Perturbations_from_GEO_down",
+    "Single_Gene_Perturbations_from_GEO_up",
+    "Disease_Perturbations_from_GEO_down",
+    "Disease_Perturbations_from_GEO_up",
+    "Drug_Perturbations_from_GEO_down",
+    "Drug_Perturbations_from_GEO_up",
+    "WikiPathways_2016",
+    "Reactome_2016",
+    "BioCarta_2016",
+    "NCI-Nature_2016"]
+
+
+def get_libary_name():
+
+	# make a get request to get the gmt names and meta data from Enrichr
+	#python 2
+    if sys.version_info[0] == 2 :
+        import urllib2
+        x = urllib2.urlopen('http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary?mode=meta')
+        response = x.read()
+        gmt_data = json.loads(response)
+
+	# python 3
+    elif sys.version_info[0] == 3:
+        import urllib
+        x = urllib.request.urlopen('http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary?mode=meta')
+        response = x.read()
+        gmt_data = json.loads(response.decode('utf-8'))
+    else:
+        print("System failure. Please Provide correct input files")
+        sys.exit(1) 
+	# generate list of gmts 
+    gmt_names = []
+
+	# get library names 
+    for inst_gmt in gmt_data['libraries']:
+
+		# only include active gmts 
+        if inst_gmt['isActive'] == True:
+            gmt_names.append(inst_gmt['libraryName'])
+
+
+    return gmt_names
+    
+def enrichr(gene_list, description, gene_set, outfile):
     """Enrichr API.
 
     :param gene_list: flat file with list of genes, one gene id per row
@@ -18,33 +73,37 @@ def enrichr(gene_list, description, enrichr_library, outdir):
     :param outdir: out put file prefix
     
     """
+    file_or_buffer, encode, compression = get_filepath_or_buffer(gene_list)
+    genes = file_or_buffer.read()
+
+   
+    # get gene lits
+    with open(gene_list) as f:
+        genes = f.read()
+
+    #genes_str = '\n'.join(genes)
+    genes_str = str(genes)
+    # name of analysis or list
+    description = str(description)
     
-    genelist = gene_list
-    list_desrciption = description
-    enrichr_library = enrichr_library
-    enrichr_results = outdir
-
-
+    #library validaty confirmationi
+    gene_set = str(gene_set)  
+    
+    enrichr_library = get_libary_name()
+    
+    while gene_set not in enrichr_library:
+        print("You have choose a invalidity library, Please enter a worked one here!!!\n" )
+        print(enrichr_library,"\n")
+        gene_set = str(input())
     ## Print options
     #print('Enrichr API : Input file is:', genelist)
-    print('Enrichr API : Analysis name: ', list_desrciption)
-    print('Enrichr API : Enrichr Library: ', enrichr_library)
+    print('Enrichr API : Analysis name: ', description)
+    print('Enrichr API : Enrichr Library: ', gene_set)
     #print('Enrichr API : Enrichr Results File: ', enrichr_results)
 
-    # get gene lits
-    #with open(genelist) as f:
-    #    genes = f.read()
- 
+
     ## enrichr url
     ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/addList'
-
-    # stick gene list here
-    #genes_str = str(genes)
-    genes_str = genelist
-    # genes_str = '\n'.join(genelist)
-
-    # name of analysis or list
-    description = str(list_desrciption)
 
     # payload
     payload = {
@@ -53,7 +112,7 @@ def enrichr(gene_list, description, enrichr_library, outdir):
        }   
 
     # response
-    #print("Enrichr API : requests.post")
+
     response = requests.post(ENRICHR_URL, files=payload)
 
     if not response.ok:
@@ -63,7 +122,7 @@ def enrichr(gene_list, description, enrichr_library, outdir):
 
     print('Enrichr API : Job ID:', job_id)
 
-    ################################################################################
+  
     # View added gene list
     #
     ENRICHR_URL_A = 'http://amp.pharm.mssm.edu/Enrichr/view?userListId=%s'
@@ -76,55 +135,39 @@ def enrichr(gene_list, description, enrichr_library, outdir):
     if not response_gene_list.ok:
         raise Exception('Error getting gene list')
 
-    print('Enrichr API : View added gene list:', job_id)
-    added_gene_list = json.loads(response_gene_list.text)
-    #print(added_gene_list)
+    print('Enrichr API :  Added gene list:', job_id)
 
-    ################################################################################
+
     # Get enrichment results
-    #
     ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/enrich'
     query_string = '?userListId=%s&backgroundType=%s'
 
     ## get id data
     user_list_id = job_id['userListId']
-
-    ## Libraray
-    gene_set_library = str(enrichr_library)
-
     response = requests.get(
-        ENRICHR_URL + query_string % (str(user_list_id), gene_set_library)
+        ENRICHR_URL + query_string % (str(user_list_id), gene_set)
           )
     if not response.ok:
         raise Exception('Error fetching enrichment results')
 
     print('Enrichr API : Get enrichment results: Job Id:', job_id)
-    data = json.loads(response.text)
-    #print(data)
 
-    ################################################################################
+
     ## Download file of enrichment results
     #
     ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/export'
-
     query_string = '?userListId=%s&filename=%s&backgroundType=%s'
-
     user_list_id = str(job_id['userListId'])
 
-    filename = enrichr_results
-
-    gene_set_library = str(enrichr_library)
-
-    url = ENRICHR_URL + query_string % (user_list_id, filename, gene_set_library)
-
+    url = ENRICHR_URL + query_string % (user_list_id, outfile, gene_set)
     response = requests.get(url, stream=True)
 
     print('Enrichr API : Downloading file of enrichment results: Job Id:', job_id)
-    with open(filename + '.txt', 'wb') as f:
+    with open(outfile + '.txt', 'wb') as f:
         for chunk in response.iter_content(chunk_size=1024):
             if chunk:
                 f.write(chunk)
     ################################################
-    print('Enrichr API : Results written to:', enrichr_results + ".txt")
+    print('Enrichr API : Results written to:', outfile + ".txt")
     print("Enrichr API : Done")
 
