@@ -120,6 +120,35 @@ The powerfull module will enable you perform gene set enrichment analysis extrea
 
 
 
+The only thing you need to prepeare is a gene list file in txt format(one gene id per row).
+
+**Note**: Enrichr uses a list of Entrez gene symbols as input.
+
+.. code:: python
+
+       with open('data/gene_list.txt') as genes:
+           print(genes.read())
+
+
+.. code:: python
+    
+    CTLA2B
+    SCARA3
+    LOC100044683
+    CMBL
+    CLIC6
+    IL13RA1
+    TACSTD2
+    DKKL1
+    CSF1
+    CITED1
+    SYNPO2L
+    TINAGL1
+    PTX3
+       
+
+
+
 Installation
 ------------
 
