@@ -83,11 +83,13 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 5000, gene_list=None):
     do this for you.
             
     """
+
  
-    file_or_buffer, encode, compression = get_filepath_or_buffer(gmt)
-    genesets_dict = { line.rstrip("\n").split("\t")[0]:  
-                      line.rstrip("\n").split("\t")[2:] 
-                      for line in file_or_buffer.readlines()}    
+    
+    with open(gmt) as genesets:    
+        genesets_dict = { line.rstrip("\n").split("\t")[0]:  
+                          line.rstrip("\n").split("\t")[2:] 
+                          for line in genesets.readlines()}    
     #filtering dict
     if sys.version_info[0] == 3 :
         genesets_filter =  {k: v for k, v in genesets_dict.items() if len(v) >= min_size and len(v) <= max_size}
