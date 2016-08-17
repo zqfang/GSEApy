@@ -202,7 +202,7 @@ def add_enrichr_parser(subparsers):
                               help="It is recommended to enter a description for your list so that" +
                                    " multiple lists can be differentiated from each other if you choose to save or share your list")
     group_enrichr.add_argument("-g", "--gene-sets", action="store", dest="library", required=True, metavar='',
-                              help="Enrichr uses a list of Entrez gene symbols as input.  ")
+                              help="Enrichr library name requires. see online tool for names.  ")
 
     add_output_group(group_enrichr)
 
