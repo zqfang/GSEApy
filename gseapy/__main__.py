@@ -7,7 +7,7 @@ import argparse as ap
 # Main function
 # ------------------------------------
 
-__version__ = '0.5.1'
+__version__ = '0.5.1a'
 
 def main():
     """The Main function/pipeline for GSEAPY."""
