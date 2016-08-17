@@ -8,7 +8,7 @@ def readme():
         return f.read()
 
 setup(name='gseapy',
-      version='0.5.1b',
+      version='0.5.2',
       description='Gene Set Enrichment Analysis in Python',
       long_description=readme(),
       classifiers=[
