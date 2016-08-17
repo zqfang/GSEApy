@@ -224,16 +224,42 @@ The only thing you need to prepeare is a gene list file in txt format(one gene i
 
 **Note**: Enrichr uses a list of Entrez gene symbols as input.
 
-Select the library you want to do enrichment analysis. For a view all avilable libraries,
-call :
+.. code:: python
 
-.. code: python
+       with open('data/gene_list.txt') as genes:
+           print(genes.read())
+
+
+.. code:: python
+    
+    CTLA2B
+    SCARA3
+    LOC100044683
+    CMBL
+    CLIC6
+    IL13RA1
+    TACSTD2
+    DKKL1
+    CSF1
+    CITED1
+    SYNPO2L
+    TINAGL1
+    PTX3
+       
+
+Select the library you want to do enrichment analysis. For a view all avilable libraries,
+call 
+
+
+.. code:: python
    
    #call get_library_name(), it will print out all library names.
    import gseapy
    names = gseapy.get_library_name()
    print(names)
 
+
+.. code:: python
 
    ['Genome_Browser_PWMs',
   'TRANSFAC_and_JASPAR_PWMs',
@@ -336,6 +362,9 @@ call :
   'Humancyc_2016',
   'NCI-Nature_2016',
   'Panther_2016']
+
+
+
 
 for for details, please track the offical links: http://amp.pharm.mssm.edu/Enrichr/
 

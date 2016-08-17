@@ -303,8 +303,136 @@ and gene_sets file in gmt format.  <code class="docutils literal"><span class="p
 <h2>Use <code class="docutils literal"><span class="pre">enrichr</span></code> command, or <code class="xref py py-func docutils literal"><span class="pre">enrichr()</span></code><a class="headerlink" href="#use-enrichr-command-or-enrichr" title="Permalink to this headline">¶</a></h2>
 <p>The only thing you need to prepeare is a gene list file in txt format(one gene id per row).</p>
 <p><strong>Note</strong>: Enrichr uses a list of Entrez gene symbols as input.</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;data/gene_list.txt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">genes</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">genes</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="code python highlight-python"><div class="highlight"><pre><span></span><span class="n">CTLA2B</span>
+<span class="n">SCARA3</span>
+<span class="n">LOC100044683</span>
+<span class="n">CMBL</span>
+<span class="n">CLIC6</span>
+<span class="n">IL13RA1</span>
+<span class="n">TACSTD2</span>
+<span class="n">DKKL1</span>
+<span class="n">CSF1</span>
+<span class="n">CITED1</span>
+<span class="n">SYNPO2L</span>
+<span class="n">TINAGL1</span>
+<span class="n">PTX3</span>
+</pre></div>
+</div>
 <p>Select the library you want to do enrichment analysis. For a view all avilable libraries,
-call :</p>
+call</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span></span><span class="c1">#call get_library_name(), it will print out all library names.</span>
+<span class="kn">import</span> <span class="nn">gseapy</span>
+<span class="n">names</span> <span class="o">=</span> <span class="n">gseapy</span><span class="o">.</span><span class="n">get_library_name</span><span class="p">()</span>
+<span class="k">print</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="code python highlight-python"><div class="highlight"><pre><span></span> [&#39;Genome_Browser_PWMs&#39;,
+&#39;TRANSFAC_and_JASPAR_PWMs&#39;,
+&#39;ChEA_2013&#39;,
+&#39;Drug_Perturbations_from_GEO_2014&#39;,
+&#39;ENCODE_TF_ChIP-seq_2014&#39;,
+&#39;BioCarta_2013&#39;,
+&#39;Reactome_2013&#39;,
+&#39;WikiPathways_2013&#39;,
+&#39;Disease_Signatures_from_GEO_up_2014&#39;,
+&#39;KEGG_2013&#39;,
+&#39;TF-LOF_Expression_from_GEO&#39;,
+&#39;TargetScan_microRNA&#39;,
+&#39;PPI_Hub_Proteins&#39;,
+&#39;GO_Molecular_Function_2015&#39;,
+&#39;GeneSigDB&#39;,
+&#39;Chromosome_Location&#39;,
+&#39;Human_Gene_Atlas&#39;,
+&#39;Mouse_Gene_Atlas&#39;,
+&#39;GO_Cellular_Component_2015&#39;,
+&#39;GO_Biological_Process_2015&#39;,
+&#39;Human_Phenotype_Ontology&#39;,
+&#39;Epigenomics_Roadmap_HM_ChIP-seq&#39;,
+&#39;KEA_2013&#39;,
+&#39;NURSA_Human_Endogenous_Complexome&#39;,
+&#39;CORUM&#39;,
+&#39;SILAC_Phosphoproteomics&#39;,
+&#39;MGI_Mammalian_Phenotype_Level_3&#39;,
+&#39;MGI_Mammalian_Phenotype_Level_4&#39;,
+&#39;Old_CMAP_up&#39;,
+&#39;Old_CMAP_down&#39;,
+&#39;OMIM_Disease&#39;,
+&#39;OMIM_Expanded&#39;,
+&#39;VirusMINT&#39;,
+&#39;MSigDB_Computational&#39;,
+&#39;MSigDB_Oncogenic_Signatures&#39;,
+&#39;Disease_Signatures_from_GEO_down_2014&#39;,
+&#39;Virus_Perturbations_from_GEO_up&#39;,
+&#39;Virus_Perturbations_from_GEO_down&#39;,
+&#39;Cancer_Cell_Line_Encyclopedia&#39;,
+&#39;NCI-60_Cancer_Cell_Lines&#39;,
+&#39;Tissue_Protein_Expression_from_ProteomicsDB&#39;,
+&#39;Tissue_Protein_Expression_from_Human_Proteome_Map&#39;,
+&#39;HMDB_Metabolites&#39;,
+&#39;Pfam_InterPro_Domains&#39;,
+&#39;GO_Biological_Process_2013&#39;,
+&#39;GO_Cellular_Component_2013&#39;,
+&#39;GO_Molecular_Function_2013&#39;,
+&#39;Allen_Brain_Atlas_up&#39;,
+&#39;ENCODE_TF_ChIP-seq_2015&#39;,
+&#39;ENCODE_Histone_Modifications_2015&#39;,
+&#39;Phosphatase_Substrates_from_DEPOD&#39;,
+&#39;Allen_Brain_Atlas_down&#39;,
+&#39;ENCODE_Histone_Modifications_2013&#39;,
+&#39;Achilles_fitness_increase&#39;,
+&#39;Achilles_fitness_decrease&#39;,
+&#39;MGI_Mammalian_Phenotype_2013&#39;,
+&#39;BioCarta_2015&#39;,
+&#39;HumanCyc_2015&#39;,
+&#39;KEGG_2015&#39;,
+&#39;NCI-Nature_2015&#39;,
+&#39;Panther_2015&#39;,
+&#39;WikiPathways_2015&#39;,
+&#39;Reactome_2015&#39;,
+&#39;ESCAPE&#39;,
+&#39;HomoloGene&#39;,
+&#39;Disease_Perturbations_from_GEO_down&#39;,
+&#39;Disease_Perturbations_from_GEO_up&#39;,
+&#39;Drug_Perturbations_from_GEO_down&#39;,
+&#39;Genes_Associated_with_NIH_Grants&#39;,
+&#39;Drug_Perturbations_from_GEO_up&#39;,
+&#39;KEA_2015&#39;,
+&#39;Single_Gene_Perturbations_from_GEO_up&#39;,
+&#39;Single_Gene_Perturbations_from_GEO_down&#39;,
+&#39;ChEA_2015&#39;,
+&#39;dbGaP&#39;,
+&#39;LINCS_L1000_Chem_Pert_up&#39;,
+&#39;LINCS_L1000_Chem_Pert_down&#39;,
+&#39;GTEx_Tissue_Sample_Gene_Expression_Profiles_down&#39;,
+&#39;GTEx_Tissue_Sample_Gene_Expression_Profiles_up&#39;,
+&#39;Ligand_Perturbations_from_GEO_down&#39;,
+&#39;Aging_Perturbations_from_GEO_down&#39;,
+&#39;Aging_Perturbations_from_GEO_up&#39;,
+&#39;Ligand_Perturbations_from_GEO_up&#39;,
+&#39;MCF7_Perturbations_from_GEO_down&#39;,
+&#39;MCF7_Perturbations_from_GEO_up&#39;,
+&#39;Microbe_Perturbations_from_GEO_down&#39;,
+&#39;Microbe_Perturbations_from_GEO_up&#39;,
+&#39;LINCS_L1000_Ligand_Perturbations_down&#39;,
+&#39;LINCS_L1000_Ligand_Perturbations_up&#39;,
+&#39;LINCS_L1000_Kinase_Perturbations_down&#39;,
+&#39;LINCS_L1000_Kinase_Perturbations_up&#39;,
+&#39;Reactome_2016&#39;,
+&#39;KEGG_2016&#39;,
+&#39;WikiPathways_2016&#39;,
+&#39;ENCODE_and_ChEA_Consensus_TFs_from_ChIP-X&#39;,
+&#39;Kinase_Perturbations_from_GEO_down&#39;,
+&#39;Kinase_Perturbations_from_GEO_up&#39;,
+&#39;BioCarta_2016&#39;,
+&#39;Humancyc_2016&#39;,
+&#39;NCI-Nature_2016&#39;,
+&#39;Panther_2016&#39;]
+</pre></div>
+</div>
 <p>for for details, please track the offical links: <a class="reference external" href="http://amp.pharm.mssm.edu/Enrichr/">http://amp.pharm.mssm.edu/Enrichr/</a></p>
 </div>
 <div class="section" id="use-replot-command-or-replot">
