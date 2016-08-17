@@ -4,7 +4,6 @@ from __future__ import absolute_import, print_function
 from bs4 import BeautifulSoup
 from numpy import in1d, unique
 from pandas import read_table
-from pandas.io.common import get_filepath_or_buffer
 import sys
 
 
