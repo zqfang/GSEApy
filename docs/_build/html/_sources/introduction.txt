@@ -17,9 +17,13 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
 .. image:: https://img.shields.io/github/license/mashape/apistatus.svg
 
 
+GSEAPY is a python wrapper for **GESA** and **Enrichr**. 
+--------------------------------------------------------------------------------------------
 
-GSEAPY is a python wrapper for **GESA**.It's used for convenient GO enrichments
-and produce **publishable quality figures** from python. GSEAPY could be used for **RNA-seq, ChIP-seq, Microarry** data.
+It's used for convenient GO enrichments and produce **publishable quality figures** from python. 
+
+GSEAPY could be used for **RNA-seq, ChIP-seq, Microarry** data.
+
 
 
 `Gene Set Enrichment Analysis <http://software.broadinstitute.org/gsea/index.jsp>`_ (GSEA) 
@@ -28,6 +32,7 @@ statistically significant, concordant differences between two biological states 
 
 The full ``GSEA`` is far too extensive to describe here; see
 `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ documentation for more information.
+
 
 Why GSEAPY
 -----------------------------------------------------
@@ -43,6 +48,13 @@ As a researcher of life science, I want a modern ``GSEA`` with lastest features.
 figures, and do many jobs at the same time without using mouse to select differrent data table,
 differrent gene sets repeatly. 
 
+
+New Features of GSEAPY
+--------------------------------------------------------
+
+#. GSEAPY add **Enrichr** API, you could perform GO analysis on latest gene sets !!! 
+
+Enrichr is open source and freely available online at: http://amp.pharm.mssm.edu/Enrichr .
 
 
 
@@ -88,6 +100,11 @@ Using the same algorithm by ``GSEA``, GSEAPY reproduce the example above.
    You can modify ``GSEA`` plots easily in .pdf files. Please Enjoy.
 
 
+GSEAPY ``enrichr`` module 
+-----------------------------------------------
+The powerfull module will enable you perform gene set enrichment analysis extreamly easily.
+
+.. figure:: enrichr.PNG
 
 
 
@@ -119,6 +136,7 @@ Mandatory
 * Pandas 
 * Matplotlib
 * Beautifulsoup4
+* requests(for enrichr API)
 
 You may also need **lxml, html5lib**, if you could not parse xml files. 
 
@@ -135,9 +153,11 @@ The ``call`` module produce GSEAPY results. The input requries a txt file(FPKM, 
 and gene_sets file in gmt format. 
 
 The ``prerank`` module produce GSEAPY results. The input a pre-ranked gene list dataset with correlation values, which in .rnk format,
-and gene_sets file in gmt format.  ``prerank`` module is an API to `GSEA` pre-rank tools.
+and gene_sets file in gmt format.  ``prerank`` module is an API to `GSEA` pre-rank tools.All input files' formats are identical to ``GSEA`` desktop version. 
 
-All input files' formats are identical to ``GSEA`` desktop version. 
+
+The ``enrichr`` module will using enrichr online tool. It will generate results in txt format.
+
 
 
 For more information to use this library,see the :ref:`run`. 

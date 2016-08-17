@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>How to Use GSEAPY &mdash; GSEAPY 0.4.3 documentation</title>
+  <title>How to Use GSEAPY &mdash; gseapy 0.5.0 documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="GSEAPY 0.4.3 documentation" href="index.html"/>
+    <link rel="top" title="gseapy 0.5.0 documentation" href="index.html"/>
         <link rel="next" title="A Protocol to walk through GSEAPY" href="gseapy_tutorial.html"/>
         <link rel="prev" title="Welcome to GSEAPY’s documentation!" href="introduction.html"/> 
 
@@ -50,7 +50,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> GSEAPY
+            <a href="index.html" class="icon icon-home"> gseapy
           
 
           
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                0.4.3
+                0.5.0
               </div>
             
           
@@ -91,10 +91,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#the-replot-command">2. The <code class="docutils literal"><span class="pre">replot</span></code> Command</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#the-call-command">3. The <code class="docutils literal"><span class="pre">call</span></code> Command</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#the-prerank-command">4. The <code class="docutils literal"><span class="pre">prerank</span></code> Command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-enrichr-command">5. The <code class="docutils literal"><span class="pre">enrichr</span></code> Command</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-apis">Module APIs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-gseapy.algorithm">Algorithm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-gseapy.enrichr">Enrichr</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-gseapy.parser">Parser</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-gseapy.gsea_plot">Graph</a></li>
 </ul>
@@ -113,7 +115,7 @@
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">GSEAPY</a>
+        <a href="index.html">gseapy</a>
       </nav>
 
 
@@ -148,6 +150,11 @@
 <span id="how-to-use-gseapy"></span><span id="run"></span><h1>How to Use GSEAPY<a class="headerlink" href="#module-gseapy" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="for-command-line-usage">
 <h2>For command line usage:<a class="headerlink" href="#for-command-line-usage" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal"><span class="pre">enrichr</span></code> module will call enrichr-api. You need a gene_list file for input. That&#8217;s all.</p>
+<div class="code bash highlight-python"><div class="highlight"><pre><span></span># An example to use enrichr api
+$ gseapy enrichr -i gene_list.txt -g KEGG_2016 -d pathway_enrichment -o test
+</pre></div>
+</div>
 <p>The <code class="docutils literal"><span class="pre">replot</span></code> module reproduce GSEA desktop version results. The only input for replot module is the location to GSEA results.</p>
 <div class="code bash highlight-python"><div class="highlight"><pre><span></span># An example to reproduce figures using replot module.
 $ gseapy replot -i ./gsea -o gseapy_out
@@ -174,6 +181,13 @@ See <a class="reference internal" href="gseapy_tutorial.html#example"><span>A Pr
 </pre></div>
 </div>
 <p>This will import the following:</p>
+<ul class="simple">
+<li>The <a class="reference internal" href="#module-gseapy.enrichr" title="gseapy.enrichr"><code class="xref py py-func docutils literal"><span class="pre">enrichr()</span></code></a> function to perform gene set enrichment analysis by calling enrichr online api.</li>
+</ul>
+<div class="code python highlight-python"><div class="highlight"><pre><span></span><span class="c1"># call enrichr</span>
+<span class="n">gseapy</span><span class="o">.</span><span class="n">enrichr</span><span class="p">(</span><span class="n">gene_list</span><span class="o">=</span><span class="s1">&#39;gene_list.txt&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;pathway_analysis&#39;</span><span class="p">,</span> <span class="n">gene_set</span><span class="o">=</span><span class="s1">&#39;KEGG_2016&#39;</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
 <ul class="simple">
 <li>The <a class="reference internal" href="#gseapy.replot" title="gseapy.replot"><code class="xref py py-func docutils literal"><span class="pre">replot()</span></code></a> function to reproduce GSEA desktop results</li>
 </ul>
@@ -207,7 +221,7 @@ See <a class="reference internal" href="gseapy_tutorial.html#example"><span>A Pr
 <h3>1. gseapy subcommands<a class="headerlink" href="#gseapy-subcommands" title="Permalink to this headline">¶</a></h3>
 <div class="code bash highlight-python"><div class="highlight"><pre><span></span>$ gseapy --help
 
- usage: gseapy [-h] [--version] {call,prerank,replot} ...
+ usage: gseapy [-h] [--version] {call,prerank,replot,enrichr} ...
 
  gseapy -- Gene Set Enrichment Analysis in Python
 
@@ -216,7 +230,7 @@ See <a class="reference internal" href="gseapy_tutorial.html#example"><span>A Pr
      call       Main GSEAPY Function: run GSEAPY instead of GSEA.
      prerank    Using pre-ranked tool to run GSEAPY.
      replot     Reproduce GSEA desktop figures.
-
+     enrichr    Peform GSEA using enrichr API.
  optional arguments:
    -h, --help   show this help message and exit
    --version    show program&#39;s version number and exit
@@ -344,12 +358,32 @@ usage: gseapy replot [-h] -i [-o] [-f] [--figsize width height] [-w]
 </pre></div>
 </div>
 </div>
+<div class="section" id="the-enrichr-command">
+<h3>5. The <code class="docutils literal"><span class="pre">enrichr</span></code> Command<a class="headerlink" href="#the-enrichr-command" title="Permalink to this headline">¶</a></h3>
+<div class="code bash highlight-python"><div class="highlight"><pre><span></span>$ gseapy enrichr -h
+
+usage: gseapy enrichr [-h] -i  [-d] -g  (-o OFILE | --o-prefix OFILE)
+
+ optional arguments:
+   -h, --help            show this help message and exit
+
+ Positional arguments:
+   -i , --input-list     Enrichr uses a list of Entrez gene symbols as input.
+   -d , --description    It is recommended to enter a description for your list
+                         so that multiple lists can be differentiated from each
+                         other if you choose to save or share your list
+   -g , --gene-sets      Enrichr uses a list of Entrez gene symbols as input.
+   -o , --ofile          Output file name. Mutually exclusive with --o-prefix.
+   --o-prefix            Output file prefix. Mutually exclusive with -o/--ofile.
+</pre></div>
+</div>
+</div>
 </div>
 <div class="section" id="module-apis">
 <h2>Module APIs<a class="headerlink" href="#module-apis" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="gseapy.replot">
-<code class="descclassname">gseapy.</code><code class="descname">replot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/gsea.html#replot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.replot" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.</code><code class="descname">replot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.replot" title="Permalink to this definition">¶</a></dt>
 <dd><p>The main fuction to run inside python.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -377,7 +411,7 @@ Because gmt file has already been filter.</li>
 
 <dl class="function">
 <dt id="gseapy.call">
-<code class="descclassname">gseapy.</code><code class="descname">call</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/gsea.html#call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.call" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.</code><code class="descname">call</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.call" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run Gene Set Enrichment Analysis.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -421,7 +455,7 @@ where dictionary key is a gene set and values are:</p>
 
 <dl class="function">
 <dt id="gseapy.prerank">
-<code class="descclassname">gseapy.</code><code class="descname">prerank</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/gsea.html#prerank"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.prerank" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.</code><code class="descname">prerank</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.prerank" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run Gene Set Enrichment Analysis with pre-ranked correlation defined by user.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -461,12 +495,32 @@ where dictionary key is a gene set and values are:</p>
 </table>
 </dd></dl>
 
+<dl class="function">
+<dt id="gseapy.enrichr">
+<code class="descclassname">gseapy.</code><code class="descname">enrichr</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.enrichr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enrichr API.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>gene_list</strong> &#8211; flat file with list of genes, one gene id per row</li>
+<li><strong>description</strong> &#8211; name of analysis</li>
+<li><strong>enrich_library</strong> &#8211; Enrichr Library to query.</li>
+<li><strong>outdir</strong> &#8211; out put file prefix</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 <div class="section" id="module-gseapy.algorithm">
 <span id="algorithm"></span><h2>Algorithm<a class="headerlink" href="#module-gseapy.algorithm" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="gseapy.algorithm.enrichment_score">
-<code class="descclassname">gseapy.algorithm.</code><code class="descname">enrichment_score</code><span class="sig-paren">(</span><em>gene_list</em>, <em>gene_set</em>, <em>weighted_score_type=1</em>, <em>correl_vector=None</em>, <em>esnull=False</em>, <em>rs=&lt;mtrand.RandomState object at 0x000002730CA5EBA8&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#enrichment_score"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.enrichment_score" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.algorithm.</code><code class="descname">enrichment_score</code><span class="sig-paren">(</span><em>gene_list</em>, <em>gene_set</em>, <em>weighted_score_type=1</em>, <em>correl_vector=None</em>, <em>esnull=False</em>, <em>rs=&lt;mtrand.RandomState object at 0x000001B6B7DF1900&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.algorithm.enrichment_score" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is the most important function of GSEAPY. It has the same algorithm with GSEA.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -503,7 +557,7 @@ equal to the permutation number.</li>
 
 <dl class="function">
 <dt id="gseapy.algorithm.gsea_compute">
-<code class="descclassname">gseapy.algorithm.</code><code class="descname">gsea_compute</code><span class="sig-paren">(</span><em>data</em>, <em>gmt</em>, <em>n</em>, <em>weighted_score_type</em>, <em>permutation_type</em>, <em>method</em>, <em>phenoPos</em>, <em>phenoNeg</em>, <em>classes</em>, <em>ascending</em>, <em>seed</em>, <em>prerank=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#gsea_compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.gsea_compute" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.algorithm.</code><code class="descname">gsea_compute</code><span class="sig-paren">(</span><em>data</em>, <em>gmt</em>, <em>n</em>, <em>weighted_score_type</em>, <em>permutation_type</em>, <em>method</em>, <em>phenoPos</em>, <em>phenoNeg</em>, <em>classes</em>, <em>ascending</em>, <em>seed</em>, <em>prerank=False</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.algorithm.gsea_compute" title="Permalink to this definition">¶</a></dt>
 <dd><p>compute enrichment scores and enrichment nulls.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -536,7 +590,7 @@ equal to the permutation number.</li>
 
 <dl class="function">
 <dt id="gseapy.algorithm.gsea_pval">
-<code class="descclassname">gseapy.algorithm.</code><code class="descname">gsea_pval</code><span class="sig-paren">(</span><em>es</em>, <em>esnull</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#gsea_pval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.gsea_pval" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.algorithm.</code><code class="descname">gsea_pval</code><span class="sig-paren">(</span><em>es</em>, <em>esnull</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.algorithm.gsea_pval" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute nominal p-value.</p>
 <p>From article (PNAS):
 estimate nominal p-value for S from esnull by using the positive
@@ -546,7 +600,7 @@ of the observed ES(S).</p>
 
 <dl class="function">
 <dt id="gseapy.algorithm.gsea_significance">
-<code class="descclassname">gseapy.algorithm.</code><code class="descname">gsea_significance</code><span class="sig-paren">(</span><em>enrichment_scores</em>, <em>enrichment_nulls</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#gsea_significance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.gsea_significance" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.algorithm.</code><code class="descname">gsea_significance</code><span class="sig-paren">(</span><em>enrichment_scores</em>, <em>enrichment_nulls</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.algorithm.gsea_significance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute nominal p-vals, normalized ES, and FDR q value.</p>
 <p>For a given NES(S) = NES* &gt;= 0. The FDR is the ratio of the percantage of all (S,pi) with
 NES(S,pi) &gt;= 0, whose NES(S,pi) &gt;= NES*, divided by the percentage of
@@ -555,20 +609,20 @@ observed S wih NES(S) &gt;= 0, whose NES(S) &gt;= NES*, and similarly if NES(S) 
 
 <dl class="function">
 <dt id="gseapy.algorithm.normalize">
-<code class="descclassname">gseapy.algorithm.</code><code class="descname">normalize</code><span class="sig-paren">(</span><em>es</em>, <em>esnull</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#normalize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.normalize" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.algorithm.</code><code class="descname">normalize</code><span class="sig-paren">(</span><em>es</em>, <em>esnull</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.algorithm.normalize" title="Permalink to this definition">¶</a></dt>
 <dd><p>normalize the ES(S,pi) and the observed ES(S), separetely rescaling
 the positive and negative scores by divident by the mean of the ES(S,pi).</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="gseapy.algorithm.preprocess">
-<code class="descclassname">gseapy.algorithm.</code><code class="descname">preprocess</code><span class="sig-paren">(</span><em>df</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#preprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.preprocess" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.algorithm.</code><code class="descname">preprocess</code><span class="sig-paren">(</span><em>df</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.algorithm.preprocess" title="Permalink to this definition">¶</a></dt>
 <dd><p>pre-processed the data frame.new filtering methods will be implement here.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="gseapy.algorithm.ranking_metric">
-<code class="descclassname">gseapy.algorithm.</code><code class="descname">ranking_metric</code><span class="sig-paren">(</span><em>df</em>, <em>method</em>, <em>phenoPos</em>, <em>phenoNeg</em>, <em>classes</em>, <em>ascending</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#ranking_metric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.ranking_metric" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.algorithm.</code><code class="descname">ranking_metric</code><span class="sig-paren">(</span><em>df</em>, <em>method</em>, <em>phenoPos</em>, <em>phenoNeg</em>, <em>classes</em>, <em>ascending</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.algorithm.ranking_metric" title="Permalink to this definition">¶</a></dt>
 <dd><p>The main function to rank an expression table.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -614,7 +668,7 @@ correlation in second column.</p>
 
 <dl class="function">
 <dt id="gseapy.algorithm.shuffle_list">
-<code class="descclassname">gseapy.algorithm.</code><code class="descname">shuffle_list</code><span class="sig-paren">(</span><em>gene_list</em>, <em>rand=&lt;mtrand.RandomState object at 0x000002730CA5EBE0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#shuffle_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.shuffle_list" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.algorithm.</code><code class="descname">shuffle_list</code><span class="sig-paren">(</span><em>gene_list</em>, <em>rand=&lt;mtrand.RandomState object at 0x000001B6B7DF1948&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.algorithm.shuffle_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a copy of a shuffled input gene_list.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -634,11 +688,34 @@ correlation in second column.</p>
 </dd></dl>
 
 </div>
+<div class="section" id="module-gseapy.enrichr">
+<span id="enrichr"></span><h2>Enrichr<a class="headerlink" href="#module-gseapy.enrichr" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="gseapy.enrichr.enrichr">
+<code class="descclassname">gseapy.enrichr.</code><code class="descname">enrichr</code><span class="sig-paren">(</span><em>gene_list</em>, <em>description</em>, <em>gene_set</em>, <em>outfile</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.enrichr.enrichr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enrichr API.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>gene_list</strong> &#8211; flat file with list of genes, one gene id per row</li>
+<li><strong>description</strong> &#8211; name of analysis</li>
+<li><strong>enrich_library</strong> &#8211; Enrichr Library to query.</li>
+<li><strong>outdir</strong> &#8211; out put file prefix</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
 <div class="section" id="module-gseapy.parser">
 <span id="parser"></span><h2>Parser<a class="headerlink" href="#module-gseapy.parser" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="gseapy.parser.gsea_cls_parser">
-<code class="descclassname">gseapy.parser.</code><code class="descname">gsea_cls_parser</code><span class="sig-paren">(</span><em>cls</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/parser.html#gsea_cls_parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.parser.gsea_cls_parser" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.parser.</code><code class="descname">gsea_cls_parser</code><span class="sig-paren">(</span><em>cls</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.parser.gsea_cls_parser" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extact class(phenotype) name from .cls file.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -654,7 +731,7 @@ correlation in second column.</p>
 
 <dl class="function">
 <dt id="gseapy.parser.gsea_edb_parser">
-<code class="descclassname">gseapy.parser.</code><code class="descname">gsea_edb_parser</code><span class="sig-paren">(</span><em>results_path</em>, <em>index=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/parser.html#gsea_edb_parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.parser.gsea_edb_parser" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.parser.</code><code class="descname">gsea_edb_parser</code><span class="sig-paren">(</span><em>results_path</em>, <em>index=0</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.parser.gsea_edb_parser" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse results.edb file stored under <strong>edb</strong> file folder.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -675,7 +752,7 @@ correlation in second column.</p>
 
 <dl class="function">
 <dt id="gseapy.parser.gsea_gmt_parser">
-<code class="descclassname">gseapy.parser.</code><code class="descname">gsea_gmt_parser</code><span class="sig-paren">(</span><em>gmt</em>, <em>min_size=3</em>, <em>max_size=5000</em>, <em>gene_list=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/parser.html#gsea_gmt_parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.parser.gsea_gmt_parser" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.parser.</code><code class="descname">gsea_gmt_parser</code><span class="sig-paren">(</span><em>gmt</em>, <em>min_size=3</em>, <em>max_size=5000</em>, <em>gene_list=None</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.parser.gsea_gmt_parser" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse gene_sets.gmt(gene set database) file.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -700,7 +777,7 @@ do this for you.</p>
 
 <dl class="function">
 <dt id="gseapy.parser.gsea_rank_metric">
-<code class="descclassname">gseapy.parser.</code><code class="descname">gsea_rank_metric</code><span class="sig-paren">(</span><em>rnk</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/parser.html#gsea_rank_metric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.parser.gsea_rank_metric" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.parser.</code><code class="descname">gsea_rank_metric</code><span class="sig-paren">(</span><em>rnk</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.parser.gsea_rank_metric" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse .rnk file. This file contains ranking correlation vector and gene names or ids.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -722,7 +799,7 @@ do this for you.</p>
 <span id="graph"></span><h2>Graph<a class="headerlink" href="#module-gseapy.gsea_plot" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="gseapy.gsea_plot.gsea_plot">
-<code class="descclassname">gseapy.gsea_plot.</code><code class="descname">gsea_plot</code><span class="sig-paren">(</span><em>rank_metric</em>, <em>enrich_term</em>, <em>hit_ind</em>, <em>nes</em>, <em>pval</em>, <em>fdr</em>, <em>RES</em>, <em>phenoPos=None</em>, <em>phenoNeg=None</em>, <em>figsize=(6.5</em>, <em>6)</em>, <em>**kwarg</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/gsea_plot.html#gsea_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.gsea_plot.gsea_plot" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.gsea_plot.</code><code class="descname">gsea_plot</code><span class="sig-paren">(</span><em>rank_metric</em>, <em>enrich_term</em>, <em>hit_ind</em>, <em>nes</em>, <em>pval</em>, <em>fdr</em>, <em>RES</em>, <em>phenoPos=None</em>, <em>phenoNeg=None</em>, <em>figsize=(6.5</em>, <em>6)</em>, <em>**kwarg</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.gsea_plot.gsea_plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is the main function for reproducing the gsea plot.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -793,7 +870,7 @@ do this for you.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.4.3',
+            VERSION:'0.5.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

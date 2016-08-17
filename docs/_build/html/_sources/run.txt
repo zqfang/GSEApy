@@ -9,6 +9,15 @@ How to Use GSEAPY
 For command line usage:
 --------------------------------
 
+The ``enrichr`` module will call enrichr-api. You need a gene_list file for input. That's all.
+
+.. code:: bash
+
+  # An example to use enrichr api
+  $ gseapy enrichr -i gene_list.txt -g KEGG_2016 -d pathway_enrichment -o test
+
+
+
 The ``replot`` module reproduce GSEA desktop version results. The only input for replot module is the location to GSEA results.
 
 .. code:: bash
@@ -54,6 +63,14 @@ Run gseapy inside python:
 
 This will import the following:
 
+* The :func:`enrichr` function to perform gene set enrichment analysis by calling enrichr online api.
+
+.. code:: python
+
+    # call enrichr
+    gseapy.enrichr(gene_list='gene_list.txt', description='pathway_analysis', gene_set='KEGG_2016', outfile='test')
+
+
 * The :func:`replot` function to reproduce GSEA desktop results
 
 .. code:: python
@@ -93,7 +110,7 @@ To See help information of GSEAPY
    
    $ gseapy --help 
    
-    usage: gseapy [-h] [--version] {call,prerank,replot} ...
+    usage: gseapy [-h] [--version] {call,prerank,replot,enrichr} ...
 
     gseapy -- Gene Set Enrichment Analysis in Python
 
@@ -102,11 +119,10 @@ To See help information of GSEAPY
         call       Main GSEAPY Function: run GSEAPY instead of GSEA.
         prerank    Using pre-ranked tool to run GSEAPY.
         replot     Reproduce GSEA desktop figures.
-
+        enrichr    Peform GSEA using enrichr API.
     optional arguments:
       -h, --help   show this help message and exit
       --version    show program's version number and exit
-
 
 
 
@@ -239,9 +255,29 @@ For command line options of each command, type: gseapy COMMAND -h
       -s , --seed           Number of random seed. Default: None
 
 
+5. The ``enrichr`` Command
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. code:: bash
+   
+   $ gseapy enrichr -h
 
+   usage: gseapy enrichr [-h] -i  [-d] -g  (-o OFILE | --o-prefix OFILE)
+
+    optional arguments:
+      -h, --help            show this help message and exit
+
+    Positional arguments:
+      -i , --input-list     Enrichr uses a list of Entrez gene symbols as input.
+      -d , --description    It is recommended to enter a description for your list
+                            so that multiple lists can be differentiated from each
+                            other if you choose to save or share your list
+      -g , --gene-sets      Enrichr uses a list of Entrez gene symbols as input.
+      -o , --ofile          Output file name. Mutually exclusive with --o-prefix.
+      --o-prefix            Output file prefix. Mutually exclusive with -o/--ofile.  
 							
+
+
 							
 Module APIs 
 ---------------------
@@ -250,12 +286,13 @@ Module APIs
 .. autofunction:: replot()
 
 
-
 .. autofunction:: call()
 
 
 .. autofunction:: prerank()
 
+
+.. autofunction:: enrichr()
 
 
 Algorithm 
@@ -263,6 +300,13 @@ Algorithm
 
 
 .. automodule:: gseapy.algorithm
+   :members:
+
+
+Enrichr
+--------------------------
+
+.. automodule:: gseapy.enrichr
    :members:
 
 

@@ -33,6 +33,7 @@ default_gene_set_libraries = [
 
 
 def get_libary_name():
+    """return enrichr active enrichr library name. """
 
 	# make a get request to get the gmt names and meta data from Enrichr
 	#python 2
@@ -69,8 +70,8 @@ def enrichr(gene_list, description, gene_set, outfile):
 
     :param gene_list: flat file with list of genes, one gene id per row
     :param description: name of analysis
-    :param enrich_library: Enrichr Library to query.
-    :param outdir: out put file prefix
+    :param gene_set: Enrichr Library to query.
+    :param outfile: out put file prefix
     
     """
     

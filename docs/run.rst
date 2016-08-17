@@ -68,7 +68,7 @@ This will import the following:
 .. code:: python
 
     # call enrichr
-    gseapy.enrichr(gene_list='gene_list.txt', description='pathway_analysis, gene_set='KEGG_2016', outfile='test')
+    gseapy.enrichr(gene_list='gene_list.txt', description='pathway_analysis', gene_set='KEGG_2016', outfile='test')
 
 
 * The :func:`replot` function to reproduce GSEA desktop results
@@ -255,7 +255,7 @@ For command line options of each command, type: gseapy COMMAND -h
       -s , --seed           Number of random seed. Default: None
 
 
-4. The ``prerank`` Command
+5. The ``enrichr`` Command
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: bash
@@ -273,10 +273,8 @@ For command line options of each command, type: gseapy COMMAND -h
                             so that multiple lists can be differentiated from each
                             other if you choose to save or share your list
       -g , --gene-sets      Enrichr uses a list of Entrez gene symbols as input.
-      -o OFILE, --ofile OFILE
-                            Output file name. Mutually exclusive with --o-prefix.
-      --o-prefix OFILE      Output file prefix. Mutually exclusive with
-                            -o/--ofile.  
+      -o , --ofile          Output file name. Mutually exclusive with --o-prefix.
+      --o-prefix            Output file prefix. Mutually exclusive with -o/--ofile.  
 							
 
 

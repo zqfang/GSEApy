@@ -217,6 +217,16 @@ Or run inside python.
 
 
 
+Use ``enrichr`` command, or :func:`enrichr`
+===============================================================
+
+The only thing you need to prepeare is a gene list file in txt format(one gene id per row).
+
+**Note**: Enrichr uses a list of Entrez gene symbols as input.
+
+for for details, please track the offical links: http://amp.pharm.mssm.edu/Enrichr/
+
+
 Use ``replot`` Command, or :func:`replot`
 ===============================================================
 

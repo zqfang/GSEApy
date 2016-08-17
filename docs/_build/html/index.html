@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Welcome to GSEAPY’s documentation! &mdash; GSEAPY 0.4.3 documentation</title>
+  <title>Welcome to GSEAPY’s documentation! &mdash; gseapy 0.5.0 documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="GSEAPY 0.4.3 documentation" href="#"/>
+    <link rel="top" title="gseapy 0.5.0 documentation" href="#"/>
         <link rel="next" title="Welcome to GSEAPY’s documentation!" href="introduction.html"/> 
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="#" class="icon icon-home"> GSEAPY
+            <a href="#" class="icon icon-home"> gseapy
           
 
           
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                0.4.3
+                0.5.0
               </div>
             
           
@@ -97,7 +97,7 @@
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="#">GSEAPY</a>
+        <a href="#">gseapy</a>
       </nav>
 
 
@@ -135,8 +135,10 @@
 <a class="reference external image-reference" href="http://bioconda.github.io"><img alt="https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat-square" src="https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat-square" /></a>
 <a class="reference external image-reference" href="https://travis-ci.org/BioNinja/gseapy"><img alt="https://travis-ci.org/BioNinja/gseapy.svg?branch=master" src="https://travis-ci.org/BioNinja/gseapy.svg?branch=master" /></a>
 <a class="reference external image-reference" href="http://gseapy.readthedocs.org/en/latest/?badge=latest"><img alt="Documentation Status" src="https://readthedocs.org/projects/gseapy/badge/?version=latest" /></a>
-<img src="https://img.shields.io/github/license/mashape/apistatus.svg" /><p>GSEAPY is a python wrapper for <strong>GESA</strong>.It&#8217;s used for convenient GO enrichments
-and produce <strong>publishable quality figures</strong> from python. GSEAPY could be used for <strong>RNA-seq, ChIP-seq, Microarry</strong> data.</p>
+<img src="https://img.shields.io/github/license/mashape/apistatus.svg" /><div class="section" id="gseapy-is-a-python-wrapper-for-gesa-and-enrichr">
+<h2>GSEAPY is a python wrapper for <strong>GESA</strong> and <strong>Enrichr</strong>.<a class="headerlink" href="#gseapy-is-a-python-wrapper-for-gesa-and-enrichr" title="Permalink to this headline">¶</a></h2>
+<p>It&#8217;s used for convenient GO enrichments and produce <strong>publishable quality figures</strong> from python.</p>
+<p>GSEAPY could be used for <strong>RNA-seq, ChIP-seq, Microarry</strong> data.</p>
 <p><a class="reference external" href="http://software.broadinstitute.org/gsea/index.jsp">Gene Set Enrichment Analysis</a> (GSEA)
 is a computational method that determines whether an a priori defined set of genes shows
 statistically significant, concordant differences between two biological states (e.g. phenotypes).</p>
@@ -145,10 +147,13 @@ statistically significant, concordant differences between two biological states 
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Welcome to GSEAPY&#8217;s documentation!</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#gseapy-is-a-python-wrapper-for-gesa-and-enrichr">GSEAPY is a python wrapper for <strong>GESA</strong> and <strong>Enrichr</strong>.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="introduction.html#why-gseapy">Why GSEAPY</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#new-features-of-gseapy">New Features of GSEAPY</a></li>
 <li class="toctree-l2"><a class="reference internal" href="introduction.html#features-of-gseapy">Features of GSEAPY</a></li>
 <li class="toctree-l2"><a class="reference internal" href="introduction.html#gsea-desktop-version-output">GSEA desktop version output</a></li>
 <li class="toctree-l2"><a class="reference internal" href="introduction.html#gseapy-replot-module-output">GSEAPY <code class="docutils literal"><span class="pre">replot</span></code> module output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#gseapy-enrichr-module">GSEAPY <code class="docutils literal"><span class="pre">enrichr</span></code> module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="introduction.html#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="introduction.html#dependency">Dependency</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="introduction.html#mandatory">Mandatory</a></li>
@@ -165,10 +170,12 @@ statistically significant, concordant differences between two biological states 
 <li class="toctree-l3"><a class="reference internal" href="run.html#the-replot-command">2. The <code class="docutils literal"><span class="pre">replot</span></code> Command</a></li>
 <li class="toctree-l3"><a class="reference internal" href="run.html#the-call-command">3. The <code class="docutils literal"><span class="pre">call</span></code> Command</a></li>
 <li class="toctree-l3"><a class="reference internal" href="run.html#the-prerank-command">4. The <code class="docutils literal"><span class="pre">prerank</span></code> Command</a></li>
+<li class="toctree-l3"><a class="reference internal" href="run.html#the-enrichr-command">5. The <code class="docutils literal"><span class="pre">enrichr</span></code> Command</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="run.html#module-apis">Module APIs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="run.html#module-gseapy.algorithm">Algorithm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="run.html#module-gseapy.enrichr">Enrichr</a></li>
 <li class="toctree-l2"><a class="reference internal" href="run.html#module-gseapy.parser">Parser</a></li>
 <li class="toctree-l2"><a class="reference internal" href="run.html#module-gseapy.gsea_plot">Graph</a></li>
 </ul>
@@ -183,10 +190,12 @@ statistically significant, concordant differences between two biological states 
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="gseapy_tutorial.html#use-prerank-command-or-prerank">Use <code class="docutils literal"><span class="pre">prerank</span></code> Command, or <code class="docutils literal"><span class="pre">prerank()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="gseapy_tutorial.html#use-enrichr-command-or-enrichr">Use <code class="docutils literal"><span class="pre">enrichr</span></code> command, or <code class="docutils literal"><span class="pre">enrichr()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="gseapy_tutorial.html#use-replot-command-or-replot">Use <code class="docutils literal"><span class="pre">replot</span></code> Command, or <code class="docutils literal"><span class="pre">replot()</span></code></a></li>
 </ul>
 </li>
 </ul>
+</div>
 </div>
 </div>
 <div class="section" id="indices-and-tables">
@@ -237,7 +246,7 @@ statistically significant, concordant differences between two biological states 
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.4.3',
+            VERSION:'0.5.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
