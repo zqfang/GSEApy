@@ -202,13 +202,13 @@ Run gseapy inside python:
     gseapy.replot(indir='./Gsea.reports',outdir='test')
 
     # calculate es, nes, pval,fdrs, and produce figures using gseapy.
-    gseapy.call(data=expression.txt, gene_sets=gene_sets.gmt, cls=test.cls, outdir='test')
+    gseapy.call(data='expression.txt', gene_sets='gene_sets.gmt', cls=test.cls, outdir='test')
    
     # using prerank tool
     gseapy.prerank(rnk='gsea_data.rnk', gene_sets='gene_sets.gmt', outdir='test')
 
     # call enrichr
-    gseapy.enrichr(gene_list='gene_list.txt', description='pathway_analysis', gene_set='KEGG_2016', outfile='test')
+    gseapy.enrichr(gene_list='gene_list.txt', description='pathway_analysis', gene_sets='KEGG_2016', outfile='test')
 
 
 

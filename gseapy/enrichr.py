@@ -65,7 +65,7 @@ def get_libary_name():
 
     return gmt_names
     
-def enrichr(gene_list, description, gene_set, outfile):
+def enrichr(gene_list, description, gene_sets, outfile):
     """Enrichr API.
 
     :param gene_list: flat file with list of genes, one gene id per row
@@ -85,7 +85,7 @@ def enrichr(gene_list, description, gene_set, outfile):
     description = str(description)
     
     #library validaty confirmationi
-    gene_set = str(gene_set)  
+    gene_set = str(gene_sets)  
     
     enrichr_library = get_libary_name()
     
@@ -165,7 +165,7 @@ def enrichr(gene_list, description, gene_set, outfile):
         for chunk in response.iter_content(chunk_size=1024):
             if chunk:
                 f.write(chunk)
-    ################################################
+
     print('Enrichr API : Results written to:', outfile + ".txt")
     print("Enrichr API : Done")
 
