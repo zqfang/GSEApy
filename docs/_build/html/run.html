@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>How to Use GSEAPY &mdash; gseapy 0.5.0 documentation</title>
+  <title>How to Use GSEAPY &mdash; gseapy 0.5.2 documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="gseapy 0.5.0 documentation" href="index.html"/>
+    <link rel="top" title="gseapy 0.5.2 documentation" href="index.html"/>
         <link rel="next" title="A Protocol to walk through GSEAPY" href="gseapy_tutorial.html"/>
         <link rel="prev" title="Welcome to GSEAPY’s documentation!" href="introduction.html"/> 
 
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                0.5.0
+                0.5.2
               </div>
             
           
@@ -199,7 +199,7 @@ See <a class="reference internal" href="gseapy_tutorial.html#example"><span>A Pr
 <li>The <a class="reference internal" href="#gseapy.call" title="gseapy.call"><code class="xref py py-func docutils literal"><span class="pre">call()</span></code></a> function to computing es,nes,pval,fdr,and generate plots <em>de novo</em>.</li>
 </ul>
 <div class="code python highlight-python"><div class="highlight"><pre><span></span><span class="c1"># An example to calculate es, nes, pval,fdrs, and produce figures using gseapy.</span>
-<span class="n">gseapy</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gsea_dat</span><span class="o">.</span><span class="n">txt</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span><span class="n">gene_sets</span><span class="o">.</span><span class="n">gmt</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">test</span><span class="o">.</span><span class="n">cls</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;gseapy_out&#39;</span><span class="p">,</span>
+<span class="n">gseapy</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s1">&#39;gsea_dat.txt&#39;</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span><span class="s1">&#39;gene_sets.gmt&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="s1">&#39;test.cls&#39;</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;gseapy_out&#39;</span><span class="p">,</span>
           <span class="n">min_size</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">permutation_n</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">weighted_score_type</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
           <span class="n">permutation_type</span> <span class="o">=</span> <span class="s1">&#39;gene_set&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;log2_ratio_of_classes&#39;</span><span class="p">,</span><span class="n">ascending</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
           <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">6.5</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
@@ -209,7 +209,7 @@ See <a class="reference internal" href="gseapy_tutorial.html#example"><span>A Pr
 <li>The <a class="reference internal" href="#gseapy.prerank" title="gseapy.prerank"><code class="xref py py-func docutils literal"><span class="pre">prerank()</span></code></a> function to computing es,nes,pval,fdr,and generate plots using a pre-ranked gene list.</li>
 </ul>
 <div class="code python highlight-python"><div class="highlight"><pre><span></span><span class="c1"># An example to calculate es, nes, pval,fdrs, and produce figures using gseapy.</span>
-<span class="n">gseapy</span><span class="o">.</span><span class="n">prerank</span><span class="p">(</span><span class="n">rnk</span><span class="o">=</span><span class="n">gsea_data</span><span class="o">.</span><span class="n">rnk</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span><span class="n">gene_sets</span><span class="o">.</span><span class="n">gmt</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;gseapy_out&#39;</span><span class="p">,</span> <span class="n">min_size</span> <span class="o">=</span> <span class="mi">15</span><span class="p">,</span>
+<span class="n">gseapy</span><span class="o">.</span><span class="n">prerank</span><span class="p">(</span><span class="n">rnk</span><span class="o">=</span><span class="s1">&#39;gsea_data.rnk&#39;</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span><span class="s1">&#39;ene_sets.gmt&#39;</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;gseapy_out&#39;</span><span class="p">,</span> <span class="n">min_size</span> <span class="o">=</span> <span class="mi">15</span><span class="p">,</span>
                <span class="n">max_size</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">permutation_n</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">weighted_score_type</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ascending</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
                <span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mf">6.5</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span> <span class="n">format</span> <span class="o">=</span> <span class="s1">&#39;png&#39;</span><span class="p">)</span>
 </pre></div>
@@ -506,8 +506,8 @@ where dictionary key is a gene set and values are:</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>gene_list</strong> &#8211; flat file with list of genes, one gene id per row</li>
 <li><strong>description</strong> &#8211; name of analysis</li>
-<li><strong>enrich_library</strong> &#8211; Enrichr Library to query.</li>
-<li><strong>outdir</strong> &#8211; out put file prefix</li>
+<li><strong>gene_set</strong> &#8211; Enrichr Library to query.</li>
+<li><strong>outfile</strong> &#8211; out put file prefix</li>
 </ul>
 </td>
 </tr>
@@ -520,7 +520,7 @@ where dictionary key is a gene set and values are:</p>
 <span id="algorithm"></span><h2>Algorithm<a class="headerlink" href="#module-gseapy.algorithm" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="gseapy.algorithm.enrichment_score">
-<code class="descclassname">gseapy.algorithm.</code><code class="descname">enrichment_score</code><span class="sig-paren">(</span><em>gene_list</em>, <em>gene_set</em>, <em>weighted_score_type=1</em>, <em>correl_vector=None</em>, <em>esnull=False</em>, <em>rs=&lt;mtrand.RandomState object at 0x000001B6B7DF1900&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.algorithm.enrichment_score" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.algorithm.</code><code class="descname">enrichment_score</code><span class="sig-paren">(</span><em>gene_list</em>, <em>gene_set</em>, <em>weighted_score_type=1</em>, <em>correl_vector=None</em>, <em>esnull=False</em>, <em>rs=&lt;mtrand.RandomState object at 0x000001B6000A0990&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.algorithm.enrichment_score" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is the most important function of GSEAPY. It has the same algorithm with GSEA.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -668,7 +668,7 @@ correlation in second column.</p>
 
 <dl class="function">
 <dt id="gseapy.algorithm.shuffle_list">
-<code class="descclassname">gseapy.algorithm.</code><code class="descname">shuffle_list</code><span class="sig-paren">(</span><em>gene_list</em>, <em>rand=&lt;mtrand.RandomState object at 0x000001B6B7DF1948&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.algorithm.shuffle_list" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.algorithm.</code><code class="descname">shuffle_list</code><span class="sig-paren">(</span><em>gene_list</em>, <em>rand=&lt;mtrand.RandomState object at 0x000001B6000A09D8&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.algorithm.shuffle_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a copy of a shuffled input gene_list.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -692,7 +692,7 @@ correlation in second column.</p>
 <span id="enrichr"></span><h2>Enrichr<a class="headerlink" href="#module-gseapy.enrichr" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="gseapy.enrichr.enrichr">
-<code class="descclassname">gseapy.enrichr.</code><code class="descname">enrichr</code><span class="sig-paren">(</span><em>gene_list</em>, <em>description</em>, <em>gene_set</em>, <em>outfile</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.enrichr.enrichr" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.enrichr.</code><code class="descname">enrichr</code><span class="sig-paren">(</span><em>gene_list</em>, <em>description</em>, <em>gene_sets</em>, <em>outfile</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.enrichr.enrichr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Enrichr API.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -701,13 +701,19 @@ correlation in second column.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>gene_list</strong> &#8211; flat file with list of genes, one gene id per row</li>
 <li><strong>description</strong> &#8211; name of analysis</li>
-<li><strong>enrich_library</strong> &#8211; Enrichr Library to query.</li>
-<li><strong>outdir</strong> &#8211; out put file prefix</li>
+<li><strong>gene_set</strong> &#8211; Enrichr Library to query.</li>
+<li><strong>outfile</strong> &#8211; out put file prefix</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="function">
+<dt id="gseapy.enrichr.get_libary_name">
+<code class="descclassname">gseapy.enrichr.</code><code class="descname">get_libary_name</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.enrichr.get_libary_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>return enrichr active enrichr library name.</p>
 </dd></dl>
 
 </div>
@@ -870,7 +876,7 @@ do this for you.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.5.0',
+            VERSION:'0.5.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

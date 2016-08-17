@@ -180,7 +180,7 @@ At least 3 files are required to run gseapy.
 .. code:: python
 
     import gseapy
-    gseapy.call(data=gsea_data.txt, cls=gsea.cls, gmt=gene_sets.gmt, outdir='gseapy_out')
+    gseapy.call(data='gsea_data.txt', cls='gsea.cls', gmt='gene_sets.gmt', outdir='gseapy_out')
 
 
 5. Command line 
@@ -212,7 +212,7 @@ Or run inside python.
 .. code:: python
 
     import gseapy
-    gseapy.prerank(rnk=gsea_data.rnk, gene_sets=gene_sets.gmt, outdir='test')
+    gseapy.prerank(rnk='gsea_data.rnk', gene_sets='gene_sets.gmt', outdir='test')
 
 
 
@@ -231,7 +231,7 @@ call :
    
    #call get_library_name(), it will print out all library names.
    import gseapy
-   names = gseapy.enrichr.get_library_name()
+   names = gseapy.get_library_name()
    print(names)
 
 
