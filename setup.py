@@ -33,7 +33,7 @@ setup(name='gseapy',
           'numpy>=1.8.0',
           'pandas>=0.16',
           'matplotlib>=1.4.3',
-          'beautifulsoup4>=4.4.1'
+          'beautifulsoup4>=4.4.1',
           'requests',],
       entry_points={'console_scripts': ['gseapy = gseapy.__main__:main'],},
       
