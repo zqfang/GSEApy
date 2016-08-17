@@ -189,6 +189,7 @@ For command line usage:
   $ gseapy prerank -r gsea_data.rnk -g gene_sets.gmt -o test
 
   # An example to use enrichr api
+  # see details of -g parameter below
   $ gseapy enrichr -i gene_list.txt -g KEGG_2016 -d pathway_enrichment -o test
 
 
@@ -207,8 +208,37 @@ Run gseapy inside python:
     # using prerank tool
     gseapy.prerank(rnk='gsea_data.rnk', gene_sets='gene_sets.gmt', outdir='test')
 
+
     # call enrichr
     gseapy.enrichr(gene_list='gene_list.txt', description='pathway_analysis', gene_sets='KEGG_2016', outfile='test')
+    
+    #see full list of latest enrichr library names:
+    names = gseapy.get_library_name()
+    print(names[:20])
+
+
+   ['Genome_Browser_PWMs',
+   'TRANSFAC_and_JASPAR_PWMs',
+   'ChEA_2013',
+   'Drug_Perturbations_from_GEO_2014',
+   'ENCODE_TF_ChIP-seq_2014',
+   'BioCarta_2013',
+   'Reactome_2013',
+   'WikiPathways_2013',
+   'Disease_Signatures_from_GEO_up_2014',
+   'KEGG_2013',
+   'TF-LOF_Expression_from_GEO',
+   'TargetScan_microRNA',
+   'PPI_Hub_Proteins',
+   'GO_Molecular_Function_2015',
+   'GeneSigDB',
+   'Chromosome_Location',
+   'Human_Gene_Atlas',
+   'Mouse_Gene_Atlas',
+   'GO_Cellular_Component_2015',
+   'GO_Biological_Process_2015',
+   'Human_Phenotype_Ontology',]
+
 
 
 
