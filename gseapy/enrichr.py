@@ -68,18 +68,23 @@ def get_libary_name():
 def enrichr(gene_list, description, gene_sets, outfile):
     """Enrichr API.
 
-    :param gene_list: flat file with list of genes, one gene id per row
+    :param gene_list: flat file with list of genes, one gene id per row.
+                      or a python list object, which make it easy to use 
+                      inside python console.
     :param description: name of analysis
     :param gene_set: Enrichr Library to query.
     :param outfile: out put file prefix
     
     """
+    if type(gene_list) is list:
+        genes = [str(gene) for gene in gene_list]
+        genes_str = '\n'.join(genes)
+    else:
+        # get gene lists
+        with open(gene_list) as f:
+            genes = f.read()
+        genes_str = str(genes)
     
-    # get gene lits
-    with open(gene_list) as f:
-        genes = f.read()
-    genes_str = str(genes)
-    #genes_str = '\n'.join(genes)
     
     # name of analysis or list
     description = str(description)
