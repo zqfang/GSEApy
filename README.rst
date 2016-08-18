@@ -161,8 +161,7 @@ Installation
    # if you have conda
    $ conda install -c bioconda gseapy
    
-   # or 
-   
+   # or   
    $ conda install -c bioninja gseapy
 
 
@@ -246,9 +245,21 @@ Run gseapy inside python:
     gseapy.prerank(rnk='gsea_data.rnk', gene_sets='gene_sets.gmt', outdir='test')
 
 
-    # call enrichr
-    gseapy.enrichr(gene_list='gene_list.txt', description='pathway_analysis', gene_sets='KEGG_2016', outfile='test')
-    
+
+For ``enrichr`` , you could assign a list object or a txt file 
+
+.. code:: python
+
+    # assign a list object to enrichr
+    l = ['SCARA3', 'LOC100044683', 'CMBL', 'CLIC6', 'IL13RA1', 'TACSTD2', 'DKKL1', 'CSF1', 
+         'SYNPO2L', 'TINAGL1', 'PTX3', 'BGN', 'HERC1', 'EFNA1', 'CIB2', 'PMP22', 'TMEM173'] 
+    gseapy.enrichr(gene_list=l, description='pathway', gene_sets='KEGG_2016', outfile='test')
+
+    # or a txt file path.
+    gseapy.enrichr(gene_list='gene_list.txt', description='pathway', gene_sets='KEGG_2016', outfile='test')
+ 
+
+   
     #see full list of latest enrichr library names, which will pass to -g parameter:
     names = gseapy.get_library_name()
     print(names[:20])

@@ -220,15 +220,37 @@ Or run inside python.
 Use ``enrichr`` command, or :func:`enrichr`
 ===============================================================
 
-The only thing you need to prepeare is a gene list file in txt format(one gene id per row).
+The only thing you need to prepeare is a gene list file.
 
 **Note**: Enrichr uses a list of Entrez gene symbols as input.
 
+
+For ``enrichr`` , you could assign a list object 
+
 .. code:: python
 
-       with open('data/gene_list.txt') as genes:
-           print(genes.read())
+    # assign a list object to enrichr
+    l = ['SCARA3', 'LOC100044683', 'CMBL', 'CLIC6', 'IL13RA1', 'TACSTD2', 'DKKL1', 'CSF1', 
+         'SYNPO2L', 'TINAGL1', 'PTX3', 'BGN', 'HERC1', 'EFNA1', 'CIB2', 'PMP22', 'TMEM173'] 
 
+    gseapy.enrichr(gene_list=l, description='pathway', gene_sets='KEGG_2016', outfile='test')
+
+
+
+
+or a gene list file in txt format(one gene id per row) 
+
+.. code:: python
+   
+   gseapy.enrichr(gene_list='gene_list.txt', description='pathway', gene_sets='KEGG_2016', outfile='test')
+
+
+Let's see what the txt file looks like.
+
+.. code:: python
+
+    with open('data/gene_list.txt') as genes:
+        print(genes.read())
 
 .. code:: python
     
@@ -362,6 +384,7 @@ call
   'Humancyc_2016',
   'NCI-Nature_2016',
   'Panther_2016']
+
 
 
 
