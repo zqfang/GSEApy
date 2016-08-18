@@ -120,7 +120,7 @@ The powerfull module will enable you perform gene set enrichment analysis extrea
 
 
 
-The only thing you need to prepeare is a gene list file in txt format(one gene id per row).
+**The only thing you need to prepeare is a gene list file in txt format(one gene id per row).**
 
 **Note**: Enrichr uses a list of Entrez gene symbols as input.
 
@@ -157,6 +157,14 @@ Installation
 .. code:: shell
 
    $ pip install gseapy
+   
+   # if you have conda
+   $ conda install -c bioconda gseapy
+   
+   # or 
+   
+   $ conda install -c bioninja gseapy
+
 
 | You may instead want to use the development version from Github, by running
 
@@ -175,7 +183,7 @@ Mandatory
 * Pandas 
 * Matplotlib
 * Beautifulsoup4
-* requests(for enrichr API)
+* Requests(for enrichr API)
 
 You may also need **lxml, html5lib**, if you could not parse xml files. 
 
@@ -218,7 +226,7 @@ For command line usage:
   $ gseapy prerank -r gsea_data.rnk -g gene_sets.gmt -o test
 
   # An example to use enrichr api
-  # see details of -g parameter below
+  # see details of -g parameter below, -d parmameter is optional
   $ gseapy enrichr -i gene_list.txt -g KEGG_2016 -d pathway_enrichment -o test
 
 
@@ -241,7 +249,7 @@ Run gseapy inside python:
     # call enrichr
     gseapy.enrichr(gene_list='gene_list.txt', description='pathway_analysis', gene_sets='KEGG_2016', outfile='test')
     
-    #see full list of latest enrichr library names:
+    #see full list of latest enrichr library names, which will pass to -g parameter:
     names = gseapy.get_library_name()
     print(names[:20])
 
