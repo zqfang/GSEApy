@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>A Protocol to walk through GSEAPY &mdash; gseapy 0.5.2 documentation</title>
+  <title>A Protocol to walk through GSEAPY &mdash; gseapy 0.5.3 documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="gseapy 0.5.2 documentation" href="index.html"/>
+    <link rel="top" title="gseapy 0.5.3 documentation" href="index.html"/>
         <link rel="prev" title="How to Use GSEAPY" href="run.html"/> 
 
   
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                0.5.2
+                0.5.3
               </div>
             
           
@@ -301,8 +301,21 @@ and gene_sets file in gmt format.  <code class="docutils literal"><span class="p
 </div>
 <div class="section" id="use-enrichr-command-or-enrichr">
 <h2>Use <code class="docutils literal"><span class="pre">enrichr</span></code> command, or <code class="xref py py-func docutils literal"><span class="pre">enrichr()</span></code><a class="headerlink" href="#use-enrichr-command-or-enrichr" title="Permalink to this headline">¶</a></h2>
-<p>The only thing you need to prepeare is a gene list file in txt format(one gene id per row).</p>
+<p>The only thing you need to prepeare is a gene list file.</p>
 <p><strong>Note</strong>: Enrichr uses a list of Entrez gene symbols as input.</p>
+<p>For <code class="docutils literal"><span class="pre">enrichr</span></code> , you could assign a list object</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span></span><span class="c1"># assign a list object to enrichr</span>
+<span class="n">l</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;SCARA3&#39;</span><span class="p">,</span> <span class="s1">&#39;LOC100044683&#39;</span><span class="p">,</span> <span class="s1">&#39;CMBL&#39;</span><span class="p">,</span> <span class="s1">&#39;CLIC6&#39;</span><span class="p">,</span> <span class="s1">&#39;IL13RA1&#39;</span><span class="p">,</span> <span class="s1">&#39;TACSTD2&#39;</span><span class="p">,</span> <span class="s1">&#39;DKKL1&#39;</span><span class="p">,</span> <span class="s1">&#39;CSF1&#39;</span><span class="p">,</span>
+     <span class="s1">&#39;SYNPO2L&#39;</span><span class="p">,</span> <span class="s1">&#39;TINAGL1&#39;</span><span class="p">,</span> <span class="s1">&#39;PTX3&#39;</span><span class="p">,</span> <span class="s1">&#39;BGN&#39;</span><span class="p">,</span> <span class="s1">&#39;HERC1&#39;</span><span class="p">,</span> <span class="s1">&#39;EFNA1&#39;</span><span class="p">,</span> <span class="s1">&#39;CIB2&#39;</span><span class="p">,</span> <span class="s1">&#39;PMP22&#39;</span><span class="p">,</span> <span class="s1">&#39;TMEM173&#39;</span><span class="p">]</span>
+
+<span class="n">gseapy</span><span class="o">.</span><span class="n">enrichr</span><span class="p">(</span><span class="n">gene_list</span><span class="o">=</span><span class="n">l</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;pathway&#39;</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span><span class="s1">&#39;KEGG_2016&#39;</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>or a gene list file in txt format(one gene id per row)</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span></span><span class="n">gseapy</span><span class="o">.</span><span class="n">enrichr</span><span class="p">(</span><span class="n">gene_list</span><span class="o">=</span><span class="s1">&#39;gene_list.txt&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;pathway&#39;</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span><span class="s1">&#39;KEGG_2016&#39;</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Let&#8217;s see what the txt file looks like.</p>
 <div class="code python highlight-python"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;data/gene_list.txt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">genes</span><span class="p">:</span>
     <span class="k">print</span><span class="p">(</span><span class="n">genes</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
 </pre></div>
@@ -503,7 +516,7 @@ inside edb folder.The gsea document tree looks like this:</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.5.2',
+            VERSION:'0.5.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
