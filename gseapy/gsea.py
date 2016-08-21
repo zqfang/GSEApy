@@ -79,15 +79,16 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=1000, 
     :param permutation_type: Permutation type, "phenotype" (default) for phenotypes, "gene_set" for genes.
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Defaut: 15.
     :param int max_size: Maximum allowed number of genes from gene set also the data set. Defaults: 15 and 1000.
-    :param weighted_score_type: refer to :func:`algorithm.enrichment_socre`. Default:1.
-    :param method: ranking metric method, refer to :func:`algorithm.ranking_metric`.
-    :param ascending: sorting order of rankings. Default: False.
-    :param outdir: results output directory.
-    :param figsize: matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
-    :param format: matplotlib figure format. Default: 'png'.
-    :param graph_num: plot graphs for top sets of each phenotype
-    :param seed: random seed. expect an interger. Defalut:None.
-    :return: Generate ``GSEA`` plots and store a dictionary into csv file,
+    :param weighted_score_type: Refer to :func:`algorithm.enrichment_socre`. Default:1.
+    :param method: Ranking metric method, refer to :func:`algorithm.ranking_metric`.
+    :param ascending: Sorting order of rankings. Default: False.
+    :param outdir: Results output directory.
+    :param figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
+    :param format: Matplotlib figure format. Default: 'png'.
+    :param graph_num: Plot graphs for top sets of each phenotype
+    :param seed: Random seed. expect an interger. Defalut:None.
+    :return: Return a DataFrame when inside python console.
+             Generate ``GSEA`` plots and store a dictionary into csv file,
              where dictionary key is a gene set and values are::
 
                  | {es: enrichment score, 
@@ -162,7 +163,8 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=1000, 
     #print(res_df.head(10))
     print("...Congratulations. GSEAPY run successfully!!!.............\n...The Job is done...........................Goodbye!")
     
-    return 
+    if isinstance(data, pd.DataFrame):
+        return res_final 
 
 def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Postive', pheno_neg='Negative',
             min_size=15, max_size=1000, permutation_n=1000, weighted_score_type=1,
@@ -175,13 +177,14 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Postive', pheno_neg=
     :param permutation_n: Number of permutations for significance computation. Default: 1000.
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Defaut: 15.
     :param int max_size: Maximum allowed number of genes from gene set also the data set. Defaults: 15 and 1000.
-    :param weighted_score_type: refer to :func:`algorithm.enrichment_socre`. Default:1.
-    :param ascending: sorting order of rankings. Default: False.
-    :param figsize: matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
-    :param format: matplotlib figure format. Default: 'png'.
-    :param graph_num: plot graphs for top sets of each phenotype
-    :param seed: random seed. expect an interger. Defalut:None.    
-    :return: Generate ``GSEA`` plots and store a dictionary into csv file,
+    :param weighted_score_type: Refer to :func:`algorithm.enrichment_socre`. Default:1.
+    :param ascending: Sorting order of rankings. Default: False.
+    :param figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
+    :param format: Matplotlib figure format. Default: 'png'.
+    :param graph_num: Plot graphs for top sets of each phenotype
+    :param seed: Random seed. expect an interger. Defalut:None.    
+    :return: Return a DataFrame when inside python console.
+             Generate ``GSEA`` plots and store a dictionary into csv file,
              where dictionary key is a gene set and values are::
 
                  | {es: enrichment score, 
@@ -241,4 +244,5 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Postive', pheno_neg=
     print("Congratulations. GSEAPY run successfully................")
     print("The Job is done.................................Goodbye!", time.ctime())
     
-    return 
+    if isinstance(rnk, pd.DataFrame):
+        return res_final 
