@@ -53,8 +53,7 @@ I love python, I would like to use Pandas to explore my data, and I want a packa
 do gene set enrichment analysis in python. SO, here is my reason: 
 
 * For Gene Enrichment Analysis, ``GSEA`` is still the one of best choice.  
-* When you have lots of expression tables, or ``GO`` terms to enrich, ``GSEA`` desktop
-version is really inconvinient. 
+* When you have lots of expression tables, or ``GO`` terms to enrich, ``GSEA`` desktop version is really inconvinient. 
 * What's more, the R version of GSEA has not been updated since 2006. 
 * ``GSEA`` desktop version do not provide means to modify plots, like legends, ticks......
 * ``GSEA`` commanline is hard to use.
