@@ -7,8 +7,8 @@ import sys
 import time
 
 
-from .parser import gsea_edb_parser,gsea_rank_metric,gsea_gmt_parser,gsea_cls_parser
-from .algorithm import enrichment_score,gsea_compute,preprocess,ranking_metric
+from .parser import gsea_edb_parser, gsea_rank_metric, gsea_gmt_parser, gsea_cls_parser
+from .algorithm import enrichment_score, gsea_compute, preprocess, ranking_metric
 from .gsea_plot import gsea_plot
 from collections import OrderedDict
 

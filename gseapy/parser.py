@@ -4,7 +4,7 @@ from __future__ import absolute_import, print_function
 from bs4 import BeautifulSoup
 from numpy import in1d
 from pandas import read_table, DataFrame
-from .enrichr import get_library_name
+from .enrichr import get_libary_name
 import sys
 
 def unique(seq):
@@ -114,7 +114,7 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
             
     """
 
-    if gmt in get_library_name():
+    if gmt in get_libary_name():
         import requests
         ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary'
         query_string = '?mode=text&libraryName=%s'
