@@ -170,10 +170,10 @@ def enrichr(gene_list, description, gene_sets, outfile):
     print('Enrichr API : Results written to:', outfile + ".txt")
     
     # convinient for viewing results inside python console. 
-    if type(gene_list) is list:
+    if isinstance(gene_list, list):
         print("Enrichr API : You are seeing this message, because you are inside python console.\n"+\
               "Enrichr API : It will return a pandas dataframe for veiwing results."  )
-        return read_table(f)
+        return read_table(outfile + '.txt')
         
     print("Enrichr API : Done")
 
