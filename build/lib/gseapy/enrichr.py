@@ -4,11 +4,10 @@
 
 
 from __future__ import print_function
-
 import json
 import requests
 import sys
-from pandas import read_table
+
 
 
 default_gene_set_libraries = [
@@ -64,7 +63,7 @@ def get_libary_name():
             gmt_names.append(inst_gmt['libraryName'])
 
 
-    return sorted(gmt_names)
+    return gmt_names
     
 def enrichr(gene_list, description, gene_sets, outfile):
     """Enrichr API.
@@ -77,7 +76,7 @@ def enrichr(gene_list, description, gene_sets, outfile):
     :param outfile: out put file prefix
     
     """
-    if isinstance(gene_list, list):
+    if type(gene_list) is list:
         genes = [str(gene) for gene in gene_list]
         genes_str = '\n'.join(genes)
     else:
@@ -125,16 +124,21 @@ def enrichr(gene_list, description, gene_sets, outfile):
     job_id = json.loads(response.text)
 
     print('Enrichr API : Job ID:', job_id)
-    
+
+  
+    # View added gene list
+    #
     ENRICHR_URL_A = 'http://amp.pharm.mssm.edu/Enrichr/view?userListId=%s'
 
     user_list_id = job_id['userListId']
+    #print(user_list_id)
+
     response_gene_list = requests.get(ENRICHR_URL_A % str(user_list_id))
 
     if not response_gene_list.ok:
         raise Exception('Error getting gene list')
 
-    print('Enrichr API : Submitted gene list:', job_id)
+    print('Enrichr API :  Added gene list:', job_id)
 
 
     # Get enrichment results
@@ -168,13 +172,5 @@ def enrichr(gene_list, description, gene_sets, outfile):
                 f.write(chunk)
 
     print('Enrichr API : Results written to:', outfile + ".txt")
-    
-    # convinient for viewing results inside python console. 
-    if type(gene_list) is list:
-        print("Enrichr API : You are seeing this message, because you are inside python console.\n"+\
-              "Enrichr API : It will return a pandas dataframe for veiwing results."  )
-        return read_table(f)
-        
     print("Enrichr API : Done")
 
-    

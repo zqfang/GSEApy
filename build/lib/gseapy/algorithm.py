@@ -15,7 +15,7 @@ def preprocess(df):
     df.drop_duplicates(subset=df.columns[0], inplace=True) #drop duplicate gene_names.    
     df.set_index(keys=df.columns[0], inplace=True)
     df.dropna(how='all', inplace=True)                     #drop rows with all NAs
-    df2 = df.select_dtypes(include=['float64'])  + 0.001 #select numbers in DataFrame      
+    df2 = df.select_dtypes(include=['float64'])  + 0.0001 #select numbers in DataFrame      
     
     return df2
 
@@ -79,7 +79,7 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
             rs.shuffle(tag_indicator[i])
         axis = 1
     '''
-    similar results could be obtained when computing esnull using code below
+    similar results could be obtained when computing esnull using code below, but a little slower.
     
     if esnull:
         tag_null = np.empty((esnull, N))
@@ -272,7 +272,17 @@ def gsea_pval(es, esnull):
     or negative portion of the distribution corresponding to the sign 
     of the observed ES(S).
     """
-   
+    '''
+    try:
+        if es < 0:
+            return float(len([ a for a in esnull if a <= es ]))/len([ a for a in esnull if a < 0])    
+        else: 
+            return float(len([ a for a in esnull if a >= es ]))/len([ a for a in esnull if a >= 0])
+    except:
+        return 1.0
+    '''    
+        
+        
     # to speed up, using numpy function to compute pval in parallel.
     es = np.array(es)
     esnull = np.array(esnull)
@@ -290,8 +300,7 @@ def gsea_pval(es, esnull):
     
 def normalize(es, esnull):
     """normalize the ES(S,pi) and the observed ES(S), separetely rescaling
-       the positive and negative scores by divident by the mean of the ES(S,pi).
-    """
+       the positive and negative scores by divident by the mean of the ES(S,pi). """
     
     try:
         if es >= 0:
@@ -368,7 +377,7 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
     esnull = np.array(enrichment_nulls)
 
     for i in range(len(enrichment_scores)):
-        enrNull = esnull[i]         
+        enrNull = esnull[i] #for numpy array, use index to extract array, do not use "for a in arr" method.        
         meanPos = enrNull[enrNull >= 0].mean()
         esnull_meanPos.append(meanPos)
                   

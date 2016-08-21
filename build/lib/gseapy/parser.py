@@ -2,51 +2,28 @@
 
 from __future__ import absolute_import, print_function
 from bs4 import BeautifulSoup
-from numpy import in1d
-from pandas import read_table, DataFrame
-from .enrichr import get_library_name
+from numpy import in1d, unique
+from pandas import read_table
 import sys
 
-def unique(seq):
-    """Remove duplicates from a list in Python while preserving order.
-    
-    :param seq: a python list object.
-    :return: a list without duplicates while preserving order.
-    
-    """    
-
-    seen = set()
-    seen_add = seen.add
-    """
-    The fastest way to sovle this problem is here
-    Python is a dynamic language, and resolving seen.add each iteration 
-    is more costly than resolving a local variable. seen.add could have 
-    changed between iterations, and the runtime isn't smart enough to rule 
-    that out. To play it safe, it has to check the object each time.   
-    """
-
-    return [x for x in seq if x not in seen and not seen_add(x)]
 
 def gsea_cls_parser(cls):
     """Extact class(phenotype) name from .cls file.
     
-    :param cls: the a class list instance or .cls file which is identical to GSEA input .
+    :param cls: the .cls file where located inside edb folder.
     :return: phenotype name and a list of class vector. 
     """
+    
+    with open(cls) as cls:
+        file = cls.readlines()
+    sample_name = file[1].strip('\n').split(" ")        
+    classes = file[2].strip('\n').split(" ")
+    phenoPos = sample_name[1]
+    phenoNeg = sample_name[2]
+    
+    return phenoPos,phenoNeg,classes
 
-    if isinstance(cls, list) :
-        classes = cls
-    elif isinstance(cls, str) :    
-        with open(cls) as c:
-            file = c.readlines()
-        classes = file[2].strip('\n').split(" ")
-    else:
-        raise Exception('Error parsing sample name!')
-    sample_name= unique(classes)
-  
-    return sample_name[0], sample_name[1], classes
-
-def gsea_edb_parser(results_path, index=0):
+def gsea_edb_parser(results_path,index = 0,):
     """Parse results.edb file stored under **edb** file folder.            
 
     :param results_path: the .results file where lcoated inside edb folder.
@@ -73,40 +50,32 @@ def gsea_edb_parser(results_path, index=0):
     #fwer = term.get('FWER')   
     #index_range = len(tag)-1
     print("Enriched Gene set is: ", enrich_term)
-
-    return enrich_term, hit_ind, nes, pval, fdr
+    return enrich_term,hit_ind, nes,pval,fdr
     
 
 def gsea_rank_metric(rnk):
     """Parse .rnk file. This file contains ranking correlation vector and gene names or ids. 
     
-    :param rnk: the .rnk file of GSEA input or a ranked pandas DataFrame instance.
-    :return: a pandas DataFrame with 3 columns names are:
+    :param rnk: the .rnk file where located inside the edb folder.
+    :return: a pandas DataFrame with 3 columns names are::
              
                  'gene_name','rank',rank2'
                  
     """
-    if isinstance(rnk, DataFrame) :
-        rank_metric = rnk.copy()
-    elif isinstance(rnk, str) :
-        rank_metric = read_table(rnk,header=None)
-    else:
-        raise Exception('Error parsing gene list!')
-        
+    
+    rank_metric = read_table(rnk,header=None)
     rank_metric.columns = ['gene_name','rank']
     rank_metric['rank2'] = rank_metric['rank']
            
     return rank_metric
     
-def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
-    """Parse gene_sets.gmt(gene set database) file or download from enrichr server.  
+def gsea_gmt_parser(gmt, min_size = 3, max_size = 5000, gene_list=None):
+    """Parse gene_sets.gmt(gene set database) file. 
     
-    :param gmt: the gene_sets.gmt file of GSEA input or an enrichr libary name.
-                checkout full enrichr library name here: http://amp.pharm.mssm.edu/Enrichr/#stats
-                
+    :param gmt: the gene_sets.gmt file where loacated inside edb folder.
     :param min_size: Minimum allowed number of genes from gene set also the data set. Default: 3. 
     :param max_size: Maximum allowed number of genes from gene set also the data set. Default: 5000.
-    :param gene_list: Used for filtering gene set. Only used this argument for :func:`call` method.
+    :param gene_list: Used for filtering gene set. Only used this argument for :func:`run` method.
     :return: Return a new filtered gene set database dictionary. 
 
     **DO NOT** filter gene sets, when use :func:`replot`. Because ``GSEA`` Desktop have already
@@ -114,25 +83,12 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
             
     """
 
-    if gmt in get_library_name():
-        import requests
-        ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary'
-        query_string = '?mode=text&libraryName=%s'
-        response = requests.get( ENRICHR_URL + query_string % gmt)
-        if not response.ok:
-            raise Exception('Error fetching enrichment results, check internet connection first.')
-            
-        print("Downloading and generating Enrichr library gene sets..............")            
-        genesets_dict = { line.decode().split("\t")[0]: [gene.split(",")[0] for gene in line.decode().split("\t")[2:-1]] 
-                          for line in response.iter_lines()}    
-
-    else:
-        with open(gmt) as genesets:    
-            genesets_dict = { line.split("\t")[0]: line.split("\t")[2:-1] 
-                              for line in genesets.readlines()}    
-
+ 
     
-
+    with open(gmt) as genesets:    
+        genesets_dict = { line.rstrip("\n").split("\t")[0]:  
+                          line.rstrip("\n").split("\t")[2:] 
+                          for line in genesets.readlines()}    
     #filtering dict
     if sys.version_info[0] == 3 :
         genesets_filter =  {k: v for k, v in genesets_dict.items() if len(v) >= min_size and len(v) <= max_size}
@@ -144,7 +100,7 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
     if gene_list is not None:
         subsets = sorted(genesets_filter.keys())             
         for subset in subsets:            
-            tag_indicator = in1d(gene_list, genesets_filter.get(subset), assume_unique=True)
+            tag_indicator = in1d(unique(gene_list), genesets_filter.get(subset), assume_unique=True)
             tag_len = sum(tag_indicator)      
             if tag_len <= min_size or tag_len >= max_size:                    
                 del genesets_filter[subset]

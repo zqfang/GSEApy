@@ -7,7 +7,7 @@ import argparse as ap
 # Main function
 # ------------------------------------
 
-__version__ = '0.6.0'
+__version__ = '0.5.3'
 
 def main():
     """The Main function/pipeline for GSEAPY."""
@@ -73,7 +73,7 @@ def add_output_option(parser):
     parser.add_argument("-o", "--outdir", dest="outdir", type=str, default='gseapy_out',
                         metavar='', action="store", help="The GSEAPY output directory. Default: the current working directory")
     parser.add_argument("-f", "--format", dest="format", type=str, metavar='', action="store",
-                        choices=("pdf", "png", "jpeg", "eps"), default="png",
+                        choices=("pdf", "png", "jpeg", "eps"), default="pdf",
                         help="Format of output figures, choose from {'pdf', 'png', 'jpeg', 'eps'}. Default: 'pdf'.")
     parser.add_argument("--figsize", action='store', nargs=2, dest='figsize',
                         metavar=('width', 'height'), type=float, default=[6.5, 6],
@@ -179,7 +179,7 @@ def add_plot_parser(subparsers):
 
     argparser_replot = subparsers.add_parser("replot", help="Reproduce GSEA desktop figures.")
 
-    group_replot = argparser_replot.add_argument_group("Input files arguments")
+    group_replot = argparser_replot.add_argument_group("Positional arguments")
 
     group_replot.add_argument("-i", "--indir", action="store", dest="indir", required=True, metavar='',
                               help="The GSEA desktop results directroy that you want to reproduce the figure ")
@@ -194,7 +194,7 @@ def add_enrichr_parser(subparsers):
     
     argparser_enrichr = subparsers.add_parser("enrichr", help="Peform GSEA using enrichr API.")
 
-    group_enrichr = argparser_enrichr.add_argument_group("Input files arguments")
+    group_enrichr = argparser_enrichr.add_argument_group("Positional arguments")
 
     group_enrichr.add_argument("-i", "--input-list", action="store", dest="gene_list", required=True, metavar='',
                               help="Enrichr uses a list of Entrez gene symbols as input.  ")

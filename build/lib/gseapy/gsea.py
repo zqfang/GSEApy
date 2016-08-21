@@ -14,20 +14,20 @@ from collections import OrderedDict
 
 import pandas as pd
 
-def replot(indir,outdir='gseapy_out', weight=1,figsize=[6.5,6], format='png',min_size=3, max_size=5000):
+def replot(indir,outdir='gseapy_out', weight=1,figsize=[6.5,6], format='pdf',min_size=3, max_size=5000):
     """The main fuction to run inside python.
           
     :param indir: GSEA desktop results directory. In the sub folder, you must contain edb file foder.    
     :param outdir: Output directory.
     :param weight: weighted score type. choose from {0,1,1.5,2}. Default: 1.
     :param figsize: matplotlib output figure figsize. Defult: [6.5,6].
-    :param format: matplotlib output figure format. Default: 'png'.
+    :param format: matplotlib output figure format. Default: 'pdf'.
     :param min_size: min size of input genes presented in Gene Sets. Default: 3.
     :param max_size: max size of input genes presented in Gene Sets. Default: 5000.
                      you will not encourage to use min_size, or max_size argment in :func:`replot` function.
                      Because gmt file has already been filter.
     
-    :return: Generate new figures with seleted figure format. Default: 'png'.   
+    :return: Generate new figures with seleted figure format. Default: 'pdf'.   
     """
     import glob
     from bs4 import BeautifulSoup   
@@ -69,7 +69,7 @@ def replot(indir,outdir='gseapy_out', weight=1,figsize=[6.5,6], format='png',min
     print("Congratulations! Your plots have been reproduced successfully!")
 
 def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=1000, permutation_n=1000, weighted_score_type=1,
-        permutation_type='gene_set', method='log2_ratio_of_classes', ascending=False, figsize=[6.5,6], format='png', 
+        permutation_type='gene_set', method='log2_ratio_of_classes', ascending=False, figsize=[6.5,6], format='pdf', 
         graph_num=20, seed=None):
     """ Run Gene Set Enrichment Analysis.
 
@@ -84,7 +84,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=1000, 
     :param ascending: sorting order of rankings. Default: False.
     :param outdir: results output directory.
     :param figsize: matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
-    :param format: matplotlib figure format. Default: 'png'.
+    :param format: matplotlib figure format. Default: pdf.
     :param graph_num: plot graphs for top sets of each phenotype
     :param seed: random seed. expect an interger. Defalut:None.
     :return: Generate ``GSEA`` plots and store a dictionary into csv file,
@@ -100,14 +100,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=1000, 
     
     """
     assert permutation_type in ["phenotype", "gene_set"]
-    if isinstance(data, pd.DataFrame) :
-        df = data.copy()
-    elif isinstance(data, str) :
-        df = pd.read_table(data)
-    else:
-        raise Exception('Error parsing gene expression dataframe!')
-        sys.exit(1)
-   
+    df = pd.read_table(data)    
     assert len(df) > 1   
     
     #select correct expression genes and values.
@@ -166,7 +159,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=1000, 
 
 def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Postive', pheno_neg='Negative',
             min_size=15, max_size=1000, permutation_n=1000, weighted_score_type=1,
-            ascending=False, figsize=[6.5,6], format='png',graph_num=20, seed=None):
+            ascending=False, figsize=[6.5,6], format='pdf',graph_num=20, seed=None):
     """ Run Gene Set Enrichment Analysis with pre-ranked correlation defined by user.
 
     :param rnk: pre-ranked correlation table, Same input with ``GSEA`` .rnk file.  
@@ -178,7 +171,7 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Postive', pheno_neg=
     :param weighted_score_type: refer to :func:`algorithm.enrichment_socre`. Default:1.
     :param ascending: sorting order of rankings. Default: False.
     :param figsize: matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
-    :param format: matplotlib figure format. Default: 'png'.
+    :param format: matplotlib figure format. Default: pdf.
     :param graph_num: plot graphs for top sets of each phenotype
     :param seed: random seed. expect an interger. Defalut:None.    
     :return: Generate ``GSEA`` plots and store a dictionary into csv file,
