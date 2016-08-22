@@ -53,6 +53,7 @@ The full ``GSEA`` is far too extensive to describe here; see
     introduction.rst
     run.rst
     gseapy_tutorial
+    gseapy_example
 	
 
 

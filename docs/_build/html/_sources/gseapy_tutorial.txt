@@ -1,7 +1,7 @@
-.. _example:
+.. _tutorial:
 
 ======================================
-A Protocol to walk through GSEAPY
+A Protocol to Prepare files for GSEAPY
 ======================================
 
 As a biological reseacher, I like protocols, so as other reseachers, too.
@@ -13,6 +13,9 @@ In order to run gseapy successfully, install gseapy use pip.
 .. code:: bash
 
     pip install gseapy
+
+    # if you have conda
+    conda install -c bioconda gseapy
 
 
 
@@ -36,10 +39,10 @@ commands below:
 .. code:: python
 
     import pandas as pd
-    data = pd.read_table('./test/gsea_data.txt')
-    data.head()
+    df = pd.read_table('./test/gsea_data.txt')
+    df.head()
 
-
+    #or assign df to the paramter 'data'
 
 
 .. raw:: html
@@ -129,6 +132,8 @@ An example of cls file looks like below.
     with open('gsea/edb/C1OE.cls') as cls:
         print(cls.read())
 
+    # or assign a list object to parameter 'cls' like this
+    # cls=['C1OE', 'C1OE', 'C1OE', 'Vector', 'Vector', 'Vector']
 
 .. parsed-literal::
 
@@ -149,6 +154,8 @@ An example of cls file looks like below.
 -----------------------------------------------------
 
 All you need to do is to download gene set database file from ``GSEA`` website.
+
+Or you could use enrichr library. In this case, just provide libarary name to parameter 'gene_sets'
 
 If you would like to use you own gene_sets.gmts files, build such a file use excel,
 and then rename to gene_sets.gmt.
