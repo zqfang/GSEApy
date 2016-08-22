@@ -28,6 +28,9 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
   
   The main documentation for GSEAPY can be found at https://pythonhosted.org/gseapy
   
+  An example to use gseapy, please click `Example <http://pythonhosted.org/gseapy/gseapy_example.html>`
+
+  
 
 GSEAPY is a python wrapper for **GESA** and **Enrichr**. 
 --------------------------------------------------------------------------------------------
