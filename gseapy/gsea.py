@@ -150,11 +150,11 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=1000, 
     #res_df = res_df[['es','nes','pval','fdr','gene_set_size','matched_size','rank_ES','genes']]
     res_df.sort_values(by='fdr', inplace=True)
     res_final = res_df.head(graph_num)
-    res_final.to_csv('{a}/{b}.csv'.format(a=outdir, b='gseapy_reports'), float_format ='%.7f')
+    res_df.to_csv('{a}/{b}.csv'.format(a=outdir, b='gseapy_reports'), float_format ='%.7f')
     
-    print("Start to generate gseapy reports, and produce figures.......", time.ctime())
+    print("Start to generate gseapy reports, and produce figures....", time.ctime())
     #Plotting
-    for gs in res_df.index.values:
+    for gs in res_final.index.values:
         fig = gsea_plot(rank_metric=dat2, enrich_term=gs, hit_ind=res.get(gs)['hit_index'],
                         nes=res.get(gs)['nes'], pval=res.get(gs)['pval'], fdr=res.get(gs)['fdr'], 
                         RES=res.get(gs)['rank_ES'], phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize)        
@@ -164,7 +164,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=1000, 
     print("...Congratulations. GSEAPY run successfully!!!.............\n...The Job is done...........................Goodbye!")
     
     if isinstance(data, pd.DataFrame):
-        return res_final 
+        return res_df 
 
 def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Postive', pheno_neg='Negative',
             min_size=15, max_size=1000, permutation_n=1000, weighted_score_type=1,
@@ -231,9 +231,9 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Postive', pheno_neg=
     res_df.sort_values(by='fdr', inplace=True)
     #res_df = res_df[['es','nes','pval','fdr','gene_set_size','matched_size','rank_ES','genes']]
     res_final = res_df.head(graph_num)
-    res_final.to_csv('{a}/{b}.csv'.format(a=outdir, b='gseapy_reports'), float_format ='%.7f')
+    res_df.to_csv('{a}/{b}.csv'.format(a=outdir, b='gseapy_reports'), float_format ='%.7f')
 
-    for gs in res_df.index.values:
+    for gs in res_final.index.values:
         fig = gsea_plot(rank_metric=dat2, enrich_term=gs, hit_ind=res.get(gs)['hit_index'],
                         nes=res.get(gs)['nes'], pval=res.get(gs)['pval'], fdr=res.get(gs)['fdr'], 
                         RES=res.get(gs)['rank_ES'], phenoPos=pheno_pos, phenoNeg=pheno_neg, figsize=figsize)        
@@ -245,4 +245,4 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Postive', pheno_neg=
     print("The Job is done.................................Goodbye!", time.ctime())
     
     if isinstance(rnk, pd.DataFrame):
-        return res_final 
+        return res_df 
