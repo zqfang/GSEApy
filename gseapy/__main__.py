@@ -132,7 +132,7 @@ def add_call_parser(subparsers):
     group_opt.add_argument("-t", "--top-graphNum", dest = "graph", action="store", type=int, default=20, metavar='',
                            help="Plot graphs for top sets of each phenotype. Default: 20")
     group_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=None, metavar='',
-                           help="Number of random seed. Default: 2000")
+                           help="Number of random seed. Default: None")
 
     return
     
@@ -170,7 +170,7 @@ def add_prerank_parser(subparsers):
     prerank_opt.add_argument("-t", "--top-graphNum", dest = "graph", action="store", type=int, default=20, metavar='',
                              help="Plot graphs for top sets of each phenotype. Default: 20")
     prerank_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=None, metavar='',
-                             help="Number of random seed. Default: 2000")
+                             help="Number of random seed. Default: None")
     
     return
     
