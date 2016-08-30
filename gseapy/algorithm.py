@@ -19,7 +19,7 @@ def preprocess(df):
     
     return df2
 
-def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=None, esnull=False, rs=np.random.RandomState()):
+def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=None, esnull=None, rs=np.random.RandomState()):
     """This is the most important function of GSEAPY. It has the same algorithm with GSEA.
     
     :param gene_list:       The ordered gene list gene_name_list, rank_metric['gene_name']
@@ -48,39 +48,43 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
      RES: Numerical vector containing the running enrichment score for all locations in the gene list .
              
     """
-    
+ 
+    axis = 0
+    N = len(gene_list)  
+  
     #Test whether each element of a 1-D array is also present in a second array
     #It's more intuitived here than orginal enrichment_score source code.
     #use .astype to covert bool to intergers  
     tag_indicator = np.in1d(gene_list, gene_set, assume_unique=True).astype(int)  # notice that the sign is 0 (no tag) or 1 (tag)
-    no_tag_indicator = 1 - tag_indicator
-    #get indices of tag_indicator
-    hit_ind = np.flatnonzero(tag_indicator).tolist()
-      
-    #compute ES score, the code below is identical to gsea enrichment_score method.
-    N = len(gene_list) 
-    Nhint = np.sum(tag_indicator)
-    Nmiss =  N - Nhint 
+
     if (weighted_score_type == 0 ): 
         correl_vector = np.repeat(1, N)
     else:
         correl_vector = np.abs(correl_vector**weighted_score_type)
         
+          
+    #get indices of tag_indicator    
+    hit_ind = np.flatnonzero(tag_indicator).tolist() 
+
+    Nhint = np.sum(tag_indicator) 
     sum_correl_tag = np.sum(correl_vector[tag_indicator.astype(bool)])
-    norm_tag =  1.0/sum_correl_tag
-    norm_no_tag = 1.0/Nmiss
     
-    # if used for compute esnull, set esnull equal to permutation number, e.g. 1000
-    axis = 0
-    
+    # if used for compute esnull, set esnull equal to permutation number, e.g. 1000    
     if esnull:
         tag_indicator = tag_indicator.repeat(esnull).reshape(N, esnull).T
+        correl_vector = correl_vector.repeat(esnull).reshape(N, esnull).T
+
+        # gene list permutation
         for i in range(esnull):
             rs.shuffle(tag_indicator[i])
+
+        # set axis to 1, because we have 2 dimentional array
         axis = 1
-    '''
-    similar results could be obtained when computing esnull using code below
-    
+        Nhint = np.sum(tag_indicator, axis=axis).reshape(esnull, 1)
+        sum_correl_tag = np.sum(correl_vector*tag_indicator, axis=axis).reshape(esnull, 1)
+    ''' 
+    #similar results could be obtained when computing esnull using code below
+    # 
     if esnull:
         tag_null = np.empty((esnull, N))
         i=0
@@ -91,7 +95,14 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
         axis = 1
         tag_indicator = tag_null
     '''
-    
+
+
+    #compute ES score, the code below is identical to gsea enrichment_score method.    
+    no_tag_indicator = 1 - tag_indicator
+    Nmiss =  N - Nhint 
+    norm_tag =  1.0/sum_correl_tag
+    norm_no_tag = 1.0/Nmiss
+       
     RES = np.cumsum(tag_indicator * correl_vector * norm_tag - no_tag_indicator * norm_no_tag, axis=axis)      
     max_ES = np.max(RES, axis=axis)
     min_ES = np.min(RES, axis=axis)
@@ -288,21 +299,28 @@ def gsea_pval(es, esnull):
     
     
     
-def normalize(es, esnull):
+def normalize(es, enrNull):
     """normalize the ES(S,pi) and the observed ES(S), separetely rescaling
        the positive and negative scores by divident by the mean of the ES(S,pi).
     """
     
     try:
+        if es == 0:
+            return 0.0
         if es >= 0:
-            meanPos = np.mean([a for a in esnull if a >= 0])                   
+            meanPos = np.mean([a for a in enrNull if a >= 0])
+            #print es, meanPos
             return es/meanPos
         else:
-            meanNeg = np.mean([a for a in esnull if a < 0])                    
+            meanNeg = np.mean([a for a in enrNull if a < 0])
+            #print es, meanNeg
             return -es/meanNeg
     except:
+
         return 0.0 #return if according mean value is uncalculable
     '''    
+
+
     esnull_meanPos = []
     esnull_negPos = []
     
@@ -363,7 +381,7 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
     #new normalize enrichment score calculating method. this could speed up significantly.
     esnull_meanPos = []
     esnull_meanNeg = []
-        
+   
     es = np.array(enrichment_scores)
     esnull = np.array(enrichment_nulls)
 
@@ -371,14 +389,16 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
         enrNull = esnull[i]         
         meanPos = enrNull[enrNull >= 0].mean()
         esnull_meanPos.append(meanPos)
-                  
+
+          
         meanNeg = enrNull[enrNull < 0 ].mean()
         esnull_meanNeg.append(meanNeg)
+
     
     pos = np.array(esnull_meanPos).reshape(len(es), 1)
     neg = np.array(esnull_meanNeg).reshape(len(es), 1)
-    
-    
+
+
     #compute normalized enrichment score and normalized esnull
     try:
         condlist1 = [ es >= 0, es < 0]
