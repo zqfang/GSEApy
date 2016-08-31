@@ -39,7 +39,7 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     :param figsize: matplotlib figsize.
     :return: fig object of gsea plot.
     """    
-    
+    plt.style.use('classic')
     # center color map at midpoint = 0
     norm = _MidpointNormalize(midpoint=0)
     
