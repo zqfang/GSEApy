@@ -119,6 +119,8 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
              genesets_dict = { line.strip("\n").split("\t")[0]: line.strip("\n").split("\t")[2:] 
                               for line in genesets.readlines()}    
     else:
+        print("Downloading and generating Enrichr library gene sets..............") 
+
         if gmt in get_libary_name():
             import requests
             ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary'
@@ -128,11 +130,10 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
             raise Exception("gene_set files(.gmt) not found")
         if not response.ok:
             raise Exception('Error fetching enrichment results, check internet connection first.')
-            
-        print("Downloading and generating Enrichr library gene sets..............")            
-        genesets_dict = { line.decode().split("\t")[0]: 
-                          [gene.strip("\n").split(",")[0] for gene in line.decode().split("\t")[2:-1]] 
-                          for line in response.iter_lines()}    
+                     
+        genesets_dict = { line.split("\t")[0]: 
+                          [gene.strip("\n").split(",")[0] for gene in line.split("\t")[2:-1]] 
+                          for line in response.iter_lines(chunk_size=1024, decode_unicode='utf-8')}    
  
     
 
