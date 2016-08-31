@@ -166,7 +166,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=1000, 
     if isinstance(data, pd.DataFrame):
         return res_df 
 
-def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Positive', pheno_neg='Negative',
+def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg',
             min_size=15, max_size=1000, permutation_n=1000, weighted_score_type=1,
             ascending=False, figsize=[6.5,6], format='png', graph_num=20, seed=None):
     """ Run Gene Set Enrichment Analysis with pre-ranked correlation defined by user.

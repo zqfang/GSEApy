@@ -164,7 +164,9 @@ def ranking_metric(df, method, phenoPos, phenoNeg, classes, ascending):
    :param classes:  a list of phenotype labels, to specify which column of dataframe belongs to what catogry of phenotype.
    :param ascending:  bool or list of bool. Sort ascending vs. descending.
    :return: returns correlation to class of each variable. same format with .rnk file. gene_name in first coloum,
-            correlation in second column.          
+            correlation in second column.  
+            
+    visit here for more docs: http://software.broadinstitute.org/gsea/doc/GSEAUserGuideFrame.html
     """ 
         
     A = phenoPos
