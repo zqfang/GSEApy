@@ -56,12 +56,12 @@ I love python, I would like to use Pandas to explore my data, and I want a packa
 do gene set enrichment analysis in python. SO, here is my reason: 
 
 * For Gene Enrichment Analysis, ``GSEA`` is still the one of best choice.  
-* When you have lots of expression tables, or ``GO`` terms to enrich, ``GSEA`` desktop version is really inconvinient. 
+* When you have lots of expression tables, or ``GO`` terms to enrich, ``GSEA`` Java version is really inconvinient. 
 * What's more, the R version of GSEA has not been updated since 2006. 
-* ``GSEA`` desktop version do not provide means to modify plots, like legends, ticks......
-* ``GSEA`` commanline is hard to use.
+* ``GSEA`` Java version does not provide means to modify plots, like legends, ticks......
+* ``GSEA`` commandline is hard to use.
 
-As a researcher of life science, **I want a modern ``GSEA`` with lastest features**. 
+As a researcher of life science, **I want a GSEA with lastest features**. 
 
 It can make life easier with these features:
 
@@ -72,7 +72,7 @@ It can make life easier with these features:
 * **Running inside python console without switch to R!!!**
 
 
-New Features of GSEAPY-v0.6.0
+New Features of GSEAPY-v0.6.x
 --------------------------------------------------------
 
 #. GSEAPY add **Enrichr** API, you could perform GO analysis on latest gene sets !!! 
@@ -100,7 +100,7 @@ Features of GSEAPY
 
 
 
-GSEA desktop version output: 
+GSEA Java version output: 
 -------------------------------------------------
 This is an example of GSEA desktop application output
 
@@ -338,7 +338,7 @@ For a full list of enrchr libary name :
 Bug Report
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you would like to report any bugs when you running gseapy, don't hesitate to email me: fangzhuoqing@sibs.ac.cn
+If you would like to report any bugs when you running gseapy, don't hesitate to create an issue on github here, or email me: fangzhuoqing@sibs.ac.cn
 
 
 To get help of GSEAPY
