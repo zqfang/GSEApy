@@ -104,7 +104,7 @@ GSEA desktop version output:
 -------------------------------------------------
 This is an example of GSEA desktop application output
 
-.. figure:: GSEA_OCT4_KD.png
+.. figure:: docs/GSEA_OCT4_KD.png
 
 
 
@@ -113,7 +113,7 @@ GSEAPY ``replot`` module output
 -----------------------------------------------
 Using the same algorithm by ``GSEA``, GSEAPY reproduce the example above.
 
-.. figure:: gseapy_OCT4_KD.png
+.. figure:: docs/gseapy_OCT4_KD.png
 
    
    
@@ -129,7 +129,7 @@ GSEAPY ``enrichr`` module
 -----------------------------------------------
 The powerfull module will enable you perform gene set enrichment analysis extreamly easily.
 
-.. figure:: enrichr.PNG
+.. figure:: docs/enrichr.PNG
 
 
 
