@@ -32,7 +32,7 @@ An example to use gseapy, please click here: `Example <http://pythonhosted.org/g
 
   
 
-GSEAPY is a python wrapper for **GESA** and **Enrichr**. 
+GSEAPY is a python wrapper for **GSEA** and **Enrichr**. 
 --------------------------------------------------------------------------------------------
 
 It's used for convenient GO enrichments and produce **publishable quality figures** in python. 
