@@ -126,10 +126,21 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     return fig
 
 def dotplot(df, cutoff=0.05, figsize=(3,6)):
-    """Visualize enrichr results
+    """Visualize enrichr/gsea results
     :param df: GSEApy DataFrame results 
     :return: dotplot
     """
+    
+    if 'fdr' in df.columns:
+        #gsea results
+        df.rename(columns={'pval':'Adjusted P-value',}, inplace=True)
+        hits_ratio =  df['matched_size'] / df['gene_set_size']
+    else:
+        #enrichr results
+        df['Count'] = df['Overlap'].str.split("/").str[0].astype(int)
+        df['Background'] = df['Overlap'].str.split("/").str[1].astype(int)
+        hits_ratio =  df['Count'] / df['Background'] 
+
     # pvalue cut off
     df = df[df['Adjusted P-value'] <= cutoff]
     
@@ -143,11 +154,6 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
     y=  [i for i in range(0,len(df))]
     labels = df.Term.values
     
-    #gene ratio      
-    df['Count'] = df['Overlap'].str.split("/").str[0].astype(int)
-    df['Background'] = df['Overlap'].str.split("/").str[1].astype(int)
-      
-    hits_ratio =  df['Count'] / df['Background'] 
     area = np.pi * (hits_ratio *50) **2 
     
     #creat scatter plot
@@ -159,9 +165,7 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
     ax.yaxis.set_major_formatter(plt.FixedFormatter(labels))
     ax.set_ylim([-1, len(df)])
     ax.grid()
-    
-
-    
+       
     #colorbar
     cax=fig.add_axes([0.93,0.25,0.05,0.20])
     cbar = fig.colorbar(sc, cax=cax,)
@@ -170,15 +174,14 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
 
     #scale of dots
     ax2 =fig.add_axes([0.93,0.55,0.05,0.12])
-  
-     
+       
     # find the index of the closest value to the median 
     idx = [area.argmax(), np.abs(area - area.median()).argmin(), area.argmin()]
-
     ax2.scatter(x=[0,0,0], y=y[:3],s=area[idx], c='black', edgecolors='face')
     for i, index in enumerate(idx):
-        ax2.text(x=0.8, y=y[i], s=hits_ratio[index].round(2), verticalalignment='center', horizontalalignment='left')
-    ax2.set_title("Ratio",loc='left')
+        ax2.text(x=0.8, y=y[i], s=hits_ratio[index].round(2), 
+                 verticalalignment='center', horizontalalignment='left')
+    ax2.set_title("Gene\nRatio",loc='left')
     
     #turn off all spines and ticks
     ax2.axis('off')
