@@ -124,4 +124,91 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     plt.close(fig)
     
     return fig
+
+def dotplot(df, cutoff=0.05, figsize=(3,6)):
+    """Visualize enrichr results
+    :param df: GSEApy DataFrame results 
+    :return: dotplot
+    """
+    # pvalue cut off
+    df = df[df['Adjusted P-value'] <= cutoff]
     
+    #sorting the dataframe for better visualization
+    df = df.sort_values(by='Adjusted P-value', ascending=False)
+    
+    # x axis values
+    padj = df['Adjusted P-value']
+    x = - padj.apply(np.log10)
+    # y axis index and values
+    y=  [i for i in range(0,len(df))]
+    labels = df.Term.values
+    
+    #gene ratio      
+    df['Count'] = df['Overlap'].str.split("/").str[0].astype(int)
+    df['Background'] = df['Overlap'].str.split("/").str[1].astype(int)
+      
+    hits_ratio =  df['Count'] / df['Background'] 
+    area = np.pi * (hits_ratio *50) **2 
+    
+    #creat scatter plot
+    fig, ax = plt.subplots(figsize=figsize)
+    sc = ax.scatter(x=x, y=y, s=area, edgecolors='face', c = padj,  
+                    cmap = plt.cm.bwr_r,vmin=padj.min(), vmax=padj.max())
+    ax.set_xlabel("-log$_{10}$(Adjust P-value)")
+    ax.yaxis.set_major_locator(plt.FixedLocator(y))
+    ax.yaxis.set_major_formatter(plt.FixedFormatter(labels))
+    ax.set_ylim([-1, len(df)])
+    ax.grid()
+    
+
+    
+    #colorbar
+    cax=fig.add_axes([0.93,0.25,0.05,0.20])
+    cbar = fig.colorbar(sc, cax=cax,)
+    cbar.ax.tick_params(right='off')
+    cbar.ax.set_title('Padj',loc='left')
+
+    #scale of dots
+    ax2 =fig.add_axes([0.93,0.55,0.05,0.12])
+  
+     
+    # find the index of the closest value to the median 
+    idx = [area.argmax(), np.abs(area - area.median()).argmin(), area.argmin()]
+
+    ax2.scatter(x=[0,0,0], y=y[:3],s=area[idx], c='black', edgecolors='face')
+    for i, index in enumerate(idx):
+        ax2.text(x=0.8, y=y[i], s=hits_ratio[index].round(2), verticalalignment='center', horizontalalignment='left')
+    ax2.set_title("Ratio",loc='left')
+    
+    #turn off all spines and ticks
+    ax2.axis('off')
+
+    #plt.tight_layout()
+    
+    plt.show()
+    
+def adjust_spines(ax, spines):
+    """function for removing spines and ticks.
+    :param ax: axes object
+    :param spines: a list of spines names to keep. e.g [left, right, top, bottom]
+                    if spines = []. remove all spines and ticks.
+    """
+    for loc, spine in ax.spines.items():
+        if loc in spines:
+            spine.set_position(('outward', 10))  # outward by 10 points
+            spine.set_smart_bounds(True)
+        else:
+            spine.set_color('none')  # don't draw spine
+
+    # turn off ticks where there is no spine
+    if 'left' in spines:
+        ax.yaxis.set_ticks_position('left')
+    else:
+        # no yaxis ticks
+        ax.yaxis.set_ticks([])
+
+    if 'bottom' in spines:
+        ax.xaxis.set_ticks_position('bottom')
+    else:
+        # no xaxis ticks
+        ax.xaxis.set_ticks([])

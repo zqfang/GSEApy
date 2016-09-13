@@ -173,6 +173,7 @@ def enrichr(gene_list, description, gene_sets, outfile):
     if isinstance(gene_list, list):
         print("Enrichr API : You are seeing this message, because you are inside python console.\n"+\
               "Enrichr API : It will return a pandas dataframe for veiwing results."  )
+        
         return read_table(outfile + '.txt')
         
     print("Enrichr API : Done")

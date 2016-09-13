@@ -9,7 +9,7 @@ import time
 
 from .parser import gsea_edb_parser, gsea_rank_metric, gsea_gmt_parser, gsea_cls_parser
 from .algorithm import enrichment_score, gsea_compute, preprocess, ranking_metric
-from .gsea_plot import gsea_plot
+from .plot import gsea_plot
 from collections import OrderedDict
 
 import pandas as pd
@@ -64,7 +64,7 @@ def replot(indir,outdir='gseapy_out', weight=1,figsize=[6.5,6], format='png',min
         #plotting
         fig = gsea_plot(rank_metric, enrich_term,hit_ind, nes, pval,
                         fdr, RES, phenoPos, phenoNeg, figsize=figsize)    
-        fig.savefig('{a}/{b}.{c}'.format(a=outdir, b=enrich_term, c=format), dpi=300,)
+        fig.savefig('{a}/.gseapy.replot.{b}.{c}'.format(a=outdir, b=enrich_term, c=format), dpi=300,)
         
     print("Congratulations! Your plots have been reproduced successfully!")
 
@@ -146,13 +146,13 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=1000, 
         res[gs] = rdict           
     
     res_df = pd.DataFrame.from_dict(res,orient='index')
-    res_df.index.name = 'Enrich_terms'
+    res_df.index.name = 'Term'
     #res_df = res_df[['es','nes','pval','fdr','gene_set_size','matched_size','rank_ES','genes']]
     res_df.sort_values(by='fdr', inplace=True)
     res_final = res_df.head(graph_num)
-    res_df.to_csv('{a}/{b}.csv'.format(a=outdir, b='gseapy_reports'), float_format ='%.7f')
+    res_df.to_csv('{a}/{b}.{c}.reports.csv'.format(a=outdir, b='gseapy', c=permutation_type), float_format ='%.7f')
     
-    print("Start to generate gseapy reports, and produce figures....", time.ctime())
+    print("Start to generate gseapy reports, and produce figures...", time.ctime())
     #Plotting
     for gs in res_final.index.values:
         fig = gsea_plot(rank_metric=dat2, enrich_term=gs, hit_ind=res.get(gs)['hit_index'],
@@ -227,11 +227,11 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
 
 
     res_df = pd.DataFrame.from_dict(res, orient='index')
-    res_df.index.name = 'Enrich_terms'
+    res_df.index.name = 'Term'
     res_df.sort_values(by='fdr', inplace=True)
     #res_df = res_df[['es','nes','pval','fdr','gene_set_size','matched_size','rank_ES','genes']]
     res_final = res_df.head(graph_num)
-    res_df.to_csv('{a}/{b}.csv'.format(a=outdir, b='gseapy_reports'), float_format ='%.7f')
+    res_df.to_csv('{a}/{b}.prerank.reports.csv'.format(a=outdir, b='gseapy'), float_format ='%.7f')
 
     for gs in res_final.index.values:
         fig = gsea_plot(rank_metric=dat2, enrich_term=gs, hit_ind=res.get(gs)['hit_index'],
