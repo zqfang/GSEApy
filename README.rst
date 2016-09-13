@@ -30,7 +30,7 @@ The main documentation for GSEAPY can be found at https://pythonhosted.org/gseap
   
 An example to use gseapy, please click here: `Example <http://pythonhosted.org/gseapy/gseapy_example.html>`_
 
-  
+**Release notes** : https://github.com/BioNinja/gseapy/releases 
 
 GSEAPY is a python wrapper for **GSEA** and **Enrichr**. 
 --------------------------------------------------------------------------------------------
@@ -47,6 +47,7 @@ statistically significant, concordant differences between two biological states 
 
 The full ``GSEA`` is far too extensive to describe here; see
 `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ documentation for more information.
+
 
 
 Why GSEAPY
