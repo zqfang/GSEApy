@@ -144,6 +144,9 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
     # pvalue cut off
     df = df[df['Adjusted P-value'] <= cutoff]
     
+    if len(df) < 1:
+        print("No enrich terms when cuttoff = %s"%cutoff )
+        return 
     #sorting the dataframe for better visualization
     df = df.sort_values(by='Adjusted P-value', ascending=False)
     
@@ -174,12 +177,21 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
 
     #scale of dots
     ax2 =fig.add_axes([0.93,0.55,0.05,0.12])
-       
-    # find the index of the closest value to the median 
-    idx = [area.argmax(), np.abs(area - area.median()).argmin(), area.argmin()]
-    ax2.scatter(x=[0,0,0], y=y[:3],s=area[idx], c='black', edgecolors='face')
+    
+    #for terms less than 3
+    if len(df) >= 3:
+        x2 = [0]*3
+        # find the index of the closest value to the median 
+        idx = [area.argmax(), np.abs(area - area.median()).argmin(), area.argmin()]
+    else:        
+        x2 =  [0]*len(df)
+        idx = [n for n in range(len(df)-1, -1,-1)]
+
+    y2 = y[:len(x2)]
+    ax2.scatter(x=x2, y=y2, s=area[idx], c='black', edgecolors='face')
+    
     for i, index in enumerate(idx):
-        ax2.text(x=0.8, y=y[i], s=hits_ratio[index].round(2), 
+        ax2.text(x=0.8, y=y2[i], s=hits_ratio[index].round(2), 
                  verticalalignment='center', horizontalalignment='left')
     ax2.set_title("Gene\nRatio",loc='left')
     
@@ -189,6 +201,8 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
     #plt.tight_layout()
     
     plt.show()
+    
+    return fig
     
 def adjust_spines(ax, spines):
     """function for removing spines and ticks.
