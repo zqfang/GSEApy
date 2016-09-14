@@ -5,12 +5,12 @@
 
 from __future__ import print_function
 
-import .plot import dotplot
+
 import json
 import requests
 import sys
 from pandas import read_table
-
+from .plot import dotplot
 
 default_gene_set_libraries = [
     'GO_Biological_Process_2015',
