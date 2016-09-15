@@ -5,11 +5,12 @@
 
 from __future__ import print_function
 
+
 import json
 import requests
 import sys
 from pandas import read_table
-
+from .plot import dotplot
 
 default_gene_set_libraries = [
     'GO_Biological_Process_2015',
@@ -173,8 +174,11 @@ def enrichr(gene_list, description, gene_sets, outfile):
     if isinstance(gene_list, list):
         print("Enrichr API : You are seeing this message, because you are inside python console.\n"+\
               "Enrichr API : It will return a pandas dataframe for veiwing results."  )
-        
-        return read_table(outfile + '.txt')
+        print("Enrichr API : Done")
+        df =  read_table(outfile + '.txt')
+        fig = dotplot(df, cutoff=0.05)
+        fig.savefig("gseapy.enrchr.results.png",dpi=300)
+        return df
         
     print("Enrichr API : Done")
 

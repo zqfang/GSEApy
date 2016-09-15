@@ -6,7 +6,8 @@ from functools import reduce
 import time
 import numpy as np
 import sys
-
+import multiprocessing
+import itertools
 
 def preprocess(df):
     """pre-processed the data frame.new filtering methods will be implement here.
@@ -467,3 +468,32 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
 
     return zip(enrichment_scores, nEnrichmentScores, enrichmentPVals, fdrs)
 
+def _es_parallel(args):
+    """
+    unpack the args tuples for Pool().map function
+    """
+    gene_list, gene_set, weighted_score_type, correl_vector, esnul, rs = args
+    
+    return enrichment_score(gene_list, gene_set, weighted_score_type, correl_vector, esnull, rs)
+
+def _multiprocess(process=1):
+    pool = multiprocessing.Pool(process)
+    
+    gene_set = gmt.keys()
+    #python 2
+    resutls = pool.map(
+    func=_es_parallel,
+        iterable=itertools.izip(
+            itertools.repeat(gene_list),
+            gene_set,
+            itertools.repeat(weighted_score_type),
+            itertools.repeat(correl_vector),
+            itertools.repeat(esnull),
+            itertools.repeat(rs)))   
+   #python 3        
+   L = pool.starmap(_es_parallel, [(1, 1), (2, 1), (3, 1)])
+    # or
+   M = pool.starmap(_es_parallel, zip(a_args, itertools.repeat(second_arg)))
+   pool.close()
+   pool.join()
+   return results
