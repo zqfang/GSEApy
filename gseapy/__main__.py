@@ -40,7 +40,8 @@ def main():
     elif subcommand == 'enrichr':
         # calling enrichr API
         from .enrichr import enrichr
-        enrichr(gene_list= args.gene_list, description=args.description, gene_sets=args.library, outfile=args.ofile)    
+        enrichr(gene_list= args.gene_list, description=args.description, gene_sets=args.library, outfile=args.outdir,
+		        format=args.format, cutoff=args.cut, figsize=args.figsize)    
     else:
         argparser.print_help()
         sys.exit(0)
@@ -204,7 +205,9 @@ def add_enrichr_parser(subparsers):
     group_enrichr.add_argument("-g", "--gene-sets", action="store", dest="library", required=True, metavar='',
                               help="Enrichr library name requires. see online tool for names.  ")
 
-    add_output_group(group_enrichr)
+    add_output_option(group_enrichr)
+    group_enrichr.add_argument("--cut-off", action="store", dest="cut", metavar='',
+                              help="Pval cutoff, used for generating plots. Default: 0.05  ")
 
     return
 

@@ -8,7 +8,7 @@ from __future__ import print_function
 
 import json
 import requests
-import sys
+import sys, os
 from pandas import read_table
 from .plot import dotplot
 
@@ -67,7 +67,7 @@ def get_libary_name():
 
     return sorted(gmt_names)
     
-def enrichr(gene_list, description, gene_sets, outfile):
+def enrichr(gene_list, description, gene_sets, outdir, cutoff=0.05, format='png', figsize=(3,6)):
     """Enrichr API.
 
     :param gene_list: flat file with list of genes, one gene id per row.
@@ -75,8 +75,9 @@ def enrichr(gene_list, description, gene_sets, outfile):
                       inside python console.
     :param description: name of analysis
     :param gene_set: Enrichr Library to query.
-    :param outfile: out put file prefix
-    
+    :param outdir: out put file directory
+	:param cutoff: Adjust P-value cutoff, for plotting. Default: 0.05
+    :return: A DataFrame of enrchment results, only if call ``enrichr`` inside python console.
     """
     if isinstance(gene_list, list):
         genes = [str(gene) for gene in gene_list]
@@ -158,26 +159,30 @@ def enrichr(gene_list, description, gene_sets, outfile):
     ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/export'
     query_string = '?userListId=%s&filename=%s&backgroundType=%s'
     user_list_id = str(job_id['userListId'])
-
+    outfile='enrichr.reports'
     url = ENRICHR_URL + query_string % (user_list_id, outfile, gene_set)
     response = requests.get(url, stream=True)
 
     print('Enrichr API : Downloading file of enrichment results: Job Id:', job_id)
-    with open(outfile + '.txt', 'wb') as f:
+    os.system("mkdir "+ outdir)
+    with open(outdir+'/'+ outfile + description + '.txt', 'wb') as f:
         for chunk in response.iter_content(chunk_size=1024):
             if chunk:
                 f.write(chunk)
 
-    print('Enrichr API : Results written to:', outfile + ".txt")
-    
+    print('Enrichr API : Results written to:', outfile + description + ".txt")
+
+    df =  read_table(outdir+'/'+outfile + '.txt')
+    fig = dotplot(df, cutoff=cutoff, figsize=figsize)
+    if fig is not None:
+        fig.savefig(outdir+'/'+"enrichr.reports.%s"%format, bbox_inches='tight', dpi=300)
+		
     # convinient for viewing results inside python console. 
     if isinstance(gene_list, list):
         print("Enrichr API : You are seeing this message, because you are inside python console.\n"+\
               "Enrichr API : It will return a pandas dataframe for veiwing results."  )
         print("Enrichr API : Done")
-        df =  read_table(outfile + '.txt')
-        fig = dotplot(df, cutoff=0.05)
-        fig.savefig("gseapy.enrchr.results.png",dpi=300)
+
         return df
         
     print("Enrichr API : Done")

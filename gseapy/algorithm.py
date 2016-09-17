@@ -467,7 +467,7 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
     print("Statistial testing finished.............................", time.ctime())
 
     return zip(enrichment_scores, nEnrichmentScores, enrichmentPVals, fdrs)
-
+'''
 def _es_parallel(args):
     """
     unpack the args tuples for Pool().map function
@@ -497,3 +497,4 @@ def _multiprocess(process=1):
    pool.close()
    pool.join()
    return results
+ '''

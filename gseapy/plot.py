@@ -134,19 +134,19 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
     if 'fdr' in df.columns:
         #gsea results
         df.rename(columns={'pval':'Adjusted P-value',}, inplace=True)
-        hits_ratio =  df['matched_size'] / df['gene_set_size']
+        df['hits_ratio'] =  df['matched_size'] / df['gene_set_size']
     else:
         #enrichr results
         df['Count'] = df['Overlap'].str.split("/").str[0].astype(int)
         df['Background'] = df['Overlap'].str.split("/").str[1].astype(int)
-        hits_ratio =  df['Count'] / df['Background'] 
+        df['hits_ratio'] =  df['Count'] / df['Background'] 
 
     # pvalue cut off
     df = df[df['Adjusted P-value'] <= cutoff]
     
     if len(df) < 1:
         print("No enrich terms when cuttoff = %s"%cutoff )
-        return 
+        return None
     #sorting the dataframe for better visualization
     df = df.sort_values(by='Adjusted P-value', ascending=False)
     
@@ -157,12 +157,12 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
     y=  [i for i in range(0,len(df))]
     labels = df.Term.values
     
-    area = np.pi * (hits_ratio *50) **2 
+    area = np.pi * (df['hits_ratio'] *50) **2 
     
     #creat scatter plot
     fig, ax = plt.subplots(figsize=figsize)
     sc = ax.scatter(x=x, y=y, s=area, edgecolors='face', c = padj,  
-                    cmap = plt.cm.bwr_r,vmin=padj.min(), vmax=padj.max())
+                    cmap = plt.cm.cool_r,vmin=padj.min(), vmax=padj.max())
     ax.set_xlabel("-log$_{10}$(Adjust P-value)")
     ax.yaxis.set_major_locator(plt.FixedLocator(y))
     ax.yaxis.set_major_formatter(plt.FixedFormatter(labels))
@@ -185,13 +185,13 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
         idx = [area.argmax(), np.abs(area - area.median()).argmin(), area.argmin()]
     else:        
         x2 =  [0]*len(df)
-        idx = [n for n in range(len(df)-1, -1,-1)]
+        idx = df.index
 
     y2 = y[:len(x2)]
     ax2.scatter(x=x2, y=y2, s=area[idx], c='black', edgecolors='face')
     
     for i, index in enumerate(idx):
-        ax2.text(x=0.8, y=y2[i], s=hits_ratio[index].round(2), 
+        ax2.text(x=0.8, y=y2[i], s=df['hits_ratio'][index].round(2), 
                  verticalalignment='center', horizontalalignment='left')
     ax2.set_title("Gene\nRatio",loc='left')
     
@@ -199,8 +199,6 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
     ax2.axis('off')
 
     #plt.tight_layout()
-    
-    plt.show()
     
     return fig
     
