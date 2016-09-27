@@ -162,7 +162,7 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
     #creat scatter plot
     fig, ax = plt.subplots(figsize=figsize)
     sc = ax.scatter(x=x, y=y, s=area, edgecolors='face', c = padj,  
-                    cmap = plt.cm.bwr_r,vmin=padj.min(), vmax=padj.max())
+                    cmap = plt.cm.seismic_r, vmin=padj.min(), vmax=padj.max())
     ax.set_xlabel("-log$_{10}$(Adjust P-value)")
     ax.yaxis.set_major_locator(plt.FixedLocator(y))
     ax.yaxis.set_major_formatter(plt.FixedFormatter(labels))
@@ -185,7 +185,7 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
         idx = [area.argmax(), np.abs(area - area.median()).argmin(), area.argmin()]
     else:        
         x2 =  [0]*len(df)
-        idx = [n for n in range(len(df)-1, -1,-1)]
+        idx = [n for n in reversed(range(len(df)))]
 
     y2 = y[:len(x2)]
     ax2.scatter(x=x2, y=y2, s=area[idx], c='black', edgecolors='face')
