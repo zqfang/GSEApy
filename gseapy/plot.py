@@ -162,7 +162,7 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
     #creat scatter plot
     fig, ax = plt.subplots(figsize=figsize)
     sc = ax.scatter(x=x, y=y, s=area, edgecolors='face', c = padj,  
-                    cmap = plt.cm.cool_r,vmin=padj.min(), vmax=padj.max())
+                    cmap = plt.cm.RdBu,vmin=padj.min(), vmax=padj.max())
     ax.set_xlabel("-log$_{10}$(Adjust P-value)")
     ax.yaxis.set_major_locator(plt.FixedLocator(y))
     ax.yaxis.set_major_formatter(plt.FixedFormatter(labels))
@@ -187,7 +187,7 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
         x2 =  [0]*len(df)
         idx = df.index
 
-    y2 = y[:len(x2)]
+    y2 = [i for i in range(0,len(x2))]
     ax2.scatter(x=x2, y=y2, s=area[idx], c='black', edgecolors='face')
     
     for i, index in enumerate(idx):
