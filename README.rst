@@ -53,18 +53,8 @@ The full ``GSEA`` is far too extensive to describe here; see
 Why GSEAPY
 -----------------------------------------------------
 
-I love python, I would like to use Pandas to explore my data, and I want a package to
-do gene set enrichment analysis in python. SO, here is my reason: 
-
-* For Gene Enrichment Analysis, ``GSEA`` is still the one of best choice.  
-* When you have lots of expression tables, or ``GO`` terms to enrich, ``GSEA`` Java version is really inconvinient. 
-* What's more, the R version of GSEA has not been updated since 2006. 
-* ``GSEA`` Java version does not provide means to modify plots, like legends, ticks......
-* ``GSEA`` commandline is hard to use.
-
-As a researcher of life science, **I want a GSEA with lastest features**. 
-
-It can make life easier with these features:
+I would like to use Pandas to explore my data, but I did not find a  convenient tool to
+do gene set enrichment analysis in python. So, here is my reason: 
 
 * User friendly for both wet and dry lab usrers.
 * Produce pubilishable figures.
@@ -81,23 +71,6 @@ New Features of GSEAPY-v0.6.x
 #. You don't need to download gene_set files. GSEAPY will do it for you. Just provide Enrichr library name, That it!!!
 
 Enrichr is open source and freely available online at: http://amp.pharm.mssm.edu/Enrichr .
-
-
-
-Features of GSEAPY
-------------------------------------------------------
-
-#. GSEAPY could reproduce the GSEA figures using GSEA desktop version results.
-
-#. GSEAPY could be used directly to perform enrichment anlysis. All parameters are same with ``GSEA``
-
-#. GSEAPY is written in ``python``, using the same algorithm of ``GSEA`` Desktop version, it runs very **fast**.
-
-#. GSEAPY produce figures in png format by default, but pdf or other matplotlib formats are all supported.
-
-#. GSEAPY is user friendly and provided with 2 ways to use(commandline or python console).
-
-...more...are...comming...
 
 
 
