@@ -149,7 +149,7 @@ def add_prerank_parser(subparsers):
     prerank_input.add_argument("-g", "--gmt", dest="gmt", action="store", type=str, required=True, 
                              help="Gene set database in GMT format. Same with GSEA.")
     prerank_input.add_argument("-l", "--label", action='store', nargs=2, dest='label',
-                             metavar=('pos', 'neg'), type=float, default=['Pos','Neg'],
+                             metavar=('pos', 'neg'), type=str, default=['Pos','Neg'],
                              help="The phenotype label argument need two parameter to define. Default: ['Pos','Neg']")
 
     # group for output files
