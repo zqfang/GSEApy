@@ -159,12 +159,12 @@ def enrichr(gene_list, description, gene_sets, outdir, cutoff=0.05, format='png'
     ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/export'
     query_string = '?userListId=%s&filename=%s&backgroundType=%s'
     user_list_id = str(job_id['userListId'])
-    outfile='enrichr.reports'
+    outfile='enrichr.reports.'
     url = ENRICHR_URL + query_string % (user_list_id, outfile, gene_set)
     response = requests.get(url, stream=True)
 
     print('Enrichr API : Downloading file of enrichment results: Job Id:', job_id)
-    os.system("mkdir "+ outdir)
+    os.mkdirs(outdir)
     with open(outdir+'/'+ outfile + description + '.txt', 'wb') as f:
         for chunk in response.iter_content(chunk_size=1024):
             if chunk:
@@ -172,7 +172,7 @@ def enrichr(gene_list, description, gene_sets, outdir, cutoff=0.05, format='png'
 
     print('Enrichr API : Results written to:', outfile + description + ".txt")
 
-    df =  read_table(outdir+'/'+outfile + '.txt')
+    df =  read_table(outdir+'/'+ outfile + description + '.txt')
     fig = dotplot(df, cutoff=cutoff, figsize=figsize)
     if fig is not None:
         fig.savefig(outdir+'/'+"enrichr.reports.%s"%format, bbox_inches='tight', dpi=300)

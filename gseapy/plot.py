@@ -187,6 +187,7 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
         x2 =  [0]*len(df)
         idx = df.index
 
+
     y2 = [i for i in range(0,len(x2))]
     ax2.scatter(x=x2, y=y2, s=area[idx], c='black', edgecolors='face')
     
