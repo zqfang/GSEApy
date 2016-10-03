@@ -33,47 +33,21 @@ statistically significant, concordant differences between two biological states 
 The full ``GSEA`` is far too extensive to describe here; see
 `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ documentation for more information.
 
-
-Why GSEAPY
------------------------------------------------------
-
-For Gene Enrichment Analysis, ``GSEA`` is still the one of best choice.  
-
-However, When you have large number of expression tables, or ``GO`` terms to enrich, ``GSEA`` desktop
-version is inconvinient. What's more, the R version of GSEA has not been updated since 2006. 
-What's worse, ``GSEA`` desktop version do not provide means to modify plots, 
-like legends, ticks......
-
-As a researcher of life science, I want a modern ``GSEA`` with lastest features. It can produce pubilishable 
-figures, and do many jobs at the same time without using mouse to select differrent data table,
-differrent gene sets repeatly. 
-
-
-New Features of GSEAPY
---------------------------------------------------------
-
-#. GSEAPY add **Enrichr** API, you could perform GO analysis on latest gene sets !!! 
-
 Enrichr is open source and freely available online at: http://amp.pharm.mssm.edu/Enrichr .
 
 
 
+Why GSEAPY
+-----------------------------------------------------
 
-Features of GSEAPY
-------------------------------------------------------
+I would like to use Pandas to explore my data, but I did not find a  convenient tool to
+do gene set enrichment analysis in python. So, here is my reason: 
 
-#. GSEAPY could reproduce the GSEA figures using GSEA desktop version results.
-
-#. GSEAPY could be used directly to perform enrichment anlysis. All parameters are same with ``GSEA``
-
-#. GSEAPY is written in ``python``, using the same algorithm of ``GSEA`` Desktop version.
-
-#. GSEAPY produce figures in pdf format by default, which are ready for publishing and easy to modifiy.
-
-#. GSEAPY is build based on Numpy, it runs very **fast**. 
-
-#. GSEAPY Enhancement will be considered. If you would like to contribute, please @BioNinja on ``Github``.
-
+* **Running inside python console without switch to R!!!**
+* User friendly for both wet and dry lab usrers.
+* Produce pubilishable figures.
+* Doing many jobs at the same time without using mouse to select differrent data table, differrent gene sets repeatly.
+* Easy to use in Bash shell. 
 
 
 GSEA desktop version output
@@ -136,7 +110,7 @@ Mandatory
 * Pandas 
 * Matplotlib
 * Beautifulsoup4
-* requests(for enrichr API)
+* Requests(for enrichr API)
 
 You may also need **lxml, html5lib**, if you could not parse xml files. 
 
@@ -145,7 +119,7 @@ You may also need **lxml, html5lib**, if you could not parse xml files.
 Run GSEAPY
 -----------------
 
-GSEAPY has three subcommands: ``replot``, ``call``, ``prerank``.
+GSEAPY has three subcommands: ``replot``, ``call``, ``prerank``,  ``enrichr``.
 
 The ``replot`` module reproduce GSEA desktop version results. The only input for GSEAPY is the location to GSEA results.
 

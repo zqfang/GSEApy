@@ -120,7 +120,7 @@ def add_call_parser(subparsers):
                            help="Max size of input genes presented in Gene Sets. Default: 1000")
     group_opt.add_argument("-n", "--permu-num", dest = "n", action="store", type=int, default=1000, metavar='',
                            help="Number of random permutations. For calculating esnulls. Default: 1000")
-    group_opt.add_argument("-w", "--weight", action='store', dest='weight', default=1, type=float, metavar='',
+    group_opt.add_argument("-w", "--weight", action='store', dest='weight', default=1.0, type=float, metavar='',
                            help='Weighted_score of rank_metrics.For weighting input genes. Choose from {0, 1, 1.5, 2},default: 1',)
     group_opt.add_argument("-m", "--method", action="store", dest="method", type=str, metavar='',
                            choices=("signal_to_noise", "t_test", "ratio_of_classes", "diff_of_classes", "log2_ratio_of_classes"),
@@ -164,7 +164,7 @@ def add_prerank_parser(subparsers):
                              help="Max size of input genes presented in Gene Sets. Default: 1000")
     prerank_opt.add_argument("-n", "--permu-num", dest = "n", action="store", type=int, default=1000, metavar='',
                              help="Number of random permutations. For calculating esnulls. Default: 1000")
-    prerank_opt.add_argument("-w", "--weight", action='store', dest='weight', default=1, type=float, metavar='',
+    prerank_opt.add_argument("-w", "--weight", action='store', dest='weight', default=1.0, type=float, metavar='',
                              help='Weighted_score of rank_metrics.For weighting input genes. Choose from {0, 1, 1.5, 2},default: 1',)
     prerank_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
                              help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
@@ -186,7 +186,7 @@ def add_plot_parser(subparsers):
                               help="The GSEA desktop results directroy that you want to reproduce the figure ")
     add_output_option(group_replot)
     #add_output_group( argparser_plot )
-    group_replot.add_argument("-w", "--weight", action='store', dest='weight', default=1, type=float, metavar='',
+    group_replot.add_argument("-w", "--weight", action='store', dest='weight', default=1.0, type=float, metavar='',
                               help='Weighted_score of rank_metrics. Please Use the same value in GSEA. Choose from (0, 1, 1.5, 2),default: 1',)
 
     return
@@ -206,7 +206,7 @@ def add_enrichr_parser(subparsers):
                               help="Enrichr library name requires. see online tool for names.  ")
 
     add_output_option(group_enrichr)
-    group_enrichr.add_argument("--cut-off", action="store", dest="cut", metavar='',
+    group_enrichr.add_argument("--cut-off", action="store", dest="cut", metavar='', type=float, default=0.05,
                               help="Pval cutoff, used for generating plots. Default: 0.05  ")
 
     return

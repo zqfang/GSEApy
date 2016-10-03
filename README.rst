@@ -48,6 +48,8 @@ statistically significant, concordant differences between two biological states 
 The full ``GSEA`` is far too extensive to describe here; see
 `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ documentation for more information.
 
+Enrichr is open source and freely available online at: http://amp.pharm.mssm.edu/Enrichr .
+
 
 
 Why GSEAPY
@@ -56,21 +58,12 @@ Why GSEAPY
 I would like to use Pandas to explore my data, but I did not find a  convenient tool to
 do gene set enrichment analysis in python. So, here is my reason: 
 
+* **Running inside python console without switch to R!!!**
 * User friendly for both wet and dry lab usrers.
 * Produce pubilishable figures.
 * Doing many jobs at the same time without using mouse to select differrent data table, differrent gene sets repeatly.
 * Easy to use in Bash shell. 
-* **Running inside python console without switch to R!!!**
 
-
-New Features of GSEAPY-v0.6.x
---------------------------------------------------------
-
-#. GSEAPY add **Enrichr** API, you could perform GO analysis on latest gene sets !!! 
-#. You can perform analysis inside python console without switching to R!!!
-#. You don't need to download gene_set files. GSEAPY will do it for you. Just provide Enrichr library name, That it!!!
-
-Enrichr is open source and freely available online at: http://amp.pharm.mssm.edu/Enrichr .
 
 
 

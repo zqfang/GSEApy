@@ -45,6 +45,7 @@ statistically significant, concordant differences between two biological states 
 The full ``GSEA`` is far too extensive to describe here; see
 `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ documentation for more information.
 
+Enrichr is open source and freely available online at: http://amp.pharm.mssm.edu/Enrichr .
 
 
 .. toctree::

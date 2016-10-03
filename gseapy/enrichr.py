@@ -74,7 +74,7 @@ def enrichr(gene_list, description, gene_sets, outdir, cutoff=0.05, format='png'
                       or a python list object, which make it easy to use 
                       inside python console.
     :param description: name of analysis
-    :param gene_set: Enrichr Library to query.
+    :param gene_sets: Enrichr Library to query.
     :param outdir: out put file directory
 	:param cutoff: Adjust P-value cutoff, for plotting. Default: 0.05
     :return: A DataFrame of enrchment results, only if call ``enrichr`` inside python console.
