@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import __main__ as main
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.transforms as transforms
@@ -126,10 +127,15 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     return fig
 
 def dotplot(df, cutoff=0.05, figsize=(3,6)):
-    """Visualize enrichr/gsea results
-    :param df: GSEApy DataFrame results 
-    :return: dotplot
+    """Visualize enrichr or gsea results.
+    
+    :param df: GSEApy DataFrame results    
+    :return:  a dotplot for enrichr terms.    
     """
+    if hasattr(main, '__file__'):
+        from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+        from matplotlib.figure import Figure
+
     
     if 'fdr' in df.columns:
         #gsea results
@@ -160,9 +166,14 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
     area = np.pi * (df['hits_ratio'] *50) **2 
     
     #creat scatter plot
-    fig, ax = plt.subplots(figsize=figsize)
-    sc = ax.scatter(x=x, y=y, s=area, edgecolors='face', c = padj,  
-                    cmap = plt.cm.RdBu,vmin=padj.min(), vmax=padj.max())
+    if hasattr(main, '__file__'):
+        fig = Figure(figsize=figsize)
+        canvas = FigureCanvas(fig)
+        ax = fig.add_subplot(111)
+    else:
+        fig, ax = plt.subplots(figsize=figsize)
+        sc = ax.scatter(x=x, y=y, s=area, edgecolors='face', c = padj,  
+                        cmap = plt.cm.RdBu,vmin=padj.min(), vmax=padj.max())
     ax.set_xlabel("-log$_{10}$(Adjust P-value)")
     ax.yaxis.set_major_locator(plt.FixedLocator(y))
     ax.yaxis.set_major_formatter(plt.FixedFormatter(labels))
@@ -200,14 +211,16 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
     ax2.axis('off')
 
     #plt.tight_layout()
-    
+    #canvas.print_figure('test',,bbox_inches='tight')    
     return fig
     
 def adjust_spines(ax, spines):
     """function for removing spines and ticks.
+    
     :param ax: axes object
     :param spines: a list of spines names to keep. e.g [left, right, top, bottom]
                     if spines = []. remove all spines and ticks.
+    
     """
     for loc, spine in ax.spines.items():
         if loc in spines:
