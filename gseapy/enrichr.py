@@ -164,7 +164,7 @@ def enrichr(gene_list, description, gene_sets, outdir, cutoff=0.05, format='png'
     response = requests.get(url, stream=True)
 
     print('Enrichr API : Downloading file of enrichment results: Job Id:', job_id)
-    os.mkdirs(outdir)
+    os.makedirs(outdir, exist_ok=True)
     with open(outdir+'/'+ outfile + description + '.txt', 'wb') as f:
         for chunk in response.iter_content(chunk_size=1024):
             if chunk:

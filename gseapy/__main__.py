@@ -40,7 +40,7 @@ def main():
     elif subcommand == 'enrichr':
         # calling enrichr API
         from .enrichr import enrichr
-        enrichr(gene_list= args.gene_list, description=args.description, gene_sets=args.library, outfile=args.outdir,
+        enrichr(gene_list= args.gene_list, description=args.description, gene_sets=args.library, outdir=args.outdir,
 		        format=args.format, cutoff=args.cut, figsize=args.figsize)    
     else:
         argparser.print_help()
