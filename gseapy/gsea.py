@@ -29,6 +29,7 @@ def replot(indir,outdir='gseapy_out', weight=1,figsize=[6.5,6], format='png',min
     
     :return: Generate new figures with seleted figure format. Default: 'png'.   
     """
+    argument = locals()
     import glob
     from bs4 import BeautifulSoup   
     #parsing files.......    
@@ -65,7 +66,11 @@ def replot(indir,outdir='gseapy_out', weight=1,figsize=[6.5,6], format='png',min
         fig = gsea_plot(rank_metric, enrich_term,hit_ind, nes, pval,
                         fdr, RES, phenoPos, phenoNeg, figsize=figsize)    
         fig.savefig('{a}/.gseapy.replot.{b}.{c}'.format(a=outdir, b=enrich_term, c=format), dpi=300,)
-        
+
+    with open(outdir+"/command.txt",'wt') as f:
+        argument = OrderedDict(sorted(argument.items(),key = lambda t:t[0]))
+        for item in argument.items():        
+            f.write("%s = %s\n"%(item[0],item[1]))        
     print("Congratulations! Your plots have been reproduced successfully!")
 
 def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=1000, permutation_n=1000, weighted_score_type=1,
@@ -100,7 +105,9 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=1000, 
                  |  genes: gene names from the data set}
     
     """
+    argument = locals()
     assert permutation_type in ["phenotype", "gene_set"]
+    
     if isinstance(data, pd.DataFrame) :
         df = data.copy()
     elif isinstance(data, str) :
@@ -166,7 +173,10 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=1000, 
 
         heatmap(df=dat.loc[gene_symbol], term=gs, outdir=outdir, figsize=(5, len(gene_symbol)/2))
     
-    #print(res_df.head(10))
+    with open(outdir+"/command.txt",'wt') as f:
+        argument = OrderedDict(sorted(argument.items(),key = lambda t:t[0]))
+        for item in argument.items():        
+            f.write("%s = %s\n"%(item[0],item[1]))   
     print("...Congratulations. GSEAPY run successfully!!!.............\n...The Job is done...........................Goodbye!")
     
     if isinstance(data, pd.DataFrame):
@@ -202,6 +212,7 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
                  |  genes: gene names from the data set}
     
     """
+    argument = locals()
     #drop duplicates in ranking metrics.
     dat2 = gsea_rank_metric(rnk) 
     dat2.drop_duplicates(subset='gene_name',inplace=True,keep='first')
@@ -250,7 +261,10 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
         fig.savefig('{a}/{b}.{c}'.format(a=outdir, b=gs, c=format), dpi=300,)
 
 
-
+    with open(outdir+"/command.txt",'wt') as f:
+        argument = OrderedDict(sorted(argument.items(),key = lambda t:t[0]))
+        for item in argument.items():        
+            f.write("%s = %s\n"%(item[0], item[1]))   
     print("Congratulations. GSEAPY run successfully................")
     print("The Job is done.................................Goodbye!", time.ctime())
     
