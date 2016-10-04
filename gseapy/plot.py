@@ -77,7 +77,7 @@ def heatmap(df, term, outdir, axis=0, figsize=(5,5)):
     ax.set(xticks=xticks, yticks=yticks)
     ax.set_xticklabels(df.columns.values, fontsize=18, rotation=90)
     ax.set_yticklabels(df.index.values,  fontsize=18)
-    ax.set_title("heatmap of %s"%term, fontsize=24)
+    ax.set_title("%s\nHeatmap of the Analyzed GeneSet"%term, fontsize=24)
     ax.tick_params(axis='both', which='both', bottom='off', top='off', 
                    right='off', left='off')
     
