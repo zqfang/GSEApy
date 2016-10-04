@@ -175,7 +175,11 @@ def ranking_metric(df, method, phenoPos, phenoNeg, classes, ascending):
     df2 = df.T   
     df2['class'] = classes
     df_mean= df2.groupby('class').mean().T
-    df_std = df2.groupby('class').std().T    
+    df_std = df2.groupby('class').std().T  
+    #exclude any zero stds.
+    df_mean = df_mean[df_std.sum(axis=1) !=0]
+    df_std = df_std[df_std.sum(axis=1) !=0]
+    
     if method == 'signal_to_noise':
         sr = (df_mean[A] - df_mean[B])/(df_std[A] + df_std[B])
     elif method == 't_test':

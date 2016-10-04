@@ -36,13 +36,14 @@ def gsea_cls_parser(cls):
 
     if isinstance(cls, list) :
         classes = cls
+        sample_name= unique(classes)
     elif isinstance(cls, str) :    
         with open(cls) as c:
             file = c.readlines()
         classes = file[2].strip('\n').split(" ")
+        sample_name = file[1].lstrip("# ").strip('\n').split(" ")
     else:
         raise Exception('Error parsing sample name!')
-    sample_name= unique(classes)
   
     return sample_name[0], sample_name[1], classes
 

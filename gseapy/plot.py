@@ -5,7 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.transforms as transforms
 from matplotlib.colors import Normalize
-
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
 
 
 class _MidpointNormalize(Normalize):
@@ -20,9 +21,71 @@ class _MidpointNormalize(Normalize):
         return np.ma.masked_array(np.interp(value, x, y))
 
 
+def _z_score(data2d, axis=0):
+    """Standarize the mean and variance of the data axis
+    Parameters
+    ----------
+    data2d : pandas.DataFrame
+    Data to normalize
+    axis : int
+    Which axis to normalize across. If 0, normalize across rows, if 1,
+    normalize across columns.
+    Returns
+    -------
+    normalized : pandas.DataFrame
+    Noramlized data with a mean of 0 and variance of 1 across the
+    specified axis.
+    """
+    if axis == 1:
+        z_scored = data2d
+    else:
+        z_scored = data2d.T
+
+    z_scored = (z_scored - z_scored.mean()) / z_scored.std()
+
+    if axis == 1:
+        return z_scored
+    else:
+        return z_scored.T
 
 
+def heatmap(df, term, outdir, axis=0, figsize=(5,5)):
+    """Visualize the dataframe. 
+    
+    :param df: DataFrame from expression table.
+    :param term: gene set name.
+    :param outdir: path to save heatmap.
+    :param axis: z_score axis.
+    :param figsize: heatmap figsize.
+     
+    """
+    df = _z_score(df, axis=axis)
 
+    # Get the positions and used label for the ticks
+    nx, ny = df.T.shape
+    xticks = np.arange(0, nx, 1) + .5
+    yticks = np.arange(0, ny, 1) + .5
+    
+
+    fig = Figure(figsize=figsize)
+    canvas = FigureCanvas(fig)
+    ax = fig.add_subplot(111)        
+    vmin = np.percentile(df.min(), 2)
+    vmax =  np.percentile(df.max(), 98)
+    matrix = ax.pcolormesh(df.values, cmap=plt.cm.RdBu_r, vmin=vmin, vmax=vmax)
+    ax.set_ylim([0,len(df)])
+    ax.set(xticks=xticks, yticks=yticks)
+    ax.set_xticklabels(df.columns.values, fontsize=18, rotation=90)
+    ax.set_yticklabels(df.index.values,  fontsize=18)
+    ax.set_title("heatmap of %s"%term, fontsize=24)
+    ax.tick_params(axis='both', which='both', bottom='off', top='off', 
+                   right='off', left='off')
+    
+    for side in ["top", "right", "left", "bottom"]:
+        ax.spines[side].set_visible(False)
+    
+    #fig.colorbar(matrix, ax=ax)
+    canvas.print_figure(outdir+"/"+term+".png", bbox_inches='tight')
 
 def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
               phenoPos=None, phenoNeg=None, figsize =(6.5,6), **kwarg):
@@ -163,8 +226,6 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
     
     #creat scatter plot
     if hasattr(main, '__file__'):
-        from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-        from matplotlib.figure import Figure
         fig = Figure(figsize=figsize)
         canvas = FigureCanvas(fig)
         ax = fig.add_subplot(111)
