@@ -121,10 +121,12 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
 
     #in most case, we will have mangy plots, so do not display plots
     #It's also convinient to run this script on command line.         
-    plt.ioff()    
+    #plt.ioff()    
     #GSEA Plots
     gs = plt.GridSpec(16,1)
-    fig = plt.figure(figsize=figsize)
+    #fig = plt.figure(figsize=figsize)
+    fig = Figure(figsize=figsize)
+    canvas = FigureCanvas(fig)
     #Ranked Metric Scores Plot
     ax1 =  fig.add_subplot(gs[11:])
     ax1.fill_between(x, y1= rank_metric['rank'], y2=0, color='#C9D3DB')
@@ -185,7 +187,7 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     fig.suptitle(enrich_term, fontsize=16)
     fig.subplots_adjust(hspace=0)
     #fig.tight_layout()
-    plt.close(fig)
+    #plt.close(fig)
     
     return fig
 
