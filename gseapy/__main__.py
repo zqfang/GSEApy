@@ -75,7 +75,7 @@ def add_output_option(parser):
                         metavar='', action="store", help="The GSEAPY output directory. Default: the current working directory")
     parser.add_argument("-f", "--format", dest="format", type=str, metavar='', action="store",
                         choices=("pdf", "png", "jpeg", "eps"), default="png",
-                        help="Format of output figures, choose from {'pdf', 'png', 'jpeg', 'eps'}. Default: 'pdf'.")
+                        help="Format of output figures, choose from {'pdf', 'png', 'jpeg', 'eps'}. Default: 'png'.")
     parser.add_argument("--figsize", action='store', nargs=2, dest='figsize',
                         metavar=('width', 'height'), type=float, default=[6.5, 6],
                         help="The figsize keyword argument need two parameter to define. Default: [6.5,6]")

@@ -132,10 +132,6 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
     :param df: GSEApy DataFrame results    
     :return:  a dotplot for enrichr terms.    
     """
-    if hasattr(main, '__file__'):
-        from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-        from matplotlib.figure import Figure
-
     
     if 'fdr' in df.columns:
         #gsea results
@@ -167,13 +163,16 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
     
     #creat scatter plot
     if hasattr(main, '__file__'):
+        from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+        from matplotlib.figure import Figure
         fig = Figure(figsize=figsize)
         canvas = FigureCanvas(fig)
         ax = fig.add_subplot(111)
     else:
         fig, ax = plt.subplots(figsize=figsize)
-        sc = ax.scatter(x=x, y=y, s=area, edgecolors='face', c = padj,  
-                        cmap = plt.cm.RdBu,vmin=padj.min(), vmax=padj.max())
+        
+    sc = ax.scatter(x=x, y=y, s=area, edgecolors='face', c = padj,  
+                    cmap = plt.cm.RdBu,vmin=padj.min(), vmax=padj.max())
     ax.set_xlabel("-log$_{10}$(Adjust P-value)")
     ax.yaxis.set_major_locator(plt.FixedLocator(y))
     ax.yaxis.set_major_formatter(plt.FixedFormatter(labels))
@@ -211,7 +210,7 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
     ax2.axis('off')
 
     #plt.tight_layout()
-    #canvas.print_figure('test',,bbox_inches='tight')    
+    #canvas.print_figure('test', bbox_inches='tight')    
     return fig
     
 def adjust_spines(ax, spines):

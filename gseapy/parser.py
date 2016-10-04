@@ -120,8 +120,8 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
                               for line in genesets.readlines()}    
     else:
         print("Downloading and generating Enrichr library gene sets..............") 
-
-        if gmt in get_libary_name():
+        names = get_libary_name()
+        if gmt in names:
             import requests
             ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary'
             query_string = '?mode=text&libraryName=%s'
