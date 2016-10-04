@@ -85,7 +85,7 @@ def heatmap(df, term, outdir, axis=0, figsize=(5,5)):
         ax.spines[side].set_visible(False)
     
     #fig.colorbar(matrix, ax=ax)
-    canvas.print_figure(outdir+"/"+term+".png", bbox_inches='tight')
+    canvas.print_figure(outdir+"/"+term+".heatmap.png", bbox_inches='tight')
 
 def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
               phenoPos=None, phenoNeg=None, figsize =(6.5,6), **kwarg):
