@@ -21,7 +21,7 @@ class _MidpointNormalize(Normalize):
         return np.ma.masked_array(np.interp(value, x, y))
 
 
-def _z_score(data2d, axis=0):
+def z_score(data2d, axis=0):
     """Standarize the mean and variance of the data axis
     Parameters
     ----------
@@ -59,7 +59,7 @@ def heatmap(df, term, outdir, axis=0, figsize=(5,5)):
     :param figsize: heatmap figsize.
      
     """
-    df = _z_score(df, axis=axis)
+    df = z_score(df, axis=axis)
 
     # Get the positions and used label for the ticks
     nx, ny = df.T.shape
@@ -81,10 +81,18 @@ def heatmap(df, term, outdir, axis=0, figsize=(5,5)):
     ax.tick_params(axis='both', which='both', bottom='off', top='off', 
                    right='off', left='off')
     
-    for side in ["top", "right", "left", "bottom"]:
-        ax.spines[side].set_visible(False)
+
     
     #fig.colorbar(matrix, ax=ax)
+    cax=fig.add_axes([0.93,0.25,0.05,0.20])
+    cbar = fig.colorbar(matrix, cax=cax)
+    cbar.ax.tick_params(axis='both', which='both', bottom='off', top='off', 
+                        right='off', left='off')
+    for side in ["top", "right", "left", "bottom"]:
+        ax.spines[side].set_visible(False)
+        cbar.ax.spines[side].set_visible(False)
+    #cbar.ax.set_title('',loc='left')
+
     canvas.print_figure(outdir+"/"+term+".heatmap.png", bbox_inches='tight')
 
 def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
@@ -233,9 +241,10 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
         ax = fig.add_subplot(111)
     else:
         fig, ax = plt.subplots(figsize=figsize)
-        
+    vmin = np.percentile(padj.min(), 2)
+    vmax =  np.percentile(padj.max(), 98)        
     sc = ax.scatter(x=x, y=y, s=area, edgecolors='face', c = padj,  
-                    cmap = plt.cm.RdBu,vmin=padj.min(), vmax=padj.max())
+                    cmap = plt.cm.RdBu,vmin=vmin, vmax=vmax)
     ax.set_xlabel("-log$_{10}$(Adjust P-value)")
     ax.yaxis.set_major_locator(plt.FixedLocator(y))
     ax.yaxis.set_major_formatter(plt.FixedFormatter(labels))
@@ -243,7 +252,7 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
     ax.grid()
        
     #colorbar
-    cax=fig.add_axes([0.93,0.25,0.05,0.20])
+    cax=fig.add_axes([0.93,0.40,0.05,0.20])
     cbar = fig.colorbar(sc, cax=cax,)
     cbar.ax.tick_params(right='off')
     cbar.ax.set_title('Padj',loc='left')

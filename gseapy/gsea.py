@@ -110,6 +110,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=1000, 
     
     if isinstance(data, pd.DataFrame) :
         df = data.copy()
+        argument['data'] = 'DataFrame'
     elif isinstance(data, str) :
         df = pd.read_table(data)
     else:
@@ -163,6 +164,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=1000, 
 
     #Plotting
     top_term = res_df.head(graph_num).index
+    width = len(classes) if len(classes) >= 6 else  5
     for gs in top_term:
         hit = res.get(gs)['hit_index']
         gene_symbol = res.get(gs)['genes']
@@ -171,10 +173,10 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=1000, 
                         RES=res.get(gs)['rank_ES'], phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize)        
         fig.savefig('{a}/{b}.gsea.{c}'.format(a=outdir, b=gs, c=format), dpi=300,)
 
-        heatmap(df=dat.loc[gene_symbol], term=gs, outdir=outdir, figsize=(5, len(gene_symbol)/2))
+        heatmap(df=dat.loc[gene_symbol], term=gs, outdir=outdir, figsize=(width, len(gene_symbol)/2))
     
     with open(outdir+"/command.txt",'wt') as f:
-        argument = OrderedDict(sorted(argument.items(),key = lambda t:t[0]))
+        argument = OrderedDict(sorted(argument.items(), key=lambda t:t[0]))
         for item in argument.items():        
             f.write("%s = %s\n"%(item[0],item[1]))   
     print("...Congratulations. GSEAPY run successfully!!!.............\n...The Job is done...........................Goodbye!")
@@ -213,9 +215,14 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
     
     """
     argument = locals()
-    #drop duplicates in ranking metrics.
-    dat2 = gsea_rank_metric(rnk) 
-    dat2.drop_duplicates(subset='gene_name',inplace=True,keep='first')
+    
+    if isinstance(rnk, pd.DataFrame) :       
+        argument['rnk'] = 'DataFrame'
+
+    dat2 = gsea_rank_metric(rnk)
+    assert len(dat2) > 1
+    #drop duplicates in ranking metrics. 
+    dat2.drop_duplicates(subset='gene_name',inplace=True, keep='first')
     assert len(dat2) > 1            
     
     #filtering out gene sets and build gene sets dictionary
