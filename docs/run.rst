@@ -68,7 +68,7 @@ This will import the following:
 .. code:: python
 
     # call enrichr
-    gseapy.enrichr(gene_list='gene_list.txt', description='pathway_analysis', gene_set='KEGG_2016', outfile='test')
+    gseapy.enrichr(gene_list='gene_list.txt', description='pathway_analysis', gene_set='KEGG_2016', outdir='test')
 
 
 * The :func:`replot` function to reproduce GSEA desktop results
@@ -87,7 +87,7 @@ This will import the following:
    # An example to calculate es, nes, pval,fdrs, and produce figures using gseapy.
    gseapy.call(data='gsea_dat.txt', gene_sets='gene_sets.gmt', cls='test.cls', outdir='gseapy_out', 
              min_size=15, max_size=1000, permutation_n = 1000, weighted_score_type=1,
-             permutation_type = 'gene_set', method='log2_ratio_of_classes',ascending=False, 
+             permutation_type = 'gene_set', method='log2_ratio_of_classes', ascending=False, 
              figsize=(6.5,6), format='png')
 
 
@@ -96,9 +96,9 @@ This will import the following:
 .. code:: python
 
    # An example to calculate es, nes, pval,fdrs, and produce figures using gseapy.
-   gseapy.prerank(rnk='gsea_data.rnk', gene_sets='ene_sets.gmt', outdir='gseapy_out', min_size = 15,
-                  max_size = 1000, permutation_n=1000, weighted_score_type=1, ascending = False, 
-                  figsize = (6.5,6), format = 'png')
+   gseapy.prerank(rnk='gsea_data.rnk', gene_sets='ene_sets.gmt', outdir='gseapy_out', min_size=15,
+                  max_size=1000, permutation_n=1000, weighted_score_type=1, ascending=False, 
+                  figsize=(6.5,6), format='png')
 
 			 
 To See help information of GSEAPY

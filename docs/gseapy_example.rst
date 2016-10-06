@@ -1,8 +1,9 @@
-.. _example:
 
+GSEAPY Tutorial
+===============
 
-GSEAPY Example
-==============
+Examples to work throught ``GSEA`` and enrichr
+----------------------------------------------
 
 1. Load essential packages
 ==========================
@@ -12,8 +13,9 @@ GSEAPY Example
     %matplotlib inline
     import pandas as pd
     import gseapy as gp
+    import matplotlib.pyplot as plt
 
-Check gseapy version
+\*\* Check gseapy version \*\*
 
 .. code:: python
 
@@ -24,7 +26,37 @@ Check gseapy version
 
 .. parsed-literal::
 
-    '0.6.0'
+    '0.7.0'
+
+
+
+Make plots look pretty
+
+plt.style.use('ggplot')
+
+See all supported enrichr library names
+=======================================
+
+.. code:: python
+
+    names = gp.get_libary_name()
+    names[:10]
+
+
+
+
+.. parsed-literal::
+
+    ['Achilles_fitness_decrease',
+     'Achilles_fitness_increase',
+     'Aging_Perturbations_from_GEO_down',
+     'Aging_Perturbations_from_GEO_up',
+     'Allen_Brain_Atlas_down',
+     'Allen_Brain_Atlas_up',
+     'BioCarta_2013',
+     'BioCarta_2015',
+     'BioCarta_2016',
+     'CORUM']
 
 
 
@@ -93,27 +125,32 @@ i. Assign enrichr with gene list object
 .. code:: python
 
     # run gseapy 
-    enrichr_results = gp.enrichr(gene_list=glist, description='KEGG', gene_sets='KEGG_2016', outfile='enrichr_kegg')
+    enrichr_results = gp.enrichr(gene_list=glist, description='KEGG', gene_sets='KEGG_2016', outdir='enrichr_kegg', cutoff=0.5)
     # and provide a txt file for enrichr will also work, in this way, no DataFrame will return
-    # enrichr_results = gp.enrichr(gene_list='./gene_list.txt', description='KEGG', gene_sets='KEGG_2016', outfile='enrichr_kegg')
+    # enrichr_results = gp.enrichr(gene_list='./gene_list.txt', description='KEGG', gene_sets='KEGG_2016', outdir='enrichr_kegg')
 
 
 .. parsed-literal::
 
     Enrichr API : Analysis name:  KEGG
     Enrichr API : Enrichr Library:  KEGG_2016
-    Enrichr API : Job ID: {'shortId': 'hmub', 'userListId': 1677700}
-    Enrichr API : Submitted gene list: {'shortId': 'hmub', 'userListId': 1677700}
-    Enrichr API : Get enrichment results: Job Id: {'shortId': 'hmub', 'userListId': 1677700}
-    Enrichr API : Downloading file of enrichment results: Job Id: {'shortId': 'hmub', 'userListId': 1677700}
-    Enrichr API : Results written to: enrichr_kegg.txt
+    Enrichr API : Job ID: {'shortId': 'itmz', 'userListId': 1733164}
+    Enrichr API : Submitted gene list: {'shortId': 'itmz', 'userListId': 1733164}
+    Enrichr API : Get enrichment results: Job Id: {'shortId': 'itmz', 'userListId': 1733164}
+    Enrichr API : Downloading file of enrichment results: Job Id: {'shortId': 'itmz', 'userListId': 1733164}
+    Enrichr API : Results written to: enrichr.reports.KEGG.txt
     Enrichr API : You are seeing this message, because you are inside python console.
     Enrichr API : It will return a pandas dataframe for veiwing results.
+    Enrichr API : Done
     
+
+
+.. image:: output_12_1.png
+
 
 .. code:: python
 
-    enrichr_results.head()
+    enrichr_results.ix[:5,:6]
 
 
 
@@ -131,7 +168,6 @@ i. Assign enrichr with gene list object
           <th>Adjusted P-value</th>
           <th>Z-score</th>
           <th>Combined Score</th>
-          <th>Genes</th>
         </tr>
       </thead>
       <tbody>
@@ -143,7 +179,6 @@ i. Assign enrichr with gene list object
           <td>0.103734</td>
           <td>-1.961363</td>
           <td>4.444307</td>
-          <td>PDGFRB;CSF1;FLT4;VEGFC;ARAP3;LPAR4;ADCY7;ADCY6...</td>
         </tr>
         <tr>
           <th>1</th>
@@ -153,7 +188,6 @@ i. Assign enrichr with gene list object
           <td>0.152127</td>
           <td>-2.083086</td>
           <td>3.922533</td>
-          <td>RET;LEF1;TGFA;LPAR4;ADCY7;ETS1;ADCY6;GLI2;FGF4...</td>
         </tr>
         <tr>
           <th>2</th>
@@ -163,7 +197,6 @@ i. Assign enrichr with gene list object
           <td>0.152127</td>
           <td>-1.956845</td>
           <td>3.684817</td>
-          <td>PDGFRB;CSF1;FLT4;VEGFC;ETS1;GNG13;FGF4;PLD2;EF...</td>
         </tr>
         <tr>
           <th>3</th>
@@ -173,7 +206,6 @@ i. Assign enrichr with gene list object
           <td>0.152127</td>
           <td>-1.805957</td>
           <td>3.400689</td>
-          <td>DES;SGCB;TPM2;TNNC1;LMNA;TPM1;ITGAV;ADCY7;ADCY...</td>
         </tr>
         <tr>
           <th>4</th>
@@ -183,7 +215,15 @@ i. Assign enrichr with gene list object
           <td>0.184562</td>
           <td>-1.843079</td>
           <td>3.114379</td>
-          <td>PDGFRB;STAT5B;EGR1;JUN;CD40;FZD2;CRTC3;NFATC1;...</td>
+        </tr>
+        <tr>
+          <th>5</th>
+          <td>AGE-RAGE signaling pathway in diabetic complic...</td>
+          <td>10/101</td>
+          <td>0.005440</td>
+          <td>0.215802</td>
+          <td>-1.919166</td>
+          <td>2.942840</td>
         </tr>
       </tbody>
     </table>
@@ -193,23 +233,6 @@ i. Assign enrichr with gene list object
 
 Make a bar plot of enrichment results
 
-.. code:: python
-
-    enrichr_results.head(5).plot.barh(x='Term',y='Combined Score')
-
-
-
-
-.. parsed-literal::
-
-    <matplotlib.axes._subplots.AxesSubplot at 0x15859331dd8>
-
-
-
-
-.. image:: output_11_1.png
-
-
 ii . Commandline usage
 ======================
 
@@ -218,18 +241,19 @@ print return to the console.
 
 .. code:: python
 
-    !gseapy enrichr -i ./gene_list.txt -d 'KEGG' -g KEGG_2016 -o 'KEGG_2016_2'
+    !gseapy enrichr -i ./gene_list.txt -d KEGG -g KEGG_2016 -o KEGG_2016_2
 
 
 .. parsed-literal::
 
-    Enrichr API : Analysis name:  'KEGG'
+    Enrichr API : Analysis name:  KEGG
     Enrichr API : Enrichr Library:  KEGG_2016
-    Enrichr API : Job ID: {'userListId': 1677701, 'shortId': 'hmuc'}
-    Enrichr API : Submitted gene list: {'userListId': 1677701, 'shortId': 'hmuc'}
-    Enrichr API : Get enrichment results: Job Id: {'userListId': 1677701, 'shortId': 'hmuc'}
-    Enrichr API : Downloading file of enrichment results: Job Id: {'userListId': 1677701, 'shortId': 'hmuc'}
-    Enrichr API : Results written to: 'KEGG_2016_2'.txt
+    Enrichr API : Job ID: {'userListId': 1733165, 'shortId': 'itn0'}
+    Enrichr API : Submitted gene list: {'userListId': 1733165, 'shortId': 'itn0'}
+    Enrichr API : Get enrichment results: Job Id: {'userListId': 1733165, 'shortId': 'itn0'}
+    Enrichr API : Downloading file of enrichment results: Job Id: {'userListId': 1733165, 'shortId': 'itn0'}
+    Enrichr API : Results written to: enrichr.reports.KEGG.txt
+    No enrich terms when cuttoff = 0.05
     Enrichr API : Done
     
 
@@ -295,7 +319,7 @@ i. Assign prank with a pandas DataFrame
     # run prerank
     # enrichr library are supported by prerank module. Just provide the name
     # you may also provide a gene_sets file in gmt format, just like GSEA do.
-    prerank_results = gp.prerank(rnk=rank,gene_sets='KEGG_2016',outdir='prerank_report')
+    prerank_results = gp.prerank(rnk=rank, gene_sets='KEGG_2016', outdir='prerank_report')
     
     # or provide a rnk file will also work, but not DataFrame will return
     #prerank_results = gp.prerank(rnk="./edb/gsea_data.gsea_data.rnk",gene_sets='KEGG_2016',outdir='prerank_report')
@@ -306,20 +330,21 @@ i. Assign prank with a pandas DataFrame
     Downloading and generating Enrichr library gene sets..............
     286 gene_sets have been filtered out when max_size=1000 and min_size=15
     7 gene_sets used for further calculating
-    Start to compute enrichment socres...................... Mon Aug 22 13:10:24 2016
-    Start to compute esnulls................................ Mon Aug 22 13:10:24 2016
+    Start to compute enrichment socres...................... Thu Oct  6 11:04:29 2016
+    Start to compute esnulls................................ Thu Oct  6 11:04:29 2016
     ......This step might take a while to run. Be patient...
-    Start to compute pvals.................................. Mon Aug 22 13:10:24 2016
-    start to compute fdrs................................... Mon Aug 22 13:10:24 2016
-    Statistial testing finished............................. Mon Aug 22 13:10:24 2016
-    Start to generate gseapy reports, and produce figures... Mon Aug 22 13:10:24 2016
+    Start to compute pvals.................................. Thu Oct  6 11:04:30 2016
+    start to compute fdrs................................... Thu Oct  6 11:04:30 2016
+    Statistial testing finished............................. Thu Oct  6 11:04:30 2016
+    Start to generate gseapy reports, and produce figures... Thu Oct  6 11:04:30 2016
+    Start to generate gseapy reports, and produce figures... Thu Oct  6 11:04:30 2016
     Congratulations. GSEAPY run successfully................
-    The Job is done.................................Goodbye! Mon Aug 22 13:10:29 2016
+    The Job is done.................................Goodbye! Thu Oct  6 11:04:35 2016
     
 
 .. code:: python
 
-    prerank_results.head(3)
+    prerank_results.ix[:5,:6]
 
 
 
@@ -337,15 +362,9 @@ i. Assign prank with a pandas DataFrame
           <th>fdr</th>
           <th>gene_set_size</th>
           <th>matched_size</th>
-          <th>rank_ES</th>
-          <th>genes</th>
-          <th>hit_index</th>
         </tr>
         <tr>
-          <th>Enrich_terms</th>
-          <th></th>
-          <th></th>
-          <th></th>
+          <th>Term</th>
           <th></th>
           <th></th>
           <th></th>
@@ -356,40 +375,49 @@ i. Assign prank with a pandas DataFrame
       </thead>
       <tbody>
         <tr>
-          <th>Pathways in cancer_Homo sapiens_hsa05200</th>
-          <td>-0.188934</td>
-          <td>-1.106978</td>
-          <td>0.300000</td>
-          <td>0.289726</td>
-          <td>397</td>
-          <td>27</td>
-          <td>[-0.0014992503748125937, -0.002998500749625187...</td>
-          <td>[TGFBR2, LAMB3, RET, PDGFRB, ADCY6, ETS1, TGFA...</td>
-          <td>[48, 125, 150, 169, 177, 196, 218, 221, 251, 2...</td>
+          <th>Cytokine-cytokine receptor interaction_Homo sapiens_hsa04060</th>
+          <td>0.418234</td>
+          <td>1.571263</td>
+          <td>0.051471</td>
+          <td>0.380873</td>
+          <td>265</td>
+          <td>18</td>
         </tr>
         <tr>
-          <th>MAPK signaling pathway_Homo sapiens_hsa04010</th>
-          <td>0.179667</td>
-          <td>0.550193</td>
-          <td>0.814667</td>
-          <td>0.875841</td>
-          <td>255</td>
-          <td>18</td>
-          <td>[-0.0014792899408284023, -0.002958579881656804...</td>
-          <td>[CACNA1H, TGFBR2, FLNC, MAP3K5, PDGFRB, PPP3CC...</td>
-          <td>[31, 48, 83, 159, 169, 190, 267, 289, 317, 349...</td>
+          <th>Pathways in cancer_Homo sapiens_hsa05200</th>
+          <td>-0.188934</td>
+          <td>-1.008608</td>
+          <td>0.436860</td>
+          <td>0.442786</td>
+          <td>397</td>
+          <td>27</td>
         </tr>
         <tr>
           <th>HTLV-I infection_Homo sapiens_hsa05166</th>
           <td>0.338286</td>
-          <td>1.108560</td>
-          <td>0.322157</td>
-          <td>0.930419</td>
+          <td>1.311226</td>
+          <td>0.183183</td>
+          <td>0.522447</td>
           <td>258</td>
           <td>19</td>
-          <td>[-0.0014814814814814814, -0.002962962962962963...</td>
-          <td>[CRTC3, TGFBR2, CD40, PDGFRB, ADCY6, PPP3CC, E...</td>
-          <td>[27, 48, 54, 169, 177, 190, 196, 221, 228, 259...</td>
+        </tr>
+        <tr>
+          <th>MAPK signaling pathway_Homo sapiens_hsa04010</th>
+          <td>0.179667</td>
+          <td>0.666764</td>
+          <td>0.834320</td>
+          <td>0.839841</td>
+          <td>255</td>
+          <td>18</td>
+        </tr>
+        <tr>
+          <th>PI3K-Akt signaling pathway_Homo sapiens_hsa04151</th>
+          <td>0.191372</td>
+          <td>0.765603</td>
+          <td>0.716570</td>
+          <td>0.876509</td>
+          <td>341</td>
+          <td>22</td>
         </tr>
       </tbody>
     </table>
@@ -400,19 +428,29 @@ i. Assign prank with a pandas DataFrame
 .. code:: python
 
     prerank_results = prerank_results.reset_index()
-    prerank_results.head(5).plot.barh(y='fdr',x='Enrich_terms')
+    prerank_results.head(5).plot.barh(y='fdr',x='Term')
 
 
 
 
 .. parsed-literal::
 
-    <matplotlib.axes._subplots.AxesSubplot at 0x1585c27c630>
+    <matplotlib.axes._subplots.AxesSubplot at 0x21dde092518>
 
 
 
 
-.. image:: output_19_1.png
+.. image:: output_22_1.png
+
+
+.. code:: python
+
+    # use dotplot
+    fig = gp.dotplot(prerank_results, cutoff=0.5)
+
+
+
+.. image:: output_23_0.png
 
 
 ii . Commanline usage
@@ -431,15 +469,16 @@ print return to the console.
     Downloading and generating Enrichr library gene sets..............
     286 gene_sets have been filtered out when max_size=1000 and min_size=15
     7 gene_sets used for further calculating
-    Start to compute enrichment socres...................... Mon Aug 22 13:16:01 2016
-    Start to compute esnulls................................ Mon Aug 22 13:16:01 2016
+    Start to compute enrichment socres...................... Thu Oct  6 11:11:08 2016
+    Start to compute esnulls................................ Thu Oct  6 11:11:08 2016
     ......This step might take a while to run. Be patient...
-    Start to compute pvals.................................. Mon Aug 22 13:16:02 2016
-    start to compute fdrs................................... Mon Aug 22 13:16:02 2016
-    Statistial testing finished............................. Mon Aug 22 13:16:02 2016
-    Start to generate gseapy reports, and produce figures... Mon Aug 22 13:16:02 2016
+    Start to compute pvals.................................. Thu Oct  6 11:11:09 2016
+    start to compute fdrs................................... Thu Oct  6 11:11:09 2016
+    Statistial testing finished............................. Thu Oct  6 11:11:09 2016
+    Start to generate gseapy reports, and produce figures... Thu Oct  6 11:11:09 2016
+    Start to generate gseapy reports, and produce figures... Thu Oct  6 11:11:09 2016
     Congratulations. GSEAPY run successfully................
-    The Job is done.................................Goodbye! Mon Aug 22 13:16:07 2016
+    The Job is done.................................Goodbye! Thu Oct  6 11:11:14 2016
     
 
 4. Call Example
@@ -630,13 +669,12 @@ and cls with a list object
 
 
 
-
 .. code:: python
 
     # run call
     # enrichr library are supported by prerank module. Just provide the name
     # you may also provide a gene_sets file in gmt format, just like GSEA do.
-    call_results = gp.call(data=gene_exp,gene_sets='KEGG_2016',cls=class_vector,outdir='call_reprot',)
+    call_results = gp.call(data=gene_exp,gene_sets='KEGG_2016',cls=class_vector,outdir='call_reprot', method='signal_to_noise')
     
     # or provide a rnk file will also work, but not DataFrame will return
     #call_results = gp.call(data='./P53_resampling_data.txt',gene_sets='edb/gene_sets.gmt',cls='./P53.cls',outdir='call_reprot',)
@@ -648,13 +686,13 @@ and cls with a list object
     Downloading and generating Enrichr library gene sets..............
     286 gene_sets have been filtered out when max_size=1000 and min_size=15
     7 gene_sets used for further calculating
-    Start to compute enrichment socres...................... Mon Aug 22 13:17:35 2016
-    Start to compute esnulls................................ Mon Aug 22 13:17:35 2016
+    Start to compute enrichment socres...................... Thu Oct  6 11:11:37 2016
+    Start to compute esnulls................................ Thu Oct  6 11:11:38 2016
     ......This step might take a while to run. Be patient...
-    Start to compute pvals.................................. Mon Aug 22 13:17:36 2016
-    start to compute fdrs................................... Mon Aug 22 13:17:36 2016
-    Statistial testing finished............................. Mon Aug 22 13:17:36 2016
-    Start to generate gseapy reports, and produce figures....... Mon Aug 22 13:17:36 2016
+    Start to compute pvals.................................. Thu Oct  6 11:11:39 2016
+    start to compute fdrs................................... Thu Oct  6 11:11:39 2016
+    Statistial testing finished............................. Thu Oct  6 11:11:39 2016
+    Start to generate gseapy reports, and produce figures... Thu Oct  6 11:11:39 2016
     ...Congratulations. GSEAPY run successfully!!!.............
     ...The Job is done...........................Goodbye!
     
@@ -679,14 +717,10 @@ and cls with a list object
           <th>fdr</th>
           <th>gene_set_size</th>
           <th>matched_size</th>
-          <th>rank_ES</th>
           <th>genes</th>
-          <th>hit_index</th>
         </tr>
         <tr>
-          <th>Enrich_terms</th>
-          <th></th>
-          <th></th>
+          <th>Term</th>
           <th></th>
           <th></th>
           <th></th>
@@ -698,64 +732,54 @@ and cls with a list object
       </thead>
       <tbody>
         <tr>
-          <th>Ras signaling pathway_Homo sapiens_hsa04014</th>
-          <td>-0.235547</td>
-          <td>-0.656496</td>
-          <td>0.936556</td>
-          <td>0.933699</td>
-          <td>227</td>
-          <td>18</td>
-          <td>[-0.0014814814814814814, -0.002962962962962963...</td>
-          <td>[CACNA1H, RUNX3, GM967, DUSP14, RAB6B, CHRNB1,...</td>
-          <td>[31, 72, 113, 141, 161, 179, 195, 198, 230, 23...</td>
-        </tr>
-        <tr>
-          <th>PI3K-Akt signaling pathway_Homo sapiens_hsa04151</th>
-          <td>0.216731</td>
-          <td>0.339975</td>
-          <td>0.974880</td>
-          <td>0.988990</td>
-          <td>341</td>
-          <td>22</td>
-          <td>[-0.0014903129657228018, -0.002980625931445603...</td>
-          <td>[CACNA1H, RUNX3, LOC677224, DUSP14, CHRNB1, H1...</td>
-          <td>[31, 72, 73, 141, 179, 183, 195, 198, 230, 237...</td>
-        </tr>
-        <tr>
           <th>HTLV-I infection_Homo sapiens_hsa05166</th>
-          <td>-0.242165</td>
-          <td>-0.678821</td>
-          <td>0.913947</td>
-          <td>1.140731</td>
+          <td>-0.249752</td>
+          <td>-0.722031</td>
+          <td>0.845070</td>
+          <td>0.847264</td>
           <td>258</td>
           <td>19</td>
-          <td>[-0.001483679525222552, -0.002967359050445104,...</td>
-          <td>[CHST8, ATRNL1, GRAMD1C, GM967, RAB6B, STK39, ...</td>
-          <td>[71, 75, 102, 113, 161, 165, 178, 197, 230, 24...</td>
-        </tr>
-        <tr>
-          <th>Rap1 signaling pathway_Homo sapiens_hsa04015</th>
-          <td>-0.253654</td>
-          <td>-0.784385</td>
-          <td>0.738462</td>
-          <td>1.292934</td>
-          <td>211</td>
-          <td>19</td>
-          <td>[-0.001483679525222552, -0.002967359050445104,...</td>
-          <td>[CACNA1H, DUSP14, RAB6B, SNX9, GPSM1, RHOB, HI...</td>
-          <td>[31, 141, 161, 198, 230, 237, 283, 295, 319, 3...</td>
+          <td>[FZD2, ETS1, STAT5B, RRAS, LTBR, PPP3CC, TNFRS...</td>
         </tr>
         <tr>
           <th>MAPK signaling pathway_Homo sapiens_hsa04010</th>
-          <td>-0.409122</td>
-          <td>-1.155688</td>
-          <td>0.287540</td>
-          <td>1.349240</td>
+          <td>-0.392928</td>
+          <td>-1.142823</td>
+          <td>0.304688</td>
+          <td>0.873115</td>
           <td>255</td>
           <td>18</td>
-          <td>[-0.0014814814814814814, -0.002962962962962963...</td>
-          <td>[BC006779, RAB6B, STK39, NPTX1, ETS1, SNX9, GP...</td>
-          <td>[74, 161, 165, 178, 195, 198, 230, 237, 247, 2...</td>
+          <td>[GADD45B, RRAS, SOS2, FGF17, PPP3CC, TNFRSF1A,...</td>
+        </tr>
+        <tr>
+          <th>PI3K-Akt signaling pathway_Homo sapiens_hsa04151</th>
+          <td>0.182245</td>
+          <td>0.630004</td>
+          <td>0.955696</td>
+          <td>0.947837</td>
+          <td>341</td>
+          <td>22</td>
+          <td>[GNG13, VEGFC, GNB4, CSF1, SOS2, FGF17, THBS4,...</td>
+        </tr>
+        <tr>
+          <th>Rap1 signaling pathway_Homo sapiens_hsa04015</th>
+          <td>-0.285975</td>
+          <td>-0.835602</td>
+          <td>0.676292</td>
+          <td>1.049224</td>
+          <td>211</td>
+          <td>19</td>
+          <td>[RRAS, VEGFC, CSF1, FGF17, PDGFRB, FGF4, PDGFC...</td>
+        </tr>
+        <tr>
+          <th>Pathways in cancer_Homo sapiens_hsa05200</th>
+          <td>0.201838</td>
+          <td>0.755293</td>
+          <td>0.843450</td>
+          <td>1.095278</td>
+          <td>397</td>
+          <td>27</td>
+          <td>[FZD2, ETS1, STAT5B, GNG13, VEGFC, GNB4, SOS2,...</td>
         </tr>
       </tbody>
     </table>
@@ -765,20 +789,42 @@ and cls with a list object
 
 .. code:: python
 
-    call_results = call_results.reset_index()
-    call_results.head(5).plot.barh(y='fdr',x='Enrich_terms')
+    with plt.style.context('ggplot'):
+        call_results = prerank_results.reset_index()
+        call_results.head(5).plot.barh(y='fdr',x='Term')
+
+
+
+.. image:: output_33_0.png
+
+
+The **call** module will generate heatmap for genes in each gene sets in
+the backgroud.
+
+.. code:: python
+
+    from IPython.display import Image
+    
+    #erich plot
+    Image("./call_reprot/HTLV-I infection_Homo sapiens_hsa05166.gsea.png",width=650, height=600)
 
 
 
 
-.. parsed-literal::
-
-    <matplotlib.axes._subplots.AxesSubplot at 0x1585bc09da0>
+.. image:: output_35_0.png
 
 
 
+.. code:: python
 
-.. image:: output_30_1.png
+    #corresponding heatmap
+    Image("./call_reprot/HTLV-I infection_Homo sapiens_hsa05166.heatmap.png")
+
+
+
+
+.. image:: output_36_0.png
+
 
 
 ii . Commanline usage
@@ -797,13 +843,13 @@ print return to the console.
     Downloading and generating Enrichr library gene sets..............
     286 gene_sets have been filtered out when max_size=1000 and min_size=15
     7 gene_sets used for further calculating
-    Start to compute enrichment socres...................... Mon Aug 22 13:25:30 2016
-    Start to compute esnulls................................ Mon Aug 22 13:25:30 2016
+    Start to compute enrichment socres...................... Thu Oct  6 11:41:50 2016
+    Start to compute esnulls................................ Thu Oct  6 11:41:50 2016
     ......This step might take a while to run. Be patient...
-    Start to compute pvals.................................. Mon Aug 22 13:25:31 2016
-    start to compute fdrs................................... Mon Aug 22 13:25:31 2016
-    Statistial testing finished............................. Mon Aug 22 13:25:31 2016
-    Start to generate gseapy reports, and produce figures....... Mon Aug 22 13:25:31 2016
+    Start to compute pvals.................................. Thu Oct  6 11:41:51 2016
+    start to compute fdrs................................... Thu Oct  6 11:41:51 2016
+    Statistial testing finished............................. Thu Oct  6 11:41:51 2016
+    Start to generate gseapy reports, and produce figures... Thu Oct  6 11:41:51 2016
     ...Congratulations. GSEAPY run successfully!!!.............
     ...The Job is done...........................Goodbye!
     

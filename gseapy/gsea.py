@@ -173,7 +173,8 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=1000, 
                         RES=res.get(gs)['rank_ES'], phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize)        
         fig.savefig('{a}/{b}.gsea.{c}'.format(a=outdir, b=gs, c=format), dpi=300,)
 
-        heatmap(df=dat.loc[gene_symbol], term=gs, outdir=outdir, figsize=(width, len(gene_symbol)/2))
+        heatmap(df=dat.loc[gene_symbol], term=gs, outdir=outdir, 
+                figsize=(width, len(gene_symbol)/2), format=format)
     
     with open(outdir+"/command.txt",'wt') as f:
         argument = OrderedDict(sorted(argument.items(), key=lambda t:t[0]))
