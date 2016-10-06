@@ -22,19 +22,16 @@ class _MidpointNormalize(Normalize):
 
 
 def z_score(data2d, axis=0):
-    """Standarize the mean and variance of the data axis
-    Parameters
-    ----------
-    data2d : pandas.DataFrame
-    Data to normalize
-    axis : int
-    Which axis to normalize across. If 0, normalize across rows, if 1,
-    normalize across columns.
-    Returns
-    -------
-    normalized : pandas.DataFrame
-    Noramlized data with a mean of 0 and variance of 1 across the
-    specified axis.
+    """Standarize the mean and variance of the data axis Parameters.
+
+    :param data2d: DataFrame to normalize.
+    :param axis: int, Which axis to normalize across. If 0, normalize across rows, 
+                  if 1, normalize across columns.
+
+    
+    :Returns: Normalized DataFrame. Noramlized data with a mean of 0 and variance of 1 
+              across the specified axis.
+
     """
     if axis == 1:
         z_scored = data2d
@@ -49,7 +46,7 @@ def z_score(data2d, axis=0):
         return z_scored.T
 
 
-def heatmap(df, term, outdir, axis=0, figsize=(5,5)):
+def heatmap(df, term, outdir, axis=0, figsize=(5,5), format='png'):
     """Visualize the dataframe. 
     
     :param df: DataFrame from expression table.
@@ -57,6 +54,7 @@ def heatmap(df, term, outdir, axis=0, figsize=(5,5)):
     :param outdir: path to save heatmap.
     :param axis: z_score axis.
     :param figsize: heatmap figsize.
+    :param format: Matplotlib supported figure formats.
      
     """
     df = z_score(df, axis=axis)
@@ -93,7 +91,8 @@ def heatmap(df, term, outdir, axis=0, figsize=(5,5)):
         cbar.ax.spines[side].set_visible(False)
     #cbar.ax.set_title('',loc='left')
 
-    canvas.print_figure(outdir+"/"+term+".heatmap.png", bbox_inches='tight')
+    canvas.print_figure("{a}/{b}.heatmap.{c}".format(a=outdir, b=term, c=format),
+                        bbox_inches='tight')
 
 def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
               phenoPos=None, phenoNeg=None, figsize =(6.5,6), **kwarg):
