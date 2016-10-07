@@ -144,15 +144,14 @@ Installation
 
 
 .. code:: shell
-
-   $ pip install gseapy
    
-   # if you have conda
-   $ conda install -c bioconda gseapy
-   
+   # if you have conda(the recommended way)
+   $ conda install -c bioconda gseapy   
    # or   
    $ conda install -c bioninja gseapy
 
+   # or use pip
+   $ pip install gseapy
 
 | You may instead want to use the development version from Github, by running
 
@@ -173,7 +172,7 @@ Mandatory
 * Beautifulsoup4
 * Requests(for enrichr API)
 
-You may also need **lxml, html5lib**, if you could not parse xml files. 
+You may also need to install **lxml, html5lib**, if you could not parse xml files. 
 
 
    
@@ -262,7 +261,7 @@ Run gseapy inside python console:
     l = ['SCARA3', 'LOC100044683', 'CMBL', 'CLIC6', 'IL13RA1', 'TACSTD2', 'DKKL1', 'CSF1', 
          'SYNPO2L', 'TINAGL1', 'PTX3', 'BGN', 'HERC1', 'EFNA1', 'CIB2', 'PMP22', 'TMEM173']
  
-    gseapy.enrichr(gene_list=l, description='pathway', gene_sets='KEGG_2016', outfile='test')
+    gseapy.enrichr(gene_list=l, description='pathway', gene_sets='KEGG_2016', outdir='test')
 
     # or a txt file path.
     gseapy.enrichr(gene_list='gene_list.txt', description='pathway', gene_sets='KEGG_2016', 
