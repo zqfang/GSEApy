@@ -140,7 +140,8 @@ For example, both a list object and txt file are supported for ``enrchr`` API
 Installation
 ------------
 
-| Install gseapy package from pypi and download 
+| Install gseapy package from pypi and download.
+
 
 .. code:: shell
 
@@ -264,7 +265,8 @@ Run gseapy inside python console:
     gseapy.enrichr(gene_list=l, description='pathway', gene_sets='KEGG_2016', outfile='test')
 
     # or a txt file path.
-    gseapy.enrichr(gene_list='gene_list.txt', description='pathway', gene_sets='KEGG_2016', outfile='test')
+    gseapy.enrichr(gene_list='gene_list.txt', description='pathway', gene_sets='KEGG_2016', 
+                   outdir='test', cutoff=0.05, format='png' )
  
 
 For a full list of enrchr libary name :
