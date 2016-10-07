@@ -7,6 +7,11 @@ import argparse as ap
 # Main function
 # ------------------------------------
 
+
+# there is a bug in add_argument(required=True), for hacking, don't set metavar='' when required=True,
+# or args = argparser.parse_args() will throw bugs!!!
+
+
 __version__ = '0.7.0'
 
 def main():
@@ -40,8 +45,8 @@ def main():
     elif subcommand == 'enrichr':
         # calling enrichr API
         from .enrichr import enrichr
-        enrichr(gene_list= args.gene_list, description=args.description, gene_sets=args.library, outdir=args.outdir,
-		        format=args.format, cutoff=args.cut, figsize=args.figsize)    
+        enrichr(gene_list= args.gene_list, description=args.descrip, gene_sets=args.library, outdir=args.outdir,
+		        format=args.format, cutoff=args.thresh, figsize=args.figsize)    
     else:
         argparser.print_help()
         sys.exit(0)
@@ -77,8 +82,10 @@ def add_output_option(parser):
                         choices=("pdf", "png", "jpeg", "eps"), default="png",
                         help="Format of output figures, choose from {'pdf', 'png', 'jpeg', 'eps'}. Default: 'png'.")
     parser.add_argument("--figsize", action='store', nargs=2, dest='figsize',
-                        metavar=('width', 'height'), type=float, default=[6.5, 6],
-                        help="The figsize keyword argument need two parameter to define. Default: [6.5,6]")
+                        metavar=('width', 'height'),type=float, default=(6.5, 6),
+                        help="The figsize keyword argument need two parameter to define. Default: (6.5, 6)")
+
+
 
 def add_output_group(parser, required=True):
     """output group"""
@@ -88,6 +95,8 @@ def add_output_group(parser, required=True):
                               help="Output file name. Mutually exclusive with --o-prefix.")
     output_group.add_argument("--o-prefix", dest="ofile", type=str, default='enrich_report',
                               help="Output file prefix. Mutually exclusive with -o/--ofile.")
+
+
 
 
 
@@ -116,8 +125,8 @@ def add_call_parser(subparsers):
     group_opt = argparser_call.add_argument_group("GSEA advanced arguments")
     group_opt.add_argument("--min-size",  dest="mins", action="store", type=int, default=15, metavar='',
                            help="Min size of input genes presented in Gene Sets. Default: 15")
-    group_opt.add_argument("--max-size", dest = "maxs", action="store", type=int, default =1000, metavar='',
-                           help="Max size of input genes presented in Gene Sets. Default: 1000")
+    group_opt.add_argument("--max-size", dest = "maxs", action="store", type=int, default=500, metavar='',
+                           help="Max size of input genes presented in Gene Sets. Default: 500")
     group_opt.add_argument("-n", "--permu-num", dest = "n", action="store", type=int, default=1000, metavar='',
                            help="Number of random permutations. For calculating esnulls. Default: 1000")
     group_opt.add_argument("-w", "--weight", action='store', dest='weight', default=1.0, type=float, metavar='',
@@ -149,8 +158,8 @@ def add_prerank_parser(subparsers):
     prerank_input.add_argument("-g", "--gmt", dest="gmt", action="store", type=str, required=True, 
                              help="Gene set database in GMT format. Same with GSEA.")
     prerank_input.add_argument("-l", "--label", action='store', nargs=2, dest='label',
-                             metavar=('pos', 'neg'), type=str, default=['Pos','Neg'],
-                             help="The phenotype label argument need two parameter to define. Default: ['Pos','Neg']")
+                             metavar=('pos', 'neg'), type=str, default=('Pos','Neg'),
+                             help="The phenotype label argument need two parameter to define. Default: ('Pos','Neg')")
 
     # group for output files
     prerank_output = argparser_prerank.add_argument_group("Output arguments")
@@ -160,8 +169,8 @@ def add_prerank_parser(subparsers):
     prerank_opt = argparser_prerank.add_argument_group("GSEA advanced arguments")
     prerank_opt.add_argument("--min-size",  dest="mins", action="store", type=int, default=15, metavar='',
                              help="Min size of input genes presented in Gene Sets. Default: 15")
-    prerank_opt.add_argument("--max-size", dest = "maxs", action="store", type=int, default =1000, metavar='',
-                             help="Max size of input genes presented in Gene Sets. Default: 1000")
+    prerank_opt.add_argument("--max-size", dest = "maxs", action="store", type=int, default=500, metavar='',
+                             help="Max size of input genes presented in Gene Sets. Default: 500")
     prerank_opt.add_argument("-n", "--permu-num", dest = "n", action="store", type=int, default=1000, metavar='',
                              help="Number of random permutations. For calculating esnulls. Default: 1000")
     prerank_opt.add_argument("-w", "--weight", action='store', dest='weight', default=1.0, type=float, metavar='',
@@ -195,19 +204,23 @@ def add_enrichr_parser(subparsers):
     
     argparser_enrichr = subparsers.add_parser("enrichr", help="Peform GSEA using enrichr API.")
 
-    group_enrichr = argparser_enrichr.add_argument_group("Input files arguments")
+    # group for required options.
+    group_opt = argparser_enrichr.add_argument_group("Input arguments")
+    group_opt.add_argument("-i", "--input-list", action="store", dest="gene_list", type=str, required=True, metavar='glist',
+                              help="Enrichr uses a list of Entrez gene symbols as input.")
 
-    group_enrichr.add_argument("-i", "--input-list", action="store", dest="gene_list", required=True, metavar='',
-                              help="Enrichr uses a list of Entrez gene symbols as input.  ")
-    group_enrichr.add_argument("-d", "--description", action='store', dest='description', default='foo',metavar='',
-                              help="It is recommended to enter a description for your list so that" +
-                                   " multiple lists can be differentiated from each other if you choose to save or share your list")
-    group_enrichr.add_argument("-g", "--gene-sets", action="store", dest="library", required=True, metavar='',
-                              help="Enrichr library name requires. see online tool for names.  ")
+    group_opt.add_argument("-g", "--gene-sets", action="store", dest="library", type=str, required=True, metavar='gmt',
+                              help="Enrichr library name required. see online tool for libarry names.")
 
-    add_output_option(group_enrichr)
-    group_enrichr.add_argument("--cut-off", action="store", dest="cut", metavar='', type=float, default=0.05,
-                              help="Pval cutoff, used for generating plots. Default: 0.05  ")
+    group_opt.add_argument("-d", "--description", action="store", dest="descrip", type=str, default='foo', metavar='',
+                              help="It is recommended to enter a description for your list so that multiple lists \
+                              can be differentiated from each other if you choose to save or share your list.") 
+    group_opt.add_argument("--cut-off", action="store", dest="thresh", metavar='', type=float, default=0.05,
+                              help="Pval cutoff, used for generating plots. Default: 0.05.")
+    
+    enrichr_output = argparser_enrichr.add_argument_group("Output arguments")
+    add_output_option(enrichr_output)
+
 
     return
 
