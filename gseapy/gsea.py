@@ -73,7 +73,7 @@ def replot(indir,outdir='gseapy_out', weight=1,figsize=[6.5,6], format='png',min
             f.write("%s = %s\n"%(item[0],item[1]))        
     print("Congratulations! Your plots have been reproduced successfully!")
 
-def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=1000, permutation_n=1000, weighted_score_type=1,
+def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, permutation_n=1000, weighted_score_type=1,
         permutation_type='gene_set', method='log2_ratio_of_classes', ascending=False, figsize=[6.5,6], format='png', 
         graph_num=20, seed=None):
     """ Run Gene Set Enrichment Analysis.
@@ -83,7 +83,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=1000, 
     :param permutation_n: Number of permutations for significance computation. Default: 1000.
     :param permutation_type: Permutation type, "phenotype" (default) for phenotypes, "gene_set" for genes.
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Defaut: 15.
-    :param int max_size: Maximum allowed number of genes from gene set also the data set. Defaults: 15 and 1000.
+    :param int max_size: Maximum allowed number of genes from gene set also the data set. Defaults: 500.
     :param weighted_score_type: Refer to :func:`algorithm.enrichment_socre`. Default:1.
     :param method: Ranking metric method, refer to :func:`algorithm.ranking_metric`.
     :param ascending: Sorting order of rankings. Default: False.
@@ -186,7 +186,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=1000, 
         return res_df 
 
 def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg',
-            min_size=15, max_size=1000, permutation_n=1000, weighted_score_type=1,
+            min_size=15, max_size=500, permutation_n=1000, weighted_score_type=1,
             ascending=False, figsize=[6.5,6], format='png', graph_num=20, seed=None):
     """ Run Gene Set Enrichment Analysis with pre-ranked correlation defined by user.
 
@@ -195,7 +195,7 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
     :param outdir: results output directory.
     :param permutation_n: Number of permutations for significance computation. Default: 1000.
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Defaut: 15.
-    :param int max_size: Maximum allowed number of genes from gene set also the data set. Defaults: 15 and 1000.
+    :param int max_size: Maximum allowed number of genes from gene set also the data set. Defaults: 500.
     :param weighted_score_type: Refer to :func:`algorithm.enrichment_socre`. Default:1.
     :param ascending: Sorting order of rankings. Default: False.
     :param figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
