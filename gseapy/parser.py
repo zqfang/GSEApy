@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import, print_function
-from bs4 import BeautifulSoup
+from __future__ import  print_function
+
 from numpy import in1d
 from pandas import read_table, DataFrame
 from .enrichr import get_libary_name
@@ -54,6 +54,7 @@ def gsea_edb_parser(results_path, index=0):
     :param index: gene_set index of gmt database, used for iterating items.   
     :return: enrichment_term, hit_index,nes, pval, fdr.
     """
+    from bs4 import BeautifulSoup
     
     soup = BeautifulSoup(open(results_path),features='xml')
     tag = soup.findAll('DTG')   
