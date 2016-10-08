@@ -43,11 +43,10 @@ install:
     - conda config --set always_yes yes --set changeps1 no
     - conda update -q conda
     - conda info -a
-    - pip install -r requirements.txt
+    - pip install -r ./requirements.txt
 
 
 script:
   - nosetests
-  #- python setup.py build_ext -i
-  #- python -m compileall -f .
-  - python setup.py test
+  # - python setup.py test
+  # - ./condatest.sh "$TRAVIS_PYTHON_VERSION"
