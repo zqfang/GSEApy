@@ -7,8 +7,6 @@ python:
   - "3.5"
 
 
-# command to install dependencies
-install: "pip install -r requirements.txt"
 
 # make edits to this line to trigger a new travis build.
 # (sometimes it errors out trying to download from PyPI)
@@ -45,10 +43,8 @@ install:
     - conda config --set always_yes yes --set changeps1 no
     - conda update -q conda
     - conda info -a
+    - pip install -r requirements.txt
 
-    # Base env only needs to cythonize sources; test script takes care of
-    # everything else.
-    - conda install cython
 
 script:
   - nosetests
