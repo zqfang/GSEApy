@@ -67,14 +67,14 @@ def get_libary_name():
 
     return sorted(gmt_names)
     
-def enrichr(gene_list, description, gene_sets, outdir, cutoff=0.05, format='png', figsize=(3,6)):
+def enrichr(gene_list, gene_sets, description='foo', outdir='gseapy_out', cutoff=0.05, format='png', figsize=(3,6)):
     """Enrichr API.
 
     :param gene_list: flat file with list of genes, one gene id per row.
                       or a python list object, which make it easy to use 
                       inside python console.
-    :param description: name of analysis
     :param gene_sets: Enrichr Library to query.
+    :param description: name of analysis
     :param outdir: out put file directory
 	:param cutoff: Adjust P-value cutoff, for plotting. Default: 0.05
     :return: A DataFrame of enrchment results, only if call ``enrichr`` inside python console.

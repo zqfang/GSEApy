@@ -1,6 +1,6 @@
 #! python
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, print_function, division
+from __future__ import  print_function, division
 
 import os
 import sys
@@ -14,7 +14,7 @@ from collections import OrderedDict
 
 import pandas as pd
 
-def replot(indir,outdir='gseapy_out', weight=1,figsize=[6.5,6], format='png',min_size=3, max_size=5000):
+def replot(indir, outdir='gseapy_out', weight=1, figsize=[6.5,6], format='png', min_size=3, max_size=5000):
     """The main fuction to run inside python.
           
     :param indir: GSEA desktop results directory. In the sub folder, you must contain edb file foder.    
@@ -30,8 +30,10 @@ def replot(indir,outdir='gseapy_out', weight=1,figsize=[6.5,6], format='png',min
     :return: Generate new figures with seleted figure format. Default: 'png'.   
     """
     argument = locals()
+    
     import glob
-    from bs4 import BeautifulSoup   
+    from bs4 import BeautifulSoup
+    
     #parsing files.......    
     results_path = glob.glob(indir+'*/edb/results.edb')[0]
     rank_path =  glob.glob(indir+'*/edb/*.rnk')[0]
