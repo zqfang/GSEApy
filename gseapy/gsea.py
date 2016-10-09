@@ -5,7 +5,7 @@ from __future__ import  print_function, division
 import os
 import sys
 import time
-
+import errno
 
 from .parser import gsea_edb_parser, gsea_rank_metric, gsea_gmt_parser, gsea_cls_parser
 from .algorithm import enrichment_score, gsea_compute, preprocess, ranking_metric
@@ -55,7 +55,13 @@ def replot(indir, outdir='gseapy_out', weight=1, figsize=[6.5,6], format='png', 
     #extract each enriment term in the results.edb files and plot.
     database = BeautifulSoup(open(results_path),features='xml')
     length = len(database.findAll('DTG'))
-    os.makedirs(outdir, exist_ok=True)
+
+    try:
+	    os.makedirs(outdir)
+	except OSError as exc:
+		if exc.errno != errno.EEXIST:
+		    raise exc
+		pass   
 
     for idx in range(length):
         #extract statistical resutls from results.edb file
@@ -139,8 +145,12 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
                                                     phenoPos=phenoPos, phenoNeg=phenoNeg, classes=classes, ascending=ascending,
                                                     seed=seed)
    
-    
-    os.makedirs(outdir, exist_ok=True)
+    try:
+	    os.makedirs(outdir)
+	except OSError as exc:
+		if exc.errno != errno.EEXIST:
+		    raise exc
+		pass
     res = OrderedDict()
     for gs,gseale,ind,RES in zip(subsets, list(results), hit_ind, rank_ES):        
         rdict = OrderedDict()      
@@ -237,7 +247,13 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
                                                     classes=None, ascending=ascending, seed=seed, prerank=True)
    
     print("Start to generate gseapy reports, and produce figures...", time.ctime())
-    os.makedirs(outdir, exist_ok=True)
+    
+	try:
+	    os.makedirs(outdir)
+	except OSError as exc:
+		if exc.errno != errno.EEXIST:
+		    raise exc
+		pass
     res = OrderedDict()
     for gs,gseale,ind,RES in zip(subsets, list(results), hit_ind, rank_ES):        
         rdict = OrderedDict()       
