@@ -57,11 +57,11 @@ def replot(indir, outdir='gseapy_out', weight=1, figsize=[6.5,6], format='png', 
     length = len(database.findAll('DTG'))
 
     try:
-	    os.makedirs(outdir)
-	except OSError as exc:
-		if exc.errno != errno.EEXIST:
-		    raise exc
-		pass   
+	os.makedirs(outdir)
+    except OSError as exc:
+	if exc.errno != errno.EEXIST:
+	    raise exc
+        pass   
 
     for idx in range(length):
         #extract statistical resutls from results.edb file
@@ -146,11 +146,11 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
                                                     seed=seed)
    
     try:
-	    os.makedirs(outdir)
-	except OSError as exc:
-		if exc.errno != errno.EEXIST:
-		    raise exc
-		pass
+	os.makedirs(outdir)
+    except OSError as exc:
+	if exc.errno != errno.EEXIST:
+	    raise exc
+	pass
     res = OrderedDict()
     for gs,gseale,ind,RES in zip(subsets, list(results), hit_ind, rank_ES):        
         rdict = OrderedDict()      
@@ -248,12 +248,12 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
    
     print("Start to generate gseapy reports, and produce figures...", time.ctime())
     
-	try:
-	    os.makedirs(outdir)
-	except OSError as exc:
-		if exc.errno != errno.EEXIST:
-		    raise exc
-		pass
+    try:
+	os.makedirs(outdir)
+    except OSError as exc:
+	if exc.errno != errno.EEXIST:
+	    raise exc
+	pass
     res = OrderedDict()
     for gs,gseale,ind,RES in zip(subsets, list(results), hit_ind, rank_ES):        
         rdict = OrderedDict()       

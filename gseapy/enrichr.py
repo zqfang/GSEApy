@@ -165,11 +165,11 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='gseapy_out', cutoff
 
     print('Enrichr API : Downloading file of enrichment results: Job Id:', job_id)
     try:
-	    os.makedirs(outdir)
-	except OSError as exc:
-		if exc.errno != errno.EEXIST:
-		    raise exc
-		pass   
+	os.makedirs(outdir)
+    except OSError as exc:
+	if exc.errno != errno.EEXIST:
+	    raise exc
+	pass   
 	
     with open(outdir+'/'+ outfile + description + '.txt', 'wb') as f:
         for chunk in response.iter_content(chunk_size=1024):
