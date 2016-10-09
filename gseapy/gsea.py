@@ -57,9 +57,9 @@ def replot(indir, outdir='gseapy_out', weight=1, figsize=[6.5,6], format='png', 
     length = len(database.findAll('DTG'))
 
     try:
-	os.makedirs(outdir)
+        os.makedirs(outdir)
     except OSError as exc:
-	if exc.errno != errno.EEXIST:
+        if exc.errno != errno.EEXIST:
 	    raise exc
         pass   
 
