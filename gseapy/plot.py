@@ -2,11 +2,12 @@
 
 import __main__ as main
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.transforms as transforms
+
 from matplotlib.colors import Normalize
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
+import matplotlib.transforms as transforms
 
 
 class _MidpointNormalize(Normalize):
