@@ -48,6 +48,6 @@ install:
 
 
 script:
-  - nosetests
+  # - nosetests
   # - python setup.py test
-  # - ./condatest.sh "$TRAVIS_PYTHON_VERSION"
+    - ./condatest.sh "$TRAVIS_PYTHON_VERSION"
