@@ -2,7 +2,7 @@ language: python
 
 python:
   - "2.7"
-  - "3.3"
+  # - "3.3"
   - "3.4"
   - "3.5"
 
@@ -26,8 +26,8 @@ notifications:
 
 # See http://docs.travis-ci.com/user/gui-and-headless-browsers/#Using-xvfb-to-Run-Tests-That-Require-GUI-(e.g.-a-Web-browser)
 before_install:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
+    - "export DISPLAY=:99.0"
+    - "sh -e /etc/init.d/xvfb start"
 
 
 # Most of this is from http://conda.pydata.org/docs/travis.html
@@ -48,6 +48,6 @@ install:
 
 
 script:
-  # - nosetests
-  # - python setup.py test
-    - ./condatest.sh "$TRAVIS_PYTHON_VERSION"
+    # - nosetests
+    # - python setup.py  test
+    - bash ./condatest.sh "$TRAVIS_PYTHON_VERSION"
