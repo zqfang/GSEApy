@@ -171,7 +171,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
     res_df.sort_values(by='fdr', inplace=True)
     
     res_df.drop(['rank_ES','hit_index'], axis=1, inplace=True)
-    res_df.to_csv('{a}/{b}.{c}.reports.csv'.format(a=outdir, b='gseapy', c=permutation_type), float_format ='%.7f')
+    res_df.to_csv('{a}/{b}.{c}.gsea.reports.csv'.format(a=outdir, b='gseapy', c=permutation_type), float_format ='%.7f')
     
     print("Start to generate gseapy reports, and produce figures...", time.ctime())
 
@@ -278,7 +278,6 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
     res_df.drop(['rank_ES','hit_index'], axis=1, inplace=True)
     res_df.to_csv('{a}/{b}.prerank.reports.csv'.format(a=outdir, b='gseapy'), float_format ='%.7f')
     
-    print("Start to generate gseapy reports, and produce figures...", time.ctime())
 
     #Plotting
     top_term = res_df.head(graph_num).index
