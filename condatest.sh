@@ -54,5 +54,5 @@ source activate $name
 
 log "run tests"
 nosetests
-(cd docs && make clean && make doctest)
+# #(cd docs && make clean && make doctest)
 
