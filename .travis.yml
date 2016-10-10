@@ -2,7 +2,7 @@ language: python
 
 python:
   - "2.7"
-  # - "3.3"
+  - "3.3"
   - "3.4"
   - "3.5"
 
@@ -43,8 +43,8 @@ install:
     - conda config --set always_yes yes --set changeps1 no
     - conda update -q conda
     - conda info -a
-    - conda install nose
-    - conda install --file "requirements.txt"
+    #- conda install nose
+    #- conda install --file "requirements.txt"
 
 
 script:

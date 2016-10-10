@@ -1,0 +1,4 @@
+nose
+numpydoc
+pyyaml
+sphinx

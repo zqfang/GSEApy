@@ -40,10 +40,11 @@ log "install test requirements"
 source deactivate
 conda env list | grep -q $name && conda env remove -y -n $name
 conda create -y -n $name  python=${PY_VERSION} \
-    --file "requirements.txt" 
-
+    --file "requirements.txt" \
+    --file "test-requirements.txt" 
+	
 source activate $name
-conda install nose
+
 log "run tests"
 nosetests
 (cd docs && make clean && make doctest)
