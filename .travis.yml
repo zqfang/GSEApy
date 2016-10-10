@@ -43,9 +43,10 @@ install:
     - conda config --set always_yes yes --set changeps1 no
     - conda update -q conda
     - conda info -a
-    #- conda install nose
-    #- conda install --file "requirements.txt"
 
+    # Base env only needs to cythonize sources; test script takes care of
+    # everything else.
+    - conda install cython
 
 script:
     # - nosetests

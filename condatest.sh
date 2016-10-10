@@ -24,10 +24,17 @@ log "starting with basic environment"
 conda create -y -n $name  python=${PY_VERSION}
 source activate $name
 
+log "temporarily install cython"
+conda install cython
+
+log "force re-cythonizing"
 rm -rf dist build
 python setup.py clean
 python setup.py build
 python setup.py sdist
+
+log "uninstall cython"
+conda remove cython
 
 log "test installation of sdist"
 set -x
