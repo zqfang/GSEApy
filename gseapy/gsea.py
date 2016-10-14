@@ -93,7 +93,36 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Defaut: 15.
     :param int max_size: Maximum allowed number of genes from gene set also the data set. Defaults: 500.
     :param weighted_score_type: Refer to :func:`algorithm.enrichment_socre`. Default:1.
-    :param method: Ranking metric method, refer to :func:`algorithm.ranking_metric`.
+    :param method:  The method used to calculate a correlation or ranking. Default: 'log2_ratio_of_classes'.
+                   Others methods are:
+   
+                   1. 'signal_to_noise' 
+      
+                      You must have at least three samples for each phenotype to use this metric.
+                      The larger the signal-to-noise ratio, the larger the differences of the means (scaled by the standard deviations);
+                      that is, the more distinct the gene expression is in each phenotype and the more the gene acts as a “class marker.” 
+    
+                   2. 't_test'
+      
+                      Uses the difference of means scaled by the standard deviation and number of samples. 
+                      Note: You must have at least three samples for each phenotype to use this metric.
+                      The larger the tTest ratio, the more distinct the gene expression is in each phenotype 
+                      and the more the gene acts as a “class marker.”
+    
+                   3. 'ratio_of_classes' (also referred to as fold change).
+      
+                      Uses the ratio of class means to calculate fold change for natural scale data.
+    
+                   4. 'diff_of_classes' 
+      
+                      Uses the difference of class means to calculate fold change for log scale data
+    
+                   5. 'log2_ratio_of_classes' 
+      
+                      Uses the log2 ratio of class means to calculate fold change for natural scale data.
+                      This is the recommended statistic for calculating fold change for natural scale data.
+   
+      	
     :param ascending: Sorting order of rankings. Default: False.
     :param outdir: Results output directory.
     :param figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
@@ -195,7 +224,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
             f.write("%s = %s\n"%(item[0],item[1]))   
     print("...Congratulations. GSEAPY run successfully!!!.............\n...The Job is done...........................Goodbye!")
     
-    if isinstance(data, pd.DataFrame):
+    if isinstance(data, pd.DataFrame) or isinstance(cls, list):
         return res_df 
 
 def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg',
