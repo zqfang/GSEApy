@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
-
-from __future__ import  print_function
-
 from numpy import in1d
 from pandas import read_table, DataFrame
-from .enrichr import get_libary_name
-import sys
+from .enrichr import get_library_name
+import sys, logging
 
 def unique(seq):
     """Remove duplicates from a list in Python while preserving order.
@@ -56,7 +53,7 @@ def gsea_edb_parser(results_path, index=0):
     """
     from bs4 import BeautifulSoup
     
-    soup = BeautifulSoup(open(results_path),features='xml')
+    soup = BeautifulSoup(open(results_path), features='xml')
     tag = soup.findAll('DTG')   
     term = dict(tag[index].attrs)
     # dict_keys(['RANKED_LIST', 'GENESET', 'FWER', 'ES_PROFILE', 
@@ -74,7 +71,7 @@ def gsea_edb_parser(results_path, index=0):
     fdr =  term.get('FDR')
     #fwer = term.get('FWER')   
     #index_range = len(tag)-1
-    print("Enriched Gene set is: ", enrich_term)
+    logging.debug("Enriched Gene set is: ", enrich_term)
 
     return enrich_term, hit_ind, nes, pval, fdr
     
@@ -121,8 +118,8 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
              genesets_dict = { line.strip("\n").split("\t")[0]: line.strip("\n").split("\t")[2:] 
                               for line in genesets.readlines()}    
     else:
-        print("Downloading and generating Enrichr library gene sets..............") 
-        names = get_libary_name()
+        logging.info("Downloading and generating Enrichr library gene sets..............") 
+        names = get_library_name()
         if gmt in names:
             import requests
             ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary'
@@ -145,7 +142,7 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
     elif sys.version_info[0] == 2:
         genesets_filter =  {k: v for k, v in genesets_dict.iteritems() if len(v) >= min_size and len(v) <= max_size}
     else:
-        print("System failure. Please Provide correct input files")
+        loging.debug("System failure. Please Provide correct input files")
         sys.exit(1)    
     if gene_list is not None:
         subsets = sorted(genesets_filter.keys())             
@@ -159,12 +156,12 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
     #some_dict = {key: value for key, value in some_dict.items() if value != value_to_remove}
     #use np.intersect1d() may be faster???    
     filsets_num = len(genesets_dict) - len(genesets_filter)
-    print("{a} gene_sets have been filtered out when max_size={b} and min_size={c}".format(a=filsets_num,b=max_size,c=min_size))
-    print("{} gene_sets used for further calculating".format(len(genesets_filter)))
+    logging.info("{a} gene_sets have been filtered out when max_size={b} and min_size={c}".format(a=filsets_num,b=max_size,c=min_size))
+    logging.info("{} gene_sets used for further calculating".format(len(genesets_filter)))
     
     if filsets_num == len(genesets_dict):
-        print("No gene sets passed throught filtering condition!!!, try new paramters again!\n" +\
-              "Note: Gene names for gseapy is case sensitive." )
+        logging.error("No gene sets passed throught filtering condition!!!, try new paramters again!\n" +\
+                      "Note: Gene names for gseapy is case sensitive." )
         sys.exit(1)
     else:
         return genesets_filter

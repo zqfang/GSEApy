@@ -1,18 +1,16 @@
 #! python
 # -*- coding: utf-8 -*-
-from __future__ import  print_function, division
+from __future__ import  absolute_import, division
 
-import os
-import sys
-import time
-import errno
-
+import __main__ as main
+import os,sys,errno, logging
 from .parser import gsea_edb_parser, gsea_rank_metric, gsea_gmt_parser, gsea_cls_parser
 from .algorithm import enrichment_score, gsea_compute, preprocess, ranking_metric
 from .plot import gsea_plot, heatmap
 from collections import OrderedDict
-
+from .__main__ import log_init
 import pandas as pd
+
 
 def replot(indir, outdir='gseapy_out', weight=1, figsize=[6.5,6], format='png', min_size=3, max_size=5000):
     """The main fuction to run inside python.
@@ -30,7 +28,14 @@ def replot(indir, outdir='gseapy_out', weight=1, figsize=[6.5,6], format='png', 
     :return: Generate new figures with seleted figure format. Default: 'png'.   
     """
     argument = locals()
-    
+
+    try:
+        os.makedirs(outdir)
+    except OSError as exc:
+        if exc.errno != errno.EEXIST:
+            raise exc
+        pass    
+    logging = log_init(outdir, module='replot')
     import glob
     from bs4 import BeautifulSoup
     
@@ -42,7 +47,7 @@ def replot(indir, outdir='gseapy_out', weight=1, figsize=[6.5,6], format='png', 
     file_list = [results_path, rank_path, gene_set_path, cls_path]      
     for file in file_list: 
         if not os.path.isfile(file):
-            print("Incorrect Input %s !" %file)
+            logging.error("Incorrect Input %s !" %file)
             sys.exit(1)    
     #extract sample names from .cls file
     phenoPos, phenoNeg, classes = gsea_cls_parser(cls_path)  
@@ -55,13 +60,6 @@ def replot(indir, outdir='gseapy_out', weight=1, figsize=[6.5,6], format='png', 
     #extract each enriment term in the results.edb files and plot.
     database = BeautifulSoup(open(results_path),features='xml')
     length = len(database.findAll('DTG'))
-
-    try:
-        os.makedirs(outdir)
-    except OSError as exc:
-        if exc.errno != errno.EEXIST:
-            raise exc
-    pass   
 
     for idx in range(length):
         #extract statistical resutls from results.edb file
@@ -79,7 +77,7 @@ def replot(indir, outdir='gseapy_out', weight=1, figsize=[6.5,6], format='png', 
         argument = OrderedDict(sorted(argument.items(),key = lambda t:t[0]))
         for item in argument.items():        
             f.write("%s = %s\n"%(item[0],item[1]))        
-    print("Congratulations! Your plots have been reproduced successfully!")
+    logging.info("Congratulations! Your plots have been reproduced successfully!")
 
 def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, permutation_n=1000, weighted_score_type=1,
         permutation_type='gene_set', method='log2_ratio_of_classes', ascending=False, figsize=[6.5,6], format='png', 
@@ -144,7 +142,15 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
     """
     argument = locals()
     assert permutation_type in ["phenotype", "gene_set"]
-    
+    try:
+        os.makedirs(outdir)
+    except OSError as exc:
+        if exc.errno != errno.EEXIST:
+            raise exc
+        pass
+
+    logging = log_init(outdir, module='call')
+
     if isinstance(data, pd.DataFrame) :
         df = data.copy()
         argument['data'] = 'DataFrame'
@@ -174,13 +180,6 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
                                                     phenoPos=phenoPos, phenoNeg=phenoNeg, classes=classes, ascending=ascending,
                                                     seed=seed)
 
-
-    try:
-        os.makedirs(outdir)
-    except OSError as exc:
-        if exc.errno != errno.EEXIST:
-            raise exc
-        pass
     res = OrderedDict()
     for gs,gseale,ind,RES in zip(subsets, list(results), hit_ind, rank_ES):        
         rdict = OrderedDict()      
@@ -202,7 +201,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
     res_df.drop(['rank_ES','hit_index'], axis=1, inplace=True)
     res_df.to_csv('{a}/{b}.{c}.gsea.reports.csv'.format(a=outdir, b='gseapy', c=permutation_type), float_format ='%.7f')
     
-    print("Start to generate gseapy reports, and produce figures...", time.ctime())
+    logging.info("Start to generate gseapy reports, and produce figures...")
 
     #Plotting
     top_term = res_df.head(graph_num).index
@@ -222,9 +221,11 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
         argument = OrderedDict(sorted(argument.items(), key=lambda t:t[0]))
         for item in argument.items():        
             f.write("%s = %s\n"%(item[0],item[1]))   
-    print("...Congratulations. GSEAPY run successfully!!!.............\n...The Job is done...........................Goodbye!")
+    logging.info("Congratulations. GSEAPY run successfully...............")
     
-    if isinstance(data, pd.DataFrame) or isinstance(cls, list):
+	# return dataframe if run gsea inside python console
+    #if isinstance(data, pd.DataFrame) or isinstance(cls, list):
+    if hasattr(main, '__file__'):
         return res_df 
 
 def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg',
@@ -258,7 +259,13 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
     
     """
     argument = locals()
-    
+    try:
+        os.makedirs(outdir)
+    except OSError as exc:
+        if exc.errno != errno.EEXIST:
+            raise exc
+        pass
+    logging = log_init(outdir, module='prerank')
     if isinstance(rnk, pd.DataFrame) :       
         argument['rnk'] = 'DataFrame'
 
@@ -276,15 +283,8 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
                                                     permutation_type='gene_set', method=None, phenoPos=pheno_pos, phenoNeg=pheno_neg,
                                                     classes=None, ascending=ascending, seed=seed, prerank=True)
    
-    print("Start to generate gseapy reports, and produce figures...", time.ctime())
+    logging.info("Start to generate gseapy reports, and produce figures...")
     
-    
-    try:
-        os.makedirs(outdir)
-    except OSError as exc:
-        if exc.errno != errno.EEXIST:
-            raise exc
-        pass 
     res = OrderedDict()
     for gs,gseale,ind,RES in zip(subsets, list(results), hit_ind, rank_ES):        
         rdict = OrderedDict()       
@@ -321,8 +321,10 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
         argument = OrderedDict(sorted(argument.items(),key = lambda t:t[0]))
         for item in argument.items():        
             f.write("%s = %s\n"%(item[0], item[1]))   
-    print("Congratulations. GSEAPY run successfully................")
-    print("The Job is done.................................Goodbye!", time.ctime())
+    logging.info("Congratulations...GSEAPY run successfully...............")
     
-    if isinstance(rnk, pd.DataFrame):
+    
+	# return dataframe if run gsea inside python console
+    #if isinstance(rnk, pd.DataFrame):
+    if hasattr(main, '__file__'):
         return res_df 

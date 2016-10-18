@@ -2,16 +2,10 @@
 # python 
 # see: http://amp.pharm.mssm.edu/Enrichr/help#api for API docs
 
-
-from __future__ import print_function
-
-
-import json
-import requests
-import sys, os, errno
+import sys, os, errno, json, requests, logging
 from pandas import read_table
 from .plot import dotplot
-
+from .__main__ import log_init
 default_gene_set_libraries = [
     'GO_Biological_Process_2015',
     "ChEA_2015",
@@ -34,7 +28,7 @@ default_gene_set_libraries = [
     "NCI-Nature_2016"]
 
 
-def get_libary_name():
+def get_library_name():
     """return enrichr active enrichr library name. """
 
 	# make a get request to get the gmt names and meta data from Enrichr
@@ -52,7 +46,7 @@ def get_libary_name():
         response = x.read()
         gmt_data = json.loads(response.decode('utf-8'))
     else:
-        print("System failure. Please Provide correct input files")
+        logging.error("System failure. Please Provide correct input files")
         sys.exit(1) 
 	# generate list of gmts 
     gmt_names = []
@@ -63,8 +57,7 @@ def get_libary_name():
 		# only include active gmts 
         if inst_gmt['isActive'] == True:
             gmt_names.append(inst_gmt['libraryName'])
-
-
+    
     return sorted(gmt_names)
     
 def enrichr(gene_list, gene_sets, description='foo', outdir='gseapy_out', cutoff=0.05, format='png', figsize=(3,6)):
@@ -79,6 +72,14 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='gseapy_out', cutoff
 	:param cutoff: Adjust P-value cutoff, for plotting. Default: 0.05
     :return: A DataFrame of enrchment results, only if call ``enrichr`` inside python console.
     """
+    try:
+        os.makedirs(outdir)
+    except OSError as exc:
+        if exc.errno != errno.EEXIST:
+            raise exc
+        pass
+
+    logging = log_init(outdir, module='enrichr')
     if isinstance(gene_list, list):
         genes = [str(gene) for gene in gene_list]
         genes_str = '\n'.join(genes)
@@ -95,17 +96,17 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='gseapy_out', cutoff
     #library validaty confirmationi
     gene_set = str(gene_sets)  
     
-    enrichr_library = get_libary_name()
+    logging.info("Connecting to Enrichr Server to get latest library names")
+    enrichr_library = get_library_name()
     
     while gene_set not in enrichr_library:
-        print("You have choose a invalidity library, Please enter a worked one here!!!\n" )
-        print(enrichr_library,"\n")
+        logging.error("%s is a invalid library name, Please enter a new one here!!!\n"%gene_set)
+        logging.info("Use get_library_name() to veiw full list of supported names")
         gene_set = str(input())
-    ## Print options
-    #print('Enrichr API : Input file is:', genelist)
-    print('Enrichr API : Analysis name: ', description)
-    print('Enrichr API : Enrichr Library: ', gene_set)
-    #print('Enrichr API : Enrichr Results File: ', enrichr_results)
+    ## logging.debug options
+    #logging.debug('Enrichr API : Input file is:', genelist)
+    logging.info('Analysis name: %s Enrichr Library: %s'%(description, gene_set))
+    #logging.('Enrichr API : Enrichr Results File: ', enrichr_results)
 
 
     ## enrichr url
@@ -126,7 +127,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='gseapy_out', cutoff
 
     job_id = json.loads(response.text)
 
-    print('Enrichr API : Job ID:', job_id)
+    logging.debug('Job ID:'+ str(job_id))
     
     ENRICHR_URL_A = 'http://amp.pharm.mssm.edu/Enrichr/view?userListId=%s'
 
@@ -136,7 +137,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='gseapy_out', cutoff
     if not response_gene_list.ok:
         raise Exception('Error getting gene list')
 
-    print('Enrichr API : Submitted gene list:', job_id)
+    logging.info('Submitted gene list:' + str(job_id))
 
 
     # Get enrichment results
@@ -151,7 +152,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='gseapy_out', cutoff
     if not response.ok:
         raise Exception('Error fetching enrichment results')
 
-    print('Enrichr API : Get enrichment results: Job Id:', job_id)
+    logging.info('Get enrichment results: Job Id:'+ str(job_id))
 
 
     ## Download file of enrichment results
@@ -163,21 +164,15 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='gseapy_out', cutoff
     url = ENRICHR_URL + query_string % (user_list_id, outfile, gene_set)
     response = requests.get(url, stream=True)
 
-    print('Enrichr API : Downloading file of enrichment results: Job Id:', job_id)
+    logging.debug('Downloading file of enrichment results: Job Id:'+ str(job_id))
 
-    try:
-        os.makedirs(outdir)
-    except OSError as exc:
-        if exc.errno != errno.EEXIST:
-            raise exc
-        pass
 	
     with open(outdir+'/'+ outfile + description + '.txt', 'wb') as f:
         for chunk in response.iter_content(chunk_size=1024):
             if chunk:
                 f.write(chunk)
 
-    print('Enrichr API : Results written to:', outfile + description + ".txt")
+    logging.debug('Results written to: ' + outfile + description + ".txt")
 
     df =  read_table(outdir+'/'+ outfile + description + '.txt')
     fig = dotplot(df, cutoff=cutoff, figsize=figsize)
@@ -186,12 +181,12 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='gseapy_out', cutoff
 		
     # convinient for viewing results inside python console. 
     if isinstance(gene_list, list):
-        print("Enrichr API : You are seeing this message, because you are inside python console.\n"+\
-              "Enrichr API : It will return a pandas dataframe for veiwing results."  )
-        print("Enrichr API : Done")
+        logging.info("Enrichr API : You are seeing this message, because you are inside python console.\n"+\
+                      "Enrichr API : It will return a pandas dataframe for veiwing results."  )
+        logging.info("Enrichr API : Job Done!")
 
         return df
         
-    print("Enrichr API : Done")
+    logging.info("Enrichr API : Job Done!")
 
     

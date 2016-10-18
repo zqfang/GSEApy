@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, division
+from __future__ import  division
 from functools import reduce
 
-import time
 import numpy as np
-import sys
+import sys, logging
 import multiprocessing
 import itertools
 
@@ -191,7 +190,7 @@ def ranking_metric(df, method, phenoPos, phenoNeg, classes, ascending):
     elif method == 'log2_ratio_of_classes':
         sr  =  np.log2(df_mean[A] / df_mean[B])
     else:
-        print("Please provide correct method name!!!")        
+        logging.error("Please provide correct method name!!!")        
         sys.exit()
     sr.sort_values(ascending=ascending, inplace=True)
     df3 = sr.to_frame().reset_index()
@@ -234,8 +233,8 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
         r2 = ranking_metric(df=dat, method=method, phenoPos=phenoPos, phenoNeg=phenoNeg, classes=classes, ascending=ascending)
     ranking=r2['rank'].values
     gene_list=r2['gene_name']
-        
-    print("Start to compute enrichment socres......................", time.ctime())
+       
+    logging.info("Start to compute enrichment socres......................")
 
     rank_ES = []
     hit_ind = []    
@@ -246,8 +245,8 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
         rank_ES.append(RES)
         hit_ind.append(ind)
            
-    print("Start to compute esnulls................................", time.ctime())
-    print("......This step might take a while to run. Be patient...")
+    logging.debug("Start to compute esnulls...............................")
+    logging.info("Statistial testing might take a while to run...........")
 
     enrichment_nulls = [ [] for a in range(len(subsets)) ]
     rs = np.random.RandomState(seed)
@@ -363,8 +362,8 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
         NES(S,pi) >= 0, whose NES(S,pi) >= NES*, divided by the percentage of
         observed S wih NES(S) >= 0, whose NES(S) >= NES*, and similarly if NES(S) = NES* <= 0.
     """
-    
-    print("Start to compute pvals..................................", time.ctime())
+
+    logging.debug("Start to compute pvals..................................")
     
     #enrichmentPVals = []
     
@@ -407,6 +406,8 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
 
 
     #compute normalized enrichment score and normalized esnull
+    logging.debug("Compute normalized enrichment score and normalized esnull")
+                   
     try:
         condlist1 = [ es >= 0, es < 0]
         choicelist1 = [ es/esnull_meanPos, -es/esnull_meanNeg ]
@@ -420,8 +421,8 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
         nEnrichmentScores = np.repeat(0.0, es.size).tolist()
         nEnrichmentNulls = np.repeat(0.0 , es.size).reshape(esnull.shape).tolist()
     
-            
-    print("start to compute fdrs...................................", time.ctime())
+           
+    logging.debug("start to compute fdrs..................................")
 
     #FDR computation
     #create a histogram of all NES(S,pi) over all S and pi
@@ -468,7 +469,7 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
         except:
             fdrs.append(1000000000.0)
 
-    print("Statistial testing finished.............................", time.ctime())
+    logging.info("Statistial testing finished.............................")
 
     return zip(enrichment_scores, nEnrichmentScores, enrichmentPVals, fdrs)
 '''

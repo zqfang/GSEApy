@@ -2,7 +2,7 @@
 
 import __main__ as main
 import numpy as np
-
+import logging
 from matplotlib.colors import Normalize
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -220,7 +220,7 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
     df = df[df['Adjusted P-value'] <= cutoff]
     
     if len(df) < 1:
-        print("No enrich terms when cuttoff = %s"%cutoff )
+        logging.warning("Warning: No enrich terms when cuttoff = %s"%cutoff )
         return None
     #sorting the dataframe for better visualization
     df = df.sort_values(by='Adjusted P-value', ascending=False)
@@ -236,10 +236,12 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
     
     #creat scatter plot
     if hasattr(main, '__file__'):
+	#If working on commandline, don't show figure
         fig = Figure(figsize=figsize)
         canvas = FigureCanvas(fig)
         ax = fig.add_subplot(111)
     else:
+	    #working inside python console, show figure
         fig, ax = plt.subplots(figsize=figsize)
     vmin = np.percentile(padj.min(), 2)
     vmax =  np.percentile(padj.max(), 98)        
