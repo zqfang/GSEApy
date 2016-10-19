@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import __main__ as main
+
 import numpy as np
-import logging
+import logging, sys
 from matplotlib.colors import Normalize
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -235,7 +235,7 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
     area = np.pi * (df['hits_ratio'] *50) **2 
     
     #creat scatter plot
-    if hasattr(main, '__file__'):
+    if hasattr(sys, 'ps1'):
 	#If working on commandline, don't show figure
         fig = Figure(figsize=figsize)
         canvas = FigureCanvas(fig)

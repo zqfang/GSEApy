@@ -5,7 +5,7 @@
 import sys, os, errno, json, requests, logging
 from pandas import read_table
 from .plot import dotplot
-from .__main__ import log_init
+
 default_gene_set_libraries = [
     'GO_Biological_Process_2015',
     "ChEA_2015",
@@ -26,6 +26,23 @@ default_gene_set_libraries = [
     "Reactome_2016",
     "BioCarta_2016",
     "NCI-Nature_2016"]
+
+def log_init(outdir, module='foo'):
+    logging.basicConfig(
+                level    = logging.DEBUG,
+                format   = 'LINE %(lineno)-4d: %(asctime)s [%(levelname)-8s] %(message)s',
+                filename = outdir + "/gseapy."+module+".log",
+                filemode = 'w')
+    # define a Handler which writes INFO messages or higher to the sys.stderr
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    # set a format which is simpler for console use
+    formatter = logging.Formatter('%(asctime)s %(message)s')
+    # tell the handler to use this format
+    console.setFormatter(formatter)
+    logging.getLogger('').addHandler(console)
+
+    return logging
 
 
 def get_library_name():
@@ -180,10 +197,16 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='gseapy_out', cutoff
         fig.savefig(outdir+'/'+"enrichr.reports.%s"%format, bbox_inches='tight', dpi=300)
 		
     # convinient for viewing results inside python console. 
-    if isinstance(gene_list, list):
+    #if isinstance(gene_list, list):
+    if hasattr(sys, 'ps1'):
         logging.info("Enrichr API : You are seeing this message, because you are inside python console.\n"+\
                       "Enrichr API : It will return a pandas dataframe for veiwing results."  )
         logging.info("Enrichr API : Job Done!")
+        logg = logging.getLogger('')
+        hds = logger.handlers
+        for hd in hds:
+            hd.stream.close()
+            logg.removeHandler(hd)
 
         return df
         

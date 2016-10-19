@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import  absolute_import, division
 
-import __main__ as main
+
 import os,sys,errno, logging
 from .parser import gsea_edb_parser, gsea_rank_metric, gsea_gmt_parser, gsea_cls_parser
 from .algorithm import enrichment_score, gsea_compute, preprocess, ranking_metric
 from .plot import gsea_plot, heatmap
 from collections import OrderedDict
-from .__main__ import log_init
+from .enrichr import log_init
 import pandas as pd
 
 
@@ -35,7 +35,7 @@ def replot(indir, outdir='gseapy_out', weight=1, figsize=[6.5,6], format='png', 
         if exc.errno != errno.EEXIST:
             raise exc
         pass    
-    logging = log_init(outdir, module='replot')
+    logger = log_init(outdir, module='replot')
     import glob
     from bs4 import BeautifulSoup
     
@@ -79,6 +79,14 @@ def replot(indir, outdir='gseapy_out', weight=1, figsize=[6.5,6], format='png', 
             f.write("%s = %s\n"%(item[0],item[1]))        
     logging.info("Congratulations! Your plots have been reproduced successfully!")
 
+    if hasattr(sys, 'ps1'):
+        logg = logging.getLogger('')
+        hds = logg.handlers
+        for hd in hds:
+            hd.stream.close()
+            logg.removeHandler(hd)
+        return 
+        
 def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, permutation_n=1000, weighted_score_type=1,
         permutation_type='gene_set', method='log2_ratio_of_classes', ascending=False, figsize=[6.5,6], format='png', 
         graph_num=20, seed=None):
@@ -149,7 +157,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
             raise exc
         pass
 
-    logging = log_init(outdir, module='call')
+    logger = log_init(outdir, module='call')
 
     if isinstance(data, pd.DataFrame) :
         df = data.copy()
@@ -225,7 +233,12 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
     
 	# return dataframe if run gsea inside python console
     #if isinstance(data, pd.DataFrame) or isinstance(cls, list):
-    if hasattr(main, '__file__'):
+    if hasattr(sys, 'ps1'):
+        logg = logging.getLogger('')
+        hds = logg.handlers
+        for hd in hds:
+            hd.stream.close()
+            logg.removeHandler(hd)       
         return res_df 
 
 def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg',
@@ -265,7 +278,7 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
         if exc.errno != errno.EEXIST:
             raise exc
         pass
-    logging = log_init(outdir, module='prerank')
+    logger = log_init(outdir, module='prerank')
     if isinstance(rnk, pd.DataFrame) :       
         argument['rnk'] = 'DataFrame'
 
@@ -326,5 +339,10 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
     
 	# return dataframe if run gsea inside python console
     #if isinstance(rnk, pd.DataFrame):
-    if hasattr(main, '__file__'):
+    if hasattr(sys, 'ps1'):
+        logg = logging.getLogger('')
+        hds = logg.handlers
+        for hd in hds:
+            hd.stream.close()
+            logg.removeHandler(hd)
         return res_df 
