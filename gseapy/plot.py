@@ -64,11 +64,15 @@ def heatmap(df, term, outdir, axis=0, figsize=(5,5), format='png'):
     nx, ny = df.T.shape
     xticks = np.arange(0, nx, 1) + .5
     yticks = np.arange(0, ny, 1) + .5
-    
 
-    fig = Figure(figsize=figsize)
-    canvas = FigureCanvas(fig)
-    ax = fig.add_subplot(111)        
+    if hasattr(sys, 'ps1'):
+        #working inside python console, show figure
+        fig, ax = plt.subplots(figsize=figsize)
+    else:
+        #If working on commandline, don't show figure
+        fig = Figure(figsize=figsize)
+        canvas = FigureCanvas(fig)
+        ax = fig.add_subplot(111)        
     vmin = np.percentile(df.min(), 2)
     vmax =  np.percentile(df.max(), 98)
     matrix = ax.pcolormesh(df.values, cmap=plt.cm.RdBu_r, vmin=vmin, vmax=vmax)
@@ -236,13 +240,13 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
     
     #creat scatter plot
     if hasattr(sys, 'ps1'):
-	#If working on commandline, don't show figure
+        #working inside python console, show figure
+        fig, ax = plt.subplots(figsize=figsize)
+    else:
+        #If working on commandline, don't show figure
         fig = Figure(figsize=figsize)
         canvas = FigureCanvas(fig)
         ax = fig.add_subplot(111)
-    else:
-	    #working inside python console, show figure
-        fig, ax = plt.subplots(figsize=figsize)
     vmin = np.percentile(padj.min(), 2)
     vmax =  np.percentile(padj.max(), 98)        
     sc = ax.scatter(x=x, y=y, s=area, edgecolors='face', c = padj,  

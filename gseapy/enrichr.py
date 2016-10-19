@@ -31,8 +31,11 @@ def log_init(outdir, module='foo'):
     logging.basicConfig(
                 level    = logging.DEBUG,
                 format   = 'LINE %(lineno)-4d: %(asctime)s [%(levelname)-8s] %(message)s',
-                filename = outdir + "/gseapy."+module+".log",
+                filename = "%s/gseapy.%s.log"%(outdir, module),
                 filemode = 'w')
+    logger = logging.getLogger(__name__)
+    #logger.setLevel(logging.DEBUG)
+
     # define a Handler which writes INFO messages or higher to the sys.stderr
     console = logging.StreamHandler()
     console.setLevel(logging.INFO)
@@ -40,9 +43,9 @@ def log_init(outdir, module='foo'):
     formatter = logging.Formatter('%(asctime)s %(message)s')
     # tell the handler to use this format
     console.setFormatter(formatter)
-    logging.getLogger('').addHandler(console)
-
-    return logging
+    logger.addHandler(console)
+    #if you want information print to the console, uisng logger.info....
+    return logger
 
 
 def get_library_name():
@@ -96,7 +99,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='gseapy_out', cutoff
             raise exc
         pass
 
-    logging = log_init(outdir, module='enrichr')
+    logger = log_init(outdir, module='enrichr')
     if isinstance(gene_list, list):
         genes = [str(gene) for gene in gene_list]
         genes_str = '\n'.join(genes)
@@ -117,8 +120,8 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='gseapy_out', cutoff
     enrichr_library = get_library_name()
     
     while gene_set not in enrichr_library:
-        logging.error("%s is a invalid library name, Please enter a new one here!!!\n"%gene_set)
-        logging.info("Use get_library_name() to veiw full list of supported names")
+        logger.error("%s is a invalid library name, Please enter a new one here!!!\n"%gene_set)
+        logger.info("Use get_library_name() to veiw full list of supported names")
         gene_set = str(input())
     ## logging.debug options
     #logging.debug('Enrichr API : Input file is:', genelist)
@@ -154,7 +157,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='gseapy_out', cutoff
     if not response_gene_list.ok:
         raise Exception('Error getting gene list')
 
-    logging.info('Submitted gene list:' + str(job_id))
+    logger.info('Submitted gene list:' + str(job_id))
 
 
     # Get enrichment results
@@ -169,7 +172,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='gseapy_out', cutoff
     if not response.ok:
         raise Exception('Error fetching enrichment results')
 
-    logging.info('Get enrichment results: Job Id:'+ str(job_id))
+    logger.info('Get enrichment results: Job Id:'+ str(job_id))
 
 
     ## Download file of enrichment results
@@ -199,14 +202,14 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='gseapy_out', cutoff
     # convinient for viewing results inside python console. 
     #if isinstance(gene_list, list):
     if hasattr(sys, 'ps1'):
-        logging.info("Enrichr API : You are seeing this message, because you are inside python console.\n"+\
+        logger.info("Enrichr API : You are seeing this message, because you are inside python console.\n"+\
                       "Enrichr API : It will return a pandas dataframe for veiwing results."  )
-        logging.info("Enrichr API : Job Done!")
-        logg = logging.getLogger('')
-        hds = logger.handlers
-        for hd in hds:
-            hd.stream.close()
-            logg.removeHandler(hd)
+        logger.info("Enrichr API : Job Done!")
+
+        handlers = logger.handlers[:]
+        for handler in handlers:
+            handler.close()
+            logger.removeHandler(handler)
 
         return df
         

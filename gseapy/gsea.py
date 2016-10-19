@@ -47,7 +47,7 @@ def replot(indir, outdir='gseapy_out', weight=1, figsize=[6.5,6], format='png', 
     file_list = [results_path, rank_path, gene_set_path, cls_path]      
     for file in file_list: 
         if not os.path.isfile(file):
-            logging.error("Incorrect Input %s !" %file)
+            logger.error("Incorrect Input %s !" %file)
             sys.exit(1)    
     #extract sample names from .cls file
     phenoPos, phenoNeg, classes = gsea_cls_parser(cls_path)  
@@ -77,14 +77,13 @@ def replot(indir, outdir='gseapy_out', weight=1, figsize=[6.5,6], format='png', 
         argument = OrderedDict(sorted(argument.items(),key = lambda t:t[0]))
         for item in argument.items():        
             f.write("%s = %s\n"%(item[0],item[1]))        
-    logging.info("Congratulations! Your plots have been reproduced successfully!")
+    logger.info("Congratulations! Your plots have been reproduced successfully!")
 
     if hasattr(sys, 'ps1'):
-        logg = logging.getLogger('')
-        hds = logg.handlers
-        for hd in hds:
-            hd.stream.close()
-            logg.removeHandler(hd)
+        handlers = logger.handlers[:]
+        for handler in handlers:
+            handler.close()
+            logger.removeHandler(handler)
         return 
         
 def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, permutation_n=1000, weighted_score_type=1,
@@ -169,7 +168,8 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
         sys.exit(1)
    
     assert len(df) > 1   
-    
+
+    logger.info("Parsing data files.....................................")     
     #select correct expression genes and values.
     dat = preprocess(df)
     
@@ -181,7 +181,8 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
     
     #filtering out gene sets and build gene sets dictionary
     gmt = gsea_gmt_parser(gene_sets, min_size=min_size, max_size=max_size,gene_list=dat2['gene_name'].values)
-    
+
+    logger.info("Star to run GSEA...Might take a wihle to run...........")   
     #compute ES, NES, pval, FDR, RES
     results,hit_ind,rank_ES, subsets = gsea_compute(data=dat, n=permutation_n,gmt=gmt, weighted_score_type=weighted_score_type,
                                                     permutation_type=permutation_type, method=method,
@@ -209,7 +210,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
     res_df.drop(['rank_ES','hit_index'], axis=1, inplace=True)
     res_df.to_csv('{a}/{b}.{c}.gsea.reports.csv'.format(a=outdir, b='gseapy', c=permutation_type), float_format ='%.7f')
     
-    logging.info("Start to generate gseapy reports, and produce figures...")
+    logger.info("Start to generate gseapy reports, and produce figures...")
 
     #Plotting
     top_term = res_df.head(graph_num).index
@@ -229,16 +230,15 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
         argument = OrderedDict(sorted(argument.items(), key=lambda t:t[0]))
         for item in argument.items():        
             f.write("%s = %s\n"%(item[0],item[1]))   
-    logging.info("Congratulations. GSEAPY run successfully...............")
+    logger.info("Congratulations. GSEAPY run successfully...............")
     
 	# return dataframe if run gsea inside python console
     #if isinstance(data, pd.DataFrame) or isinstance(cls, list):
     if hasattr(sys, 'ps1'):
-        logg = logging.getLogger('')
-        hds = logg.handlers
-        for hd in hds:
-            hd.stream.close()
-            logg.removeHandler(hd)       
+        handlers = logger.handlers[:]
+        for handler in handlers:
+            handler.close()
+            logger.removeHandler(handler)     
         return res_df 
 
 def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg',
@@ -281,7 +281,8 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
     logger = log_init(outdir, module='prerank')
     if isinstance(rnk, pd.DataFrame) :       
         argument['rnk'] = 'DataFrame'
-
+        
+    logger.info("Parsing data files.....................................") 
     dat2 = gsea_rank_metric(rnk)
     assert len(dat2) > 1
     #drop duplicates in ranking metrics. 
@@ -291,12 +292,13 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
     #filtering out gene sets and build gene sets dictionary
     gmt = gsea_gmt_parser(gene_sets, min_size=min_size, max_size=max_size, gene_list=dat2['gene_name'].values)
     
+    logger.info("Star to run GSEA...Might take a wihle to run...........") 
     #compute ES, NES, pval, FDR, RES
     results,hit_ind,rank_ES, subsets = gsea_compute(data=dat2, n=permutation_n, gmt=gmt, weighted_score_type=weighted_score_type,
                                                     permutation_type='gene_set', method=None, phenoPos=pheno_pos, phenoNeg=pheno_neg,
                                                     classes=None, ascending=ascending, seed=seed, prerank=True)
    
-    logging.info("Start to generate gseapy reports, and produce figures...")
+    logger.info("Start to generate gseapy reports, and produce figures...")
     
     res = OrderedDict()
     for gs,gseale,ind,RES in zip(subsets, list(results), hit_ind, rank_ES):        
@@ -334,15 +336,14 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
         argument = OrderedDict(sorted(argument.items(),key = lambda t:t[0]))
         for item in argument.items():        
             f.write("%s = %s\n"%(item[0], item[1]))   
-    logging.info("Congratulations...GSEAPY run successfully...............")
+    logger.info("Congratulations...GSEAPY run successfully...............")
     
     
 	# return dataframe if run gsea inside python console
     #if isinstance(rnk, pd.DataFrame):
     if hasattr(sys, 'ps1'):
-        logg = logging.getLogger('')
-        hds = logg.handlers
-        for hd in hds:
-            hd.stream.close()
-            logg.removeHandler(hd)
+        handlers = logger.handlers[:]
+        for handler in handlers:
+            handler.close()
+            logger.removeHandler(handler)
         return res_df 
