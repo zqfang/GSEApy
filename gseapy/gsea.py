@@ -182,7 +182,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
     #filtering out gene sets and build gene sets dictionary
     gmt = gsea_gmt_parser(gene_sets, min_size=min_size, max_size=max_size,gene_list=dat2['gene_name'].values)
 
-    logger.info("Star to run GSEA...Might take a wihle to run...........")   
+    logger.info("Star to run GSEA...Might take a while to run...........")   
     #compute ES, NES, pval, FDR, RES
     results,hit_ind,rank_ES, subsets = gsea_compute(data=dat, n=permutation_n,gmt=gmt, weighted_score_type=weighted_score_type,
                                                     permutation_type=permutation_type, method=method,
@@ -292,7 +292,7 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
     #filtering out gene sets and build gene sets dictionary
     gmt = gsea_gmt_parser(gene_sets, min_size=min_size, max_size=max_size, gene_list=dat2['gene_name'].values)
     
-    logger.info("Star to run GSEA...Might take a wihle to run...........") 
+    logger.info("Star to run GSEA...Might take a while to run...........") 
     #compute ES, NES, pval, FDR, RES
     results,hit_ind,rank_ES, subsets = gsea_compute(data=dat2, n=permutation_n, gmt=gmt, weighted_score_type=weighted_score_type,
                                                     permutation_type='gene_set', method=None, phenoPos=pheno_pos, phenoNeg=pheno_neg,
