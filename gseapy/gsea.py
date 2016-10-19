@@ -149,6 +149,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
     """
     argument = locals()
     assert permutation_type in ["phenotype", "gene_set"]
+    assert min_size <= max_size
     try:
         os.makedirs(outdir)
     except OSError as exc:
@@ -167,9 +168,9 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
         raise Exception('Error parsing gene expression dataframe!')
         sys.exit(1)
    
-    assert len(df) > 1   
+    assert len(df) > 1
 
-    logger.info("Parsing data files.....................................")     
+    logger.info("Parsing data files......................................")     
     #select correct expression genes and values.
     dat = preprocess(df)
     
@@ -181,14 +182,15 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
     
     #filtering out gene sets and build gene sets dictionary
     gmt = gsea_gmt_parser(gene_sets, min_size=min_size, max_size=max_size,gene_list=dat2['gene_name'].values)
+    logger.info("%s gene_sets used for further statistical testing....."% len(gmt))
 
-    logger.info("Star to run GSEA...Might take a while to run...........")   
+    logger.info("Starr to run GSEA...Might take a while..................")   
     #compute ES, NES, pval, FDR, RES
     results,hit_ind,rank_ES, subsets = gsea_compute(data=dat, n=permutation_n,gmt=gmt, weighted_score_type=weighted_score_type,
                                                     permutation_type=permutation_type, method=method,
                                                     phenoPos=phenoPos, phenoNeg=phenoNeg, classes=classes, ascending=ascending,
                                                     seed=seed)
-
+    logger.info("Start to generate gseapy reports, and produce figures...")
     res = OrderedDict()
     for gs,gseale,ind,RES in zip(subsets, list(results), hit_ind, rank_ES):        
         rdict = OrderedDict()      
@@ -210,7 +212,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
     res_df.drop(['rank_ES','hit_index'], axis=1, inplace=True)
     res_df.to_csv('{a}/{b}.{c}.gsea.reports.csv'.format(a=outdir, b='gseapy', c=permutation_type), float_format ='%.7f')
     
-    logger.info("Start to generate gseapy reports, and produce figures...")
+
 
     #Plotting
     top_term = res_df.head(graph_num).index
@@ -272,6 +274,7 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
     
     """
     argument = locals()
+    assert min_size <= max_size
     try:
         os.makedirs(outdir)
     except OSError as exc:
@@ -282,17 +285,15 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
     if isinstance(rnk, pd.DataFrame) :       
         argument['rnk'] = 'DataFrame'
         
-    logger.info("Parsing data files.....................................") 
+    logger.info("Parsing data files......................................") 
     dat2 = gsea_rank_metric(rnk)
     assert len(dat2) > 1
     #drop duplicates in ranking metrics. 
-    dat2.drop_duplicates(subset='gene_name',inplace=True, keep='first')
-    assert len(dat2) > 1            
-    
+    dat2.drop_duplicates(subset='gene_name',inplace=True, keep='first')   
     #filtering out gene sets and build gene sets dictionary
     gmt = gsea_gmt_parser(gene_sets, min_size=min_size, max_size=max_size, gene_list=dat2['gene_name'].values)
-    
-    logger.info("Star to run GSEA...Might take a while to run...........") 
+    logger.info("%s gene_sets used for further statistical testing....."% len(gmt))   
+    logger.info("Start to run GSEA...Might take a while..................") 
     #compute ES, NES, pval, FDR, RES
     results,hit_ind,rank_ES, subsets = gsea_compute(data=dat2, n=permutation_n, gmt=gmt, weighted_score_type=weighted_score_type,
                                                     permutation_type='gene_set', method=None, phenoPos=pheno_pos, phenoNeg=pheno_neg,

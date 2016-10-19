@@ -145,7 +145,7 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
     elif sys.version_info[0] == 2:
         genesets_filter =  {k: v for k, v in genesets_dict.iteritems() if len(v) >= min_size and len(v) <= max_size}
     else:
-        loging.debug("System failure. Please Provide correct input files")
+        logging.error("System failure. Please Provide correct input files")
         sys.exit(1)    
     if gene_list is not None:
         subsets = sorted(genesets_filter.keys())             
@@ -160,7 +160,6 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
     #use np.intersect1d() may be faster???    
     filsets_num = len(genesets_dict) - len(genesets_filter)
     logging.info("{a} gene_sets have been filtered out when max_size={b} and min_size={c}".format(a=filsets_num,b=max_size,c=min_size))
-    logging.info("{} gene_sets used for further calculating".format(len(genesets_filter)))
     
     if filsets_num == len(genesets_dict):
         logging.error("No gene sets passed throught filtering condition!!!, try new paramters again!\n" +\

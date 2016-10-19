@@ -116,7 +116,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='gseapy_out', cutoff
     #library validaty confirmationi
     gene_set = str(gene_sets)  
     
-    logging.info("Connecting to Enrichr Server to get latest library names")
+    logger.info("Connecting to Enrichr Server to get latest library names")
     enrichr_library = get_library_name()
     
     while gene_set not in enrichr_library:
@@ -125,7 +125,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='gseapy_out', cutoff
         gene_set = str(input())
     ## logging.debug options
     #logging.debug('Enrichr API : Input file is:', genelist)
-    logging.info('Analysis name: %s Enrichr Library: %s'%(description, gene_set))
+    logger.info('Analysis name: %s Enrichr Library: %s'%(description, gene_set))
     #logging.('Enrichr API : Enrichr Results File: ', enrichr_results)
 
 
@@ -157,7 +157,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='gseapy_out', cutoff
     if not response_gene_list.ok:
         raise Exception('Error getting gene list')
 
-    logger.info('Submitted gene list:' + str(job_id))
+    logging.info('Submitted gene list:' + str(job_id))
 
 
     # Get enrichment results
@@ -172,7 +172,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='gseapy_out', cutoff
     if not response.ok:
         raise Exception('Error fetching enrichment results')
 
-    logger.info('Get enrichment results: Job Id:'+ str(job_id))
+    logging.debug('Get enrichment results: Job Id:'+ str(job_id))
 
 
     ## Download file of enrichment results
@@ -184,7 +184,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='gseapy_out', cutoff
     url = ENRICHR_URL + query_string % (user_list_id, outfile, gene_set)
     response = requests.get(url, stream=True)
 
-    logging.debug('Downloading file of enrichment results: Job Id:'+ str(job_id))
+    logger.info('Downloading file of enrichment results: Job Id:'+ str(job_id))
 
 	
     with open(outdir+'/'+ outfile + description + '.txt', 'wb') as f:
@@ -202,9 +202,9 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='gseapy_out', cutoff
     # convinient for viewing results inside python console. 
     #if isinstance(gene_list, list):
     if hasattr(sys, 'ps1'):
-        logger.info("Enrichr API : You are seeing this message, because you are inside python console.\n"+\
-                      "Enrichr API : It will return a pandas dataframe for veiwing results."  )
-        logger.info("Enrichr API : Job Done!")
+        logger.info("Enrichr: You are seeing this message, because you are inside python console.\n"+\
+                      "Enrichr: It will return a pandas dataframe for veiwing results."  )
+        logger.info("Enrichr: Job Done!")
 
         handlers = logger.handlers[:]
         for handler in handlers:
@@ -213,6 +213,6 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='gseapy_out', cutoff
 
         return df
         
-    logging.info("Enrichr API : Job Done!")
+    logging.info("Enrichr: Job Done!")
 
     
