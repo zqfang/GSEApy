@@ -183,8 +183,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='gseapy_out', cutoff
     # convinient for viewing results inside python console. 
     #if isinstance(gene_list, list):
     if hasattr(sys, 'ps1'):
-        logger.info("Enrichr: You are seeing this message, because you are inside python console.")
-        logger.info("Enrichr: It will return a pandas dataframe for veiwing results.")
+        logger.info("Enrichr: You are inside python console, a dataframe is returned.")
         logger.info("Enrichr: Job Done!")
 
         handlers = logger.handlers[:]

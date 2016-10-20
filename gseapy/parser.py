@@ -74,7 +74,7 @@ def gsea_edb_parser(results_path, index=0):
     fdr =  term.get('FDR')
     #fwer = term.get('FWER')   
     #index_range = len(tag)-1
-    logging.debug("Enriched Gene set is: ", enrich_term)
+    logging.debug("Enriched Gene set is: "+ enrich_term)
 
     return enrich_term, hit_ind, nes, pval, fdr
     
