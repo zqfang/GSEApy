@@ -76,9 +76,9 @@ This is an example of GSEA desktop application output
 
 
 
-GSEAPY ``replot`` module output
+GSEAPY ``Prerank`` module output
 -----------------------------------------------
-Using the same algorithm by ``GSEA``, GSEAPY reproduce the example above.
+Using the same data from ``GSEA``, GSEAPY reproduce the example above.
 
 .. figure:: docs/gseapy_OCT4_KD.png
 
@@ -287,7 +287,7 @@ For a full list of enrchr libary name :
    'Reactome_2013',
    'WikiPathways_2013',
    'Disease_Signatures_from_GEO_up_2014',
-   'KEGG_2013',
+   'KEGG_2016',
    'TF-LOF_Expression_from_GEO',
    'TargetScan_microRNA',
    'PPI_Hub_Proteins',

@@ -121,7 +121,7 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
              genesets_dict = { line.strip("\n").split("\t")[0]: line.strip("\n").split("\t")[2:] 
                               for line in genesets.readlines()}    
     else:
-        logging.info("Downloading and generating Enrichr library gene sets..............") 
+        logging.info("Downloading and generating Enrichr library gene sets...") 
         names = get_library_name()
         if gmt in names:
             import requests
@@ -145,7 +145,7 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
     elif sys.version_info[0] == 2:
         genesets_filter =  {k: v for k, v in genesets_dict.iteritems() if len(v) >= min_size and len(v) <= max_size}
     else:
-        logging.error("System failure. Please Provide correct input files")
+        sys.stderr.write("System failure. Please Provide correct input files")
         sys.exit(1)    
     if gene_list is not None:
         subsets = sorted(genesets_filter.keys())             
@@ -162,8 +162,8 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
     logging.info("{a} gene_sets have been filtered out when max_size={b} and min_size={c}".format(a=filsets_num,b=max_size,c=min_size))
     
     if filsets_num == len(genesets_dict):
-        logging.error("No gene sets passed throught filtering condition!!!, try new paramters again!\n" +\
-                      "Note: Gene names for gseapy is case sensitive." )
+        sys.stderr.write("No gene sets passed throught filtering condition!!!, try new paramters again!\n" +\
+                         "Note: Gene names for gseapy is case sensitive." )
         sys.exit(1)
     else:
         return genesets_filter

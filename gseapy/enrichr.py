@@ -5,6 +5,7 @@
 import sys, os, errno, json, requests, logging
 from pandas import read_table
 from .plot import dotplot
+from .__main__ import log_init
 
 default_gene_set_libraries = [
     'GO_Biological_Process_2015',
@@ -27,26 +28,6 @@ default_gene_set_libraries = [
     "BioCarta_2016",
     "NCI-Nature_2016"]
 
-def log_init(outdir, module='foo'):
-    logging.basicConfig(
-                level    = logging.DEBUG,
-                format   = 'LINE %(lineno)-4d: %(asctime)s [%(levelname)-8s] %(message)s',
-                filename = "%s/gseapy.%s.log"%(outdir, module),
-                filemode = 'w')
-    logger = logging.getLogger(__name__)
-    #logger.setLevel(logging.DEBUG)
-
-    # define a Handler which writes INFO messages or higher to the sys.stderr
-    console = logging.StreamHandler()
-    console.setLevel(logging.INFO)
-    # set a format which is simpler for console use
-    formatter = logging.Formatter('%(asctime)s %(message)s')
-    # tell the handler to use this format
-    console.setFormatter(formatter)
-    logger.addHandler(console)
-    #if you want information print to the console, uisng logger.info....
-    return logger
-
 
 def get_library_name():
     """return enrichr active enrichr library name. """
@@ -66,7 +47,7 @@ def get_library_name():
         response = x.read()
         gmt_data = json.loads(response.decode('utf-8'))
     else:
-        logging.error("System failure. Please Provide correct input files")
+        sys.stderr.write("System failure. Please Provide correct input files")
         sys.exit(1) 
 	# generate list of gmts 
     gmt_names = []
@@ -213,6 +194,6 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='gseapy_out', cutoff
 
         return df
         
-    logging.info("Enrichr: Job Done!")
+    logger.info("Enrichr: Job Done!")
 
     

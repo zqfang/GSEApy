@@ -1,5 +1,5 @@
 
-import sys,logging
+import sys, logging
 import argparse as ap
 
 
@@ -223,7 +223,25 @@ def add_enrichr_parser(subparsers):
 
 
     return
+def log_init(outdir, module='foo'):
+    logging.basicConfig(
+                level    = logging.DEBUG,
+                format   = 'LINE %(lineno)-4d: %(asctime)s [%(levelname)-8s] %(message)s',
+                filename = "%s/gseapy.%s.log"%(outdir, module),
+                filemode = 'w')
+    logger = logging.getLogger(__name__)
+    #logger.setLevel(logging.DEBUG)
 
+    # define a Handler which writes INFO messages or higher to the sys.stderr
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    # set a format which is simpler for console use
+    formatter = logging.Formatter('%(asctime)s %(message)s')
+    # tell the handler to use this format
+    console.setFormatter(formatter)
+    logger.addHandler(console)
+    #if you want information print to the console, uisng logger.info....
+    return logger
 
 if __name__ == '__main__':
     try:

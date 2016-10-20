@@ -1,9 +1,9 @@
 
-GSEAPY Tutorial
-===============
+GSEAPY Example
+==============
 
-Examples to work throught ``GSEA`` and enrichr
-----------------------------------------------
+Examples to walk through ``GSEA`` and enrichr
+---------------------------------------------
 
 1. Load essential packages
 ==========================
@@ -26,20 +26,18 @@ Examples to work throught ``GSEA`` and enrichr
 
 .. parsed-literal::
 
-    '0.7.0'
+    '0.7.2'
 
 
 
-Make plots look pretty
+See all gseapy supported enrichr library names
+==============================================
 
-plt.style.use('ggplot')
-
-See all supported enrichr library names
-=======================================
+Enrichr library could be used for ``call`` and ``prerank``, too
 
 .. code:: python
 
-    names = gp.get_libary_name()
+    names = gp.get_library_name()
     names[:10]
 
 
@@ -125,27 +123,23 @@ i. Assign enrichr with gene list object
 .. code:: python
 
     # run gseapy 
-    enrichr_results = gp.enrichr(gene_list=glist, description='KEGG', gene_sets='KEGG_2016', outdir='enrichr_kegg', cutoff=0.5)
-    # and provide a txt file for enrichr will also work, in this way, no DataFrame will return
-    # enrichr_results = gp.enrichr(gene_list='./gene_list.txt', description='KEGG', gene_sets='KEGG_2016', outdir='enrichr_kegg')
+    enrichr_results = gp.enrichr(gene_list=glist, description='test_name', gene_sets='KEGG_2016', outdir='enrichr_kegg', cutoff=0.5)
+    # and provide a txt file for enrichr will also work
+    #enrichr_results = gp.enrichr(gene_list='./gene_list.txt', description='KEGG', gene_sets='KEGG_2016', outdir='enrichr_kegg')
 
 
 .. parsed-literal::
 
-    Enrichr API : Analysis name:  KEGG
-    Enrichr API : Enrichr Library:  KEGG_2016
-    Enrichr API : Job ID: {'shortId': 'itmz', 'userListId': 1733164}
-    Enrichr API : Submitted gene list: {'shortId': 'itmz', 'userListId': 1733164}
-    Enrichr API : Get enrichment results: Job Id: {'shortId': 'itmz', 'userListId': 1733164}
-    Enrichr API : Downloading file of enrichment results: Job Id: {'shortId': 'itmz', 'userListId': 1733164}
-    Enrichr API : Results written to: enrichr.reports.KEGG.txt
-    Enrichr API : You are seeing this message, because you are inside python console.
-    Enrichr API : It will return a pandas dataframe for veiwing results.
-    Enrichr API : Done
+    2016-10-20 12:45:00,587 Connecting to Enrichr Server to get latest library names
+    2016-10-20 12:45:02,713 Analysis name: test_name Enrichr Library: KEGG_2016
+    2016-10-20 12:45:07,271 Downloading file of enrichment results: Job Id:{'userListId': 1760726, 'shortId': 'jewl'}
+    2016-10-20 12:45:10,722 Enrichr: You are seeing this message, because you are inside python console.
+    Enrichr: It will return a pandas dataframe for veiwing results.
+    2016-10-20 12:45:10,737 Enrichr: Job Done!
     
 
 
-.. image:: output_12_1.png
+.. image:: output_10_1.png
 
 
 .. code:: python
@@ -231,8 +225,6 @@ i. Assign enrichr with gene list object
 
 
 
-Make a bar plot of enrichment results
-
 ii . Commandline usage
 ======================
 
@@ -246,15 +238,10 @@ print return to the console.
 
 .. parsed-literal::
 
-    Enrichr API : Analysis name:  KEGG
-    Enrichr API : Enrichr Library:  KEGG_2016
-    Enrichr API : Job ID: {'userListId': 1733165, 'shortId': 'itn0'}
-    Enrichr API : Submitted gene list: {'userListId': 1733165, 'shortId': 'itn0'}
-    Enrichr API : Get enrichment results: Job Id: {'userListId': 1733165, 'shortId': 'itn0'}
-    Enrichr API : Downloading file of enrichment results: Job Id: {'userListId': 1733165, 'shortId': 'itn0'}
-    Enrichr API : Results written to: enrichr.reports.KEGG.txt
-    No enrich terms when cuttoff = 0.05
-    Enrichr API : Done
+    2016-10-20 12:45:14,716 Connecting to Enrichr Server to get latest library names
+    2016-10-20 12:45:17,106 Analysis name: KEGG Enrichr Library: KEGG_2016
+    2016-10-20 12:45:21,753 Downloading file of enrichment results: Job Id:{'userListId': 1760727, 'shortId': 'jewm'}
+    2016-10-20 12:45:22,628 Enrichr: Job Done!
     
 
 3. Prerank example
@@ -318,28 +305,19 @@ i. Assign prank with a pandas DataFrame
 
     # run prerank
     # enrichr library are supported by prerank module. Just provide the name
-    # you may also provide a gene_sets file in gmt format, just like GSEA do.
-    prerank_results = gp.prerank(rnk=rank, gene_sets='KEGG_2016', outdir='prerank_report')
+    prerank_results = gp.prerank(rnk=rank, gene_sets='./edb/gene_sets.gmt', outdir='prerank_report2')
     
-    # or provide a rnk file will also work, but not DataFrame will return
+    # or give enrichr names
     #prerank_results = gp.prerank(rnk="./edb/gsea_data.gsea_data.rnk",gene_sets='KEGG_2016',outdir='prerank_report')
 
 
 .. parsed-literal::
 
-    Downloading and generating Enrichr library gene sets..............
-    286 gene_sets have been filtered out when max_size=1000 and min_size=15
-    7 gene_sets used for further calculating
-    Start to compute enrichment socres...................... Thu Oct  6 11:04:29 2016
-    Start to compute esnulls................................ Thu Oct  6 11:04:29 2016
-    ......This step might take a while to run. Be patient...
-    Start to compute pvals.................................. Thu Oct  6 11:04:30 2016
-    start to compute fdrs................................... Thu Oct  6 11:04:30 2016
-    Statistial testing finished............................. Thu Oct  6 11:04:30 2016
-    Start to generate gseapy reports, and produce figures... Thu Oct  6 11:04:30 2016
-    Start to generate gseapy reports, and produce figures... Thu Oct  6 11:04:30 2016
-    Congratulations. GSEAPY run successfully................
-    The Job is done.................................Goodbye! Thu Oct  6 11:04:35 2016
+    2016-10-20 12:45:22,900 Parsing data files for GSEA.............................
+    2016-10-20 12:45:22,944 7 gene_sets used for further statistical testing.....
+    2016-10-20 12:45:22,946 Start to run GSEA...Might take a while..................
+    2016-10-20 12:45:24,688 Start to generate gseapy reports, and produce figures...
+    2016-10-20 12:45:29,308 Congratulations...GSEAPY run successfully...............
     
 
 .. code:: python
@@ -375,49 +353,49 @@ i. Assign prank with a pandas DataFrame
       </thead>
       <tbody>
         <tr>
-          <th>Cytokine-cytokine receptor interaction_Homo sapiens_hsa04060</th>
-          <td>0.418234</td>
-          <td>1.571263</td>
-          <td>0.051471</td>
-          <td>0.380873</td>
-          <td>265</td>
-          <td>18</td>
+          <th>ES-SPECIFIC</th>
+          <td>-0.485630</td>
+          <td>-2.487222</td>
+          <td>0.000000</td>
+          <td>0.000000</td>
+          <td>25</td>
+          <td>25</td>
         </tr>
         <tr>
-          <th>Pathways in cancer_Homo sapiens_hsa05200</th>
-          <td>-0.188934</td>
-          <td>-1.008608</td>
-          <td>0.436860</td>
-          <td>0.442786</td>
-          <td>397</td>
-          <td>27</td>
+          <th>OCT4 KD-SPECIFIC</th>
+          <td>0.474139</td>
+          <td>2.486317</td>
+          <td>0.000000</td>
+          <td>0.000000</td>
+          <td>60</td>
+          <td>60</td>
         </tr>
         <tr>
-          <th>HTLV-I infection_Homo sapiens_hsa05166</th>
-          <td>0.338286</td>
-          <td>1.311226</td>
-          <td>0.183183</td>
-          <td>0.522447</td>
-          <td>258</td>
-          <td>19</td>
+          <th>CDX2 OE-SPECIFIC</th>
+          <td>0.505286</td>
+          <td>2.283415</td>
+          <td>0.001379</td>
+          <td>0.000487</td>
+          <td>33</td>
+          <td>33</td>
         </tr>
         <tr>
-          <th>MAPK signaling pathway_Homo sapiens_hsa04010</th>
-          <td>0.179667</td>
-          <td>0.666764</td>
-          <td>0.834320</td>
-          <td>0.839841</td>
-          <td>255</td>
-          <td>18</td>
+          <th>TS-SPECIFIC</th>
+          <td>0.446409</td>
+          <td>2.100429</td>
+          <td>0.002710</td>
+          <td>0.001947</td>
+          <td>39</td>
+          <td>39</td>
         </tr>
         <tr>
-          <th>PI3K-Akt signaling pathway_Homo sapiens_hsa04151</th>
-          <td>0.191372</td>
-          <td>0.765603</td>
-          <td>0.716570</td>
-          <td>0.876509</td>
-          <td>341</td>
-          <td>22</td>
+          <th>GATA3 OE-SPECIFIC</th>
+          <td>0.370833</td>
+          <td>1.751660</td>
+          <td>0.019582</td>
+          <td>0.026280</td>
+          <td>40</td>
+          <td>40</td>
         </tr>
       </tbody>
     </table>
@@ -435,28 +413,18 @@ i. Assign prank with a pandas DataFrame
 
 .. parsed-literal::
 
-    <matplotlib.axes._subplots.AxesSubplot at 0x21dde092518>
+    <matplotlib.axes._subplots.AxesSubplot at 0x2548cb4dbe0>
 
 
 
 
-.. image:: output_22_1.png
+.. image:: output_19_1.png
 
 
-.. code:: python
+ii . Commandline usage
+======================
 
-    # use dotplot
-    fig = gp.dotplot(prerank_results, cutoff=0.5)
-
-
-
-.. image:: output_23_0.png
-
-
-ii . Commanline usage
-=====================
-
-You may also want to use preank in commandline, but not DataFrame will
+You may also want to use prerank in commandline, but not DataFrame will
 print return to the console.
 
 .. code:: python
@@ -466,19 +434,11 @@ print return to the console.
 
 .. parsed-literal::
 
-    Downloading and generating Enrichr library gene sets..............
-    286 gene_sets have been filtered out when max_size=1000 and min_size=15
-    7 gene_sets used for further calculating
-    Start to compute enrichment socres...................... Thu Oct  6 11:11:08 2016
-    Start to compute esnulls................................ Thu Oct  6 11:11:08 2016
-    ......This step might take a while to run. Be patient...
-    Start to compute pvals.................................. Thu Oct  6 11:11:09 2016
-    start to compute fdrs................................... Thu Oct  6 11:11:09 2016
-    Statistial testing finished............................. Thu Oct  6 11:11:09 2016
-    Start to generate gseapy reports, and produce figures... Thu Oct  6 11:11:09 2016
-    Start to generate gseapy reports, and produce figures... Thu Oct  6 11:11:09 2016
-    Congratulations. GSEAPY run successfully................
-    The Job is done.................................Goodbye! Thu Oct  6 11:11:14 2016
+    2016-10-20 12:45:32,976 Parsing data files for GSEA.............................
+    2016-10-20 12:45:41,315 7 gene_sets used for further statistical testing.....
+    2016-10-20 12:45:41,315 Start to run GSEA...Might take a while..................
+    2016-10-20 12:45:42,847 Start to generate gseapy reports, and produce figures...
+    2016-10-20 12:45:48,008 Congratulations...GSEAPY run successfully...............
     
 
 4. Call Example
@@ -672,29 +632,21 @@ and cls with a list object
 .. code:: python
 
     # run call
-    # enrichr library are supported by prerank module. Just provide the name
+    # enrichr library are supported by call module. Just provide the name
     # you may also provide a gene_sets file in gmt format, just like GSEA do.
-    call_results = gp.call(data=gene_exp,gene_sets='KEGG_2016',cls=class_vector,outdir='call_reprot', method='signal_to_noise')
+    call_results = gp.call(data=gene_exp, gene_sets='KEGG_2016', cls=class_vector, outdir='call_reprot', method='signal_to_noise')
     
-    # or provide a rnk file will also work, but not DataFrame will return
+    # or provide a txt file will also work
     #call_results = gp.call(data='./P53_resampling_data.txt',gene_sets='edb/gene_sets.gmt',cls='./P53.cls',outdir='call_reprot',)
-    
 
 
 .. parsed-literal::
 
-    Downloading and generating Enrichr library gene sets..............
-    286 gene_sets have been filtered out when max_size=1000 and min_size=15
-    7 gene_sets used for further calculating
-    Start to compute enrichment socres...................... Thu Oct  6 11:11:37 2016
-    Start to compute esnulls................................ Thu Oct  6 11:11:38 2016
-    ......This step might take a while to run. Be patient...
-    Start to compute pvals.................................. Thu Oct  6 11:11:39 2016
-    start to compute fdrs................................... Thu Oct  6 11:11:39 2016
-    Statistial testing finished............................. Thu Oct  6 11:11:39 2016
-    Start to generate gseapy reports, and produce figures... Thu Oct  6 11:11:39 2016
-    ...Congratulations. GSEAPY run successfully!!!.............
-    ...The Job is done...........................Goodbye!
+    2016-10-20 12:45:48,644 Parsing data files for GSEA.............................
+    2016-10-20 12:45:57,963 7 gene_sets used for further statistical testing.....
+    2016-10-20 12:45:57,963 Start to run GSEA...Might take a while..................
+    2016-10-20 12:45:59,518 Start to generate gseapy reports, and produce figures...
+    2016-10-20 12:46:13,504 Congratulations. GSEAPY run successfully...............
     
 
 .. code:: python
@@ -734,9 +686,9 @@ and cls with a list object
         <tr>
           <th>HTLV-I infection_Homo sapiens_hsa05166</th>
           <td>-0.249752</td>
-          <td>-0.722031</td>
-          <td>0.845070</td>
-          <td>0.847264</td>
+          <td>-0.742833</td>
+          <td>0.828777</td>
+          <td>0.815474</td>
           <td>258</td>
           <td>19</td>
           <td>[FZD2, ETS1, STAT5B, RRAS, LTBR, PPP3CC, TNFRS...</td>
@@ -744,9 +696,9 @@ and cls with a list object
         <tr>
           <th>MAPK signaling pathway_Homo sapiens_hsa04010</th>
           <td>-0.392928</td>
-          <td>-1.142823</td>
-          <td>0.304688</td>
-          <td>0.873115</td>
+          <td>-1.156748</td>
+          <td>0.279346</td>
+          <td>0.831333</td>
           <td>255</td>
           <td>18</td>
           <td>[GADD45B, RRAS, SOS2, FGF17, PPP3CC, TNFRSF1A,...</td>
@@ -754,9 +706,9 @@ and cls with a list object
         <tr>
           <th>PI3K-Akt signaling pathway_Homo sapiens_hsa04151</th>
           <td>0.182245</td>
-          <td>0.630004</td>
-          <td>0.955696</td>
-          <td>0.947837</td>
+          <td>0.645624</td>
+          <td>0.946203</td>
+          <td>0.936590</td>
           <td>341</td>
           <td>22</td>
           <td>[GNG13, VEGFC, GNB4, CSF1, SOS2, FGF17, THBS4,...</td>
@@ -764,9 +716,9 @@ and cls with a list object
         <tr>
           <th>Rap1 signaling pathway_Homo sapiens_hsa04015</th>
           <td>-0.285975</td>
-          <td>-0.835602</td>
-          <td>0.676292</td>
-          <td>1.049224</td>
+          <td>-0.859209</td>
+          <td>0.651772</td>
+          <td>0.994642</td>
           <td>211</td>
           <td>19</td>
           <td>[RRAS, VEGFC, CSF1, FGF17, PDGFRB, FGF4, PDGFC...</td>
@@ -774,9 +726,9 @@ and cls with a list object
         <tr>
           <th>Pathways in cancer_Homo sapiens_hsa05200</th>
           <td>0.201838</td>
-          <td>0.755293</td>
-          <td>0.843450</td>
-          <td>1.095278</td>
+          <td>0.754624</td>
+          <td>0.871166</td>
+          <td>1.111111</td>
           <td>397</td>
           <td>27</td>
           <td>[FZD2, ETS1, STAT5B, GNG13, VEGFC, GNB4, SOS2,...</td>
@@ -795,7 +747,7 @@ and cls with a list object
 
 
 
-.. image:: output_33_0.png
+.. image:: output_29_0.png
 
 
 The **call** module will generate heatmap for genes in each gene sets in
@@ -811,7 +763,7 @@ the backgroud.
 
 
 
-.. image:: output_35_0.png
+.. image:: output_31_0.png
 
 
 
@@ -823,12 +775,12 @@ the backgroud.
 
 
 
-.. image:: output_36_0.png
+.. image:: output_32_0.png
 
 
 
-ii . Commanline usage
-=====================
+ii . Commandline usage
+======================
 
 You may also want to use call in commandline, but not DataFrame will
 print return to the console.
@@ -840,17 +792,10 @@ print return to the console.
 
 .. parsed-literal::
 
-    Downloading and generating Enrichr library gene sets..............
-    286 gene_sets have been filtered out when max_size=1000 and min_size=15
-    7 gene_sets used for further calculating
-    Start to compute enrichment socres...................... Thu Oct  6 11:41:50 2016
-    Start to compute esnulls................................ Thu Oct  6 11:41:50 2016
-    ......This step might take a while to run. Be patient...
-    Start to compute pvals.................................. Thu Oct  6 11:41:51 2016
-    start to compute fdrs................................... Thu Oct  6 11:41:51 2016
-    Statistial testing finished............................. Thu Oct  6 11:41:51 2016
-    Start to generate gseapy reports, and produce figures... Thu Oct  6 11:41:51 2016
-    ...Congratulations. GSEAPY run successfully!!!.............
-    ...The Job is done...........................Goodbye!
+    2016-10-20 12:46:17,176 Parsing data files for GSEA.............................
+    2016-10-20 12:46:23,697 7 gene_sets used for further statistical testing.....
+    2016-10-20 12:46:23,697 Start to run GSEA...Might take a while..................
+    2016-10-20 12:46:25,224 Start to generate gseapy reports, and produce figures...
+    2016-10-20 12:46:39,519 Congratulations. GSEAPY run successfully...............
     
 

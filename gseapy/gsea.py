@@ -8,7 +8,7 @@ from .parser import gsea_edb_parser, gsea_rank_metric, gsea_gmt_parser, gsea_cls
 from .algorithm import enrichment_score, gsea_compute, preprocess, ranking_metric
 from .plot import gsea_plot, heatmap
 from collections import OrderedDict
-from .enrichr import log_init
+from .__main__ import log_init
 import pandas as pd
 
 
@@ -36,6 +36,9 @@ def replot(indir, outdir='gseapy_out', weight=1, figsize=[6.5,6], format='png', 
             raise exc
         pass    
     logger = log_init(outdir, module='replot')
+    #write command to log file
+    argument = OrderedDict(sorted(argument.items(), key=lambda t:t[0]))
+    logger.debug("Command: replot, "+str(argument))
     import glob
     from bs4 import BeautifulSoup
     
@@ -73,10 +76,7 @@ def replot(indir, outdir='gseapy_out', weight=1, figsize=[6.5,6], format='png', 
                         fdr, RES, phenoPos, phenoNeg, figsize=figsize)    
         fig.savefig('{a}/.gsea.replot.{b}.{c}'.format(a=outdir, b=enrich_term, c=format), dpi=300,)
 
-    with open(outdir+"/command.txt",'wt') as f:
-        argument = OrderedDict(sorted(argument.items(),key = lambda t:t[0]))
-        for item in argument.items():        
-            f.write("%s = %s\n"%(item[0],item[1]))        
+      
     logger.info("Congratulations! Your plots have been reproduced successfully!")
 
     if hasattr(sys, 'ps1'):
@@ -169,8 +169,11 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
         sys.exit(1)
    
     assert len(df) > 1
-
-    logger.info("Parsing data files......................................")     
+    #write command to log file
+    argument = OrderedDict(sorted(argument.items(), key=lambda t:t[0]))
+    logger.debug("Command: call, "+str(argument))
+    #Start Analysis
+    logger.info("Parsing data files for GSEA.............................")     
     #select correct expression genes and values.
     dat = preprocess(df)
     
@@ -184,7 +187,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
     gmt = gsea_gmt_parser(gene_sets, min_size=min_size, max_size=max_size,gene_list=dat2['gene_name'].values)
     logger.info("%s gene_sets used for further statistical testing....."% len(gmt))
 
-    logger.info("Starr to run GSEA...Might take a while..................")   
+    logger.info("Start to run GSEA...Might take a while..................")   
     #compute ES, NES, pval, FDR, RES
     results,hit_ind,rank_ES, subsets = gsea_compute(data=dat, n=permutation_n,gmt=gmt, weighted_score_type=weighted_score_type,
                                                     permutation_type=permutation_type, method=method,
@@ -227,11 +230,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
 
         heatmap(df=dat.loc[gene_symbol], term=gs, outdir=outdir, 
                 figsize=(width, len(gene_symbol)/2), format=format)
-    
-    with open(outdir+"/command.txt",'wt') as f:
-        argument = OrderedDict(sorted(argument.items(), key=lambda t:t[0]))
-        for item in argument.items():        
-            f.write("%s = %s\n"%(item[0],item[1]))   
+      
     logger.info("Congratulations. GSEAPY run successfully...............")
     
 	# return dataframe if run gsea inside python console
@@ -284,8 +283,11 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
     logger = log_init(outdir, module='prerank')
     if isinstance(rnk, pd.DataFrame) :       
         argument['rnk'] = 'DataFrame'
-        
-    logger.info("Parsing data files......................................") 
+    #write command to log file
+    argument = OrderedDict(sorted(argument.items(), key=lambda t:t[0]))
+    logger.debug("Command: prerank, "+str(argument))
+    #Start Analysis
+    logger.info("Parsing data files for GSEA.............................") 
     dat2 = gsea_rank_metric(rnk)
     assert len(dat2) > 1
     #drop duplicates in ranking metrics. 
@@ -332,11 +334,7 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
                         RES=res.get(gs)['rank_ES'], phenoPos=pheno_pos, phenoNeg=pheno_neg, figsize=figsize)        
         fig.savefig('{a}/{b}.gsea.{c}'.format(a=outdir, b=gs, c=format), dpi=300,)
 
-
-    with open(outdir+"/command.txt",'wt') as f:
-        argument = OrderedDict(sorted(argument.items(),key = lambda t:t[0]))
-        for item in argument.items():        
-            f.write("%s = %s\n"%(item[0], item[1]))   
+   
     logger.info("Congratulations...GSEAPY run successfully...............")
     
     

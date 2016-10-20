@@ -65,14 +65,10 @@ def heatmap(df, term, outdir, axis=0, figsize=(5,5), format='png'):
     xticks = np.arange(0, nx, 1) + .5
     yticks = np.arange(0, ny, 1) + .5
 
-    if hasattr(sys, 'ps1'):
-        #working inside python console, show figure
-        fig, ax = plt.subplots(figsize=figsize)
-    else:
-        #If working on commandline, don't show figure
-        fig = Figure(figsize=figsize)
-        canvas = FigureCanvas(fig)
-        ax = fig.add_subplot(111)        
+    #If working on commandline, don't show figure
+    fig = Figure(figsize=figsize)
+    canvas = FigureCanvas(fig)
+    ax = fig.add_subplot(111)        
     vmin = np.percentile(df.min(), 2)
     vmax =  np.percentile(df.max(), 98)
     matrix = ax.pcolormesh(df.values, cmap=plt.cm.RdBu_r, vmin=vmin, vmax=vmax)
@@ -95,7 +91,6 @@ def heatmap(df, term, outdir, axis=0, figsize=(5,5), format='png'):
         ax.spines[side].set_visible(False)
         cbar.ax.spines[side].set_visible(False)
     #cbar.ax.set_title('',loc='left')
-
     canvas.print_figure("{a}/{b}.heatmap.{c}".format(a=outdir, b=term, c=format),
                         bbox_inches='tight')
 
@@ -249,8 +244,8 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
         ax = fig.add_subplot(111)
     vmin = np.percentile(padj.min(), 2)
     vmax =  np.percentile(padj.max(), 98)        
-    sc = ax.scatter(x=x, y=y, s=area, edgecolors='face', c = padj,  
-                    cmap = plt.cm.RdBu,vmin=vmin, vmax=vmax)
+    sc = ax.scatter(x=x, y=y, s=area, edgecolors='face', c=padj,  
+                    cmap = plt.cm.RdBu, vmin=vmin, vmax=vmax)
     ax.set_xlabel("-log$_{10}$(Adjust P-value)")
     ax.yaxis.set_major_locator(plt.FixedLocator(y))
     ax.yaxis.set_major_formatter(plt.FixedFormatter(labels))
@@ -258,7 +253,7 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
     ax.grid()
        
     #colorbar
-    cax=fig.add_axes([0.93,0.40,0.05,0.20])
+    cax=fig.add_axes([0.93,0.20,0.05,0.20])
     cbar = fig.colorbar(sc, cax=cax,)
     cbar.ax.tick_params(right='off')
     cbar.ax.set_title('Padj',loc='left')
