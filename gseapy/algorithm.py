@@ -234,7 +234,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
     ranking=r2['rank'].values
     gene_list=r2['gene_name']
        
-    logging.info("Start to compute enrichment socres......................")
+    logging.debug("Start to compute enrichment socres......................")
 
     rank_ES = []
     hit_ind = []    
@@ -246,7 +246,6 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
         hit_ind.append(ind)
            
     logging.debug("Start to compute esnulls...............................")
-    logging.info("Statistial testing might take a while to run...........")
 
     enrichment_nulls = [ [] for a in range(len(subsets)) ]
     rs = np.random.RandomState(seed)
@@ -469,7 +468,7 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
         except:
             fdrs.append(1000000000.0)
 
-    logging.info("Statistial testing finished.............................")
+    logging.debug("Statistial testing finished.............................")
 
     return zip(enrichment_scores, nEnrichmentScores, enrichmentPVals, fdrs)
 '''
