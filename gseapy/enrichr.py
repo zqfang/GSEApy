@@ -106,7 +106,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='gseapy_out', cutoff
         gene_set = str(input())
     ## logging.debug options
     #logging.debug('Enrichr API : Input file is:', genelist)
-    logger.info('Analysis name: %s Enrichr Library: %s'%(description, gene_set))
+    logger.info('Analysis name: %s, Enrichr Library: %s'%(description, gene_set))
     #logging.('Enrichr API : Enrichr Results File: ', enrichr_results)
 
 
@@ -183,8 +183,8 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='gseapy_out', cutoff
     # convinient for viewing results inside python console. 
     #if isinstance(gene_list, list):
     if hasattr(sys, 'ps1'):
-        logger.info("Enrichr: You are seeing this message, because you are inside python console.\n"+\
-                      "Enrichr: It will return a pandas dataframe for veiwing results."  )
+        logger.info("Enrichr: You are seeing this message, because you are inside python console.")
+        logger.info("Enrichr: It will return a pandas dataframe for veiwing results.")
         logger.info("Enrichr: Job Done!")
 
         handlers = logger.handlers[:]

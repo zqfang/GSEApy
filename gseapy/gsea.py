@@ -231,7 +231,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
         heatmap(df=dat.loc[gene_symbol], term=gs, outdir=outdir, 
                 figsize=(width, len(gene_symbol)/2), format=format)
       
-    logger.info("Congratulations. GSEAPY run successfully...............")
+    logger.info("Congratulations. GSEAPY run successfully................")
     
 	# return dataframe if run gsea inside python console
     #if isinstance(data, pd.DataFrame) or isinstance(cls, list):
