@@ -2,12 +2,12 @@
 import sys, os
 from setuptools import setup
 
-version='0.7.2'
+__version__='0.7.3'
 
 if sys.argv[-1] == 'publish':
     os.system("python setup.py sdist bdist_egg register upload")
     print("You probably want to also tag the version now:")
-    print("  git tag -a %s -m 'version %s'" % (version, version))
+    print("  git tag -a %s -m 'version %s'" % (__version__,__version__))
     print("  git push --tags")
     sys.exit()
 
@@ -16,7 +16,7 @@ def readme():
         return f.read()
 
 setup(name='gseapy',
-      version=version,
+      version=__version__,
       description='Gene Set Enrichment Analysis in Python',
       long_description=readme(),
       classifiers=[
