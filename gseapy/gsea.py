@@ -43,20 +43,20 @@ def replot(indir, outdir='gseapy_out', weight=1, figsize=[6.5,6], format='png', 
     from bs4 import BeautifulSoup
     
     #parsing files.......    
-    results_path = glob.glob(indir+'*/edb/results.edb')[0]
-    rank_path =  glob.glob(indir+'*/edb/*.rnk')[0]
-    gene_set_path =  glob.glob(indir+'/edb/gene_sets.gmt')[0]
-    cls_path = glob.glob(indir+'*/edb/*.cls')
-    file_list = [results_path, rank_path, gene_set_path]      
-    for file in file_list: 
-        if not os.path.isfile(file):
-            logger.error("Incorrect Input %s !" %file)
-            sys.exit(1)    
+    try:
+        results_path = glob.glob(indir+'*/edb/results.edb')[0]
+        rank_path =  glob.glob(indir+'*/edb/*.rnk')[0]
+        gene_set_path =  glob.glob(indir+'*/edb/gene_sets.gmt')[0]
+    except IndexError as e: 
+        logger.debug(e) 
+        logger.error("Could not locate GSEA files in the given directory!")
+        sys.exit(1)    
     #extract sample names from .cls file
-    if file_list:
+    cls_path = glob.glob(indir+'*/edb/*.cls')
+    if cls_path:
         phenoPos, phenoNeg, classes = gsea_cls_parser(cls_path[0])
     else:
-        phenoPos, phenoNeg = 'Pos','Neg'  
+        phenoPos, phenoNeg = '',''  
     #obtain gene sets
     gene_set_dict = gsea_gmt_parser(gene_set_path, min_size=min_size, max_size=max_size)
     #obtain rank_metrics
@@ -64,7 +64,7 @@ def replot(indir, outdir='gseapy_out', weight=1, figsize=[6.5,6], format='png', 
     correl_vector =  rank_metric['rank'].values        
     gene_list = rank_metric['gene_name']
     #extract each enriment term in the results.edb files and plot.
-    database = BeautifulSoup(open(results_path),features='xml')
+    database = BeautifulSoup(open(results_path), features='xml')
     length = len(database.findAll('DTG'))
 
     for idx in range(length):
