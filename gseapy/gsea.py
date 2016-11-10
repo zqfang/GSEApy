@@ -56,6 +56,7 @@ def replot(indir, outdir='gseapy_out', weight=1, figsize=[6.5,6], format='png', 
     if cls_path:
         phenoPos, phenoNeg, classes = gsea_cls_parser(cls_path[0])
     else:
+        # logic for prerank results
         phenoPos, phenoNeg = '',''  
     #obtain gene sets
     gene_set_dict = gsea_gmt_parser(gene_set_path, min_size=min_size, max_size=max_size)

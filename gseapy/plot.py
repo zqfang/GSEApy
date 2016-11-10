@@ -137,7 +137,7 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     #Ranked Metric Scores Plot
     ax1 =  fig.add_subplot(gs[11:])
     ax1.fill_between(x, y1= rank_metric['rank'], y2=0, color='#C9D3DB')
-    ax1.set_ylabel("Ranked list metric",fontsize=14)    
+    ax1.set_ylabel("Ranked list metric", fontsize=14)    
     ax1.text(.05, .9, phenoP_label, color='red', horizontalalignment='left', verticalalignment='top',
          transform=ax1.transAxes)
     ax1.text(.95, .05, phenoN_label, color='Blue', horizontalalignment='right', verticalalignment='bottom',
@@ -165,17 +165,17 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     ax2.vlines(hit_ind, 0, 1,linewidth=.5,transform=trans2)
     ax2.spines['bottom'].set_visible(False)
     ax2.tick_params(axis='both', which='both', bottom='off', top='off', 
-                    labelbottom='off', right='off', left='off',labelleft='off')
+                    labelbottom='off', right='off', left='off', labelleft='off')
     #colormap
-    ax3 =  fig.add_subplot(gs[10],sharex=ax1)
+    ax3 =  fig.add_subplot(gs[10], sharex=ax1)
     ax3.imshow(im_matrix, aspect='auto', norm=norm, cmap=plt.cm.seismic, interpolation='none') # cm.coolwarm
     ax3.spines['bottom'].set_visible(False)
     ax3.tick_params(axis='both', which='both', bottom='off', top='off', 
                     labelbottom='off', right='off', left='off',labelleft='off')
 
     # Enrichment score plot
-    ax4 = fig.add_subplot(gs[:8],sharex=ax1)
-    ax4.plot(x,RES,linewidth=4,color ='#88C544')
+    ax4 = fig.add_subplot(gs[:8], sharex=ax1)
+    ax4.plot(x, RES, linewidth=4, color ='#88C544')
     ax4.text(.1, .1, fdr_label, transform=ax4.transAxes)
     ax4.text(.1, .2, pval_label, transform=ax4.transAxes)
     ax4.text(.1, .3, nes_label, transform=ax4.transAxes)
@@ -198,7 +198,7 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     
     return fig
 
-def dotplot(df, cutoff=0.05, figsize=(3,6)):
+def dotplot(df, cutoff=0.05, figsize=(3,6), scale=50):
     """Visualize enrichr or gsea results.
     
     :param df: GSEApy DataFrame results    
@@ -231,7 +231,7 @@ def dotplot(df, cutoff=0.05, figsize=(3,6)):
     y=  [i for i in range(0,len(df))]
     labels = df.Term.values
     
-    area = np.pi * (df['hits_ratio'] *50) **2 
+    area = np.pi * (df['hits_ratio'] *scale) **2 
     
     #creat scatter plot
     if hasattr(sys, 'ps1'):
