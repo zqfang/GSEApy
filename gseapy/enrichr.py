@@ -100,10 +100,14 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='gseapy_out', cutoff
     logger.info("Connecting to Enrichr Server to get latest library names")
     enrichr_library = get_library_name()
     
-    while gene_set not in enrichr_library:
-        logger.error("%s is a invalid library name, Please enter a new one here!!!\n"%gene_set)
-        logger.info("Use get_library_name() to veiw full list of supported names")
-        gene_set = str(input())
+    while True:
+        if gene_set in enrichr_library:
+            break
+        else:
+            sys.stderr.write("%s is not a enrichr library name\n"%gene_set)
+            sys.stdout.write("Hint: use get_library_name() to veiw full list of supported names")
+            gene_set = str(input("Enter a correct enrichr library name here: "))
+        
     ## logging.debug options
     #logging.debug('Enrichr API : Input file is:', genelist)
     logger.info('Analysis name: %s, Enrichr Library: %s'%(description, gene_set))
