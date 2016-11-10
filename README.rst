@@ -140,14 +140,15 @@ For example, both a list object and txt file are supported for ``enrchr`` API
 Installation
 ------------
 
-| Install gseapy package from pypi and download.
+| Install gseapy package from bioconda or pypi.
 
 
 .. code:: shell
    
    # if you have conda(the recommended way)
-   $ conda install -c bioconda gseapy   
-   # or   
+   $ conda install -c bioconda gseapy 
+  
+   # windows users 
    $ conda install -c bioninja gseapy
 
    # or use pip

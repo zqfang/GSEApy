@@ -45,15 +45,18 @@ def replot(indir, outdir='gseapy_out', weight=1, figsize=[6.5,6], format='png', 
     #parsing files.......    
     results_path = glob.glob(indir+'*/edb/results.edb')[0]
     rank_path =  glob.glob(indir+'*/edb/*.rnk')[0]
-    gene_set_path =  glob.glob(indir+'*/edb/gene_sets.gmt')[0]
-    cls_path = glob.glob(indir+'*/edb/*.cls')[0]
-    file_list = [results_path, rank_path, gene_set_path, cls_path]      
+    gene_set_path =  glob.glob(indir+'/edb/gene_sets.gmt')[0]
+    cls_path = glob.glob(indir+'*/edb/*.cls')
+    file_list = [results_path, rank_path, gene_set_path]      
     for file in file_list: 
         if not os.path.isfile(file):
             logger.error("Incorrect Input %s !" %file)
             sys.exit(1)    
     #extract sample names from .cls file
-    phenoPos, phenoNeg, classes = gsea_cls_parser(cls_path)  
+    if file_list:
+        phenoPos, phenoNeg, classes = gsea_cls_parser(cls_path[0])
+    else:
+        phenoPos, phenoNeg = 'Pos','Neg'  
     #obtain gene sets
     gene_set_dict = gsea_gmt_parser(gene_set_path, min_size=min_size, max_size=max_size)
     #obtain rank_metrics
