@@ -98,7 +98,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
     :param data: Gene expression data table.  
     :param gene_sets: Gene sets file. e.g. gmt files. Same input with GSEA.
     :param permutation_n: Number of permutations for significance computation. Default: 1000.
-    :param permutation_type: Permutation type, "phenotype" (default) for phenotypes, "gene_set" for genes.
+    :param permutation_type: Permutation type, "phenotype" for phenotypes, "gene_set" for genes.
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Defaut: 15.
     :param int max_size: Maximum allowed number of genes from gene set also the data set. Defaults: 500.
     :param weighted_score_type: Refer to :func:`algorithm.enrichment_socre`. Default:1.
@@ -230,6 +230,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
         fig = gsea_plot(rank_metric=dat2, enrich_term=gs, hit_ind=hit,
                         nes=res.get(gs)['nes'], pval=res.get(gs)['pval'], fdr=res.get(gs)['fdr'], 
                         RES=res.get(gs)['rank_ES'], phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize)        
+        gs = gs.replace('/','_')
         fig.savefig('{a}/{b}.gsea.{c}'.format(a=outdir, b=gs, c=format), dpi=300,)
 
         heatmap(df=dat.loc[gene_symbol], term=gs, outdir=outdir, 
@@ -336,6 +337,7 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
         fig = gsea_plot(rank_metric=dat2, enrich_term=gs, hit_ind=res.get(gs)['hit_index'],
                         nes=res.get(gs)['nes'], pval=res.get(gs)['pval'], fdr=res.get(gs)['fdr'], 
                         RES=res.get(gs)['rank_ES'], phenoPos=pheno_pos, phenoNeg=pheno_neg, figsize=figsize)        
+        gs = gs.replace('/','_')
         fig.savefig('{a}/{b}.gsea.{c}'.format(a=outdir, b=gs, c=format), dpi=300,)
 
    
