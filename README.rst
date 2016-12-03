@@ -276,8 +276,12 @@ Run gseapy inside python console:
                    outdir='test', cutoff=0.05, format='png' )
  
 
-For a full list of enrchr libary name :
+GSEAPY supported gene set libaries :
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To see the full list of gseapy supported gene set librarys, please click here: `Library <http://amp.pharm.mssm.edu/Enrichr/#stats>`_
+
+Or use ``get_library_name`` function inside python console.
 
 .. code:: python
    
