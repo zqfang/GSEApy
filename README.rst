@@ -80,6 +80,8 @@ GSEAPY ``Prerank`` module output
 -----------------------------------------------
 Using the same data from ``GSEA``, GSEAPY reproduce the example above.
 
+Using ``replot`` module will reproduce the same figure for GSEA Java desktop outputs
+
 .. figure:: docs/gseapy_OCT4_KD.png
 
    
@@ -102,7 +104,7 @@ The powerfull module will enable you perform gene set enrichment analysis extrea
 
 **The only thing you need to prepeare is a gene list file in txt format(one gene id per row).**
 
-**Note**: Enrichr uses a list of Entrez gene symbols as input.
+**Note**: Enrichr uses a list of Entrez gene symbols as input. You should convert all gene names to uppercase.
 
 For example, both a list object and txt file are supported for ``enrchr`` API
 
@@ -195,6 +197,11 @@ See `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Ma
 
 
 The ``enrichr`` module will using enrichr online tool. It will generate results in txt format.
+
+Before you start:
+~~~~~~~~~~~~~~~~~~~~~~
+
+**You should convert all gene symobl names to uppercase first.**
 
 
 For command line usage:
