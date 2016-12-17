@@ -76,10 +76,10 @@ def prepare_argparser():
 def add_output_option(parser):
     """output option"""
 
-    parser.add_argument("-o", "--outdir", dest="outdir", type=str, default='gseapy_out',
+    parser.add_argument("-o", "--outdir", dest="outdir", type=str, default='gseapy_reports',
                         metavar='', action="store", help="The GSEAPY output directory. Default: the current working directory")
     parser.add_argument("-f", "--format", dest="format", type=str, metavar='', action="store",
-                        choices=("pdf", "png", "jpeg", "eps"), default="png",
+                        choices=("pdf", "png", "jpeg", "eps"), default="pdf",
                         help="Format of output figures, choose from {'pdf', 'png', 'jpeg', 'eps'}. Default: 'png'.")
     parser.add_argument("--figsize", action='store', nargs=2, dest='figsize',
                         metavar=('width', 'height'),type=float, default=(6.5, 6),
@@ -91,9 +91,9 @@ def add_output_group(parser, required=True):
     """output group"""
 
     output_group = parser.add_mutually_exclusive_group(required=required)
-    output_group.add_argument("-o", "--ofile", dest="ofile", type=str, default='enrich_report',
+    output_group.add_argument("-o", "--ofile", dest="ofile", type=str, default='gseapy_reports',
                               help="Output file name. Mutually exclusive with --o-prefix.")
-    output_group.add_argument("--o-prefix", dest="ofile", type=str, default='enrich_report',
+    output_group.add_argument("--o-prefix", dest="ofile", type=str, default='gseapy_report',
                               help="Output file prefix. Mutually exclusive with -o/--ofile.")
 
 
