@@ -198,16 +198,20 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     
     return fig
 
-def dotplot(df, cutoff=0.05, figsize=(3,6), scale=50):
+def dotplot(df, cutoff=0.05,term_num=10, figsize=(3,6), scale=50):
     """Visualize enrichr or gsea results.
     
-    :param df: GSEApy DataFrame results    
-    :return:  a dotplot for enrichr terms.    
+    :param df: GSEApy DataFrame results. 
+    :param cutoff: p-adjust cut-off. 
+    :param term_num: number of enriched terms to show.
+    :param scale: dotplot point size scale.
+    :return:  a dotplot for enrichr terms. 
+
     """
     
     if 'fdr' in df.columns:
         #gsea results
-        df.rename(columns={'pval':'Adjusted P-value',}, inplace=True)
+        df.rename(columns={'fdr':'Adjusted P-value',}, inplace=True)
         df['hits_ratio'] =  df['matched_size'] / df['gene_set_size']
     else:
         #enrichr results
@@ -223,7 +227,7 @@ def dotplot(df, cutoff=0.05, figsize=(3,6), scale=50):
         return None
     #sorting the dataframe for better visualization
     df = df.sort_values(by='Adjusted P-value', ascending=False)
-    
+    df = df.head(term_num)
     # x axis values
     padj = df['Adjusted P-value']
     x = - padj.apply(np.log10)
