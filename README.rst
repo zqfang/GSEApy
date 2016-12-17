@@ -61,7 +61,7 @@ do gene set enrichment analysis in python. So, here is my reason:
 * **Running inside python console without switch to R!!!**
 * User friendly for both wet and dry lab usrers.
 * Produce pubilishable figures.
-* Doing many jobs at the same time without using mouse to select differrent data table, differrent gene sets repeatly.
+* Perform batch jobs easy.
 * Easy to use in Bash shell. 
 
 
@@ -96,13 +96,16 @@ Using ``replot`` module will reproduce the same figure for GSEA Java desktop out
 
 GSEAPY ``enrichr`` module 
 -----------------------------------------------
+
 The powerfull module will enable you perform gene set enrichment analysis extreamly easily.
+
+**You Could submit batch jobs to Enrichr Server**
 
 .. figure:: docs/enrichr.PNG
 
 
 
-**The only thing you need to prepeare is a gene list file in txt format(one gene id per row).**
+**The only thing you need to prepeare is a gene list file in txt format(one gene id per row), or a python list object.**
 
 **Note**: Enrichr uses a list of Entrez gene symbols as input. You should convert all gene names to uppercase.
 
@@ -150,7 +153,7 @@ Installation
    # if you have conda(the recommended way)
    $ conda install -c bioconda gseapy 
   
-   # windows users 
+   # for  windows users 
    $ conda install -c bioninja gseapy
 
    # or use pip
@@ -196,7 +199,7 @@ All input files' formats are identical to ``GSEA`` desktop version.
 See `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ documentation for more information.
 
 
-The ``enrichr`` module will using enrichr online tool. It will generate results in txt format.
+The ``enrichr`` module will using enrichr API online. It runs very fast and generates results in txt format.
 
 Before you start:
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -250,9 +253,9 @@ Run gseapy inside python console:
     # assign dataframe, and use enrichr libary data set 'KEGG_2016'
     expression_dataframe = pd.DataFrame()
       
-    sample_name = ['A','A','A','B','B','B']
+    sample_name = ['A','A','A','B','B','B'] # always only two group 
 
-    # assign gene_sets parameter with enrichr library name is suported.
+    # assign gene_sets parameter with enrichr library name or gmt file on your local computor.
     gseapy.call(data=expression_dataframe, gene_sets='KEGG_2016', cls= sample_names, outdir='test')
    
     # using prerank tool
@@ -287,6 +290,8 @@ Or use ``get_library_name`` function inside python console.
    
     #see full list of latest enrichr library names, which will pass to -g parameter:
     names = gseapy.get_library_name()
+
+    # show top 20 entries.
     print(names[:20])
 
 
