@@ -80,7 +80,7 @@ def add_output_option(parser):
                         metavar='', action="store", help="The GSEAPY output directory. Default: the current working directory")
     parser.add_argument("-f", "--format", dest="format", type=str, metavar='', action="store",
                         choices=("pdf", "png", "jpeg", "eps"), default="pdf",
-                        help="Format of output figures, choose from {'pdf', 'png', 'jpeg', 'eps'}. Default: 'png'.")
+                        help="Format of output figures, choose from {'pdf', 'png', 'jpeg', 'eps'}. Default: 'pdf'.")
     parser.add_argument("--figsize", action='store', nargs=2, dest='figsize',
                         metavar=('width', 'height'),type=float, default=(6.5, 6),
                         help="The figsize keyword argument need two parameter to define. Default: (6.5, 6)")
@@ -140,7 +140,7 @@ def add_call_parser(subparsers):
     group_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
                            help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
     group_opt.add_argument("-t", "--top-graphNum", dest = "graph", action="store", type=int, default=20, metavar='',
-                           help="Plot graphs for top sets of each phenotype. Default: 20")
+                           help="Numbers of top graphs of each phenotype. Default: 20")
     group_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=None, metavar='',
                            help="Number of random seed. Default: None")
 
@@ -178,7 +178,7 @@ def add_prerank_parser(subparsers):
     prerank_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
                              help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
     prerank_opt.add_argument("-t", "--top-graphNum", dest = "graph", action="store", type=int, default=20, metavar='',
-                             help="Plot graphs for top sets of each phenotype. Default: 20")
+                             help="Numbers of top graphs of each phenotype. Default: 20")
     prerank_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=None, metavar='',
                              help="Number of random seed. Default: None")
     
@@ -216,7 +216,7 @@ def add_enrichr_parser(subparsers):
                               help="It is recommended to enter a description for your list so that multiple lists \
                               can be differentiated from each other if you choose to save or share your list.") 
     group_opt.add_argument("--cut-off", action="store", dest="thresh", metavar='', type=float, default=0.05,
-                              help="Pval cutoff, used for generating plots. Default: 0.05.")
+                              help="Adjust-Pval cutoff, used for generating plots. Default: 0.05.")
     
     enrichr_output = argparser_enrichr.add_argument_group("Output arguments")
     add_output_option(enrichr_output)

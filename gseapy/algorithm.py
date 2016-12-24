@@ -15,7 +15,7 @@ def preprocess(df):
     df.drop_duplicates(subset=df.columns[0], inplace=True) #drop duplicate gene_names.    
     df.set_index(keys=df.columns[0], inplace=True)
     df.dropna(how='all', inplace=True)                     #drop rows with all NAs
-    df2 = df.select_dtypes(include=['float64'])  + 0.001 #select numbers in DataFrame      
+    df2 = df.select_dtypes(include=['float64'])  + 0.00001 #select numbers in DataFrame      
     
     return df2
 
@@ -112,7 +112,7 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
     return es.tolist(), hit_ind, RES.tolist()
  
 
-def shuffle_list(gene_list, rand=np.random.RandomState(0)):
+def shuffle_list(gene_list, rand=np.random.RandomState()):
     """Returns a copy of a shuffled input gene_list.
     
     :param gene_list: rank_metric['gene_name'].values
