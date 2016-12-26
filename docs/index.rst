@@ -7,10 +7,10 @@ Welcome to GSEAPY's documentation!
 =====================================================
 
 GSEAPY: Gene Set Enrichment Analysis in Python.
+------------------------------------------------
 
 .. image:: https://badge.fury.io/py/gseapy.svg
     :target: https://badge.fury.io/py/gseapy
-
 
 .. image:: https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat-square
     :target: http://bioconda.github.io
@@ -18,12 +18,17 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
 .. image:: https://travis-ci.org/BioNinja/gseapy.svg?branch=master
     :target: https://travis-ci.org/BioNinja/gseapy
 
-.. image:: https://readthedocs.org/projects/gseapy/badge/?version=latest
+.. image:: http://readthedocs.org/projects/gseapy/badge/?version=latest
     :target: http://gseapy.readthedocs.org/en/latest/?badge=latest
     :alt: Documentation Status
 
+.. image:: https://img.shields.io/badge/license-MIT-blue.svg
+    :target:  https://img.shields.io/badge/license-MIT-blue.svg
+.. image:: https://img.shields.io/badge/python-3.5-blue.svg
+    :target:   https://img.shields.io/badge/python-3.5-blue.svg
+.. image:: https://img.shields.io/badge/python-2.7-blue.svg
+    :target:  https://img.shields.io/badge/python-2.7-blue.svg
 
-.. image:: https://img.shields.io/github/license/mashape/apistatus.svg
 
 
 
