@@ -3,6 +3,7 @@ GSEAPY
 ========
 
 GSEAPY: Gene Set Enrichment Analysis in Python.
+------------------------------------------------
 
 .. image:: https://badge.fury.io/py/gseapy.svg
     :target: https://badge.fury.io/py/gseapy
