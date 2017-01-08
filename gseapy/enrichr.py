@@ -88,6 +88,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr', cutoff=0.
         # get gene lists
         with open(gene_list) as f:
             genes = f.read()
+	p
         genes_str = str(genes)
     
     
@@ -182,20 +183,17 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr', cutoff=0.
     df =  read_table(outdir+'/'+ outfile + description + '.txt')
     fig = dotplot(df, cutoff=cutoff, figsize=figsize)
     if fig is not None:
-        fig.savefig(outdir+'/'+"enrichr.reports.%s"%format, bbox_inches='tight', dpi=300)
+        fig.savefig(outdir+'/'+"enrichr.reports.%s.%s"%(description, format), bbox_inches='tight', dpi=300)
 		
-    # convinient for viewing results inside python console. 
-    #if isinstance(gene_list, list):
+
+    handlers = logger.handlers[:]
+    for handler in handlers:
+        handler.close()
+        logger.removeHandler(handler)
     if hasattr(sys, 'ps1'):
         logger.info("Enrichr: You are inside python console, a dataframe is returned.")
         logger.info("Enrichr: Job Done!")
-
-        handlers = logger.handlers[:]
-        for handler in handlers:
-            handler.close()
-            logger.removeHandler(handler)
-
-        return df
+        return df        
         
     logger.info("Enrichr: Job Done!")
 

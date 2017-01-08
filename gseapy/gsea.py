@@ -82,13 +82,11 @@ def replot(indir, outdir='gseapy_out', weight=1, figsize=[6.5,6], format='pdf', 
 
       
     logger.info("Congratulations! Your plots have been reproduced successfully!")
-
-    if hasattr(sys, 'ps1'):
-        handlers = logger.handlers[:]
-        for handler in handlers:
-            handler.close()
-            logger.removeHandler(handler)
-        return 
+    handlers = logger.handlers[:]
+    for handler in handlers:
+        handler.close()
+        logger.removeHandler(handler)
+    return 
         
 def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, permutation_n=1000, 
           weighted_score_type=1,permutation_type='gene_set', method='log2_ratio_of_classes',
@@ -140,7 +138,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
     :param seed: Random seed. expect an interger. Defalut:None.
     :return: Return a DataFrame when inside python console.
              Generate ``GSEA`` plots and store a dictionary into csv file,
-             where dictionary key is a gene set and values are::
+             where  each column represents::
 
                  | {es: enrichment score, 
                  |  nes: normalized enrichment score, 
@@ -240,11 +238,11 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
     
 	# return dataframe if run gsea inside python console
     #if isinstance(data, pd.DataFrame) or isinstance(cls, list):
+    handlers = logger.handlers[:]
+    for handler in handlers:
+        handler.close()
+        logger.removeHandler(handler)     
     if hasattr(sys, 'ps1'):
-        handlers = logger.handlers[:]
-        for handler in handlers:
-            handler.close()
-            logger.removeHandler(handler)     
         return res_df 
 
 def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg',
@@ -266,7 +264,7 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
     :param seed: Random seed. expect an interger. Defalut:None.    
     :return: Return a DataFrame when inside python console.
              Generate ``GSEA`` plots and store a dictionary into csv file,
-             where dictionary key is a gene set and values are::
+             where each column represents::
 
                  | {es: enrichment score, 
                  |  nes: normalized enrichment score, 
@@ -344,11 +342,11 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
     logger.info("Congratulations...GSEAPY run successfully...............")
     
     
-	# return dataframe if run gsea inside python console
+    #return dataframe if run gsea inside python console
     #if isinstance(rnk, pd.DataFrame):
+    handlers = logger.handlers[:]
+    for handler in handlers:
+        handler.close()
+        logger.removeHandler(handler)
     if hasattr(sys, 'ps1'):
-        handlers = logger.handlers[:]
-        for handler in handlers:
-            handler.close()
-            logger.removeHandler(handler)
         return res_df 
