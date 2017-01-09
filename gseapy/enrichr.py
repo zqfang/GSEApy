@@ -88,7 +88,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr', cutoff=0.
         # get gene lists
         with open(gene_list) as f:
             genes = f.read()
-	p
+	
         genes_str = str(genes)
     
     
