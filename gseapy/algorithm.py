@@ -5,8 +5,8 @@ from functools import reduce
 
 import numpy as np
 import sys, logging
-import multiprocessing
-import itertools
+
+logger = logging.getLogger(__name__)
 
 def preprocess(df):
     """pre-processed the data frame.new filtering methods will be implement here.
@@ -190,7 +190,7 @@ def ranking_metric(df, method, phenoPos, phenoNeg, classes, ascending):
     elif method == 'log2_ratio_of_classes':
         sr  =  np.log2(df_mean[A] / df_mean[B])
     else:
-        logging.error("Please provide correct method name!!!")        
+        logger.error("Please provide correct method name!!!")        
         sys.exit()
     sr.sort_values(ascending=ascending, inplace=True)
     df3 = sr.to_frame().reset_index()
@@ -234,7 +234,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
     ranking=r2['rank'].values
     gene_list=r2['gene_name']
        
-    logging.debug("Start to compute enrichment socres......................")
+    logger.debug("Start to compute enrichment socres......................")
 
     rank_ES = []
     hit_ind = []    
@@ -245,7 +245,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
         rank_ES.append(RES)
         hit_ind.append(ind)
            
-    logging.debug("Start to compute esnulls...............................")
+    logger.debug("Start to compute esnulls...............................")
 
     enrichment_nulls = [ [] for a in range(len(subsets)) ]
     rs = np.random.RandomState(seed)
@@ -362,7 +362,7 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
         observed S wih NES(S) >= 0, whose NES(S) >= NES*, and similarly if NES(S) = NES* <= 0.
     """
 
-    logging.debug("Start to compute pvals..................................")
+    logger.debug("Start to compute pvals..................................")
     
     #enrichmentPVals = []
     
@@ -405,7 +405,7 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
 
 
     #compute normalized enrichment score and normalized esnull
-    logging.debug("Compute normalized enrichment score and normalized esnull")
+    logger.debug("Compute normalized enrichment score and normalized esnull")
                    
     try:
         condlist1 = [ es >= 0, es < 0]
@@ -421,7 +421,7 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
         nEnrichmentNulls = np.repeat(0.0 , es.size).reshape(esnull.shape).tolist()
     
            
-    logging.debug("start to compute fdrs..................................")
+    logger.debug("start to compute fdrs..................................")
 
     #FDR computation
     #create a histogram of all NES(S,pi) over all S and pi
@@ -468,7 +468,7 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
         except:
             fdrs.append(1000000000.0)
 
-    logging.debug("Statistial testing finished.............................")
+    logger.debug("Statistial testing finished.............................")
 
     return zip(enrichment_scores, nEnrichmentScores, enrichmentPVals, fdrs)
 '''

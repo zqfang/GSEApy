@@ -3,12 +3,12 @@
 from __future__ import  absolute_import, division
 
 
-import os,sys,errno, logging
-from .parser import gsea_edb_parser, gsea_rank_metric, gsea_gmt_parser, gsea_cls_parser
+import os,sys, logging
+from .parser import *
 from .algorithm import enrichment_score, gsea_compute, preprocess, ranking_metric
 from .plot import gsea_plot, heatmap
 from collections import OrderedDict
-from .__main__ import log_init
+from .utils import log_init, log_remove, mkdirs
 import pandas as pd
 
 
@@ -29,12 +29,7 @@ def replot(indir, outdir='gseapy_out', weight=1, figsize=[6.5,6], format='pdf', 
     """
     argument = locals()
 
-    try:
-        os.makedirs(outdir)
-    except OSError as exc:
-        if exc.errno != errno.EEXIST:
-            raise exc
-        pass    
+    mkdirs(outdir)   
     logger = log_init(outdir, module='replot')
     #write command to log file
     argument = OrderedDict(sorted(argument.items(), key=lambda t:t[0]))
@@ -78,14 +73,12 @@ def replot(indir, outdir='gseapy_out', weight=1, figsize=[6.5,6], format='pdf', 
         #plotting
         fig = gsea_plot(rank_metric, enrich_term,hit_ind, nes, pval,
                         fdr, RES, phenoPos, phenoNeg, figsize=figsize)    
-        fig.savefig('{a}/.gsea.replot.{b}.{c}'.format(a=outdir, b=enrich_term, c=format), dpi=300,)
+        fig.savefig('{a}/.gsea.replot.{b}.{c}'.format(a=outdir, b=enrich_term, c=format),
+                    bbox_inches='tight', dpi=300,)
 
       
     logger.info("Congratulations! Your plots have been reproduced successfully!")
-    handlers = logger.handlers[:]
-    for handler in handlers:
-        handler.close()
-        logger.removeHandler(handler)
+    log_remove(logger)
     return 
         
 def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, permutation_n=1000, 
@@ -152,13 +145,8 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
     argument = locals()
     assert permutation_type in ["phenotype", "gene_set"]
     assert min_size <= max_size
-    try:
-        os.makedirs(outdir)
-    except OSError as exc:
-        if exc.errno != errno.EEXIST:
-            raise exc
-        pass
 
+    mkdirs(outdir)
     logger = log_init(outdir, module='call')
 
     if isinstance(data, pd.DataFrame) :
@@ -187,7 +175,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
     
     #filtering out gene sets and build gene sets dictionary
     gmt = gsea_gmt_parser(gene_sets, min_size=min_size, max_size=max_size,gene_list=dat2['gene_name'].values)
-    logger.info("%s gene_sets used for further statistical testing....."% len(gmt))
+    logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
 
     logger.info("Start to run GSEA...Might take a while..................")   
     #compute ES, NES, pval, FDR, RES
@@ -229,7 +217,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
                         nes=res.get(gs)['nes'], pval=res.get(gs)['pval'], fdr=res.get(gs)['fdr'], 
                         RES=res.get(gs)['rank_ES'], phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize)        
         gs = gs.replace('/','_')
-        fig.savefig('{a}/{b}.gsea.{c}'.format(a=outdir, b=gs, c=format), dpi=300,)
+        fig.savefig('{a}/{b}.gsea.{c}'.format(a=outdir, b=gs, c=format), bbox_inches='tight', dpi=300,)
 
         heatmap(df=dat.loc[gene_symbol], term=gs, outdir=outdir, 
                 figsize=(width, len(gene_symbol)/2), format=format)
@@ -238,10 +226,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
     
 	# return dataframe if run gsea inside python console
     #if isinstance(data, pd.DataFrame) or isinstance(cls, list):
-    handlers = logger.handlers[:]
-    for handler in handlers:
-        handler.close()
-        logger.removeHandler(handler)     
+    log_remove(logger)
     if hasattr(sys, 'ps1'):
         return res_df 
 
@@ -277,12 +262,8 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
     """
     argument = locals()
     assert min_size <= max_size
-    try:
-        os.makedirs(outdir)
-    except OSError as exc:
-        if exc.errno != errno.EEXIST:
-            raise exc
-        pass
+    
+    mkdirs(outdir)
     logger = log_init(outdir, module='prerank')
     if isinstance(rnk, pd.DataFrame) :       
         argument['rnk'] = 'DataFrame'
@@ -297,7 +278,7 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
     dat2.drop_duplicates(subset='gene_name',inplace=True, keep='first')   
     #filtering out gene sets and build gene sets dictionary
     gmt = gsea_gmt_parser(gene_sets, min_size=min_size, max_size=max_size, gene_list=dat2['gene_name'].values)
-    logger.info("%s gene_sets used for further statistical testing....."% len(gmt))   
+    logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))   
     logger.info("Start to run GSEA...Might take a while..................") 
     #compute ES, NES, pval, FDR, RES
     results,hit_ind,rank_ES, subsets = gsea_compute(data=dat2, n=permutation_n, gmt=gmt, weighted_score_type=weighted_score_type,
@@ -336,7 +317,7 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
                         nes=res.get(gs)['nes'], pval=res.get(gs)['pval'], fdr=res.get(gs)['fdr'], 
                         RES=res.get(gs)['rank_ES'], phenoPos=pheno_pos, phenoNeg=pheno_neg, figsize=figsize)        
         gs = gs.replace('/','_')
-        fig.savefig('{a}/{b}.gsea.{c}'.format(a=outdir, b=gs, c=format), dpi=300,)
+        fig.savefig('{a}/{b}.gsea.{c}'.format(a=outdir, b=gs, c=format), bbox_inches='tight', dpi=300,)
 
    
     logger.info("Congratulations...GSEAPY run successfully...............")
@@ -344,9 +325,6 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
     
     #return dataframe if run gsea inside python console
     #if isinstance(rnk, pd.DataFrame):
-    handlers = logger.handlers[:]
-    for handler in handlers:
-        handler.close()
-        logger.removeHandler(handler)
+    log_remove(logger)
     if hasattr(sys, 'ps1'):
         return res_df 

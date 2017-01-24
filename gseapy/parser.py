@@ -1,31 +1,10 @@
 # -*- coding: utf-8 -*-
 from numpy import in1d
 from pandas import read_table, DataFrame
-from .enrichr import get_library_name
-import sys, logging
+from .utils import unique, DEFAULT_LIBRARY
+import sys, logging, json
 
-
-
-
-def unique(seq):
-    """Remove duplicates from a list in Python while preserving order.
-    
-    :param seq: a python list object.
-    :return: a list without duplicates while preserving order.
-    
-    """    
-
-    seen = set()
-    seen_add = seen.add
-    """
-    The fastest way to sovle this problem is here
-    Python is a dynamic language, and resolving seen.add each iteration 
-    is more costly than resolving a local variable. seen.add could have 
-    changed between iterations, and the runtime isn't smart enough to rule 
-    that out. To play it safe, it has to check the object each time.   
-    """
-
-    return [x for x in seq if x not in seen and not seen_add(x)]
+logger = logging.getLogger(__name__)
 
 def gsea_cls_parser(cls):
     """Extact class(phenotype) name from .cls file.
@@ -74,7 +53,7 @@ def gsea_edb_parser(results_path, index=0):
     fdr =  term.get('FDR')
     #fwer = term.get('FWER')   
     #index_range = len(tag)-1
-    logging.debug("Enriched Gene set is: "+ enrich_term)
+    logger.debug("Enriched Gene set is: "+ enrich_term)
 
     return enrich_term, hit_ind, nes, pval, fdr
     
@@ -117,12 +96,16 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
     """
 
     if gmt.lower().endswith(".gmt"):
+        logger.info("User Defined gene sets is given.......continue..........") 
         with open(gmt) as genesets:    
              genesets_dict = { line.strip("\n").split("\t")[0]: line.strip("\n").split("\t")[2:] 
                               for line in genesets.readlines()}    
     else:
-        logging.info("Downloading and generating Enrichr library gene sets...") 
-        names = get_library_name()
+        logger.info("Downloading and generating Enrichr library gene sets...") 
+        if gmt in DEFAULT_LIBRARY:
+            names = DEFAULT_LIBRARY
+        else:
+            names = get_library_name()
         if gmt in names:
             import requests
             ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary'
@@ -168,3 +151,34 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
     else:
         return genesets_filter
     
+def get_library_name():
+    """return enrichr active enrichr library name. """
+
+    # make a get request to get the gmt names and meta data from Enrichr
+    #python 2
+    if sys.version_info[0] == 2 :
+        import urllib2
+        x = urllib2.urlopen('http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary?mode=meta')
+        response = x.read()
+        gmt_data = json.loads(response)
+
+    # python 3
+    elif sys.version_info[0] == 3:
+        import urllib
+        x = urllib.request.urlopen('http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary?mode=meta')
+        response = x.read()
+        gmt_data = json.loads(response.decode('utf-8'))
+    else:
+        sys.stderr.write("System failure. Please Provide correct input files")
+        sys.exit(1) 
+    # generate list of gmts 
+    gmt_names = []
+
+    # get library names 
+    for inst_gmt in gmt_data['libraries']:
+
+        # only include active gmts 
+        if inst_gmt['isActive'] == True:
+            gmt_names.append(inst_gmt['libraryName'])
+    
+    return sorted(gmt_names)

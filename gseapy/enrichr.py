@@ -2,66 +2,14 @@
 # python 
 # see: http://amp.pharm.mssm.edu/Enrichr/help#api for API docs
 
-import sys, os, errno, json, requests, logging
+import sys, json, requests, logging
 from pandas import read_table
 from .plot import dotplot
-from .__main__ import log_init
+from .utils import *
 
-default_gene_set_libraries = [
-    'GO_Biological_Process_2015',
-    "ChEA_2015",
-    "KEGG_2016",
-    "ESCAPE",
-    "Epigenomics_Roadmap_HM_ChIP-seq",
-    "ENCODE_TF_ChIP-seq_2015",
-    "ENCODE_Histone_Modifications_2015",
-    "OMIM_Expanded",
-    "TF-LOF_Expression_from_GEO",
-    "Single_Gene_Perturbations_from_GEO_down",
-    "Single_Gene_Perturbations_from_GEO_up",
-    "Disease_Perturbations_from_GEO_down",
-    "Disease_Perturbations_from_GEO_up",
-    "Drug_Perturbations_from_GEO_down",
-    "Drug_Perturbations_from_GEO_up",
-    "WikiPathways_2016",
-    "Reactome_2016",
-    "BioCarta_2016",
-    "NCI-Nature_2016"]
-
-
-def get_library_name():
-    """return enrichr active enrichr library name. """
-
-	# make a get request to get the gmt names and meta data from Enrichr
-	#python 2
-    if sys.version_info[0] == 2 :
-        import urllib2
-        x = urllib2.urlopen('http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary?mode=meta')
-        response = x.read()
-        gmt_data = json.loads(response)
-
-	# python 3
-    elif sys.version_info[0] == 3:
-        import urllib
-        x = urllib.request.urlopen('http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary?mode=meta')
-        response = x.read()
-        gmt_data = json.loads(response.decode('utf-8'))
-    else:
-        sys.stderr.write("System failure. Please Provide correct input files")
-        sys.exit(1) 
-	# generate list of gmts 
-    gmt_names = []
-
-	# get library names 
-    for inst_gmt in gmt_data['libraries']:
-
-		# only include active gmts 
-        if inst_gmt['isActive'] == True:
-            gmt_names.append(inst_gmt['libraryName'])
     
-    return sorted(gmt_names)
-    
-def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr', cutoff=0.05, format='pdf', figsize=(3,6)):
+def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr',
+            cutoff=0.05, format='pdf', figsize=(3,6), top_term=10, scale=0.8):
     """Enrichr API.
 
     :param gene_list: Flat file with list of genes, one gene id per row.
@@ -73,12 +21,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr', cutoff=0.
     :param format: Output figure format supported by matplotlib ,('pdf','png','eps'...). Default: 'pdf'.
     :return: A DataFrame of enrchment results, only if call ``enrichr`` inside python console.
     """
-    try:
-        os.makedirs(outdir)
-    except OSError as exc:
-        if exc.errno != errno.EEXIST:
-            raise exc
-        pass
+    mkdirs(outdir)
 
     logger = log_init(outdir, module='enrichr')
     if isinstance(gene_list, list):
@@ -99,15 +42,19 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr', cutoff=0.
     gene_set = str(gene_sets)  
     
     logger.info("Connecting to Enrichr Server to get latest library names")
-    enrichr_library = get_library_name()
+ 
+
     
-    while True:
-        if gene_set in enrichr_library:
-            break
-        else:
+    
+
+    if gene_set in DEFAULT_LIBRARY:
+        enrichr_library = DEFAULT_LIBRARY
+    else:
+        enrichr_library = get_library_name()
+        if gene_set not in enrichr_library:
             sys.stderr.write("%s is not a enrichr library name\n"%gene_set)
             sys.stdout.write("Hint: use get_library_name() to veiw full list of supported names")
-            gene_set = str(input("Enter a correct enrichr library name here: "))
+            sys.exit(1)
         
     ## logging.debug options
     #logging.debug('Enrichr API : Input file is:', genelist)
@@ -133,7 +80,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr', cutoff=0.
 
     job_id = json.loads(response.text)
 
-    logging.debug('Job ID:'+ str(job_id))
+    logger.debug('Job ID:'+ str(job_id))
     
     ENRICHR_URL_A = 'http://amp.pharm.mssm.edu/Enrichr/view?userListId=%s'
 
@@ -143,7 +90,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr', cutoff=0.
     if not response_gene_list.ok:
         raise Exception('Error getting gene list')
 
-    logging.info('Submitted gene list:' + str(job_id))
+    logger.info('Submitted gene list:' + str(job_id))
 
 
     # Get enrichment results
@@ -158,7 +105,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr', cutoff=0.
     if not response.ok:
         raise Exception('Error fetching enrichment results')
 
-    logging.debug('Get enrichment results: Job Id:'+ str(job_id))
+    logger.debug('Get enrichment results: Job Id:'+ str(job_id))
 
 
     ## Download file of enrichment results
@@ -178,23 +125,23 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr', cutoff=0.
             if chunk:
                 f.write(chunk)
 
-    logging.debug('Results written to: ' + outfile + description + ".txt")
+    logger.debug('Results written to: ' + outfile + description + ".txt")
 
     df =  read_table(outdir+'/'+ outfile + description + '.txt')
-    fig = dotplot(df, cutoff=cutoff, figsize=figsize)
+    fig = dotplot(df, cutoff=cutoff, figsize=figsize, top_term=top_term, scale=scale)
     if fig is not None:
         fig.savefig(outdir+'/'+"enrichr.reports.%s.%s"%(description, format), bbox_inches='tight', dpi=300)
-		
 
-    handlers = logger.handlers[:]
-    for handler in handlers:
-        handler.close()
-        logger.removeHandler(handler)
+        
     if hasattr(sys, 'ps1'):
         logger.info("Enrichr: You are inside python console, a dataframe is returned.")
         logger.info("Enrichr: Job Done!")
+        log_remove(logger)
         return df        
+    else:
+        logger.info("Enrichr: Job Done!")
+    log_remove(logger)
         
-    logger.info("Enrichr: Job Done!")
+    
 
     

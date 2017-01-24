@@ -8,7 +8,9 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import matplotlib.transforms as transforms
+from .parser import unique
 
+logger = logging.getLogger(__name__)
 
 class _MidpointNormalize(Normalize):
     def __init__(self, vmin=None, vmax=None, midpoint=None, clip=False):
@@ -198,12 +200,12 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     
     return fig
 
-def dotplot(df, cutoff=0.05,term_num=10, figsize=(3,6), scale=50):
-    """Visualize enrichr or gsea results.
+def dotplot(df, cutoff=0.05, figsize=(3.5,6), top_term=10, scale=1):
+    """Visualize enrichr results.
     
     :param df: GSEApy DataFrame results. 
     :param cutoff: p-adjust cut-off. 
-    :param term_num: number of enriched terms to show.
+    :param top_term: number of enriched terms to show.
     :param scale: dotplot point size scale.
     :return:  a dotplot for enrichr terms. 
 
@@ -223,19 +225,20 @@ def dotplot(df, cutoff=0.05,term_num=10, figsize=(3,6), scale=50):
     df = df[df['Adjusted P-value'] <= cutoff]
     
     if len(df) < 1:
-        logging.warning("Warning: No enrich terms when cuttoff = %s"%cutoff )
+        logger.warning("Warning: No enrich terms when cuttoff = %s"%cutoff )
         return None
     #sorting the dataframe for better visualization
     df = df.sort_values(by='Adjusted P-value', ascending=False)
-    df = df.head(term_num)
+    df = df.head(top_term)
     # x axis values
     padj = df['Adjusted P-value']
+    combined_score = df['Combined Score'].round().astype('int')
     x = - padj.apply(np.log10)
     # y axis index and values
     y=  [i for i in range(0,len(df))]
     labels = df.Term.values
     
-    area = np.pi * (df['hits_ratio'] *scale) **2 
+    area = np.pi * (df['Count'] *scale) **2 
     
     #creat scatter plot
     if hasattr(sys, 'ps1'):
@@ -246,49 +249,63 @@ def dotplot(df, cutoff=0.05,term_num=10, figsize=(3,6), scale=50):
         fig = Figure(figsize=figsize)
         canvas = FigureCanvas(fig)
         ax = fig.add_subplot(111)
-    vmin = np.percentile(padj.min(), 2)
-    vmax =  np.percentile(padj.max(), 98)        
-    sc = ax.scatter(x=x, y=y, s=area, edgecolors='face', c=padj,  
+    vmin = np.percentile(combined_score.min(), 2)
+    vmax =  np.percentile(combined_score.max(), 98)        
+    sc = ax.scatter(x=x, y=y, s=area, edgecolors='face', c=combined_score,  
                     cmap = plt.cm.RdBu, vmin=vmin, vmax=vmax)
-    ax.set_xlabel("-log$_{10}$(Adjust P-value)")
+    ax.set_xlabel("-log$_{10}$(Adjust P-value)", fontsize=16)
     ax.yaxis.set_major_locator(plt.FixedLocator(y))
     ax.yaxis.set_major_formatter(plt.FixedFormatter(labels))
-    ax.set_ylim([-1, len(df)])
+    ax.set_yticklabels(labels, fontsize=16)
+    #ax.set_ylim([-1, len(df)])
     ax.grid()
        
     #colorbar
-    cax=fig.add_axes([0.93,0.20,0.05,0.20])
+    cax=fig.add_axes([0.93,0.20,0.07,0.22])
     cbar = fig.colorbar(sc, cax=cax,)
     cbar.ax.tick_params(right='off')
-    cbar.ax.set_title('Padj',loc='left')
+    cbar.ax.set_title('Com-\nscore',loc='left', fontsize=12)
 
-    #scale of dots
-    ax2 =fig.add_axes([0.93,0.55,0.05,0.12])
+
     
     #for terms less than 3
     if len(df) >= 3:
-        x2 = [0]*3
+        
         # find the index of the closest value to the median 
-        idx = [area.argmax(), np.abs(area - area.median()).argmin(), area.argmin()]
+        idx = [area.argmax(), np.abs(area - area.mean()).argmin(), area.argmin()]
+        idx = unique(idx)
+        x2 = [0]*len(idx)
     else:        
         x2 =  [0]*len(df)
         idx = df.index
-
+    #scale of dots
+    ax2 =fig.add_axes([0.93,0.55,0.09,0.06*len(idx)])
 
     y2 = [i for i in range(0,len(x2))]
     ax2.scatter(x=x2, y=y2, s=area[idx], c='black', edgecolors='face')
     
     for i, index in enumerate(idx):
-        ax2.text(x=0.8, y=y2[i], s=df['hits_ratio'][index].round(2), 
+        ax2.text(x=0.5, y=y2[i], s=df['Count'][index], 
                  verticalalignment='center', horizontalalignment='left')
-    ax2.set_title("Gene\nRatio",loc='left')
+    ax2.set_title("Gene\nCounts",loc='left')
     
     #turn off all spines and ticks
     ax2.axis('off')
-
+    #adjust_spines(ax2, spines=[])
     #plt.tight_layout()
     #canvas.print_figure('test', bbox_inches='tight')    
     return fig
+
+def barplot(df, top_term=10):
+    """ barplot for enrichr results"""
+    df['logAdj'] = - np.log10(df['Adjusted P-value'])
+    df = df.sort_values('logAdj')
+    dat = df.head(top_term)
+    with plt.style.context('seaborn-whitegrid'):
+        bar = dat.plot.barh(x='Term',y='logAdj', alpha=0.7, figsize=(4,6))
+        bar.legend(loc=4)
+        bar.set_xlabel("-log$_{10}$ Adjusted P-value", fontsize=16)
+    return fig 
     
 def adjust_spines(ax, spines):
     """function for removing spines and ticks.

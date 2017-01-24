@@ -46,7 +46,7 @@ def main():
         # calling enrichr API
         from .enrichr import enrichr
         enrichr(gene_list= args.gene_list, description=args.descrip, gene_sets=args.library, outdir=args.outdir,
-		        format=args.format, cutoff=args.thresh, figsize=args.figsize)    
+		      format=args.format, cutoff=args.thresh, figsize=args.figsize, top_term=args.term, scale=args.scale)    
     else:
         argparser.print_help()
         sys.exit(0)
@@ -217,31 +217,15 @@ def add_enrichr_parser(subparsers):
                               can be differentiated from each other if you choose to save or share your list.") 
     group_opt.add_argument("--cut-off", action="store", dest="thresh", metavar='', type=float, default=0.05,
                               help="Adjust-Pval cutoff, used for generating plots. Default: 0.05.")
-    
+    group_opt.add_argument("-t", "--top-term", dest = "term", action="store", type=int, default=10, metavar='',
+                           help="Numbers of top terms showed in the plot. Default: 10")
+    group_opt.add_argument("--scale", dest = "scale", action="store", type=float, default=0.6, metavar='',
+                           help="scatter dot scale in the dotplot. Default: 0.6")    
     enrichr_output = argparser_enrichr.add_argument_group("Output arguments")
     add_output_option(enrichr_output)
 
 
     return
-def log_init(outdir, module='foo'):
-    logging.basicConfig(
-                level    = logging.DEBUG,
-                format   = 'LINE %(lineno)-4d: %(asctime)s [%(levelname)-8s] %(message)s',
-                filename = "%s/gseapy.%s.log"%(outdir, module),
-                filemode = 'w')
-    logger = logging.getLogger(__name__)
-    #logger.setLevel(logging.DEBUG)
-
-    # define a Handler which writes INFO messages or higher to the sys.stderr
-    console = logging.StreamHandler()
-    console.setLevel(logging.INFO)
-    # set a format which is simpler for console use
-    formatter = logging.Formatter('%(asctime)s %(message)s')
-    # tell the handler to use this format
-    console.setFormatter(formatter)
-    logger.addHandler(console)
-    #if you want information print to the console, uisng logger.info....
-    return logger
 
 if __name__ == '__main__':
     try:
