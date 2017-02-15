@@ -20,8 +20,8 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
 
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg
     :target:  https://img.shields.io/badge/license-MIT-blue.svg
-.. image:: https://img.shields.io/badge/python-3.5-blue.svg
-    :target:   https://img.shields.io/badge/python-3.5-blue.svg
+.. image:: https://img.shields.io/badge/python-3.6-blue.svg
+    :target:   https://img.shields.io/badge/python-3.6-blue.svg
 .. image:: https://img.shields.io/badge/python-2.7-blue.svg
     :target:  https://img.shields.io/badge/python-2.7-blue.svg
 
