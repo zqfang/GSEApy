@@ -12,7 +12,7 @@ import argparse as ap
 # or args = argparser.parse_args() will throw bugs!!!
 
 
-__version__ = '0.7.4'
+__version__ = '0.7.6'
 
 def main():
     """The Main function/pipeline for GSEAPY."""
@@ -45,8 +45,9 @@ def main():
     elif subcommand == 'enrichr':
         # calling enrichr API
         from .enrichr import enrichr
-        enrichr(gene_list= args.gene_list, description=args.descrip, gene_sets=args.library, outdir=args.outdir,
-		      format=args.format, cutoff=args.thresh, figsize=args.figsize, top_term=args.term, scale=args.scale)    
+        enrichr(gene_list= args.gene_list, description=args.descrip, gene_sets=args.library,
+                outdir=args.outdir, format=args.format, cutoff=args.thresh, figsize=args.figsize,
+                top_term=args.term, scale=args.scale, no_plot=args.no_plot)    
     else:
         argparser.print_help()
         sys.exit(0)
@@ -205,23 +206,25 @@ def add_enrichr_parser(subparsers):
     argparser_enrichr = subparsers.add_parser("enrichr", help="Peform GSEA using enrichr API.")
 
     # group for required options.
-    group_opt = argparser_enrichr.add_argument_group("Input arguments")
-    group_opt.add_argument("-i", "--input-list", action="store", dest="gene_list", type=str, required=True, metavar='glist',
+    enrichr_opt = argparser_enrichr.add_argument_group("Input arguments")
+    enrichr_opt.add_argument("-i", "--input-list", action="store", dest="gene_list", type=str, required=True, metavar='glist',
                               help="Enrichr uses a list of Entrez gene symbols as input.")
-
-    group_opt.add_argument("-g", "--gene-sets", action="store", dest="library", type=str, required=True, metavar='gmt',
+    enrichr_opt.add_argument("-g", "--gene-sets", action="store", dest="library", type=str, required=True, metavar='gmt',
                               help="Enrichr library name required. see online tool for libarry names.")
-
-    group_opt.add_argument("-d", "--description", action="store", dest="descrip", type=str, default='foo', metavar='',
+    enrichr_opt.add_argument("-d", "--description", action="store", dest="descrip", type=str, default='foo', metavar='',
                               help="It is recommended to enter a description for your list so that multiple lists \
                               can be differentiated from each other if you choose to save or share your list.") 
-    group_opt.add_argument("--cut-off", action="store", dest="thresh", metavar='', type=float, default=0.05,
+    enrichr_opt.add_argument("--cut-off", action="store", dest="thresh", metavar='', type=float, default=0.05,
                               help="Adjust-Pval cutoff, used for generating plots. Default: 0.05.")
-    group_opt.add_argument("-t", "--top-term", dest = "term", action="store", type=int, default=10, metavar='',
-                           help="Numbers of top terms showed in the plot. Default: 10")
-    group_opt.add_argument("--scale", dest = "scale", action="store", type=float, default=0.6, metavar='',
-                           help="scatter dot scale in the dotplot. Default: 0.6")    
-    enrichr_output = argparser_enrichr.add_argument_group("Output arguments")
+    enrichr_opt.add_argument("-t", "--top-term", dest = "term", action="store", type=int, default=10, metavar='',
+                              help="Numbers of top terms showed in the plot. Default: 10")
+    enrichr_opt.add_argument("--scale", dest = "scale", action="store", type=float, default=0.6, metavar='',
+                              help="scatter dot scale in the dotplot. Default: 0.6")    
+    enrichr_opt.add_argument("--no-plot", action='store_true', dest='no_plot', default=False,
+                              help="Suppress the plot output.This is useful only if data are intrested. Default: False.")
+
+
+    enrichr_output = argparser_enrichr.add_argument_group("Output figure arguments")
     add_output_option(enrichr_output)
 
 

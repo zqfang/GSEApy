@@ -2,7 +2,7 @@
 import sys, os
 from setuptools import setup
 
-__version__='0.7.5'
+__version__='0.7.6'
 
 if sys.argv[-1] == 'publish':
     os.system("python setup.py sdist bdist_egg register upload")

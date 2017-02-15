@@ -9,7 +9,7 @@ from .utils import *
 
     
 def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr',
-            cutoff=0.05, format='pdf', figsize=(3,6), top_term=10, scale=0.8):
+            cutoff=0.05, format='pdf', figsize=(3,6), top_term=10, scale=0.8, no_plot=False):
     """Enrichr API.
 
     :param gene_list: Flat file with list of genes, one gene id per row.
@@ -18,7 +18,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr',
     :param description: name of analysis
     :param outdir: Output file directory
     :param cutoff: Adjust P-value cutoff, for plotting. Default: 0.05
-    :param format: Output figure format supported by matplotlib ,('pdf','png','eps'...). Default: 'pdf'.
+    :param format: Output figure format supported by matplotlib,('pdf','png','eps'...). Default: 'pdf'.
     :return: A DataFrame of enrchment results, only if call ``enrichr`` inside python console.
     """
     mkdirs(outdir)
@@ -33,8 +33,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr',
             genes = f.read()
 	
         genes_str = str(genes)
-    
-    
+       
     # name of analysis or list
     description = str(description)
     
@@ -42,11 +41,6 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr',
     gene_set = str(gene_sets)  
     
     logger.info("Connecting to Enrichr Server to get latest library names")
- 
-
-    
-    
-
     if gene_set in DEFAULT_LIBRARY:
         enrichr_library = DEFAULT_LIBRARY
     else:
@@ -56,34 +50,23 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr',
             sys.stdout.write("Hint: use get_library_name() to veiw full list of supported names")
             sys.exit(1)
         
-    ## logging.debug options
-    #logging.debug('Enrichr API : Input file is:', genelist)
     logger.info('Analysis name: %s, Enrichr Library: %s'%(description, gene_set))
-    #logging.('Enrichr API : Enrichr Results File: ', enrichr_results)
-
 
     ## enrichr url
     ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/addList'
-
     # payload
     payload = {
       'list': (None, genes_str),
       'description': (None, description)
        }   
-
     # response
-
     response = requests.post(ENRICHR_URL, files=payload)
-
     if not response.ok:
         raise Exception('Error analyzing gene list')
-
     job_id = json.loads(response.text)
 
-    logger.debug('Job ID:'+ str(job_id))
-    
+    logger.debug('Job ID:'+ str(job_id))   
     ENRICHR_URL_A = 'http://amp.pharm.mssm.edu/Enrichr/view?userListId=%s'
-
     user_list_id = job_id['userListId']
     response_gene_list = requests.get(ENRICHR_URL_A % str(user_list_id))
 
@@ -91,12 +74,9 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr',
         raise Exception('Error getting gene list')
 
     logger.info('Submitted gene list:' + str(job_id))
-
-
     # Get enrichment results
     ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/enrich'
     query_string = '?userListId=%s&backgroundType=%s'
-
     ## get id data
     user_list_id = job_id['userListId']
     response = requests.get(
@@ -106,10 +86,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr',
         raise Exception('Error fetching enrichment results')
 
     logger.debug('Get enrichment results: Job Id:'+ str(job_id))
-
-
     ## Download file of enrichment results
-    #
     ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/export'
     query_string = '?userListId=%s&filename=%s&backgroundType=%s'
     user_list_id = str(job_id['userListId'])
@@ -117,9 +94,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr',
     url = ENRICHR_URL + query_string % (user_list_id, outfile, gene_set)
     response = requests.get(url, stream=True)
 
-    logger.info('Downloading file of enrichment results: Job Id:'+ str(job_id))
-
-	
+    logger.info('Downloading file of enrichment results: Job Id:'+ str(job_id))	
     with open(outdir+'/'+ outfile + description + '.txt', 'wb') as f:
         for chunk in response.iter_content(chunk_size=1024):
             if chunk:
@@ -128,11 +103,12 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr',
     logger.debug('Results written to: ' + outfile + description + ".txt")
 
     df =  read_table(outdir+'/'+ outfile + description + '.txt')
-    fig = dotplot(df, cutoff=cutoff, figsize=figsize, top_term=top_term, scale=scale)
-    if fig is not None:
-        fig.savefig(outdir+'/'+"enrichr.reports.%s.%s"%(description, format), bbox_inches='tight', dpi=300)
+    if not no_plot:
+        fig = dotplot(df, cutoff=cutoff, figsize=figsize, top_term=top_term, scale=scale)
+        if fig is not None:
+            fig.savefig(outdir+'/'+"enrichr.reports.%s.%s"%(description, format),
+                        bbox_inches='tight', dpi=300)
 
-        
     if hasattr(sys, 'ps1'):
         logger.info("Enrichr: You are inside python console, a dataframe is returned.")
         logger.info("Enrichr: Job Done!")
