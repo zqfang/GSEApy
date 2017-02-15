@@ -19,7 +19,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr',
     :param outdir: Output file directory
     :param cutoff: Adjust P-value cutoff, for plotting. Default: 0.05
     :param format: Output figure format supported by matplotlib,('pdf','png','eps'...). Default: 'pdf'.
-    :param no_plot: Bool, do not draw figures. This is useful only if data are interested. Default: False.
+    :param no_plot: Bool, if equal to True, no figure will be draw. This is useful only if data are interested. Default: False.
     :return: A DataFrame of enrchment results, only if call ``enrichr`` inside python console.
     """
     mkdirs(outdir)
