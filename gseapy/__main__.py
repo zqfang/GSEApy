@@ -12,7 +12,7 @@ import argparse as ap
 # or args = argparser.parse_args() will throw bugs!!!
 
 
-__version__ = '0.7.6'
+__version__ = '0.7.7'
 
 def main():
     """The Main function/pipeline for GSEAPY."""
@@ -85,8 +85,6 @@ def add_output_option(parser):
     parser.add_argument("--figsize", action='store', nargs=2, dest='figsize',
                         metavar=('width', 'height'),type=float, default=(6.5, 6),
                         help="The figsize keyword argument need two parameter to define. Default: (6.5, 6)")
-
-
 
 def add_output_group(parser, required=True):
     """output group"""
@@ -207,20 +205,20 @@ def add_enrichr_parser(subparsers):
 
     # group for required options.
     enrichr_opt = argparser_enrichr.add_argument_group("Input arguments")
-    enrichr_opt.add_argument("-i", "--input-list", action="store", dest="gene_list", type=str, required=True, metavar='glist',
+    enrichr_opt.add_argument("-i", "--input-list", action="store", dest="gene_list", type=str, required=True, metavar='file',
                               help="Enrichr uses a list of Entrez gene symbols as input.")
     enrichr_opt.add_argument("-g", "--gene-sets", action="store", dest="library", type=str, required=True, metavar='gmt',
                               help="Enrichr library name required. see online tool for libarry names.")
     enrichr_opt.add_argument("-d", "--description", action="store", dest="descrip", type=str, default='foo', metavar='',
                               help="It is recommended to enter a description for your list so that multiple lists \
                               can be differentiated from each other if you choose to save or share your list.") 
-    enrichr_opt.add_argument("--cut-off", action="store", dest="thresh", metavar='', type=float, default=0.05,
+    enrichr_opt.add_argument("--cut-off", action="store", dest="thresh", metavar='float', type=float, default=0.05,
                               help="Adjust-Pval cutoff, used for generating plots. Default: 0.05.")
-    enrichr_opt.add_argument("-t", "--top-term", dest = "term", action="store", type=int, default=10, metavar='',
+    enrichr_opt.add_argument("-t", "--top-term", dest="term", action="store", type=int, default=10, metavar='int',
                               help="Numbers of top terms showed in the plot. Default: 10")
-    enrichr_opt.add_argument("--scale", dest = "scale", action="store", type=float, default=0.6, metavar='',
-                              help="scatter dot scale in the dotplot. Default: 0.6")    
-    enrichr_opt.add_argument("--no-plot", action='store_true', dest='no_plot', default=False,
+    enrichr_opt.add_argument("--scale", dest = "scale", action="store", type=float, default=0.5, metavar='float',
+                              help="scatter dot scale in the dotplot. Default: 0.5")    
+    enrichr_opt.add_argument("--no-plot", action='store_true', dest='no_plot', default=False, 
                               help="Suppress the plot output.This is useful only if data are intrested. Default: False.")
 
 

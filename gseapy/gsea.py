@@ -1,6 +1,6 @@
 #! python
 # -*- coding: utf-8 -*-
-from __future__ import  absolute_import, division
+from __future__ import  division
 
 
 import os,sys, logging
@@ -194,7 +194,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
         rdict['gene_set_size'] = len(gmt[gs])
         rdict['matched_size'] = len(ind)
         rdict['rank_ES'] = RES
-        rdict['genes'] = dat2.ix[ind,'gene_name'].tolist()
+        rdict['genes'] = ",".join(dat2.ix[ind,'gene_name'].tolist())
         rdict['hit_index'] = ind
         res[gs] = rdict           
     
@@ -216,7 +216,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
         fig = gsea_plot(rank_metric=dat2, enrich_term=gs, hit_ind=hit,
                         nes=res.get(gs)['nes'], pval=res.get(gs)['pval'], fdr=res.get(gs)['fdr'], 
                         RES=res.get(gs)['rank_ES'], phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize)        
-        gs = gs.replace('/','_')
+        gs = gs.replace('/','_').replace(":","_")
         fig.savefig('{a}/{b}.gsea.{c}'.format(a=outdir, b=gs, c=format), bbox_inches='tight', dpi=300,)
 
         heatmap(df=dat.loc[gene_symbol], term=gs, outdir=outdir, 
@@ -297,7 +297,7 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
         rdict['gene_set_size'] = len(gmt[gs])
         rdict['matched_size'] = len(ind)
         rdict['rank_ES'] = RES
-        rdict['genes'] = dat2.ix[ind,'gene_name'].tolist()
+        rdict['genes'] = ",".join(dat2.ix[ind,'gene_name'].tolist())
         rdict['hit_index'] = ind
         res[gs] = rdict           
 
@@ -316,7 +316,7 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
         fig = gsea_plot(rank_metric=dat2, enrich_term=gs, hit_ind=res.get(gs)['hit_index'],
                         nes=res.get(gs)['nes'], pval=res.get(gs)['pval'], fdr=res.get(gs)['fdr'], 
                         RES=res.get(gs)['rank_ES'], phenoPos=pheno_pos, phenoNeg=pheno_neg, figsize=figsize)        
-        gs = gs.replace('/','_')
+        gs = gs.replace('/','_').replace(":","_")
         fig.savefig('{a}/{b}.gsea.{c}'.format(a=outdir, b=gs, c=format), bbox_inches='tight', dpi=300,)
 
    

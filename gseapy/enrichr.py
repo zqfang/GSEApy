@@ -4,7 +4,7 @@
 
 import sys, json, requests, logging
 from pandas import read_table
-from .plot import dotplot
+from .plot import barplot
 from .utils import *
 
     
@@ -91,7 +91,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr',
     ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/export'
     query_string = '?userListId=%s&filename=%s&backgroundType=%s'
     user_list_id = str(job_id['userListId'])
-    outfile='enrichr.reports.'
+    outfile='Enrichr.reports.'
     url = ENRICHR_URL + query_string % (user_list_id, outfile, gene_set)
     response = requests.get(url, stream=True)
 
@@ -105,7 +105,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr',
 
     df =  read_table(outdir+'/'+ outfile + description + '.txt')
     if not no_plot:
-        fig = dotplot(df, cutoff=cutoff, figsize=figsize, top_term=top_term, scale=scale)
+        fig = barplot(df, top_term=top_term,)
         if fig is not None:
             fig.savefig(outdir+'/'+"enrichr.reports.%s.%s"%(description, format),
                         bbox_inches='tight', dpi=300)

@@ -298,13 +298,22 @@ def dotplot(df, cutoff=0.05, figsize=(3.5,6), top_term=10, scale=1):
 
 def barplot(df, top_term=10):
     """ barplot for enrichr results"""
-    df['logAdj'] = - np.log10(df['Adjusted P-value'])
-    df = df.sort_values('logAdj')
-    dat = df.head(top_term)
-    with plt.style.context('seaborn-whitegrid'):
-        bar = dat.plot.barh(x='Term',y='logAdj', alpha=0.7, figsize=(4,6))
-        bar.legend(loc=4)
-        bar.set_xlabel("-log$_{10}$ Adjusted P-value", fontsize=16)
+
+
+    d=df.copy()
+    d['logAP'] = - np.log10(d['Adjusted P-value']) 
+    d = d.sort_values('logAP', ascending=False)
+    dd = d.head(top_term).sort_values('logAP')
+    fig = Figure(figsize=(12,6))
+    canvas = FigureCanvas(fig)
+    ax = fig.add_subplot(111)
+    bar = dd.plot.barh(x='Term', y='logAP', color="salmon", alpha=0.75, edgecolor='none',fontsize=32, ax=ax)
+    bar.set_xlabel("-log$_{10}$ Adjust P-value", fontsize=32)
+    bar.set_ylabel("")
+    #bar.set_title("Enrichr",fontsize=32)
+    bar.legend(loc=4)
+    #fig.savefig(png, bbox_inches='tight')
+    #fig.savefig(pdf, bbox_inches='tight')
     return fig 
     
 def adjust_spines(ax, spines):
