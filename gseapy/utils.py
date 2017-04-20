@@ -22,7 +22,7 @@ def unique(seq):
 
     return [x for x in seq if x not in seen and not seen_add(x)]
 
-def log_init(outdir, module='foo', log_level=logging.WARNING):
+def log_init(outdir, module='foo', log_level=logging.INFO):
     logging.basicConfig(
                 level    = logging.DEBUG,
                 format   = 'LINE %(lineno)-4d: %(asctime)s [%(levelname)-8s] %(message)s',

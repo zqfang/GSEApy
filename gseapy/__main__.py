@@ -12,7 +12,7 @@ import argparse as ap
 # or args = argparser.parse_args() will throw bugs!!!
 
 
-__version__ = '0.7.7'
+__version__ = '0.7.8'
 
 def main():
     """The Main function/pipeline for GSEAPY."""
@@ -27,27 +27,27 @@ def main():
         from .gsea import replot
 
         replot(indir=args.indir, outdir=args.outdir, weight=args.weight,
-               figsize=args.figsize, format=args.format,)
+               figsize=args.figsize, format=args.format, verbose=args.verbose)
 
     elif subcommand == "call":
         # compute using GSEAPY
         from .gsea import call
 
         call(args.data, args.gmt, args.cls, args.outdir, args.mins, args.maxs, args.n, args.weight,
-            args.type, args.method, args.ascending, args.figsize, args.format, args.graph, args.seed)
+            args.type, args.method, args.ascending, args.figsize, args.format, args.graph, args.seed, args.verbose)
     
     elif subcommand == "prerank":
         from .gsea import prerank
         
         prerank(args.rnk, args.gmt, args.outdir, args.label[0], args.label[1], args.mins, args.maxs, args.n, args.weight,
-                args.ascending, args.figsize, args.format, args.graph, args.seed)
+                args.ascending, args.figsize, args.format, args.graph, args.seed, args.verbose)
     
     elif subcommand == 'enrichr':
         # calling enrichr API
         from .enrichr import enrichr
         enrichr(gene_list= args.gene_list, description=args.descrip, gene_sets=args.library,
                 outdir=args.outdir, format=args.format, cutoff=args.thresh, figsize=args.figsize,
-                top_term=args.term, scale=args.scale, no_plot=args.no_plot)    
+                top_term=args.term, scale=args.scale, no_plot=args.no_plot, verbose=args.verbose)    
     else:
         argparser.print_help()
         sys.exit(0)
@@ -85,7 +85,8 @@ def add_output_option(parser):
     parser.add_argument("--figsize", action='store', nargs=2, dest='figsize',
                         metavar=('width', 'height'),type=float, default=(6.5, 6),
                         help="The figsize keyword argument need two parameter to define. Default: (6.5, 6)")
-
+    parser.add_argument("-v", "--verbose", action="store_true", default=False, dest='verbose',
+                        help="increase output verbosity, print out progress of your job", )
 def add_output_group(parser, required=True):
     """output group"""
 

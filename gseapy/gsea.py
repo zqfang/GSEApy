@@ -12,7 +12,7 @@ from .utils import log_init, log_remove, mkdirs
 import pandas as pd
 
 
-def replot(indir, outdir='gseapy_out', weight=1, figsize=[6.5,6], format='pdf', min_size=3, max_size=5000):
+def replot(indir, outdir='gseapy_replot', weight=1, figsize=[6.5,6], format='pdf', min_size=3, max_size=5000, verbose=False):
     """The main fuction to run inside python.
           
     :param indir: GSEA desktop results directory. In the sub folder, you must contain edb file foder.    
@@ -24,13 +24,14 @@ def replot(indir, outdir='gseapy_out', weight=1, figsize=[6.5,6], format='pdf', 
     :param max_size: max size of input genes presented in Gene Sets. Default: 5000.
                      you will not encourage to use min_size, or max_size argment in :func:`replot` function.
                      Because gmt file has already been filter.
-    
+    :param verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
+
     :return: Generate new figures with seleted figure format. Default: 'pdf'.   
     """
     argument = locals()
 
     mkdirs(outdir)   
-    logger = log_init(outdir, module='replot')
+    logger = log_init(outdir, module='replot', log_level= logging.INFO if verbose else logging.WARNING)
     #write command to log file
     argument = OrderedDict(sorted(argument.items(), key=lambda t:t[0]))
     logger.debug("Command: replot, "+str(argument))
@@ -83,7 +84,7 @@ def replot(indir, outdir='gseapy_out', weight=1, figsize=[6.5,6], format='pdf', 
         
 def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, permutation_n=1000, 
           weighted_score_type=1,permutation_type='gene_set', method='log2_ratio_of_classes',
-	  ascending=False, figsize=[6.5,6], format='pdf', graph_num=20, seed=None):
+	  ascending=False, figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
     """ Run Gene Set Enrichment Analysis.
 
     :param data: Gene expression data table.  
@@ -129,6 +130,8 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
     :param format: Matplotlib figure format. Default: 'pdf'.
     :param graph_num: Plot graphs for top sets of each phenotype
     :param seed: Random seed. expect an interger. Defalut:None.
+    :param verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
+
     :return: Return a DataFrame when inside python console.
              Generate ``GSEA`` plots and store a dictionary into csv file,
              where  each column represents::
@@ -147,7 +150,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
     assert min_size <= max_size
 
     mkdirs(outdir)
-    logger = log_init(outdir, module='call')
+    logger = log_init(outdir, module='call', log_level = logging.INFO if verbose else logging.WARNING)
 
     if isinstance(data, pd.DataFrame) :
         df = data.copy()
@@ -194,7 +197,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
         rdict['gene_set_size'] = len(gmt[gs])
         rdict['matched_size'] = len(ind)
         rdict['rank_ES'] = RES
-        rdict['genes'] = ",".join(dat2.ix[ind,'gene_name'].tolist())
+        rdict['genes'] = dat2.ix[ind,'gene_name'].tolist()
         rdict['hit_index'] = ind
         res[gs] = rdict           
     
@@ -232,7 +235,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
 
 def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg',
             min_size=15, max_size=500, permutation_n=1000, weighted_score_type=1,
-            ascending=False, figsize=[6.5,6], format='pdf', graph_num=20, seed=None):
+            ascending=False, figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
     """ Run Gene Set Enrichment Analysis with pre-ranked correlation defined by user.
 
     :param rnk: pre-ranked correlation table, Same input with ``GSEA`` .rnk file.  
@@ -246,7 +249,9 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
     :param figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
     :param format: Matplotlib figure format. Default: 'pdf'.
     :param graph_num: Plot graphs for top sets of each phenotype
-    :param seed: Random seed. expect an interger. Defalut:None.    
+    :param seed: Random seed. expect an interger. Defalut:None. 
+    :param verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
+       
     :return: Return a DataFrame when inside python console.
              Generate ``GSEA`` plots and store a dictionary into csv file,
              where each column represents::
@@ -264,7 +269,7 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
     assert min_size <= max_size
     
     mkdirs(outdir)
-    logger = log_init(outdir, module='prerank')
+    logger = log_init(outdir, module='prerank', log_level= logging.INFO if verbose else logging.WARNING)
     if isinstance(rnk, pd.DataFrame) :       
         argument['rnk'] = 'DataFrame'
     #write command to log file
@@ -297,7 +302,7 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
         rdict['gene_set_size'] = len(gmt[gs])
         rdict['matched_size'] = len(ind)
         rdict['rank_ES'] = RES
-        rdict['genes'] = ",".join(dat2.ix[ind,'gene_name'].tolist())
+        rdict['genes'] = dat2.ix[ind,'gene_name'].tolist()
         rdict['hit_index'] = ind
         res[gs] = rdict           
 

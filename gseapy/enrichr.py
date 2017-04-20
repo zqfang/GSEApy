@@ -9,7 +9,7 @@ from .utils import *
 
     
 def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr',
-            cutoff=0.05, format='pdf', figsize=(3,6), top_term=10, scale=0.8, no_plot=False):
+            cutoff=0.05, format='pdf', figsize=(3,6), top_term=10, scale=0.8, no_plot=False, verbose=False):
     """Enrichr API.
 
     :param gene_list: Flat file with list of genes, one gene id per row.
@@ -20,11 +20,12 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr',
     :param cutoff: Adjust P-value cutoff, for plotting. Default: 0.05
     :param format: Output figure format supported by matplotlib,('pdf','png','eps'...). Default: 'pdf'.
     :param no_plot: Bool, if equal to True, no figure will be draw. This is useful only if data are interested. Default: False.
+    :param verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
     :return: A DataFrame of enrchment results, only if call ``enrichr`` inside python console.
     """
     mkdirs(outdir)
 
-    logger = log_init(outdir, module='enrichr')
+    logger = log_init(outdir, module='enrichr',log_level= logging.INFO if verbose else logging.WARNING)
     if isinstance(gene_list, list):
         genes = [str(gene) for gene in gene_list]
         genes_str = '\n'.join(genes)
