@@ -252,20 +252,14 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
     
     
     if permutation_type == "phenotype":
-        
-        dat2 = dat.T 
+        l2 = list(classes)
+        dat2 = dat.copy()
         for i in range(n):
-            dat2.apply(rs.shuffle, axis=0) #permutation classes
-            r2 = ranking_metric(df=dat2.T, method=method, phenoPos=phenoPos, phenoNeg=phenoNeg, classes=classes, ascending=ascending )
+            rs.shuffle(l2) #permutation classes
+            r2 = ranking_metric(df=dat2, method=method, phenoPos=phenoPos, phenoNeg=phenoNeg, classes=l2, ascending=ascending)
             ranking2=r2['rank']
             gene_list2=r2['gene_name'].values
-        
-    
-        #for i in range(n):    
-        #gene_list.apply(np.random.shuffle,axis=0) #permutation genes
-        #r2 = ranking_metric(df=dat,method = method, classes=classes,ascending= ascending)
-        #gene_list2 = shuffle_list(gene_list, rs)
-        #ranking2=ranking           
+                 
             for si,subset in enumerate(subsets):
                 esn = enrichment_score(gene_list=gene_list2, gene_set=gmt.get(subset), 
                                        weighted_score_type=w, correl_vector=ranking2)[0] 
