@@ -106,10 +106,11 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr',
 
     df =  read_table(outdir+'/'+ outfile + description + '.txt')
     if not no_plot:
-        fig = barplot(df, top_term=top_term,)
-        if fig is not None:
-            fig.savefig(outdir+'/'+"enrichr.reports.%s.%s"%(description, format),
-                        bbox_inches='tight', dpi=300)
+        if df.shape[0] > 0:
+            fig = barplot(df, top_term=top_term,)
+            if fig is not None:
+                fig.savefig(outdir+'/'+"enrichr.reports.%s.%s"%(description, format),
+                            bbox_inches='tight', dpi=300)
 
     if hasattr(sys, 'ps1'):
         logger.info("Enrichr: You are inside python console, a dataframe is returned.")
