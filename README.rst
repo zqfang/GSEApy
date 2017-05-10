@@ -11,8 +11,8 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
 .. image:: https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat-square
     :target: http://bioconda.github.io
 
-.. image:: https://travis-ci.org/BioNinja/gseapy.svg?branch=master
-    :target: https://travis-ci.org/BioNinja/gseapy
+.. image:: https://travis-ci.org/BioNinja/GSEApy.svg?branch=master
+    :target: https://travis-ci.org/BioNinja/GSEApy
 
 .. image:: http://readthedocs.org/projects/gseapy/badge/?version=latest
     :target: http://gseapy.readthedocs.org/en/latest/?badge=latest
@@ -36,14 +36,12 @@ An example to use gseapy, please click here: `Example <http://pythonhosted.org/g
 
 **Release notes** : https://github.com/BioNinja/gseapy/releases 
 
-GSEAPY is a python wrapper for **GSEA** and **Enrichr**. 
+GSEAPY* is a python wrapper for **GSEA** and **Enrichr**. 
 --------------------------------------------------------------------------------------------
 
 It's used for convenient GO enrichments and produce **publishable quality figures** in python. 
 
 GSEAPY could be used for **RNA-seq, ChIP-seq, Microarry** data.
-
-
 
 `Gene Set Enrichment Analysis <http://software.broadinstitute.org/gsea/index.jsp>`_ (GSEA) 
 is a computational method that determines whether an a priori defined set of genes shows 
@@ -55,6 +53,7 @@ The full ``GSEA`` is far too extensive to describe here; see
 Enrichr is open source and freely available online at: http://amp.pharm.mssm.edu/Enrichr .
 
 
+If you use gseapy, you should cite the original GSEA and Enrichr paper.
 
 Why GSEAPY
 -----------------------------------------------------
@@ -62,13 +61,11 @@ Why GSEAPY
 I would like to use Pandas to explore my data, but I did not find a  convenient tool to
 do gene set enrichment analysis in python. So, here is my reason: 
 
-* **Running inside python console without switch to R!!!**
+* **Running inside python interactive console without switch to R!!!**
 * User friendly for both wet and dry lab usrers.
 * Produce pubilishable figures.
-* Perform batch jobs easy.
-* Easy to use in Bash shell. 
-
-
+* Perform batch jobs easy(using for loops).
+* Easy to use in bashshell or your  data analysis workflow, e.g. snakemake.  
 
 
 GSEA Java version output: 
@@ -154,7 +151,7 @@ Installation
 
 .. code:: shell
    
-   # if you have conda(the recommended way)
+   # if you have conda
    $ conda install -c bioconda gseapy 
   
    # for  windows users 
@@ -171,7 +168,7 @@ Installation
 
 Dependency
 --------------
-* Python 2.7 or 3.3+
+* Python 2.7 or 3.4+
 
 Mandatory
 ~~~~~~~~~
@@ -257,7 +254,7 @@ Run gseapy inside python console:
     # assign dataframe, and use enrichr libary data set 'KEGG_2016'
     expression_dataframe = pd.DataFrame()
       
-    sample_name = ['A','A','A','B','B','B'] # always only two group 
+    sample_name = ['A','A','A','B','B','B'] # always only two group,any names you like 
 
     # assign gene_sets parameter with enrichr library name or gmt file on your local computor.
     gseapy.call(data=expression_dataframe, gene_sets='KEGG_2016', cls= sample_names, outdir='test')
