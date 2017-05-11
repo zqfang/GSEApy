@@ -12,7 +12,7 @@ import argparse as ap
 # or args = argparser.parse_args() will throw bugs!!!
 
 
-__version__ = '0.7.9'
+__version__ = '0.7.10'
 
 def main():
     """The Main function/pipeline for GSEAPY."""

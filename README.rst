@@ -36,7 +36,7 @@ An example to use gseapy, please click here: `Example <http://pythonhosted.org/g
 
 **Release notes** : https://github.com/BioNinja/gseapy/releases 
 
-GSEAPY* is a python wrapper for **GSEA** and **Enrichr**. 
+GSEAPY is a python wrapper for **GSEA** and **Enrichr**. 
 --------------------------------------------------------------------------------------------
 
 It's used for convenient GO enrichments and produce **publishable quality figures** in python. 
@@ -53,7 +53,7 @@ The full ``GSEA`` is far too extensive to describe here; see
 Enrichr is open source and freely available online at: http://amp.pharm.mssm.edu/Enrichr .
 
 
-If you use gseapy, you should cite the original GSEA and Enrichr paper.
+**If you use gseapy, you should cite the original ``GSEA`` and ``Enrichr`` paper.**
 
 Why GSEAPY
 -----------------------------------------------------
