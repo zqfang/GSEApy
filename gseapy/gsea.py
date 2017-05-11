@@ -74,7 +74,7 @@ def replot(indir, outdir='gseapy_replot', weight=1, figsize=[6.5,6], format='pdf
         #plotting
         fig = gsea_plot(rank_metric, enrich_term,hit_ind, nes, pval,
                         fdr, RES, phenoPos, phenoNeg, figsize=figsize)    
-        fig.savefig('{a}/.gsea.replot.{b}.{c}'.format(a=outdir, b=enrich_term, c=format),
+        fig.savefig('{a}/{b}.gsea.replot.{c}'.format(a=outdir, b=enrich_term, c=format),
                     bbox_inches='tight', dpi=300,)
 
       
