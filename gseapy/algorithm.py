@@ -99,15 +99,15 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
     return es.tolist(), hit_ind, RES.tolist()
  
 
- def enrichment_score_ss(gene_set, expressions, weighted_score_type=0.25, esnull=None, rs=np.random.RandomState()):
+def enrichment_score_ss(gene_set, expressions, weighted_score_type=0.25, esnull=None, rs=np.random.RandomState()):
     """
     Given a gene set, a map of gene names to expression levels, and a weight score, returns the ssGSEA
     enrichment score for the gene set as described by *D. Barbie et al 2009*
-    
+
     ssGSEA  allows one to define an enrichment score that represents the degree of absolute enrichment
     of a gene set in each sample within a given data set.  
-     The  enrichment score was produced using the Empirical Cumulative Distribution Functions (ECDF)
-     of the genes in the signature and the remaining genes.
+    The  enrichment score was produced using the Empirical Cumulative Distribution Functions (ECDF)
+    of the genes in the signature and the remaining genes.
 
     :requires: every member of gene_set is a key in expressions
     :param gene_set: a list of gene_names in the gene_set given by gmt file.
@@ -115,7 +115,7 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
     :param weighted_score_type: the weighted exponent on the :math:`P^W_G` term.
 
     :returns: an array representing the intermediate Enrichment Scores for each step along the sorted gene list.
-              To find the total enrichment score, take the sum of all values in the array. 
+          To find the total enrichment score, take the sum of all values in the array. 
     """
 
 
@@ -139,9 +139,9 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
     #determining denominator value
     i =1
     for gene in keys_sorted:
-        if gene in gene_set:
-            P_GW_denominator += i ** weighted_score_type
-        i += 1
+    if gene in gene_set:
+        P_GW_denominator += i ** weighted_score_type
+    i += 1
     """
 
     #determining denominator value
@@ -155,13 +155,13 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
     i = 1 #current rank stepping through listing of sorted genes
 
     for gene in keys_sorted:
-        if gene in gene_set:
-            P_GW_numerator += i ** weighted_score_type
-        else:
-            P_NG_numerator += 1
+    if gene in gene_set:
+        P_GW_numerator += i ** weighted_score_type
+    else:
+        P_NG_numerator += 1
 
-        RES.append(P_GW_numerator / P_GW_denominator - P_NG_numerator / P_NG_denominator)
-        i += 1
+    RES.append(P_GW_numerator / P_GW_denominator - P_NG_numerator / P_NG_denominator)
+    i += 1
     """
 
     axis = 0
@@ -175,7 +175,7 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
         axis=1
         tag_indicator = tag_indicator.repeat(esnull).reshape(N, esnull).T
         index = index.repeat(esnull).reshape(N, esnull).T
-        # gene list permutation
+    # gene list permutation
         for i in range(esnull):
             rs.shuffle(tag_indicator[i])
 
@@ -199,7 +199,7 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
 
     max_ES = np.max(RES, axis=axis)
     min_ES = np.min(RES, axis=axis)
-    
+
     es = np.where(np.abs(max_ES) > np.abs(min_ES), max_ES, min_ES)
 
     return es.tolist(), hit_ind, RES.tolist() 
@@ -380,7 +380,7 @@ def gsea_compute_ss(data, gmt, n, weighted_score_type, permutation_type, method,
 
     for subset in subsets:
         es,ind,RES = enrichment_score_ss(gene_set=gmt.get(subset), expressions=exp_dict, 
-                        weighted_score_type=w, esnull=None, rs=rs)
+                                         weighted_score_type=w, esnull=None, rs=rs)
         enrichment_scores.append(es)
         rank_ES.append(RES)
         hit_ind.append(ind)

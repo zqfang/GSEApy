@@ -29,8 +29,8 @@ class GSEAbase:
         self.logger=None
 
 class GSEA(GSEAbase):
-    def __init__(self, data, gene_sets, classes,outdir="GSEA_out", 
-                 permutation_type='gene_set', method='log2_ratio_of_classes',)
+    def __init__(self, data, gene_sets, classes, outdir="GSEA_out", 
+                 permutation_type='gene_set', method='log2_ratio_of_classes',):
         self.data = data
         self.gene_sets=gene_sets
         self.classes=classes
@@ -40,8 +40,9 @@ class GSEA(GSEAbase):
     def run(self):
         return call(self.data, self.gene_sets, self.classes, self.outdir, 
                     self.min_size, self.max_size, self.permutation_num, 
-                    self.weighted_score_type, self.permutation_type,self.method
-                    self.ascending, self.figsize, self.format, self.graph_num, self.seed, self.verbose)
+                    self.weighted_score_type, self.permutation_type,self.method,
+                    self.ascending, self.figsize, self.format, self.graph_num, 
+                    self.seed, self.verbose)
 
 
 class Prerank(GSEAbase):
@@ -59,7 +60,7 @@ class Prerank(GSEAbase):
                         self.graph_num, self.seed, self.verbose)
 
 class SingleSampleGSEA(GSEAbase):
-    def __init__(self, data, gene_sets, weighted_score_type=0.25, outdir="GSEA_SingleSample")
+    def __init__(self, data, gene_sets, weighted_score_type=0.25, outdir="GSEA_SingleSample"):
         self.data = data
         self.gene_sets=gene_sets
         self.outdir=outdir
@@ -94,10 +95,10 @@ class SingleSampleGSEA(GSEAbase):
 
         logger.info("Start to run GSEA...Might take a while..................")   
         #compute ES, NES, pval, FDR, RES
-        results,hit_ind,rank_ES, subsets = gsea_compute(data=dat, n=self.permutation_num, gmt=gmt,
-                                                        weighted_score_type=self.weighted_score_type,
-                                                        permutation_type=self.permutation_type, ascending=self.ascending,
-                                                        seed=self.seed)
+        results,hit_ind,rank_ES, subsets = gsea_compute_ss(data=dat, n=self.permutation_num, gmt=gmt,
+                                                           weighted_score_type=self.weighted_score_type,
+                                                           permutation_type=self.permutation_type, ascending=self.ascending,
+                                                           seed=self.seed)
         logger.info("Start to generate gseapy reports, and produce figures...")
         res_zip = zip(subsets, list(results), hit_ind, rank_ES)
         res = save_results(obj=res_zip, outdir=self.outdir, module='SingleSample',permutation_type="gene_sets")
@@ -120,8 +121,8 @@ class SingleSampleGSEA(GSEAbase):
     
         logger.info("Congratulations. GSEApy run successfully................")
         log_remove(logger)
-
-        return self.results =  res
+        self.results = res
+        return self.results 
         
 
 

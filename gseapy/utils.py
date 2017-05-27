@@ -1,7 +1,8 @@
 
 import os,errno,logging
 from collections import OrderedDict
-from pandas.DataFrame import from_dict
+from pandas import DataFrame
+
 def unique(seq):
     """Remove duplicates from a list in Python while preserving order.
     
@@ -74,7 +75,7 @@ def save_results(obj, outdir, module, permutation_type):
         rdict['hit_index'] = ind
         res[gs] = rdict           
 
-    res_df = from_dict(res, orient='index')
+    res_df = DataFrame.from_dict(res, orient='index')
     res_df.index.name = 'Term'
     res_df.sort_values(by='fdr', inplace=True)
 
