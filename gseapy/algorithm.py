@@ -82,19 +82,6 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
         axis = 1
         Nhint = np.sum(tag_indicator, axis=axis).reshape(esnull, 1)
         sum_correl_tag = np.sum(correl_vector*tag_indicator, axis=axis).reshape(esnull, 1)
-    ''' 
-    #similar results could be obtained when computing esnull using code below
-    # 
-    if esnull:
-        tag_null = np.empty((esnull, N))
-        i=0
-        while i < esnull:
-            rs.shuffle(tag_indicator)
-            tag_null[i] = tag_indicator
-            i +=1
-        axis = 1
-        tag_indicator = tag_null
-    '''
 
 
     #compute ES score, the code below is identical to gsea enrichment_score method.    
@@ -111,6 +98,113 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
    
     return es.tolist(), hit_ind, RES.tolist()
  
+
+ def enrichment_score_ss(gene_set, expressions, weighted_score_type=0.25, esnull=None, rs=np.random.RandomState()):
+    """
+    Given a gene set, a map of gene names to expression levels, and a weight score, returns the ssGSEA
+    enrichment score for the gene set as described by *D. Barbie et al 2009*
+    
+    ssGSEA  allows one to define an enrichment score that represents the degree of absolute enrichment
+    of a gene set in each sample within a given data set.  
+     The  enrichment score was produced using the Empirical Cumulative Distribution Functions (ECDF)
+     of the genes in the signature and the remaining genes.
+
+    :requires: every member of gene_set is a key in expressions
+    :param gene_set: a list of gene_names in the gene_set given by gmt file.
+    :param expressions: dict, a dictionary mapping gene names to their absolute expression values
+    :param weighted_score_type: the weighted exponent on the :math:`P^W_G` term.
+
+    :returns: an array representing the intermediate Enrichment Scores for each step along the sorted gene list.
+              To find the total enrichment score, take the sum of all values in the array. 
+    """
+
+
+    """
+    # For a given signature G of size NG and single sample S, of the data set of N genes, 
+    # the genes are replaced by their ranks according the their absolute expression from
+    # high to low: L={r1,r2,...rn}. 
+    # An enrichment score ES(G,S) is obtained by a sum (integration) of 
+    # the difference between a weighted ECDF of the genes in the signature P_WG 
+    # and and the ECDF of the remaining genes P_NG
+
+    """
+    #first sort by absolute expression value, starting with the highest expressed genes first
+    keys_sorted = sorted(expressions, key=expressions.get, reverse=True) #returns the sorted list of keys
+    #expressions.sort_values(inplace=False, ascending=False)
+
+    #values representing the ECDF of genes in the geneset
+    P_GW_numerator = 0
+    P_GW_denominator = 0
+    """
+    #determining denominator value
+    i =1
+    for gene in keys_sorted:
+        if gene in gene_set:
+            P_GW_denominator += i ** weighted_score_type
+        i += 1
+    """
+
+    #determining denominator value
+    #values representing the ECDF of genes not in the gene_set
+    P_NG_numerator = 0
+    P_NG_denominator = len(expressions) - len(gene_set)
+
+    #integrate different in P_GW and P_NG
+    """
+    RES = [] #ranked_enrichment_score
+    i = 1 #current rank stepping through listing of sorted genes
+
+    for gene in keys_sorted:
+        if gene in gene_set:
+            P_GW_numerator += i ** weighted_score_type
+        else:
+            P_NG_numerator += 1
+
+        RES.append(P_GW_numerator / P_GW_denominator - P_NG_numerator / P_NG_denominator)
+        i += 1
+    """
+
+    axis = 0
+    #speed up using numpy array
+    tag_indicator = np.in1d(keys_sorted, gene_set, assume_unique=True).astype(int)        
+    hit_ind = np.flatnonzero(tag_indicator).tolist() 
+    N =len(tag_indicator)
+    index = np.arange(1, N+1)
+
+    if esnull:
+        axis=1
+        tag_indicator = tag_indicator.repeat(esnull).reshape(N, esnull).T
+        index = index.repeat(esnull).reshape(N, esnull).T
+        # gene list permutation
+        for i in range(esnull):
+            rs.shuffle(tag_indicator[i])
+
+
+    P_GW_denominator = np.sum(tag_indicator*index** weighted_score_type, axis=axis)
+    P_GW_numerator = np.cumsum(tag_indicator*index** weighted_score_type, axis=axis)
+    P_NG_numerator = np.cumsum(np.invert(tag_indicator.astype(bool)), axis=axis)
+    RES = P_GW_numerator / P_GW_denominator - P_NG_numerator/ P_NG_denominator
+
+    """
+    This calculation is repeated for each signature and each sample in the data set.
+    Note that the exponent of this quantity (α) is set to 1/4,
+    and adds a modest weight to the rank. 
+    In the regular GSEA a similar enrichment score is used, but the weight is typically set to 1. 
+    Also, instead of the sum over i, the enrichment score is computed according to the largest difference. 
+    This quantity is slightly more robust and more sensitive to differences 
+    in the tails of the distributions than the Kolmogorov–Smirnov statistic.
+    """
+
+    #get indices of tag_indicator  
+
+    max_ES = np.max(RES, axis=axis)
+    min_ES = np.min(RES, axis=axis)
+    
+    es = np.where(np.abs(max_ES) > np.abs(min_ES), max_ES, min_ES)
+
+    return es.tolist(), hit_ind, RES.tolist() 
+
+
 
 def shuffle_list(gene_list, rand=np.random.RandomState()):
     """Returns a copy of a shuffled input gene_list.
@@ -223,6 +317,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
       a nested list of ranked enrichment score of each input gene_sets. Used for plotting.
     
     """
+    rs = np.random.RandomState(seed)
     enrichment_scores = []
     w = weighted_score_type
     subsets = sorted(gmt.keys())    
@@ -248,8 +343,6 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
     logger.debug("Start to compute esnulls...............................")
 
     enrichment_nulls = [ [] for a in range(len(subsets)) ]
-    rs = np.random.RandomState(seed)
-    
     
     if permutation_type == "phenotype":
         l2 = list(classes)
@@ -272,7 +365,35 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
 
     return gsea_significance(enrichment_scores, enrichment_nulls),hit_ind,rank_ES, subsets
 
+def gsea_compute_ss(data, gmt, n, weighted_score_type, permutation_type, method, seed):
+    """compute enrichment scores and enrichment nulls for single sample GSEA. 
+    """
+    rs = np.random.RandomState(seed) 
+    enrichment_scores = []
+    rank_ES = []
+    hit_ind = []  
+    w = weighted_score_type
+    subsets = sorted(gmt.keys())   
+    exp_dict = data.to_dict()
+    logger.debug("Start to compute enrichment socres......................") 
 
+
+    for subset in subsets:
+        es,ind,RES = enrichment_score_ss(gene_set=gmt.get(subset), expressions=exp_dict, 
+                        weighted_score_type=w, esnull=None, rs=rs)
+        enrichment_scores.append(es)
+        rank_ES.append(RES)
+        hit_ind.append(ind)
+
+    logger.debug("Start to compute esnulls...............................")
+    enrichment_nulls = [ [] for a in range(len(subsets)) ]   
+
+    for si,subset in enumerate(subsets):
+        esn = enrichment_score(gene_set=gmt.get(subset), expressions=exp_dict, 
+                               weighted_score_type=w, esnull=n, rs=rs)[0]                                         
+        enrichment_nulls[si] = esn # esn is a list, don't need to use append method. 
+
+    return gsea_significance(enrichment_scores, enrichment_nulls), hit_ind, rank_ES, subsets    
 
 def gsea_pval(es, esnull):
     """Compute nominal p-value.

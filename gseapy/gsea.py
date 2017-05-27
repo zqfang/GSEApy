@@ -7,80 +7,125 @@ import os,sys, logging
 from .parser import *
 from .algorithm import enrichment_score, gsea_compute, preprocess, ranking_metric
 from .plot import gsea_plot, heatmap
-from collections import OrderedDict
-from .utils import log_init, log_remove, mkdirs
+from .utils import log_init, log_remove, mkdirs, save_results
 import pandas as pd
 
+class GSEAbase:
+    def __init__(self, gene_sets, outdir, 
+                 min_size=15, max_size=500, permutation_num=1000, 
+                 weighted_score_type=1, ascending=False, figsize=[6.5,6], 
+                 format='pdf', graph_num=20, seed=None, verbose=False ):
+        self.gene_sets = gene_sets
+        self.min_size=min_size
+        self.max_size=max_size
+        self.permutation_num=permutation_num
+        self.weight_score_type=weight_score_type
+        self.ascending=ascending
+        self.figsize=figsize
+        self.format=format
+        self.graph_num=graph_num
+        self.seed=seed
+        self.verbose=verbose
+        self.logger=None
 
-def replot(indir, outdir='gseapy_replot', weight=1, figsize=[6.5,6], format='pdf', min_size=3, max_size=5000, verbose=False):
-    """The main fuction to run inside python.
+class GSEA(GSEAbase):
+    def __init__(self, data, gene_sets, classes,outdir="GSEA_out", 
+                 permutation_type='gene_set', method='log2_ratio_of_classes',)
+        self.data = data
+        self.gene_sets=gene_sets
+        self.classes=classes
+        self.outdir=outdir
+        self.permutation_type=permutation_type
+        self.method=method
+    def run(self):
+        return call(self.data, self.gene_sets, self.classes, self.outdir, 
+                    self.min_size, self.max_size, self.permutation_num, 
+                    self.weighted_score_type, self.permutation_type,self.method
+                    self.ascending, self.figsize, self.format, self.graph_num, self.seed, self.verbose)
+
+
+class Prerank(GSEAbase):
+    def __init__(self, rnk, gene_sets, outdir="GSEA_prerank", pheno_pos='Pos', pheno_neg='Neg'):
+        self.rnk =rnk
+        self.gene_sets=gene_sets
+        self.outdir=outdir
+        self.pheno_pos=pheno_pos
+        self.pheno_neg=pheno_neg
+    def run(self):
+        return prerank(self.rnk, self.gene_sets, self.outdir, 
+                        self.pheno_pos, self.pheno_neg, self.min_size, self.max_size, 
+                        self.permutation_num, self.weighted_score_type, 
+                        self.ascending, self.figsize, self.format, 
+                        self.graph_num, self.seed, self.verbose)
+
+class SingleSampleGSEA(GSEAbase):
+    def __init__(self, data, gene_sets, weighted_score_type=0.25, outdir="GSEA_SingleSample")
+        self.data = data
+        self.gene_sets=gene_sets
+        self.outdir=outdir
+        self.weighted_score_type=weighted_score_type
+        self.permutation_type=permutation_type
+        self.method=method
+        self.results=None
+    def run(self):
+        
+        mkdirs(self.outdir)
+        logger = log_init(self.outdir, module='single_sample', log_level = logging.INFO if verbose else logging.WARNING)
+
+        if isinstance(self.data, pd.DataFrame) :
+            df = data.copy()
+            argument['data'] = 'DataFrame'
+        elif isinstance(self.data, str) :
+            df = pd.read_table(data)
+        else:
+            raise Exception('Error parsing gene expression dataframe!')
+            sys.exit(1)
+       
+        assert len(df) > 1
+        #write command to log file
+
+        #Start Analysis
+        logger.info("Parsing data files for GSEA.............................")     
+        #select correct expression genes and values.
+        dat = preprocess(df)
+        #filtering out gene sets and build gene sets dictionary
+        gmt = gsea_gmt_parser(self.gene_sets, min_size=self.min_size, max_size=self.max_size, gene_list=dat.index.values)
+        logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
+
+        logger.info("Start to run GSEA...Might take a while..................")   
+        #compute ES, NES, pval, FDR, RES
+        results,hit_ind,rank_ES, subsets = gsea_compute(data=dat, n=self.permutation_num, gmt=gmt,
+                                                        weighted_score_type=self.weighted_score_type,
+                                                        permutation_type=self.permutation_type, ascending=self.ascending,
+                                                        seed=self.seed)
+        logger.info("Start to generate gseapy reports, and produce figures...")
+        res_zip = zip(subsets, list(results), hit_ind, rank_ES)
+        res = save_results(obj=res_zip, outdir=self.outdir, module='SingleSample',permutation_type="gene_sets")
+
+        #Plotting
+        top_term = res_df.head(graph_num).index
+        width = len(classes) if len(classes) >= 6 else  5
+        for gs in top_term:
+            hit = res.get(gs)['hit_index']
+            gene_symbol = res.get(gs)['genes']
+            fig = gsea_plot(rank_metric=dat2, enrich_term=gs, hit_ind=hit,
+                            nes=res.get(gs)['nes'], pval=res.get(gs)['pval'], fdr=res.get(gs)['fdr'], 
+                            RES=res.get(gs)['rank_ES'], phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize)        
+            gs = gs.replace('/','_').replace(":","_")
+            fig.savefig('{a}/{b}.gsea.{c}'.format(a=outdir, b=gs, c=format), bbox_inches='tight', dpi=300,)
+
+            heatmap(df=dat.loc[gene_symbol], term=gs, outdir=outdir, 
+                    figsize=(width, len(gene_symbol)/2), format=format)
           
-    :param indir: GSEA desktop results directory. In the sub folder, you must contain edb file foder.    
-    :param outdir: Output directory.
-    :param weight: weighted score type. choose from {0,1,1.5,2}. Default: 1.
-    :param figsize: matplotlib output figure figsize. Defult: [6.5,6].
-    :param format: matplotlib output figure format. Default: 'pdf'.
-    :param min_size: min size of input genes presented in Gene Sets. Default: 3.
-    :param max_size: max size of input genes presented in Gene Sets. Default: 5000.
-                     you will not encourage to use min_size, or max_size argment in :func:`replot` function.
-                     Because gmt file has already been filter.
-    :param verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
-
-    :return: Generate new figures with seleted figure format. Default: 'pdf'.   
-    """
-    argument = locals()
-
-    mkdirs(outdir)   
-    logger = log_init(outdir, module='replot', log_level= logging.INFO if verbose else logging.WARNING)
-    #write command to log file
-    argument = OrderedDict(sorted(argument.items(), key=lambda t:t[0]))
-    logger.debug("Command: replot, "+str(argument))
-    import glob
-    from bs4 import BeautifulSoup
     
-    #parsing files.......    
-    try:
-        results_path = glob.glob(indir+'*/edb/results.edb')[0]
-        rank_path =  glob.glob(indir+'*/edb/*.rnk')[0]
-        gene_set_path =  glob.glob(indir+'*/edb/gene_sets.gmt')[0]
-    except IndexError as e: 
-        logger.debug(e) 
-        logger.error("Could not locate GSEA files in the given directory!")
-        sys.exit(1)    
-    #extract sample names from .cls file
-    cls_path = glob.glob(indir+'*/edb/*.cls')
-    if cls_path:
-        phenoPos, phenoNeg, classes = gsea_cls_parser(cls_path[0])
-    else:
-        # logic for prerank results
-        phenoPos, phenoNeg = '',''  
-    #obtain gene sets
-    gene_set_dict = gsea_gmt_parser(gene_set_path, min_size=min_size, max_size=max_size)
-    #obtain rank_metrics
-    rank_metric = gsea_rank_metric(rank_path)
-    correl_vector =  rank_metric['rank'].values        
-    gene_list = rank_metric['gene_name']
-    #extract each enriment term in the results.edb files and plot.
-    database = BeautifulSoup(open(results_path), features='xml')
-    length = len(database.findAll('DTG'))
+        logger.info("Congratulations. GSEApy run successfully................")
+        log_remove(logger)
 
-    for idx in range(length):
-        #extract statistical resutls from results.edb file
-        enrich_term, hit_ind, nes, pval, fdr= gsea_edb_parser(results_path, index=idx)
-        gene_set = gene_set_dict.get(enrich_term)
-        #calculate enrichment score    
-        RES = enrichment_score(gene_list=gene_list, gene_set=gene_set, weighted_score_type=weight, 
-                               correl_vector=correl_vector)[2]
-        #plotting
-        fig = gsea_plot(rank_metric, enrich_term,hit_ind, nes, pval,
-                        fdr, RES, phenoPos, phenoNeg, figsize=figsize)    
-        fig.savefig('{a}/{b}.gsea.replot.{c}'.format(a=outdir, b=enrich_term, c=format),
-                    bbox_inches='tight', dpi=300,)
+        return self.results =  res
+        
 
-      
-    logger.info("Congratulations! Your plots have been reproduced successfully!")
-    log_remove(logger)
-    return 
+
+
         
 def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, permutation_n=1000, 
           weighted_score_type=1,permutation_type='gene_set', method='log2_ratio_of_classes',
@@ -187,28 +232,8 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
                                                     phenoPos=phenoPos, phenoNeg=phenoNeg, classes=classes, ascending=ascending,
                                                     seed=seed)
     logger.info("Start to generate gseapy reports, and produce figures...")
-    res = OrderedDict()
-    for gs,gseale,ind,RES in zip(subsets, list(results), hit_ind, rank_ES):        
-        rdict = OrderedDict()      
-        rdict['es'] = gseale[0]
-        rdict['nes'] = gseale[1]
-        rdict['pval'] = gseale[2]
-        rdict['fdr'] = gseale[3]
-        rdict['gene_set_size'] = len(gmt[gs])
-        rdict['matched_size'] = len(ind)
-        rdict['rank_ES'] = RES
-        rdict['genes'] = dat2.ix[ind,'gene_name'].tolist()
-        rdict['hit_index'] = ind
-        res[gs] = rdict           
-    
-    res_df = pd.DataFrame.from_dict(res,orient='index')
-    res_df.index.name = 'Term'
-    res_df.sort_values(by='fdr', inplace=True)
-    
-    res_df.drop(['rank_ES','hit_index'], axis=1, inplace=True)
-    res_df.to_csv('{a}/{b}.{c}.gsea.reports.csv'.format(a=outdir, b='gseapy', c=permutation_type), float_format ='%.7f')
-    
-
+    res_zip = zip(subsets, list(results), hit_ind, rank_ES)
+    res = save_results(obj=res_zip, outdir=self.outdir, module='GSEA',permutation_type=permutation_type)
 
     #Plotting
     top_term = res_df.head(graph_num).index
@@ -231,7 +256,8 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
     #if isinstance(data, pd.DataFrame) or isinstance(cls, list):
     log_remove(logger)
     if hasattr(sys, 'ps1'):
-        return res_df 
+        return res 
+
 
 def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg',
             min_size=15, max_size=500, permutation_n=1000, weighted_score_type=1,
@@ -291,28 +317,8 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
                                                     classes=None, ascending=ascending, seed=seed, prerank=True)
    
     logger.info("Start to generate gseapy reports, and produce figures...")
-    
-    res = OrderedDict()
-    for gs,gseale,ind,RES in zip(subsets, list(results), hit_ind, rank_ES):        
-        rdict = OrderedDict()       
-        rdict['es'] = gseale[0]
-        rdict['nes'] = gseale[1]
-        rdict['pval'] = gseale[2]
-        rdict['fdr'] = gseale[3]
-        rdict['gene_set_size'] = len(gmt[gs])
-        rdict['matched_size'] = len(ind)
-        rdict['rank_ES'] = RES
-        rdict['genes'] = dat2.ix[ind,'gene_name'].tolist()
-        rdict['hit_index'] = ind
-        res[gs] = rdict           
-
-
-    res_df = pd.DataFrame.from_dict(res, orient='index')
-    res_df.index.name = 'Term'
-    res_df.sort_values(by='fdr', inplace=True)
-    
-    res_df.drop(['rank_ES','hit_index'], axis=1, inplace=True)
-    res_df.to_csv('{a}/{b}.prerank.reports.csv'.format(a=outdir, b='gseapy'), float_format ='%.7f')
+    res_zip = zip(subsets, list(results), hit_ind, rank_ES)
+    res = save_results(obj=res_zip, outdir=outdir, module='GSEA',permutation_type=permutation_type)
     
 
     #Plotting
@@ -332,4 +338,75 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
     #if isinstance(rnk, pd.DataFrame):
     log_remove(logger)
     if hasattr(sys, 'ps1'):
-        return res_df 
+        return res
+
+def replot(indir, outdir='gseapy_replot', weight=1, figsize=[6.5,6], format='pdf', min_size=3, max_size=5000, verbose=False):
+    """The main fuction to run inside python.
+          
+    :param indir: GSEA desktop results directory. In the sub folder, you must contain edb file foder.    
+    :param outdir: Output directory.
+    :param weight: weighted score type. choose from {0,1,1.5,2}. Default: 1.
+    :param figsize: matplotlib output figure figsize. Defult: [6.5,6].
+    :param format: matplotlib output figure format. Default: 'pdf'.
+    :param min_size: min size of input genes presented in Gene Sets. Default: 3.
+    :param max_size: max size of input genes presented in Gene Sets. Default: 5000.
+                     you will not encourage to use min_size, or max_size argment in :func:`replot` function.
+                     Because gmt file has already been filter.
+    :param verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
+
+    :return: Generate new figures with seleted figure format. Default: 'pdf'.   
+    """
+    argument = locals()
+
+    mkdirs(outdir)   
+    logger = log_init(outdir, module='replot', log_level= logging.INFO if verbose else logging.WARNING)
+    #write command to log file
+    argument = OrderedDict(sorted(argument.items(), key=lambda t:t[0]))
+    logger.debug("Command: replot, "+str(argument))
+    import glob
+    from bs4 import BeautifulSoup
+    
+    #parsing files.......    
+    try:
+        results_path = glob.glob(indir+'*/edb/results.edb')[0]
+        rank_path =  glob.glob(indir+'*/edb/*.rnk')[0]
+        gene_set_path =  glob.glob(indir+'*/edb/gene_sets.gmt')[0]
+    except IndexError as e: 
+        logger.debug(e) 
+        logger.error("Could not locate GSEA files in the given directory!")
+        sys.exit(1)    
+    #extract sample names from .cls file
+    cls_path = glob.glob(indir+'*/edb/*.cls')
+    if cls_path:
+        phenoPos, phenoNeg, classes = gsea_cls_parser(cls_path[0])
+    else:
+        # logic for prerank results
+        phenoPos, phenoNeg = '',''  
+    #obtain gene sets
+    gene_set_dict = gsea_gmt_parser(gene_set_path, min_size=min_size, max_size=max_size)
+    #obtain rank_metrics
+    rank_metric = gsea_rank_metric(rank_path)
+    correl_vector =  rank_metric['rank'].values        
+    gene_list = rank_metric['gene_name']
+    #extract each enriment term in the results.edb files and plot.
+    database = BeautifulSoup(open(results_path), features='xml')
+    length = len(database.findAll('DTG'))
+
+    for idx in range(length):
+        #extract statistical resutls from results.edb file
+        enrich_term, hit_ind, nes, pval, fdr= gsea_edb_parser(results_path, index=idx)
+        gene_set = gene_set_dict.get(enrich_term)
+        #calculate enrichment score    
+        RES = enrichment_score(gene_list=gene_list, gene_set=gene_set, weighted_score_type=weight, 
+                               correl_vector=correl_vector)[2]
+        #plotting
+        fig = gsea_plot(rank_metric, enrich_term,hit_ind, nes, pval,
+                        fdr, RES, phenoPos, phenoNeg, figsize=figsize)    
+        fig.savefig('{a}/{b}.gsea.replot.{c}'.format(a=outdir, b=enrich_term, c=format),
+                    bbox_inches='tight', dpi=300,)
+
+      
+    logger.info("Congratulations! Your plots have been reproduced successfully!")
+    log_remove(logger)
+
+    return 
