@@ -39,18 +39,28 @@ An example to use gseapy, please click here: `Example <http://pythonhosted.org/g
 GSEAPY is a python wrapper for **GSEA** and **Enrichr**. 
 --------------------------------------------------------------------------------------------
 
-It's used for convenient GO enrichments and produce **publishable quality figures** in python. 
+GSEAPY has five subcommands: ``gsea``, ``prerank``, ``single``, ``replot`` ``enrichr``.
 
-GSEAPY could be used for **RNA-seq, ChIP-seq, Microarry** data.
+1. The ``gsea`` module produce GSEAPY results.  
+The input requries a txt file(FPKM, Expected Counts, TPM, et.al), a cls file, and gene_sets file in gmt format. 
 
-`Gene Set Enrichment Analysis <http://software.broadinstitute.org/gsea/index.jsp>`_ (GSEA) 
-is a computational method that determines whether an a priori defined set of genes shows 
-statistically significant, concordant differences between two biological states (e.g. phenotypes). 
+2. The ``prerank`` module produce GSEAPY results.  
+The input expects a pre-ranked gene list dataset with correlation values, which in .rnk format, and gene_sets file in gmt format.  ``prerank`` module is an API to `GSEA` pre-rank tools.
+
+3. The ``single`` module perform **single sample GSEA(ssGSEA)** analysis.  
+The input expects a gene list with expression values(same with ``.rnk`` file, and gene_sets file in gmt format. ssGSEA enrichment score for the gene set as described by `D. Barbie et al 2009 <http://www.nature.com/nature/journal/v462/n7269/abs/nature08460.html>`_.
+
+4. The ``replot`` module reproduce GSEA desktop version results.  
+The only input for GSEAPY is the location to GSEA Desktop output results.
+
+5. The ``enrichr`` module enable you perform gene set enrichment analysis using ``Enrichr`` API.
+Enrichr is open source and freely available online at: http://amp.pharm.mssm.edu/Enrichr . It runs very fast and generates results in txt format.
+
+GSEAPY could be used for **RNA-seq, ChIP-seq, Microarry** data. It's used for convenient GO enrichments and produce **publishable quality figures** in python. 
+
 
 The full ``GSEA`` is far too extensive to describe here; see
-`GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ documentation for more information.
-
-Enrichr is open source and freely available online at: http://amp.pharm.mssm.edu/Enrichr .
+`GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ documentation for more information. All files' formats for GSEApy are identical to ``GSEA`` desktop version. 
 
 
 **If you use gseapy, you should cite the original ``GSEA`` and ``Enrichr`` paper.**
@@ -97,12 +107,10 @@ Using ``Prerank`` or ``replot`` module will reproduce the same figure for GSEA J
 
 GSEAPY ``enrichr`` module 
 -----------------------------------------------
-
-The powerfull module will enable you perform gene set enrichment analysis extreamly easily.
-
-**You Could submit batch jobs to Enrichr Server**
+A graphical introduction of Enrichr 
 
 .. figure:: docs/enrichr.PNG
+
 
 
 
@@ -154,10 +162,10 @@ Installation
    # if you have conda
    $ conda install -c bioconda gseapy 
   
-   # for  windows users 
+   # for windows users 
    $ conda install -c bioninja gseapy
 
-   # or use pip
+   # or use pip to install the lastest release 
    $ pip install gseapy
 
 | You may instead want to use the development version from Github, by running
@@ -186,27 +194,10 @@ You may also need to install **lxml, html5lib**, if you could not parse xml file
 Run GSEAPY
 -----------------
 
-GSEAPY has four subcommands: ``replot``, ``gsea``, ``prerank``, ``single``, ``enrichr``.
-
-The ``replot`` module reproduce GSEA desktop version results. The only input for GSEAPY is the location to GSEA results.
-
-The ``gsea`` module produce GSEAPY results. The input requries a txt file(FPKM, Expected Counts, TPM, et.al), a cls file,
-and gene_sets file in gmt format. 
-
-The ``prerank`` module produce GSEAPY results. The input expects a pre-ranked gene list dataset with correlation values, which in .rnk format, and gene_sets file in gmt format.  ``prerank`` module is an API to `GSEA` pre-rank tools.
-
-The ``single`` module perform single sample GSEA analysis. The input expects a gene list with expression values(same with ``.rnk`` file, and gene_sets file in gmt format.ssGSEA enrichment score for the gene set as described by `D. Barbie et al 2009 <http://www.nature.com/nature/journal/v462/n7269/abs/nature08460.html>`_.
-
-All input files' formats are identical to ``GSEA`` desktop version. 
-See `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ documentation for more information.
-
-
-The ``enrichr`` module will using enrichr API online. It runs very fast and generates results in txt format.
-
 Before you start:
 ~~~~~~~~~~~~~~~~~~~~~~
 
-**You should convert all gene symobl names to uppercase first.**
+Unless you know exactly how GSEA works, you should **convert all gene symobl names to uppercase first.**
 
 
 For command line usage:
@@ -219,17 +210,17 @@ For command line usage:
   $ gseapy replot -i ./Gsea.reports -o test
   
   
-  # An example to compute using gseapy gsea module
+  # An example to run GSEA using gseapy gsea module
   $ gseapy gsea -d exptable.txt -c test.cls -g gene_sets.gmt -o test
 
-  # An example to compute using gseapy prerank module
+  # An example to run Prerank using gseapy prerank module
   $ gseapy prerank -r gsea_data.rnk -g gene_sets.gmt -o test
 
-  # An example to compute using gseapy single module
+  # An example to run ssGSEA using gseapy single module
   $ gseapy single -d expression.txt -g gene_sets.gmt -o test
 
   # An example to use enrichr api
-  # see details of -g parameter below, -d parmameter is optional
+  # see details of -g below, -d  is optional
   $ gseapy enrichr -i gene_list.txt -g KEGG_2016 -d pathway_enrichment -o test
 
 
@@ -242,21 +233,23 @@ Run gseapy inside python console:
 .. code:: python
   
     import gseapy
-    # An example to reproduce figures using replot module.
-    gseapy.replot(indir='./Gsea.reports', outdir='test')
 
-    # calculate es, nes, pval,fdrs, and produce figures using gseapy.
+    # run GSEA.
     gseapy.call(data='expression.txt', gene_sets='gene_sets.gmt', cls='test.cls', outdir='test')
    
     # using prerank tool
     gseapy.prerank(rnk='gsea_data.rnk', gene_sets='gene_sets.gmt', outdir='test')
 
-    # using ssGSEA
+    # run ssGSEA
     from gseapy.gsea import SingleSampleGSEA
     ss = SingleSampleGSEA(data="expression.txt", gene_sets= "gene_sets.gmt", outdir='test')
     ss.run()
 
-2. If you perfer to use assign Dataframe, dict, list to gseapy, you could do this
+    # An example to reproduce figures using replot module.
+    gseapy.replot(indir='./Gsea.reports', outdir='test')
+
+
+2. If you prefer to use Dataframe, dict, list in interactive python console, you could do this
 
 .. code:: python
   
