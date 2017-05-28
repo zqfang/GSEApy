@@ -10,12 +10,45 @@ from .plot import gsea_plot, heatmap
 from .utils import log_init, log_remove, mkdirs, save_results
 import pandas as pd
 
+
+
 class GSEAbase:
-    def __init__(self, gene_sets, outdir, 
+    def __init__(self):
+        self.results=None
+        self.verbose=False
+        self.module=None
+        self.logger=None
+       
+    def savefig(self, fig):
+        #fig.savefig()
+        return
+    def to_csv(self, res):
+        self.results = res
+        return self.results
+
+    def log_start(self):
+        verobse = logging.INFO if self.verbose else logging.WARNING
+        self.logger = log_init(self.outdir, module=self.module, log_level=logging.INFO))
+        return self.logger
+    def log_stop(self):
+         log_remove(self.logger)
+
+    
+class GSEA(GSEAbase):
+    """GSEA main tool"""
+    def __init__(self, data, gene_sets, classes, outdir='GSEA_ouput', 
                  min_size=15, max_size=500, permutation_num=1000, 
-                 weighted_score_type=1, ascending=False, figsize=[6.5,6], 
-                 format='pdf', graph_num=20, seed=None, verbose=False ):
-        self.gene_sets = gene_sets
+                 weighted_score_type=1,permutation_type='gene_set', 
+                 method='log2_ratio_of_classes', ascending=False, 
+                 figsize=[6.5,6], format='pdf', graph_num=20, 
+                 seed=None, verbose=False):
+        
+        self.data = data
+        self.gene_sets=gene_sets
+        self.classes=classes
+        self.outdir=outdir
+        self.permutation_type=permutation_type
+        self.method=method
         self.min_size=min_size
         self.max_size=max_size
         self.permutation_num=permutation_num
@@ -26,41 +59,56 @@ class GSEAbase:
         self.graph_num=graph_num
         self.seed=seed
         self.verbose=verbose
-        self.logger=None
 
-class GSEA(GSEAbase):
-    def __init__(self, data, gene_sets, classes, outdir="GSEA_out", 
-                 permutation_type='gene_set', method='log2_ratio_of_classes',):
-        self.data = data
-        self.gene_sets=gene_sets
-        self.classes=classes
-        self.outdir=outdir
-        self.permutation_type=permutation_type
-        self.method=method
     def run(self):
-        return call(self.data, self.gene_sets, self.classes, self.outdir, 
-                    self.min_size, self.max_size, self.permutation_num, 
-                    self.weighted_score_type, self.permutation_type,self.method,
-                    self.ascending, self.figsize, self.format, self.graph_num, 
-                    self.seed, self.verbose)
+
+        self.results=call(self.data, self.gene_sets, self.classes, self.outdir, 
+                          self.min_size, self.max_size, self.permutation_num, 
+                          self.weighted_score_type, self.permutation_type,self.method,
+                          self.ascending, self.figsize, self.format, self.graph_num, 
+                          self.seed, self.verbose)
+
+        return  self.results
 
 
 class Prerank(GSEAbase):
-    def __init__(self, rnk, gene_sets, outdir="GSEA_prerank", pheno_pos='Pos', pheno_neg='Neg'):
+    """GSEA prerank tool"""
+    def __init__(self, rnk, gene_sets, outdir='GSEA_prerank', 
+                 pheno_pos='Pos', pheno_neg='Neg', min_size=15, max_size=500, 
+                 permutation_num=1000, weighted_score_type=1,
+                 ascending=False, figsize=[6.5,6], format='pdf', 
+                 graph_num=20, seed=None, verbose=False):
+
         self.rnk =rnk
         self.gene_sets=gene_sets
         self.outdir=outdir
         self.pheno_pos=pheno_pos
         self.pheno_neg=pheno_neg
+        self.min_size=min_size
+        self.max_size=max_size
+        self.permutation_num=permutation_num
+        self.weight_score_type=weight_score_type
+        self.ascending=ascending
+        self.figsize=figsize
+        self.format=format
+        self.graph_num=graph_num
+        self.seed=seed
+        self.verbose=verbose
     def run(self):
-        return prerank(self.rnk, self.gene_sets, self.outdir, 
-                        self.pheno_pos, self.pheno_neg, self.min_size, self.max_size, 
-                        self.permutation_num, self.weighted_score_type, 
-                        self.ascending, self.figsize, self.format, 
-                        self.graph_num, self.seed, self.verbose)
+        self.results = prerank(self.rnk, self.gene_sets, self.outdir, 
+                               self.pheno_pos, self.pheno_neg, self.min_size, self.max_size, 
+                               self.permutation_num, self.weighted_score_type, 
+                               self.ascending, self.figsize, self.format, 
+                               self.graph_num, self.seed, self.verbose)
+        return self.results
+    
 
 class SingleSampleGSEA(GSEAbase):
-    def __init__(self, data, gene_sets, weighted_score_type=0.25, outdir="GSEA_SingleSample"):
+    """GSEA extention: single sample GSEA"""
+    def __init__(self, data, gene_sets, outdir="GSEA_SingleSample",
+                 min_size=15, max_size=500, permutation_num=1000, weighted_score_type=0.25,
+                 ascending=False, figsize=[6.5,6], format='pdf',
+                 graph_num=20, seed=None, verbose=False):
         self.data = data
         self.gene_sets=gene_sets
         self.outdir=outdir
@@ -68,14 +116,25 @@ class SingleSampleGSEA(GSEAbase):
         self.permutation_type=permutation_type
         self.method=method
         self.results=None
+        self.min_size=min_size
+        self.max_size=max_size
+        self.permutation_num=permutation_num
+        self.weight_score_type=weight_score_type
+        self.ascending=ascending
+        self.figsize=figsize
+        self.format=format
+        self.graph_num=graph_num
+        self.seed=seed
+        self.verbose=verbose
+
     def run(self):
         
         mkdirs(self.outdir)
-        logger = log_init(self.outdir, module='single_sample', log_level = logging.INFO if verbose else logging.WARNING)
+        logger = super().log_start(self)
 
         if isinstance(self.data, pd.DataFrame) :
             df = data.copy()
-            argument['data'] = 'DataFrame'
+
         elif isinstance(self.data, str) :
             df = pd.read_table(data)
         else:
@@ -101,7 +160,7 @@ class SingleSampleGSEA(GSEAbase):
                                                            seed=self.seed)
         logger.info("Start to generate gseapy reports, and produce figures...")
         res_zip = zip(subsets, list(results), hit_ind, rank_ES)
-        res = save_results(obj=res_zip, outdir=self.outdir, module='SingleSample',permutation_type="gene_sets")
+        res, res_df = save_results(zipdata=res_zip, outdir=self.outdir, module='SingleSample',permutation_type="gene_sets")
 
         #Plotting
         top_term = res_df.head(graph_num).index
@@ -234,7 +293,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
                                                     seed=seed)
     logger.info("Start to generate gseapy reports, and produce figures...")
     res_zip = zip(subsets, list(results), hit_ind, rank_ES)
-    res = save_results(obj=res_zip, outdir=self.outdir, module='GSEA',permutation_type=permutation_type)
+    res, res_df = save_results(zipdata=res_zip, outdir=self.outdir, module='GSEA',permutation_type=permutation_type)
 
     #Plotting
     top_term = res_df.head(graph_num).index
@@ -255,9 +314,10 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
     
 	# return dataframe if run gsea inside python console
     #if isinstance(data, pd.DataFrame) or isinstance(cls, list):
+
     log_remove(logger)
-    if hasattr(sys, 'ps1'):
-        return res 
+
+        return res
 
 
 def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg',
@@ -319,7 +379,7 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
    
     logger.info("Start to generate gseapy reports, and produce figures...")
     res_zip = zip(subsets, list(results), hit_ind, rank_ES)
-    res = save_results(obj=res_zip, outdir=outdir, module='GSEA',permutation_type=permutation_type)
+    res, res_df = save_results(zipdata=res_zip, outdir=self.outdir, module='GSEA',permutation_type=permutation_type)
     
 
     #Plotting

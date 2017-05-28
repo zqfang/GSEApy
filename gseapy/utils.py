@@ -58,11 +58,11 @@ def mkdirs(outdir):
             raise exc
         pass   
  
-def save_results(obj, outdir, module, permutation_type):
+def save_results(zipdata, outdir, module, permutation_type):
     """Save GSEA results to a csv file
     """
     res = OrderedDict()
-    for gs,gseale,ind,RES in obj:        
+    for gs,gseale,ind,RES in zipdata:        
         rdict = OrderedDict()      
         rdict['es'] = gseale[0]
         rdict['nes'] = gseale[1]
@@ -82,7 +82,7 @@ def save_results(obj, outdir, module, permutation_type):
     res_df.drop(['rank_ES','hit_index'], axis=1, inplace=True)
     res_df.to_csv('{a}/gseapy.{c}.gsea.reports.csv'.format(a=outdir, b=module, c=permutation_type), float_format ='%.7f')
 
-    return res
+    return res, res_df
 
 DEFAULT_LIBRARY =   ['Achilles_fitness_decrease', 
 					 'Achilles_fitness_increase',
