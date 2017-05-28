@@ -170,19 +170,21 @@ def enrichment_score_ss(gene_set, expressions, weighted_score_type=0.25, esnull=
     hit_ind = np.flatnonzero(tag_indicator).tolist() 
     N =len(tag_indicator)
     index = np.arange(1, N+1)
-
+    P_GW_denominator = np.sum(tag_indicator*index** weighted_score_type, axis=axis)
     if esnull:
         axis=1
         tag_indicator = tag_indicator.repeat(esnull).reshape(N, esnull).T
         index = index.repeat(esnull).reshape(N, esnull).T
-    # gene list permutation
+        # gene list permutation
         for i in range(esnull):
             rs.shuffle(tag_indicator[i])
+        P_GW_denominator = np.sum(tag_indicator*index** weighted_score_type, axis=axis).reshape(esnull, 1)
 
 
-    P_GW_denominator = np.sum(tag_indicator*index** weighted_score_type, axis=axis)
+    
     P_GW_numerator = np.cumsum(tag_indicator*index** weighted_score_type, axis=axis)
     P_NG_numerator = np.cumsum(np.invert(tag_indicator.astype(bool)), axis=axis)
+
     RES = P_GW_numerator / P_GW_denominator - P_NG_numerator/ P_NG_denominator
 
     """
@@ -374,7 +376,7 @@ def gsea_compute_ss(data, gmt, n, weighted_score_type, seed):
     hit_ind = []  
     w = weighted_score_type
     subsets = sorted(gmt.keys())   
-    exp_dict = data.to_dict()
+    exp_dict = data.to_dict()['rank']
     logger.debug("Start to compute enrichment socres......................") 
 
 

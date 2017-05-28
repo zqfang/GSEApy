@@ -1,14 +1,14 @@
 #! python
 # -*- coding: utf-8 -*-
-from __future__ import  division
-
 
 import os,sys, logging
+import pandas as pd
+from collections import OrderedDict
 from .parser import *
 from .algorithm import enrichment_score, gsea_compute, gsea_compute_ss, preprocess, ranking_metric
 from .plot import gsea_plot, heatmap
 from .utils import log_init, log_remove, mkdirs, save_results
-import pandas as pd
+
 
 
 
@@ -18,20 +18,67 @@ class GSEAbase:
         self.verbose=False
         self.module=None
         self.logger=None
+        self.results=None
+        self.res_dict={}
        
-    def savefig(self, fig):
+    def savefig(self):
         #fig.savefig()
-        return
-    def to_csv(self, res):
-        self.results = res
-        return self.results
+        pass
+    def save_results(self, zipdata, outdir, module, gmt, rank_metric, permutation_type):
 
-    def log_start(self):
-        verobse = logging.INFO if self.verbose else logging.WARNING
-        self.logger = log_init(self.outdir, module=self.module, log_level=logging.INFO)
+        res = OrderedDict()
+        for gs,gseale,ind,RES in zipdata:        
+            rdict = OrderedDict()      
+            rdict['es'] = gseale[0]
+            rdict['nes'] = gseale[1]
+            rdict['pval'] = gseale[2]
+            rdict['fdr'] = gseale[3]
+            rdict['gene_set_size'] = len(gmt[gs])
+            rdict['matched_size'] = len(ind)
+            rdict['rank_ES'] = RES
+            rdict['genes'] = rank_metric.iloc[ind, data.columns.get_loc('gene_name')].tolist()
+            rdict['hit_index'] = ind
+            res[gs] = rdict           
+
+        res_df = DataFrame.from_dict(res, orient='index')
+        res_df.index.name = 'Term'
+        res_df.sort_values(by='fdr', inplace=True)
+        res_df.drop(['rank_ES','hit_index'], axis=1, inplace=True)
+        res_df.to_csv('{a}/gseapy.{c}.report.csv'.format(a=outdir, b=module, c=permutation_type),
+                      float_format ='%.7f')    
+
+        self.res_dict = res
+        self.results  = res_df
+        return 
+
+    def log_init(self, module='GSEA', log_level=logging.INFO):
+
+        logging.basicConfig(
+                            level    = logging.DEBUG,
+                            format   = 'LINE %(lineno)-4d: %(asctime)s [%(levelname)-8s] %(message)s',
+                            filename = "%s/gseapy.%s.log"%(self.outdir, self.module),
+                            filemode = 'w')
+
+        logger = logging.getLogger(__name__)
+        #logger.setLevel(logging.DEBUG)
+        # define a Handler which writes INFO messages or higher to the sys.stderr
+        console = logging.StreamHandler()
+        console.setLevel(log_level)
+        # set a format which is simpler for console use
+        formatter = logging.Formatter('%(asctime)s %(message)s')
+        # tell the handler to use this format
+        console.setFormatter(formatter)
+        logger.addHandler(console)
+        #if you want information print to the console, uisng logger.info....
+        self.logger=logger
+
         return self.logger
     def log_stop(self):
-         log_remove(self.logger)
+        handlers = self.logger.handlers[:]
+        for handler in handlers:
+            handler.close()
+            self.logger.removeHandler(handler)     
+
          return
 
     
@@ -69,7 +116,7 @@ class GSEA(GSEAbase):
                           self.ascending, self.figsize, self.format, self.graph_num, 
                           self.seed, self.verbose)
 
-        return  self.results
+        return  
 
 
 class Prerank(GSEAbase):
@@ -101,7 +148,7 @@ class Prerank(GSEAbase):
                                self.permutation_num, self.weighted_score_type, 
                                self.ascending, self.figsize, self.format, 
                                self.graph_num, self.seed, self.verbose)
-        return self.results
+        return 
     
 
 class SingleSampleGSEA(GSEAbase):
@@ -129,7 +176,8 @@ class SingleSampleGSEA(GSEAbase):
     def run(self):
         
         mkdirs(self.outdir)
-        logger = self.log_start()
+        logger = self.log_init(module=self.module, 
+                                log_level=logging.INFO if self.verbose else logging.WARNING)
 
         if isinstance(self.data, pd.DataFrame) :
             df = self.data.copy()
@@ -160,11 +208,12 @@ class SingleSampleGSEA(GSEAbase):
                                                            seed=self.seed)
         logger.info("Start to generate gseapy reports, and produce figures...")
         res_zip = zip(subsets, list(results), hit_ind, rank_ES)
-        res, res_df = save_results(zipdata=res_zip, outdir=self.outdir, module='SingleSample', 
-                                   gmt=gmt, data=dat, permutation_type="gene_sets")
+
+        self.save_results(zipdata=res_zip, outdir=self.outdir, module=self.module, 
+                                   gmt=gmt, rank_metric=dat, permutation_type="gene_sets")
 
         #Plotting
-        top_term = res_df.head(self.graph_num).index
+        top_term = self.results.head(self.graph_num).index
         
         for gs in top_term:
             hit = res.get(gs)['hit_index']
@@ -173,13 +222,12 @@ class SingleSampleGSEA(GSEAbase):
                             nes=res.get(gs)['nes'], pval=res.get(gs)['pval'], fdr=res.get(gs)['fdr'], 
                             RES=res.get(gs)['rank_ES'], phenoPos="", phenoNeg="", figsize=self.figsize)        
             gs = gs.replace('/','_').replace(":","_")
-            fig.savefig('{a}/{b}.gsea.{c}'.format(a=outdir, b=gs, c=format), bbox_inches='tight', dpi=300,)
+            fig.savefig('{a}/{b}.gsea.{c}'.format(a=self.outdir, b=gs, c=self.format), bbox_inches='tight', dpi=300,)
 
         
         logger.info("Congratulations. GSEApy run successfully................")
         self.log_stop()
-        self.results = res
-        return self.results 
+        return 
         
 
 
@@ -315,8 +363,8 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
     #if isinstance(data, pd.DataFrame) or isinstance(cls, list):
 
     log_remove(logger)
-
-    return res
+    if hasattr(sys, 'ps1'):
+        return res
 
 
 def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg',
