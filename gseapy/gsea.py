@@ -149,7 +149,7 @@ class SingleSampleGSEA(GSEAbase):
         dat2 = dat.set_index('gene_name')
         del dat2['rank2']
         #filtering out gene sets and build gene sets dictionary
-        gmt = gsea_gmt_parser(self.gene_sets, min_size=self.min_size, max_size=self.max_size, gene_list=dat.index.values)
+        gmt = gsea_gmt_parser(self.gene_sets, min_size=self.min_size, max_size=self.max_size, gene_list=dat2.index.values)
         logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
 
         
@@ -164,14 +164,14 @@ class SingleSampleGSEA(GSEAbase):
                                    gmt=gmt, data=dat, permutation_type="gene_sets")
 
         #Plotting
-        top_term = res_df.head(graph_num).index
-        width = len(classes) if len(classes) >= 6 else  5
+        top_term = res_df.head(self.graph_num).index
+        
         for gs in top_term:
             hit = res.get(gs)['hit_index']
             gene_symbol = res.get(gs)['genes']
             fig = gsea_plot(rank_metric=dat, enrich_term=gs, hit_ind=hit,
                             nes=res.get(gs)['nes'], pval=res.get(gs)['pval'], fdr=res.get(gs)['fdr'], 
-                            RES=res.get(gs)['rank_ES'], phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize)        
+                            RES=res.get(gs)['rank_ES'], phenoPos="", phenoNeg="", figsize=self.figsize)        
             gs = gs.replace('/','_').replace(":","_")
             fig.savefig('{a}/{b}.gsea.{c}'.format(a=outdir, b=gs, c=format), bbox_inches='tight', dpi=300,)
 
