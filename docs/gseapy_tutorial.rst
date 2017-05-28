@@ -19,7 +19,7 @@ In order to run gseapy successfully, install gseapy use pip.
 
 
 
-Use ``call`` command, or :func:`call`
+Use ``gsea`` command, or :func:`gsea`
 ================================================
 
 Follow the steps blow.
@@ -184,18 +184,17 @@ An example of gmt file looks like below:
 
 At least 3 files are required to run gseapy.
 
+interactive python console
 .. code:: python
-
+     
     import gseapy
     gseapy.call(data='gsea_data.txt', cls='gsea.cls', gmt='gene_sets.gmt', outdir='gseapy_out')
 
 
-5. Command line 
----------------------------------------------------------
-
+bash shell
 .. code:: bash
 
-    gseapy call -d gsea_data.txt -c test.cls -g gene_sets.gmt -o gseapy_out
+    gseapy gsea -d gsea_data.txt -c test.cls -g gene_sets.gmt -o gseapy_out
 
 
 Use ``prerank`` Command, or :func:`prerank`
@@ -222,6 +221,20 @@ Or run inside python.
     gseapy.prerank(rnk='gsea_data.rnk', gene_sets='gene_sets.gmt', outdir='test')
 
 
+Use ``single`` command, or :func:`SingleSampleGSEA`
+===============================================================
+
+.. code:: bash
+ 
+    gseapy single -d expression.txt -g gene_sets.gmt -o test
+
+
+.. code:: python
+
+    # run ssGSEA
+    from gseapy.gsea import SingleSampleGSEA
+    ss = SingleSampleGSEA(data="expression.txt", gene_sets= "gene_sets.gmt", outdir='test')
+    ss.run()
 
 
 Use ``enrichr`` command, or :func:`enrichr`
@@ -276,13 +289,11 @@ Let's see what the txt file looks like.
     PTX3
        
 
-Select the library you want to do enrichment analysis. For a view all avilable libraries,
-call 
-
+Select the library you want to do enrichment analysis. For a view all avilable libraries,run
 
 .. code:: python
    
-   #call get_library_name(), it will print out all library names.
+   #s get_library_name(), it will print out all library names.
    import gseapy
    names = gseapy.get_library_name()
    print(names)
