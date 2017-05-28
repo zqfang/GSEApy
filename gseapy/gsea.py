@@ -28,10 +28,11 @@ class GSEAbase:
 
     def log_start(self):
         verobse = logging.INFO if self.verbose else logging.WARNING
-        self.logger = log_init(self.outdir, module=self.module, log_level=logging.INFO))
+        self.logger = log_init(self.outdir, module=self.module, log_level=logging.INFO)
         return self.logger
     def log_stop(self):
          log_remove(self.logger)
+         return
 
     
 class GSEA(GSEAbase):
@@ -126,6 +127,7 @@ class SingleSampleGSEA(GSEAbase):
         self.graph_num=graph_num
         self.seed=seed
         self.verbose=verbose
+        self.module='SingleSample'
 
     def run(self):
         
@@ -179,7 +181,7 @@ class SingleSampleGSEA(GSEAbase):
           
     
         logger.info("Congratulations. GSEApy run successfully................")
-        log_remove(logger)
+        super().log_stop(self)
         self.results = res
         return self.results 
         
@@ -317,7 +319,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
 
     log_remove(logger)
 
-        return res
+    return res
 
 
 def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg',
