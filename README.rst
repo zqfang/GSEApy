@@ -41,10 +41,10 @@ GSEAPY is a python wrapper for **GSEA** and **Enrichr**.
 
 GSEAPY has five subcommands: ``gsea``, ``prerank``, ``single``, ``replot`` ``enrichr``.
 
-1. The ``gsea`` module produce GSEAPY results.  
+1. The ``gsea`` module produce **GSEA** results.    
 The input requries a txt file(FPKM, Expected Counts, TPM, et.al), a cls file, and gene_sets file in gmt format. 
 
-2. The ``prerank`` module produce GSEAPY results.  
+2. The ``prerank`` module produce **Prerank tool** results.  
 The input expects a pre-ranked gene list dataset with correlation values, which in .rnk format, and gene_sets file in gmt format.  ``prerank`` module is an API to `GSEA` pre-rank tools.
 
 3. The ``single`` module perform **single sample GSEA(ssGSEA)** analysis.  
