@@ -8,9 +8,11 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>How to Use GSEAPY &mdash; gseapy 0.7.2 documentation</title>
+  <title>How to Use GSEAPY &mdash; GSEApy 0.8.0 documentation</title>
   
 
+  
+  
   
   
 
@@ -33,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="gseapy 0.7.2 documentation" href="index.html"/>
+    <link rel="top" title="GSEApy 0.8.0 documentation" href="index.html"/>
         <link rel="next" title="A Protocol to Prepare files for GSEAPY" href="gseapy_tutorial.html"/>
         <link rel="prev" title="Welcome to GSEAPY’s documentation!" href="introduction.html"/> 
 
@@ -44,6 +46,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -53,7 +56,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> gseapy
+            <a href="index.html" class="icon icon-home"> GSEApy
           
 
           
@@ -63,7 +66,7 @@
             
             
               <div class="version">
-                0.7.2
+                0.8.0
               </div>
             
           
@@ -84,7 +87,10 @@
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Welcome to GSEAPY&#8217;s documentation!</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">How to Use GSEAPY</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#for-command-line-usage">For command line usage:</a></li>
@@ -123,8 +129,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">gseapy</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GSEApy</a>
+        
       </nav>
 
 
@@ -133,23 +141,40 @@
         <div class="rst-content">
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>How to Use GSEAPY</li>
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>How to Use GSEAPY</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/run.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/run.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -208,7 +233,7 @@ See <span class="xref std std-ref">example</span> for details, or, see <a class=
 <li>The <a class="reference internal" href="#gseapy.call" title="gseapy.call"><code class="xref py py-func docutils literal"><span class="pre">call()</span></code></a> function to computing es,nes,pval,fdr,and generate plots <em>de novo</em>.</li>
 </ul>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># An example to calculate es, nes, pval,fdrs, and produce figures using gseapy.</span>
-<span class="n">gseapy</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s1">&#39;gsea_dat.txt&#39;</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span><span class="s1">&#39;gene_sets.gmt&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="s1">&#39;test.cls&#39;</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;gseapy_out&#39;</span><span class="p">,</span>
+<span class="n">gseapy</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s1">&#39;gsea_dat.txt&#39;</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span><span class="s1">&#39;gene_sets.gmt&#39;</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="s1">&#39;test.cls&#39;</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;gseapy_out&#39;</span><span class="p">,</span>
           <span class="n">min_size</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">permutation_n</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">weighted_score_type</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
           <span class="n">permutation_type</span> <span class="o">=</span> <span class="s1">&#39;gene_set&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;log2_ratio_of_classes&#39;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
           <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">6.5</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
@@ -275,15 +300,16 @@ $ gseapy enrichr -h
 <li><strong>outdir</strong> &#8211; Output directory.</li>
 <li><strong>weight</strong> &#8211; weighted score type. choose from {0,1,1.5,2}. Default: 1.</li>
 <li><strong>figsize</strong> &#8211; matplotlib output figure figsize. Defult: [6.5,6].</li>
-<li><strong>format</strong> &#8211; matplotlib output figure format. Default: &#8216;png&#8217;.</li>
+<li><strong>format</strong> &#8211; matplotlib output figure format. Default: &#8216;pdf&#8217;.</li>
 <li><strong>min_size</strong> &#8211; min size of input genes presented in Gene Sets. Default: 3.</li>
 <li><strong>max_size</strong> &#8211; max size of input genes presented in Gene Sets. Default: 5000.
 you will not encourage to use min_size, or max_size argment in <a class="reference internal" href="#gseapy.replot" title="gseapy.replot"><code class="xref py py-func docutils literal"><span class="pre">replot()</span></code></a> function.
 Because gmt file has already been filter.</li>
+<li><strong>verbose</strong> &#8211; Bool, increase output verbosity, print out progress of your job, Default: False.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Generate new figures with seleted figure format. Default: &#8216;png&#8217;.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Generate new figures with seleted figure format. Default: &#8216;pdf&#8217;.</p>
 </td>
 </tr>
 </tbody>
@@ -302,7 +328,7 @@ Because gmt file has already been filter.</li>
 <li><strong>data</strong> &#8211; Gene expression data table.</li>
 <li><strong>gene_sets</strong> &#8211; Gene sets file. e.g. gmt files. Same input with GSEA.</li>
 <li><strong>permutation_n</strong> &#8211; Number of permutations for significance computation. Default: 1000.</li>
-<li><strong>permutation_type</strong> &#8211; Permutation type, &#8220;phenotype&#8221; (default) for phenotypes, &#8220;gene_set&#8221; for genes.</li>
+<li><strong>permutation_type</strong> &#8211; Permutation type, &#8220;phenotype&#8221; for phenotypes, &#8220;gene_set&#8221; for genes.</li>
 <li><strong>min_size</strong> (<em>int</em>) &#8211; Minimum allowed number of genes from gene set also the data set. Defaut: 15.</li>
 <li><strong>max_size</strong> (<em>int</em>) &#8211; Maximum allowed number of genes from gene set also the data set. Defaults: 500.</li>
 <li><strong>weighted_score_type</strong> &#8211; Refer to <code class="xref py py-func docutils literal"><span class="pre">algorithm.enrichment_socre()</span></code>. Default:1.</li>
@@ -330,15 +356,16 @@ This is the recommended statistic for calculating fold change for natural scale 
 <li><strong>ascending</strong> &#8211; Sorting order of rankings. Default: False.</li>
 <li><strong>outdir</strong> &#8211; Results output directory.</li>
 <li><strong>figsize</strong> &#8211; Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].</li>
-<li><strong>format</strong> &#8211; Matplotlib figure format. Default: &#8216;png&#8217;.</li>
+<li><strong>format</strong> &#8211; Matplotlib figure format. Default: &#8216;pdf&#8217;.</li>
 <li><strong>graph_num</strong> &#8211; Plot graphs for top sets of each phenotype</li>
 <li><strong>seed</strong> &#8211; Random seed. expect an interger. Defalut:None.</li>
+<li><strong>verbose</strong> &#8211; Bool, increase output verbosity, print out progress of your job, Default: False.</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><p>Return a DataFrame when inside python console.
 Generate <code class="docutils literal"><span class="pre">GSEA</span></code> plots and store a dictionary into csv file,
-where dictionary key is a gene set and values are:</p>
+where  each column represents:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">|</span> <span class="p">{</span><span class="n">es</span><span class="p">:</span> <span class="n">enrichment</span> <span class="n">score</span><span class="p">,</span> 
 <span class="o">|</span>  <span class="n">nes</span><span class="p">:</span> <span class="n">normalized</span> <span class="n">enrichment</span> <span class="n">score</span><span class="p">,</span> 
 <span class="o">|</span>  <span class="n">p</span><span class="p">:</span> <span class="n">P</span><span class="o">-</span><span class="n">value</span><span class="p">,</span> 
@@ -373,15 +400,16 @@ where dictionary key is a gene set and values are:</p>
 <li><strong>weighted_score_type</strong> &#8211; Refer to <code class="xref py py-func docutils literal"><span class="pre">algorithm.enrichment_socre()</span></code>. Default:1.</li>
 <li><strong>ascending</strong> &#8211; Sorting order of rankings. Default: False.</li>
 <li><strong>figsize</strong> &#8211; Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].</li>
-<li><strong>format</strong> &#8211; Matplotlib figure format. Default: &#8216;png&#8217;.</li>
+<li><strong>format</strong> &#8211; Matplotlib figure format. Default: &#8216;pdf&#8217;.</li>
 <li><strong>graph_num</strong> &#8211; Plot graphs for top sets of each phenotype</li>
 <li><strong>seed</strong> &#8211; Random seed. expect an interger. Defalut:None.</li>
+<li><strong>verbose</strong> &#8211; Bool, increase output verbosity, print out progress of your job, Default: False.</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><p>Return a DataFrame when inside python console.
 Generate <code class="docutils literal"><span class="pre">GSEA</span></code> plots and store a dictionary into csv file,
-where dictionary key is a gene set and values are:</p>
+where each column represents:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">|</span> <span class="p">{</span><span class="n">es</span><span class="p">:</span> <span class="n">enrichment</span> <span class="n">score</span><span class="p">,</span> 
 <span class="o">|</span>  <span class="n">nes</span><span class="p">:</span> <span class="n">normalized</span> <span class="n">enrichment</span> <span class="n">score</span><span class="p">,</span> 
 <span class="o">|</span>  <span class="n">p</span><span class="p">:</span> <span class="n">P</span><span class="o">-</span><span class="n">value</span><span class="p">,</span> 
@@ -407,13 +435,15 @@ where dictionary key is a gene set and values are:</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>gene_list</strong> &#8211; flat file with list of genes, one gene id per row.
-or a python list object, which make it easy to use 
-inside python console.</li>
+<li><strong>gene_list</strong> &#8211; Flat file with list of genes, one gene id per row.
+or a python list object</li>
 <li><strong>gene_sets</strong> &#8211; Enrichr Library to query.</li>
 <li><strong>description</strong> &#8211; name of analysis</li>
-<li><strong>outdir</strong> &#8211; out put file directory
-:param cutoff: Adjust P-value cutoff, for plotting. Default: 0.05</li>
+<li><strong>outdir</strong> &#8211; Output file directory</li>
+<li><strong>cutoff</strong> &#8211; Adjust P-value cutoff, for plotting. Default: 0.05</li>
+<li><strong>format</strong> &#8211; Output figure format supported by matplotlib,(&#8216;pdf&#8217;,&#8217;png&#8217;,&#8217;eps&#8217;...). Default: &#8216;pdf&#8217;.</li>
+<li><strong>no_plot</strong> &#8211; Bool, if equal to True, no figure will be draw. This is useful only if data are interested. Default: False.</li>
+<li><strong>verbose</strong> &#8211; Bool, increase output verbosity, print out progress of your job, Default: False.</li>
 </ul>
 </td>
 </tr>
@@ -429,7 +459,7 @@ inside python console.</li>
 <span id="algorithm"></span><h2>Algorithm<a class="headerlink" href="#module-gseapy.algorithm" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="gseapy.algorithm.enrichment_score">
-<code class="descclassname">gseapy.algorithm.</code><code class="descname">enrichment_score</code><span class="sig-paren">(</span><em>gene_list</em>, <em>gene_set</em>, <em>weighted_score_type=1</em>, <em>correl_vector=None</em>, <em>esnull=None</em>, <em>rs=&lt;mtrand.RandomState object at 0x000001E6E952B9B0&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.algorithm.enrichment_score" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.algorithm.</code><code class="descname">enrichment_score</code><span class="sig-paren">(</span><em>gene_list</em>, <em>gene_set</em>, <em>weighted_score_type=1</em>, <em>correl_vector=None</em>, <em>esnull=None</em>, <em>rs=&lt;mtrand.RandomState object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.algorithm.enrichment_score" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is the most important function of GSEAPY. It has the same algorithm with GSEA.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -458,6 +488,37 @@ equal to the permutation number.</li>
 <p>hit_index: index of a gene in gene_list, if gene included in gene_set.</p>
 <p>RES: Numerical vector containing the running enrichment score for all locations in the gene list .</p>
 </p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="gseapy.algorithm.enrichment_score_ss">
+<code class="descclassname">gseapy.algorithm.</code><code class="descname">enrichment_score_ss</code><span class="sig-paren">(</span><em>gene_set</em>, <em>expressions</em>, <em>weighted_score_type=0.25</em>, <em>esnull=None</em>, <em>rs=&lt;mtrand.RandomState object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.algorithm.enrichment_score_ss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a gene set, a map of gene names to expression levels, and a weight score, returns the ssGSEA
+enrichment score for the gene set as described by <em>D. Barbie et al 2009</em></p>
+<p>ssGSEA  allows one to define an enrichment score that represents the degree of absolute enrichment
+of a gene set in each sample within a given data set.  
+The  enrichment score was produced using the Empirical Cumulative Distribution Functions (ECDF)
+of the genes in the signature and the remaining genes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><p class="first">every member of gene_set is a key in expressions</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>gene_set</strong> &#8211; a list of gene_names in the gene_set given by gmt file.</li>
+<li><strong>expressions</strong> &#8211; dict, a dictionary mapping gene names to their absolute expression values</li>
+<li><strong>weighted_score_type</strong> &#8211; the weighted exponent on the  term.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">an array representing the intermediate Enrichment Scores for each step along the sorted gene list.
+To find the total enrichment score, take the sum of all values in the array.</p>
 </td>
 </tr>
 </tbody>
@@ -495,6 +556,12 @@ equal to the permutation number.</li>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="function">
+<dt id="gseapy.algorithm.gsea_compute_ss">
+<code class="descclassname">gseapy.algorithm.</code><code class="descname">gsea_compute_ss</code><span class="sig-paren">(</span><em>data</em>, <em>gmt</em>, <em>n</em>, <em>weighted_score_type</em>, <em>seed</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.algorithm.gsea_compute_ss" title="Permalink to this definition">¶</a></dt>
+<dd><p>compute enrichment scores and enrichment nulls for single sample GSEA.</p>
 </dd></dl>
 
 <dl class="function">
@@ -582,7 +649,7 @@ This is the recommended statistic for calculating fold change for natural scale 
 
 <dl class="function">
 <dt id="gseapy.algorithm.shuffle_list">
-<code class="descclassname">gseapy.algorithm.</code><code class="descname">shuffle_list</code><span class="sig-paren">(</span><em>gene_list</em>, <em>rand=&lt;mtrand.RandomState object at 0x000001E6E952B9E8&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.algorithm.shuffle_list" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.algorithm.</code><code class="descname">shuffle_list</code><span class="sig-paren">(</span><em>gene_list</em>, <em>rand=&lt;mtrand.RandomState object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.algorithm.shuffle_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a copy of a shuffled input gene_list.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -606,20 +673,22 @@ This is the recommended statistic for calculating fold change for natural scale 
 <span id="enrichr"></span><h2>Enrichr<a class="headerlink" href="#module-gseapy.enrichr" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="gseapy.enrichr.enrichr">
-<code class="descclassname">gseapy.enrichr.</code><code class="descname">enrichr</code><span class="sig-paren">(</span><em>gene_list</em>, <em>gene_sets</em>, <em>description='foo'</em>, <em>outdir='gseapy_out'</em>, <em>cutoff=0.05</em>, <em>format='png'</em>, <em>figsize=(3</em>, <em>6)</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.enrichr.enrichr" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.enrichr.</code><code class="descname">enrichr</code><span class="sig-paren">(</span><em>gene_list</em>, <em>gene_sets</em>, <em>description='foo'</em>, <em>outdir='Enrichr'</em>, <em>cutoff=0.05</em>, <em>format='pdf'</em>, <em>figsize=(3</em>, <em>6)</em>, <em>top_term=10</em>, <em>scale=0.8</em>, <em>no_plot=False</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.enrichr.enrichr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Enrichr API.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>gene_list</strong> &#8211; flat file with list of genes, one gene id per row.
-or a python list object, which make it easy to use 
-inside python console.</li>
+<li><strong>gene_list</strong> &#8211; Flat file with list of genes, one gene id per row.
+or a python list object</li>
 <li><strong>gene_sets</strong> &#8211; Enrichr Library to query.</li>
 <li><strong>description</strong> &#8211; name of analysis</li>
-<li><strong>outdir</strong> &#8211; out put file directory
-:param cutoff: Adjust P-value cutoff, for plotting. Default: 0.05</li>
+<li><strong>outdir</strong> &#8211; Output file directory</li>
+<li><strong>cutoff</strong> &#8211; Adjust P-value cutoff, for plotting. Default: 0.05</li>
+<li><strong>format</strong> &#8211; Output figure format supported by matplotlib,(&#8216;pdf&#8217;,&#8217;png&#8217;,&#8217;eps&#8217;...). Default: &#8216;pdf&#8217;.</li>
+<li><strong>no_plot</strong> &#8211; Bool, if equal to True, no figure will be draw. This is useful only if data are interested. Default: False.</li>
+<li><strong>verbose</strong> &#8211; Bool, increase output verbosity, print out progress of your job, Default: False.</li>
 </ul>
 </td>
 </tr>
@@ -630,15 +699,15 @@ inside python console.</li>
 </table>
 </dd></dl>
 
-<dl class="function">
-<dt id="gseapy.enrichr.get_library_name">
-<code class="descclassname">gseapy.enrichr.</code><code class="descname">get_library_name</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.enrichr.get_library_name" title="Permalink to this definition">¶</a></dt>
-<dd><p>return enrichr active enrichr library name.</p>
-</dd></dl>
-
 </div>
 <div class="section" id="module-gseapy.parser">
 <span id="parser"></span><h2>Parser<a class="headerlink" href="#module-gseapy.parser" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="gseapy.parser.get_library_name">
+<code class="descclassname">gseapy.parser.</code><code class="descname">get_library_name</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.parser.get_library_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>return enrichr active enrichr library name.</p>
+</dd></dl>
+
 <dl class="function">
 <dt id="gseapy.parser.gsea_cls_parser">
 <code class="descclassname">gseapy.parser.</code><code class="descname">gsea_cls_parser</code><span class="sig-paren">(</span><em>cls</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.parser.gsea_cls_parser" title="Permalink to this definition">¶</a></dt>
@@ -719,22 +788,6 @@ do this for you.</p>
 </table>
 </dd></dl>
 
-<dl class="function">
-<dt id="gseapy.parser.unique">
-<code class="descclassname">gseapy.parser.</code><code class="descname">unique</code><span class="sig-paren">(</span><em>seq</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.parser.unique" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove duplicates from a list in Python while preserving order.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>seq</strong> &#8211; a python list object.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list without duplicates while preserving order.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
 </div>
 <div class="section" id="module-gseapy.plot">
 <span id="graph"></span><h2>Graph<a class="headerlink" href="#module-gseapy.plot" title="Permalink to this headline">¶</a></h2>
@@ -758,16 +811,29 @@ if spines = []. remove all spines and ticks.</li>
 </dd></dl>
 
 <dl class="function">
+<dt id="gseapy.plot.barplot">
+<code class="descclassname">gseapy.plot.</code><code class="descname">barplot</code><span class="sig-paren">(</span><em>df</em>, <em>top_term=10</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.plot.barplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>barplot for enrichr results</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="gseapy.plot.dotplot">
-<code class="descclassname">gseapy.plot.</code><code class="descname">dotplot</code><span class="sig-paren">(</span><em>df</em>, <em>cutoff=0.05</em>, <em>figsize=(3</em>, <em>6)</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.plot.dotplot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Visualize enrichr or gsea results.</p>
+<code class="descclassname">gseapy.plot.</code><code class="descname">dotplot</code><span class="sig-paren">(</span><em>df</em>, <em>cutoff=0.05</em>, <em>figsize=(3.5</em>, <em>6)</em>, <em>top_term=10</em>, <em>scale=1</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.plot.dotplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Visualize enrichr results.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>df</strong> &#8211; GSEApy DataFrame results</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>df</strong> &#8211; GSEApy DataFrame results.</li>
+<li><strong>cutoff</strong> &#8211; p-adjust cut-off.</li>
+<li><strong>top_term</strong> &#8211; number of enriched terms to show.</li>
+<li><strong>scale</strong> &#8211; dotplot point size scale.</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a dotplot for enrichr terms.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a dotplot for enrichr terms.</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -852,15 +918,18 @@ across the specified axis.</p>
 
 
            </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="gseapy_tutorial.html" class="btn btn-neutral float-right" title="A Protocol to Prepare files for GSEAPY" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="gseapy_tutorial.html" class="btn btn-neutral float-right" title="A Protocol to Prepare files for GSEAPY" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="introduction.html" class="btn btn-neutral" title="Welcome to GSEAPY’s documentation!" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="introduction.html" class="btn btn-neutral" title="Welcome to GSEAPY’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -869,7 +938,7 @@ across the specified axis.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Zhuoqing Fang.
+        &copy; Copyright 2017, Zhuoqing Fang.
 
     </p>
   </div>
@@ -891,10 +960,11 @@ across the specified axis.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.7.2',
+            VERSION:'0.8.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>
