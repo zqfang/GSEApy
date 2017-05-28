@@ -194,11 +194,11 @@ $ gseapy enrichr -i gene_list.txt -g KEGG_2016 -d pathway_enrichment -o test
 $ gseapy replot -i ./gsea -o gseapy_out
 </pre></div>
 </div>
-<p>The <code class="docutils literal"><span class="pre">call</span></code> module produce GSEAPY results.</p>
+<p>The <code class="docutils literal"><span class="pre">gsea</span></code> module produce GSEAPY results.</p>
 <p>The input requries a txt file( FPKM, Expected Counts, TPM, et.al), a cls file,
 and gene_sets file in gmt format.</p>
-<div class="code bash highlight-default"><div class="highlight"><pre><span></span># an example to compute using gseapy call module
-$ gseapy call -d gsea_data.txt -c test.cls -g gene_sets.gmt
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span># an example to compute using gseapy gsea module
+$ gseapy gsea -d gsea_data.txt -c test.cls -g gene_sets.gmt
 </pre></div>
 </div>
 <p>The <code class="docutils literal"><span class="pre">prerank</span></code> module input expects a pre-ranked gene list dataset with correlation values, which in .rnk format,
@@ -230,7 +230,7 @@ See <span class="xref std std-ref">example</span> for details, or, see <a class=
 </pre></div>
 </div>
 <ul class="simple">
-<li>The <a class="reference internal" href="#gseapy.call" title="gseapy.call"><code class="xref py py-func docutils literal"><span class="pre">call()</span></code></a> function to computing es,nes,pval,fdr,and generate plots <em>de novo</em>.</li>
+<li>The <code class="xref py py-func docutils literal"><span class="pre">gsea()</span></code> function to computing es,nes,pval,fdr,and generate plots <em>de novo</em>.</li>
 </ul>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># An example to calculate es, nes, pval,fdrs, and produce figures using gseapy.</span>
 <span class="n">gseapy</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s1">&#39;gsea_dat.txt&#39;</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span><span class="s1">&#39;gene_sets.gmt&#39;</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="s1">&#39;test.cls&#39;</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;gseapy_out&#39;</span><span class="p">,</span>
@@ -255,7 +255,7 @@ See <span class="xref std std-ref">example</span> for details, or, see <a class=
 <h3>1. gseapy subcommands<a class="headerlink" href="#gseapy-subcommands" title="Permalink to this headline">¶</a></h3>
 <div class="code bash highlight-default"><div class="highlight"><pre><span></span>$ gseapy --help
 
- usage: gseapy [-h] [--version] {call,prerank,replot,enrichr} ...
+ usage: gseapy [-h] [--version] {gsea,prerank,single,replot,enrichr} ...
 
  gseapy -- Gene Set Enrichment Analysis in Python
 
@@ -263,6 +263,7 @@ See <span class="xref std std-ref">example</span> for details, or, see <a class=
    {call,replot}
      call       Main GSEAPY Function: run GSEAPY instead of GSEA.
      prerank    Using pre-ranked tool to run GSEAPY.
+     single     Run Single Sample GSEA.
      replot     Reproduce GSEA desktop figures.
      enrichr    Peform GSEA using enrichr API.
  optional arguments:
@@ -276,7 +277,7 @@ See <span class="xref std std-ref">example</span> for details, or, see <a class=
 <h3>2. The subcommands help<a class="headerlink" href="#the-subcommands-help" title="Permalink to this headline">¶</a></h3>
 <div class="code bash highlight-default"><div class="highlight"><pre><span></span>$ gseapy replot -h
 # or
-$ gseapy call -h
+$ gseapy gsea -h
 # or
 $ gseapy prerank -h
 # or

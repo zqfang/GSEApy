@@ -27,7 +27,7 @@ The ``replot`` module reproduce GSEA desktop version results. The only input for
 
 
 
-The ``call`` module produce GSEAPY results. 
+The ``gsea`` module produce GSEAPY results. 
 
 The input requries a txt file( FPKM, Expected Counts, TPM, et.al), a cls file,
 and gene_sets file in gmt format.
@@ -35,8 +35,8 @@ and gene_sets file in gmt format.
 
 .. code:: bash
     
-    # an example to compute using gseapy call module
-    $ gseapy call -d gsea_data.txt -c test.cls -g gene_sets.gmt
+    # an example to compute using gseapy gsea module
+    $ gseapy gsea -d gsea_data.txt -c test.cls -g gene_sets.gmt
 
 
 
@@ -80,7 +80,7 @@ This will import the following:
 
 
 
-* The :func:`call` function to computing es,nes,pval,fdr,and generate plots *de novo*.
+* The :func:`gsea` function to computing es,nes,pval,fdr,and generate plots *de novo*.
 
 .. code:: python
 
@@ -110,7 +110,7 @@ To See help information of GSEAPY
    
    $ gseapy --help 
    
-    usage: gseapy [-h] [--version] {call,prerank,replot,enrichr} ...
+    usage: gseapy [-h] [--version] {gsea,prerank,single,replot,enrichr} ...
 
     gseapy -- Gene Set Enrichment Analysis in Python
 
@@ -118,6 +118,7 @@ To See help information of GSEAPY
       {call,replot}
         call       Main GSEAPY Function: run GSEAPY instead of GSEA.
         prerank    Using pre-ranked tool to run GSEAPY.
+        single     Run Single Sample GSEA.
         replot     Reproduce GSEA desktop figures.
         enrichr    Peform GSEA using enrichr API.
     optional arguments:
@@ -136,7 +137,7 @@ For command line options of each command, type: gseapy COMMAND -h
 
    $ gseapy replot -h
    # or
-   $ gseapy call -h
+   $ gseapy gsea -h
    # or
    $ gseapy prerank -h
    # or 
