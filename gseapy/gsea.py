@@ -19,37 +19,8 @@ class GSEAbase:
         self.module=None
         self.logger=None
         self.results=None
-        self.res_dict={}
+        self.res2df=None
        
-    def savefig(self):
-        #fig.savefig()
-        pass
-    def save_results(self, zipdata, outdir, module, gmt, rank_metric, permutation_type):
-
-        res = OrderedDict()
-        for gs,gseale,ind,RES in zipdata:        
-            rdict = OrderedDict()      
-            rdict['es'] = gseale[0]
-            rdict['nes'] = gseale[1]
-            rdict['pval'] = gseale[2]
-            rdict['fdr'] = gseale[3]
-            rdict['gene_set_size'] = len(gmt[gs])
-            rdict['matched_size'] = len(ind)
-            rdict['rank_ES'] = RES
-            rdict['genes'] = rank_metric.iloc[ind, rank_metric.columns.get_loc('gene_name')].tolist()
-            rdict['hit_index'] = ind
-            res[gs] = rdict           
-
-        res_df = DataFrame.from_dict(res, orient='index')
-        res_df.index.name = 'Term'
-        res_df.sort_values(by='fdr', inplace=True)
-        res_df.drop(['rank_ES','hit_index'], axis=1, inplace=True)
-        res_df.to_csv('{a}/gseapy.{b}.{c}.report.csv'.format(a=outdir, b=module, c=permutation_type),
-                      float_format ='%.7f')    
-
-        self.res_dict = res
-        self.results  = res_df
-        return 
 
     def log_init(self, module='GSEA', log_level=logging.INFO):
 
@@ -80,6 +51,60 @@ class GSEAbase:
             self.logger.removeHandler(handler)     
 
         return
+    def plotting(self, rank_metric, results, res2df, 
+                graph_num, outdir, format, figsize, module=None, data=None,
+                classes=None, phenoPos='', phenoNeg=''):
+        """
+        :param rank_metric: dat2.
+        :param results: self.results
+        :param data: expression table
+        
+        """
+        #Plotting
+        top_term = res2df.head(graph_num).index
+        
+        for gs in top_term:
+            hit = results.get(gs)['hit_index']
+            gene_symbol = results.get(gs)['genes']
+            fig = gsea_plot(rank_metric=rank_metric, enrich_term=gs, hit_ind=hit,
+                            nes=results.get(gs)['nes'], pval=results.get(gs)['pval'], fdr=results.get(gs)['fdr'], 
+                            RES=results.get(gs)['rank_ES'], phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize)        
+            gs = gs.replace('/','_').replace(":","_")
+            fig.savefig('{a}/{b}.gsea.{c}'.format(a=outdir, b=gs, c=format), bbox_inches='tight', dpi=300,)
+             
+            if module == 'gsea':
+                width = len(classes) if len(classes) >= 6 else  5
+                heatmap(df=data.loc[gene_symbol], term=gs, outdir=outdir, 
+                        figsize=(width, len(gene_symbol)/2), format=format)
+      
+
+
+    def save_results(self, zipdata, outdir, module, gmt, rank_metric, permutation_type):
+
+        res = OrderedDict()
+        for gs,gseale,ind,RES in zipdata:        
+            rdict = OrderedDict()      
+            rdict['es'] = gseale[0]
+            rdict['nes'] = gseale[1]
+            rdict['pval'] = gseale[2]
+            rdict['fdr'] = gseale[3]
+            rdict['gene_set_size'] = len(gmt[gs])
+            rdict['matched_size'] = len(ind)
+            rdict['rank_ES'] = RES
+            rdict['genes'] = rank_metric.iloc[ind, rank_metric.columns.get_loc('gene_name')].tolist()
+            rdict['hit_index'] = ind
+            res[gs] = rdict           
+
+        res_df = DataFrame.from_dict(res, orient='index')
+        res_df.index.name = 'Term'
+        res_df.sort_values(by='fdr', inplace=True)
+        res_df.drop(['rank_ES','hit_index'], axis=1, inplace=True)
+        res_df.to_csv('{a}/gseapy.{b}.{c}.report.csv'.format(a=outdir, b=module, c=permutation_type),
+                      float_format ='%.7f')    
+
+        self.res2df = res_df
+        self.results  = res
+        return 
 
     
 class GSEA(GSEAbase):
@@ -213,18 +238,10 @@ class SingleSampleGSEA(GSEAbase):
                                    gmt=gmt, rank_metric=dat, permutation_type="gene_sets")
         
         #Plotting
-        res = self.res_dict
-        top_term = self.results.head(self.graph_num).index
-        
-        for gs in top_term:
-            hit = res.get(gs)['hit_index']
-            gene_symbol = res.get(gs)['genes']
-            fig = gsea_plot(rank_metric=dat, enrich_term=gs, hit_ind=hit,
-                            nes=res.get(gs)['nes'], pval=res.get(gs)['pval'], fdr=res.get(gs)['fdr'], 
-                            RES=res.get(gs)['rank_ES'], phenoPos="", phenoNeg="", figsize=self.figsize)        
-            gs = gs.replace('/','_').replace(":","_")
-            fig.savefig('{a}/{b}.gsea.{c}'.format(a=self.outdir, b=gs, c=self.format), bbox_inches='tight', dpi=300,)
-
+        res = self.res2df
+        self.plotting(rank_metric=dat, results=self.results, res2df=self.res2df, 
+                      graph_num=self.graph_num, outdir=self.outdir,
+                      figsize=self.figsize, format=self.format, module=self.module)
         
         logger.info("Congratulations. GSEApy run successfully................")
         self.log_stop()
