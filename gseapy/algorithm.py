@@ -365,7 +365,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
 
     return gsea_significance(enrichment_scores, enrichment_nulls),hit_ind,rank_ES, subsets
 
-def gsea_compute_ss(data, gmt, n, weighted_score_type, permutation_type, method, seed):
+def gsea_compute_ss(data, gmt, n, weighted_score_type, seed):
     """compute enrichment scores and enrichment nulls for single sample GSEA. 
     """
     rs = np.random.RandomState(seed) 
@@ -389,7 +389,7 @@ def gsea_compute_ss(data, gmt, n, weighted_score_type, permutation_type, method,
     enrichment_nulls = [ [] for a in range(len(subsets)) ]   
 
     for si,subset in enumerate(subsets):
-        esn = enrichment_score(gene_set=gmt.get(subset), expressions=exp_dict, 
+        esn = enrichment_score_ss(gene_set=gmt.get(subset), expressions=exp_dict, 
                                weighted_score_type=w, esnull=n, rs=rs)[0]                                         
         enrichment_nulls[si] = esn # esn is a list, don't need to use append method. 
 

@@ -5,7 +5,7 @@ from __future__ import  division
 
 import os,sys, logging
 from .parser import *
-from .algorithm import enrichment_score, gsea_compute, preprocess, ranking_metric
+from .algorithm import enrichment_score, gsea_compute, gsea_compute_ss, preprocess, ranking_metric
 from .plot import gsea_plot, heatmap
 from .utils import log_init, log_remove, mkdirs, save_results
 import pandas as pd
@@ -114,13 +114,9 @@ class SingleSampleGSEA(GSEAbase):
         self.gene_sets=gene_sets
         self.outdir=outdir
         self.weighted_score_type=weighted_score_type
-        self.permutation_type=permutation_type
-        self.method=method
-        self.results=None
         self.min_size=min_size
         self.max_size=max_size
         self.permutation_num=permutation_num
-        self.weight_score_type=weight_score_type
         self.ascending=ascending
         self.figsize=figsize
         self.format=format
@@ -128,17 +124,17 @@ class SingleSampleGSEA(GSEAbase):
         self.seed=seed
         self.verbose=verbose
         self.module='SingleSample'
+        self.results=None
 
     def run(self):
         
         mkdirs(self.outdir)
-        logger = super().log_start(self)
+        logger = self.log_start()
 
         if isinstance(self.data, pd.DataFrame) :
-            df = data.copy()
-
-        elif isinstance(self.data, str) :
-            df = pd.read_table(data)
+            df = self.data.copy()
+        elif isinstance(self.data, str):
+            df = pd.read_table(self.data)
         else:
             raise Exception('Error parsing gene expression dataframe!')
             sys.exit(1)
@@ -149,20 +145,23 @@ class SingleSampleGSEA(GSEAbase):
         #Start Analysis
         logger.info("Parsing data files for GSEA.............................")     
         #select correct expression genes and values.
-        dat = preprocess(df)
+        dat = gsea_rank_metric(df)
+        dat2 = dat.set_index('gene_name')
+        del dat2['rank2']
         #filtering out gene sets and build gene sets dictionary
         gmt = gsea_gmt_parser(self.gene_sets, min_size=self.min_size, max_size=self.max_size, gene_list=dat.index.values)
         logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
 
+        
         logger.info("Start to run GSEA...Might take a while..................")   
         #compute ES, NES, pval, FDR, RES
-        results,hit_ind,rank_ES, subsets = gsea_compute_ss(data=dat, n=self.permutation_num, gmt=gmt,
+        results,hit_ind,rank_ES, subsets = gsea_compute_ss(data=dat2, n=self.permutation_num, gmt=gmt,
                                                            weighted_score_type=self.weighted_score_type,
-                                                           permutation_type=self.permutation_type, ascending=self.ascending,
                                                            seed=self.seed)
         logger.info("Start to generate gseapy reports, and produce figures...")
         res_zip = zip(subsets, list(results), hit_ind, rank_ES)
-        res, res_df = save_results(zipdata=res_zip, outdir=self.outdir, module='SingleSample',permutation_type="gene_sets")
+        res, res_df = save_results(zipdata=res_zip, outdir=self.outdir, module='SingleSample', 
+                                   gmt=gmt, data=dat, permutation_type="gene_sets")
 
         #Plotting
         top_term = res_df.head(graph_num).index
@@ -170,18 +169,15 @@ class SingleSampleGSEA(GSEAbase):
         for gs in top_term:
             hit = res.get(gs)['hit_index']
             gene_symbol = res.get(gs)['genes']
-            fig = gsea_plot(rank_metric=dat2, enrich_term=gs, hit_ind=hit,
+            fig = gsea_plot(rank_metric=dat, enrich_term=gs, hit_ind=hit,
                             nes=res.get(gs)['nes'], pval=res.get(gs)['pval'], fdr=res.get(gs)['fdr'], 
                             RES=res.get(gs)['rank_ES'], phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize)        
             gs = gs.replace('/','_').replace(":","_")
             fig.savefig('{a}/{b}.gsea.{c}'.format(a=outdir, b=gs, c=format), bbox_inches='tight', dpi=300,)
 
-            heatmap(df=dat.loc[gene_symbol], term=gs, outdir=outdir, 
-                    figsize=(width, len(gene_symbol)/2), format=format)
-          
-    
+        
         logger.info("Congratulations. GSEApy run successfully................")
-        super().log_stop(self)
+        self.log_stop()
         self.results = res
         return self.results 
         
@@ -295,7 +291,8 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
                                                     seed=seed)
     logger.info("Start to generate gseapy reports, and produce figures...")
     res_zip = zip(subsets, list(results), hit_ind, rank_ES)
-    res, res_df = save_results(zipdata=res_zip, outdir=self.outdir, module='GSEA',permutation_type=permutation_type)
+    res, res_df = save_results(zipdata=res_zip, outdir=outdir, 
+                               module='GSEA', gmt=gmt,data=dat2, permutation_type=permutation_type)
 
     #Plotting
     top_term = res_df.head(graph_num).index
@@ -381,7 +378,8 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
    
     logger.info("Start to generate gseapy reports, and produce figures...")
     res_zip = zip(subsets, list(results), hit_ind, rank_ES)
-    res, res_df = save_results(zipdata=res_zip, outdir=self.outdir, module='GSEA',permutation_type=permutation_type)
+    res, res_df = save_results(zipdata=res_zip, outdir=outdir, 
+                               module='prerank', gmt=gmt, data=dat2, permutation_type=permutation_type)
     
 
     #Plotting

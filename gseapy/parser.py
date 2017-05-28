@@ -70,7 +70,7 @@ def gsea_rank_metric(rnk):
     if isinstance(rnk, DataFrame) :
         rank_metric = rnk.copy()
     elif isinstance(rnk, str) :
-        rank_metric = read_table(rnk,header=None)
+        rank_metric = read_table(rnk, header=None)
     else:
         raise Exception('Error parsing gene list!')
         

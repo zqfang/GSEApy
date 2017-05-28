@@ -58,7 +58,7 @@ def mkdirs(outdir):
             raise exc
         pass   
  
-def save_results(zipdata, outdir, module, permutation_type):
+def save_results(zipdata, outdir, module, gmt, data, permutation_type):
     """Save GSEA results to a csv file
     """
     res = OrderedDict()
@@ -71,7 +71,7 @@ def save_results(zipdata, outdir, module, permutation_type):
         rdict['gene_set_size'] = len(gmt[gs])
         rdict['matched_size'] = len(ind)
         rdict['rank_ES'] = RES
-        rdict['genes'] = dat2.iloc[ind, dat2.columns.get_loc('gene_name')].tolist()
+        rdict['genes'] = data.iloc[ind, data.columns.get_loc('gene_name')].tolist()
         rdict['hit_index'] = ind
         res[gs] = rdict           
 
