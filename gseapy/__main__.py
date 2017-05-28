@@ -46,7 +46,7 @@ def main():
     elif subcommand == "single":
         from .gsea import SingleSampleGSEA
         ss = SingleSampleGSEA(data=args.data, gene_sets=args.gmt, outdir=args.outdir,
-                              min_size=args.mins, max_size=args.max, permutation_num=args.n, 
+                              min_size=args.mins, max_size=args.maxs, permutation_num=args.n, 
                               weighted_score_type=args.weight, ascending=args.ascending, 
                               figsize=args.figsize, format='pdf', graph_num=args.graph, 
                               seed=args.seed, verbose=args.verbose)
