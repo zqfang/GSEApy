@@ -36,7 +36,7 @@ class GSEAbase:
             rdict['gene_set_size'] = len(gmt[gs])
             rdict['matched_size'] = len(ind)
             rdict['rank_ES'] = RES
-            rdict['genes'] = rank_metric.iloc[ind, data.columns.get_loc('gene_name')].tolist()
+            rdict['genes'] = rank_metric.iloc[ind, rank_metric.columns.get_loc('gene_name')].tolist()
             rdict['hit_index'] = ind
             res[gs] = rdict           
 
@@ -44,7 +44,7 @@ class GSEAbase:
         res_df.index.name = 'Term'
         res_df.sort_values(by='fdr', inplace=True)
         res_df.drop(['rank_ES','hit_index'], axis=1, inplace=True)
-        res_df.to_csv('{a}/gseapy.{c}.report.csv'.format(a=outdir, b=module, c=permutation_type),
+        res_df.to_csv('{a}/gseapy.{b}.{c}.report.csv'.format(a=outdir, b=module, c=permutation_type),
                       float_format ='%.7f')    
 
         self.res_dict = res
@@ -79,7 +79,7 @@ class GSEAbase:
             handler.close()
             self.logger.removeHandler(handler)     
 
-         return
+        return
 
     
 class GSEA(GSEAbase):
@@ -100,7 +100,7 @@ class GSEA(GSEAbase):
         self.min_size=min_size
         self.max_size=max_size
         self.permutation_num=permutation_num
-        self.weight_score_type=weight_score_type
+        self.weighted_score_type=weighted_score_type
         self.ascending=ascending
         self.figsize=figsize
         self.format=format
@@ -135,7 +135,7 @@ class Prerank(GSEAbase):
         self.min_size=min_size
         self.max_size=max_size
         self.permutation_num=permutation_num
-        self.weight_score_type=weight_score_type
+        self.weighted_score_type=weighted_score_type
         self.ascending=ascending
         self.figsize=figsize
         self.format=format
@@ -211,8 +211,9 @@ class SingleSampleGSEA(GSEAbase):
 
         self.save_results(zipdata=res_zip, outdir=self.outdir, module=self.module, 
                                    gmt=gmt, rank_metric=dat, permutation_type="gene_sets")
-
+        
         #Plotting
+        res = self.res_dict
         top_term = self.results.head(self.graph_num).index
         
         for gs in top_term:
@@ -427,7 +428,7 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
     logger.info("Start to generate gseapy reports, and produce figures...")
     res_zip = zip(subsets, list(results), hit_ind, rank_ES)
     res, res_df = save_results(zipdata=res_zip, outdir=outdir, 
-                               module='prerank', gmt=gmt, data=dat2, permutation_type=permutation_type)
+                               module='prerank', gmt=gmt, data=dat2, permutation_type="gene_sets")
     
 
     #Plotting
