@@ -1,5 +1,5 @@
 #
-from .gsea import call, replot, prerank
+from .gsea import call, replot, prerank, gsea
 from .enrichr import enrichr
 from .parser import get_library_name
 

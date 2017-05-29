@@ -4,25 +4,27 @@
 import os,sys, logging
 import pandas as pd
 from collections import OrderedDict
+from numpy import number
 from .parser import *
 from .algorithm import enrichment_score, gsea_compute, gsea_compute_ss, preprocess, ranking_metric
 from .plot import gsea_plot, heatmap
-from .utils import log_init, log_remove, mkdirs, save_results
-
-
+from .utils import log_init, log_remove, mkdirs
 
 
 class GSEAbase:
+    """base class of GSEA."""
     def __init__(self):
         self.results=None
         self.verbose=False
         self.module=None
-        self.logger=None
         self.results=None
-        self.res2df=None
+        self.res2d=None
+        self.ranking=None
+        self._logger=None
        
 
-    def log_init(self, module='GSEA', log_level=logging.INFO):
+    def _log_init(self, module='GSEA', log_level=logging.INFO):
+        """logging start"""
 
         logging.basicConfig(
                             level    = logging.DEBUG,
@@ -41,19 +43,39 @@ class GSEAbase:
         console.setFormatter(formatter)
         logger.addHandler(console)
         #if you want information print to the console, uisng logger.info....
-        self.logger=logger
+        self._logger=logger
 
-        return self.logger
-    def log_stop(self):
-        handlers = self.logger.handlers[:]
+        return self._logger
+    def _log_stop(self):
+        """log stop"""
+
+        handlers = self._logger.handlers[:]
         for handler in handlers:
             handler.close()
-            self.logger.removeHandler(handler)     
+            self._logger.removeHandler(handler)     
+    def _rank_metric(self, rnk):
+        """Parse ranking file. This file contains ranking correlation vector and gene names or ids. 
+        
+        :param rnk: the .rnk file of GSEA input or a ranked pandas DataFrame instance.
+        :return: a pandas DataFrame with 3 columns names are: 'gene_name','rank',rank2'
+                     
+        """
+        if isinstance(rnk, pd.DataFrame) :
+            rank_metric = rnk
+        elif isinstance(rnk, str) :
+            rank_metric = pd.read_table(rnk, header=None)
+        else:
+            raise Exception('Error parsing gene ranking values!')
+            
+        rank_metric.columns = ['gene_name','rank']
+        rank_metric['rank2'] = rank_metric['rank']
+               
+        self.ranking = rank_metric
+        return self.ranking
 
-        return
-    def plotting(self, rank_metric, results, res2df, 
-                graph_num, outdir, format, figsize, module=None, data=None,
-                classes=None, phenoPos='', phenoNeg=''):
+    def _plotting(self, rank_metric, results, res2d, 
+                 graph_num, outdir, format, figsize, module=None, data=None,
+                 classes=None, phenoPos='', phenoNeg=''):
         """
         :param rank_metric: dat2.
         :param results: self.results
@@ -61,25 +83,25 @@ class GSEAbase:
         
         """
         #Plotting
-        top_term = res2df.head(graph_num).index
+        top_term = res2d.head(graph_num).index
         
         for gs in top_term:
             hit = results.get(gs)['hit_index']
-            gene_symbol = results.get(gs)['genes']
             fig = gsea_plot(rank_metric=rank_metric, enrich_term=gs, hit_ind=hit,
                             nes=results.get(gs)['nes'], pval=results.get(gs)['pval'], fdr=results.get(gs)['fdr'], 
                             RES=results.get(gs)['rank_ES'], phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize)        
             gs = gs.replace('/','_').replace(":","_")
-            fig.savefig('{a}/{b}.gsea.{c}'.format(a=outdir, b=gs, c=format), bbox_inches='tight', dpi=300,)
+            fig.savefig('{a}/{b}.{c}.{d}'.format(a=outdir, b=gs, c=module, d=format), bbox_inches='tight', dpi=300,)
              
             if module == 'gsea':
                 width = len(classes) if len(classes) >= 6 else  5
-                heatmap(df=data.loc[gene_symbol], term=gs, outdir=outdir, 
-                        figsize=(width, len(gene_symbol)/2), format=format)
+                heatmap(df=data.iloc[hit], term=gs, outdir=outdir, 
+                        figsize=(width, len(hit)/2), format=format)
       
 
 
-    def save_results(self, zipdata, outdir, module, gmt, rank_metric, permutation_type):
+    def _save_results(self, zipdata, outdir, module, gmt, rank_metric, permutation_type):
+        """reformat gsea results, and save to txt"""
 
         res = OrderedDict()
         for gs,gseale,ind,RES in zipdata:        
@@ -90,8 +112,11 @@ class GSEAbase:
             rdict['fdr'] = gseale[3]
             rdict['gene_set_size'] = len(gmt[gs])
             rdict['matched_size'] = len(ind)
+            #reformat gene list.
+            _genes = rank_metric.iloc[ind, rank_metric.columns.get_loc('gene_name')]
+            rdict['genes'] = _genes.to_string(header=False, index=False).replace("\n", ",")
+
             rdict['rank_ES'] = RES
-            rdict['genes'] = rank_metric.iloc[ind, rank_metric.columns.get_loc('gene_name')].tolist()
             rdict['hit_index'] = ind
             res[gs] = rdict           
 
@@ -102,7 +127,7 @@ class GSEAbase:
         res_df.to_csv('{a}/gseapy.{b}.{c}.report.csv'.format(a=outdir, b=module, c=permutation_type),
                       float_format ='%.7f')    
 
-        self.res2df = res_df
+        self.res2d = res_df
         self.results  = res
         return 
 
@@ -132,17 +157,84 @@ class GSEA(GSEAbase):
         self.graph_num=graph_num
         self.seed=seed
         self.verbose=verbose
+        self.module='gsea'
+    def __preprocess(self, df):
+        """pre-processed the data frame.new filtering methods will be implement here.
+        """    
+        
+        df.drop_duplicates(subset=df.columns[0], inplace=True) #drop duplicate gene_names.    
+        df.set_index(keys=df.columns[0], inplace=True)
+        df.dropna(how='all', inplace=True)                     #drop rows with all NAs
+        df2 = df.select_dtypes(include=[number])  + 0.00001 #select numbers in DataFrame      
+        
+        return df
 
     def run(self):
 
-        self.results=call(self.data, self.gene_sets, self.classes, self.outdir, 
-                          self.min_size, self.max_size, self.permutation_num, 
-                          self.weighted_score_type, self.permutation_type,self.method,
-                          self.ascending, self.figsize, self.format, self.graph_num, 
-                          self.seed, self.verbose)
 
-        return  
+        assert self.permutation_type in ["phenotype", "gene_set"]
+        assert self.min_size <= self.max_size
 
+        if isinstance(self.data, pd.DataFrame) :
+            df = self.data
+
+        elif isinstance(self.data, str) :
+            df = pd.read_table(self.data)
+        else:
+            raise Exception('Error parsing gene expression dataframe!')
+            sys.exit(1)
+   
+        assert len(df) > 1
+
+        mkdirs(self.outdir)
+        logger = self._log_init(module=self.module, 
+                               log_level=logging.INFO if self.verbose else logging.WARNING)
+
+        #Start Analysis
+        logger.info("Parsing data files for GSEA.............................")     
+
+        #select correct expression genes and values.
+        dat = self.__preprocess(df)
+        
+        # phenotype labels parsing
+        phenoPos, phenoNeg, cls_vector = gsea_cls_parser(self.classes)
+        
+        #ranking metrics calculation.    
+        dat2 = ranking_metric(df=dat, method=self.method, phenoPos=phenoPos, phenoNeg=phenoNeg, 
+                              classes=cls_vector, ascending=self.ascending)
+
+        #filtering out gene sets and build gene sets dictionary
+        gmt = gsea_gmt_parser(self.gene_sets, min_size=self.min_size, max_size=self.max_size, 
+                              gene_list=dat2['gene_name'].values)
+
+        logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
+
+        logger.info("Start to run GSEA...Might take a while..................")   
+        #compute ES, NES, pval, FDR, RES
+        gsea_results,hit_ind,rank_ES, subsets = gsea_compute(data=dat, n=self.permutation_num, gmt=gmt, 
+                                                             weighted_score_type=self.weighted_score_type,
+                                                             permutation_type=self.permutation_type, 
+                                                             method=self.method,
+                                                             phenoPos=phenoPos, phenoNeg=phenoNeg, 
+                                                             classes=cls_vector, 
+                                                             ascending=self.ascending, seed=self.seed)                                                             
+        
+        logger.info("Start to generate gseapy reports, and produce figures...")
+        res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
+
+        self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module, 
+                                   gmt=gmt, rank_metric=dat2, permutation_type="gene_sets")
+        
+        #Plotting
+        self._plotting(rank_metric=dat2, results=self.results, res2d=self.res2d, 
+                       graph_num=self.graph_num, outdir=self.outdir,
+                       figsize=self.figsize, format=self.format, module=self.module,
+                       data=dat, classes=cls_vector, phenoPos=phenoPos, phenoNeg=phenoNeg)
+        
+        logger.info("Congratulations. GSEApy run successfully................")
+        self._log_stop()
+
+        return         
 
 class Prerank(GSEAbase):
     """GSEA prerank tool"""
@@ -167,12 +259,52 @@ class Prerank(GSEAbase):
         self.graph_num=graph_num
         self.seed=seed
         self.verbose=verbose
+        self.module='prerank'
+
     def run(self):
-        self.results = prerank(self.rnk, self.gene_sets, self.outdir, 
-                               self.pheno_pos, self.pheno_neg, self.min_size, self.max_size, 
-                               self.permutation_num, self.weighted_score_type, 
-                               self.ascending, self.figsize, self.format, 
-                               self.graph_num, self.seed, self.verbose)
+
+        mkdirs(self.outdir)
+        logger = self._log_init(module=self.module, 
+                               log_level=logging.INFO if self.verbose else logging.WARNING)
+
+
+        dat2 = self._rank_metric(self.rnk)  
+        #drop duplicates in ranking metrics. 
+        dat2.drop_duplicates(subset='gene_name',inplace=True, keep='first')     
+        assert len(dat2) > 1
+        
+        #Start Analysis
+        logger.info("Parsing data files for GSEA.............................")     
+
+        #filtering out gene sets and build gene sets dictionary
+        gmt = gsea_gmt_parser(self.gene_sets, min_size=self.min_size, max_size=self.max_size,
+                              gene_list=dat2['gene_name'].values)
+        logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
+
+        
+        logger.info("Start to run GSEA...Might take a while..................")   
+        #compute ES, NES, pval, FDR, RES
+        gsea_results, hit_ind,rank_ES, subsets = gsea_compute(data=dat2, n=self.permutation_num, gmt=gmt, 
+                                                              weighted_score_type=self.weighted_score_type,
+                                                              permutation_type='gene_set', method=None, 
+                                                              phenoPos=self.pheno_pos, phenoNeg=self.pheno_neg,
+                                                              classes=None, ascending=self.ascending, seed=self.seed, 
+                                                              prerank=True)
+
+        logger.info("Start to generate gseapy reports, and produce figures...")
+        res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
+
+        self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module, 
+                                   gmt=gmt, rank_metric=dat2, permutation_type="gene_sets")
+        
+        #Plotting
+        self._plotting(rank_metric=dat2, results=self.results, res2d=self.res2d, 
+                       graph_num=self.graph_num, outdir=self.outdir,
+                       figsize=self.figsize, format=self.format, module=self.module)
+        
+        logger.info("Congratulations. GSEApy run successfully................")
+        self._log_stop()
+
         return 
     
 
@@ -196,62 +328,72 @@ class SingleSampleGSEA(GSEAbase):
         self.seed=seed
         self.verbose=verbose
         self.module='SingleSample'
-        self.results=None
 
     def run(self):
         
         mkdirs(self.outdir)
-        logger = self.log_init(module=self.module, 
-                                log_level=logging.INFO if self.verbose else logging.WARNING)
+        logger = self._log_init(module=self.module, 
+                               log_level=logging.INFO if self.verbose else logging.WARNING)
 
-        if isinstance(self.data, pd.DataFrame) :
-            df = self.data.copy()
-        elif isinstance(self.data, str):
-            df = pd.read_table(self.data)
-        else:
-            raise Exception('Error parsing gene expression dataframe!')
-            sys.exit(1)
-       
-        assert len(df) > 1
-        #write command to log file
 
+        dat = self._rank_metric(self.data)  
+   
+        assert len(dat) > 1
+        
         #Start Analysis
         logger.info("Parsing data files for GSEA.............................")     
         #select correct expression genes and values.
-        dat = gsea_rank_metric(df)
+
         dat2 = dat.set_index('gene_name')
         del dat2['rank2']
         #filtering out gene sets and build gene sets dictionary
         gmt = gsea_gmt_parser(self.gene_sets, min_size=self.min_size, max_size=self.max_size, gene_list=dat2.index.values)
         logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
 
-        
-        logger.info("Start to run GSEA...Might take a while..................")   
+        logger.info("Start to run GSEA...Might take a while..................") 
         #compute ES, NES, pval, FDR, RES
-        results,hit_ind,rank_ES, subsets = gsea_compute_ss(data=dat2, n=self.permutation_num, gmt=gmt,
-                                                           weighted_score_type=self.weighted_score_type,
-                                                           seed=self.seed)
+        gsea_results, hit_ind, rank_ES, subsets = gsea_compute_ss(data=dat2, n=self.permutation_num, gmt=gmt,
+                                                                  weighted_score_type=self.weighted_score_type,
+                                                                  seed=self.seed)
+   
+        
         logger.info("Start to generate gseapy reports, and produce figures...")
-        res_zip = zip(subsets, list(results), hit_ind, rank_ES)
+        res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
 
-        self.save_results(zipdata=res_zip, outdir=self.outdir, module=self.module, 
+        self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module, 
                                    gmt=gmt, rank_metric=dat, permutation_type="gene_sets")
         
         #Plotting
-        res = self.res2df
-        self.plotting(rank_metric=dat, results=self.results, res2df=self.res2df, 
-                      graph_num=self.graph_num, outdir=self.outdir,
-                      figsize=self.figsize, format=self.format, module=self.module)
+        self._plotting(rank_metric=dat, results=self.results, res2d=self.res2d, 
+                       graph_num=self.graph_num, outdir=self.outdir,
+                       figsize=self.figsize, format=self.format, module=self.module)
         
         logger.info("Congratulations. GSEApy run successfully................")
-        self.log_stop()
+        self._log_stop()
+
         return 
         
+def ssgsea(data, gene_sets, outdir="GSEA_SingleSample", min_size=15, max_size=500,
+           permutation_num=1000, weighted_score_type=0.25, ascending=False, 
+           figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
+    """single sample GSEA tool"""
+    ss = SingleSampleGSEA(data, gene_sets, outdir, min_size, max_size, 
+                          permutation_num, weighted_score_type,
+                          ascending, figsize, format, graph_num, seed, verbose)
+    ss.run()
 
+    return
 
+def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, permutation_num=1000, 
+          weighted_score_type=1,permutation_type='gene_set', method='log2_ratio_of_classes',
+      ascending=False, figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
+
+    sys.stderr.write("call function has been deprecated, plesea use gsea() instead.")
+
+    return
 
         
-def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, permutation_n=1000, 
+def gsea(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, permutation_num=1000, 
           weighted_score_type=1,permutation_type='gene_set', method='log2_ratio_of_classes',
 	  ascending=False, figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
     """ Run Gene Set Enrichment Analysis.
@@ -314,79 +456,15 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
                  |  genes: gene names from the data set}
     
     """
-    argument = locals()
-    assert permutation_type in ["phenotype", "gene_set"]
-    assert min_size <= max_size
+    gs = GSEA(data, gene_sets, cls, outdir, min_size, max_size, permutation_num, 
+              weighted_score_type,permutation_type, method, ascending,
+               figsize, format, graph_num, seed, verbose)
+    gs.run()
 
-    mkdirs(outdir)
-    logger = log_init(outdir, module='call', log_level = logging.INFO if verbose else logging.WARNING)
-
-    if isinstance(data, pd.DataFrame) :
-        df = data.copy()
-        argument['data'] = 'DataFrame'
-    elif isinstance(data, str) :
-        df = pd.read_table(data)
-    else:
-        raise Exception('Error parsing gene expression dataframe!')
-        sys.exit(1)
-   
-    assert len(df) > 1
-    #write command to log file
-    argument = OrderedDict(sorted(argument.items(), key=lambda t:t[0]))
-    logger.debug("Command: call, "+str(argument))
-    #Start Analysis
-    logger.info("Parsing data files for GSEA.............................")     
-    #select correct expression genes and values.
-    dat = preprocess(df)
-    
-    # phenotype labels parsing
-    phenoPos, phenoNeg, classes = gsea_cls_parser(cls)
-    
-    #ranking metrics calculation.    
-    dat2 = ranking_metric(df=dat, method=method, phenoPos=phenoPos, phenoNeg=phenoNeg, classes=classes, ascending=ascending)
-    
-    #filtering out gene sets and build gene sets dictionary
-    gmt = gsea_gmt_parser(gene_sets, min_size=min_size, max_size=max_size,gene_list=dat2['gene_name'].values)
-    logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
-
-    logger.info("Start to run GSEA...Might take a while..................")   
-    #compute ES, NES, pval, FDR, RES
-    results,hit_ind,rank_ES, subsets = gsea_compute(data=dat, n=permutation_n,gmt=gmt, weighted_score_type=weighted_score_type,
-                                                    permutation_type=permutation_type, method=method,
-                                                    phenoPos=phenoPos, phenoNeg=phenoNeg, classes=classes, ascending=ascending,
-                                                    seed=seed)
-    logger.info("Start to generate gseapy reports, and produce figures...")
-    res_zip = zip(subsets, list(results), hit_ind, rank_ES)
-    res, res_df = save_results(zipdata=res_zip, outdir=outdir, 
-                               module='GSEA', gmt=gmt,data=dat2, permutation_type=permutation_type)
-
-    #Plotting
-    top_term = res_df.head(graph_num).index
-    width = len(classes) if len(classes) >= 6 else  5
-    for gs in top_term:
-        hit = res.get(gs)['hit_index']
-        gene_symbol = res.get(gs)['genes']
-        fig = gsea_plot(rank_metric=dat2, enrich_term=gs, hit_ind=hit,
-                        nes=res.get(gs)['nes'], pval=res.get(gs)['pval'], fdr=res.get(gs)['fdr'], 
-                        RES=res.get(gs)['rank_ES'], phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize)        
-        gs = gs.replace('/','_').replace(":","_")
-        fig.savefig('{a}/{b}.gsea.{c}'.format(a=outdir, b=gs, c=format), bbox_inches='tight', dpi=300,)
-
-        heatmap(df=dat.loc[gene_symbol], term=gs, outdir=outdir, 
-                figsize=(width, len(gene_symbol)/2), format=format)
-      
-    logger.info("Congratulations. GSEApy run successfully................")
-    
-	# return dataframe if run gsea inside python console
-    #if isinstance(data, pd.DataFrame) or isinstance(cls, list):
-
-    log_remove(logger)
-    if hasattr(sys, 'ps1'):
-        return res
-
+    return
 
 def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg',
-            min_size=15, max_size=500, permutation_n=1000, weighted_score_type=1,
+            min_size=15, max_size=500, permutation_numf=1000, weighted_score_type=1,
             ascending=False, figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
     """ Run Gene Set Enrichment Analysis with pre-ranked correlation defined by user.
 
@@ -417,55 +495,10 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
                  |  genes: gene names from the data set}
     
     """
-    argument = locals()
-    assert min_size <= max_size
-    
-    mkdirs(outdir)
-    logger = log_init(outdir, module='prerank', log_level= logging.INFO if verbose else logging.WARNING)
-    if isinstance(rnk, pd.DataFrame) :       
-        argument['rnk'] = 'DataFrame'
-    #write command to log file
-    argument = OrderedDict(sorted(argument.items(), key=lambda t:t[0]))
-    logger.debug("Command: prerank, "+str(argument))
-    #Start Analysis
-    logger.info("Parsing data files for GSEA.............................") 
-    dat2 = gsea_rank_metric(rnk)
-    assert len(dat2) > 1
-    #drop duplicates in ranking metrics. 
-    dat2.drop_duplicates(subset='gene_name',inplace=True, keep='first')   
-    #filtering out gene sets and build gene sets dictionary
-    gmt = gsea_gmt_parser(gene_sets, min_size=min_size, max_size=max_size, gene_list=dat2['gene_name'].values)
-    logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))   
-    logger.info("Start to run GSEA...Might take a while..................") 
-    #compute ES, NES, pval, FDR, RES
-    results,hit_ind,rank_ES, subsets = gsea_compute(data=dat2, n=permutation_n, gmt=gmt, weighted_score_type=weighted_score_type,
-                                                    permutation_type='gene_set', method=None, phenoPos=pheno_pos, phenoNeg=pheno_neg,
-                                                    classes=None, ascending=ascending, seed=seed, prerank=True)
-   
-    logger.info("Start to generate gseapy reports, and produce figures...")
-    res_zip = zip(subsets, list(results), hit_ind, rank_ES)
-    res, res_df = save_results(zipdata=res_zip, outdir=outdir, 
-                               module='prerank', gmt=gmt, data=dat2, permutation_type="gene_sets")
-    
-
-    #Plotting
-    top_term = res_df.head(graph_num).index
-    for gs in top_term:
-        fig = gsea_plot(rank_metric=dat2, enrich_term=gs, hit_ind=res.get(gs)['hit_index'],
-                        nes=res.get(gs)['nes'], pval=res.get(gs)['pval'], fdr=res.get(gs)['fdr'], 
-                        RES=res.get(gs)['rank_ES'], phenoPos=pheno_pos, phenoNeg=pheno_neg, figsize=figsize)        
-        gs = gs.replace('/','_').replace(":","_")
-        fig.savefig('{a}/{b}.gsea.{c}'.format(a=outdir, b=gs, c=format), bbox_inches='tight', dpi=300,)
-
-   
-    logger.info("Congratulations...GSEApy run successfully...............")
-    
-    
-    #return dataframe if run gsea inside python console
-    #if isinstance(rnk, pd.DataFrame):
-    log_remove(logger)
-    if hasattr(sys, 'ps1'):
-        return res
+    pre = Prerank(rnk, gene_sets, outdir, pheno_pos, pheno_neg, 
+                  min_size, max_size, permutation_num, weighted_score_type,
+                  ascending, figsize, format, graph_num, seed, verbose)
+    pre.run()
 
 def replot(indir, outdir='gseapy_replot', weight=1, figsize=[6.5,6], format='pdf', min_size=3, max_size=5000, verbose=False):
     """The main fuction to run inside python.
