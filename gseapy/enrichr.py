@@ -9,7 +9,7 @@ from .utils import *
 
     
 def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr',
-            cutoff=0.05, format='pdf', figsize=(3,6), top_term=10, scale=0.8, no_plot=False, verbose=False):
+            cutoff=0.05, format='pdf', figsize=(3,6), top_term=10, no_plot=False, verbose=False):
     """Enrichr API.
 
     :param gene_list: Flat file with list of genes, one gene id per row.

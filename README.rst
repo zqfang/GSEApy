@@ -235,7 +235,7 @@ Run gseapy inside python console:
     import gseapy
 
     # run GSEA.
-    gseapy.call(data='expression.txt', gene_sets='gene_sets.gmt', cls='test.cls', outdir='test')
+    gseapy.gsea(data='expression.txt', gene_sets='gene_sets.gmt', cls='test.cls', outdir='test')
    
     # using prerank tool
     gseapy.prerank(rnk='gsea_data.rnk', gene_sets='gene_sets.gmt', outdir='test')
@@ -260,7 +260,7 @@ Run gseapy inside python console:
     sample_name = ['A','A','A','B','B','B'] # always only two group,any names you like 
 
     # assign gene_sets parameter with enrichr library name or gmt file on your local computor.
-    gseapy.call(data=expression_dataframe, gene_sets='KEGG_2016', cls= sample_names, outdir='test')
+    gseapy.gsea(data=expression_dataframe, gene_sets='KEGG_2016', cls= sample_names, outdir='test')
    
     # using prerank tool
     gene_ranked_dataframe = pd.DataFrame()

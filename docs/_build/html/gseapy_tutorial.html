@@ -102,7 +102,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#use-prerank-command-or-prerank">Use <code class="docutils literal"><span class="pre">prerank</span></code> Command, or <code class="docutils literal"><span class="pre">prerank()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#use-single-command-or-singlesamplegsea">Use <code class="docutils literal"><span class="pre">single</span></code> command, or <code class="docutils literal"><span class="pre">SingleSampleGSEA()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#use-single-command-or-ssgsea">Use <code class="docutils literal"><span class="pre">single</span></code> command, or <code class="docutils literal"><span class="pre">ssgsea()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#use-enrichr-command-or-enrichr">Use <code class="docutils literal"><span class="pre">enrichr</span></code> command, or <code class="docutils literal"><span class="pre">enrichr()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#use-replot-command-or-replot">Use <code class="docutils literal"><span class="pre">replot</span></code> Command, or <code class="docutils literal"><span class="pre">replot()</span></code></a></li>
 </ul>
@@ -111,11 +111,13 @@
 <li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#load-essential-packages">1. Load essential packages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#see-all-gseapy-supported-enrichr-library-names">See all gseapy supported enrichr library names</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#enrichr-example">2. Enrichr Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#ii-commandline-usage">ii . Commandline usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#ii-command-line-usage">ii . Command line usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#prerank-example">3. Prerank example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#id1">ii . Commandline usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#call-example">4. Call Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#id2">ii . Commandline usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#id1">ii . Command line usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#gsea-example">4. GSEA Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#ii-show-the-gsea-plots">ii. Show the gsea plots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#iii-command-line-usage">iii . Command line usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#single-sample-gsea-example">5. Single Sample GSEA example</a></li>
 </ul>
 
             
@@ -323,7 +325,7 @@ and then rename to gene_sets.gmt.</p>
 .. code:: python</p>
 <blockquote>
 <div>import gseapy
-gseapy.call(data=&#8217;gsea_data.txt&#8217;, cls=&#8217;gsea.cls&#8217;, gmt=&#8217;gene_sets.gmt&#8217;, outdir=&#8217;gseapy_out&#8217;)</div></blockquote>
+gseapy.gsea(data=&#8217;gsea_data.txt&#8217;, cls=&#8217;gsea.cls&#8217;, gmt=&#8217;gene_sets.gmt&#8217;, outdir=&#8217;gseapy_out&#8217;)</div></blockquote>
 <p>bash shell
 .. code:: bash</p>
 <blockquote>
@@ -345,15 +347,13 @@ and gene_sets file in gmt format.  <code class="docutils literal"><span class="p
 </pre></div>
 </div>
 </div>
-<div class="section" id="use-single-command-or-singlesamplegsea">
-<h2>Use <code class="docutils literal"><span class="pre">single</span></code> command, or <code class="xref py py-func docutils literal"><span class="pre">SingleSampleGSEA()</span></code><a class="headerlink" href="#use-single-command-or-singlesamplegsea" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="use-single-command-or-ssgsea">
+<h2>Use <code class="docutils literal"><span class="pre">single</span></code> command, or <code class="xref py py-func docutils literal"><span class="pre">ssgsea()</span></code><a class="headerlink" href="#use-single-command-or-ssgsea" title="Permalink to this headline">¶</a></h2>
 <div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">gseapy</span> <span class="n">single</span> <span class="o">-</span><span class="n">d</span> <span class="n">expression</span><span class="o">.</span><span class="n">txt</span> <span class="o">-</span><span class="n">g</span> <span class="n">gene_sets</span><span class="o">.</span><span class="n">gmt</span> <span class="o">-</span><span class="n">o</span> <span class="n">test</span>
 </pre></div>
 </div>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># run ssGSEA</span>
-<span class="kn">from</span> <span class="nn">gseapy.gsea</span> <span class="k">import</span> <span class="n">SingleSampleGSEA</span>
-<span class="n">ss</span> <span class="o">=</span> <span class="n">SingleSampleGSEA</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s2">&quot;expression.txt&quot;</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span> <span class="s2">&quot;gene_sets.gmt&quot;</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
-<span class="n">ss</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1">#ssGSEA</span>
+<span class="n">ss</span> <span class="o">=</span> <span class="n">ssgsea</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s2">&quot;expression.txt&quot;</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span> <span class="s2">&quot;gene_sets.gmt&quot;</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

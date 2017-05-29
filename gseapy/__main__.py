@@ -57,7 +57,7 @@ def main():
         from .enrichr import enrichr
         enrichr(gene_list= args.gene_list, description=args.descrip, gene_sets=args.library,
                 outdir=args.outdir, format=args.format, cutoff=args.thresh, figsize=args.figsize,
-                top_term=args.term, scale=args.scale, no_plot=args.no_plot, verbose=args.verbose)    
+                top_term=args.term, no_plot=args.no_plot, verbose=args.verbose)    
     else:
         argparser.print_help()
         sys.exit(0)

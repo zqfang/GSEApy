@@ -382,13 +382,14 @@ def ssgsea(data, gene_sets, outdir="GSEA_SingleSample", min_size=15, max_size=50
                           ascending, figsize, format, graph_num, seed, verbose)
     ss.run()
 
-    return
+    return ss
 
 def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, permutation_num=1000, 
           weighted_score_type=1,permutation_type='gene_set', method='log2_ratio_of_classes',
       ascending=False, figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
 
-    sys.stderr.write("call function has been deprecated, plesea use gsea() instead.")
+    sys.stderr.write("DeprecationWarning: "+\
+                     "call function has been deprecated, plesea use gseapy.gsea() instead.")
 
     return
 
@@ -461,10 +462,10 @@ def gsea(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
                figsize, format, graph_num, seed, verbose)
     gs.run()
 
-    return
+    return gs
 
 def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg',
-            min_size=15, max_size=500, permutation_numf=1000, weighted_score_type=1,
+            min_size=15, max_size=500, permutation_num=1000, weighted_score_type=1,
             ascending=False, figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
     """ Run Gene Set Enrichment Analysis with pre-ranked correlation defined by user.
 
@@ -499,6 +500,7 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
                   min_size, max_size, permutation_num, weighted_score_type,
                   ascending, figsize, format, graph_num, seed, verbose)
     pre.run()
+    return pre
 
 def replot(indir, outdir='gseapy_replot', weight=1, figsize=[6.5,6], format='pdf', min_size=3, max_size=5000, verbose=False):
     """The main fuction to run inside python.
