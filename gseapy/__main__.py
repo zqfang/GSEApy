@@ -24,23 +24,27 @@ def main():
 
     if subcommand == "replot":
         # reproduce plots using GSEAPY
-        from .gsea import replot
+        from .gsea import Replot
+        rep = Replot(indir=args.indir, outdir=args.outdir, weighted_score_type=args.weight, 
+                     figsize=args.figsize, format=args.format, verbose=args.verbose)
+        rep.run()
 
-        replot(indir=args.indir, outdir=args.outdir, weight=args.weight,
-               figsize=args.figsize, format=args.format, verbose=args.verbose)
 
     elif subcommand == "gsea":
         # compute using GSEAPY
         from .gsea import GSEA
 
-        gs = GSEA(args.data, args.gmt, args.cls, args.outdir, args.mins, args.maxs, args.n, args.weight,
-                  args.type, args.method, args.ascending, args.figsize, args.format, args.graph, args.seed, args.verbose)
+        gs = GSEA(args.data, args.gmt, args.cls, args.outdir, 
+                  args.mins, args.maxs, args.n, args.weight,
+                  args.type, args.method, args.ascending, 
+                  args.figsize, args.format, args.graph, args.seed, args.verbose)
         gs.run()
     elif subcommand == "prerank":
         from .gsea import Prerank
         
-        pre = Prerank(args.rnk, args.gmt, args.outdir, args.label[0], args.label[1], args.mins, args.maxs, args.n, args.weight,
-                args.ascending, args.figsize, args.format, args.graph, args.seed, args.verbose)
+        pre = Prerank(args.rnk, args.gmt, args.outdir, args.label[0], args.label[1], 
+                      args.mins, args.maxs, args.n, args.weight, args.ascending,
+                      args.figsize, args.format, args.graph, args.seed, args.verbose)
         pre.run()
 
     elif subcommand == "single":
@@ -48,16 +52,17 @@ def main():
         ss = SingleSampleGSEA(data=args.data, gene_sets=args.gmt, outdir=args.outdir,
                               min_size=args.mins, max_size=args.maxs, permutation_num=args.n, 
                               weighted_score_type=args.weight, ascending=args.ascending, 
-                              figsize=args.figsize, format='pdf', graph_num=args.graph, 
+                              figsize=args.figsize, format=args.format, graph_num=args.graph, 
                               seed=args.seed, verbose=args.verbose)
         ss.run()
 
     elif subcommand == "enrichr":
         # calling enrichr API
-        from .enrichr import enrichr
-        enrichr(gene_list= args.gene_list, description=args.descrip, gene_sets=args.library,
-                outdir=args.outdir, format=args.format, cutoff=args.thresh, figsize=args.figsize,
-                top_term=args.term, no_plot=args.no_plot, verbose=args.verbose)    
+        from .enrichr import Enrichr
+        enr = Enrichr(gene_list= args.gene_list, descriptions=args.descrip, gene_sets=args.library,
+                      outdir=args.outdir, format=args.format, cutoff=args.thresh, figsize=args.figsize,
+                      top_term=args.term, no_plot=args.no_plot, verbose=args.verbose)   
+        enr.run() 
     else:
         argparser.print_help()
         sys.exit(0)

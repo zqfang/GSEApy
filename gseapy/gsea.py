@@ -8,7 +8,7 @@ from numpy import number
 from .parser import *
 from .algorithm import enrichment_score, gsea_compute, gsea_compute_ss, preprocess, ranking_metric
 from .plot import gsea_plot, heatmap
-from .utils import log_init, log_remove, mkdirs
+from .utils import mkdirs
 
 
 class GSEAbase:
@@ -372,17 +372,74 @@ class SingleSampleGSEA(GSEAbase):
         self._log_stop()
 
         return 
-        
-def ssgsea(data, gene_sets, outdir="GSEA_SingleSample", min_size=15, max_size=500,
-           permutation_num=1000, weighted_score_type=0.25, ascending=False, 
-           figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
-    """single sample GSEA tool"""
-    ss = SingleSampleGSEA(data, gene_sets, outdir, min_size, max_size, 
-                          permutation_num, weighted_score_type,
-                          ascending, figsize, format, graph_num, seed, verbose)
-    ss.run()
 
-    return ss
+class Replot(GSEAbase):
+    """To Reproduce GSEA desktop output results."""
+    def __init__(self, indir, outdir='gseapy_replot', weighted_score_type=1, 
+                  min_size=3, max_size=1000, figsize=[6.5,6], format='pdf', verbose=False):
+        self.indir=indir
+        self.outdir=outdir
+        self.weighted_score_type=weighted_score_type
+        self.min_size=min_size
+        self.max_size=max_size
+        self.figsize=figsize
+        self.format=format
+        self.verbose=verbose
+        self.module='replot'
+
+    def run(self):
+
+        mkdirs(self.outdir)
+        logger = self._log_init(module=self.module,  
+                                log_level=logging.INFO if self.verbose else logging.WARNING)
+        import glob
+        from bs4 import BeautifulSoup
+        
+        #parsing files.......    
+        try:
+            results_path = glob.glob(self.indir+'*/edb/results.edb')[0]
+            rank_path =  glob.glob(self.indir+'*/edb/*.rnk')[0]
+            gene_set_path =  glob.glob(self.indir+'*/edb/gene_sets.gmt')[0]
+        except IndexError as e: 
+            logger.debug(e) 
+            logger.error("Could not locate GSEA files in the given directory!")
+            sys.exit(1)    
+        #extract sample names from .cls file
+        cls_path = glob.glob(self.indir+'*/edb/*.cls')
+        if cls_path:
+            phenoPos, phenoNeg, classes = gsea_cls_parser(cls_path[0])
+        else:
+            # logic for prerank results
+            phenoPos, phenoNeg = '',''  
+        #obtain gene sets
+        gene_set_dict = gsea_gmt_parser(gene_set_path, min_size=self.min_size, max_size=self.max_size)
+        #obtain rank_metrics
+        rank_metric = self._rank_metric(rank_path)
+        correl_vector =  rank_metric['rank'].values        
+        gene_list = rank_metric['gene_name']
+        #extract each enriment term in the results.edb files and plot.
+        database = BeautifulSoup(open(results_path), features='xml')
+        length = len(database.findAll('DTG'))
+
+        for idx in range(length):
+            #extract statistical resutls from results.edb file
+            enrich_term, hit_ind, nes, pval, fdr= gsea_edb_parser(results_path, index=idx)
+            gene_set = gene_set_dict.get(enrich_term)
+            #calculate enrichment score    
+            RES = enrichment_score(gene_list=gene_list, gene_set=gene_set, 
+                                   weighted_score_type=self.weighted_score_type, 
+                                   correl_vector=correl_vector)[2]
+            #plotting
+            fig = gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval,
+                            fdr, RES, phenoPos, phenoNeg, figsize=self.figsize)    
+            fig.savefig('{a}/{b}.gsea.{c}.{d}'.format(a=self.outdir, b=enrich_term,
+                                                      c=self.module, d=self.format),
+                        bbox_inches='tight', dpi=300,)
+
+          
+        logger.info("Congratulations! Your plots have been reproduced successfully!")
+        self._log_stop()
+
 
 def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, permutation_num=1000, 
           weighted_score_type=1,permutation_type='gene_set', method='log2_ratio_of_classes',
@@ -464,6 +521,18 @@ def gsea(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
 
     return gs
 
+
+def ssgsea(data, gene_sets, outdir="GSEA_SingleSample", min_size=15, max_size=500,
+           permutation_num=1000, weighted_score_type=0.25, ascending=False, 
+           figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
+    """single sample GSEA tool"""
+    ss = SingleSampleGSEA(data, gene_sets, outdir, min_size, max_size, 
+                          permutation_num, weighted_score_type,
+                          ascending, figsize, format, graph_num, seed, verbose)
+    ss.run()
+    return ss
+    
+
 def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg',
             min_size=15, max_size=500, permutation_num=1000, weighted_score_type=1,
             ascending=False, figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
@@ -502,8 +571,11 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
     pre.run()
     return pre
 
-def replot(indir, outdir='gseapy_replot', weight=1, figsize=[6.5,6], format='pdf', min_size=3, max_size=5000, verbose=False):
-    """The main fuction to run inside python.
+
+
+def replot(indir, outdir='gseapy_replot', weighted_score_type=1, 
+           min_size=3, max_size=1000, figsize=[6.5,6], format='pdf', verbose=False):
+    """The main fuction to reproduce GSEA desktop outputs.
           
     :param indir: GSEA desktop results directory. In the sub folder, you must contain edb file foder.    
     :param outdir: Output directory.
@@ -518,57 +590,8 @@ def replot(indir, outdir='gseapy_replot', weight=1, figsize=[6.5,6], format='pdf
 
     :return: Generate new figures with seleted figure format. Default: 'pdf'.   
     """
-    argument = locals()
-
-    mkdirs(outdir)   
-    logger = log_init(outdir, module='replot', log_level= logging.INFO if verbose else logging.WARNING)
-    #write command to log file
-    argument = OrderedDict(sorted(argument.items(), key=lambda t:t[0]))
-    logger.debug("Command: replot, "+str(argument))
-    import glob
-    from bs4 import BeautifulSoup
-    
-    #parsing files.......    
-    try:
-        results_path = glob.glob(indir+'*/edb/results.edb')[0]
-        rank_path =  glob.glob(indir+'*/edb/*.rnk')[0]
-        gene_set_path =  glob.glob(indir+'*/edb/gene_sets.gmt')[0]
-    except IndexError as e: 
-        logger.debug(e) 
-        logger.error("Could not locate GSEA files in the given directory!")
-        sys.exit(1)    
-    #extract sample names from .cls file
-    cls_path = glob.glob(indir+'*/edb/*.cls')
-    if cls_path:
-        phenoPos, phenoNeg, classes = gsea_cls_parser(cls_path[0])
-    else:
-        # logic for prerank results
-        phenoPos, phenoNeg = '',''  
-    #obtain gene sets
-    gene_set_dict = gsea_gmt_parser(gene_set_path, min_size=min_size, max_size=max_size)
-    #obtain rank_metrics
-    rank_metric = gsea_rank_metric(rank_path)
-    correl_vector =  rank_metric['rank'].values        
-    gene_list = rank_metric['gene_name']
-    #extract each enriment term in the results.edb files and plot.
-    database = BeautifulSoup(open(results_path), features='xml')
-    length = len(database.findAll('DTG'))
-
-    for idx in range(length):
-        #extract statistical resutls from results.edb file
-        enrich_term, hit_ind, nes, pval, fdr= gsea_edb_parser(results_path, index=idx)
-        gene_set = gene_set_dict.get(enrich_term)
-        #calculate enrichment score    
-        RES = enrichment_score(gene_list=gene_list, gene_set=gene_set, weighted_score_type=weight, 
-                               correl_vector=correl_vector)[2]
-        #plotting
-        fig = gsea_plot(rank_metric, enrich_term,hit_ind, nes, pval,
-                        fdr, RES, phenoPos, phenoNeg, figsize=figsize)    
-        fig.savefig('{a}/{b}.gsea.replot.{c}'.format(a=outdir, b=enrich_term, c=format),
-                    bbox_inches='tight', dpi=300,)
-
-      
-    logger.info("Congratulations! Your plots have been reproduced successfully!")
-    log_remove(logger)
+    rep = Replot(indir, outdir, weighted_score_type, 
+                 min_size, max_size, figsize, format, verbose)
+    rep.run()
 
     return 

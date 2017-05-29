@@ -296,7 +296,7 @@ def dotplot(df, cutoff=0.05, figsize=(3.5,6), top_term=10, scale=1):
     #canvas.print_figure('test', bbox_inches='tight')    
     return fig
 
-def barplot(df, top_term=10):
+def barplot(df, cutoff=0.05, figsize=(12,6), top_term=10):
     """ barplot for enrichr results"""
 
 
@@ -304,7 +304,7 @@ def barplot(df, top_term=10):
     d['logAP'] = - np.log10(d['Adjusted P-value']) 
     d = d.sort_values('logAP', ascending=False)
     dd = d.head(top_term).sort_values('logAP')
-    fig = Figure(figsize=(12,6))
+    fig = Figure(figsize=figsize)
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(111)
     bar = dd.plot.barh(x='Term', y='logAP', color="salmon", alpha=0.75, edgecolor='none',fontsize=32, ax=ax)

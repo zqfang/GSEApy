@@ -1,7 +1,5 @@
 
-import os,errno,logging
-from collections import OrderedDict
-from pandas import DataFrame
+import os, errno
 
 def unique(seq):
     """Remove duplicates from a list in Python while preserving order.
@@ -22,32 +20,6 @@ def unique(seq):
     """
 
     return [x for x in seq if x not in seen and not seen_add(x)]
-
-def log_init(outdir, module='foo', log_level=logging.INFO):
-    logging.basicConfig(
-                level    = logging.DEBUG,
-                format   = 'LINE %(lineno)-4d: %(asctime)s [%(levelname)-8s] %(message)s',
-                filename = "%s/gseapy.%s.log"%(outdir, module),
-                filemode = 'w')
-    logger = logging.getLogger(__name__)
-    #logger.setLevel(logging.DEBUG)
-
-    # define a Handler which writes INFO messages or higher to the sys.stderr
-    console = logging.StreamHandler()
-    console.setLevel(log_level)
-    # set a format which is simpler for console use
-    formatter = logging.Formatter('%(asctime)s %(message)s')
-    # tell the handler to use this format
-    console.setFormatter(formatter)
-    logger.addHandler(console)
-    #if you want information print to the console, uisng logger.info....
-    return logger
-
-def log_remove(logger):
-    handlers = logger.handlers[:]
-    for handler in handlers:
-    	   handler.close()
-    	   logger.removeHandler(handler)
 
 def mkdirs(outdir):
     
