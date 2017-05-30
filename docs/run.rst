@@ -85,7 +85,7 @@ This will import the following:
 .. code:: python
 
    # An example to calculate es, nes, pval,fdrs, and produce figures using gseapy.
-   gseapy.call(data='gsea_dat.txt', gene_sets='gene_sets.gmt', cls='test.cls', outdir='gseapy_out', 
+   gseapy.gsea(data='gsea_dat.txt', gene_sets='gene_sets.gmt', cls='test.cls', outdir='gseapy_out', 
              min_size=15, max_size=1000, permutation_n = 1000, weighted_score_type=1,
              permutation_type = 'gene_set', method='log2_ratio_of_classes', ascending=False, 
              figsize=(6.5,6), format='png')
@@ -115,8 +115,8 @@ To See help information of GSEAPY
     gseapy -- Gene Set Enrichment Analysis in Python
 
     positional arguments:
-      {call,replot}
-        call       Main GSEAPY Function: run GSEAPY instead of GSEA.
+      {gsea,replot}
+        gsea       Main GSEAPY Function: run GSEAPY instead of GSEA.
         prerank    Using pre-ranked tool to run GSEAPY.
         single     Run Single Sample GSEA.
         replot     Reproduce GSEA desktop figures.
@@ -155,7 +155,7 @@ Module APIs
 .. autofunction:: replot()
 
 
-.. autofunction:: call()
+.. autofunction:: gsea()
 
 
 .. autofunction:: prerank()

@@ -57,27 +57,6 @@ def gsea_edb_parser(results_path, index=0):
 
     return enrich_term, hit_ind, nes, pval, fdr
     
-
-def gsea_rank_metric(rnk):
-    """Parse .rnk file. This file contains ranking correlation vector and gene names or ids. 
-    
-    :param rnk: the .rnk file of GSEA input or a ranked pandas DataFrame instance.
-    :return: a pandas DataFrame with 3 columns names are:
-             
-                 'gene_name','rank',rank2'
-                 
-    """
-    if isinstance(rnk, DataFrame) :
-        rank_metric = rnk.copy()
-    elif isinstance(rnk, str) :
-        rank_metric = read_table(rnk, header=None)
-    else:
-        raise Exception('Error parsing gene list!')
-        
-    rank_metric.columns = ['gene_name','rank']
-    rank_metric['rank2'] = rank_metric['rank']
-           
-    return rank_metric
     
 def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
     """Parse gene_sets.gmt(gene set database) file or download from enrichr server.  

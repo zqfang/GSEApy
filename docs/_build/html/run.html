@@ -230,10 +230,10 @@ See <span class="xref std std-ref">example</span> for details, or, see <a class=
 </pre></div>
 </div>
 <ul class="simple">
-<li>The <code class="xref py py-func docutils literal"><span class="pre">gsea()</span></code> function to computing es,nes,pval,fdr,and generate plots <em>de novo</em>.</li>
+<li>The <a class="reference internal" href="#gseapy.gsea" title="gseapy.gsea"><code class="xref py py-func docutils literal"><span class="pre">gsea()</span></code></a> function to computing es,nes,pval,fdr,and generate plots <em>de novo</em>.</li>
 </ul>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># An example to calculate es, nes, pval,fdrs, and produce figures using gseapy.</span>
-<span class="n">gseapy</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s1">&#39;gsea_dat.txt&#39;</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span><span class="s1">&#39;gene_sets.gmt&#39;</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="s1">&#39;test.cls&#39;</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;gseapy_out&#39;</span><span class="p">,</span>
+<span class="n">gseapy</span><span class="o">.</span><span class="n">gsea</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s1">&#39;gsea_dat.txt&#39;</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span><span class="s1">&#39;gene_sets.gmt&#39;</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="s1">&#39;test.cls&#39;</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;gseapy_out&#39;</span><span class="p">,</span>
           <span class="n">min_size</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">permutation_n</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">weighted_score_type</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
           <span class="n">permutation_type</span> <span class="o">=</span> <span class="s1">&#39;gene_set&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;log2_ratio_of_classes&#39;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
           <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">6.5</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
@@ -260,8 +260,8 @@ See <span class="xref std std-ref">example</span> for details, or, see <a class=
  gseapy -- Gene Set Enrichment Analysis in Python
 
  positional arguments:
-   {call,replot}
-     call       Main GSEAPY Function: run GSEAPY instead of GSEA.
+   {gsea,replot}
+     gsea       Main GSEAPY Function: run GSEAPY instead of GSEA.
      prerank    Using pre-ranked tool to run GSEAPY.
      single     Run Single Sample GSEA.
      replot     Reproduce GSEA desktop figures.
@@ -318,8 +318,8 @@ Because gmt file has already been filter.</li>
 </dd></dl>
 
 <dl class="function">
-<dt id="gseapy.call">
-<code class="descclassname">gseapy.</code><code class="descname">call</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.call" title="Permalink to this definition">¶</a></dt>
+<dt id="gseapy.gsea">
+<code class="descclassname">gseapy.</code><code class="descname">gsea</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.gsea" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run Gene Set Enrichment Analysis.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -674,7 +674,7 @@ This is the recommended statistic for calculating fold change for natural scale 
 <span id="enrichr"></span><h2>Enrichr<a class="headerlink" href="#module-gseapy.enrichr" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="gseapy.enrichr.enrichr">
-<code class="descclassname">gseapy.enrichr.</code><code class="descname">enrichr</code><span class="sig-paren">(</span><em>gene_list</em>, <em>gene_sets</em>, <em>description='foo'</em>, <em>outdir='Enrichr'</em>, <em>cutoff=0.05</em>, <em>format='pdf'</em>, <em>figsize=(3</em>, <em>6)</em>, <em>top_term=10</em>, <em>scale=0.8</em>, <em>no_plot=False</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.enrichr.enrichr" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.enrichr.</code><code class="descname">enrichr</code><span class="sig-paren">(</span><em>gene_list</em>, <em>gene_sets</em>, <em>description='foo'</em>, <em>outdir='Enrichr'</em>, <em>cutoff=0.05</em>, <em>format='pdf'</em>, <em>figsize=(3</em>, <em>6)</em>, <em>top_term=10</em>, <em>no_plot=False</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.enrichr.enrichr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Enrichr API.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />

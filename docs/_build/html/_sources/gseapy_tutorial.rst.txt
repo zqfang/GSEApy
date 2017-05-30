@@ -188,8 +188,8 @@ interactive python console
 .. code:: python
      
     import gseapy
-    gseapy.call(data='gsea_data.txt', cls='gsea.cls', gmt='gene_sets.gmt', outdir='gseapy_out')
-
+    gseapy.gsea(data='gsea_data.txt', cls='gsea.cls', gmt='gene_sets.gmt', outdir='gseapy_out')
+    
 
 bash shell
 .. code:: bash
@@ -221,8 +221,10 @@ Or run inside python.
     gseapy.prerank(rnk='gsea_data.rnk', gene_sets='gene_sets.gmt', outdir='test')
 
 
-Use ``single`` command, or :func:`SingleSampleGSEA`
+
+Use ``single`` command, or :func:`ssgsea`
 ===============================================================
+
 
 .. code:: bash
  
@@ -231,10 +233,9 @@ Use ``single`` command, or :func:`SingleSampleGSEA`
 
 .. code:: python
 
-    # run ssGSEA
-    from gseapy.gsea import SingleSampleGSEA
-    ss = SingleSampleGSEA(data="expression.txt", gene_sets= "gene_sets.gmt", outdir='test')
-    ss.run()
+    #ssGSEA
+    ss = ssgsea(data="expression.txt", gene_sets= "gene_sets.gmt", outdir='test')
+
 
 
 Use ``enrichr`` command, or :func:`enrichr`
