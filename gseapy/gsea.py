@@ -14,7 +14,7 @@ from gseapy.utils import mkdirs
 class GSEAbase:
     """base class of GSEA."""
     def __init__(self):
-        self.gene_sets='base'
+        self.gene_sets='KEGG_2016'
         self.module='base'
         self.results=None
         self.res2d=None
@@ -79,11 +79,19 @@ class GSEAbase:
         """
         :param rank_metric: dat2.
         :param results: self.results
-        :param data: expression table
+        :param data: preprocessed expression table
         
         """
         #Plotting
         top_term = res2d.head(graph_num).index
+        if module == 'gsea':
+            width = len(classes) if len(classes) >= 6 else  5
+            datA = data.loc[:, cls_booA]
+            datB = data.loc[:, cls_booB]
+            datAB=pd.concat([datA,datB], axis=1)
+
+        cls_booA =list(map(lambda x: True if x == phenoPos else False, classes))
+        cls_booB =list(map(lambda x: True if x == phenoNeg else False, classes))
         
         for gs in top_term:
             hit = results.get(gs)['hit_index']
@@ -94,12 +102,6 @@ class GSEAbase:
             fig.savefig('{a}/{b}.{c}.{d}'.format(a=outdir, b=gs, c=module, d=format), bbox_inches='tight', dpi=300,)
              
             if module == 'gsea':
-                width = len(classes) if len(classes) >= 6 else  5
-                cls_booA =list(map(lambda x: True if x == phenoPos else False, classes))
-                cls_booB =list(map(lambda x: True if x == phenoNeg else False, classes))
-                datA = data.loc[:, cls_booA]
-                datB = data.loc[:, cls_booB]
-                datAB=pd.concat([datA,datB], axis=1)
                 heatmap(df=datAB.iloc[hit], term=gs, outdir=outdir, 
                         figsize=(width, len(hit)/2), format=format)
       
@@ -179,7 +181,7 @@ class GSEA(GSEAbase):
         return df2
 
     def run(self):
-
+        """GSEA main procedure"""
 
         assert self.permutation_type in ["phenotype", "gene_set"]
         assert self.min_size <= self.max_size
@@ -271,7 +273,7 @@ class Prerank(GSEAbase):
         self.module='prerank'
 
     def run(self):
-        """main prerank workflow"""
+        """GSEA prerank workflow"""
 
         assert self.min_size <= self.max_size
         mkdirs(self.outdir)
@@ -341,7 +343,8 @@ class SingleSampleGSEA(GSEAbase):
         self.module='SingleSample'
 
     def run(self):
-        """main ssgsea workflow"""
+        """Single Sample GSEA workflow"""
+
         assert self.min_size <= self.max_size
 
         mkdirs(self.outdir)
@@ -368,8 +371,7 @@ class SingleSampleGSEA(GSEAbase):
         gsea_results, hit_ind, rank_ES, subsets = gsea_compute_ss(data=dat2, n=self.permutation_num, gmt=gmt,
                                                                   weighted_score_type=self.weighted_score_type,
                                                                   seed=self.seed)
-   
-        
+          
         logger.info("Start to generate gseapy reports, and produce figures...")
         res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
 
@@ -388,7 +390,7 @@ class SingleSampleGSEA(GSEAbase):
 
 class Replot(GSEAbase):
     """To Reproduce GSEA desktop output results."""
-    def __init__(self, indir, outdir='gseapy_replot', weighted_score_type=1, 
+    def __init__(self, indir, outdir='GSEApy_Replot', weighted_score_type=1, 
                   min_size=3, max_size=1000, figsize=[6.5,6], format='pdf', verbose=False):
         self.indir=indir
         self.outdir=outdir
@@ -456,7 +458,7 @@ class Replot(GSEAbase):
         self._log_stop()
 
 
-def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, permutation_num=1000, 
+def call(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permutation_num=1000, 
           weighted_score_type=1,permutation_type='gene_set', method='log2_ratio_of_classes',
       ascending=False, figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
 
@@ -466,7 +468,7 @@ def call(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, p
     return
 
         
-def gsea(data, gene_sets, cls, outdir='gseapy_out', min_size=15, max_size=500, permutation_num=1000, 
+def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permutation_num=1000, 
           weighted_score_type=1,permutation_type='gene_set', method='log2_ratio_of_classes',
 	  ascending=False, figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
     """ Run Gene Set Enrichment Analysis.
@@ -548,7 +550,7 @@ def ssgsea(data, gene_sets, outdir="GSEA_SingleSample", min_size=15, max_size=50
     return ss
     
 
-def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg',
+def prerank(rnk, gene_sets, outdir='GSEA_Prerank', pheno_pos='Pos', pheno_neg='Neg',
             min_size=15, max_size=500, permutation_num=1000, weighted_score_type=1,
             ascending=False, figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
     """ Run Gene Set Enrichment Analysis with pre-ranked correlation defined by user.
@@ -588,7 +590,7 @@ def prerank(rnk, gene_sets, outdir='gseapy_out', pheno_pos='Pos', pheno_neg='Neg
 
 
 
-def replot(indir, outdir='gseapy_replot', weighted_score_type=1, 
+def replot(indir, outdir='GSEA_Replot', weighted_score_type=1, 
            min_size=3, max_size=1000, figsize=[6.5,6], format='pdf', verbose=False):
     """The main fuction to reproduce GSEA desktop outputs.
           
