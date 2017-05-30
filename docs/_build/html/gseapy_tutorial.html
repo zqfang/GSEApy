@@ -102,7 +102,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#use-prerank-command-or-prerank">Use <code class="docutils literal"><span class="pre">prerank</span></code> Command, or <code class="docutils literal"><span class="pre">prerank()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#use-single-command-or-ssgsea">Use <code class="docutils literal"><span class="pre">single</span></code> command, or <code class="docutils literal"><span class="pre">ssgsea()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#use-ssgsea-command-or-ssgsea">Use <code class="docutils literal"><span class="pre">ssgsea</span></code> command, or <code class="docutils literal"><span class="pre">ssgsea()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#use-enrichr-command-or-enrichr">Use <code class="docutils literal"><span class="pre">enrichr</span></code> command, or <code class="docutils literal"><span class="pre">enrichr()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#use-replot-command-or-replot">Use <code class="docutils literal"><span class="pre">replot</span></code> Command, or <code class="docutils literal"><span class="pre">replot()</span></code></a></li>
 </ul>
@@ -347,13 +347,13 @@ and gene_sets file in gmt format.  <code class="docutils literal"><span class="p
 </pre></div>
 </div>
 </div>
-<div class="section" id="use-single-command-or-ssgsea">
-<h2>Use <code class="docutils literal"><span class="pre">single</span></code> command, or <code class="xref py py-func docutils literal"><span class="pre">ssgsea()</span></code><a class="headerlink" href="#use-single-command-or-ssgsea" title="Permalink to this headline">¶</a></h2>
-<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">gseapy</span> <span class="n">single</span> <span class="o">-</span><span class="n">d</span> <span class="n">expression</span><span class="o">.</span><span class="n">txt</span> <span class="o">-</span><span class="n">g</span> <span class="n">gene_sets</span><span class="o">.</span><span class="n">gmt</span> <span class="o">-</span><span class="n">o</span> <span class="n">test</span>
+<div class="section" id="use-ssgsea-command-or-ssgsea">
+<h2>Use <code class="docutils literal"><span class="pre">ssgsea</span></code> command, or <code class="xref py py-func docutils literal"><span class="pre">ssgsea()</span></code><a class="headerlink" href="#use-ssgsea-command-or-ssgsea" title="Permalink to this headline">¶</a></h2>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">gseapy</span> <span class="n">ssgsea</span> <span class="o">-</span><span class="n">d</span> <span class="n">expression</span><span class="o">.</span><span class="n">txt</span> <span class="o">-</span><span class="n">g</span> <span class="n">gene_sets</span><span class="o">.</span><span class="n">gmt</span> <span class="o">-</span><span class="n">o</span> <span class="n">test</span>
 </pre></div>
 </div>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1">#ssGSEA</span>
-<span class="n">ss</span> <span class="o">=</span> <span class="n">ssgsea</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s2">&quot;expression.txt&quot;</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span> <span class="s2">&quot;gene_sets.gmt&quot;</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
+<span class="n">gseapy</span><span class="o">.</span><span class="n">ssgsea</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s2">&quot;expression.txt&quot;</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span> <span class="s2">&quot;gene_sets.gmt&quot;</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

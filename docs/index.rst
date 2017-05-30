@@ -36,7 +36,7 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
 GSEAPY is a python wrapper for **GSEA** and **Enrichr**. 
 --------------------------------------------------------------------------------------------
 
-GSEAPY has five subcommands: ``gsea``, ``prerank``, ``single``, ``replot`` ``enrichr``.
+GSEAPY has five subcommands: ``gsea``, ``prerank``, ``ssgsea``, ``replot`` ``enrichr``.
 
 1. The ``gsea`` module produce **GSEA** results.    
 The input requries a txt file(FPKM, Expected Counts, TPM, et.al), a cls file, and gene_sets file in gmt format. 
@@ -44,7 +44,7 @@ The input requries a txt file(FPKM, Expected Counts, TPM, et.al), a cls file, an
 2. The ``prerank`` module produce **Prerank tool** results.  
 The input expects a pre-ranked gene list dataset with correlation values, which in .rnk format, and gene_sets file in gmt format.  ``prerank`` module is an API to `GSEA` pre-rank tools.
 
-3. The ``single`` module perform **single sample GSEA(ssGSEA)** analysis.  
+3. The ``ssgsea`` module perform **single sample GSEA(ssGSEA)** analysis.  
 The input expects a gene list with expression values(same with ``.rnk`` file, and gene_sets file in gmt format. ssGSEA enrichment score for the gene set as described by `D. Barbie et al 2009 <http://www.nature.com/nature/journal/v462/n7269/abs/nature08460.html>`_.
 
 4. The ``replot`` module reproduce GSEA desktop version results.  
@@ -70,7 +70,7 @@ do gene set enrichment analysis in python. So, here is my reason:
 
 * **Running inside python interactive console without switch to R!!!**
 * User friendly for both wet and dry lab usrers.
-* Produce pubilishable figures.
+* Produce and reproduce pubilishable figures.
 * Perform batch jobs easy(using for loops).
 * Easy to use in bash shell or your  data analysis workflow, e.g. snakemake.  
 

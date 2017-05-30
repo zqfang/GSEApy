@@ -47,7 +47,7 @@ def main():
                       args.figsize, args.format, args.graph, args.seed, args.verbose)
         pre.run()
 
-    elif subcommand == "single":
+    elif subcommand == "ssgsea":
         from .gsea import SingleSampleGSEA
         ss = SingleSampleGSEA(data=args.data, gene_sets=args.gmt, outdir=args.outdir,
                               min_size=args.mins, max_size=args.maxs, permutation_num=args.n, 
@@ -82,7 +82,7 @@ def prepare_argparser():
     add_gsea_parser(subparsers)
     # command for 'prerank'
     add_prerank_parser(subparsers)
-    # command for 'single'
+    # command for 'ssgsea'
     add_singlesample_parser(subparsers)
     # command for 'plot'
     add_plot_parser(subparsers)
@@ -205,7 +205,7 @@ def add_prerank_parser(subparsers):
 def add_singlesample_parser(subparsers):
     """Add function 'singlesample' argument parsers."""
 
-    argparser_gsea = subparsers.add_parser("single", help="Run Single Sample GSEA.")
+    argparser_gsea = subparsers.add_parser("ssgsea", help="Run Single Sample GSEA.")
 
     # group for input files
     group_input = argparser_gsea.add_argument_group("Input files arguments")

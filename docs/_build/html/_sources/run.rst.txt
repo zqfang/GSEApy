@@ -110,15 +110,15 @@ To See help information of GSEAPY
    
    $ gseapy --help 
    
-    usage: gseapy [-h] [--version] {gsea,prerank,single,replot,enrichr} ...
+    usage: gseapy [-h] [--version] {gsea,prerank,ssgsea,replot,enrichr} ...
 
     gseapy -- Gene Set Enrichment Analysis in Python
 
     positional arguments:
-      {gsea,replot}
+      {gsea,prerank,ssgsea,replot,enrichr}
         gsea       Main GSEAPY Function: run GSEAPY instead of GSEA.
         prerank    Using pre-ranked tool to run GSEAPY.
-        single     Run Single Sample GSEA.
+        ssgsea     Run Single Sample GSEA.
         replot     Reproduce GSEA desktop figures.
         enrichr    Peform GSEA using enrichr API.
     optional arguments:
@@ -141,7 +141,10 @@ For command line options of each command, type: gseapy COMMAND -h
    # or
    $ gseapy prerank -h
    # or 
+   $ gseapy ssgsea -h
+   # or 
    $ gseapy enrichr -h
+
 
 
 							
@@ -152,16 +155,17 @@ Module APIs
 ---------------------
 
 
-.. autofunction:: replot()
-
-
 .. autofunction:: gsea()
 
 
 .. autofunction:: prerank()
 
+.. autofunction:: ssgsea()
+
 
 .. autofunction:: enrichr()
+
+.. autofunction:: replot()
 
 
 Algorithm 

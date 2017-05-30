@@ -222,19 +222,19 @@ Or run inside python.
 
 
 
-Use ``single`` command, or :func:`ssgsea`
+Use ``ssgsea`` command, or :func:`ssgsea`
 ===============================================================
 
 
 .. code:: bash
  
-    gseapy single -d expression.txt -g gene_sets.gmt -o test
+    gseapy ssgsea -d expression.txt -g gene_sets.gmt -o test
 
 
 .. code:: python
 
     #ssGSEA
-    ss = ssgsea(data="expression.txt", gene_sets= "gene_sets.gmt", outdir='test')
+    gseapy.ssgsea(data="expression.txt", gene_sets= "gene_sets.gmt", outdir='test')
 
 
 

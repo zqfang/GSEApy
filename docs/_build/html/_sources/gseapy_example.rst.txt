@@ -33,7 +33,7 @@ Examples to walk through ``GSEApy`` and enrichr
 See all gseapy supported enrichr library names
 ==============================================
 
-Enrichr library could be used for ``call`` and ``prerank``, too
+Enrichr library could be used for ``gsea`` and ``prerank``, too
 
 .. code:: ipython3
 
@@ -137,15 +137,15 @@ i. Assign enrichr with gene list object
 
     # run gseapy
     # if you are only intrested in dataframe that enrichr returned, please set no_plot=True
-    enrichr_results = gp.enrichr(gene_list=glist, description='test_name', gene_sets='KEGG_2016',
+    enr = gp.enrichr(gene_list=glist, description='test_name', gene_sets='KEGG_2016',
                                  outdir='enrichr_kegg', cutoff=0.5, no_plot=False)
     # and provide a txt file for enrichr will also work
-    #enrichr_results = gp.enrichr(gene_list='./gene_list.txt', description='KEGG', 
+    #enr = gp.enrichr(gene_list='./gene_list.txt', description='KEGG', 
     #                             gene_sets='KEGG_2016', outdir='enrichr_kegg')
 
 .. code:: ipython3
 
-    enrichr_results.iloc[:5,:6]
+    enr.res2d.iloc[:5,:6]
 
 
 
@@ -848,7 +848,7 @@ You may also want to use gsea in command line
 5. Single Sample GSEA example
 =============================
 
-**Note: When you run ssGSEA, all genes names in your gene\_sets file
+**Note: When you run ssGSEA, all genes names in your gene_sets file
 should be found in your expression table**
 
 i. Assign ssgsea() with a txt file or a dataframe
@@ -1030,7 +1030,7 @@ ii. command line usage of single sample gsea
 
 .. code:: ipython3
 
-    !gseapy single -d ./temp.txt -g temp.gmt -o ssgsea_report2 -v 
+    !gseapy ssgsea -d ./temp.txt -g temp.gmt -o ssgsea_report2 -v 
 
 
 .. parsed-literal::
