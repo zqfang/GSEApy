@@ -15,7 +15,7 @@ class GSEAbase:
     """base class of GSEA."""
     def __init__(self):
         self.verbose=False
-        self.module=None
+        self.module='base'
         self.results=None
         self.res2d=None
         self.ranking=None
@@ -28,7 +28,7 @@ class GSEAbase:
         logging.basicConfig(
                             level    = logging.DEBUG,
                             format   = 'LINE %(lineno)-4d: %(asctime)s [%(levelname)-8s] %(message)s',
-                            filename = "%s/gseapy.%s.log"%(self.outdir, self.module),
+                            filename = "%s/gseapy.%s.log"%(self.outdir, module),
                             filemode = 'w')
 
         logger = logging.getLogger(__name__)

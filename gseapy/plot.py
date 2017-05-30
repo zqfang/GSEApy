@@ -299,9 +299,12 @@ def dotplot(df, cutoff=0.05, figsize=(3.5,6), top_term=10, scale=1):
 def barplot(df, cutoff=0.05, figsize=(12,6), top_term=10):
     """ barplot for enrichr results"""
 
-
-    d=df.copy()
-    d['logAP'] = - np.log10(d['Adjusted P-value']) 
+    # pvalue cut off
+    d = df[df['Adjusted P-value'] <= cutoff]
+    
+    if len(d) < 1:
+        return None
+    d = d.assign(logAP = - np.log10(d.loc[:,'Adjusted P-value']).values )
     d = d.sort_values('logAP', ascending=False)
     dd = d.head(top_term).sort_values('logAP')
     fig = Figure(figsize=figsize)

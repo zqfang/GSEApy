@@ -99,13 +99,13 @@ class Enrichr(GSEAbase):
         ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/export'
         query_string = '?userListId=%s&filename=%s&backgroundType=%s'
         user_list_id = str(job_id['userListId'])
-
-
-        url = ENRICHR_URL + query_string % (user_list_id, outfile, gene_set)
+        filename = "%s.%s.%s.reports"%(gene_set, description, self.module)
+        
+        url = ENRICHR_URL + query_string % (user_list_id, filename, gene_set)
         response = requests.get(url, stream=True)
 
         logger.info('Downloading file of enrichment results: Job Id:'+ str(job_id)) 
-        outfile="%s/%s.%s.%s.reports.txt"%s(self.outdir, gene_set, description, self.module)
+        outfile="%s/%s.%s.%s.reports.txt"%(self.outdir, gene_set, description, self.module)
 
         with open(outfile, 'wb') as f:
             for chunk in response.iter_content(chunk_size=1024):
@@ -119,12 +119,13 @@ class Enrichr(GSEAbase):
 
         #plotting
         if not self.__no_plot:
-            if df.shape[0] > 0:
-                fig = barplot(df=df, cutoff=self.cutoff, 
-                              figsize=self.figsize, top_term=self.__top_term,)
-                if fig is not None:
-                    fig.savefig(outfile.replace("txt", self.format),
-                                bbox_inches='tight', dpi=300)
+            fig = barplot(df=df, cutoff=self.cutoff, 
+                        figsize=self.figsize, top_term=self.__top_term,)
+            if fig is None:
+                logger.warning("Warning: No enrich terms using library %s when cuttoff = %s"%(gene_set, self.cutoff))
+            else:
+                fig.savefig(outfile.replace("txt", self.format),
+                            bbox_inches='tight', dpi=300)
         
         self._log_stop()
 

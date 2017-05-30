@@ -131,7 +131,7 @@ def add_gsea_parser(subparsers):
                              help="Input class vector (phenotype) file in CLS format. Same with GSEA.")
     group_input.add_argument("-g", "--gmt", dest="gmt", action="store", type=str, required=True,
                              help="Gene set database in GMT format. Same with GSEA.")
-    group_input.add_argument("-p", "--permu-type", action="store", dest="type", type=str, metavar='',
+    group_input.add_argument("-p", "--permu-type", action="store", dest="type", type=str, metavar='int',
                              choices=("gene_set", "phenotype"), default="gene_set",
                              help="Permutation type. Same with GSEA, choose from {'gene_set', 'phenotype'}")
 
@@ -158,7 +158,7 @@ def add_gsea_parser(subparsers):
     group_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
                            help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
     group_opt.add_argument("-t", "--top-graphNum", dest = "graph", action="store", type=int, default=20, metavar='int',
-                           help="Numbers of top graphs of each phenotype. Default: 20")
+                           help="Numbers of top graphs produced. Default: 20")
     group_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=None, metavar='',
                            help="Number of random seed. Default: None")
 
@@ -189,14 +189,14 @@ def add_prerank_parser(subparsers):
                              help="Min size of input genes presented in Gene Sets. Default: 15")
     prerank_opt.add_argument("--max-size", dest = "maxs", action="store", type=int, default=500, metavar='int',
                              help="Max size of input genes presented in Gene Sets. Default: 500")
-    prerank_opt.add_argument("-n", "--permu-num", dest = "n", action="store", type=int, default=1000, metavar='',
+    prerank_opt.add_argument("-n", "--permu-num", dest = "n", action="store", type=int, default=1000, metavar='int',
                              help="Number of random permutations. For calculating esnulls. Default: 1000")
-    prerank_opt.add_argument("-w", "--weight", action='store', dest='weight', default=1.0, type=float, metavar='',
+    prerank_opt.add_argument("-w", "--weight", action='store', dest='weight', default=1.0, type=float, metavar='int',
                              help='Weighted_score of rank_metrics.For weighting input genes. Choose from {0, 1, 1.5, 2},default: 1',)
     prerank_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
                              help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
     prerank_opt.add_argument("-t", "--top-graphNum", dest = "graph", action="store", type=int, default=20, metavar='int',
-                             help="Numbers of top graphs of each phenotype. Default: 20")
+                             help="Numbers of top graphs produced. Default: 20")
     prerank_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=None, metavar='',
                              help="Number of random seed. Default: None")
     
@@ -230,7 +230,7 @@ def add_singlesample_parser(subparsers):
     group_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
                            help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
     group_opt.add_argument("-t", "--top-graphNum", dest = "graph", action="store", type=int, default=20, metavar='int',
-                           help="Numbers of top graphs of each phenotype. Default: 20")
+                           help="Numbers of top graphs produced. Default: 20")
     group_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=None, metavar='',
                            help="Number of random seed. Default: None")
 
@@ -242,9 +242,9 @@ def add_plot_parser(subparsers):
 
     argparser_replot = subparsers.add_parser("replot", help="Reproduce GSEA desktop output figures.")
 
-    group_replot = argparser_replot.add_argument_group("Input files arguments")
+    group_replot = argparser_replot.add_argument_group("Input arguments")
 
-    group_replot.add_argument("-i", "--indir", action="store", dest="indir", required=True, metavar='',
+    group_replot.add_argument("-i", "--indir", action="store", dest="indir", required=True, metavar='GSEA_dir',
                               help="The GSEA desktop results directroy that you want to reproduce the figure ")
     add_output_option(group_replot)
     #add_output_group( argparser_plot )
@@ -259,12 +259,12 @@ def add_enrichr_parser(subparsers):
 
     # group for required options.
     enrichr_opt = argparser_enrichr.add_argument_group("Input arguments")
-    enrichr_opt.add_argument("-i", "--input-list", action="store", dest="gene_list", type=str, required=True, metavar='file',
+    enrichr_opt.add_argument("-i", "--input-list", action="store", dest="gene_list", type=str, required=True, metavar='geneSymbols',
                               help="Enrichr uses a list of Entrez gene symbols as input.")
     enrichr_opt.add_argument("-g", "--gene-sets", action="store", dest="library", type=str, required=True, metavar='gmt',
-                              help="Enrichr library name required. see online tool for libarry names.")
-    enrichr_opt.add_argument("-d", "--description", action="store", dest="descrip", type=str, default='foo', metavar='',
-                              help="It is recommended to enter a description for your list so that multiple lists \
+                              help="Enrichr library name required. see online tool for libary names.")
+    enrichr_opt.add_argument("--description", action="store", dest="descrip", type=str, default='enrichr', metavar='strings',
+                              help="It is recommended to enter a short description for your list so that multiple lists \
                               can be differentiated from each other if you choose to save or share your list.") 
     enrichr_opt.add_argument("--cut-off", action="store", dest="thresh", metavar='float', type=float, default=0.05,
                               help="Adjust-Pval cutoff, used for generating plots. Default: 0.05.")
