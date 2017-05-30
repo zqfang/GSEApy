@@ -42,13 +42,13 @@ GSEAPY is a python wrapper for **GSEA** and **Enrichr**.
 GSEAPY has five sub-commands available: ``gsea``, ``prerank``, ``single``, ``replot`` ``enrichr``.
 
 
-:gsea:    The ``gsea`` module produce **GSEA** results.The input requries a txt file(FPKM, Expected Counts, TPM, et.al), a cls file, and gene_sets file in gmt format. 
-:prerank: The ``prerank`` module produce **Prerank tool** results.  The input expects a pre-ranked gene list dataset with correlation values, which in .rnk format, and gene_sets file in gmt format.  ``prerank`` module is an API to `GSEA` pre-rank tools.
-:single: The ``single`` module perform **single sample GSEA(ssGSEA)** analysis.  The input expects a gene list with expression values(same with ``.rnk`` file, and gene_sets file in gmt format. ssGSEA enrichment score for the gene set as described by `D. Barbie et al 2009 <http://www.nature.com/nature/journal/v462/n7269/abs/nature08460.html>`_.
+:gsea    The ``gsea`` module produce `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ results.The input requries a txt file(FPKM, Expected Counts, TPM, et.al), a cls file, and gene_sets file in gmt format. 
+:prerank The ``prerank`` module produce **Prerank tool** results.  The input expects a pre-ranked gene list dataset with correlation values, which in .rnk format, and gene_sets file in gmt format.  ``prerank`` module is an API to `GSEA` pre-rank tools.
+:single The ``single`` module perform **single sample GSEA(ssGSEA)** analysis.  The input expects a gene list with expression values(same with ``.rnk`` file, and gene_sets file in gmt format. ssGSEA enrichment score for the gene set as described by `D. Barbie et al 2009 <http://www.nature.com/nature/journal/v462/n7269/abs/nature08460.html>`_.
 
-:replot: The ``replot`` module reproduce GSEA desktop version results.  The only input for GSEAPY is the location to GSEA Desktop output results.
+:replot The ``replot`` module reproduce GSEA desktop version results.  The only input for GSEAPY is the location to ``GSEA`` Desktop output results.
 
-:enrichr: The ``enrichr`` module enable you perform gene set enrichment analysis using ``Enrichr`` API. Enrichr is open source and freely available online at: http://amp.pharm.mssm.edu/Enrichr . It runs very fast and generates results in txt format.
+:enrichr The ``enrichr`` module enable you perform gene set enrichment analysis using ``Enrichr`` API. Enrichr is open source and freely available online at: http://amp.pharm.mssm.edu/Enrichr . It runs very fast.
 
 
 Please use 'gseapy COMMAND -h' to see the detail description for each option of each module.
