@@ -5,8 +5,8 @@
 import sys, json, requests, logging
 from pandas import read_table
 from gseapy.gsea import GSEAbase
-from .plot import barplot
-from .utils import *
+from gseapy.plot import barplot
+from gseapy.utils import *
 
 class Enrichr(GSEAbase):
     """Enrichr API"""
@@ -99,19 +99,22 @@ class Enrichr(GSEAbase):
         ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/export'
         query_string = '?userListId=%s&filename=%s&backgroundType=%s'
         user_list_id = str(job_id['userListId'])
-        outfile='Enrichr.reports.'
+
+
         url = ENRICHR_URL + query_string % (user_list_id, outfile, gene_set)
         response = requests.get(url, stream=True)
 
         logger.info('Downloading file of enrichment results: Job Id:'+ str(job_id)) 
-        with open(self.outdir+'/'+ outfile + description + '.txt', 'wb') as f:
+        outfile="%s/%s.%s.%s.reports.txt"%s(self.outdir, gene_set, description, self.module)
+
+        with open(outfile, 'wb') as f:
             for chunk in response.iter_content(chunk_size=1024):
                 if chunk:
                     f.write(chunk)
 
-        logger.debug('Results written to: ' + outfile + description + ".txt")
+        logger.debug('Results written to: ' + outfile)
         #save results
-        df =  read_table(self.outdir+'/'+ outfile + description + '.txt')
+        df =  read_table(outfile)
         self.res2d = df
 
         #plotting
@@ -120,7 +123,7 @@ class Enrichr(GSEAbase):
                 fig = barplot(df=df, cutoff=self.cutoff, 
                               figsize=self.figsize, top_term=self.__top_term,)
                 if fig is not None:
-                    fig.savefig(self.outdir+'/'+"enrichr.reports.%s.%s"%(description, self.format),
+                    fig.savefig(outfile.replace("txt", self.format),
                                 bbox_inches='tight', dpi=300)
         
         self._log_stop()

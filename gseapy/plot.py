@@ -8,7 +8,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import matplotlib.transforms as transforms
-from .parser import unique
+from gseapy.parser import unique
 
 logger = logging.getLogger(__name__)
 

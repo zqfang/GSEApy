@@ -5,16 +5,15 @@ import os,sys, logging
 import pandas as pd
 from collections import OrderedDict
 from numpy import number
-from .parser import *
-from .algorithm import enrichment_score, gsea_compute, gsea_compute_ss, preprocess, ranking_metric
-from .plot import gsea_plot, heatmap
-from .utils import mkdirs
+from gseapy.parser import *
+from gseapy.algorithm import enrichment_score, gsea_compute, gsea_compute_ss, preprocess, ranking_metric
+from gseapy.plot import gsea_plot, heatmap
+from gseapy.utils import mkdirs
 
 
 class GSEAbase:
     """base class of GSEA."""
     def __init__(self):
-        self.results=None
         self.verbose=False
         self.module=None
         self.results=None
@@ -262,7 +261,9 @@ class Prerank(GSEAbase):
         self.module='prerank'
 
     def run(self):
+        """main prerank workflow"""
 
+        assert self.min_size <= self.max_size
         mkdirs(self.outdir)
         logger = self._log_init(module=self.module, 
                                log_level=logging.INFO if self.verbose else logging.WARNING)
@@ -330,7 +331,9 @@ class SingleSampleGSEA(GSEAbase):
         self.module='SingleSample'
 
     def run(self):
-        
+        """main ssgsea workflow"""
+        assert self.min_size <= self.max_size
+
         mkdirs(self.outdir)
         logger = self._log_init(module=self.module, 
                                log_level=logging.INFO if self.verbose else logging.WARNING)
@@ -388,6 +391,8 @@ class Replot(GSEAbase):
         self.module='replot'
 
     def run(self):
+        """main replot function"""
+        assert self.min_size <= self.max_size
 
         mkdirs(self.outdir)
         logger = self._log_init(module=self.module,  

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from numpy import in1d
 from pandas import read_table, DataFrame
-from .utils import unique, DEFAULT_LIBRARY
+from gseapy.utils import unique, DEFAULT_LIBRARY
 import sys, logging, json
 
 logger = logging.getLogger(__name__)

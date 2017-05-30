@@ -242,13 +242,12 @@ Run gseapy inside python console:
     # run GSEA.
     gseapy.gsea(data='expression.txt', gene_sets='gene_sets.gmt', cls='test.cls', outdir='test')
    
-    # using prerank tool
+    # run prerank 
     gseapy.prerank(rnk='gsea_data.rnk', gene_sets='gene_sets.gmt', outdir='test')
 
     # run ssGSEA
-    from gseapy.gsea import SingleSampleGSEA
-    ss = SingleSampleGSEA(data="expression.txt", gene_sets= "gene_sets.gmt", outdir='test')
-    ss.run()
+    gseapy.ssgsea(data="expression.txt", gene_sets= "gene_sets.gmt", outdir='test')
+
 
     # An example to reproduce figures using replot module.
     gseapy.replot(indir='./Gsea.reports', outdir='test')
