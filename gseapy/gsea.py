@@ -86,13 +86,13 @@ class GSEAbase:
         top_term = res2d.head(graph_num).index
         if module == 'gsea':
             width = len(classes) if len(classes) >= 6 else  5
+            cls_booA =list(map(lambda x: True if x == phenoPos else False, classes))
+            cls_booB =list(map(lambda x: True if x == phenoNeg else False, classes))
             datA = data.loc[:, cls_booA]
             datB = data.loc[:, cls_booB]
             datAB=pd.concat([datA,datB], axis=1)
 
-        cls_booA =list(map(lambda x: True if x == phenoPos else False, classes))
-        cls_booB =list(map(lambda x: True if x == phenoNeg else False, classes))
-        
+      
         for gs in top_term:
             hit = results.get(gs)['hit_index']
             fig = gsea_plot(rank_metric=rank_metric, enrich_term=gs, hit_ind=hit,
