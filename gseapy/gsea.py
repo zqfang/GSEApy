@@ -14,21 +14,22 @@ from gseapy.utils import mkdirs
 class GSEAbase:
     """base class of GSEA."""
     def __init__(self):
-        self.verbose=False
+        self.gene_sets='base'
         self.module='base'
         self.results=None
         self.res2d=None
         self.ranking=None
+        self.verbose=False
         self._logger=None
        
 
     def _log_init(self, module='GSEA', log_level=logging.INFO):
         """logging start"""
-
+        gene_set =os.path.split(self.gene_sets)[-1].lower().rstrip(".gmt")
         logging.basicConfig(
                             level    = logging.DEBUG,
                             format   = 'LINE %(lineno)-4d: %(asctime)s [%(levelname)-8s] %(message)s',
-                            filename = "%s/gseapy.%s.log"%(self.outdir, module),
+                            filename = "%s/gseapy.%s.%s.log"%(self.outdir, module, gene_set),
                             filemode = 'w')
 
         logger = logging.getLogger(__name__)
@@ -60,7 +61,7 @@ class GSEAbase:
                      
         """
         if isinstance(rnk, pd.DataFrame) :
-            rank_metric = rnk
+            rank_metric = rnk.copy()
         elif isinstance(rnk, str) :
             rank_metric = pd.read_table(rnk, header=None)
         else:
@@ -175,7 +176,7 @@ class GSEA(GSEAbase):
         assert self.min_size <= self.max_size
 
         if isinstance(self.data, pd.DataFrame) :
-            df = self.data
+            df = self.data.copy()
 
         elif isinstance(self.data, str) :
             df = pd.read_table(self.data)
