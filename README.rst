@@ -81,7 +81,8 @@ GSEA Java version output:
 This is an example of GSEA desktop application output
 
 .. figure:: docs/GSEA_OCT4_KD.png
-     :align: center
+
+
 
 
 
@@ -93,7 +94,8 @@ Using the same data from ``GSEA``, GSEAPY reproduce the example above.
 Using ``Prerank`` or ``replot`` module will reproduce the same figure for GSEA Java desktop outputs
 
 .. figure:: docs/gseapy_OCT4_KD.png
-      :align: center
+
+
 
    
    
