@@ -8,16 +8,6 @@ import sys, logging
 
 logger = logging.getLogger(__name__)
 
-def preprocess(df):
-    """pre-processed the data frame.new filtering methods will be implement here.
-    """    
-    
-    df.drop_duplicates(subset=df.columns[0], inplace=True) #drop duplicate gene_names.    
-    df.set_index(keys=df.columns[0], inplace=True)
-    df.dropna(how='all', inplace=True)                     #drop rows with all NAs
-    df2 = df.select_dtypes(include=['float64'])  + 0.00001 #select numbers in DataFrame      
-    
-    return df2
 
 def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=None, esnull=None, rs=np.random.RandomState()):
     """This is the most important function of GSEAPY. It has the same algorithm with GSEA.
@@ -267,13 +257,11 @@ def ranking_metric(df, method, phenoPos, phenoNeg, classes, ascending):
         
     A = phenoPos
     B = phenoNeg
-    df2 = df.T   
-    df2['class'] = classes
-    df_mean= df2.groupby('class').mean().T
-    df_std = df2.groupby('class').std().T  
+
     #exclude any zero stds.
-    df_mean = df_mean[df_std.sum(axis=1) !=0]
-    df_std = df_std[df_std.sum(axis=1) !=0]
+    df_mean = df.groupby(by=classes, axis=1).mean()
+    df_std =  df.groupby(by=classes, axis=1).std()
+
     
     if method == 'signal_to_noise':
         sr = (df_mean[A] - df_mean[B])/(df_std[A] + df_std[B])

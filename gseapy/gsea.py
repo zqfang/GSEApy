@@ -6,7 +6,7 @@ import pandas as pd
 from collections import OrderedDict
 from numpy import number
 from gseapy.parser import *
-from gseapy.algorithm import enrichment_score, gsea_compute, gsea_compute_ss, preprocess, ranking_metric
+from gseapy.algorithm import enrichment_score, gsea_compute, gsea_compute_ss, ranking_metric
 from gseapy.plot import gsea_plot, heatmap
 from gseapy.utils import mkdirs
 
@@ -95,7 +95,12 @@ class GSEAbase:
              
             if module == 'gsea':
                 width = len(classes) if len(classes) >= 6 else  5
-                heatmap(df=data.iloc[hit], term=gs, outdir=outdir, 
+                cls_booA =list(map(lambda x: True if x == phenoPos else False, classes))
+                cls_booB =list(map(lambda x: True if x == phenoNeg else False, classes))
+                datA = data.loc[:, cls_booA]
+                datB = data.loc[:, cls_booB]
+                datAB=pd.concat([datA,datB], axis=1)
+                heatmap(df=datAB.iloc[hit], term=gs, outdir=outdir, 
                         figsize=(width, len(hit)/2), format=format)
       
 
@@ -158,16 +163,20 @@ class GSEA(GSEAbase):
         self.seed=seed
         self.verbose=verbose
         self.module='gsea'
-    def __preprocess(self, df):
+    def __preprocess(self, df, cls_vector):
         """pre-processed the data frame.new filtering methods will be implement here.
         """    
         
         df.drop_duplicates(subset=df.columns[0], inplace=True) #drop duplicate gene_names.    
         df.set_index(keys=df.columns[0], inplace=True)
         df.dropna(how='all', inplace=True)                     #drop rows with all NAs
-        df2 = df.select_dtypes(include=[number])  + 0.00001 #select numbers in DataFrame      
+        df2 = df.select_dtypes(include=[number])  + 0.00001 #select numbers in DataFrame
         
-        return df
+        #drop any genes which std ==0
+        df_std =  df2.groupby(by=cls_vector, axis=1).std()    
+        df2 =  df2[~df_std.isin([0]).any(axis=1)]     
+        
+        return df2
 
     def run(self):
 
@@ -193,11 +202,11 @@ class GSEA(GSEAbase):
         #Start Analysis
         logger.info("Parsing data files for GSEA.............................")     
 
-        #select correct expression genes and values.
-        dat = self.__preprocess(df)
-        
         # phenotype labels parsing
         phenoPos, phenoNeg, cls_vector = gsea_cls_parser(self.classes)
+        #select correct expression genes and values.
+        dat = self.__preprocess(df, cls_vector)
+        
         
         #ranking metrics calculation.    
         dat2 = ranking_metric(df=dat, method=self.method, phenoPos=phenoPos, phenoNeg=phenoNeg, 
