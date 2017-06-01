@@ -509,13 +509,15 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
 	  ascending=False, processes=1, figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
     """ Run Gene Set Enrichment Analysis.
 
-    :param data: Gene expression data table.  
-    :param gene_sets: Gene sets file. e.g. gmt files. Same input with GSEA.
-    :param permutation_n: Number of permutations for significance computation. Default: 1000.
-    :param permutation_type: Permutation type, "phenotype" for phenotypes, "gene_set" for genes.
+    :param data: Gene expression data table or pandas DataFrame.  
+    :param gene_sets: Enrichr Library name or .gmt gene sets file. Same input with GSEA.
+    :param cls: a list or a .cls file format required for GSEA.
+    :param str outdir: Results output directory.
+    :param int permutation_num: Number of permutations for significance computation. Default: 1000.
+    :param str permutation_type: Permutation type, "phenotype" for phenotypes, "gene_set" for genes.
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Defaut: 15.
     :param int max_size: Maximum allowed number of genes from gene set also the data set. Defaults: 500.
-    :param weighted_score_type: Refer to :func:`algorithm.enrichment_socre`. Default:1.
+    :param float weighted_score_type: Refer to :func:`algorithm.enrichment_socre`. Default:1.
     :param method:  The method used to calculate a correlation or ranking. Default: 'log2_ratio_of_classes'.
                    Others methods are:
    
@@ -546,17 +548,15 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
                       This is the recommended statistic for calculating fold change for natural scale data.
    
       	
-    :param ascending: Sorting order of rankings. Default: False.
-    :param outdir: Results output directory.
-    :param figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
-    :param format: Matplotlib figure format. Default: 'pdf'.
-    :param graph_num: Plot graphs for top sets of each phenotype
+    :param bool ascending: Sorting order of rankings. Default: False.
+    :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
+    :param str format: Matplotlib figure format. Default: 'pdf'.
+    :param int graph_num: Plot graphs for top sets of each phenotype
     :param seed: Random seed. expect an interger. Defalut:None.
-    :param verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
+    :param bool verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
 
-    :return: Return a DataFrame when inside python console.
-             Generate ``GSEA`` plots and store a dictionary into csv file,
-             where  each column represents::
+    :return: Return a Prerank obj. All results store to  store a dictionary, obj.results,
+             where contains::
 
                  | {es: enrichment score, 
                  |  nes: normalized enrichment score, 
@@ -578,7 +578,35 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
 def ssgsea(data, gene_sets, outdir="GSEA_SingleSample", min_size=15, max_size=500,
            permutation_num=1000, weighted_score_type=0.25, ascending=False, processes=1,
            figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
-    """single sample GSEA tool"""
+    """Run Gene Set Enrichment Analysis with single sample GSEA tool
+    
+    :param data: expression or pandas DataFrame. Same input with ``GSEA`` .rnk file.  
+    :param gene_sets: Enrichr Library name or .gmt gene sets file. Same input with GSEA.
+    :param outdir: results output directory.
+    :param int min_size: Minimum allowed number of genes from gene set also the data set. Defaut: 15.
+    :param int max_size: Maximum allowed number of genes from gene set also the data set. Defaults: 500.
+    :param int permutation_num: Number of permutations for significance computation. Default: 1000.
+    :param str weighted_score_type: Refer to :func:`algorithm.enrichment_socre`. Default:0.25.
+    :param bool ascending: Sorting order of rankings. Default: False.
+    :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
+    :param str format: Matplotlib figure format. Default: 'pdf'.
+    :param int graph_num: Plot graphs for top sets of each phenotype
+    :param seed: Random seed. expect an interger. Defalut:None. 
+    :param bool verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
+       
+    :return: Return a ssGSEA obj. All results store to  store a dictionary, obj.results,
+             where contains::
+
+                 | {es: enrichment score, 
+                 |  nes: normalized enrichment score, 
+                 |  p: P-value, 
+                 |  fdr: FDR, 
+                 |  size: gene set size,
+                 |  matched_size: genes matched to the data, 
+                 |  genes: gene names from the data set}
+    
+    """
+
     ss = SingleSampleGSEA(data, gene_sets, outdir, min_size, max_size, 
                           permutation_num, weighted_score_type,
                           ascending, figsize, format, graph_num, seed, verbose)
@@ -592,23 +620,22 @@ def prerank(rnk, gene_sets, outdir='GSEA_Prerank', pheno_pos='Pos', pheno_neg='N
             graph_num=20, seed=None, verbose=False):
     """ Run Gene Set Enrichment Analysis with pre-ranked correlation defined by user.
 
-    :param rnk: pre-ranked correlation table, Same input with ``GSEA`` .rnk file.  
-    :param gene_sets: Gene sets file. e.g. gmt files. Same input with GSEA.
+    :param rnk: pre-ranked correlation table or pandas DataFrame. Same input with ``GSEA`` .rnk file.  
+    :param gene_sets: Enrichr Library name or .gmt gene sets file. Same input with GSEA.
     :param outdir: results output directory.
-    :param permutation_n: Number of permutations for significance computation. Default: 1000.
+    :param int permutation_num: Number of permutations for significance computation. Default: 1000.
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Defaut: 15.
     :param int max_size: Maximum allowed number of genes from gene set also the data set. Defaults: 500.
-    :param weighted_score_type: Refer to :func:`algorithm.enrichment_socre`. Default:1.
-    :param ascending: Sorting order of rankings. Default: False.
-    :param figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
-    :param format: Matplotlib figure format. Default: 'pdf'.
-    :param graph_num: Plot graphs for top sets of each phenotype
+    :param str weighted_score_type: Refer to :func:`algorithm.enrichment_socre`. Default:1.
+    :param bool ascending: Sorting order of rankings. Default: False.
+    :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
+    :param str format: Matplotlib figure format. Default: 'pdf'.
+    :param int graph_num: Plot graphs for top sets of each phenotype
     :param seed: Random seed. expect an interger. Defalut:None. 
-    :param verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
+    :param bool verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
        
-    :return: Return a DataFrame when inside python console.
-             Generate ``GSEA`` plots and store a dictionary into csv file,
-             where each column represents::
+    :return: Return a Prerank obj. All results store to  store a dictionary, obj.results,
+             where contains::
 
                  | {es: enrichment score, 
                  |  nes: normalized enrichment score, 
@@ -633,16 +660,17 @@ def replot(indir, outdir='GSEA_Replot', weighted_score_type=1,
           
     :param indir: GSEA desktop results directory. In the sub folder, you must contain edb file foder.    
     :param outdir: Output directory.
-    :param weight: weighted score type. choose from {0,1,1.5,2}. Default: 1.
-    :param figsize: matplotlib output figure figsize. Defult: [6.5,6].
-    :param format: matplotlib output figure format. Default: 'pdf'.
-    :param min_size: min size of input genes presented in Gene Sets. Default: 3.
-    :param max_size: max size of input genes presented in Gene Sets. Default: 5000.
+    :param float weighted_score_type: weighted score type. choose from {0,1,1.5,2}. Default: 1.
+    :param list figsize: matplotlib output figure figsize. Defult: [6.5,6].
+    :param str format: matplotlib output figure format. Default: 'pdf'.
+    :param int min_size: min size of input genes presented in Gene Sets. Default: 3.
+    :param int max_size: max size of input genes presented in Gene Sets. Default: 5000.
                      you will not encourage to use min_size, or max_size argment in :func:`replot` function.
                      Because gmt file has already been filter.
     :param verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
 
     :return: Generate new figures with seleted figure format. Default: 'pdf'.   
+
     """
     rep = Replot(indir, outdir, weighted_score_type, 
                  min_size, max_size, figsize, format, verbose)

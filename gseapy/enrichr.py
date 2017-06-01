@@ -132,19 +132,20 @@ class Enrichr(GSEAbase):
 
         return 
 def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr',
-            cutoff=0.05, format='pdf', figsize=(12,6), top_term=10, no_plot=False, verbose=False):
+            cutoff=0.05, format='pdf', figsize=(8,6), top_term=10, no_plot=False, verbose=False):
     """Enrichr API.
 
-    :param gene_list: Flat file with list of genes, one gene id per row.
-                      or a python list object
-    :param gene_sets: Enrichr Library to query.
-    :param description: name of analysis
+    :param gene_list: Flat file with list of genes, one gene id per row, or a python list object
+    :param gene_sets: Enrichr Library to query. Required enrichr library name
+    :param description: name of analysis. optinal.
     :param outdir: Output file directory
-    :param cutoff: Adjust P-value cutoff, for plotting. Default: 0.05
-    :param format: Output figure format supported by matplotlib,('pdf','png','eps'...). Default: 'pdf'.
-    :param no_plot: Bool, if equal to True, no figure will be draw. This is useful only if data are interested. Default: False.
-    :param verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
-    :return: A DataFrame of enrchment results, only if call ``enrichr`` inside python console.
+    :param float cutoff: Adjust P-value cutoff, for plotting. Default: 0.05
+    :param str format: Output figure format supported by matplotlib,('pdf','png','eps'...). Default: 'pdf'.
+    :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. (width,height). Default: (6.5,6).
+    :param bool no_plot: if equal to True, no figure will be draw. This is useful only if data are interested. Default: False.
+    :param bool verbose: Increase output verbosity, print out progress of your job, Default: False.
+
+    :return: An Enrichr object, which obj.res2d contains your enrichr query.
     """
     enr = Enrichr(gene_list, gene_sets, description, outdir,
                   cutoff, format, figsize, top_term, no_plot, verbose)
