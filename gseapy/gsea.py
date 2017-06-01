@@ -17,11 +17,11 @@ class GSEAbase:
     def __init__(self):
         self.gene_sets='KEGG_2016'
         self.module='base'
-        self.processes=1
         self.results=None
         self.res2d=None
         self.ranking=None
         self.verbose=False
+        self._processes=1
         self._logger=None
        
 
@@ -89,7 +89,7 @@ class GSEAbase:
 
         #multi-threading
         cpu_num = cpu_count()
-        cpus = self.processes if self.processes <= cpu_num else cpu_num
+        cpus = self._processes if self._processes <= cpu_num else cpu_num
         pool = Pool(processes=cpus)
         figs = []
      
@@ -102,17 +102,18 @@ class GSEAbase:
             #                RES=results.get(gs)['rank_ES'], phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize)        
             
             #return fig obj to save.
-            figs.append(pool.apply_async(gsea_plot, args=(rank_metric, gs, hit, results.get(gs)['nes'],
-                                                          results.get(gs)['pval'],results.get(gs)['fdr'], 
-                                                          results.get(gs)['rank_ES'], 
-                                                          phenoPos, phenoNeg, figsize)))
+            pool.apply_async(gsea_plot, args=(rank_metric, gs, hit, results.get(gs)['nes'],
+                                              results.get(gs)['pval'],results.get(gs)['fdr'], 
+                                              results.get(gs)['rank_ES'], 
+                                              phenoPos, phenoNeg, figsize, self.format,
+                                              self.outdir,self.module))
         pool.close()
         pool.join()
-
+        """
         for fi in figs:
             fig = fi.get()
             fig.savefig('{a}/{b}.{c}.{d}'.format(a=outdir, b=gs, c=module, d=format), bbox_inches='tight', dpi=300,)
-
+        """
         
         if module == 'gsea':
             width = len(classes) if len(classes) >= 6 else  5
@@ -171,9 +172,9 @@ class GSEA(GSEAbase):
     """GSEA main tool"""
     def __init__(self, data, gene_sets, classes, outdir='GSEA_ouput', 
                  min_size=15, max_size=500, permutation_num=1000, 
-                 weighted_score_type=1,permutation_type='gene_set', 
+                 weighted_score_type=1, permutation_type='gene_set', 
                  method='log2_ratio_of_classes', ascending=False, 
-                 figsize=[6.5,6], format='pdf', graph_num=20, 
+                 processes=1, figsize=[6.5,6], format='pdf', graph_num=20, 
                  seed=None, verbose=False):
         
         self.data = data
@@ -187,12 +188,14 @@ class GSEA(GSEAbase):
         self.permutation_num=permutation_num
         self.weighted_score_type=weighted_score_type
         self.ascending=ascending
+        self._processes=processes
         self.figsize=figsize
         self.format=format
         self.graph_num=graph_num
         self.seed=seed
         self.verbose=verbose
         self.module='gsea'
+        self.ranking=None
     def __preprocess(self, df, cls_vector):
         """pre-processed the data frame.new filtering methods will be implement here.
         """    
@@ -255,8 +258,8 @@ class GSEA(GSEAbase):
                                                              permutation_type=self.permutation_type, 
                                                              method=self.method,
                                                              phenoPos=phenoPos, phenoNeg=phenoNeg, 
-                                                             classes=cls_vector, 
-                                                             ascending=self.ascending, seed=self.seed)                                                             
+                                                             classes=cls_vector, ascending=self.ascending, 
+                                                             seed=self.seed, processes=self._processes)                                                             
         
         logger.info("Start to generate gseapy reports, and produce figures...")
         res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
@@ -280,7 +283,7 @@ class Prerank(GSEAbase):
     def __init__(self, rnk, gene_sets, outdir='GSEA_prerank', 
                  pheno_pos='Pos', pheno_neg='Neg', min_size=15, max_size=500, 
                  permutation_num=1000, weighted_score_type=1,
-                 ascending=False, figsize=[6.5,6], format='pdf', 
+                 ascending=False, processes=1, figsize=[6.5,6], format='pdf', 
                  graph_num=20, seed=None, verbose=False):
 
         self.rnk =rnk
@@ -298,7 +301,10 @@ class Prerank(GSEAbase):
         self.graph_num=graph_num
         self.seed=seed
         self.verbose=verbose
+        self.ranking=None
         self.module='prerank'
+        self._processes=processes
+
 
     def run(self):
         """GSEA prerank workflow"""
@@ -353,7 +359,7 @@ class SingleSampleGSEA(GSEAbase):
     """GSEA extention: single sample GSEA"""
     def __init__(self, data, gene_sets, outdir="GSEA_SingleSample",
                  min_size=15, max_size=500, permutation_num=1000, weighted_score_type=0.25,
-                 ascending=False, figsize=[6.5,6], format='pdf',
+                 ascending=False, processes=1, figsize=[6.5,6], format='pdf',
                  graph_num=20, seed=None, verbose=False):
         self.data = data
         self.gene_sets=gene_sets
@@ -368,7 +374,9 @@ class SingleSampleGSEA(GSEAbase):
         self.graph_num=graph_num
         self.seed=seed
         self.verbose=verbose
+        self.ranking=None
         self.module='SingleSample'
+        self._processes=processes
 
     def run(self):
         """Single Sample GSEA workflow"""
@@ -398,7 +406,7 @@ class SingleSampleGSEA(GSEAbase):
         #compute ES, NES, pval, FDR, RES
         gsea_results, hit_ind, rank_ES, subsets = gsea_compute_ss(data=dat2, n=self.permutation_num, gmt=gmt,
                                                                   weighted_score_type=self.weighted_score_type,
-                                                                  seed=self.seed)
+                                                                  seed=self.seed, processes=self._processes)
           
         logger.info("Start to generate gseapy reports, and produce figures...")
         res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
@@ -498,7 +506,7 @@ def call(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
         
 def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permutation_num=1000, 
           weighted_score_type=1,permutation_type='gene_set', method='log2_ratio_of_classes',
-	  ascending=False, figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
+	  ascending=False, processes=1, figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
     """ Run Gene Set Enrichment Analysis.
 
     :param data: Gene expression data table.  
@@ -560,7 +568,7 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
     
     """
     gs = GSEA(data, gene_sets, cls, outdir, min_size, max_size, permutation_num, 
-              weighted_score_type,permutation_type, method, ascending,
+              weighted_score_type,permutation_type, method, ascending, processes,
                figsize, format, graph_num, seed, verbose)
     gs.run()
 
@@ -568,7 +576,7 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
 
 
 def ssgsea(data, gene_sets, outdir="GSEA_SingleSample", min_size=15, max_size=500,
-           permutation_num=1000, weighted_score_type=0.25, ascending=False, 
+           permutation_num=1000, weighted_score_type=0.25, ascending=False, processes=1,
            figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
     """single sample GSEA tool"""
     ss = SingleSampleGSEA(data, gene_sets, outdir, min_size, max_size, 
@@ -580,7 +588,8 @@ def ssgsea(data, gene_sets, outdir="GSEA_SingleSample", min_size=15, max_size=50
 
 def prerank(rnk, gene_sets, outdir='GSEA_Prerank', pheno_pos='Pos', pheno_neg='Neg',
             min_size=15, max_size=500, permutation_num=1000, weighted_score_type=1,
-            ascending=False, figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
+            ascending=False, processes=1, figsize=[6.5,6], format='pdf',
+            graph_num=20, seed=None, verbose=False):
     """ Run Gene Set Enrichment Analysis with pre-ranked correlation defined by user.
 
     :param rnk: pre-ranked correlation table, Same input with ``GSEA`` .rnk file.  
@@ -612,7 +621,7 @@ def prerank(rnk, gene_sets, outdir='GSEA_Prerank', pheno_pos='Pos', pheno_neg='N
     """
     pre = Prerank(rnk, gene_sets, outdir, pheno_pos, pheno_neg, 
                   min_size, max_size, permutation_num, weighted_score_type,
-                  ascending, figsize, format, graph_num, seed, verbose)
+                  ascending, processes, figsize, format, graph_num, seed, verbose)
     pre.run()
     return pre
 

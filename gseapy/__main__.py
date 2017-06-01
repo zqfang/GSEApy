@@ -36,14 +36,14 @@ def main():
 
         gs = GSEA(args.data, args.gmt, args.cls, args.outdir, 
                   args.mins, args.maxs, args.n, args.weight,
-                  args.type, args.method, args.ascending, 
+                  args.type, args.method, args.ascending, args.threads,
                   args.figsize, args.format, args.graph, args.seed, args.verbose)
         gs.run()
     elif subcommand == "prerank":
         from .gsea import Prerank
         
         pre = Prerank(args.rnk, args.gmt, args.outdir, args.label[0], args.label[1], 
-                      args.mins, args.maxs, args.n, args.weight, args.ascending,
+                      args.mins, args.maxs, args.n, args.weight, args.ascending, args.threads,
                       args.figsize, args.format, args.graph, args.seed, args.verbose)
         pre.run()
 
@@ -52,8 +52,8 @@ def main():
         ss = SingleSampleGSEA(data=args.data, gene_sets=args.gmt, outdir=args.outdir,
                               min_size=args.mins, max_size=args.maxs, permutation_num=args.n, 
                               weighted_score_type=args.weight, ascending=args.ascending, 
-                              figsize=args.figsize, format=args.format, graph_num=args.graph, 
-                              seed=args.seed, verbose=args.verbose)
+                              processes=args.threads, figsize=args.figsize, format=args.format, 
+                              graph_num=args.graph, seed=args.seed, verbose=args.verbose)
         ss.run()
 
     elif subcommand == "enrichr":
@@ -131,7 +131,7 @@ def add_gsea_parser(subparsers):
                              help="Input class vector (phenotype) file in CLS format. Same with GSEA.")
     group_input.add_argument("-g", "--gmt", dest="gmt", action="store", type=str, required=True,
                              help="Gene set database in GMT format. Same with GSEA.")
-    group_input.add_argument("-p", "--permu-type", action="store", dest="type", type=str, metavar='int',
+    group_input.add_argument("-P", "--Permu-type", action="store", dest="type", type=str, metavar='int',
                              choices=("gene_set", "phenotype"), default="gene_set",
                              help="Permutation type. Same with GSEA, choose from {'gene_set', 'phenotype'}")
 
@@ -161,6 +161,8 @@ def add_gsea_parser(subparsers):
                            help="Numbers of top graphs produced. Default: 20")
     group_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=None, metavar='',
                            help="Number of random seed. Default: None")
+    group_opt.add_argument("-p", "--threads", dest = "threads", action="store", type=int, default=1, metavar='Procs',
+                           help="Number of Processes you are going to use. Default: 1")
 
     return
     
@@ -199,6 +201,8 @@ def add_prerank_parser(subparsers):
                              help="Numbers of top graphs produced. Default: 20")
     prerank_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=None, metavar='',
                              help="Number of random seed. Default: None")
+    prerank_opt.add_argument("-p", "--threads", dest = "threads", action="store", type=int, default=1, metavar='Procs',
+                           help="Number of Processes you are going to use. Default: 1")
     
     return
 
@@ -233,6 +237,8 @@ def add_singlesample_parser(subparsers):
                            help="Numbers of top graphs produced. Default: 20")
     group_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=None, metavar='',
                            help="Number of random seed. Default: None")
+    group_opt.add_argument("-p", "--threads", dest = "threads", action="store", type=int, default=1, metavar='Procs',
+                           help="Number of Processes you are going to use. Default: 1")
 
     return
 

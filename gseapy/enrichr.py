@@ -25,6 +25,7 @@ class Enrichr(GSEAbase):
         self.verbose=verbose
         self.module="enrichr"
         self.res2d=None
+        self._processes=1
     def run(self):
         """run enrichr"""
 

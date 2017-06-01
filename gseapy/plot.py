@@ -97,7 +97,7 @@ def heatmap(df, term, outdir, axis=0, figsize=(5,5), format='png'):
                         bbox_inches='tight')
 
 def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
-              phenoPos=None, phenoNeg=None, figsize =(6.5,6), **kwarg):
+              phenoPos, phenoNeg, figsize, format, outdir, module):
     """This is the main function for reproducing the gsea plot.
     
     :param rank_metric: rankings, rank_metric['rank'].values.
@@ -110,7 +110,7 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     :param phenoPos: phenotype lable, positive correlated.
     :param phenoNeg: phenotype lable, negative correlated.
     :param figsize: matplotlib figsize.
-    :return: fig object of gsea plot.
+    :return: 
     """    
     # plt.style.use('classic')
     # center color map at midpoint = 0
@@ -197,8 +197,9 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     fig.subplots_adjust(hspace=0)
     #fig.tight_layout()
     #plt.close(fig)
-    
-    return fig
+    canvas.print_figure('{0}/{1}.{2}.{3}'.format(outdir, enrich_term, module, format), 
+                         bbox_inches='tight', dpi=300,)
+    return 
 
 def dotplot(df, cutoff=0.05, figsize=(3.5,6), top_term=10, scale=1):
     """Visualize enrichr results.

@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import  division
-from functools import reduce
 
-import numpy as np
 import sys, logging
+import numpy as np
+from functools import reduce
+from multiprocessing import Pool,cpu_count
 
 logger = logging.getLogger(__name__)
 
@@ -280,9 +281,16 @@ def ranking_metric(df, method, phenoPos, phenoNeg, classes, ascending):
     df3['rank2'] = df3['rank']
 
     return df3
+    
+def _rnknull(df, method, phenoPos, phenoNeg, classes, ascending):
+        r2 = ranking_metric(df=df, method=method, phenoPos=phenoPos, 
+                            phenoNeg=phenoNeg, classes=classes, ascending=ascending)
+        ranking2=r2['rank'].values
+        gene_list2=r2['gene_name'].values
+        return ranking2, gene_list2
             
 def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
-                 phenoPos, phenoNeg, classes, ascending, seed, prerank=False):
+                 phenoPos, phenoNeg, classes, ascending, seed, processes, prerank=False):
     """compute enrichment scores and enrichment nulls. 
     
     :param data: prepreocessed expression dataframe or a pre-ranked file if prerank=True.
@@ -306,30 +314,43 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
     
     """
     rs = np.random.RandomState(seed)
+
     enrichment_scores = []
+    rank_ES = []
+    hit_ind = [] 
+
     w = weighted_score_type
     subsets = sorted(gmt.keys())    
     dat = data.copy()
     if prerank:
         r2 =data.copy()
     else:
-        r2 = ranking_metric(df=dat, method=method, phenoPos=phenoPos, phenoNeg=phenoNeg, classes=classes, ascending=ascending)
+        r2 = ranking_metric(df=dat, method=method, phenoPos=phenoPos, 
+                            phenoNeg=phenoNeg, classes=classes, ascending=ascending)
     ranking=r2['rank'].values
     gene_list=r2['gene_name']
        
     logger.debug("Start to compute enrichment socres......................")
 
-    rank_ES = []
-    hit_ind = []    
+  
+    #multi-threading  
+    temp_es=[]  
+    pool_es = Pool(processes=processes)
+
     for subset in subsets:
-        es,ind,RES = enrichment_score(gene_list=gene_list, gene_set=gmt.get(subset), 
-                              weighted_score_type=w, correl_vector=ranking)
+        temp_es.append(pool_es.apply_async(enrichment_score, args=(gene_list, gmt.get(subset), w, 
+                                                                     ranking, None,rs)))
+
+    pool_es.close()
+    pool_es.join()
+    for temp in temp_es:
+        es,ind,RES = temp.get()
         enrichment_scores.append(es)
         rank_ES.append(RES)
         hit_ind.append(ind)
            
     logger.debug("Start to compute esnulls...............................")
-
+    """ 
     enrichment_nulls = [ [] for a in range(len(subsets)) ]
     
     if permutation_type == "phenotype":
@@ -337,7 +358,8 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
         dat2 = dat.copy()
         for i in range(n):
             rs.shuffle(l2) #permutation classes
-            r2 = ranking_metric(df=dat2, method=method, phenoPos=phenoPos, phenoNeg=phenoNeg, classes=l2, ascending=ascending)
+            r2 = ranking_metric(df=dat2, method=method, phenoPos=phenoPos, 
+                                 phenoNeg=phenoNeg, classes=l2, ascending=ascending)
             ranking2=r2['rank']
             gene_list2=r2['gene_name'].values
                  
@@ -351,9 +373,54 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
                                    correl_vector=ranking, esnull=n, rs=rs)[0]                                         
             enrichment_nulls[si] = esn # esn is a list, don't need to use append method. 
 
-    return gsea_significance(enrichment_scores, enrichment_nulls),hit_ind,rank_ES, subsets
 
-def gsea_compute_ss(data, gmt, n, weighted_score_type, seed):
+
+    """
+
+
+
+
+    enrichment_nulls = [ [] for a in range(len(subsets)) ]
+    
+    if permutation_type == "phenotype":
+        l2 = list(classes)
+        dat2 = dat.copy()
+        rank_nulls=[]
+        pool_rnkn = Pool(processes=processes) 
+
+
+        for i in range(n):
+            rs.shuffle(l2) 
+            rank_nulls.append(pool_rnkn.apply_async(_rnknull, args=(dat2, method, 
+                                                                  phenoPos, phenoNeg,
+                                                                  l2, ascending)))
+        pool_rnkn.close()
+        pool_rnkn.join()
+
+        for temp_rnk in rank_nulls:
+            rnkn, gl = temp_rnk.get()     
+            for si, subset in enumerate(subsets):
+                esn = enrichment_score(gene_list=gl, gene_set=gmt.get(subset), 
+                                       weighted_score_type=w, correl_vector=rnkn, esnull=None, rs=rs)[0] 
+                enrichment_nulls[si].append(esn)
+    else: 
+
+        temp_esnu=[]
+        pool_esnu = Pool(processes=processes)                     
+        for subset in subsets:
+            temp_esnu.append(pool_esnu.apply_async(enrichment_score, args=(gene_list, gmt.get(subset), w, 
+                                                                           ranking, n, rs)))                                         
+
+        pool_esnu.close()
+        pool_esnu.join()
+        # esn is a list, don't need to use append method. 
+        for si, temp in enumerate(temp_esnu):
+            enrichment_nulls[si] = temp.get()[0]
+
+
+    return gsea_significance(enrichment_scores, enrichment_nulls), hit_ind,rank_ES, subsets
+
+def gsea_compute_ss(data, gmt, n, weighted_score_type, seed, processes):
     """compute enrichment scores and enrichment nulls for single sample GSEA. 
     """
     rs = np.random.RandomState(seed) 
@@ -365,21 +432,35 @@ def gsea_compute_ss(data, gmt, n, weighted_score_type, seed):
     exp_dict = data.to_dict()['rank']
     logger.debug("Start to compute enrichment socres......................") 
 
+    temp_es=[]  
+    pool_es = Pool(processes=processes)
 
     for subset in subsets:
-        es,ind,RES = enrichment_score_ss(gene_set=gmt.get(subset), expressions=exp_dict, 
-                                         weighted_score_type=w, esnull=None, rs=rs)
+        temp_es.append(pool_es.apply_async(enrichment_score_ss, args=(gmt.get(subset), exp_dict, 
+                                                                      w, None,rs)))
+
+    pool_es.close()
+    pool_es.join()
+    for temp in temp_es:
+        es,ind,RES = temp.get()
         enrichment_scores.append(es)
         rank_ES.append(RES)
         hit_ind.append(ind)
 
     logger.debug("Start to compute esnulls...............................")
-    enrichment_nulls = [ [] for a in range(len(subsets)) ]   
 
-    for si,subset in enumerate(subsets):
-        esn = enrichment_score_ss(gene_set=gmt.get(subset), expressions=exp_dict, 
-                               weighted_score_type=w, esnull=n, rs=rs)[0]                                         
-        enrichment_nulls[si] = esn # esn is a list, don't need to use append method. 
+    enrichment_nulls = [ [] for a in range(len(subsets)) ]   
+    temp_esnu=[]
+    pool_esnu = Pool(processes=processes)                     
+    for subset in subsets:
+        temp_esnu.append(pool_esnu.apply_async(enrichment_score_ss, args=(gmt.get(subset), exp_dict, 
+                                                                          w, n, rs)))                                         
+
+    pool_esnu.close()
+    pool_esnu.join()
+        # esn is a list, don't need to use append method. 
+    for si, temp in enumerate(temp_esnu):
+        enrichment_nulls[si] = temp.get()[0]
 
     return gsea_significance(enrichment_scores, enrichment_nulls), hit_ind, rank_ES, subsets    
 
