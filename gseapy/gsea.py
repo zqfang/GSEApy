@@ -88,9 +88,7 @@ class GSEAbase:
         top_term = res2d.head(graph_num).index
 
         #multi-threading
-        cpu_num = cpu_count()
-        cpus = self._processes if self._processes <= cpu_num else cpu_num
-        pool = Pool(processes=cpus)
+        pool = Pool(processes=self._processes)
         figs = []
      
         for gs in top_term:
@@ -122,7 +120,7 @@ class GSEAbase:
             datA = data.loc[:, cls_booA]
             datB = data.loc[:, cls_booB]
             datAB=pd.concat([datA,datB], axis=1)
-            pool_heat = Pool(cpus)
+            pool_heat = Pool(self._processes)
             
             #no values need to be returned
             for gs in top_term:
@@ -232,6 +230,10 @@ class GSEA(GSEAbase):
         logger = self._log_init(module=self.module, 
                                log_level=logging.INFO if self.verbose else logging.WARNING)
 
+        #cpu numbers
+        cpu_num = cpu_count()
+        self._processes = cpu_num if self._processes > cpu_num else self.__preprocess
+
         #Start Analysis
         logger.info("Parsing data files for GSEA.............................")     
 
@@ -319,6 +321,10 @@ class Prerank(GSEAbase):
         #drop duplicates in ranking metrics. 
         dat2.drop_duplicates(subset='gene_name',inplace=True, keep='first')     
         assert len(dat2) > 1
+
+        #cpu numbers
+        cpu_num = cpu_count()
+        self._processes = cpu_num if self._processes > cpu_num else self.__preprocess
         
         #Start Analysis
         logger.info("Parsing data files for GSEA.............................")     
@@ -391,6 +397,10 @@ class SingleSampleGSEA(GSEAbase):
         dat = self._rank_metric(self.data)  
    
         assert len(dat) > 1
+
+        #cpu numbers
+        cpu_num = cpu_count()
+        self._processes = cpu_num if self._processes > cpu_num else self.__preprocess
         
         #Start Analysis
         logger.info("Parsing data files for GSEA.............................")     

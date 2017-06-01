@@ -131,7 +131,7 @@ def add_gsea_parser(subparsers):
                              help="Input class vector (phenotype) file in CLS format. Same with GSEA.")
     group_input.add_argument("-g", "--gmt", dest="gmt", action="store", type=str, required=True,
                              help="Gene set database in GMT format. Same with GSEA.")
-    group_input.add_argument("-P", "--Permu-type", action="store", dest="type", type=str, metavar='int',
+    group_input.add_argument("-t", "--permu-type", action="store", dest="type", type=str, metavar='perType',
                              choices=("gene_set", "phenotype"), default="gene_set",
                              help="Permutation type. Same with GSEA, choose from {'gene_set', 'phenotype'}")
 
@@ -141,13 +141,13 @@ def add_gsea_parser(subparsers):
 
      # group for General options.
     group_opt = argparser_gsea.add_argument_group("GSEA advanced arguments")
+    group_opt.add_argument("-n", "--permu-num", dest = "n", action="store", type=int, default=1000, metavar='perNum',
+                           help="Number of random permutations. For calculating esnulls. Default: 1000")
     group_opt.add_argument("--min-size",  dest="mins", action="store", type=int, default=15, metavar='int',
                            help="Min size of input genes presented in Gene Sets. Default: 15")
     group_opt.add_argument("--max-size", dest = "maxs", action="store", type=int, default=500, metavar='int',
                            help="Max size of input genes presented in Gene Sets. Default: 500")
-    group_opt.add_argument("-n", "--permu-num", dest = "n", action="store", type=int, default=1000, metavar='PerMut',
-                           help="Number of random permutations. For calculating esnulls. Default: 1000")
-    group_opt.add_argument("-w", "--weight", action='store', dest='weight', default=1.0, type=float, metavar='',
+    group_opt.add_argument("-w", "--weight", action='store', dest='weight', default=1.0, type=float, metavar='float',
                            help='Weighted_score of rank_metrics.For weighting input genes. Choose from {0, 1, 1.5, 2},default: 1',)
     group_opt.add_argument("-m", "--method", action="store", dest="method", type=str, metavar='',
                            choices=("signal_to_noise", "t_test", "ratio_of_classes", "diff_of_classes", "log2_ratio_of_classes"),
@@ -157,11 +157,11 @@ def add_gsea_parser(subparsers):
                            Default: 'log2_ratio_of_classes'")
     group_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
                            help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
-    group_opt.add_argument("-t", "--top-graphNum", dest = "graph", action="store", type=int, default=20, metavar='int',
+    group_opt.add_argument("--graph", dest = "graph", action="store", type=int, default=20, metavar='int',
                            help="Numbers of top graphs produced. Default: 20")
     group_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=None, metavar='',
                            help="Number of random seed. Default: None")
-    group_opt.add_argument("-p", "--threads", dest = "threads", action="store", type=int, default=1, metavar='Procs',
+    group_opt.add_argument("-p", "--threads", dest = "threads", action="store", type=int, default=1, metavar='procs',
                            help="Number of Processes you are going to use. Default: 1")
 
     return
@@ -187,21 +187,21 @@ def add_prerank_parser(subparsers):
 
      # group for General options.
     prerank_opt = argparser_prerank.add_argument_group("GSEA advanced arguments")
+    prerank_opt.add_argument("-n", "--permu-num", dest = "n", action="store", type=int, default=1000, metavar='perNum',
+                             help="Number of random permutations. For calculating esnulls. Default: 1000")
     prerank_opt.add_argument("--min-size",  dest="mins", action="store", type=int, default=15, metavar='int',
                              help="Min size of input genes presented in Gene Sets. Default: 15")
     prerank_opt.add_argument("--max-size", dest = "maxs", action="store", type=int, default=500, metavar='int',
                              help="Max size of input genes presented in Gene Sets. Default: 500")
-    prerank_opt.add_argument("-n", "--permu-num", dest = "n", action="store", type=int, default=1000, metavar='int',
-                             help="Number of random permutations. For calculating esnulls. Default: 1000")
-    prerank_opt.add_argument("-w", "--weight", action='store', dest='weight', default=1.0, type=float, metavar='int',
+    prerank_opt.add_argument("-w", "--weight", action='store', dest='weight', default=1.0, type=float, metavar='float',
                              help='Weighted_score of rank_metrics.For weighting input genes. Choose from {0, 1, 1.5, 2},default: 1',)
     prerank_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
                              help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
-    prerank_opt.add_argument("-t", "--top-graphNum", dest = "graph", action="store", type=int, default=20, metavar='int',
+    prerank_opt.add_argument("--graph", dest = "graph", action="store", type=int, default=20, metavar='int',
                              help="Numbers of top graphs produced. Default: 20")
     prerank_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=None, metavar='',
                              help="Number of random seed. Default: None")
-    prerank_opt.add_argument("-p", "--threads", dest = "threads", action="store", type=int, default=1, metavar='Procs',
+    prerank_opt.add_argument("-p", "--threads", dest = "threads", action="store", type=int, default=1, metavar='procs',
                            help="Number of Processes you are going to use. Default: 1")
     
     return
@@ -223,21 +223,21 @@ def add_singlesample_parser(subparsers):
 
     # group for General options.
     group_opt = argparser_gsea.add_argument_group("GSEA advanced arguments")
+    group_opt.add_argument("-n", "--permu-num", dest = "n", action="store", type=int, default=1000, metavar='perNum',
+                           help="Number of random permutations. For calculating esnulls. Default: 1000")
     group_opt.add_argument("--min-size", dest="mins", action="store", type=int, default=15, metavar='int',
                            help="Min size of input genes presented in Gene Sets. Default: 15")
     group_opt.add_argument("--max-size", dest = "maxs", action="store", type=int, default=500,metavar='int',
                            help="Max size of input genes presented in Gene Sets. Default: 500")
-    group_opt.add_argument("-n", "--permu-num", dest = "n", action="store", type=int, default=1000, metavar='PerMut',
-                           help="Number of random permutations. For calculating esnulls. Default: 1000")
     group_opt.add_argument("-w", "--weight", action='store', dest='weight', default=0.25, type=float, metavar='weight',
                            help='Weighted_score of rank_metrics.For weighting input genes.default: 0.25',)
     group_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
                            help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
-    group_opt.add_argument("-t", "--top-graphNum", dest = "graph", action="store", type=int, default=20, metavar='int',
+    group_opt.add_argument("--graph", dest = "graph", action="store", type=int, default=20, metavar='int',
                            help="Numbers of top graphs produced. Default: 20")
     group_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=None, metavar='',
                            help="Number of random seed. Default: None")
-    group_opt.add_argument("-p", "--threads", dest = "threads", action="store", type=int, default=1, metavar='Procs',
+    group_opt.add_argument("-p", "--threads", dest = "threads", action="store", type=int, default=1, metavar='procs',
                            help="Number of Processes you are going to use. Default: 1")
 
     return

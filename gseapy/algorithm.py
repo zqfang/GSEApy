@@ -5,7 +5,7 @@ from __future__ import  division
 import sys, logging
 import numpy as np
 from functools import reduce
-from multiprocessing import Pool,cpu_count
+from multiprocessing import Pool
 
 logger = logging.getLogger(__name__)
 
