@@ -4,6 +4,7 @@
 import os,sys, logging
 import pandas as pd
 from collections import OrderedDict
+from multiprocessing import Pool, cpu_count
 from numpy import number
 from gseapy.parser import *
 from gseapy.algorithm import enrichment_score, gsea_compute, gsea_compute_ss, ranking_metric
@@ -16,6 +17,7 @@ class GSEAbase:
     def __init__(self):
         self.gene_sets='KEGG_2016'
         self.module='base'
+        self.processes=1
         self.results=None
         self.res2d=None
         self.ranking=None
@@ -84,6 +86,34 @@ class GSEAbase:
         """
         #Plotting
         top_term = res2d.head(graph_num).index
+
+        #multi-threading
+        cpu_num = cpu_count()
+        cpus = self.processes if self.processes <= cpu_num else cpu_num
+        pool = Pool(processes=cpus)
+        figs = []
+     
+        for gs in top_term:
+            hit = results.get(gs)['hit_index']
+            gs = gs.replace('/','_').replace(":","_")
+
+            #fig = gsea_plot(rank_metric=rank_metric, enrich_term=gs, hit_ind=hit,
+            #                nes=results.get(gs)['nes'], pval=results.get(gs)['pval'], fdr=results.get(gs)['fdr'], 
+            #                RES=results.get(gs)['rank_ES'], phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize)        
+            
+            #return fig obj to save.
+            figs.append(pool.apply_async(gsea_plot, args=(rank_metric, gs, hit, results.get(gs)['nes'],
+                                                          results.get(gs)['pval'],results.get(gs)['fdr'], 
+                                                          results.get(gs)['rank_ES'], 
+                                                          phenoPos, phenoNeg, figsize)))
+        pool.close()
+        pool.join()
+
+        for fi in figs:
+            fig = fi.get()
+            fig.savefig('{a}/{b}.{c}.{d}'.format(a=outdir, b=gs, c=module, d=format), bbox_inches='tight', dpi=300,)
+
+        
         if module == 'gsea':
             width = len(classes) if len(classes) >= 6 else  5
             cls_booA =list(map(lambda x: True if x == phenoPos else False, classes))
@@ -91,19 +121,17 @@ class GSEAbase:
             datA = data.loc[:, cls_booA]
             datB = data.loc[:, cls_booB]
             datAB=pd.concat([datA,datB], axis=1)
-
-      
-        for gs in top_term:
-            hit = results.get(gs)['hit_index']
-            fig = gsea_plot(rank_metric=rank_metric, enrich_term=gs, hit_ind=hit,
-                            nes=results.get(gs)['nes'], pval=results.get(gs)['pval'], fdr=results.get(gs)['fdr'], 
-                            RES=results.get(gs)['rank_ES'], phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize)        
-            gs = gs.replace('/','_').replace(":","_")
-            fig.savefig('{a}/{b}.{c}.{d}'.format(a=outdir, b=gs, c=module, d=format), bbox_inches='tight', dpi=300,)
-             
-            if module == 'gsea':
-                heatmap(df=datAB.iloc[hit], term=gs, outdir=outdir, 
-                        figsize=(width, len(hit)/2), format=format)
+            pool_heat = Pool(cpus)
+            
+            #no values need to be returned
+            for gs in top_term:
+                hit = results.get(gs)['hit_index']
+                gs = gs.replace('/','_').replace(":","_")
+                pool_heat.apply_async(heatmap, args=(datAB.iloc[hit], gs, outdir, 0,
+                                                    (width, len(hit)/2), format))
+  
+            pool_heat.close()
+            pool_heat.join() 
       
 
 

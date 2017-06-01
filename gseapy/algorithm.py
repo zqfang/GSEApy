@@ -104,8 +104,13 @@ def enrichment_score_ss(gene_set, expressions, weighted_score_type=0.25, esnull=
     :param expressions: dict, a dictionary mapping gene names to their absolute expression values
     :param weighted_score_type: the weighted exponent on the :math:`P^W_G` term.
 
-    :returns: an array representing the intermediate Enrichment Scores for each step along the sorted gene list.
-          To find the total enrichment score, take the sum of all values in the array. 
+    :returns: 
+             ES: Enrichment score (real number between -1 and +1),take the sum of all values in the RES array . 
+     
+             hit_index: index of a gene in gene_list, if gene included in gene_set.
+     
+             RES: Numerical vector containing the running enrichment score for all locations in the gene list .
+    
     """
 
 
@@ -120,7 +125,6 @@ def enrichment_score_ss(gene_set, expressions, weighted_score_type=0.25, esnull=
     """
     #first sort by absolute expression value, starting with the highest expressed genes first
     keys_sorted = sorted(expressions, key=expressions.get, reverse=True) #returns the sorted list of keys
-    #expressions.sort_values(inplace=False, ascending=False)
 
     #values representing the ECDF of genes in the geneset
     P_GW_numerator = 0
@@ -175,7 +179,6 @@ def enrichment_score_ss(gene_set, expressions, weighted_score_type=0.25, esnull=
     P_GW_numerator = np.cumsum(tag_indicator*index** weighted_score_type, axis=axis)
     P_NG_numerator = np.cumsum(np.invert(tag_indicator.astype(bool)), axis=axis)
 
-    RES = P_GW_numerator / P_GW_denominator - P_NG_numerator/ P_NG_denominator
 
     """
     This calculation is repeated for each signature and each sample in the data set.
@@ -186,13 +189,8 @@ def enrichment_score_ss(gene_set, expressions, weighted_score_type=0.25, esnull=
     This quantity is slightly more robust and more sensitive to differences 
     in the tails of the distributions than the Kolmogorov–Smirnov statistic.
     """
-
-    #get indices of tag_indicator  
-
-    max_ES = np.max(RES, axis=axis)
-    min_ES = np.min(RES, axis=axis)
-
-    es = np.where(np.abs(max_ES) > np.abs(min_ES), max_ES, min_ES)
+    RES = P_GW_numerator / P_GW_denominator - P_NG_numerator/ P_NG_denominator
+    es = np.sum(RES, axis=axis)
 
     return es.tolist(), hit_ind, RES.tolist() 
 
@@ -576,34 +574,3 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
     logger.debug("Statistial testing finished.............................")
 
     return zip(enrichment_scores, nEnrichmentScores, enrichmentPVals, fdrs)
-'''
-def _es_parallel(args):
-    """
-    unpack the args tuples for Pool().map function
-    """
-    gene_list, gene_set, weighted_score_type, correl_vector, esnul, rs = args
-    
-    return enrichment_score(gene_list, gene_set, weighted_score_type, correl_vector, esnull, rs)
-
-def _multiprocess(process=1):
-    pool = multiprocessing.Pool(process)
-    
-    gene_set = gmt.keys()
-    #python 2
-    resutls = pool.map(
-    func=_es_parallel,
-        iterable=itertools.izip(
-            itertools.repeat(gene_list),
-            gene_set,
-            itertools.repeat(weighted_score_type),
-            itertools.repeat(correl_vector),
-            itertools.repeat(esnull),
-            itertools.repeat(rs)))   
-   #python 3        
-   L = pool.starmap(_es_parallel, [(1, 1), (2, 1), (3, 1)])
-    # or
-   M = pool.starmap(_es_parallel, zip(a_args, itertools.repeat(second_arg)))
-   pool.close()
-   pool.join()
-   return results
- '''
