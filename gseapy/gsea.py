@@ -194,18 +194,19 @@ class GSEA(GSEAbase):
         self.verbose=verbose
         self.module='gsea'
         self.ranking=None
-    def __preprocess(self, df, cls_vector):
+    def __drop_dat(self, df, cls_vector):
         """pre-processed the data frame.new filtering methods will be implement here.
         """    
         
         df.drop_duplicates(subset=df.columns[0], inplace=True) #drop duplicate gene_names.    
         df.set_index(keys=df.columns[0], inplace=True)
         df.dropna(how='all', inplace=True)                     #drop rows with all NAs
-        df2 = df.select_dtypes(include=[number])  + 0.00001 #select numbers in DataFrame
+        df2 = df.select_dtypes(include=[number])  
         
         #drop any genes which std ==0
         df_std =  df2.groupby(by=cls_vector, axis=1).std()    
-        df2 =  df2[~df_std.isin([0]).any(axis=1)]     
+        df2 =  df2[~df_std.isin([0]).any(axis=1)] 
+        df2 = df2 + 0.00001 # we don't like zeros!!!  
         
         return df2
 
@@ -232,7 +233,7 @@ class GSEA(GSEAbase):
 
         #cpu numbers
         cpu_num = cpu_count()
-        self._processes = cpu_num if self._processes > cpu_num else self.__preprocess
+        self._processes = cpu_num if self._processes > cpu_num else self._processes
 
         #Start Analysis
         logger.info("Parsing data files for GSEA.............................")     
@@ -240,7 +241,7 @@ class GSEA(GSEAbase):
         # phenotype labels parsing
         phenoPos, phenoNeg, cls_vector = gsea_cls_parser(self.classes)
         #select correct expression genes and values.
-        dat = self.__preprocess(df, cls_vector)
+        dat = self.__drop_dat(df, cls_vector)
         
         
         #ranking metrics calculation.    
@@ -324,7 +325,7 @@ class Prerank(GSEAbase):
 
         #cpu numbers
         cpu_num = cpu_count()
-        self._processes = cpu_num if self._processes > cpu_num else self.__preprocess
+        self._processes = cpu_num if self._processes > cpu_num else self._processes
         
         #Start Analysis
         logger.info("Parsing data files for GSEA.............................")     
@@ -342,7 +343,7 @@ class Prerank(GSEAbase):
                                                               permutation_type='gene_set', method=None, 
                                                               phenoPos=self.pheno_pos, phenoNeg=self.pheno_neg,
                                                               classes=None, ascending=self.ascending, seed=self.seed, 
-                                                              prerank=True)
+                                                              processes=self._processes, prerank=True)
 
         logger.info("Start to generate gseapy reports, and produce figures...")
         res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
@@ -382,7 +383,7 @@ class SingleSampleGSEA(GSEAbase):
         self.verbose=verbose
         self.ranking=None
         self.module='SingleSample'
-        self._processes=processes
+        self._processes=processes 
 
     def run(self):
         """Single Sample GSEA workflow"""
@@ -400,7 +401,7 @@ class SingleSampleGSEA(GSEAbase):
 
         #cpu numbers
         cpu_num = cpu_count()
-        self._processes = cpu_num if self._processes > cpu_num else self.__preprocess
+        self._processes = cpu_num if self._processes > cpu_num else self._processes
         
         #Start Analysis
         logger.info("Parsing data files for GSEA.............................")     
