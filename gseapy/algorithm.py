@@ -432,38 +432,40 @@ def gsea_compute_ss(data, gmt, n, weighted_score_type, seed, processes):
     enrichment_scores = []
     rank_ES=[]
     hit_ind=[]
-    #ank_ES = [[] for a in range(len(subsets))]
-    #hit_ind = [[] for a in range(len(subsets))]  
+
     
     logger.debug("Start to compute enrichment socres......................") 
 
-    temp_es=[]  
-    pool_es = Pool(processes=processes)
+    #temp_es=[]  
+    #pool_es = Pool(processes=processes)
 
     for subset in subsets:
-        temp_es.append(pool_es.apply_async(enrichment_score_ss, args=(gmt.get(subset), exp_dict, 
-                                                                      w, None,rs)))
-
-    pool_es.close()
-    pool_es.join()
-    for i, temp in enumerate(temp_es):
-        es,ind,RES = temp.get()
+        #temp_es.append(pool_es.apply_async(enrichment_score_ss, args=(gmt.get(subset), exp_dict, 
+        #                                                              w, None,rs)))
+        es, ind, RES= enrichment_score_ss(gmt.get(subset), exp_dict, w, None,rs)
         enrichment_scores.append(es)
         rank_ES.append(RES)
         hit_ind.append(ind)
-        #rank_ES[i] = RES
-        #hit_ind[i] = ind
+    """
+    #pool_es.close()
+    #pool_es.join()
+    #for i, temp in enumerate(temp_es):
+     #   es,ind,RES = temp.get()
+        enrichment_scores.append(es)
+        rank_ES.append(RES)
+        hit_ind.append(ind)
+    """
 
     logger.debug("Start to compute esnulls...............................")
 
     enrichment_nulls = [ [] for a in range(len(subsets)) ]   
- 
+    
     temp_esnu=[]
     pool_esnu = Pool(processes=processes)                     
     for subset in subsets:
         temp_esnu.append(pool_esnu.apply_async(enrichment_score_ss, args=(gmt.get(subset), exp_dict, 
                                                                           w, n, rs)))                                         
-
+    
     pool_esnu.close()
     pool_esnu.join()
 
@@ -476,7 +478,7 @@ def gsea_compute_ss(data, gmt, n, weighted_score_type, seed, processes):
         esn = enrichment_score_ss(gene_set=gmt.get(subset), expressions=exp_dict, 
                               weighted_score_type=w, esnull=n, rs=rs)[0]                                               
         enrichment_nulls[si] = esn # esn is a list, don't need to use append method. 
-    """                                
+    """                      
     return gsea_significance(enrichment_scores, enrichment_nulls), hit_ind, rank_ES, subsets    
 
 def gsea_pval(es, esnull):
