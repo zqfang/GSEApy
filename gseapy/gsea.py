@@ -495,11 +495,8 @@ class Replot(GSEAbase):
                                    correl_vector=correl_vector)[2]
             #plotting
             fig = gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval,
-                            fdr, RES, phenoPos, phenoNeg, figsize=self.figsize)    
-            fig.savefig('{a}/{b}.gsea.{c}.{d}'.format(a=self.outdir, b=enrich_term,
-                                                      c=self.module, d=self.format),
-                        bbox_inches='tight', dpi=300,)
-
+                            fdr, RES, phenoPos, phenoNeg, self.figsize,
+                            self.format, self.outdir, self.module)    
           
         logger.info("Congratulations! Your plots have been reproduced successfully!")
         self._log_stop()
