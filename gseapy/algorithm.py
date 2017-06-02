@@ -332,9 +332,14 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
     gene_list=r2['gene_name']
        
     logger.debug("Start to compute enrichment socres......................")
+    for subset in subsets:
+        es, ind, RES = enrichment_score(gene_list, gmt.get(subset), w, ranking, None, rs) 
+        enrichment_scores.append(es)
+        rank_ES.append(RES)
+        hit_ind.append(ind)
 
-  
-    #multi-threading  
+    """
+    #multi-threading for enrichment scores
     temp_es=[]  
     pool_es = Pool(processes=processes)
 
@@ -349,9 +354,10 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
         enrichment_scores.append(es)
         rank_ES.append(RES)
         hit_ind.append(ind)
-           
+    """       
     logger.debug("Start to compute esnulls...............................")
     """ 
+    # old single threading method.
     enrichment_nulls = [ [] for a in range(len(subsets)) ]
     
     if permutation_type == "phenotype":
@@ -374,22 +380,17 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
                                    correl_vector=ranking, esnull=n, rs=rs)[0]                                         
             enrichment_nulls[si] = esn # esn is a list, don't need to use append method. 
 
-
-
     """
-
-
-
-
     enrichment_nulls = [ [] for a in range(len(subsets)) ]
     
     if permutation_type == "phenotype":
         l2 = list(classes)
         dat2 = dat.copy()
+        #multi-threading for rankings.
         rank_nulls=[]
         pool_rnkn = Pool(processes=processes) 
 
-
+ 
         for i in range(n):
             rs.shuffle(l2) 
             rank_nulls.append(pool_rnkn.apply_async(_rnknull, args=(dat2, method, 
@@ -397,7 +398,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
                                                                   l2, ascending)))
         pool_rnkn.close()
         pool_rnkn.join()
-
+       
         for temp_rnk in rank_nulls:
             rnkn, gl = temp_rnk.get()     
             for si, subset in enumerate(subsets):
@@ -405,7 +406,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
                                        weighted_score_type=w, correl_vector=rnkn, esnull=None, rs=rs)[0] 
                 enrichment_nulls[si].append(esn)
     else: 
-
+        #multi-threading for esnulls.
         temp_esnu=[]
         pool_esnu = Pool(processes=processes)                     
         for subset in subsets:
@@ -436,25 +437,12 @@ def gsea_compute_ss(data, gmt, n, weighted_score_type, seed, processes):
     
     logger.debug("Start to compute enrichment socres......................") 
 
-    #temp_es=[]  
-    #pool_es = Pool(processes=processes)
-
     for subset in subsets:
-        #temp_es.append(pool_es.apply_async(enrichment_score_ss, args=(gmt.get(subset), exp_dict, 
-        #                                                              w, None,rs)))
         es, ind, RES= enrichment_score_ss(gmt.get(subset), exp_dict, w, None,rs)
         enrichment_scores.append(es)
         rank_ES.append(RES)
         hit_ind.append(ind)
-    """
-    #pool_es.close()
-    #pool_es.join()
-    #for i, temp in enumerate(temp_es):
-     #   es,ind,RES = temp.get()
-        enrichment_scores.append(es)
-        rank_ES.append(RES)
-        hit_ind.append(ind)
-    """
+
 
     logger.debug("Start to compute esnulls...............................")
 
@@ -472,8 +460,9 @@ def gsea_compute_ss(data, gmt, n, weighted_score_type, seed, processes):
     # esn is a list, don't need to use append method. 
     for si, temp in enumerate(temp_esnu):
         enrichment_nulls[si] = temp.get()[0]
-        #print(temp.get()[0])
+
     """
+    # old single threading method
     for si,subset in enumerate(subsets):
         esn = enrichment_score_ss(gene_set=gmt.get(subset), expressions=exp_dict, 
                               weighted_score_type=w, esnull=n, rs=rs)[0]                                               
