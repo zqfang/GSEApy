@@ -560,6 +560,7 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
    
       	
     :param bool ascending: Sorting order of rankings. Default: False.
+    :param int processes: Number of Processes you are going to use. Default: 1.
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
     :param str format: Matplotlib figure format. Default: 'pdf'.
     :param int graph_num: Plot graphs for top sets of each phenotype
@@ -599,6 +600,7 @@ def ssgsea(data, gene_sets, outdir="GSEA_SingleSample", min_size=15, max_size=50
     :param int permutation_num: Number of permutations for significance computation. Default: 1000.
     :param str weighted_score_type: Refer to :func:`algorithm.enrichment_socre`. Default:0.25.
     :param bool ascending: Sorting order of rankings. Default: False.
+    :param int processes: Number of Processes you are going to use. Default: 1.
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
     :param str format: Matplotlib figure format. Default: 'pdf'.
     :param int graph_num: Plot graphs for top sets of each phenotype
@@ -639,6 +641,7 @@ def prerank(rnk, gene_sets, outdir='GSEA_Prerank', pheno_pos='Pos', pheno_neg='N
     :param int max_size: Maximum allowed number of genes from gene set also the data set. Defaults: 500.
     :param str weighted_score_type: Refer to :func:`algorithm.enrichment_socre`. Default:1.
     :param bool ascending: Sorting order of rankings. Default: False.
+    :param int processes: Number of Processes you are going to use. Default: 1.
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
     :param str format: Matplotlib figure format. Default: 'pdf'.
     :param int graph_num: Plot graphs for top sets of each phenotype

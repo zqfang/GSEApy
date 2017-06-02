@@ -332,6 +332,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
     gene_list=r2['gene_name']
        
     logger.debug("Start to compute enrichment socres......................")
+    
     for subset in subsets:
         es, ind, RES = enrichment_score(gene_list, gmt.get(subset), w, ranking, None, rs) 
         enrichment_scores.append(es)
