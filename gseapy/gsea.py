@@ -271,10 +271,11 @@ class GSEA(GSEAbase):
                                    gmt=gmt, rank_metric=dat2, permutation_type="gene_sets")
         
         #Plotting
+        heat_dat = dat.loc[dat2.gene_name]
         self._plotting(rank_metric=dat2, results=self.results, res2d=self.res2d, 
                        graph_num=self.graph_num, outdir=self.outdir,
                        figsize=self.figsize, format=self.format, module=self.module,
-                       data=dat, classes=cls_vector, phenoPos=phenoPos, phenoNeg=phenoNeg)
+                       data=heat_dat, classes=cls_vector, phenoPos=phenoPos, phenoNeg=phenoNeg)
         
         logger.info("Congratulations. GSEApy run successfully................")
         self._log_stop()
@@ -551,7 +552,7 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
     
                    4. 'diff_of_classes' 
       
-                      Uses the difference of class means to calculate fold change for log scale data
+                      Uses the difference of class means to calculate fold change for natural scale data
     
                    5. 'log2_ratio_of_classes' 
       

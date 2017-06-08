@@ -237,7 +237,7 @@ def ranking_metric(df, method, phenoPos, phenoNeg, classes, ascending):
     
                    4. 'diff_of_classes' 
       
-                      Uses the difference of class means to calculate fold change for log scale data
+                      Uses the difference of class means to calculate fold change for natural scale data
     
                    5. 'log2_ratio_of_classes' 
       
