@@ -61,7 +61,7 @@ def heatmap(df, term, outdir, axis=0, figsize=(5,5), format='png'):
      
     """
     df = z_score(df, axis=axis)
-
+    df = df.iloc[::-1]
     # Get the positions and used label for the ticks
     nx, ny = df.T.shape
     xticks = np.arange(0, nx, 1) + .5
@@ -297,7 +297,7 @@ def dotplot(df, cutoff=0.05, figsize=(3.5,6), top_term=10, scale=1):
     #canvas.print_figure('test', bbox_inches='tight')    
     return fig
 
-def barplot(df, cutoff=0.05, figsize=(12,6), top_term=10):
+def barplot(df, cutoff=0.05, figsize=(6.5,6), top_term=10):
     """ barplot for enrichr results"""
 
     # pvalue cut off
