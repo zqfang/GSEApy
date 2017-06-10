@@ -546,11 +546,9 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
     
                    4. 'diff_of_classes' 
       
-<<<<<<< HEAD
+
                       Uses the difference of class means to calculate fold change for nature scale data
-=======
-                      Uses the difference of class means to calculate fold change for natural scale data
->>>>>>> d940ff5510a24e91a0d299f4e6ff76d2c4edd9b6
+
     
                    5. 'log2_ratio_of_classes' 
       
