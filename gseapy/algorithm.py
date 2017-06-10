@@ -242,12 +242,8 @@ def ranking_metric(df, method, phenoPos, phenoNeg, classes, ascending):
     
                    4. 'diff_of_classes' 
       
-<<<<<<< HEAD
                       Uses the difference of class means to calculate fold change for natureal scale data
-=======
-                      Uses the difference of class means to calculate fold change for natural scale data
->>>>>>> d940ff5510a24e91a0d299f4e6ff76d2c4edd9b6
-    
+  
                    5. 'log2_ratio_of_classes' 
       
                       Uses the log2 ratio of class means to calculate fold change for natural scale data.
