@@ -86,6 +86,9 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
     min_ES = np.min(RES, axis=axis)
     
     es = np.where(np.abs(max_ES) > np.abs(min_ES), max_ES, min_ES)
+ 
+    if esnull:
+        return es.tolist()
    
     return es.tolist(), hit_ind, RES.tolist()
  
@@ -193,6 +196,8 @@ def enrichment_score_ss(gene_set, expressions, weighted_score_type=0.25, esnull=
     RES = P_GW_numerator / P_GW_denominator - P_NG_numerator/ P_NG_denominator
     es = np.sum(RES, axis=axis)
 
+    if esnull:
+        return es.tolist()
 
     return es.tolist(), hit_ind, RES.tolist() 
 
@@ -237,12 +242,12 @@ def ranking_metric(df, method, phenoPos, phenoNeg, classes, ascending):
     
                    4. 'diff_of_classes' 
       
-                      Uses the difference of class means to calculate fold change for log scale data
+                      Uses the difference of class means to calculate fold change for natureal scale data
     
                    5. 'log2_ratio_of_classes' 
       
                       Uses the log2 ratio of class means to calculate fold change for natural scale data.
-                      This is the recommended statistic for calculating fold change for natural scale data.
+                      This is the recommended statistic for calculating fold change for log scale data.
    
       
    :param phenoPos: one of lables of phenotype's names.
@@ -404,7 +409,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
             rnkn, gl = temp_rnk.get()     
             for si, subset in enumerate(subsets):
                 esn = enrichment_score(gene_list=gl, gene_set=gmt.get(subset), 
-                                       weighted_score_type=w, correl_vector=rnkn, esnull=None, rs=rs)[0] 
+                                       weighted_score_type=w, correl_vector=rnkn, esnull=None, rs=rs)
                 enrichment_nulls[si].append(esn)
     else: 
         #multi-threading for esnulls.
@@ -418,7 +423,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
         pool_esnu.join()
         # esn is a list, don't need to use append method. 
         for si, temp in enumerate(temp_esnu):
-            enrichment_nulls[si] = temp.get()[0]
+            enrichment_nulls[si] = temp.get()
 
 
     return gsea_significance(enrichment_scores, enrichment_nulls), hit_ind,rank_ES, subsets
@@ -460,7 +465,7 @@ def gsea_compute_ss(data, gmt, n, weighted_score_type, seed, processes):
 
     # esn is a list, don't need to use append method. 
     for si, temp in enumerate(temp_esnu):
-        enrichment_nulls[si] = temp.get()[0]
+        enrichment_nulls[si] = temp.get()
 
     """
     # old single threading method

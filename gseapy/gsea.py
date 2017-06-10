@@ -89,16 +89,16 @@ class GSEAbase:
 
         #multi-threading
         pool = Pool(processes=self._processes)
-        figs = []
      
         for gs in top_term:
             hit = results.get(gs)['hit_index']
             gs = gs.replace('/','_').replace(":","_")
-
-            #fig = gsea_plot(rank_metric=rank_metric, enrich_term=gs, hit_ind=hit,
-            #                nes=results.get(gs)['nes'], pval=results.get(gs)['pval'], fdr=results.get(gs)['fdr'], 
-            #                RES=results.get(gs)['rank_ES'], phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize)        
-            
+            """
+            gsea_plot(rank_metric=rank_metric, enrich_term=gs, hit_ind=hit,
+                      nes=results.get(gs)['nes'], pval=results.get(gs)['pval'], fdr=results.get(gs)['fdr'], 
+                      RES=results.get(gs)['rank_ES'], phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize,
+                      format=format, outdir=outdir, module=module)        
+            """    
             #return fig obj to save.
             pool.apply_async(gsea_plot, args=(rank_metric, gs, hit, results.get(gs)['nes'],
                                               results.get(gs)['pval'],results.get(gs)['fdr'], 
@@ -107,11 +107,7 @@ class GSEAbase:
                                               self.outdir,self.module))
         pool.close()
         pool.join()
-        """
-        for fi in figs:
-            fig = fi.get()
-            fig.savefig('{a}/{b}.{c}.{d}'.format(a=outdir, b=gs, c=module, d=format), bbox_inches='tight', dpi=300,)
-        """
+
         
         if module == 'gsea':
             width = len(classes) if len(classes) >= 6 else  5
@@ -128,7 +124,8 @@ class GSEAbase:
                 gs = gs.replace('/','_').replace(":","_")
                 pool_heat.apply_async(heatmap, args=(datAB.iloc[hit], gs, outdir, 0,
                                                     (width, len(hit)/2), format))
-  
+                #heatmap(datAB.iloc[hit], gs, outdir, 0, (width, len(hit)/2), format)
+
             pool_heat.close()
             pool_heat.join() 
       
@@ -232,7 +229,7 @@ class GSEA(GSEAbase):
                                log_level=logging.INFO if self.verbose else logging.WARNING)
 
         #cpu numbers
-        cpu_num = cpu_count()
+        cpu_num = cpu_count() 
         self._processes = cpu_num if self._processes > cpu_num else self._processes
 
         #Start Analysis
@@ -271,10 +268,11 @@ class GSEA(GSEAbase):
                                    gmt=gmt, rank_metric=dat2, permutation_type="gene_sets")
         
         #Plotting
+        heat_dat = dat.loc[dat2.gene_name]
         self._plotting(rank_metric=dat2, results=self.results, res2d=self.res2d, 
                        graph_num=self.graph_num, outdir=self.outdir,
                        figsize=self.figsize, format=self.format, module=self.module,
-                       data=dat, classes=cls_vector, phenoPos=phenoPos, phenoNeg=phenoNeg)
+                       data=heat_dat, classes=cls_vector, phenoPos=phenoPos, phenoNeg=phenoNeg)
         
         logger.info("Congratulations. GSEApy run successfully................")
         self._log_stop()
@@ -324,7 +322,7 @@ class Prerank(GSEAbase):
         assert len(dat2) > 1
 
         #cpu numbers
-        cpu_num = cpu_count()
+        cpu_num = cpu_count() 
         self._processes = cpu_num if self._processes > cpu_num else self._processes
         
         #Start Analysis
@@ -400,7 +398,7 @@ class SingleSampleGSEA(GSEAbase):
         assert len(dat) > 1
 
         #cpu numbers
-        cpu_num = cpu_count()
+        cpu_num = cpu_count() 
         self._processes = cpu_num if self._processes > cpu_num else self._processes
         
         #Start Analysis
@@ -548,12 +546,12 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
     
                    4. 'diff_of_classes' 
       
-                      Uses the difference of class means to calculate fold change for log scale data
+                      Uses the difference of class means to calculate fold change for nature scale data
     
                    5. 'log2_ratio_of_classes' 
       
                       Uses the log2 ratio of class means to calculate fold change for natural scale data.
-                      This is the recommended statistic for calculating fold change for natural scale data.
+                      This is the recommended statistic for calculating fold change for log scale data.
    
       	
     :param bool ascending: Sorting order of rankings. Default: False.
