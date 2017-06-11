@@ -409,7 +409,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
             rnkn, gl = temp_rnk.get()     
             for si, subset in enumerate(subsets):
                 esn = enrichment_score(gene_list=gl, gene_set=gmt.get(subset), 
-                                       weighted_score_type=w, correl_vector=rnkn, esnull=None, rs=rs)
+                                       weighted_score_type=w, correl_vector=rnkn, esnull=None, rs=rs)[0]
                 enrichment_nulls[si].append(esn)
     else: 
         #multi-threading for esnulls.
