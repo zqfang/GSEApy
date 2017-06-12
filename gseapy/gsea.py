@@ -23,7 +23,7 @@ class GSEAbase:
         self.verbose=False
         self._processes=1
         self._logger=None
-       
+
 
     def _log_init(self, module='GSEA', log_level=logging.INFO):
         """logging start"""
@@ -54,13 +54,13 @@ class GSEAbase:
         handlers = self._logger.handlers[:]
         for handler in handlers:
             handler.close()
-            self._logger.removeHandler(handler)     
+            self._logger.removeHandler(handler)
     def _rank_metric(self, rnk):
-        """Parse ranking file. This file contains ranking correlation vector and gene names or ids. 
-        
+        """Parse ranking file. This file contains ranking correlation vector and gene names or ids.
+
         :param rnk: the .rnk file of GSEA input or a ranked pandas DataFrame instance.
         :return: a pandas DataFrame with 3 columns names are: 'gene_name','rank',rank2'
-                     
+
         """
         if isinstance(rnk, pd.DataFrame) :
             rank_metric = rnk.copy()
@@ -68,47 +68,47 @@ class GSEAbase:
             rank_metric = pd.read_table(rnk, header=None)
         else:
             raise Exception('Error parsing gene ranking values!')
-            
+
         rank_metric.columns = ['gene_name','rank']
         rank_metric['rank2'] = rank_metric['rank']
-               
+
         self.ranking = rank_metric
         return self.ranking
 
-    def _plotting(self, rank_metric, results, res2d, 
+    def _plotting(self, rank_metric, results, res2d,
                  graph_num, outdir, format, figsize, module=None, data=None,
                  classes=None, phenoPos='', phenoNeg=''):
         """
         :param rank_metric: dat2.
         :param results: self.results
         :param data: preprocessed expression table
-        
+
         """
         #Plotting
         top_term = res2d.head(graph_num).index
 
         #multi-threading
         pool = Pool(processes=self._processes)
-     
+
         for gs in top_term:
             hit = results.get(gs)['hit_index']
             gs = gs.replace('/','_').replace(":","_")
             """
             gsea_plot(rank_metric=rank_metric, enrich_term=gs, hit_ind=hit,
-                      nes=results.get(gs)['nes'], pval=results.get(gs)['pval'], fdr=results.get(gs)['fdr'], 
+                      nes=results.get(gs)['nes'], pval=results.get(gs)['pval'], fdr=results.get(gs)['fdr'],
                       RES=results.get(gs)['rank_ES'], phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize,
-                      format=format, outdir=outdir, module=module)        
-            """    
+                      format=format, outdir=outdir, module=module)
+            """
             #return fig obj to save.
             pool.apply_async(gsea_plot, args=(rank_metric, gs, hit, results.get(gs)['nes'],
-                                              results.get(gs)['pval'],results.get(gs)['fdr'], 
-                                              results.get(gs)['rank_ES'], 
+                                              results.get(gs)['pval'],results.get(gs)['fdr'],
+                                              results.get(gs)['rank_ES'],
                                               phenoPos, phenoNeg, figsize, self.format,
                                               self.outdir,self.module))
         pool.close()
         pool.join()
 
-        
+
         if module == 'gsea':
             width = len(classes) if len(classes) >= 6 else  5
             cls_booA =list(map(lambda x: True if x == phenoPos else False, classes))
@@ -117,7 +117,7 @@ class GSEAbase:
             datB = data.loc[:, cls_booB]
             datAB=pd.concat([datA,datB], axis=1)
             pool_heat = Pool(self._processes)
-            
+
             #no values need to be returned
             for gs in top_term:
                 hit = results.get(gs)['hit_index']
@@ -127,16 +127,16 @@ class GSEAbase:
                 #heatmap(datAB.iloc[hit], gs, outdir, 0, (width, len(hit)/2), format)
 
             pool_heat.close()
-            pool_heat.join() 
-      
+            pool_heat.join()
+
 
 
     def _save_results(self, zipdata, outdir, module, gmt, rank_metric, permutation_type):
         """reformat gsea results, and save to txt"""
 
         res = OrderedDict()
-        for gs,gseale,ind,RES in zipdata:        
-            rdict = OrderedDict()      
+        for gs,gseale,ind,RES in zipdata:
+            rdict = OrderedDict()
             rdict['es'] = gseale[0]
             rdict['nes'] = gseale[1]
             rdict['pval'] = gseale[2]
@@ -149,29 +149,29 @@ class GSEAbase:
 
             rdict['rank_ES'] = RES
             rdict['hit_index'] = ind
-            res[gs] = rdict           
+            res[gs] = rdict
 
         res_df = DataFrame.from_dict(res, orient='index')
         res_df.index.name = 'Term'
         res_df.sort_values(by='fdr', inplace=True)
         res_df.drop(['rank_ES','hit_index'], axis=1, inplace=True)
         res_df.to_csv('{a}/gseapy.{b}.{c}.report.csv'.format(a=outdir, b=module, c=permutation_type),
-                      float_format ='%.7f')    
+                      float_format ='%.7f')
 
         self.res2d = res_df
         self.results  = res
-        return 
+        return
 
-    
+
 class GSEA(GSEAbase):
     """GSEA main tool"""
-    def __init__(self, data, gene_sets, classes, outdir='GSEA_ouput', 
-                 min_size=15, max_size=500, permutation_num=1000, 
-                 weighted_score_type=1, permutation_type='gene_set', 
-                 method='log2_ratio_of_classes', ascending=False, 
-                 processes=1, figsize=[6.5,6], format='pdf', graph_num=20, 
+    def __init__(self, data, gene_sets, classes, outdir='GSEA_ouput',
+                 min_size=15, max_size=500, permutation_num=1000,
+                 weighted_score_type=1, permutation_type='gene_set',
+                 method='log2_ratio_of_classes', ascending=False,
+                 processes=1, figsize=[6.5,6], format='pdf', graph_num=20,
                  seed=None, verbose=False):
-        
+
         self.data = data
         self.gene_sets=gene_sets
         self.classes=classes
@@ -193,18 +193,18 @@ class GSEA(GSEAbase):
         self.ranking=None
     def __drop_dat(self, df, cls_vector):
         """pre-processed the data frame.new filtering methods will be implement here.
-        """    
-        
-        df.drop_duplicates(subset=df.columns[0], inplace=True) #drop duplicate gene_names.    
+        """
+
+        df.drop_duplicates(subset=df.columns[0], inplace=True) #drop duplicate gene_names.
         df.set_index(keys=df.columns[0], inplace=True)
         df.dropna(how='all', inplace=True)                     #drop rows with all NAs
-        df2 = df.select_dtypes(include=[number])  
-        
+        df2 = df.select_dtypes(include=[number])
+
         #drop any genes which std ==0
-        df_std =  df2.groupby(by=cls_vector, axis=1).std()    
-        df2 =  df2[~df_std.isin([0]).any(axis=1)] 
-        df2 = df2 + 0.00001 # we don't like zeros!!!  
-        
+        df_std =  df2.groupby(by=cls_vector, axis=1).std()
+        df2 =  df2[~df_std.isin([0]).any(axis=1)]
+        df2 = df2 + 0.00001 # we don't like zeros!!!
+
         return df2
 
     def run(self):
@@ -221,70 +221,70 @@ class GSEA(GSEAbase):
         else:
             raise Exception('Error parsing gene expression dataframe!')
             sys.exit(1)
-   
+
         assert len(df) > 1
 
         mkdirs(self.outdir)
-        logger = self._log_init(module=self.module, 
+        logger = self._log_init(module=self.module,
                                log_level=logging.INFO if self.verbose else logging.WARNING)
 
         #cpu numbers
-        cpu_num = cpu_count() 
+        cpu_num = cpu_count()
         self._processes = cpu_num if self._processes > cpu_num else self._processes
 
         #Start Analysis
-        logger.info("Parsing data files for GSEA.............................")     
+        logger.info("Parsing data files for GSEA.............................")
 
         # phenotype labels parsing
         phenoPos, phenoNeg, cls_vector = gsea_cls_parser(self.classes)
         #select correct expression genes and values.
         dat = self.__drop_dat(df, cls_vector)
-        
-        
-        #ranking metrics calculation.    
-        dat2 = ranking_metric(df=dat, method=self.method, phenoPos=phenoPos, phenoNeg=phenoNeg, 
+
+
+        #ranking metrics calculation.
+        dat2 = ranking_metric(df=dat, method=self.method, phenoPos=phenoPos, phenoNeg=phenoNeg,
                               classes=cls_vector, ascending=self.ascending)
 
         #filtering out gene sets and build gene sets dictionary
-        gmt = gsea_gmt_parser(self.gene_sets, min_size=self.min_size, max_size=self.max_size, 
+        gmt = gsea_gmt_parser(self.gene_sets, min_size=self.min_size, max_size=self.max_size,
                               gene_list=dat2['gene_name'].values)
 
         logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
 
-        logger.info("Start to run GSEA...Might take a while..................")   
+        logger.info("Start to run GSEA...Might take a while..................")
         #compute ES, NES, pval, FDR, RES
-        gsea_results,hit_ind,rank_ES, subsets = gsea_compute(data=dat, n=self.permutation_num, gmt=gmt, 
+        gsea_results,hit_ind,rank_ES, subsets = gsea_compute(data=dat, n=self.permutation_num, gmt=gmt,
                                                              weighted_score_type=self.weighted_score_type,
-                                                             permutation_type=self.permutation_type, 
+                                                             permutation_type=self.permutation_type,
                                                              method=self.method,
-                                                             phenoPos=phenoPos, phenoNeg=phenoNeg, 
-                                                             classes=cls_vector, ascending=self.ascending, 
-                                                             seed=self.seed, processes=self._processes)                                                             
-        
+                                                             phenoPos=phenoPos, phenoNeg=phenoNeg,
+                                                             classes=cls_vector, ascending=self.ascending,
+                                                             seed=self.seed, processes=self._processes)
+
         logger.info("Start to generate gseapy reports, and produce figures...")
         res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
 
-        self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module, 
+        self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
                                    gmt=gmt, rank_metric=dat2, permutation_type="gene_sets")
-        
+
         #Plotting
         heat_dat = dat.loc[dat2.gene_name]
-        self._plotting(rank_metric=dat2, results=self.results, res2d=self.res2d, 
+        self._plotting(rank_metric=dat2, results=self.results, res2d=self.res2d,
                        graph_num=self.graph_num, outdir=self.outdir,
                        figsize=self.figsize, format=self.format, module=self.module,
                        data=heat_dat, classes=cls_vector, phenoPos=phenoPos, phenoNeg=phenoNeg)
-        
+
         logger.info("Congratulations. GSEApy run successfully................")
         self._log_stop()
 
-        return         
+        return
 
 class Prerank(GSEAbase):
     """GSEA prerank tool"""
-    def __init__(self, rnk, gene_sets, outdir='GSEA_prerank', 
-                 pheno_pos='Pos', pheno_neg='Neg', min_size=15, max_size=500, 
+    def __init__(self, rnk, gene_sets, outdir='GSEA_prerank',
+                 pheno_pos='Pos', pheno_neg='Neg', min_size=15, max_size=500,
                  permutation_num=1000, weighted_score_type=1,
-                 ascending=False, processes=1, figsize=[6.5,6], format='pdf', 
+                 ascending=False, processes=1, figsize=[6.5,6], format='pdf',
                  graph_num=20, seed=None, verbose=False):
 
         self.rnk =rnk
@@ -312,53 +312,53 @@ class Prerank(GSEAbase):
 
         assert self.min_size <= self.max_size
         mkdirs(self.outdir)
-        logger = self._log_init(module=self.module, 
+        logger = self._log_init(module=self.module,
                                log_level=logging.INFO if self.verbose else logging.WARNING)
 
 
-        dat2 = self._rank_metric(self.rnk)  
-        #drop duplicates in ranking metrics. 
-        dat2.drop_duplicates(subset='gene_name',inplace=True, keep='first')     
+        dat2 = self._rank_metric(self.rnk)
+        #drop duplicates in ranking metrics.
+        dat2.drop_duplicates(subset='gene_name',inplace=True, keep='first')
         assert len(dat2) > 1
 
         #cpu numbers
-        cpu_num = cpu_count() 
+        cpu_num = cpu_count()
         self._processes = cpu_num if self._processes > cpu_num else self._processes
-        
+
         #Start Analysis
-        logger.info("Parsing data files for GSEA.............................")     
+        logger.info("Parsing data files for GSEA.............................")
 
         #filtering out gene sets and build gene sets dictionary
         gmt = gsea_gmt_parser(self.gene_sets, min_size=self.min_size, max_size=self.max_size,
                               gene_list=dat2['gene_name'].values)
         logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
 
-        
-        logger.info("Start to run GSEA...Might take a while..................")   
+
+        logger.info("Start to run GSEA...Might take a while..................")
         #compute ES, NES, pval, FDR, RES
-        gsea_results, hit_ind,rank_ES, subsets = gsea_compute(data=dat2, n=self.permutation_num, gmt=gmt, 
+        gsea_results, hit_ind,rank_ES, subsets = gsea_compute(data=dat2, n=self.permutation_num, gmt=gmt,
                                                               weighted_score_type=self.weighted_score_type,
-                                                              permutation_type='gene_set', method=None, 
+                                                              permutation_type='gene_set', method=None,
                                                               phenoPos=self.pheno_pos, phenoNeg=self.pheno_neg,
-                                                              classes=None, ascending=self.ascending, seed=self.seed, 
+                                                              classes=None, ascending=self.ascending, seed=self.seed,
                                                               processes=self._processes, prerank=True)
 
         logger.info("Start to generate gseapy reports, and produce figures...")
         res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
 
-        self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module, 
+        self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
                                    gmt=gmt, rank_metric=dat2, permutation_type="gene_sets")
-        
+
         #Plotting
-        self._plotting(rank_metric=dat2, results=self.results, res2d=self.res2d, 
+        self._plotting(rank_metric=dat2, results=self.results, res2d=self.res2d,
                        graph_num=self.graph_num, outdir=self.outdir,
                        figsize=self.figsize, format=self.format, module=self.module)
-        
+
         logger.info("Congratulations. GSEApy run successfully................")
         self._log_stop()
 
-        return 
-    
+        return
+
 
 class SingleSampleGSEA(GSEAbase):
     """GSEA extention: single sample GSEA"""
@@ -381,7 +381,7 @@ class SingleSampleGSEA(GSEAbase):
         self.verbose=verbose
         self.ranking=None
         self.module='SingleSample'
-        self._processes=processes 
+        self._processes=processes
 
     def run(self):
         """Single Sample GSEA workflow"""
@@ -389,20 +389,20 @@ class SingleSampleGSEA(GSEAbase):
         assert self.min_size <= self.max_size
 
         mkdirs(self.outdir)
-        logger = self._log_init(module=self.module, 
+        logger = self._log_init(module=self.module,
                                log_level=logging.INFO if self.verbose else logging.WARNING)
 
 
-        dat = self._rank_metric(self.data)  
-   
+        dat = self._rank_metric(self.data)
+
         assert len(dat) > 1
 
         #cpu numbers
-        cpu_num = cpu_count() 
+        cpu_num = cpu_count()
         self._processes = cpu_num if self._processes > cpu_num else self._processes
-        
+
         #Start Analysis
-        logger.info("Parsing data files for GSEA.............................")     
+        logger.info("Parsing data files for GSEA.............................")
         #select correct expression genes and values.
 
         dat2 = dat.set_index('gene_name')
@@ -411,31 +411,31 @@ class SingleSampleGSEA(GSEAbase):
         gmt = gsea_gmt_parser(self.gene_sets, min_size=self.min_size, max_size=self.max_size, gene_list=dat2.index.values)
         logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
 
-        logger.info("Start to run GSEA...Might take a while..................") 
+        logger.info("Start to run GSEA...Might take a while..................")
         #compute ES, NES, pval, FDR, RES
         gsea_results, hit_ind, rank_ES, subsets = gsea_compute_ss(data=dat2, n=self.permutation_num, gmt=gmt,
                                                                   weighted_score_type=self.weighted_score_type,
                                                                   seed=self.seed, processes=self._processes)
-          
+
         logger.info("Start to generate gseapy reports, and produce figures...")
         res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
 
-        self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module, 
+        self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
                                    gmt=gmt, rank_metric=dat, permutation_type="gene_sets")
-        
+
         #Plotting
-        self._plotting(rank_metric=dat, results=self.results, res2d=self.res2d, 
+        self._plotting(rank_metric=dat, results=self.results, res2d=self.res2d,
                        graph_num=self.graph_num, outdir=self.outdir,
                        figsize=self.figsize, format=self.format, module=self.module)
-        
+
         logger.info("Congratulations. GSEApy run successfully................")
         self._log_stop()
 
-        return 
+        return
 
 class Replot(GSEAbase):
     """To Reproduce GSEA desktop output results."""
-    def __init__(self, indir, outdir='GSEApy_Replot', weighted_score_type=1, 
+    def __init__(self, indir, outdir='GSEApy_Replot', weighted_score_type=1,
                   min_size=3, max_size=1000, figsize=[6.5,6], format='pdf', verbose=False):
         self.indir=indir
         self.outdir=outdir
@@ -452,32 +452,32 @@ class Replot(GSEAbase):
         assert self.min_size <= self.max_size
 
         mkdirs(self.outdir)
-        logger = self._log_init(module=self.module,  
+        logger = self._log_init(module=self.module,
                                 log_level=logging.INFO if self.verbose else logging.WARNING)
         import glob
         from bs4 import BeautifulSoup
-        
-        #parsing files.......    
+
+        #parsing files.......
         try:
             results_path = glob.glob(self.indir+'*/edb/results.edb')[0]
             rank_path =  glob.glob(self.indir+'*/edb/*.rnk')[0]
             gene_set_path =  glob.glob(self.indir+'*/edb/gene_sets.gmt')[0]
-        except IndexError as e: 
-            logger.debug(e) 
+        except IndexError as e:
+            logger.debug(e)
             logger.error("Could not locate GSEA files in the given directory!")
-            sys.exit(1)    
+            sys.exit(1)
         #extract sample names from .cls file
         cls_path = glob.glob(self.indir+'*/edb/*.cls')
         if cls_path:
             phenoPos, phenoNeg, classes = gsea_cls_parser(cls_path[0])
         else:
             # logic for prerank results
-            phenoPos, phenoNeg = '',''  
+            phenoPos, phenoNeg = '',''
         #obtain gene sets
         gene_set_dict = gsea_gmt_parser(gene_set_path, min_size=self.min_size, max_size=self.max_size)
         #obtain rank_metrics
         rank_metric = self._rank_metric(rank_path)
-        correl_vector =  rank_metric['rank'].values        
+        correl_vector =  rank_metric['rank'].values
         gene_list = rank_metric['gene_name']
         #extract each enriment term in the results.edb files and plot.
         database = BeautifulSoup(open(results_path), features='xml')
@@ -487,20 +487,20 @@ class Replot(GSEAbase):
             #extract statistical resutls from results.edb file
             enrich_term, hit_ind, nes, pval, fdr= gsea_edb_parser(results_path, index=idx)
             gene_set = gene_set_dict.get(enrich_term)
-            #calculate enrichment score    
-            RES = enrichment_score(gene_list=gene_list, gene_set=gene_set, 
-                                   weighted_score_type=self.weighted_score_type, 
+            #calculate enrichment score
+            RES = enrichment_score(gene_list=gene_list, gene_set=gene_set,
+                                   weighted_score_type=self.weighted_score_type,
                                    correl_vector=correl_vector)[2]
             #plotting
             fig = gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval,
                             fdr, RES, phenoPos, phenoNeg, self.figsize,
-                            self.format, self.outdir, self.module)    
-          
+                            self.format, self.outdir, self.module)
+
         logger.info("Congratulations! Your plots have been reproduced successfully!")
         self._log_stop()
 
 
-def call(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permutation_num=1000, 
+def call(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permutation_num=1000,
           weighted_score_type=1,permutation_type='gene_set', method='log2_ratio_of_classes',
       ascending=False, figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
 
@@ -509,13 +509,13 @@ def call(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
 
     return
 
-        
-def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permutation_num=1000, 
+
+def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permutation_num=1000,
           weighted_score_type=1,permutation_type='gene_set', method='log2_ratio_of_classes',
 	  ascending=False, processes=1, figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
     """ Run Gene Set Enrichment Analysis.
 
-    :param data: Gene expression data table or pandas DataFrame.  
+    :param data: Gene expression data table or pandas DataFrame.
     :param gene_sets: Enrichr Library name or .gmt gene sets file. Same input with GSEA.
     :param cls: a list or a .cls file format required for GSEA.
     :param str outdir: Results output directory.
@@ -526,36 +526,36 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
     :param float weighted_score_type: Refer to :func:`algorithm.enrichment_socre`. Default:1.
     :param method:  The method used to calculate a correlation or ranking. Default: 'log2_ratio_of_classes'.
                    Others methods are:
-   
-                   1. 'signal_to_noise' 
-      
+
+                   1. 'signal_to_noise'
+
                       You must have at least three samples for each phenotype to use this metric.
                       The larger the signal-to-noise ratio, the larger the differences of the means (scaled by the standard deviations);
-                      that is, the more distinct the gene expression is in each phenotype and the more the gene acts as a “class marker.” 
-    
+                      that is, the more distinct the gene expression is in each phenotype and the more the gene acts as a “class marker.”
+
                    2. 't_test'
-      
-                      Uses the difference of means scaled by the standard deviation and number of samples. 
+
+                      Uses the difference of means scaled by the standard deviation and number of samples.
                       Note: You must have at least three samples for each phenotype to use this metric.
-                      The larger the tTest ratio, the more distinct the gene expression is in each phenotype 
+                      The larger the tTest ratio, the more distinct the gene expression is in each phenotype
                       and the more the gene acts as a “class marker.”
-    
+
                    3. 'ratio_of_classes' (also referred to as fold change).
-      
+
                       Uses the ratio of class means to calculate fold change for natural scale data.
-    
-                   4. 'diff_of_classes' 
-      
+
+                   4. 'diff_of_classes'
+
 
                       Uses the difference of class means to calculate fold change for nature scale data
 
-    
-                   5. 'log2_ratio_of_classes' 
-      
+
+                   5. 'log2_ratio_of_classes'
+
                       Uses the log2 ratio of class means to calculate fold change for natural scale data.
                       This is the recommended statistic for calculating fold change for log scale data.
-   
-      	
+
+
     :param bool ascending: Sorting order of rankings. Default: False.
     :param int processes: Number of Processes you are going to use. Default: 1.
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
@@ -567,16 +567,16 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
     :return: Return a Prerank obj. All results store to  store a dictionary, obj.results,
              where contains::
 
-                 | {es: enrichment score, 
-                 |  nes: normalized enrichment score, 
-                 |  p: P-value, 
-                 |  fdr: FDR, 
+                 | {es: enrichment score,
+                 |  nes: normalized enrichment score,
+                 |  p: P-value,
+                 |  fdr: FDR,
                  |  size: gene set size,
-                 |  matched_size: genes matched to the data, 
+                 |  matched_size: genes matched to the data,
                  |  genes: gene names from the data set}
-    
+
     """
-    gs = GSEA(data, gene_sets, cls, outdir, min_size, max_size, permutation_num, 
+    gs = GSEA(data, gene_sets, cls, outdir, min_size, max_size, permutation_num,
               weighted_score_type,permutation_type, method, ascending, processes,
                figsize, format, graph_num, seed, verbose)
     gs.run()
@@ -588,8 +588,8 @@ def ssgsea(data, gene_sets, outdir="GSEA_SingleSample", min_size=15, max_size=50
            permutation_num=1000, weighted_score_type=0.25, ascending=False, processes=1,
            figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
     """Run Gene Set Enrichment Analysis with single sample GSEA tool
-    
-    :param data: expression or pandas DataFrame. Same input with ``GSEA`` .rnk file.  
+
+    :param data: expression or pandas DataFrame. Same input with ``GSEA`` .rnk file.
     :param gene_sets: Enrichr Library name or .gmt gene sets file. Same input with GSEA.
     :param outdir: results output directory.
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Defaut: 15.
@@ -601,28 +601,28 @@ def ssgsea(data, gene_sets, outdir="GSEA_SingleSample", min_size=15, max_size=50
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
     :param str format: Matplotlib figure format. Default: 'pdf'.
     :param int graph_num: Plot graphs for top sets of each phenotype
-    :param seed: Random seed. expect an interger. Defalut:None. 
+    :param seed: Random seed. expect an interger. Defalut:None.
     :param bool verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
-       
+
     :return: Return a ssGSEA obj. All results store to  store a dictionary, obj.results,
              where contains::
 
-                 | {es: enrichment score, 
-                 |  nes: normalized enrichment score, 
-                 |  p: P-value, 
-                 |  fdr: FDR, 
+                 | {es: enrichment score,
+                 |  nes: normalized enrichment score,
+                 |  p: P-value,
+                 |  fdr: FDR,
                  |  size: gene set size,
-                 |  matched_size: genes matched to the data, 
+                 |  matched_size: genes matched to the data,
                  |  genes: gene names from the data set}
-    
+
     """
 
-    ss = SingleSampleGSEA(data, gene_sets, outdir, min_size, max_size, 
-                          permutation_num, weighted_score_type,
-                          ascending, figsize, format, graph_num, seed, verbose)
+    ss = SingleSampleGSEA(data, gene_sets, outdir, min_size, max_size,
+                          permutation_num, weighted_score_type, ascending,
+                          processes, figsize, format, graph_num, seed, verbose)
     ss.run()
     return ss
-    
+
 
 def prerank(rnk, gene_sets, outdir='GSEA_Prerank', pheno_pos='Pos', pheno_neg='Neg',
             min_size=15, max_size=500, permutation_num=1000, weighted_score_type=1,
@@ -630,7 +630,7 @@ def prerank(rnk, gene_sets, outdir='GSEA_Prerank', pheno_pos='Pos', pheno_neg='N
             graph_num=20, seed=None, verbose=False):
     """ Run Gene Set Enrichment Analysis with pre-ranked correlation defined by user.
 
-    :param rnk: pre-ranked correlation table or pandas DataFrame. Same input with ``GSEA`` .rnk file.  
+    :param rnk: pre-ranked correlation table or pandas DataFrame. Same input with ``GSEA`` .rnk file.
     :param gene_sets: Enrichr Library name or .gmt gene sets file. Same input with GSEA.
     :param outdir: results output directory.
     :param int permutation_num: Number of permutations for significance computation. Default: 1000.
@@ -642,22 +642,22 @@ def prerank(rnk, gene_sets, outdir='GSEA_Prerank', pheno_pos='Pos', pheno_neg='N
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
     :param str format: Matplotlib figure format. Default: 'pdf'.
     :param int graph_num: Plot graphs for top sets of each phenotype
-    :param seed: Random seed. expect an interger. Defalut:None. 
+    :param seed: Random seed. expect an interger. Defalut:None.
     :param bool verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
-       
+
     :return: Return a Prerank obj. All results store to  store a dictionary, obj.results,
              where contains::
 
-                 | {es: enrichment score, 
-                 |  nes: normalized enrichment score, 
-                 |  p: P-value, 
-                 |  fdr: FDR, 
+                 | {es: enrichment score,
+                 |  nes: normalized enrichment score,
+                 |  p: P-value,
+                 |  fdr: FDR,
                  |  size: gene set size,
-                 |  matched_size: genes matched to the data, 
+                 |  matched_size: genes matched to the data,
                  |  genes: gene names from the data set}
-    
+
     """
-    pre = Prerank(rnk, gene_sets, outdir, pheno_pos, pheno_neg, 
+    pre = Prerank(rnk, gene_sets, outdir, pheno_pos, pheno_neg,
                   min_size, max_size, permutation_num, weighted_score_type,
                   ascending, processes, figsize, format, graph_num, seed, verbose)
     pre.run()
@@ -665,11 +665,11 @@ def prerank(rnk, gene_sets, outdir='GSEA_Prerank', pheno_pos='Pos', pheno_neg='N
 
 
 
-def replot(indir, outdir='GSEA_Replot', weighted_score_type=1, 
+def replot(indir, outdir='GSEA_Replot', weighted_score_type=1,
            min_size=3, max_size=1000, figsize=[6.5,6], format='pdf', verbose=False):
     """The main fuction to reproduce GSEA desktop outputs.
-          
-    :param indir: GSEA desktop results directory. In the sub folder, you must contain edb file foder.    
+
+    :param indir: GSEA desktop results directory. In the sub folder, you must contain edb file foder.
     :param outdir: Output directory.
     :param float weighted_score_type: weighted score type. choose from {0,1,1.5,2}. Default: 1.
     :param list figsize: matplotlib output figure figsize. Defult: [6.5,6].
@@ -680,11 +680,11 @@ def replot(indir, outdir='GSEA_Replot', weighted_score_type=1,
                      Because gmt file has already been filter.
     :param verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
 
-    :return: Generate new figures with seleted figure format. Default: 'pdf'.   
+    :return: Generate new figures with seleted figure format. Default: 'pdf'.
 
     """
-    rep = Replot(indir, outdir, weighted_score_type, 
+    rep = Replot(indir, outdir, weighted_score_type,
                  min_size, max_size, figsize, format, verbose)
     rep.run()
 
-    return 
+    return
