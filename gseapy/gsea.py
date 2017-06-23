@@ -92,14 +92,12 @@ class GSEAbase:
 
         for gs in top_term:
             hit = results.get(gs)['hit_index']
-            gs = gs.replace('/','_').replace(":","_")
             """
             gsea_plot(rank_metric=rank_metric, enrich_term=gs, hit_ind=hit,
                       nes=results.get(gs)['nes'], pval=results.get(gs)['pval'], fdr=results.get(gs)['fdr'],
                       RES=results.get(gs)['rank_ES'], phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize,
                       format=format, outdir=outdir, module=module)
             """
-            #return fig obj to save.
             pool.apply_async(gsea_plot, args=(rank_metric, gs, hit, results.get(gs)['nes'],
                                               results.get(gs)['pval'],results.get(gs)['fdr'],
                                               results.get(gs)['rank_ES'],
@@ -121,7 +119,6 @@ class GSEAbase:
             #no values need to be returned
             for gs in top_term:
                 hit = results.get(gs)['hit_index']
-                gs = gs.replace('/','_').replace(":","_")
                 pool_heat.apply_async(heatmap, args=(datAB.iloc[hit], gs, outdir, 0,
                                                     (width, len(hit)/2), format))
                 #heatmap(datAB.iloc[hit], gs, outdir, 0, (width, len(hit)/2), format)
@@ -151,7 +148,7 @@ class GSEAbase:
             rdict['hit_index'] = ind
             res[gs] = rdict
 
-        res_df = DataFrame.from_dict(res, orient='index')
+        res_df = pd.DataFrame.from_dict(res, orient='index')
         res_df.index.name = 'Term'
         res_df.sort_values(by='fdr', inplace=True)
         res_df.drop(['rank_ES','hit_index'], axis=1, inplace=True)
@@ -492,7 +489,7 @@ class Replot(GSEAbase):
                                    weighted_score_type=self.weighted_score_type,
                                    correl_vector=correl_vector)[2]
             #plotting
-            fig = gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval,
+            gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval,
                             fdr, RES, phenoPos, phenoNeg, self.figsize,
                             self.format, self.outdir, self.module)
 

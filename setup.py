@@ -2,10 +2,10 @@
 import sys, os
 from setuptools import setup
 
-__version__='0.8.0'
+__version__='0.8.1'
 
 if sys.argv[-1] == 'publish':
-    os.system("python setup.py sdist bdist_egg register upload")
+    os.system("python setup.py sdist bdist_wheel register upload")
     print("You probably want to also tag the version now:")
     print("  git tag -a %s -m 'version %s'" % (__version__,__version__))
     print("  git push --tags")

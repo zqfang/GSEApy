@@ -93,6 +93,7 @@ def heatmap(df, term, outdir, axis=0, figsize=(5,5), format='png'):
         ax.spines[side].set_visible(False)
         cbar.ax.spines[side].set_visible(False)
     #cbar.ax.set_title('',loc='left')
+    term = term.replace('/','_').replace(":","_")
     canvas.print_figure("{a}/{b}.heatmap.{c}".format(a=outdir, b=term, c=format),
                         bbox_inches='tight')
 
@@ -197,6 +198,7 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     fig.subplots_adjust(hspace=0)
     #fig.tight_layout()
     #plt.close(fig)
+    enrich_term = enrich_term.replace('/','_').replace(":","_")
     canvas.print_figure('{0}/{1}.{2}.{3}'.format(outdir, enrich_term, module, format), 
                          bbox_inches='tight', dpi=300,)
     return 
