@@ -6,6 +6,7 @@ import sys, json, requests, logging
 from pandas import read_table
 from gseapy.gsea import GSEAbase
 from gseapy.plot import barplot
+from gseapy.parser import get_library_name
 from gseapy.utils import *
 
 class Enrichr(GSEAbase):
