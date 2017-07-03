@@ -89,7 +89,7 @@ class GSEAbase:
         rank_metric.reset_index(drop=True, inplace=True) 
         rank_metric.columns = ['gene_name','rank']
         rank_metric['rank2'] = rank_metric['rank']
-     
+
         self.ranking = rank_metric
         return self.ranking
 

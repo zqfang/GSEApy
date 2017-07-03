@@ -51,7 +51,7 @@ class Enrichr(GSEAbase):
         
             genes_str = str(genes) 
 
-        return gene_str
+        return genes_str
 
     def run(self):
         """run enrichr"""
@@ -70,7 +70,7 @@ class Enrichr(GSEAbase):
         
             genes_str = str(genes)
         """
-        gene_str=parse_input()
+        genes_str=self.parse_input()
 
         # name of analysis or list
         description = str(self.descriptions)
