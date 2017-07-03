@@ -55,6 +55,12 @@ class GSEAbase:
         for handler in handlers:
             handler.close()
             self._logger.removeHandler(handler)
+    def _cores(self):
+        #cpu numbers
+        cpu_num = cpu_count()-1
+        cores = cpu_num if self._processes > cpu_num else self._processes
+        self._processes = int(cores)
+
     def _rank_metric(self, rnk):
         """Parse ranking file. This file contains ranking correlation vector and gene names or ids.
 
@@ -65,13 +71,25 @@ class GSEAbase:
         if isinstance(rnk, pd.DataFrame) :
             rank_metric = rnk.copy()
         elif isinstance(rnk, str) :
-            rank_metric = pd.read_table(rnk, header=None)
+            rank_metric = pd.read_table(rnk, header=None, comment='#')
         else:
             raise Exception('Error parsing gene ranking values!')
 
+        #sort ranking values from high to low
+        rank_metric.sort_values(by=rank_metric.columns[1], ascending=False, inplace=True)
+        #drop na values
+        if dat.isnull().any(axis=1).sum() >0:
+            self._logger.warning("Input gene rankings contains NA values(gene name and ranking value), drop them all!")
+            rank_metric.dropna(how='all', inplace=True) 
+        #drop duplicate IDs, keep the first
+        if dat.duplicated(subset=dat.columns[0]).sum() >0:
+            self._logger.warning("Input gene rankings contains duplicate IDs, Only use the duplicated ID with highest value!")
+            rank_metric.drop_duplicates(subset=rank_metric.columns[0],inplace=True, keep='first')
+        #reset ranking index, or will caused problems
+        rank_metric.reset_index(drop=True, inplace=True) 
         rank_metric.columns = ['gene_name','rank']
         rank_metric['rank2'] = rank_metric['rank']
-
+     
         self.ranking = rank_metric
         return self.ranking
 
@@ -225,9 +243,6 @@ class GSEA(GSEAbase):
         logger = self._log_init(module=self.module,
                                log_level=logging.INFO if self.verbose else logging.WARNING)
 
-        #cpu numbers
-        cpu_num = cpu_count()
-        self._processes = cpu_num if self._processes > cpu_num else self._processes
 
         #Start Analysis
         logger.info("Parsing data files for GSEA.............................")
@@ -249,6 +264,8 @@ class GSEA(GSEAbase):
         logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
 
         logger.info("Start to run GSEA...Might take a while..................")
+        #cpu numbers
+        self._cores()
         #compute ES, NES, pval, FDR, RES
         gsea_results,hit_ind,rank_ES, subsets = gsea_compute(data=dat, n=self.permutation_num, gmt=gmt,
                                                              weighted_score_type=self.weighted_score_type,
@@ -314,13 +331,10 @@ class Prerank(GSEAbase):
 
 
         dat2 = self._rank_metric(self.rnk)
-        #drop duplicates in ranking metrics.
-        dat2.drop_duplicates(subset='gene_name',inplace=True, keep='first')
         assert len(dat2) > 1
 
         #cpu numbers
-        cpu_num = cpu_count()
-        self._processes = cpu_num if self._processes > cpu_num else self._processes
+        self._cores()
 
         #Start Analysis
         logger.info("Parsing data files for GSEA.............................")
@@ -391,12 +405,10 @@ class SingleSampleGSEA(GSEAbase):
 
 
         dat = self._rank_metric(self.data)
-
         assert len(dat) > 1
 
         #cpu numbers
-        cpu_num = cpu_count()
-        self._processes = cpu_num if self._processes > cpu_num else self._processes
+        self._cores()
 
         #Start Analysis
         logger.info("Parsing data files for GSEA.............................")

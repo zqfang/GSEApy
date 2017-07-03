@@ -2,8 +2,8 @@
 # python 
 # see: http://amp.pharm.mssm.edu/Enrichr/help#api for API docs
 
-import sys, json, requests, logging
-from pandas import read_table
+import sys, json, requests, os, logging
+from pandas import read_table, DataFrame, Series
 from gseapy.gsea import GSEAbase
 from gseapy.plot import barplot
 from gseapy.parser import get_library_name
@@ -27,11 +27,39 @@ class Enrichr(GSEAbase):
         self.module="enrichr"
         self.res2d=None
         self._processes=1
+
+    def parse_input(self):
+        if isinstance(self.gene_list, list):
+            genes = [str(gene) for gene in self.gene_list]
+            genes_str = '\n'.join(genes)
+
+        elif isinstance(self.gene_list, (DataFrame, Series)):
+            #input type is bed file
+            if self.gene_list.shape[1] >=3:
+                genes= self.gene_list.iloc[:,:3].apply(lambda x: "\t".join([str(i) for i in x]), axis=1).tolist()
+            # input type with weight values
+            elif self.gene_list.shape[1] == 2:
+               genes= self.gene_list.apply(lambda x: ",".join([str(i) for i in x]), axis=1).tolist()
+            else:
+               genes = self.gene_list.squeeze().tolist()
+            genes_str = '\n'.join(genes)
+
+        else:
+            # get gene lists or bed file, or gene list with weighted values.
+            with open(self.gene_list) as f:
+                genes = f.read()
+        
+            genes_str = str(genes) 
+
+        return gene_str
+
     def run(self):
         """run enrichr"""
 
         mkdirs(self.outdir)
-
+        
+        #read input file
+        """
         if isinstance(self.gene_list, list):
             genes = [str(gene) for gene in self.gene_list]
             genes_str = '\n'.join(genes)
@@ -41,6 +69,8 @@ class Enrichr(GSEAbase):
                 genes = f.read()
         
             genes_str = str(genes)
+        """
+        gene_str=parse_input()
 
         # name of analysis or list
         description = str(self.descriptions)
