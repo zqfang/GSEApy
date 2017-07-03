@@ -78,11 +78,11 @@ class GSEAbase:
         #sort ranking values from high to low
         rank_metric.sort_values(by=rank_metric.columns[1], ascending=False, inplace=True)
         #drop na values
-        if dat.isnull().any(axis=1).sum() >0:
+        if rank_metric.isnull().any(axis=1).sum() >0:
             self._logger.warning("Input gene rankings contains NA values(gene name and ranking value), drop them all!")
             rank_metric.dropna(how='all', inplace=True) 
         #drop duplicate IDs, keep the first
-        if dat.duplicated(subset=dat.columns[0]).sum() >0:
+        if rank_metric.duplicated(subset=dat.columns[0]).sum() >0:
             self._logger.warning("Input gene rankings contains duplicate IDs, Only use the duplicated ID with highest value!")
             rank_metric.drop_duplicates(subset=rank_metric.columns[0],inplace=True, keep='first')
         #reset ranking index, or will caused problems
