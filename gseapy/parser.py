@@ -102,7 +102,7 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
     
 
     #filtering dict
-    if sys.version_info[0] == 3 :
+    if sys.version_info[0] >= 3 :
         genesets_filter =  {k: v for k, v in genesets_dict.items() if len(v) >= min_size and len(v) <= max_size}
     elif sys.version_info[0] == 2:
         genesets_filter =  {k: v for k, v in genesets_dict.iteritems() if len(v) >= min_size and len(v) <= max_size}
@@ -142,7 +142,7 @@ def get_library_name():
         gmt_data = json.loads(response)
 
     # python 3
-    elif sys.version_info[0] == 3:
+    elif sys.version_info[0] >= 3:
         import urllib
         x = urllib.request.urlopen('http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary?mode=meta')
         response = x.read()
