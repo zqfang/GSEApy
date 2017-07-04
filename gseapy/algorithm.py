@@ -343,24 +343,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
         enrichment_scores.append(es)
         rank_ES.append(RES)
         hit_ind.append(ind)
-
-    """
-    #multi-threading for enrichment scores
-    temp_es=[]  
-    pool_es = Pool(processes=processes)
-
-    for subset in subsets:
-        temp_es.append(pool_es.apply_async(enrichment_score, args=(gene_list, gmt.get(subset), w, 
-                                                                     ranking, None,rs)))
-
-    pool_es.close()
-    pool_es.join()
-    for temp in temp_es:
-        es,ind,RES = temp.get()
-        enrichment_scores.append(es)
-        rank_ES.append(RES)
-        hit_ind.append(ind)
-    """       
+      
     logger.debug("Start to compute esnulls...............................")
     """ 
     # old single threading method.
@@ -519,36 +502,7 @@ def normalize(es, enrNull):
     except:
 
         return 0.0 #return if according mean value is uncalculable
-    '''    
-
-
-    esnull_meanPos = []
-    esnull_negPos = []
-    
-    
-    es = np.array(es)
-    esnull = np.array(esnull)
-
-    for enrNull in esnull:        
-        meanPos = enrNull[enrNull >= 0].mean()
-        esnull_meanPos.append(meanPos)
-                  
-        meanNeg = enrNull[enrNull < 0 ].mean()
-        esnull_meanNeg.append(meanNeg)
-    
-    pos = np.array(esnull_meanPos).reshape(len(es), 1)
-    neg = np.array(esnull_meanNeg).reshape(len(es), 1)
-
-    try:
-        condlist = [ es >= 0, es < 0]
-        choicelist = [ es/pos, -es/neg ]
-        nes = np.select(condlist, choicelist)
-        
-    except:
-        nes = np.repeat(0.0 , es.size)
-    '''      
-    
- 
+   
 
 def gsea_significance(enrichment_scores, enrichment_nulls):
     """Compute nominal p-vals, normalized ES, and FDR q value.
@@ -560,25 +514,10 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
 
     logger.debug("Start to compute pvals..................................")
     
-    #enrichmentPVals = []
     
     #compute pvals.
     enrichmentPVals = gsea_pval(enrichment_scores, enrichment_nulls).tolist()
-    '''
-    #old normalize function method to caculate nesnull
-    nEnrichmentScores = []    
-    nEnrichmentNulls = []
-    
-    for i in range(len(enrichment_scores)):
-        es = enrichment_scores[i]
-        enrNull = enrichment_nulls[i]
-        #enrichmentPVals.append(gsea_pval(es, enrNull))
 
-        nes = normalize(es, enrNull)
-        nEnrichmentScores.append(nes)        
-        #nenrNull = [ normalize(s, enrNull) for s in enrNull ]
-        #nEnrichmentNulls.append(nenrNull)
-    '''
     #new normalize enrichment score calculating method. this could speed up significantly.
     esnull_meanPos = []
     esnull_meanNeg = []
@@ -619,26 +558,12 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
            
     logger.debug("start to compute fdrs..................................")
 
-    #FDR computation
+    #FDR null distribution histogram
     #create a histogram of all NES(S,pi) over all S and pi
     #Use this null distribution to compute an FDR q value,
     vals = reduce(lambda x,y: x+y, nEnrichmentNulls, [])
-
-    """
-    def shorten(l, p=10000):
-        
-        #Take each len(l)/p element, if len(l)/p >= 2.
-        
-        e = len(l)/p
-        if e <= 1:
-            return l
-        else:
-            return [ l[i] for i in range(0, len(l), e) ]
-
-    vals = shorten(vals) -> this can speed up second part. is it relevant TODO?  
-   
-    """
-
+    
+    #FDR computation
     nvals = np.array(sorted(vals))
     nnes = np.array(sorted(nEnrichmentScores))
     fdrs = []
@@ -657,10 +582,11 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
             nesPos = int(np.searchsorted(nnes, 0, side="left"))
             nesHigherAndPos = int(np.searchsorted(nnes, nes, side="right"))
         try:
-            top = allHigherAndPos/float(allPos) #p value
-            down = nesHigherAndPos/float(nesPos)
-
-            fdrs.append(top/down)
+            pi_norm = allHigherAndPos/float(allPos) #p value
+            pi_obs = nesHigherAndPos/float(nesPos)
+            
+            fdr = pi_norm/pi_obs if pi_norm/pi_obs < 1.0  else 1.0
+            fdrs.append(fdr)
         except:
             fdrs.append(1000000000.0)
 
