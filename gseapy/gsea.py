@@ -177,6 +177,12 @@ class GSEAbase:
         self.results  = res
         return
 
+    def get_libraries(self):
+        """return enrichr active enrichr library name.Offical API """
+        import requests, json
+        libs_json = json.loads(requests.get('http://amp.pharm.mssm.edu/Enrichr/datasetStatistics').text)
+        libs = [lib['libraryName']for lib in libs_json['statistics']]
+        return sorted(libs)
 
 class GSEA(GSEAbase):
     """GSEA main tool"""
@@ -573,7 +579,7 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
     :param seed: Random seed. expect an interger. Defalut:None.
     :param bool verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
 
-    :return: Return a Prerank obj. All results store to  store a dictionary, obj.results,
+    :return: Return a GSEA obj. All results store to a dictionary, obj.results,
              where contains::
 
                  | {es: enrichment score,
@@ -613,7 +619,7 @@ def ssgsea(data, gene_sets, outdir="GSEA_SingleSample", min_size=15, max_size=50
     :param seed: Random seed. expect an interger. Defalut:None.
     :param bool verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
 
-    :return: Return a ssGSEA obj. All results store to  store a dictionary, obj.results,
+    :return: Return a ssGSEA obj. All results store to  a dictionary, obj.results,
              where contains::
 
                  | {es: enrichment score,
@@ -654,7 +660,7 @@ def prerank(rnk, gene_sets, outdir='GSEA_Prerank', pheno_pos='Pos', pheno_neg='N
     :param seed: Random seed. expect an interger. Defalut:None.
     :param bool verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
 
-    :return: Return a Prerank obj. All results store to  store a dictionary, obj.results,
+    :return: Return a Prerank obj. All results store to  a dictionary, obj.results,
              where contains::
 
                  | {es: enrichment score,
