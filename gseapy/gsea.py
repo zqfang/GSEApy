@@ -1,7 +1,7 @@
 #! python
 # -*- coding: utf-8 -*-
 
-import os,sys,logging,josn
+import os,sys,logging,json
 import requests
 import pandas as pd
 from collections import OrderedDict
