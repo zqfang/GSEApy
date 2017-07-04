@@ -1,7 +1,8 @@
 #! python
 # -*- coding: utf-8 -*-
 
-import os,sys, logging
+import os,sys,logging,josn
+import requests
 import pandas as pd
 from collections import OrderedDict
 from multiprocessing import Pool, cpu_count
@@ -179,8 +180,8 @@ class GSEAbase:
 
     def get_libraries(self):
         """return enrichr active enrichr library name.Offical API """
-        import requests, json
-        libs_json = json.loads(requests.get('http://amp.pharm.mssm.edu/Enrichr/datasetStatistics').text)
+        lib_url='http://amp.pharm.mssm.edu/Enrichr/datasetStatistics'
+        libs_json = json.loads(requests.get(lib_url).text)
         libs = [lib['libraryName']for lib in libs_json['statistics']]
         return sorted(libs)
 
@@ -592,7 +593,7 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
 
     """
     gs = GSEA(data, gene_sets, cls, outdir, min_size, max_size, permutation_num,
-              weighted_score_type,permutation_type, method, ascending, processes,
+              weighted_score_type, permutation_type, method, ascending, processes,
                figsize, format, graph_num, seed, verbose)
     gs.run()
 

@@ -2,7 +2,8 @@
 # python 
 # see: http://amp.pharm.mssm.edu/Enrichr/help#api for API docs
 
-import sys, json, requests, os, logging
+import sys, json, os, logging
+import requests
 from time import sleep
 from pandas import read_table, DataFrame, Series
 from gseapy.gsea import GSEAbase
