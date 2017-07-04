@@ -3,16 +3,17 @@
 # see: http://amp.pharm.mssm.edu/Enrichr/help#api for API docs
 
 import sys, json, requests, os, logging
+from time import sleep
 from pandas import read_table, DataFrame, Series
 from gseapy.gsea import GSEAbase
 from gseapy.plot import barplot
-from gseapy.parser import get_library_name
 from gseapy.utils import *
+#from gseapy.parser import get_library_name
 
 class Enrichr(GSEAbase):
     """Enrichr API"""
     def __init__(self, gene_list, gene_sets, descriptions='foo', outdir='Enrichr',
-            cutoff=0.05, format='pdf', figsize=(12,6), top_term=10, no_plot=False, verbose=False):
+            cutoff=0.05, format='pdf', figsize=(8,6), top_term=10, no_plot=False, verbose=False):
 
         self.gene_list=gene_list
         self.gene_sets=gene_sets
@@ -27,6 +28,7 @@ class Enrichr(GSEAbase):
         self.module="enrichr"
         self.res2d=None
         self._processes=1
+
 
     def parse_input(self):
         if isinstance(self.gene_list, list):
@@ -59,17 +61,6 @@ class Enrichr(GSEAbase):
         mkdirs(self.outdir)
         
         #read input file
-        """
-        if isinstance(self.gene_list, list):
-            genes = [str(gene) for gene in self.gene_list]
-            genes_str = '\n'.join(genes)
-        else:
-            # get gene lists
-            with open(self.gene_list) as f:
-                genes = f.read()
-        
-            genes_str = str(genes)
-        """
         genes_str=self.parse_input()
 
         # name of analysis or list
@@ -85,7 +76,7 @@ class Enrichr(GSEAbase):
         if gene_set in DEFAULT_LIBRARY:
             enrichr_library = DEFAULT_LIBRARY
         else:
-            enrichr_library = get_library_name()
+            enrichr_library = self.get_libraries()
             if gene_set not in enrichr_library:
                 sys.stderr.write("%s is not a enrichr library name\n"%gene_set)
                 sys.stdout.write("Hint: use get_library_name() to veiw full list of supported names")
@@ -104,6 +95,8 @@ class Enrichr(GSEAbase):
         response = requests.post(ENRICHR_URL, files=payload)
         if not response.ok:
             raise Exception('Error analyzing gene list')
+
+        sleep(1)
         job_id = json.loads(response.text)
 
         logger.debug('Job ID:'+ str(job_id))   
@@ -135,10 +128,11 @@ class Enrichr(GSEAbase):
         
         url = ENRICHR_URL + query_string % (user_list_id, filename, gene_set)
         response = requests.get(url, stream=True)
-
+        sleep(1)
+        
         logger.info('Downloading file of enrichment results: Job Id:'+ str(job_id)) 
         outfile="%s/%s.%s.%s.reports.txt"%(self.outdir, gene_set, description, self.module)
-
+        
         with open(outfile, 'wb') as f:
             for chunk in response.iter_content(chunk_size=1024):
                 if chunk:
