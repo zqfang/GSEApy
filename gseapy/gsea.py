@@ -206,7 +206,7 @@ class GSEAbase:
         """return enrichr active enrichr library name.Offical API """
         lib_url='http://amp.pharm.mssm.edu/Enrichr/datasetStatistics'
         libs_json = json.loads(requests.get(lib_url).text)
-        libs = [lib['libraryName']for lib in libs_json['statistics']]
+        libs = [lib['libraryName'] for lib in libs_json['statistics']]
         return sorted(libs)
 
 class GSEA(GSEAbase):

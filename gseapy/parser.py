@@ -3,6 +3,7 @@ from numpy import in1d
 from pandas import read_table, DataFrame
 from gseapy.utils import unique, DEFAULT_LIBRARY
 import sys, logging, json
+import requests
 
 def gsea_cls_parser(cls):
     """Extact class(phenotype) name from .cls file.
@@ -84,7 +85,6 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
         else:
             names = get_library_name()
         if gmt in names:
-            import requests
             ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary'
             query_string = '?mode=text&libraryName=%s'
             response = requests.get( ENRICHR_URL + query_string % gmt)
@@ -132,6 +132,7 @@ def get_library_name():
     """return enrichr active enrichr library name. """
 
     # make a get request to get the gmt names and meta data from Enrichr
+    """old code
     #python 2
     if sys.version_info[0] == 2 :
         import urllib2
@@ -148,14 +149,18 @@ def get_library_name():
     else:
         sys.stderr.write("System failure. Please Provide correct input files")
         sys.exit(1) 
-    # generate list of gmts 
-    gmt_names = []
+    # generate list of lib names 
+    libs = []
 
     # get library names 
     for inst_gmt in gmt_data['libraries']:
 
         # only include active gmts 
         if inst_gmt['isActive'] == True:
-            gmt_names.append(inst_gmt['libraryName'])
-    
-    return sorted(gmt_names)
+            libs.append(inst_gmt['libraryName'])
+    """
+    lib_url='http://amp.pharm.mssm.edu/Enrichr/datasetStatistics'
+    libs_json = json.loads(requests.get(lib_url).text)
+    libs = [lib['libraryName'] for lib in libs_json['statistics']]    
+
+    return sorted(libs)
