@@ -105,7 +105,7 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
     elif sys.version_info[0] == 2:
         genesets_filter =  {k: v for k, v in genesets_dict.iteritems() if len(v) >= min_size and len(v) <= max_size}
     else:
-        sys.stderr.write("System failure. Please Provide correct input files")
+        logging.error("System failure. Please Provide correct input files")
         sys.exit(1)    
     if gene_list is not None:
         subsets = sorted(genesets_filter.keys())             
@@ -122,7 +122,7 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
     logging.info("%04d gene_sets have been filtered out when max_size=%s and min_size=%s"%(filsets_num, max_size, min_size))
     
     if filsets_num == len(genesets_dict):
-        sys.stderr.write("No gene sets passed throught filtering condition!!!, try new paramters again!\n" +\
+        logging.error("No gene sets passed throught filtering condition!!!, try new paramters again!\n" +\
                          "Note: Gene names for gseapy is case sensitive." )
         sys.exit(1)
     else:

@@ -183,7 +183,8 @@ class GSEAbase:
             rdict['matched_size'] = len(ind)
             #reformat gene list.
             _genes = rank_metric.iloc[ind, rank_metric.columns.get_loc('gene_name')]
-            rdict['genes'] = _genes.to_string(header=False, index=False).replace("\n", ",")
+            _genes = _genes.to_string(header=False, index=False).split("\n")
+            rdict['genes'] = ",".join([g.strip() for g in _genes.split("\n")])
 
             rdict['rank_ES'] = RES
             rdict['hit_index'] = ind
@@ -318,7 +319,6 @@ class GSEA(GSEAbase):
                        data=heat_dat, classes=cls_vector, phenoPos=phenoPos, phenoNeg=phenoNeg)
 
         logger.info("Congratulations. GSEApy run successfully................")
-        self._log_stop()
 
         return
 
@@ -395,7 +395,6 @@ class Prerank(GSEAbase):
                        figsize=self.figsize, format=self.format, module=self.module)
 
         logger.info("Congratulations. GSEApy run successfully................")
-        self._log_stop()
 
         return
 
@@ -467,7 +466,6 @@ class SingleSampleGSEA(GSEAbase):
                        figsize=self.figsize, format=self.format, module=self.module)
 
         logger.info("Congratulations. GSEApy run successfully................")
-        self._log_stop()
 
         return
 
@@ -535,7 +533,6 @@ class Replot(GSEAbase):
                             self.format, self.outdir, self.module)
 
         logger.info("Congratulations! Your plots have been reproduced successfully!")
-        self._log_stop()
 
 
 def call(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permutation_num=1000,

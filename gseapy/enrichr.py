@@ -154,8 +154,6 @@ class Enrichr(GSEAbase):
                 fig.savefig(outfile.replace("txt", self.format),
                             bbox_inches='tight', dpi=300)
         
-        self._log_stop()
-
         return 
 def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr',
             cutoff=0.05, format='pdf', figsize=(8,6), top_term=10, no_plot=False, verbose=False):
