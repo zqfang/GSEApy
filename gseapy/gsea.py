@@ -21,6 +21,7 @@ class GSEAbase:
         self.results=None
         self.res2d=None
         self.ranking=None
+        self.ascending=False
         self.verbose=False
         self._processes=1
         self._logger=None
@@ -92,7 +93,7 @@ class GSEAbase:
             raise Exception('Error parsing gene ranking values!')
 
         #sort ranking values from high to low
-        rank_metric.sort_values(by=rank_metric.columns[1], ascending=False, inplace=True)
+        rank_metric.sort_values(by=rank_metric.columns[1], ascending=self.ascending, inplace=True)
         #drop na values
         if rank_metric.isnull().any(axis=1).sum() >0:
             self._logger.warning("Input gene rankings contains NA values(gene name and ranking value), drop them all!")
@@ -114,7 +115,7 @@ class GSEAbase:
         rank_metric['rank2'] = rank_metric['rank']
 
         self.ranking = rank_metric
-        return self.ranking
+        return rank_metric
 
     def _plotting(self, rank_metric, results, res2d,
                  graph_num, outdir, format, figsize, module=None, data=None,
@@ -184,7 +185,7 @@ class GSEAbase:
             #reformat gene list.
             _genes = rank_metric.iloc[ind, rank_metric.columns.get_loc('gene_name')]
             _genes = _genes.to_string(header=False, index=False).split("\n")
-            rdict['genes'] = ",".join([g.strip() for g in _genes.split("\n")])
+            rdict['genes'] = ",".join([ g.strip() for g in _genes ])
 
             rdict['rank_ES'] = RES
             rdict['hit_index'] = ind
