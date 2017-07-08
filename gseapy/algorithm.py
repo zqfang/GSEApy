@@ -7,8 +7,6 @@ import numpy as np
 from functools import reduce
 from multiprocessing import Pool
 
-logger = logging.getLogger(__name__)
-
 
 def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=None, esnull=None, rs=np.random.RandomState()):
     """This is the most important function of GSEAPY. It has the same algorithm with GSEA.
@@ -279,7 +277,7 @@ def ranking_metric(df, method, phenoPos, phenoNeg, classes, ascending):
     elif method == 'log2_ratio_of_classes':
         sr  =  np.log2(df_mean[A] / df_mean[B])
     else:
-        logger.error("Please provide correct method name!!!")        
+        logging.error("Please provide correct method name!!!")        
         sys.exit()
     sr.sort_values(ascending=ascending, inplace=True)
     df3 = sr.to_frame().reset_index()
@@ -336,7 +334,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
     ranking=r2['rank'].values
     gene_list=r2['gene_name']
        
-    logger.debug("Start to compute enrichment socres......................")
+    logging.debug("Start to compute enrichment socres......................")
     
     for subset in subsets:
         es, ind, RES = enrichment_score(gene_list, gmt.get(subset), w, ranking, None, rs) 
@@ -344,7 +342,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
         rank_ES.append(RES)
         hit_ind.append(ind)
       
-    logger.debug("Start to compute esnulls...............................")
+    logging.debug("Start to compute esnulls...............................")
     """ 
     # old single threading method.
     enrichment_nulls = [ [] for a in range(len(subsets)) ]
@@ -424,7 +422,7 @@ def gsea_compute_ss(data, gmt, n, weighted_score_type, seed, processes):
     hit_ind=[]
 
     
-    logger.debug("Start to compute enrichment socres......................") 
+    logging.debug("Start to compute enrichment socres......................") 
 
     for subset in subsets:
         es, ind, RES= enrichment_score_ss(gmt.get(subset), exp_dict, w, None,rs)
@@ -433,7 +431,7 @@ def gsea_compute_ss(data, gmt, n, weighted_score_type, seed, processes):
         hit_ind.append(ind)
 
 
-    logger.debug("Start to compute esnulls...............................")
+    logging.debug("Start to compute esnulls...............................")
 
     enrichment_nulls = [ [] for a in range(len(subsets)) ]   
     
@@ -512,7 +510,7 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
         observed S wih NES(S) >= 0, whose NES(S) >= NES*, and similarly if NES(S) = NES* <= 0.
     """
 
-    logger.debug("Start to compute pvals..................................")
+    logging.debug("Start to compute pvals..................................")
     
     
     #compute pvals.
@@ -540,7 +538,7 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
 
 
     #compute normalized enrichment score and normalized esnull
-    logger.debug("Compute normalized enrichment score and normalized esnull")
+    logging.debug("Compute normalized enrichment score and normalized esnull")
                    
     try:
         condlist1 = [ es >= 0, es < 0]
@@ -556,7 +554,7 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
         nEnrichmentNulls = np.repeat(0.0 , es.size).reshape(esnull.shape).tolist()
     
            
-    logger.debug("start to compute fdrs..................................")
+    logging.debug("start to compute fdrs..................................")
 
     #FDR null distribution histogram
     #create a histogram of all NES(S,pi) over all S and pi
@@ -590,6 +588,6 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
         except:
             fdrs.append(1000000000.0)
 
-    logger.debug("Statistial testing finished.............................")
+    logging.debug("Statistial testing finished.............................")
 
     return zip(enrichment_scores, nEnrichmentScores, enrichmentPVals, fdrs)

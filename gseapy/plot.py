@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
 import numpy as np
 import logging, sys
 from matplotlib.colors import Normalize
@@ -10,7 +9,6 @@ import matplotlib.pyplot as plt
 import matplotlib.transforms as transforms
 from gseapy.parser import unique
 
-logger = logging.getLogger(__name__)
 
 class _MidpointNormalize(Normalize):
     def __init__(self, vmin=None, vmax=None, midpoint=None, clip=False):
@@ -228,7 +226,7 @@ def dotplot(df, cutoff=0.05, figsize=(3.5,6), top_term=10, scale=1):
     df = df[df['Adjusted P-value'] <= cutoff]
     
     if len(df) < 1:
-        logger.warning("Warning: No enrich terms when cuttoff = %s"%cutoff )
+        logging.warning("Warning: No enrich terms when cuttoff = %s"%cutoff )
         return None
     #sorting the dataframe for better visualization
     df = df.sort_values(by='Adjusted P-value', ascending=False)

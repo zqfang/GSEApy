@@ -4,8 +4,6 @@ from pandas import read_table, DataFrame
 from gseapy.utils import unique, DEFAULT_LIBRARY
 import sys, logging, json
 
-logger = logging.getLogger(__name__)
-
 def gsea_cls_parser(cls):
     """Extact class(phenotype) name from .cls file.
     
@@ -53,7 +51,7 @@ def gsea_edb_parser(results_path, index=0):
     fdr =  term.get('FDR')
     #fwer = term.get('FWER')   
     #index_range = len(tag)-1
-    logger.debug("Enriched Gene set is: "+ enrich_term)
+    logging.debug("Enriched Gene set is: "+ enrich_term)
 
     return enrich_term, hit_ind, nes, pval, fdr
     
@@ -75,12 +73,12 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
     """
 
     if gmt.lower().endswith(".gmt"):
-        logger.info("User Defined gene sets is given.......continue..........") 
+        logging.info("User Defined gene sets is given.......continue..........") 
         with open(gmt) as genesets:    
              genesets_dict = { line.strip("\n").split("\t")[0]: line.strip("\n").split("\t")[2:] 
                               for line in genesets.readlines()}    
     else:
-        logger.info("Downloading and generating Enrichr library gene sets...") 
+        logging.info("Downloading and generating Enrichr library gene sets...") 
         if gmt in DEFAULT_LIBRARY:
             names = DEFAULT_LIBRARY
         else:
@@ -121,7 +119,7 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
     #some_dict = {key: value for key, value in some_dict.items() if value != value_to_remove}
     #use np.intersect1d() may be faster???    
     filsets_num = len(genesets_dict) - len(genesets_filter)
-    logging.info("{a} gene_sets have been filtered out when max_size={b} and min_size={c}".format(a=filsets_num,b=max_size,c=min_size))
+    logging.info("%04d gene_sets have been filtered out when max_size=%s and min_size=%s"%(filsets_num, max_size, min_size))
     
     if filsets_num == len(genesets_dict):
         sys.stderr.write("No gene sets passed throught filtering condition!!!, try new paramters again!\n" +\

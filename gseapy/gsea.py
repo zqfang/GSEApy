@@ -28,15 +28,19 @@ class GSEAbase:
 
     def _log_init(self, module='GSEA', log_level=logging.INFO):
         """logging start"""
+
+        # clear old root logger handlers
+        logging.getLogger("").handlers = []
+
+        # init a root logger
         gene_set =os.path.split(self.gene_sets)[-1].lower().rstrip(".gmt")
+        
         logging.basicConfig(
                             level    = logging.DEBUG,
                             format   = 'LINE %(lineno)-4d: %(asctime)s [%(levelname)-8s] %(message)s',
                             filename = "%s/gseapy.%s.%s.log"%(self.outdir, module, gene_set),
                             filemode = 'w')
-
-        logger = logging.getLogger(__name__)
-        #logger.setLevel(logging.DEBUG)
+        
         # define a Handler which writes INFO messages or higher to the sys.stderr
         console = logging.StreamHandler()
         console.setLevel(log_level)
@@ -44,11 +48,14 @@ class GSEAbase:
         formatter = logging.Formatter('%(asctime)s %(message)s')
         # tell the handler to use this format
         console.setFormatter(formatter)
-        logger.addHandler(console)
-        #if you want information print to the console, uisng logger.info....
+
+        logging.getLogger("").addHandler(console)
+        logger = logging.getLogger("")
+        #logger.setLevel(log_level)
+
         self._logger=logger
 
-        return self._logger
+        return logger
     def _log_stop(self):
         """log stop"""
 
@@ -56,10 +63,18 @@ class GSEAbase:
         for handler in handlers:
             handler.close()
             self._logger.removeHandler(handler)
-    def _cores(self):
-        #cpu numbers
+
+    def _set_cores(self):
+        """set cpus numbers to be used"""
+
         cpu_num = cpu_count()-1
-        cores = cpu_num if self._processes > cpu_num else self._processes
+        if self._processes > cpu_num:
+            cores = cpu_num
+        elif self._processes < 1:
+            cores = 1
+        else:
+            cores = self._processes
+
         self._processes = int(cores)
 
     def _rank_metric(self, rnk):
@@ -81,12 +96,19 @@ class GSEAbase:
         #drop na values
         if rank_metric.isnull().any(axis=1).sum() >0:
             self._logger.warning("Input gene rankings contains NA values(gene name and ranking value), drop them all!")
+            #print out NAs
+            NAs = rank_metric[rank_metric.isnull().any(axis=1)]
+            self._logger.warning(NAs.to_string())
             rank_metric.dropna(how='all', inplace=True) 
         #drop duplicate IDs, keep the first
         if rank_metric.duplicated(subset=rank_metric.columns[0]).sum() >0:
             self._logger.warning("Input gene rankings contains duplicated IDs, Only use the duplicated ID with highest value!")
+            #print out duplicated IDs.
+            dups = rank_metric[rank_metric.duplicated(subset=rank_metric.columns[0])]
+            self._logger.warning(dups.to_string())
             rank_metric.drop_duplicates(subset=rank_metric.columns[0], inplace=True, keep='first')
-        #reset ranking index, or will caused problems
+ 
+        #reset ranking index, or will cause problems
         rank_metric.reset_index(drop=True, inplace=True) 
         rank_metric.columns = ['gene_name','rank']
         rank_metric['rank2'] = rank_metric['rank']
@@ -272,7 +294,7 @@ class GSEA(GSEAbase):
 
         logger.info("Start to run GSEA...Might take a while..................")
         #cpu numbers
-        self._cores()
+        self._set_cores()
         #compute ES, NES, pval, FDR, RES
         gsea_results,hit_ind,rank_ES, subsets = gsea_compute(data=dat, n=self.permutation_num, gmt=gmt,
                                                              weighted_score_type=self.weighted_score_type,
@@ -341,7 +363,7 @@ class Prerank(GSEAbase):
         assert len(dat2) > 1
 
         #cpu numbers
-        self._cores()
+        self._set_cores()
 
         #Start Analysis
         logger.info("Parsing data files for GSEA.............................")
@@ -415,7 +437,7 @@ class SingleSampleGSEA(GSEAbase):
         assert len(dat) > 1
 
         #cpu numbers
-        self._cores()
+        self._set_cores()
 
         #Start Analysis
         logger.info("Parsing data files for GSEA.............................")
