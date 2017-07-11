@@ -111,7 +111,7 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
             raise Exception('Error fetching enrichment results, check internet connection first.')
                      
         genesets_dict = { line.split("\t")[0]: 
-                          map(lambda x: x.split(",")[0], line.split("\t")[2:-1]) 
+                          list(map(lambda x: x.split(",")[0], line.split("\t")[2:-1])) 
                           for line in response.iter_lines(chunk_size=1024, decode_unicode='utf-8')}    
  
     
