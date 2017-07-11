@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
+
+import sys, logging, json
+import requests
+
 from numpy import in1d
 from pandas import read_table, DataFrame
 from gseapy.utils import unique, DEFAULT_LIBRARY
-import sys, logging, json
-import requests
+from requests.packages.urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
+
 
 def gsea_cls_parser(cls):
     """Extact class(phenotype) name from .cls file.
@@ -85,9 +90,21 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
         else:
             names = get_library_name()
         if gmt in names:
+            """
+            define max tries num
+            if the backoff_factor is 0.1, then sleep() will sleep for
+            [0.1s, 0.2s, 0.4s, ...] between retries. 
+            It will also force a retry if the status code returned is 500, 502, 503 or 504.
+            """
+            s = requests.Session()
+            retries = Retry(total=5, backoff_factor=0.1,
+                            status_forcelist=[ 500, 502, 503, 504 ])
+            s.mount('http://', HTTPAdapter(max_retries=retries))
+            #queery string
             ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary'
             query_string = '?mode=text&libraryName=%s'
-            response = requests.get( ENRICHR_URL + query_string % gmt)
+            #get
+            response = s.get( ENRICHR_URL + query_string % gmt, timeout=None)
         else: 
             raise Exception("gene_set files(.gmt) not found")
         if not response.ok:

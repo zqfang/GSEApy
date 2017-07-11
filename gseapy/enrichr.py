@@ -9,7 +9,8 @@ from pandas import read_table, DataFrame, Series
 from gseapy.gsea import GSEAbase
 from gseapy.plot import barplot
 from gseapy.utils import *
-#from gseapy.parser import get_library_name
+from requests.packages.urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
 
 class Enrichr(GSEAbase):
     """Enrichr API"""
@@ -103,7 +104,7 @@ class Enrichr(GSEAbase):
         logger.debug('Job ID:'+ str(job_id))   
         ENRICHR_URL_A = 'http://amp.pharm.mssm.edu/Enrichr/view?userListId=%s'
         user_list_id = job_id['userListId']
-        response_gene_list = requests.get(ENRICHR_URL_A % str(user_list_id))
+        response_gene_list = requests.get(ENRICHR_URL_A % str(user_list_id), timeout=None)
 
         if not response_gene_list.ok:
             raise Exception('Error getting gene list')
@@ -114,9 +115,7 @@ class Enrichr(GSEAbase):
         query_string = '?userListId=%s&backgroundType=%s'
         ## get id data
         user_list_id = job_id['userListId']
-        response = requests.get(
-            ENRICHR_URL + query_string % (str(user_list_id), gene_set)
-              )
+        response = requests.get(ENRICHR_URL + query_string % (str(user_list_id), gene_set))
         if not response.ok:
             raise Exception('Error fetching enrichment results')
 
@@ -125,11 +124,15 @@ class Enrichr(GSEAbase):
         ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/export'
         query_string = '?userListId=%s&filename=%s&backgroundType=%s'
         user_list_id = str(job_id['userListId'])
-        filename = "%s.%s.%s.reports"%(gene_set, description, self.module)
-        
+        filename = "%s.%s.%s.reports"%(gene_set, description, self.module)        
         url = ENRICHR_URL + query_string % (user_list_id, filename, gene_set)
-        response = requests.get(url, stream=True)
-        sleep(1)
+
+        # set max retries num =5 
+        s = requests.Session()
+        retries = Retry(total=5, backoff_factor=0.1,
+                        status_forcelist=[ 500, 502, 503, 504 ])
+        s.mount('http://', HTTPAdapter(max_retries=retries))
+        response = s.get(url, stream=True, timeout=None)
         
         logger.info('Downloading file of enrichment results: Job Id:'+ str(job_id)) 
         outfile="%s/%s.%s.%s.reports.txt"%(self.outdir, gene_set, description, self.module)
