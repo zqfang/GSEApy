@@ -117,42 +117,7 @@ A graphical introduction of Enrichr
     :align: center
 
 
-
-
-**The only thing you need to prepeare is a gene list file in txt format(one gene id per row), or a python list object.**
-
 **Note**: Enrichr uses a list of Entrez gene symbols as input. You should convert all gene names to uppercase.
-
-For example, both a list object and txt file are supported for ``enrchr`` API
-
-.. code:: python
-
-    # if you perfer to run gseapy.enrchr() inside python console, you could assign a list object to 
-    # gseapy like this.
-    gene_list = ['SCARA3', 'LOC100044683', 'CMBL', 'CLIC6', 'IL13RA1', 'TACSTD2', 'DKKL1',
-                    'CSF1', 'CITED1', 'SYNPO2L']
-
-.. code:: python
-
-    # an alternative way is that you could provide a gene list txt file which looks like this:
-    with open('data/gene_list.txt') as genes:
-        print(genes.read())
-
-    
-    CTLA2B
-    SCARA3
-    LOC100044683
-    CMBL
-    CLIC6
-    IL13RA1
-    TACSTD2
-    DKKL1
-    CSF1
-    CITED1
-    SYNPO2L
-    TINAGL1
-    PTX3
-       
 
 
 
@@ -167,7 +132,8 @@ Installation
    # if you have conda
    $ conda install -c bioconda gseapy 
   
-   # for windows users 
+   # install lastest release
+   # and for windows users 
    $ conda install -c bioninja gseapy
 
    # or use pip to install the lastest release 
@@ -253,7 +219,9 @@ Run gseapy inside python console:
     gseapy.replot(indir='./Gsea.reports', outdir='test')
 
 
-2. If you prefer to use Dataframe, dict, list in interactive python console, you could do this
+2. If you prefer to use Dataframe, dict, list in interactive python console, you could do this.
+
+see detail here: `Example <http://pythonhosted.org/gseapy/gseapy_example.html>`_
 
 .. code:: python
   
@@ -274,15 +242,15 @@ Run gseapy inside python console:
     gseapy.ssgsea(data=ssGSEA_dataframe, gene_sets='KEGG_2016', outdir='test')
 
 
-3. For ``enrichr`` , you could assign a list object or a txt file 
+3. For ``enrichr`` , you could assign a list, pd.Series, pd.DataFrame object, or a txt file (should be one gene name per row.)
 
 .. code:: python
 
     # assign a list object to enrichr
-    l = ['SCARA3', 'LOC100044683', 'CMBL', 'CLIC6', 'IL13RA1', 'TACSTD2', 'DKKL1', 'CSF1', 
+    gl = ['SCARA3', 'LOC100044683', 'CMBL', 'CLIC6', 'IL13RA1', 'TACSTD2', 'DKKL1', 'CSF1', 
          'SYNPO2L', 'TINAGL1', 'PTX3', 'BGN', 'HERC1', 'EFNA1', 'CIB2', 'PMP22', 'TMEM173']
  
-    gseapy.enrichr(gene_list=l, description='pathway', gene_sets='KEGG_2016', outdir='test')
+    gseapy.enrichr(gene_list=gl, description='pathway', gene_sets='KEGG_2016', outdir='test')
 
     # or a txt file path.
     gseapy.enrichr(gene_list='gene_list.txt', description='pathway', gene_sets='KEGG_2016', 
