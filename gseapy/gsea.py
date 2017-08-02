@@ -32,12 +32,10 @@ class GSEAbase:
 
         # clear old root logger handlers
         logging.getLogger("").handlers = []
-
-        # init a root logger
+        # log file naming rules
         gene_set =os.path.split(self.gene_sets)[-1].lower().rstrip(".gmt")
-        
-        logging.basicConfig(
-                            level    = logging.DEBUG,
+        # init a root logger        
+        logging.basicConfig(level    = logging.DEBUG,
                             format   = 'LINE %(lineno)-4d: %(asctime)s [%(levelname)-8s] %(message)s',
                             filename = "%s/gseapy.%s.%s.log"%(self.outdir, module, gene_set),
                             filemode = 'w')
@@ -49,11 +47,10 @@ class GSEAbase:
         formatter = logging.Formatter('%(asctime)s %(message)s')
         # tell the handler to use this format
         console.setFormatter(formatter)
-
+        # add handlers
         logging.getLogger("").addHandler(console)
         logger = logging.getLogger("")
         #logger.setLevel(log_level)
-
         self._logger=logger
 
         return logger
@@ -66,7 +63,7 @@ class GSEAbase:
             self._logger.removeHandler(handler)
 
     def _set_cores(self):
-        """set cpus numbers to be used"""
+        """set cpu numbers to be used"""
 
         cpu_num = cpu_count()-1
         if self._processes > cpu_num:
@@ -75,19 +72,22 @@ class GSEAbase:
             cores = 1
         else:
             cores = self._processes
-
+        # have to be int if user input is float
         self._processes = int(cores)
 
     def _rank_metric(self, rnk):
-        """Parse ranking file. This file contains ranking correlation vector and gene names or ids.
+        """Parse ranking file. This file contains ranking correlation vector( or expression values) 
+           and gene names or ids.
 
-        :param rnk: the .rnk file of GSEA input or a ranked pandas DataFrame instance.
+        :param rnk: the .rnk file of GSEA input or a pandas DataFrame, Series instance.
         :return: a pandas DataFrame with 3 columns names are: 'gene_name','rank',rank2'
 
         """
-        if isinstance(rnk, pd.DataFrame) :
+        if isinstance(rnk, pd.DataFrame):
             rank_metric = rnk.copy()
-        elif isinstance(rnk, str) :
+        elif isinstance(rnk, pd.Series):
+            rank_metric = rnk.reset_index()
+        elif os.path.isfile(rnk):
             rank_metric = pd.read_table(rnk, header=None, comment='#')
         else:
             raise Exception('Error parsing gene ranking values!')
@@ -99,14 +99,14 @@ class GSEAbase:
             self._logger.warning("Input gene rankings contains NA values(gene name and ranking value), drop them all!")
             #print out NAs
             NAs = rank_metric[rank_metric.isnull().any(axis=1)]
-            self._logger.warning(NAs.to_string())
+            self._logger.debug(NAs.to_string())
             rank_metric.dropna(how='all', inplace=True) 
         #drop duplicate IDs, keep the first
         if rank_metric.duplicated(subset=rank_metric.columns[0]).sum() >0:
             self._logger.warning("Input gene rankings contains duplicated IDs, Only use the duplicated ID with highest value!")
             #print out duplicated IDs.
             dups = rank_metric[rank_metric.duplicated(subset=rank_metric.columns[0])]
-            self._logger.warning(dups.to_string())
+            self._logger.debug(dups.to_string())
             rank_metric.drop_duplicates(subset=rank_metric.columns[0], inplace=True, keep='first')
  
         #reset ranking index, or will cause problems
@@ -261,20 +261,17 @@ class GSEA(GSEAbase):
 
         if isinstance(self.data, pd.DataFrame) :
             df = self.data.copy()
-
-        elif isinstance(self.data, str) :
+        elif os.path.isfile(self.data) :
             df = pd.read_table(self.data)
         else:
             raise Exception('Error parsing gene expression dataframe!')
             sys.exit(1)
-
+        #data frame must have lenght > 1
         assert len(df) > 1
-
+        # creat output dirs
         mkdirs(self.outdir)
         logger = self._log_init(module=self.module,
                                log_level=logging.INFO if self.verbose else logging.WARNING)
-
-
         #Start Analysis
         logger.info("Parsing data files for GSEA.............................")
 
@@ -282,8 +279,6 @@ class GSEA(GSEAbase):
         phenoPos, phenoNeg, cls_vector = gsea_cls_parser(self.classes)
         #select correct expression genes and values.
         dat = self.__drop_dat(df, cls_vector)
-
-
         #ranking metrics calculation.
         dat2 = ranking_metric(df=dat, method=self.method, phenoPos=phenoPos, phenoNeg=phenoNeg,
                               classes=cls_vector, ascending=self.ascending)
@@ -293,7 +288,6 @@ class GSEA(GSEAbase):
                               gene_list=dat2['gene_name'].values)
 
         logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
-
         logger.info("Start to run GSEA...Might take a while..................")
         #cpu numbers
         self._set_cores()
@@ -308,7 +302,6 @@ class GSEA(GSEAbase):
 
         logger.info("Start to generate gseapy reports, and produce figures...")
         res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
-
         self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
                                    gmt=gmt, rank_metric=dat2, permutation_type="gene_sets")
 
@@ -358,23 +351,18 @@ class Prerank(GSEAbase):
         mkdirs(self.outdir)
         logger = self._log_init(module=self.module,
                                log_level=logging.INFO if self.verbose else logging.WARNING)
-
-
+        #parsing rankings
         dat2 = self._rank_metric(self.rnk)
         assert len(dat2) > 1
 
         #cpu numbers
         self._set_cores()
-
         #Start Analysis
         logger.info("Parsing data files for GSEA.............................")
-
         #filtering out gene sets and build gene sets dictionary
         gmt = gsea_gmt_parser(self.gene_sets, min_size=self.min_size, max_size=self.max_size,
                               gene_list=dat2['gene_name'].values)
         logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
-
-
         logger.info("Start to run GSEA...Might take a while..................")
         #compute ES, NES, pval, FDR, RES
         gsea_results, hit_ind,rank_ES, subsets = gsea_compute(data=dat2, n=self.permutation_num, gmt=gmt,
@@ -386,7 +374,6 @@ class Prerank(GSEAbase):
 
         logger.info("Start to generate gseapy reports, and produce figures...")
         res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
-
         self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
                                    gmt=gmt, rank_metric=dat2, permutation_type="gene_sets")
 
@@ -431,7 +418,6 @@ class SingleSampleGSEA(GSEAbase):
         mkdirs(self.outdir)
         logger = self._log_init(module=self.module,
                                log_level=logging.INFO if self.verbose else logging.WARNING)
-
 
         dat = self._rank_metric(self.data)
         assert len(dat) > 1

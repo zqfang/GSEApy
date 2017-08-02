@@ -280,22 +280,18 @@ def dotplot(df, cutoff=0.05, figsize=(3.5,6), top_term=10, scale=1):
         x2 =  [0]*len(df)
         idx = df.index
     #scale of dots
-    ax2 =fig.add_axes([0.93,0.55,0.09,0.06*len(idx)])
-
-    y2 = [i for i in range(0,len(x2))]
-    ax2.scatter(x=x2, y=y2, s=area[idx], c='black', edgecolors='face')
+    ax2 =fig.add_axes([0.93,0.55,0.09,0.06*len(idx)])  
+    #s=area[idx]  
+    l1 = ax2.scatter([],[], s=10, edgecolors='none')
+    l2 = ax2.scatter([],[], s=50, edgecolors='none')
+    l3 = ax2.scatter([],[], s=100, edgecolors='none')
+    labels = df['Count'][idx]
+    leg = ax.legend([l1, l2, l3], labels, nrow=3, frameon=True, fontsize=12,
+                     handlelength=2, loc = 8, borderpad = 1.8,
+                     handletextpad=1, title='Gene\nRatio', scatterpoints = 1)
     
-    for i, index in enumerate(idx):
-        ax2.text(x=0.5, y=y2[i], s=df['Count'][index], 
-                 verticalalignment='center', horizontalalignment='left')
-    ax2.set_title("Gene\nCounts",loc='left')
-    
-    #turn off all spines and ticks
-    ax2.axis('off')
-    #adjust_spines(ax2, spines=[])
-    #plt.tight_layout()
-    #canvas.print_figure('test', bbox_inches='tight')    
-    return fig
+    #canvas.print_figure('test', bbox_inches='tight')
+    return fig 
 
 def barplot(df, cutoff=0.05, figsize=(6.5,6), top_term=10):
     """ barplot for enrichr results"""

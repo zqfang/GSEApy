@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>A Protocol to Prepare files for GSEAPY &mdash; GSEApy 0.8.0 documentation</title>
+  <title>A Protocol to Prepare files for GSEAPY &mdash; GSEApy 0.8.3 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="GSEApy 0.8.0 documentation" href="index.html"/>
+    <link rel="top" title="GSEApy 0.8.3 documentation" href="index.html"/>
         <link rel="next" title="GSEAPY Example" href="gseapy_example.html"/>
         <link rel="prev" title="How to Use GSEAPY" href="run.html"/> 
 
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                0.8.0
+                0.8.3
               </div>
             
           
@@ -91,7 +91,7 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Welcome to GSEAPY&#8217;s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Welcome to GSEAPY’s documentation!</a></li>
 <li class="toctree-l1"><a class="reference internal" href="run.html">How to Use GSEAPY</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">A Protocol to Prepare files for GSEAPY</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#use-gsea-command-or-gsea">Use <code class="docutils literal"><span class="pre">gsea</span></code> command, or <code class="docutils literal"><span class="pre">gsea()</span></code></a><ul>
@@ -200,7 +200,7 @@
 <div class="section" id="prepare-an-tabular-text-file-of-gene-expression-like-this">
 <h3>1. Prepare an tabular text file of gene expression like this:<a class="headerlink" href="#prepare-an-tabular-text-file-of-gene-expression-like-this" title="Permalink to this headline">¶</a></h3>
 <p><strong>RNA-seq,ChIP-seq, Microarry data</strong> are all supported.</p>
-<p>Here is to see what the structure of expression table looks like, you don&#8217;t have to run
+<p>Here is to see what the structure of expression table looks like, you don’t have to run
 commands below:</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s1">&#39;./test/gsea_data.txt&#39;</span><span class="p">)</span>
@@ -302,7 +302,7 @@ commands below:</p>
 <div class="section" id="gene-sets-file-in-gmt-format">
 <h3>3. Gene_sets file in gmt format.<a class="headerlink" href="#gene-sets-file-in-gmt-format" title="Permalink to this headline">¶</a></h3>
 <p>All you need to do is to download gene set database file from <code class="docutils literal"><span class="pre">GSEA</span></code> website.</p>
-<p>Or you could use enrichr library. In this case, just provide libarary name to parameter &#8216;gene_sets&#8217;</p>
+<p>Or you could use enrichr library. In this case, just provide libarary name to parameter ‘gene_sets’</p>
 <p>If you would like to use you own gene_sets.gmts files, build such a file use excel,
 and then rename to gene_sets.gmt.</p>
 <p>An example of gmt file looks like below:</p>
@@ -325,7 +325,7 @@ and then rename to gene_sets.gmt.</p>
 .. code:: python</p>
 <blockquote>
 <div>import gseapy
-gseapy.gsea(data=&#8217;gsea_data.txt&#8217;, cls=&#8217;gsea.cls&#8217;, gmt=&#8217;gene_sets.gmt&#8217;, outdir=&#8217;gseapy_out&#8217;)</div></blockquote>
+gseapy.gsea(data=’gsea_data.txt’, cls=’gsea.cls’, gmt=’gene_sets.gmt’, outdir=’gseapy_out’)</div></blockquote>
 <p>bash shell
 .. code:: bash</p>
 <blockquote>
@@ -373,7 +373,7 @@ and gene_sets file in gmt format.  <code class="docutils literal"><span class="p
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">gseapy</span><span class="o">.</span><span class="n">enrichr</span><span class="p">(</span><span class="n">gene_list</span><span class="o">=</span><span class="s1">&#39;gene_list.txt&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;pathway&#39;</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span><span class="s1">&#39;KEGG_2016&#39;</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Let&#8217;s see what the txt file looks like.</p>
+<p>Let’s see what the txt file looks like.</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;data/gene_list.txt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">genes</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">genes</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
 </pre></div>
@@ -524,7 +524,7 @@ inside edb folder.The gsea document tree looks like this:</p>
 <span class="n">gseapy</span><span class="o">.</span><span class="n">replot</span><span class="p">(</span><span class="n">indir</span> <span class="o">=</span><span class="s1">&#39;gsea&#39;</span><span class="p">,</span> <span class="n">outdir</span> <span class="o">=</span> <span class="s1">&#39;gseapy_out&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>If you prefer to run in command line, it&#8217;s more simple.</p>
+<p>If you prefer to run in command line, it’s more simple.</p>
 <div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">gseapy</span> <span class="n">replot</span> <span class="o">-</span><span class="n">i</span> <span class="n">gsea</span> <span class="o">-</span><span class="n">o</span> <span class="n">gseapy_out</span>
 </pre></div>
 </div>
@@ -578,7 +578,7 @@ inside edb folder.The gsea document tree looks like this:</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.8.0',
+            VERSION:'0.8.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

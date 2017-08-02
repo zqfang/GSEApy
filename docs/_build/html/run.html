@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>How to Use GSEAPY &mdash; GSEApy 0.8.0 documentation</title>
+  <title>How to Use GSEAPY &mdash; GSEApy 0.8.3 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="GSEApy 0.8.0 documentation" href="index.html"/>
+    <link rel="top" title="GSEApy 0.8.3 documentation" href="index.html"/>
         <link rel="next" title="A Protocol to Prepare files for GSEAPY" href="gseapy_tutorial.html"/>
         <link rel="prev" title="Welcome to GSEAPY’s documentation!" href="introduction.html"/> 
 
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                0.8.0
+                0.8.3
               </div>
             
           
@@ -91,7 +91,7 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Welcome to GSEAPY&#8217;s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Welcome to GSEAPY’s documentation!</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">How to Use GSEAPY</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#for-command-line-usage">For command line usage:</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#run-gseapy-inside-python">Run gseapy inside python:</a></li>
@@ -186,7 +186,7 @@
 <span id="how-to-use-gseapy"></span><span id="run"></span><h1>How to Use GSEAPY<a class="headerlink" href="#module-gseapy" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="for-command-line-usage">
 <h2>For command line usage:<a class="headerlink" href="#for-command-line-usage" title="Permalink to this headline">¶</a></h2>
-<p>The <code class="docutils literal"><span class="pre">enrichr</span></code> module will call enrichr-api. You need a gene_list file for input. That&#8217;s all.</p>
+<p>The <code class="docutils literal"><span class="pre">enrichr</span></code> module will call enrichr-api. You need a gene_list file for input. That’s all.</p>
 <div class="code bash highlight-default"><div class="highlight"><pre><span></span># An example to use enrichr api
 $ gseapy enrichr -i gene_list.txt -g KEGG_2016 -d pathway_enrichment -o test
 </pre></div>
@@ -208,7 +208,7 @@ and gene_sets file in gmt format.  <code class="docutils literal"><span class="p
 <div class="code bash highlight-default"><div class="highlight"><pre><span></span>$ gseapy prerank -r gsea_data.rnk -g gene_sets.gmt -o test
 </pre></div>
 </div>
-<p>The input files&#8217; formats are identical to <code class="docutils literal"><span class="pre">GSEA</span></code> desktop version.
+<p>The input files’ formats are identical to <code class="docutils literal"><span class="pre">GSEA</span></code> desktop version.
 See <span class="xref std std-ref">example</span> for details, or, see <a class="reference external" href="http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page">GSEA</a> documentation for more information.</p>
 </div>
 <div class="section" id="run-gseapy-inside-python">
@@ -301,53 +301,54 @@ $ gseapy enrichr -h
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>data</strong> &#8211; Gene expression data table or pandas DataFrame.</li>
-<li><strong>gene_sets</strong> &#8211; Enrichr Library name or .gmt gene sets file. Same input with GSEA.</li>
-<li><strong>cls</strong> &#8211; a list or a .cls file format required for GSEA.</li>
-<li><strong>outdir</strong> (<em>str</em>) &#8211; Results output directory.</li>
-<li><strong>permutation_num</strong> (<em>int</em>) &#8211; Number of permutations for significance computation. Default: 1000.</li>
-<li><strong>permutation_type</strong> (<em>str</em>) &#8211; Permutation type, &#8220;phenotype&#8221; for phenotypes, &#8220;gene_set&#8221; for genes.</li>
-<li><strong>min_size</strong> (<em>int</em>) &#8211; Minimum allowed number of genes from gene set also the data set. Defaut: 15.</li>
-<li><strong>max_size</strong> (<em>int</em>) &#8211; Maximum allowed number of genes from gene set also the data set. Defaults: 500.</li>
-<li><strong>weighted_score_type</strong> (<em>float</em>) &#8211; Refer to <code class="xref py py-func docutils literal"><span class="pre">algorithm.enrichment_socre()</span></code>. Default:1.</li>
-<li><strong>method</strong> &#8211; <p>The method used to calculate a correlation or ranking. Default: &#8216;log2_ratio_of_classes&#8217;.
+<li><strong>data</strong> – Gene expression data table or pandas DataFrame.</li>
+<li><strong>gene_sets</strong> – Enrichr Library name or .gmt gene sets file. Same input with GSEA.</li>
+<li><strong>cls</strong> – a list or a .cls file format required for GSEA.</li>
+<li><strong>outdir</strong> (<em>str</em>) – Results output directory.</li>
+<li><strong>permutation_num</strong> (<em>int</em>) – Number of permutations for significance computation. Default: 1000.</li>
+<li><strong>permutation_type</strong> (<em>str</em>) – Permutation type, “phenotype” for phenotypes, “gene_set” for genes.</li>
+<li><strong>min_size</strong> (<em>int</em>) – Minimum allowed number of genes from gene set also the data set. Defaut: 15.</li>
+<li><strong>max_size</strong> (<em>int</em>) – Maximum allowed number of genes from gene set also the data set. Defaults: 500.</li>
+<li><strong>weighted_score_type</strong> (<em>float</em>) – Refer to <code class="xref py py-func docutils literal"><span class="pre">algorithm.enrichment_socre()</span></code>. Default:1.</li>
+<li><strong>method</strong> – <p>The method used to calculate a correlation or ranking. Default: ‘log2_ratio_of_classes’.
 Others methods are:</p>
 <ol class="arabic">
-<li>&#8216;signal_to_noise&#8217;<p>You must have at least three samples for each phenotype to use this metric.
+<li>’signal_to_noise’<p>You must have at least three samples for each phenotype to use this metric.
 The larger the signal-to-noise ratio, the larger the differences of the means (scaled by the standard deviations);
 that is, the more distinct the gene expression is in each phenotype and the more the gene acts as a “class marker.”</p>
 </li>
-<li>&#8216;t_test&#8217;<p>Uses the difference of means scaled by the standard deviation and number of samples. 
+<li>’t_test’<p>Uses the difference of means scaled by the standard deviation and number of samples.
 Note: You must have at least three samples for each phenotype to use this metric.
-The larger the tTest ratio, the more distinct the gene expression is in each phenotype 
+The larger the tTest ratio, the more distinct the gene expression is in each phenotype
 and the more the gene acts as a “class marker.”</p>
 </li>
-<li>&#8216;ratio_of_classes&#8217; (also referred to as fold change).<p>Uses the ratio of class means to calculate fold change for natural scale data.</p>
+<li>’ratio_of_classes’ (also referred to as fold change).<p>Uses the ratio of class means to calculate fold change for natural scale data.</p>
 </li>
-<li>&#8216;diff_of_classes&#8217;<p>Uses the difference of class means to calculate fold change for log scale data</p>
+<li>’diff_of_classes’<p>Uses the difference of class means to calculate fold change for nature scale data</p>
 </li>
-<li>&#8216;log2_ratio_of_classes&#8217;<p>Uses the log2 ratio of class means to calculate fold change for natural scale data.
-This is the recommended statistic for calculating fold change for natural scale data.</p>
+<li>’log2_ratio_of_classes’<p>Uses the log2 ratio of class means to calculate fold change for natural scale data.
+This is the recommended statistic for calculating fold change for log scale data.</p>
 </li>
 </ol>
 </li>
-<li><strong>ascending</strong> (<em>bool</em>) &#8211; Sorting order of rankings. Default: False.</li>
-<li><strong>figsize</strong> (<em>list</em>) &#8211; Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].</li>
-<li><strong>format</strong> (<em>str</em>) &#8211; Matplotlib figure format. Default: &#8216;pdf&#8217;.</li>
-<li><strong>graph_num</strong> (<em>int</em>) &#8211; Plot graphs for top sets of each phenotype</li>
-<li><strong>seed</strong> &#8211; Random seed. expect an interger. Defalut:None.</li>
-<li><strong>verbose</strong> (<em>bool</em>) &#8211; Bool, increase output verbosity, print out progress of your job, Default: False.</li>
+<li><strong>ascending</strong> (<em>bool</em>) – Sorting order of rankings. Default: False.</li>
+<li><strong>processes</strong> (<em>int</em>) – Number of Processes you are going to use. Default: 1.</li>
+<li><strong>figsize</strong> (<em>list</em>) – Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].</li>
+<li><strong>format</strong> (<em>str</em>) – Matplotlib figure format. Default: ‘pdf’.</li>
+<li><strong>graph_num</strong> (<em>int</em>) – Plot graphs for top sets of each phenotype</li>
+<li><strong>seed</strong> – Random seed. expect an interger. Defalut:None.</li>
+<li><strong>verbose</strong> (<em>bool</em>) – Bool, increase output verbosity, print out progress of your job, Default: False.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><p>Return a Prerank obj. All results store to  store a dictionary, obj.results,
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><p>Return a GSEA obj. All results store to a dictionary, obj.results,
 where contains:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">|</span> <span class="p">{</span><span class="n">es</span><span class="p">:</span> <span class="n">enrichment</span> <span class="n">score</span><span class="p">,</span> 
-<span class="o">|</span>  <span class="n">nes</span><span class="p">:</span> <span class="n">normalized</span> <span class="n">enrichment</span> <span class="n">score</span><span class="p">,</span> 
-<span class="o">|</span>  <span class="n">p</span><span class="p">:</span> <span class="n">P</span><span class="o">-</span><span class="n">value</span><span class="p">,</span> 
-<span class="o">|</span>  <span class="n">fdr</span><span class="p">:</span> <span class="n">FDR</span><span class="p">,</span> 
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">|</span> <span class="p">{</span><span class="n">es</span><span class="p">:</span> <span class="n">enrichment</span> <span class="n">score</span><span class="p">,</span>
+<span class="o">|</span>  <span class="n">nes</span><span class="p">:</span> <span class="n">normalized</span> <span class="n">enrichment</span> <span class="n">score</span><span class="p">,</span>
+<span class="o">|</span>  <span class="n">p</span><span class="p">:</span> <span class="n">P</span><span class="o">-</span><span class="n">value</span><span class="p">,</span>
+<span class="o">|</span>  <span class="n">fdr</span><span class="p">:</span> <span class="n">FDR</span><span class="p">,</span>
 <span class="o">|</span>  <span class="n">size</span><span class="p">:</span> <span class="n">gene</span> <span class="nb">set</span> <span class="n">size</span><span class="p">,</span>
-<span class="o">|</span>  <span class="n">matched_size</span><span class="p">:</span> <span class="n">genes</span> <span class="n">matched</span> <span class="n">to</span> <span class="n">the</span> <span class="n">data</span><span class="p">,</span> 
+<span class="o">|</span>  <span class="n">matched_size</span><span class="p">:</span> <span class="n">genes</span> <span class="n">matched</span> <span class="n">to</span> <span class="n">the</span> <span class="n">data</span><span class="p">,</span>
 <span class="o">|</span>  <span class="n">genes</span><span class="p">:</span> <span class="n">gene</span> <span class="n">names</span> <span class="kn">from</span> <span class="nn">the</span> <span class="n">data</span> <span class="nb">set</span><span class="p">}</span>
 </pre></div>
 </div>
@@ -367,30 +368,31 @@ where contains:</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>rnk</strong> &#8211; pre-ranked correlation table or pandas DataFrame. Same input with <code class="docutils literal"><span class="pre">GSEA</span></code> .rnk file.</li>
-<li><strong>gene_sets</strong> &#8211; Enrichr Library name or .gmt gene sets file. Same input with GSEA.</li>
-<li><strong>outdir</strong> &#8211; results output directory.</li>
-<li><strong>permutation_num</strong> (<em>int</em>) &#8211; Number of permutations for significance computation. Default: 1000.</li>
-<li><strong>min_size</strong> (<em>int</em>) &#8211; Minimum allowed number of genes from gene set also the data set. Defaut: 15.</li>
-<li><strong>max_size</strong> (<em>int</em>) &#8211; Maximum allowed number of genes from gene set also the data set. Defaults: 500.</li>
-<li><strong>weighted_score_type</strong> (<em>str</em>) &#8211; Refer to <code class="xref py py-func docutils literal"><span class="pre">algorithm.enrichment_socre()</span></code>. Default:1.</li>
-<li><strong>ascending</strong> (<em>bool</em>) &#8211; Sorting order of rankings. Default: False.</li>
-<li><strong>figsize</strong> (<em>list</em>) &#8211; Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].</li>
-<li><strong>format</strong> (<em>str</em>) &#8211; Matplotlib figure format. Default: &#8216;pdf&#8217;.</li>
-<li><strong>graph_num</strong> (<em>int</em>) &#8211; Plot graphs for top sets of each phenotype</li>
-<li><strong>seed</strong> &#8211; Random seed. expect an interger. Defalut:None.</li>
-<li><strong>verbose</strong> (<em>bool</em>) &#8211; Bool, increase output verbosity, print out progress of your job, Default: False.</li>
+<li><strong>rnk</strong> – pre-ranked correlation table or pandas DataFrame. Same input with <code class="docutils literal"><span class="pre">GSEA</span></code> .rnk file.</li>
+<li><strong>gene_sets</strong> – Enrichr Library name or .gmt gene sets file. Same input with GSEA.</li>
+<li><strong>outdir</strong> – results output directory.</li>
+<li><strong>permutation_num</strong> (<em>int</em>) – Number of permutations for significance computation. Default: 1000.</li>
+<li><strong>min_size</strong> (<em>int</em>) – Minimum allowed number of genes from gene set also the data set. Defaut: 15.</li>
+<li><strong>max_size</strong> (<em>int</em>) – Maximum allowed number of genes from gene set also the data set. Defaults: 500.</li>
+<li><strong>weighted_score_type</strong> (<em>str</em>) – Refer to <code class="xref py py-func docutils literal"><span class="pre">algorithm.enrichment_socre()</span></code>. Default:1.</li>
+<li><strong>ascending</strong> (<em>bool</em>) – Sorting order of rankings. Default: False.</li>
+<li><strong>processes</strong> (<em>int</em>) – Number of Processes you are going to use. Default: 1.</li>
+<li><strong>figsize</strong> (<em>list</em>) – Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].</li>
+<li><strong>format</strong> (<em>str</em>) – Matplotlib figure format. Default: ‘pdf’.</li>
+<li><strong>graph_num</strong> (<em>int</em>) – Plot graphs for top sets of each phenotype</li>
+<li><strong>seed</strong> – Random seed. expect an interger. Defalut:None.</li>
+<li><strong>verbose</strong> (<em>bool</em>) – Bool, increase output verbosity, print out progress of your job, Default: False.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><p>Return a Prerank obj. All results store to  store a dictionary, obj.results,
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><p>Return a Prerank obj. All results store to  a dictionary, obj.results,
 where contains:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">|</span> <span class="p">{</span><span class="n">es</span><span class="p">:</span> <span class="n">enrichment</span> <span class="n">score</span><span class="p">,</span> 
-<span class="o">|</span>  <span class="n">nes</span><span class="p">:</span> <span class="n">normalized</span> <span class="n">enrichment</span> <span class="n">score</span><span class="p">,</span> 
-<span class="o">|</span>  <span class="n">p</span><span class="p">:</span> <span class="n">P</span><span class="o">-</span><span class="n">value</span><span class="p">,</span> 
-<span class="o">|</span>  <span class="n">fdr</span><span class="p">:</span> <span class="n">FDR</span><span class="p">,</span> 
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">|</span> <span class="p">{</span><span class="n">es</span><span class="p">:</span> <span class="n">enrichment</span> <span class="n">score</span><span class="p">,</span>
+<span class="o">|</span>  <span class="n">nes</span><span class="p">:</span> <span class="n">normalized</span> <span class="n">enrichment</span> <span class="n">score</span><span class="p">,</span>
+<span class="o">|</span>  <span class="n">p</span><span class="p">:</span> <span class="n">P</span><span class="o">-</span><span class="n">value</span><span class="p">,</span>
+<span class="o">|</span>  <span class="n">fdr</span><span class="p">:</span> <span class="n">FDR</span><span class="p">,</span>
 <span class="o">|</span>  <span class="n">size</span><span class="p">:</span> <span class="n">gene</span> <span class="nb">set</span> <span class="n">size</span><span class="p">,</span>
-<span class="o">|</span>  <span class="n">matched_size</span><span class="p">:</span> <span class="n">genes</span> <span class="n">matched</span> <span class="n">to</span> <span class="n">the</span> <span class="n">data</span><span class="p">,</span> 
+<span class="o">|</span>  <span class="n">matched_size</span><span class="p">:</span> <span class="n">genes</span> <span class="n">matched</span> <span class="n">to</span> <span class="n">the</span> <span class="n">data</span><span class="p">,</span>
 <span class="o">|</span>  <span class="n">genes</span><span class="p">:</span> <span class="n">gene</span> <span class="n">names</span> <span class="kn">from</span> <span class="nn">the</span> <span class="n">data</span> <span class="nb">set</span><span class="p">}</span>
 </pre></div>
 </div>
@@ -410,30 +412,31 @@ where contains:</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>data</strong> &#8211; expression or pandas DataFrame. Same input with <code class="docutils literal"><span class="pre">GSEA</span></code> .rnk file.</li>
-<li><strong>gene_sets</strong> &#8211; Enrichr Library name or .gmt gene sets file. Same input with GSEA.</li>
-<li><strong>outdir</strong> &#8211; results output directory.</li>
-<li><strong>min_size</strong> (<em>int</em>) &#8211; Minimum allowed number of genes from gene set also the data set. Defaut: 15.</li>
-<li><strong>max_size</strong> (<em>int</em>) &#8211; Maximum allowed number of genes from gene set also the data set. Defaults: 500.</li>
-<li><strong>permutation_num</strong> (<em>int</em>) &#8211; Number of permutations for significance computation. Default: 1000.</li>
-<li><strong>weighted_score_type</strong> (<em>str</em>) &#8211; Refer to <code class="xref py py-func docutils literal"><span class="pre">algorithm.enrichment_socre()</span></code>. Default:0.25.</li>
-<li><strong>ascending</strong> (<em>bool</em>) &#8211; Sorting order of rankings. Default: False.</li>
-<li><strong>figsize</strong> (<em>list</em>) &#8211; Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].</li>
-<li><strong>format</strong> (<em>str</em>) &#8211; Matplotlib figure format. Default: &#8216;pdf&#8217;.</li>
-<li><strong>graph_num</strong> (<em>int</em>) &#8211; Plot graphs for top sets of each phenotype</li>
-<li><strong>seed</strong> &#8211; Random seed. expect an interger. Defalut:None.</li>
-<li><strong>verbose</strong> (<em>bool</em>) &#8211; Bool, increase output verbosity, print out progress of your job, Default: False.</li>
+<li><strong>data</strong> – expression or pandas DataFrame. Same input with <code class="docutils literal"><span class="pre">GSEA</span></code> .rnk file.</li>
+<li><strong>gene_sets</strong> – Enrichr Library name or .gmt gene sets file. Same input with GSEA.</li>
+<li><strong>outdir</strong> – results output directory.</li>
+<li><strong>min_size</strong> (<em>int</em>) – Minimum allowed number of genes from gene set also the data set. Defaut: 15.</li>
+<li><strong>max_size</strong> (<em>int</em>) – Maximum allowed number of genes from gene set also the data set. Defaults: 500.</li>
+<li><strong>permutation_num</strong> (<em>int</em>) – Number of permutations for significance computation. Default: 1000.</li>
+<li><strong>weighted_score_type</strong> (<em>str</em>) – Refer to <code class="xref py py-func docutils literal"><span class="pre">algorithm.enrichment_socre()</span></code>. Default:0.25.</li>
+<li><strong>ascending</strong> (<em>bool</em>) – Sorting order of rankings. Default: False.</li>
+<li><strong>processes</strong> (<em>int</em>) – Number of Processes you are going to use. Default: 1.</li>
+<li><strong>figsize</strong> (<em>list</em>) – Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].</li>
+<li><strong>format</strong> (<em>str</em>) – Matplotlib figure format. Default: ‘pdf’.</li>
+<li><strong>graph_num</strong> (<em>int</em>) – Plot graphs for top sets of each phenotype</li>
+<li><strong>seed</strong> – Random seed. expect an interger. Defalut:None.</li>
+<li><strong>verbose</strong> (<em>bool</em>) – Bool, increase output verbosity, print out progress of your job, Default: False.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><p>Return a ssGSEA obj. All results store to  store a dictionary, obj.results,
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><p>Return a ssGSEA obj. All results store to  a dictionary, obj.results,
 where contains:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">|</span> <span class="p">{</span><span class="n">es</span><span class="p">:</span> <span class="n">enrichment</span> <span class="n">score</span><span class="p">,</span> 
-<span class="o">|</span>  <span class="n">nes</span><span class="p">:</span> <span class="n">normalized</span> <span class="n">enrichment</span> <span class="n">score</span><span class="p">,</span> 
-<span class="o">|</span>  <span class="n">p</span><span class="p">:</span> <span class="n">P</span><span class="o">-</span><span class="n">value</span><span class="p">,</span> 
-<span class="o">|</span>  <span class="n">fdr</span><span class="p">:</span> <span class="n">FDR</span><span class="p">,</span> 
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">|</span> <span class="p">{</span><span class="n">es</span><span class="p">:</span> <span class="n">enrichment</span> <span class="n">score</span><span class="p">,</span>
+<span class="o">|</span>  <span class="n">nes</span><span class="p">:</span> <span class="n">normalized</span> <span class="n">enrichment</span> <span class="n">score</span><span class="p">,</span>
+<span class="o">|</span>  <span class="n">p</span><span class="p">:</span> <span class="n">P</span><span class="o">-</span><span class="n">value</span><span class="p">,</span>
+<span class="o">|</span>  <span class="n">fdr</span><span class="p">:</span> <span class="n">FDR</span><span class="p">,</span>
 <span class="o">|</span>  <span class="n">size</span><span class="p">:</span> <span class="n">gene</span> <span class="nb">set</span> <span class="n">size</span><span class="p">,</span>
-<span class="o">|</span>  <span class="n">matched_size</span><span class="p">:</span> <span class="n">genes</span> <span class="n">matched</span> <span class="n">to</span> <span class="n">the</span> <span class="n">data</span><span class="p">,</span> 
+<span class="o">|</span>  <span class="n">matched_size</span><span class="p">:</span> <span class="n">genes</span> <span class="n">matched</span> <span class="n">to</span> <span class="n">the</span> <span class="n">data</span><span class="p">,</span>
 <span class="o">|</span>  <span class="n">genes</span><span class="p">:</span> <span class="n">gene</span> <span class="n">names</span> <span class="kn">from</span> <span class="nn">the</span> <span class="n">data</span> <span class="nb">set</span><span class="p">}</span>
 </pre></div>
 </div>
@@ -453,15 +456,15 @@ where contains:</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>gene_list</strong> &#8211; Flat file with list of genes, one gene id per row, or a python list object</li>
-<li><strong>gene_sets</strong> &#8211; Enrichr Library to query. Required enrichr library name</li>
-<li><strong>description</strong> &#8211; name of analysis. optinal.</li>
-<li><strong>outdir</strong> &#8211; Output file directory</li>
-<li><strong>cutoff</strong> (<em>float</em>) &#8211; Adjust P-value cutoff, for plotting. Default: 0.05</li>
-<li><strong>format</strong> (<em>str</em>) &#8211; Output figure format supported by matplotlib,(&#8216;pdf&#8217;,&#8217;png&#8217;,&#8217;eps&#8217;...). Default: &#8216;pdf&#8217;.</li>
-<li><strong>figsize</strong> (<em>list</em>) &#8211; Matplotlib figsize, accept a tuple or list, e.g. (width,height). Default: (6.5,6).</li>
-<li><strong>no_plot</strong> (<em>bool</em>) &#8211; if equal to True, no figure will be draw. This is useful only if data are interested. Default: False.</li>
-<li><strong>verbose</strong> (<em>bool</em>) &#8211; Increase output verbosity, print out progress of your job, Default: False.</li>
+<li><strong>gene_list</strong> – Flat file with list of genes, one gene id per row, or a python list object</li>
+<li><strong>gene_sets</strong> – Enrichr Library to query. Required enrichr library name</li>
+<li><strong>description</strong> – name of analysis. optinal.</li>
+<li><strong>outdir</strong> – Output file directory</li>
+<li><strong>cutoff</strong> (<em>float</em>) – Adjust P-value cutoff, for plotting. Default: 0.05</li>
+<li><strong>format</strong> (<em>str</em>) – Output figure format supported by matplotlib,(‘pdf’,’png’,’eps’…). Default: ‘pdf’.</li>
+<li><strong>figsize</strong> (<em>list</em>) – Matplotlib figsize, accept a tuple or list, e.g. (width,height). Default: (6.5,6).</li>
+<li><strong>no_plot</strong> (<em>bool</em>) – if equal to True, no figure will be draw. This is useful only if data are interested. Default: False.</li>
+<li><strong>verbose</strong> (<em>bool</em>) – Increase output verbosity, print out progress of your job, Default: False.</li>
 </ul>
 </td>
 </tr>
@@ -481,20 +484,20 @@ where contains:</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>indir</strong> &#8211; GSEA desktop results directory. In the sub folder, you must contain edb file foder.</li>
-<li><strong>outdir</strong> &#8211; Output directory.</li>
-<li><strong>weighted_score_type</strong> (<em>float</em>) &#8211; weighted score type. choose from {0,1,1.5,2}. Default: 1.</li>
-<li><strong>figsize</strong> (<em>list</em>) &#8211; matplotlib output figure figsize. Defult: [6.5,6].</li>
-<li><strong>format</strong> (<em>str</em>) &#8211; matplotlib output figure format. Default: &#8216;pdf&#8217;.</li>
-<li><strong>min_size</strong> (<em>int</em>) &#8211; min size of input genes presented in Gene Sets. Default: 3.</li>
-<li><strong>max_size</strong> (<em>int</em>) &#8211; max size of input genes presented in Gene Sets. Default: 5000.
+<li><strong>indir</strong> – GSEA desktop results directory. In the sub folder, you must contain edb file foder.</li>
+<li><strong>outdir</strong> – Output directory.</li>
+<li><strong>weighted_score_type</strong> (<em>float</em>) – weighted score type. choose from {0,1,1.5,2}. Default: 1.</li>
+<li><strong>figsize</strong> (<em>list</em>) – matplotlib output figure figsize. Defult: [6.5,6].</li>
+<li><strong>format</strong> (<em>str</em>) – matplotlib output figure format. Default: ‘pdf’.</li>
+<li><strong>min_size</strong> (<em>int</em>) – min size of input genes presented in Gene Sets. Default: 3.</li>
+<li><strong>max_size</strong> (<em>int</em>) – max size of input genes presented in Gene Sets. Default: 5000.
 you will not encourage to use min_size, or max_size argment in <a class="reference internal" href="#gseapy.replot" title="gseapy.replot"><code class="xref py py-func docutils literal"><span class="pre">replot()</span></code></a> function.
 Because gmt file has already been filter.</li>
-<li><strong>verbose</strong> &#8211; Bool, increase output verbosity, print out progress of your job, Default: False.</li>
+<li><strong>verbose</strong> – Bool, increase output verbosity, print out progress of your job, Default: False.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Generate new figures with seleted figure format. Default: &#8216;pdf&#8217;.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Generate new figures with seleted figure format. Default: ‘pdf’.</p>
 </td>
 </tr>
 </tbody>
@@ -513,9 +516,9 @@ Because gmt file has already been filter.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>gene_list</strong> &#8211; The ordered gene list gene_name_list, rank_metric[&#8216;gene_name&#8217;]</li>
-<li><strong>gene_set</strong> &#8211; gene_sets in gmt file, please used gsea_gmt_parser to get gene_set.</li>
-<li><strong>weighted_score_type</strong> &#8211; It&#8217;s indentical to gsea&#8217;s weighted_score method. weighting by the correlation 
+<li><strong>gene_list</strong> – The ordered gene list gene_name_list, rank_metric[‘gene_name’]</li>
+<li><strong>gene_set</strong> – gene_sets in gmt file, please used gsea_gmt_parser to get gene_set.</li>
+<li><strong>weighted_score_type</strong> – It’s indentical to gsea’s weighted_score method. weighting by the correlation 
 is a very reasonable choice that allows significant gene sets with less than perfect coherence. 
 options: 0(classic),1,1.5,2. default:1. if one is interested in penalizing sets for lack of 
 coherence or to discover sets with any type of nonrandom distribution of tags, a value p &lt; 1 
@@ -523,11 +526,11 @@ might be appropriate. On the other hand, if one uses sets with largenumber of ge
 a small subset of those is expected to be coherent, then one could consider using p &gt; 1. 
 Our recommendation is to use p = 1 and use other settings only if you are very experienced 
 with the method and its behavior.</li>
-<li><strong>correl_vector</strong> &#8211; A vector with the correlations (e.g. signal to noise scores) corresponding to the genes in 
-the gene list. Or rankings, rank_metric[&#8216;rank&#8217;].values</li>
-<li><strong>esnull</strong> &#8211; Only used this paramter when computing esnuall for statistial testing. set the esnull value
+<li><strong>correl_vector</strong> – A vector with the correlations (e.g. signal to noise scores) corresponding to the genes in 
+the gene list. Or rankings, rank_metric[‘rank’].values</li>
+<li><strong>esnull</strong> – Only used this paramter when computing esnuall for statistial testing. set the esnull value
 equal to the permutation number.</li>
-<li><strong>rs</strong> &#8211; Random state for initialize gene list shuffling. Default: np.random.RandomState(seed=None)</li>
+<li><strong>rs</strong> – Random state for initialize gene list shuffling. Default: np.random.RandomState(seed=None)</li>
 </ul>
 </td>
 </tr>
@@ -558,9 +561,9 @@ of the genes in the signature and the remaining genes.</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>gene_set</strong> &#8211; a list of gene_names in the gene_set given by gmt file.</li>
-<li><strong>expressions</strong> &#8211; dict, a dictionary mapping gene names to their absolute expression values</li>
-<li><strong>weighted_score_type</strong> &#8211; the weighted exponent on the  term.</li>
+<li><strong>gene_set</strong> – a list of gene_names in the gene_set given by gmt file.</li>
+<li><strong>expressions</strong> – dict, a dictionary mapping gene names to their absolute expression values</li>
+<li><strong>weighted_score_type</strong> – the weighted exponent on the  term.</li>
 </ul>
 </td>
 </tr>
@@ -583,17 +586,17 @@ of the genes in the signature and the remaining genes.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>data</strong> &#8211; prepreocessed expression dataframe or a pre-ranked file if prerank=True.</li>
-<li><strong>gmt</strong> &#8211; all gene sets in .gmt file. need to call gsea_gmt_parser() to get results.</li>
-<li><strong>n</strong> &#8211; permutation number. default: 1000.</li>
-<li><strong>method</strong> &#8211; ranking_metric method. see above.</li>
-<li><strong>phenoPos</strong> &#8211; one of lables of phenotype&#8217;s names.</li>
-<li><strong>phenoNeg</strong> &#8211; one of lable of phenotype&#8217;s names.</li>
-<li><strong>classes</strong> &#8211; a list of phenotype labels, to specify which column of dataframe belongs to what catogry of phenotype.</li>
-<li><strong>weighted_score_type</strong> &#8211; default:1</li>
-<li><strong>ascending</strong> &#8211; sorting order of rankings. Default: False.</li>
-<li><strong>seed</strong> &#8211; random seed. Default: np.random.RandomState()</li>
-<li><strong>prerank</strong> &#8211; if true, this function will compute using pre-ranked file passed by parameter data.</li>
+<li><strong>data</strong> – prepreocessed expression dataframe or a pre-ranked file if prerank=True.</li>
+<li><strong>gmt</strong> – all gene sets in .gmt file. need to call gsea_gmt_parser() to get results.</li>
+<li><strong>n</strong> – permutation number. default: 1000.</li>
+<li><strong>method</strong> – ranking_metric method. see above.</li>
+<li><strong>phenoPos</strong> – one of lables of phenotype’s names.</li>
+<li><strong>phenoNeg</strong> – one of lable of phenotype’s names.</li>
+<li><strong>classes</strong> – a list of phenotype labels, to specify which column of dataframe belongs to what catogry of phenotype.</li>
+<li><strong>weighted_score_type</strong> – default:1</li>
+<li><strong>ascending</strong> – sorting order of rankings. Default: False.</li>
+<li><strong>seed</strong> – random seed. Default: np.random.RandomState()</li>
+<li><strong>prerank</strong> – if true, this function will compute using pre-ranked file passed by parameter data.</li>
 </ul>
 </td>
 </tr>
@@ -648,32 +651,32 @@ the positive and negative scores by divident by the mean of the ES(S,pi).</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>df</strong> &#8211; gene_expression DataFrame.</li>
-<li><strong>method</strong> &#8211; <p>The method used to calculate a correlation or ranking. Default: &#8216;log2_ratio_of_classes&#8217;.
+<li><strong>df</strong> – gene_expression DataFrame.</li>
+<li><strong>method</strong> – <p>The method used to calculate a correlation or ranking. Default: ‘log2_ratio_of_classes’.
 Others methods are:</p>
 <ol class="arabic">
-<li>&#8216;signal_to_noise&#8217;<p>You must have at least three samples for each phenotype to use this metric.
+<li>’signal_to_noise’<p>You must have at least three samples for each phenotype to use this metric.
 The larger the signal-to-noise ratio, the larger the differences of the means (scaled by the standard deviations);
 that is, the more distinct the gene expression is in each phenotype and the more the gene acts as a “class marker.”</p>
 </li>
-<li>&#8216;t_test&#8217;<p>Uses the difference of means scaled by the standard deviation and number of samples. 
+<li>’t_test’<p>Uses the difference of means scaled by the standard deviation and number of samples. 
 Note: You must have at least three samples for each phenotype to use this metric.
 The larger the tTest ratio, the more distinct the gene expression is in each phenotype 
 and the more the gene acts as a “class marker.”</p>
 </li>
-<li>&#8216;ratio_of_classes&#8217; (also referred to as fold change).<p>Uses the ratio of class means to calculate fold change for natural scale data.</p>
+<li>’ratio_of_classes’ (also referred to as fold change).<p>Uses the ratio of class means to calculate fold change for natural scale data.</p>
 </li>
-<li>&#8216;diff_of_classes&#8217;<p>Uses the difference of class means to calculate fold change for log scale data</p>
+<li>’diff_of_classes’<p>Uses the difference of class means to calculate fold change for natureal scale data</p>
 </li>
-<li>&#8216;log2_ratio_of_classes&#8217;<p>Uses the log2 ratio of class means to calculate fold change for natural scale data.
-This is the recommended statistic for calculating fold change for natural scale data.</p>
+<li>’log2_ratio_of_classes’<p>Uses the log2 ratio of class means to calculate fold change for natural scale data.
+This is the recommended statistic for calculating fold change for log scale data.</p>
 </li>
 </ol>
 </li>
-<li><strong>phenoPos</strong> &#8211; one of lables of phenotype&#8217;s names.</li>
-<li><strong>phenoNeg</strong> &#8211; one of lable of phenotype&#8217;s names.</li>
-<li><strong>classes</strong> &#8211; a list of phenotype labels, to specify which column of dataframe belongs to what catogry of phenotype.</li>
-<li><strong>ascending</strong> &#8211; bool or list of bool. Sort ascending vs. descending.</li>
+<li><strong>phenoPos</strong> – one of lables of phenotype’s names.</li>
+<li><strong>phenoNeg</strong> – one of lable of phenotype’s names.</li>
+<li><strong>classes</strong> – a list of phenotype labels, to specify which column of dataframe belongs to what catogry of phenotype.</li>
+<li><strong>ascending</strong> – bool or list of bool. Sort ascending vs. descending.</li>
 </ul>
 </td>
 </tr>
@@ -699,8 +702,8 @@ This is the recommended statistic for calculating fold change for natural scale 
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>gene_list</strong> &#8211; rank_metric[&#8216;gene_name&#8217;].values</li>
-<li><strong>rand</strong> &#8211; random seed. Use random.Random(0) if you like.</li>
+<li><strong>gene_list</strong> – rank_metric[‘gene_name’].values</li>
+<li><strong>rand</strong> – random seed. Use random.Random(0) if you like.</li>
 </ul>
 </td>
 </tr>
@@ -716,7 +719,7 @@ This is the recommended statistic for calculating fold change for natural scale 
 <span id="enrichr"></span><h2>Enrichr<a class="headerlink" href="#module-gseapy.enrichr" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="gseapy.enrichr.Enrichr">
-<em class="property">class </em><code class="descclassname">gseapy.enrichr.</code><code class="descname">Enrichr</code><span class="sig-paren">(</span><em>gene_list</em>, <em>gene_sets</em>, <em>descriptions='foo'</em>, <em>outdir='Enrichr'</em>, <em>cutoff=0.05</em>, <em>format='pdf'</em>, <em>figsize=(12</em>, <em>6)</em>, <em>top_term=10</em>, <em>no_plot=False</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.enrichr.Enrichr" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">gseapy.enrichr.</code><code class="descname">Enrichr</code><span class="sig-paren">(</span><em>gene_list</em>, <em>gene_sets</em>, <em>descriptions=’foo’</em>, <em>outdir=’Enrichr’</em>, <em>cutoff=0.05</em>, <em>format=’pdf’</em>, <em>figsize=(8</em>, <em>6)</em>, <em>top_term=10</em>, <em>no_plot=False</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.enrichr.Enrichr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Enrichr API</p>
 <dl class="method">
 <dt id="gseapy.enrichr.Enrichr.run">
@@ -728,22 +731,22 @@ This is the recommended statistic for calculating fold change for natural scale 
 
 <dl class="function">
 <dt id="gseapy.enrichr.enrichr">
-<code class="descclassname">gseapy.enrichr.</code><code class="descname">enrichr</code><span class="sig-paren">(</span><em>gene_list</em>, <em>gene_sets</em>, <em>description='foo'</em>, <em>outdir='Enrichr'</em>, <em>cutoff=0.05</em>, <em>format='pdf'</em>, <em>figsize=(8</em>, <em>6)</em>, <em>top_term=10</em>, <em>no_plot=False</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.enrichr.enrichr" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.enrichr.</code><code class="descname">enrichr</code><span class="sig-paren">(</span><em>gene_list</em>, <em>gene_sets</em>, <em>description=’foo’</em>, <em>outdir=’Enrichr’</em>, <em>cutoff=0.05</em>, <em>format=’pdf’</em>, <em>figsize=(8</em>, <em>6)</em>, <em>top_term=10</em>, <em>no_plot=False</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.enrichr.enrichr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Enrichr API.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>gene_list</strong> &#8211; Flat file with list of genes, one gene id per row, or a python list object</li>
-<li><strong>gene_sets</strong> &#8211; Enrichr Library to query. Required enrichr library name</li>
-<li><strong>description</strong> &#8211; name of analysis. optinal.</li>
-<li><strong>outdir</strong> &#8211; Output file directory</li>
-<li><strong>cutoff</strong> (<em>float</em>) &#8211; Adjust P-value cutoff, for plotting. Default: 0.05</li>
-<li><strong>format</strong> (<em>str</em>) &#8211; Output figure format supported by matplotlib,(&#8216;pdf&#8217;,&#8217;png&#8217;,&#8217;eps&#8217;...). Default: &#8216;pdf&#8217;.</li>
-<li><strong>figsize</strong> (<em>list</em>) &#8211; Matplotlib figsize, accept a tuple or list, e.g. (width,height). Default: (6.5,6).</li>
-<li><strong>no_plot</strong> (<em>bool</em>) &#8211; if equal to True, no figure will be draw. This is useful only if data are interested. Default: False.</li>
-<li><strong>verbose</strong> (<em>bool</em>) &#8211; Increase output verbosity, print out progress of your job, Default: False.</li>
+<li><strong>gene_list</strong> – Flat file with list of genes, one gene id per row, or a python list object</li>
+<li><strong>gene_sets</strong> – Enrichr Library to query. Required enrichr library name</li>
+<li><strong>description</strong> – name of analysis. optinal.</li>
+<li><strong>outdir</strong> – Output file directory</li>
+<li><strong>cutoff</strong> (<em>float</em>) – Adjust P-value cutoff, for plotting. Default: 0.05</li>
+<li><strong>format</strong> (<em>str</em>) – Output figure format supported by matplotlib,(‘pdf’,’png’,’eps’…). Default: ‘pdf’.</li>
+<li><strong>figsize</strong> (<em>list</em>) – Matplotlib figsize, accept a tuple or list, e.g. (width,height). Default: (6.5,6).</li>
+<li><strong>no_plot</strong> (<em>bool</em>) – if equal to True, no figure will be draw. This is useful only if data are interested. Default: False.</li>
+<li><strong>verbose</strong> (<em>bool</em>) – Increase output verbosity, print out progress of your job, Default: False.</li>
 </ul>
 </td>
 </tr>
@@ -771,7 +774,7 @@ This is the recommended statistic for calculating fold change for natural scale 
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cls</strong> &#8211; the a class list instance or .cls file which is identical to GSEA input .</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cls</strong> – the a class list instance or .cls file which is identical to GSEA input .</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">phenotype name and a list of class vector.</td>
 </tr>
@@ -788,8 +791,8 @@ This is the recommended statistic for calculating fold change for natural scale 
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>results_path</strong> &#8211; the .results file where lcoated inside edb folder.</li>
-<li><strong>index</strong> &#8211; gene_set index of gmt database, used for iterating items.</li>
+<li><strong>results_path</strong> – the .results file where lcoated inside edb folder.</li>
+<li><strong>index</strong> – gene_set index of gmt database, used for iterating items.</li>
 </ul>
 </td>
 </tr>
@@ -809,11 +812,11 @@ This is the recommended statistic for calculating fold change for natural scale 
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>gmt</strong> &#8211; the gene_sets.gmt file of GSEA input or an enrichr libary name.
+<li><strong>gmt</strong> – the gene_sets.gmt file of GSEA input or an enrichr libary name.
 checkout full enrichr library name here: <a class="reference external" href="http://amp.pharm.mssm.edu/Enrichr/#stats">http://amp.pharm.mssm.edu/Enrichr/#stats</a></li>
-<li><strong>min_size</strong> &#8211; Minimum allowed number of genes from gene set also the data set. Default: 3.</li>
-<li><strong>max_size</strong> &#8211; Maximum allowed number of genes from gene set also the data set. Default: 5000.</li>
-<li><strong>gene_list</strong> &#8211; Used for filtering gene set. Only used this argument for <code class="xref py py-func docutils literal"><span class="pre">call()</span></code> method.</li>
+<li><strong>min_size</strong> – Minimum allowed number of genes from gene set also the data set. Default: 3.</li>
+<li><strong>max_size</strong> – Maximum allowed number of genes from gene set also the data set. Default: 5000.</li>
+<li><strong>gene_list</strong> – Used for filtering gene set. Only used this argument for <code class="xref py py-func docutils literal"><span class="pre">call()</span></code> method.</li>
 </ul>
 </td>
 </tr>
@@ -838,8 +841,8 @@ do this for you.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>ax</strong> &#8211; axes object</li>
-<li><strong>spines</strong> &#8211; a list of spines names to keep. e.g [left, right, top, bottom]
+<li><strong>ax</strong> – axes object</li>
+<li><strong>spines</strong> – a list of spines names to keep. e.g [left, right, top, bottom]
 if spines = []. remove all spines and ticks.</li>
 </ul>
 </td>
@@ -850,7 +853,7 @@ if spines = []. remove all spines and ticks.</li>
 
 <dl class="function">
 <dt id="gseapy.plot.barplot">
-<code class="descclassname">gseapy.plot.</code><code class="descname">barplot</code><span class="sig-paren">(</span><em>df</em>, <em>cutoff=0.05</em>, <em>figsize=(12</em>, <em>6)</em>, <em>top_term=10</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.plot.barplot" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.plot.</code><code class="descname">barplot</code><span class="sig-paren">(</span><em>df</em>, <em>cutoff=0.05</em>, <em>figsize=(6.5</em>, <em>6)</em>, <em>top_term=10</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.plot.barplot" title="Permalink to this definition">¶</a></dt>
 <dd><p>barplot for enrichr results</p>
 </dd></dl>
 
@@ -863,10 +866,10 @@ if spines = []. remove all spines and ticks.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>df</strong> &#8211; GSEApy DataFrame results.</li>
-<li><strong>cutoff</strong> &#8211; p-adjust cut-off.</li>
-<li><strong>top_term</strong> &#8211; number of enriched terms to show.</li>
-<li><strong>scale</strong> &#8211; dotplot point size scale.</li>
+<li><strong>df</strong> – GSEApy DataFrame results.</li>
+<li><strong>cutoff</strong> – p-adjust cut-off.</li>
+<li><strong>top_term</strong> – number of enriched terms to show.</li>
+<li><strong>scale</strong> – dotplot point size scale.</li>
 </ul>
 </td>
 </tr>
@@ -886,16 +889,16 @@ if spines = []. remove all spines and ticks.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>rank_metric</strong> &#8211; rankings, rank_metric[&#8216;rank&#8217;].values.</li>
-<li><strong>enrich_term</strong> &#8211; gene_set name</li>
-<li><strong>hit_ind</strong> &#8211; hit indexs of rank_metric[&#8216;gene_name&#8217;] presented in gene set S.</li>
-<li><strong>nes</strong> &#8211; Normalized enrichment scores.</li>
-<li><strong>pval</strong> &#8211; nominal p-value.</li>
-<li><strong>fdr</strong> &#8211; false discoveray rate.</li>
-<li><strong>RES</strong> &#8211; ranking enrichment scores of all genes in rank_metric[&#8216;gene_name&#8217;].</li>
-<li><strong>phenoPos</strong> &#8211; phenotype lable, positive correlated.</li>
-<li><strong>phenoNeg</strong> &#8211; phenotype lable, negative correlated.</li>
-<li><strong>figsize</strong> &#8211; matplotlib figsize.</li>
+<li><strong>rank_metric</strong> – rankings, rank_metric[‘rank’].values.</li>
+<li><strong>enrich_term</strong> – gene_set name</li>
+<li><strong>hit_ind</strong> – hit indexs of rank_metric[‘gene_name’] presented in gene set S.</li>
+<li><strong>nes</strong> – Normalized enrichment scores.</li>
+<li><strong>pval</strong> – nominal p-value.</li>
+<li><strong>fdr</strong> – false discoveray rate.</li>
+<li><strong>RES</strong> – ranking enrichment scores of all genes in rank_metric[‘gene_name’].</li>
+<li><strong>phenoPos</strong> – phenotype lable, positive correlated.</li>
+<li><strong>phenoNeg</strong> – phenotype lable, negative correlated.</li>
+<li><strong>figsize</strong> – matplotlib figsize.</li>
 </ul>
 </td>
 </tr>
@@ -908,19 +911,19 @@ if spines = []. remove all spines and ticks.</li>
 
 <dl class="function">
 <dt id="gseapy.plot.heatmap">
-<code class="descclassname">gseapy.plot.</code><code class="descname">heatmap</code><span class="sig-paren">(</span><em>df</em>, <em>term</em>, <em>outdir</em>, <em>axis=0</em>, <em>figsize=(5</em>, <em>5)</em>, <em>format='png'</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.plot.heatmap" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.plot.</code><code class="descname">heatmap</code><span class="sig-paren">(</span><em>df</em>, <em>term</em>, <em>outdir</em>, <em>axis=0</em>, <em>figsize=(5</em>, <em>5)</em>, <em>format=’png’</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.plot.heatmap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Visualize the dataframe.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>df</strong> &#8211; DataFrame from expression table.</li>
-<li><strong>term</strong> &#8211; gene set name.</li>
-<li><strong>outdir</strong> &#8211; path to save heatmap.</li>
-<li><strong>axis</strong> &#8211; z_score axis.</li>
-<li><strong>figsize</strong> &#8211; heatmap figsize.</li>
-<li><strong>format</strong> &#8211; Matplotlib supported figure formats.</li>
+<li><strong>df</strong> – DataFrame from expression table.</li>
+<li><strong>term</strong> – gene set name.</li>
+<li><strong>outdir</strong> – path to save heatmap.</li>
+<li><strong>axis</strong> – z_score axis.</li>
+<li><strong>figsize</strong> – heatmap figsize.</li>
+<li><strong>format</strong> – Matplotlib supported figure formats.</li>
 </ul>
 </td>
 </tr>
@@ -937,8 +940,8 @@ if spines = []. remove all spines and ticks.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>data2d</strong> &#8211; DataFrame to normalize.</li>
-<li><strong>axis</strong> &#8211; int, Which axis to normalize across. If 0, normalize across rows, 
+<li><strong>data2d</strong> – DataFrame to normalize.</li>
+<li><strong>axis</strong> – int, Which axis to normalize across. If 0, normalize across rows, 
 if 1, normalize across columns.</li>
 </ul>
 </td>
@@ -998,7 +1001,7 @@ across the specified axis.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.8.0',
+            VERSION:'0.8.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
