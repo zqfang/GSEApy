@@ -71,7 +71,7 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
 
         Nhint = np.sum(tag_indicator, axis=axis).reshape(esnull, 1)
         sum_correl_tag = np.sum(correl_vector*tag_indicator, axis=axis).reshape(esnull, 1)
-     else:
+    else:
         Nhint = np.sum(tag_indicator) 
         sum_correl_tag = np.sum(correl_vector[tag_indicator.astype(bool)])
 
@@ -290,11 +290,12 @@ def ranking_metric(df, method, phenoPos, phenoNeg, classes, ascending):
 def _rnknull(df, method, phenoPos, phenoNeg, classes, ascending):
     """For multiprocessing 
     """
-        r2 = ranking_metric(df=df, method=method, phenoPos=phenoPos, 
-                            phenoNeg=phenoNeg, classes=classes, ascending=ascending)
-        ranking2=r2['rank'].values
-        gene_list2=r2['gene_name'].values
-        return ranking2, gene_list2
+    r2 = ranking_metric(df=df, method=method, phenoPos=phenoPos, 
+                        phenoNeg=phenoNeg, classes=classes, ascending=ascending)
+    ranking2=r2['rank'].values
+    gene_list2=r2['gene_name'].values
+
+    return ranking2, gene_list2
             
 def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
                  phenoPos, phenoNeg, classes, ascending, seed, processes, prerank=False):
