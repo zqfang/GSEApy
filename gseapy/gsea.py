@@ -409,7 +409,16 @@ class SingleSampleGSEA(GSEAbase):
         self.ranking=None
         self.module='SingleSample'
         self._processes=processes
-
+    def parse_gct(self):
+        """support for multi-sample input. 
+           gct format input      
+        """
+    def corplot(self):
+        """NES Correlation plot
+        """
+    def setplot(self):
+        """ranked genes' location plot
+        """
     def run(self):
         """Single Sample GSEA workflow"""
 

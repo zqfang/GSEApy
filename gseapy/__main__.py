@@ -7,12 +7,11 @@ import argparse as ap
 # Main function
 # ------------------------------------
 
-
 # there is a bug in add_argument(required=True), for hacking, don't set metavar='' when required=True,
 # or args = argparser.parse_args() will throw bugs!!!
 
 
-__version__ = '0.8.3'
+__version__ = '0.8.4'
 
 def main():
     """The Main function/pipeline for GSEAPY."""
