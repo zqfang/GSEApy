@@ -83,8 +83,12 @@ class GSEAbase:
         :return: a pandas DataFrame with 3 columns names are: 'gene_name','rank',rank2'
 
         """
+        #load data
         if isinstance(rnk, pd.DataFrame):
             rank_metric = rnk.copy()
+            # handle dataframe with gene_name as index.
+            if rnk.shape[1] == 1:
+                rank_metric = rnk.reset_index()
         elif isinstance(rnk, pd.Series):
             rank_metric = rnk.reset_index()
         elif os.path.isfile(rnk):
@@ -100,22 +104,24 @@ class GSEAbase:
             self._logger.warning("Input gene rankings contains NA values(gene name and ranking value), drop them all!")
             #print out NAs
             NAs = rank_metric[rank_metric.isnull().any(axis=1)]
-            self._logger.debug(NAs.to_string())
+            self._logger.debug('NAs list:\n'+NAs.to_string())
             rank_metric.dropna(how='any', inplace=True) 
         #drop duplicate IDs, keep the first
         if rank_metric.duplicated(subset=rank_metric.columns[0]).sum() >0:
             self._logger.warning("Input gene rankings contains duplicated IDs, Only use the duplicated ID with highest value!")
             #print out duplicated IDs.
             dups = rank_metric[rank_metric.duplicated(subset=rank_metric.columns[0])]
-            self._logger.debug(dups.to_string())
+            self._logger.debug('Dups list:\n'+dups.to_string())
             rank_metric.drop_duplicates(subset=rank_metric.columns[0], inplace=True, keep='first')
  
+        
         if rank_metric.shape[1] == 2:
-            #reset ranking index, or will cause problems
+            #reset ranking index, because you have sort values and drop duplicates.
             rank_metric.reset_index(drop=True, inplace=True) 
             rank_metric.columns = ['gene_name','rank']
-            rank_metric['rank2'] = rank_metric['rank']
-            self.ranking = rank_metric
+            self.ranking = rank_metric['rank']
+            #use for plotting, need 2d array
+            rank_metric['rank2'] = rank_metric['rank']        
         return rank_metric
 
     def _plotting(self, rank_metric, results, res2d,
@@ -411,15 +417,6 @@ class SingleSampleGSEA(GSEAbase):
         self.module='SingleSample'
         self._processes=processes
 
-    def __parse_gct(self):
-        """support for multi-sample input. 
-           gct format input      
-        """
-        df = self._rank_metric(self.data)
-        df.set_index(keys=df.columns[0], inplace=True)
-        df2 = df.select_dtypes(include=[number])
-        return df2
-
     def corplot(self):
         """NES Correlation plot
         """
@@ -432,10 +429,12 @@ class SingleSampleGSEA(GSEAbase):
         mkdirs(self.outdir)
         logger = self._log_init(module=self.module,
                                 log_level=logging.INFO if self.verbose else logging.WARNING)
+        #load data
         data = self._rank_metric(self.data)
-        if data.shape[1] > 2:
-            #multi-sample ssGSEA
-            self.runOnSamples()
+        # logic to process gct expression matrix
+        if self.ranking is None:
+            #gct expression matrix support for ssGSEA
+            self.runOnSamples(df=data)
         else:
             #only for one sample
             self.runSample(df=data)
@@ -446,27 +445,33 @@ class SingleSampleGSEA(GSEAbase):
         assert self.min_size <= self.max_size
 
         mkdirs(self.outdir)
+        #dat = self._rank_metric(df)
+        #assert len(dat) > 1
+        #Start Analysis
+        self._logger.info("Parsing data files for GSEA.............................")
+        #select correct expression genes and values.
+        if isinstance(df, pd.DataFrame):
+            if df.shape[1] == 1:
+                df = df.reset_index()
+        elif isinstance(df, pd.Series):
+            df = df.reset_index()
+            #sort ranking values from high to low or reverse
+            df.sort_values(by=df.columns[1], ascending=self.ascending, inplace=True)
+            df.columns = ['gene_name','rank']
+            df['rank2'] = df['rank']
+        else:
+            raise Exception('Error parsing gene ranking values!')
+        # revmove rank2
+        dat2 = df.set_index('gene_name')
+        del dat2['rank2']
+        #cpu numbers
+        self._set_cores()
         #filtering out gene sets and build gene sets dictionary
         if gmt is None:
-            #logger = self._log_init(module=self.module,
-            #                     log_level=logging.INFO if self.verbose else logging.WARNING)
             gmt = gsea_gmt_parser(self.gene_sets, 
                                   min_size=self.min_size, 
                                   max_size=self.max_size, 
                                   gene_list=dat2.index.values)
-
-        dat = self._rank_metric(df)
-        assert len(dat) > 1
-
-        #cpu numbers
-        self._set_cores()
-
-        #Start Analysis
-        self._logger.info("Parsing data files for GSEA.............................")
-        #select correct expression genes and values.
-
-        dat2 = dat.set_index('gene_name')
-        del dat2['rank2']
         self._logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
         self._logger.info("Start to run GSEA...Might take a while..................")
         #compute ES, NES, pval, FDR, RES
@@ -478,28 +483,30 @@ class SingleSampleGSEA(GSEAbase):
         res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
 
         self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
-                                   gmt=gmt, rank_metric=dat, permutation_type="gene_sets")
+                                   gmt=gmt, rank_metric=df, permutation_type="gene_sets")
 
         #Plotting
-        self._plotting(rank_metric=dat, results=self.results, res2d=self.res2d,
+        self._plotting(rank_metric=df, results=self.results, res2d=self.res2d,
                        graph_num=self.graph_num, outdir=self.outdir,
                        figsize=self.figsize, format=self.format, module=self.module)
 
         self._logger.info("Congratulations. GSEApy run successfully................")
 
         return
-    def runOnSamples(self):
+    def runOnSamples(self, df):
         """ssGSEA for gct expression matrix
         """
         #filter out duplicates and NAs
-        df = self.__parse_gct()
+        df.set_index(keys=df.columns[0], inplace=True)
+        df = df.select_dtypes(include=[number])
+        #df = self.__parse_gct()
         #filtering out gene sets and build gene sets dictionary
         gmt = gsea_gmt_parser(self.gene_sets, 
                               min_size=self.min_size, 
                               max_size=self.max_size, 
                               gene_list=df.index.values)
         #Save each sample results to ordereddict
-        self.resultsOnSamples = OrderedDict()
+        self.resultsOnSamples = {}
         outdir = self.outdir
         #run ssgsea for gct expression matrixs
         for name, ser in df.iteritems():
