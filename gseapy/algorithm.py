@@ -339,8 +339,11 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
        
     logging.debug("Start to compute enrichment socres......................")
 
-    rs = np.random.RandomState(seed)
     for subset in subsets:
+        #you have to reseed, or all your ranoom shuffling inside enrichment_score function
+        # are sharing the same seed value, which means shuffling state are same for each 
+        # iteration if no reseed.
+        rs = np.random.RandomState(seed)
         es, ind, RES = enrichment_score(gene_list, gmt.get(subset), w, ranking, None, rs) 
         enrichment_scores.append(es)
         rank_ES.append(RES)
@@ -421,7 +424,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
 def gsea_compute_ss(data, gmt, n, weighted_score_type, seed, processes):
     """compute enrichment scores and enrichment nulls for single sample GSEA. 
     """
-    rs = np.random.RandomState(seed) 
+    
     w = weighted_score_type
     subsets = sorted(gmt.keys())   
     exp_dict = data.to_dict()['rank']
@@ -433,7 +436,10 @@ def gsea_compute_ss(data, gmt, n, weighted_score_type, seed, processes):
     
     logging.debug("Start to compute enrichment socres......................") 
 
+    
     for subset in subsets:
+        #
+        rs = np.random.RandomState(seed) 
         es, ind, RES= enrichment_score_ss(gmt.get(subset), exp_dict, w, None,rs)
         enrichment_scores.append(es)
         rank_ES.append(RES)
