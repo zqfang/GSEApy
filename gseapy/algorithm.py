@@ -321,8 +321,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
       a nested list of ranked enrichment score of each input gene_sets. Used for plotting.
     
     """
-    rs = np.random.RandomState(seed)
-
+    
     enrichment_scores = []
     rank_ES = []
     hit_ind = [] 
@@ -339,7 +338,8 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
     gene_list=r2['gene_name']
        
     logging.debug("Start to compute enrichment socres......................")
-    
+
+    rs = np.random.RandomState(seed)
     for subset in subsets:
         es, ind, RES = enrichment_score(gene_list, gmt.get(subset), w, ranking, None, rs) 
         enrichment_scores.append(es)
@@ -381,6 +381,9 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
         rank_nulls=[]
         pool_rnkn = Pool(processes=processes) 
         for i in range(n):
+            #you have to reseed, or all your processes are sharing the same seed value
+            #rs = np.random.RandomState(seed)
+            rs = np.random.RandomState()
             rs.shuffle(l2)
             l3 = deepcopy(l2) 
             rank_nulls.append(pool_rnkn.apply_async(_rnknull, args=(dat2, method, 
@@ -400,6 +403,9 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
         temp_esnu=[]
         pool_esnu = Pool(processes=processes)                     
         for subset in subsets:
+            #you have to reseed, or all your processes are sharing the same seed value
+            #rs = np.random.RandomState(seed)
+            rs = np.random.RandomState()
             temp_esnu.append(pool_esnu.apply_async(enrichment_score, args=(gene_list, gmt.get(subset), w, 
                                                                            ranking, n, rs)))                                         
 
@@ -441,6 +447,9 @@ def gsea_compute_ss(data, gmt, n, weighted_score_type, seed, processes):
     temp_esnu=[]
     pool_esnu = Pool(processes=processes)                     
     for subset in subsets:
+        #you have to reseed, or all your processes are sharing the same seed value
+        #rs = np.random.RandomState(seed)
+        rs = np.random.RandomState()
         temp_esnu.append(pool_esnu.apply_async(enrichment_score_ss, args=(gmt.get(subset), exp_dict, 
                                                                           w, n, rs)))                                         
     

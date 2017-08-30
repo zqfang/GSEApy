@@ -13,7 +13,7 @@ from gseapy.plot import gsea_plot, heatmap
 from gseapy.utils import mkdirs
 
 
-class GSEAbase:
+class GSEAbase(object):
     """base class of GSEA."""
     def __init__(self):
         self.gene_sets='KEGG_2016'
@@ -52,8 +52,8 @@ class GSEAbase:
         logger = logging.getLogger("")
         #logger.setLevel(log_level)
         self._logger=logger
-
         return logger
+
     def _log_stop(self):
         """log stop"""
 
@@ -492,6 +492,7 @@ class SingleSampleGSEA(GSEAbase):
         self._logger.info("Congratulations. GSEApy run successfully................")
 
         return
+        
     def runOnSamples(self, df):
         """ssGSEA for gct expression matrix
         """
