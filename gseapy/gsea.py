@@ -530,14 +530,13 @@ class Replot(GSEAbase):
         self.format=format
         self.verbose=verbose
         self.module='replot'
+        self.gene_sets=None
+        self.ascending=False
 
     def run(self):
         """main replot function"""
         assert self.min_size <= self.max_size
 
-        mkdirs(self.outdir)
-        logger = self._log_init(module=self.module,
-                                log_level=logging.INFO if self.verbose else logging.WARNING)
         import glob
         from bs4 import BeautifulSoup
 
@@ -557,6 +556,12 @@ class Replot(GSEAbase):
         else:
             # logic for prerank results
             phenoPos, phenoNeg = '',''
+        #start reploting
+        self.gene_sets=gene_set_path
+        mkdirs(self.outdir)
+        logger = self._log_init(module=self.module,
+                                log_level=logging.INFO if self.verbose else logging.WARNING)
+
         #obtain gene sets
         gene_set_dict = gsea_gmt_parser(gene_set_path, min_size=self.min_size, max_size=self.max_size)
         #obtain rank_metrics
