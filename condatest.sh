@@ -52,7 +52,8 @@ conda create -y -n $name  python=${PY_VERSION} \
 
 source activate $name
 
-
+conda install coverage
+conda install -c conda-forge coveralls
 
 log "run command test"
 #python setup.py test
