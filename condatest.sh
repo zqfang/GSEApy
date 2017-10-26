@@ -48,11 +48,13 @@ source deactivate
 conda env list | grep -q $name && conda env remove -y -n $name
 conda create -y -n $name  python=${PY_VERSION} \
     --file "requirements.txt" \
-    --file "test-requirements.txt" 
-	
+    --file "test-requirements.txt"
+
 source activate $name
 
 log "run tests"
 nosetests
-# #(cd docs && make clean && make doctest)
 
+python setup.py test
+
+# #(cd docs && make clean && make doctest)
