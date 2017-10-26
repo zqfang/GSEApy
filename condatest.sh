@@ -56,8 +56,7 @@ source activate $name
 
 log "run command test"
 #python setup.py test
-
-nosetests
-
+#nosetests
+coverage run setup.py test
 
 # #(cd docs && make clean && make doctest)

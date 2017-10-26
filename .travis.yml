@@ -52,4 +52,4 @@ install:
 script:
     # - nosetests
     - bash ./condatest.sh "$TRAVIS_PYTHON_VERSION"
-    - coverage run setup.py test
+    #- coverage run setup.py test
