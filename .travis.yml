@@ -46,6 +46,8 @@ install:
     # Base env only needs to cythonize sources; test script takes care of
     # everything else.
     - conda install cython
+    - conda install coverage
+    - conda install -c conda-forge coveralls
 
 script:
     # - nosetests
