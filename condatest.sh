@@ -52,9 +52,12 @@ conda create -y -n $name  python=${PY_VERSION} \
 
 source activate $name
 
-log "run tests"
+
+
+log "run command test"
+#python setup.py test
+
 nosetests
 
-python setup.py test
 
 # #(cd docs && make clean && make doctest)
