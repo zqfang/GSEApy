@@ -15,6 +15,7 @@ dist
 *.pyo
 *.tmp*
 .cache
+.DS_Store
 
 tmp/
 
