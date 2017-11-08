@@ -386,7 +386,8 @@ class Prerank(GSEAbase):
         #Plotting
         self._plotting(rank_metric=dat2, results=self.results, res2d=self.res2d,
                        graph_num=self.graph_num, outdir=self.outdir,
-                       figsize=self.figsize, format=self.format, module=self.module)
+                       figsize=self.figsize, format=self.format,
+                       module=self.module, phenoPos=self.pheno_pos, phenoNeg=self.pheno_neg)
 
         logger.info("Congratulations. GSEApy run successfully................")
 
@@ -487,7 +488,8 @@ class SingleSampleGSEA(GSEAbase):
         #Plotting
         self._plotting(rank_metric=df, results=self.results, res2d=self.res2d,
                        graph_num=self.graph_num, outdir=self.outdir,
-                       figsize=self.figsize, format=self.format, module=self.module)
+                       figsize=self.figsize, format=self.format,
+                       module=self.module,phenoPos=self.pheno_pos, phenoNeg=self.pheno_neg)
 
         self._logger.info("Congratulations. GSEApy run successfully................")
 
