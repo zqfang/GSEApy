@@ -488,8 +488,7 @@ class SingleSampleGSEA(GSEAbase):
         #Plotting
         self._plotting(rank_metric=df, results=self.results, res2d=self.res2d,
                        graph_num=self.graph_num, outdir=self.outdir,
-                       figsize=self.figsize, format=self.format,
-                       module=self.module,phenoPos=self.pheno_pos, phenoNeg=self.pheno_neg)
+                       figsize=self.figsize, format=self.format, module=self.module)
 
         self._logger.info("Congratulations. GSEApy run successfully................")
 
