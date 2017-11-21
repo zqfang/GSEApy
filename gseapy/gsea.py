@@ -6,7 +6,7 @@ import requests
 import pandas as pd
 from collections import OrderedDict
 from multiprocessing import Pool, cpu_count
-from numpy import number
+from numpy import number, log, exp
 from gseapy.parser import *
 from gseapy.algorithm import enrichment_score, gsea_compute, gsea_compute_ss, ranking_metric
 from gseapy.plot import gsea_plot, heatmap
@@ -396,13 +396,14 @@ class Prerank(GSEAbase):
 
 class SingleSampleGSEA(GSEAbase):
     """GSEA extention: single sample GSEA"""
-    def __init__(self, data, gene_sets, outdir="GSEA_SingleSample",
-                 min_size=15, max_size=500, permutation_num=1000, weighted_score_type=0.25,
+    def __init__(self, data, gene_sets, outdir="GSEA_SingleSample", sample_norm_method='rank',
+                 min_size=2, max_size=2000, permutation_num=1000, weighted_score_type=0.25,
                  ascending=False, processes=1, figsize=[6.5,6], format='pdf',
                  graph_num=20, seed=None, verbose=False):
-        self.data = data
+        self.data=data
         self.gene_sets=gene_sets
         self.outdir=outdir
+        self.sample_norm_method=sample_norm_method
         self.weighted_score_type=weighted_score_type
         self.min_size=min_size
         self.max_size=max_size
@@ -431,6 +432,20 @@ class SingleSampleGSEA(GSEAbase):
                                 log_level=logging.INFO if self.verbose else logging.WARNING)
         #load data
         data = self._rank_metric(self.data)
+
+        # normalized samples
+        if self.sample_norm_method == 'rank':
+            data = data.rank(axis=0, method='average', na_option='bottom')
+            data = 10000*data / data.shape[0]
+        elif self.sample_norm_method == 'log_rank':
+            data = data.rank(axis=0, method='average', na_option='bottom')
+            data = log(10000*data / data.shape[0] + exp(1))
+        elif self.sample_norm_method == 'log':
+            data[data < 1] = 1
+            data = log(data + exp(1))
+        else:
+            sys.stderr.write("No supported method: %s"%self.sample_norm_type)
+
         # logic to process gct expression matrix
         if self.ranking is None:
             #gct expression matrix support for ssGSEA
@@ -506,6 +521,7 @@ class SingleSampleGSEA(GSEAbase):
                               min_size=self.min_size,
                               max_size=self.max_size,
                               gene_list=df.index.values)
+
         #Save each sample results to ordereddict
         self.resultsOnSamples = {}
         outdir = self.outdir
@@ -673,7 +689,7 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
     return gs
 
 
-def ssgsea(data, gene_sets, outdir="GSEA_SingleSample", min_size=15, max_size=500,
+def ssgsea(data, gene_sets, outdir="GSEA_SingleSample", sample_norm_method='rank', min_size=15, max_size=500,
            permutation_num=1000, weighted_score_type=0.25, ascending=False, processes=1,
            figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
     """Run Gene Set Enrichment Analysis with single sample GSEA tool
@@ -681,6 +697,7 @@ def ssgsea(data, gene_sets, outdir="GSEA_SingleSample", min_size=15, max_size=50
     :param data: expression or pandas DataFrame. Same input with ``GSEA`` .rnk file.
     :param gene_sets: Enrichr Library name or .gmt gene sets file. Same input with GSEA.
     :param outdir: results output directory.
+    :param str sample_norm_method: "Sample normalization method. Choose from {'rank', 'log', 'log_rank'}. Default: rank"
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Defaut: 15.
     :param int max_size: Maximum allowed number of genes from gene set also the data set. Defaults: 500.
     :param int permutation_num: Number of permutations for significance computation. Default: 1000.
@@ -706,7 +723,7 @@ def ssgsea(data, gene_sets, outdir="GSEA_SingleSample", min_size=15, max_size=50
 
     """
 
-    ss = SingleSampleGSEA(data, gene_sets, outdir, min_size, max_size,
+    ss = SingleSampleGSEA(data, gene_sets, outdir, sample_norm_method, min_size, max_size,
                           permutation_num, weighted_score_type, ascending,
                           processes, figsize, format, graph_num, seed, verbose)
     ss.run()

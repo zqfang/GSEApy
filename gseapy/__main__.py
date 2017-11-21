@@ -49,6 +49,7 @@ def main():
     elif subcommand == "ssgsea":
         from .gsea import SingleSampleGSEA
         ss = SingleSampleGSEA(data=args.data, gene_sets=args.gmt, outdir=args.outdir,
+                              sample_norm_method=args.norm,
                               min_size=args.mins, max_size=args.maxs, permutation_num=args.n, 
                               weighted_score_type=args.weight, ascending=args.ascending, 
                               processes=args.threads, figsize=args.figsize, format=args.format, 
@@ -222,6 +223,10 @@ def add_singlesample_parser(subparsers):
 
     # group for General options.
     group_opt = argparser_gsea.add_argument_group("GSEA advanced arguments")
+    group_opt.add_argument("-", "--norm-method", dest = "norm", action="store", type=str,
+                           default='rank', metavar='normalize', 
+                           choices=("rank", "log", "log_rank", ),
+                           help="Sample normalization method. Choose from {'rank', 'log', 'log_rank'}. Default: rank")
     group_opt.add_argument("-n", "--permu-num", dest = "n", action="store", type=int, default=1000, metavar='perNum',
                            help="Number of random permutations. For calculating esnulls. Default: 1000")
     group_opt.add_argument("--min-size", dest="mins", action="store", type=int, default=15, metavar='int',

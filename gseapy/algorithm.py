@@ -117,8 +117,9 @@ def enrichment_score_ss(gene_set, expressions, weighted_score_type=0.25, esnull=
     
     """
 
-    #first sort by absolute expression value, starting with the highest expressed genes first
+    #first sort by normalized expression value, starting with the highest expressed genes first
     keys_sorted = sorted(expressions, key=expressions.get, reverse=True) #returns the sorted list of keys
+
 
     #values representing the ECDF of genes in the geneset
     P_GW_numerator = 0
@@ -136,6 +137,22 @@ def enrichment_score_ss(gene_set, expressions, weighted_score_type=0.25, esnull=
     #values representing the ECDF of genes not in the gene_set
     P_NG_numerator = 0
     P_NG_denominator = len(expressions) - len(gene_set)
+
+    # transform the normalized expression data for a single sample into ranked (in decreasing order)
+    # expression values
+    if weighted_score_type == 0: 
+        # don't bother doing calcuation, just set to 1
+        ranked_index = np.rep(1, len(expressions))
+    elif weighted_score_type > 0: 
+        # calculate z.score of normalized (e.g., ranked) expression values
+        x=[]
+        for k in keys_sorted: x.append(expressions[k])
+        x = np.array(x)
+        ranked_index = (x- x.mean())/x.std()
+    else:
+        logging.warning("Using negative values of weighted_score_type, not allowed")
+        sys.exit(0)
+
 
     #integrate different in P_GW and P_NG
     """
@@ -157,24 +174,25 @@ def enrichment_score_ss(gene_set, expressions, weighted_score_type=0.25, esnull=
     tag_indicator = np.in1d(keys_sorted, gene_set, assume_unique=True).astype(int)        
     hit_ind = np.flatnonzero(tag_indicator).tolist() 
     N =len(tag_indicator)
-    index = np.arange(1, N+1)
-    
+    Nh = len(gene_set)
+    Nm =  N - Nh
+    #index = np.arange(1, N+1)
+    index = ranked_index
     if esnull:
         axis=1
-        #tag_indicator = tag_indicator.repeat(esnull).reshape(N, esnull).T
-        #index = index.repeat(esnull).reshape(N, esnull).T
         tag_indicator = np.tile(tag_indicator, (esnull,1))
         index = np.tile(index,(esnull,1))
         # gene list permutation
         for i in range(esnull):
             rs.shuffle(tag_indicator[i])
         #temp = np.apply_along_axis(rs.shuffle, 1, tag_indicator)
-        P_GW_denominator = np.sum(tag_indicator*index** weighted_score_type, axis=axis).reshape(esnull, 1)
+        P_GW_denominator = np.sum(tag_indicator*index** weighted_score_type, axis=axis, keepdims=True)
     else:
         P_GW_denominator = np.sum(tag_indicator*index** weighted_score_type, axis=axis)
 
     P_GW_numerator = np.cumsum(tag_indicator*index** weighted_score_type, axis=axis)
     P_NG_numerator = np.cumsum(np.invert(tag_indicator.astype(bool)), axis=axis)
+
 
 
     """
@@ -193,8 +211,29 @@ def enrichment_score_ss(gene_set, expressions, weighted_score_type=0.25, esnull=
     # the difference between a weighted ECDF of the genes in the signature P_WG 
     # and and the ECDF of the remaining genes P_NG
     """
+    
     RES = P_GW_numerator / P_GW_denominator - P_NG_numerator/ P_NG_denominator
     es = np.sum(RES, axis=axis)
+
+    
+    # # "up" represents the peaks in the mountain plot; i.e., increments in the running-sum
+    # up = ranked_index / P_GW_denominator
+    # # "gaps" contains the lengths of the gaps between ranked pathway genes
+    # gaps =P_NG_numerator
+    # # "down" contain the valleys in the mountain plot; i.e., the decrements in the running-sum
+    # down = gaps/ P_NG_denominator
+    # # calculate the cumulative sums at each of the ranked pathway genes
+    # RES = np.cumsum(c(up,up[Nh])-down)
+ 
+    # valleys = RES[1:Nh]-up
+
+    # max_ES = np.max(RES)
+    # min_ES = np.min(valleys)    
+    # # calculates the area under RES by adding up areas of individual
+    # # rectangles + triangles
+    # gaps = gaps+1
+    # RES = c(valleys,0) * (gaps) + 0.5*( c(0,RES[1:Nh]) - c(valleys,0) ) * (gaps)
+    # ES = np.sum(RES)
 
     if esnull:
         return es.tolist()

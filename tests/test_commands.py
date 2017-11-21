@@ -27,6 +27,9 @@ def prernk():
 def geneGMT():
     return "tests/data/edb/gene_sets.gmt"
 
+@pytest.fixture
+def ssGCT():
+    return "tests/data/ss/ss_test.txt"
 
 def test_gsea(gseaGCT, gseaCLS, geneGMT):
     # Only tests of the command runs successfully,
@@ -43,11 +46,11 @@ def test_prerank(prernk, geneGMT):
     prerank(prernk, geneGMT, tmpdir.name)
     tmpdir.cleanup()
 
-def test_ssgsea(prernk, geneGMT):
+def test_ssgsea(ssGCT, geneGMT):
     # Only tests of the command runs successfully,
     # doesnt't check the image
     tmpdir= TemporaryDirectory(dir="tests")
-    ssgsea(prernk, geneGMT, tmpdir.name)
+    ssgsea(ssGCT, geneGMT, tmpdir.name)
     tmpdir.cleanup()
 
 def test_enrichr(genelist):
