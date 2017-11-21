@@ -25,7 +25,7 @@ def prernk():
 
 @pytest.fixture
 def geneGMT():
-    return "tests/data/edb/gene_sets.gmt"
+    return "tests/data/genes.gmt"
 
 @pytest.fixture
 def ssGCT():
