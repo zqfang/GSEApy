@@ -92,7 +92,10 @@ class GSEAbase(object):
         elif isinstance(rnk, pd.Series):
             rank_metric = rnk.reset_index()
         elif os.path.isfile(rnk):
-            rank_metric = pd.read_table(rnk, header=None, comment='#')
+            if rnk.endswith("gct"):
+                rank_metric = pd.read_table(rnk, skiprows=1, comment='#')
+            else:
+                rank_metric = pd.read_table(rnk, header=None, comment='#')
         else:
             raise Exception('Error parsing gene ranking values!')
 

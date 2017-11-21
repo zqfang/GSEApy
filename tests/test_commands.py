@@ -29,7 +29,7 @@ def geneGMT():
 
 @pytest.fixture
 def ssGCT():
-    return "tests/data/ss/ss_test.txt"
+    return "tests/data/testSet_rand1200.gct"
 
 def test_gsea(gseaGCT, gseaCLS, geneGMT):
     # Only tests of the command runs successfully,

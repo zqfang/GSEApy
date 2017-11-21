@@ -223,7 +223,7 @@ def add_singlesample_parser(subparsers):
 
     # group for General options.
     group_opt = argparser_gsea.add_argument_group("GSEA advanced arguments")
-    group_opt.add_argument("-", "--norm-method", dest = "norm", action="store", type=str,
+    group_opt.add_argument("--norm-method", dest = "norm", action="store", type=str,
                            default='rank', metavar='normalize', 
                            choices=("rank", "log", "log_rank", ),
                            help="Sample normalization method. Choose from {'rank', 'log', 'log_rank'}. Default: rank")
