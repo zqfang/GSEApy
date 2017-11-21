@@ -229,10 +229,10 @@ def add_singlesample_parser(subparsers):
                            help="Sample normalization method. Choose from {'rank', 'log', 'log_rank'}. Default: rank")
     group_opt.add_argument("-n", "--permu-num", dest = "n", action="store", type=int, default=1000, metavar='perNum',
                            help="Number of random permutations. For calculating esnulls. Default: 1000")
-    group_opt.add_argument("--min-size", dest="mins", action="store", type=int, default=15, metavar='int',
-                           help="Min size of input genes presented in Gene Sets. Default: 15")
-    group_opt.add_argument("--max-size", dest = "maxs", action="store", type=int, default=500,metavar='int',
-                           help="Max size of input genes presented in Gene Sets. Default: 500")
+    group_opt.add_argument("--min-size", dest="mins", action="store", type=int, default=2, metavar='int',
+                           help="Min size of input genes presented in Gene Sets. Default: 2")
+    group_opt.add_argument("--max-size", dest = "maxs", action="store", type=int, default=2000,metavar='int',
+                           help="Max size of input genes presented in Gene Sets. Default: 2000")
     group_opt.add_argument("-w", "--weight", action='store', dest='weight', default=0.25, type=float, metavar='weight',
                            help='Weighted_score of rank_metrics.For weighting input genes.default: 0.25',)
     group_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
