@@ -120,7 +120,7 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     #figsize = (6,6)
     phenoP_label = phenoPos + ' (Positively Correlated)'
     phenoN_label = phenoNeg + ' (Negatively Correlated)'
-    zero_score_ind = np.abs(rank_metric['rank']).argmin()
+    zero_score_ind = rank_metric['rank'].abs().argmin()
     z_score_label = 'Zero score at ' + str(zero_score_ind)
     nes_label = 'NES: '+ "{:.3f}".format(float(nes))
     pval_label = 'Pval: '+ "{:.3f}".format(float(pval))
