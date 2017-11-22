@@ -121,23 +121,13 @@ def enrichment_score_ss(gene_set, expressions, weighted_score_type=0.25, esnull=
     #returns the sorted list of keys
     keys_sorted = sorted(expressions, key=expressions.get, reverse=True)
 
-
     #values representing the ECDF of genes in the geneset
     P_GW_numerator = 0
     P_GW_denominator = 0
-
-    """
-    #determining denominator value
-    i =1
-    for gene in keys_sorted:
-        if gene in gene_set:
-            P_GW_denominator += expressions[gene] ** weighted_score_type
-        i += 1
-    """
-
     P_NG_numerator = 0
     # transform the normalized expression data for a single sample into ranked (in decreasing order)
     # expression values
+    # see: http://rowley.mit.edu/caw_web/ssGSEAProjection/ssGSEAProjection.Library.R
     if weighted_score_type == 0: 
         # don't bother doing calcuation, just set to 1
         ranked_index = np.rep(1, len(expressions))
@@ -154,20 +144,6 @@ def enrichment_score_ss(gene_set, expressions, weighted_score_type=0.25, esnull=
 
 
     #integrate different in P_GW and P_NG
-    """
-    RES = [] #ranked_enrichment_score
-    i = 1 #current rank stepping through listing of sorted genes
-
-    for gene in keys_sorted:
-        if gene in gene_set:
-            P_GW_numerator += expressions[gene] ** weighted_score_type
-        else:
-            P_NG_numerator += 1
-
-        RES.append(P_GW_numerator / P_GW_denominator - P_NG_numerator / P_NG_denominator)
-        i += 1
-    """
-
     axis = 0
     #speed up using numpy array
     tag_indicator = np.in1d(keys_sorted, gene_set, assume_unique=True).astype(int)        
@@ -184,42 +160,25 @@ def enrichment_score_ss(gene_set, expressions, weighted_score_type=0.25, esnull=
         # gene list permutation
         for i in range(esnull):
             rs.shuffle(tag_indicator[i])
-    #     #temp = np.apply_along_axis(rs.shuffle, 1, tag_indicator)
-    #   P_GW_denominator = np.sum(tag_indicator*index** weighted_score_type, axis=axis, keepdims=True)
-    # else:
-    #     P_GW_denominator = np.sum(tag_indicator*index** weighted_score_type, axis=axis)
 
+    # take from here 
+    # https://gist.github.com/gaoce/39e0907146c752c127728ad74e123b33
     # calculate numerator of each gene hits
-    P_GW_numerator = tag_indicator*index** weighted_score_type
-    P_GW_denominator = np.sum(tag_indicator*index** weighted_score_type, axis=axis, keepdims=True)
-    P_NG_numerator = 1 -tag_indicator 
+    rank_alpha = (tag_indicator*index)** weighted_score_type
+    P_GW_denominator = np.sum(rank_alpha, axis=axis, keepdims=True)
+    P_GW_numerator = np.cumsum(rank_alpha, axis=axis)
+
     P_NG_denominator = len(expressions) - len(gene_set)
-    """
-    This calculation is repeated for each signature and each sample in the data set.
-    Note that the exponent of this quantity (α) is set to 1/4,
-    and adds a modest weight to the rank. 
-    In the regular GSEA a similar enrichment score is used, but the weight is typically set to 1. 
-    Also, instead of the sum over i, the enrichment score is computed according to the largest difference. 
-    This quantity is slightly more robust and more sensitive to differences 
-    in the tails of the distributions than the Kolmogorov–Smirnov statistic.
-    
-    # For a given signature G of size NG and single sample S, of the data set of N genes, 
-    # the genes are replaced by their ranks according the their absolute expression from
-    # high to low: L={r1,r2,...rn}. 
-    # An enrichment score ES(G,S) is obtained by a sum (integration) of 
-    # the difference between a weighted ECDF of the genes in the signature P_WG 
-    # and and the ECDF of the remaining genes P_NG
-    """
-    
+    P_NG_numerator = np.cumsum(1 -tag_indicator, axis=axis)
+
     RES = P_GW_numerator / P_GW_denominator - P_NG_numerator/ P_NG_denominator
-    REScumsum = np.cumsum(RES, axis=axis)
-    # keepdims=True?
-    es = np.sum(RES, axis=axis)
+    # scale es by gene numbers
+    es = np.sum(RES, axis=axis)/len(expressions)
 
     if esnull:
         return es.tolist()
 
-    return es.tolist(), hit_ind, REScumsum.tolist() 
+    return es.tolist(), hit_ind, RES.tolist() 
 
 
 def shuffle_list(gene_list, rand=np.random.RandomState()):

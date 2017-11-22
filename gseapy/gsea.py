@@ -466,8 +466,10 @@ class SingleSampleGSEA(GSEAbase):
         return rank_metric    
 
     def norm_samples(self, dat):
-        """normalizatin samples"""
-
+        """normalizatin samples
+           see here: http://rowley.mit.edu/caw_web/ssGSEAProjection/ssGSEAProjection.Library.R
+        """
+        
         #set index of gene_names
         #data = self.data.set_index(keys=data.columns[0], inplace=True)
 
