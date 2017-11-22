@@ -457,7 +457,7 @@ class SingleSampleGSEA(GSEAbase):
         else:
             raise Exception('Error parsing gene ranking values!')   
         
-        if rank_metric.index.duplicates().sum() > 0:
+        if rank_metric.index.duplicated().sum() > 0:
             logging.info("Warning: dropping duplicated gene names, only keep the first values")
             rank_metric = rank_metric.loc[rank_metric.index.drop_duplicates(keep='first')]
         # if single sample input, set ranking is not None for temp.
