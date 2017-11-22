@@ -498,7 +498,7 @@ class SingleSampleGSEA(GSEAbase):
 
         # normalized samples, and rank
         normdat = self.norm_samples(data)
-        print(normdat.head(10))
+
         # logic to process gct expression matrix
         if self.ranking is None:
             #gct expression matrix support for ssGSEA
@@ -530,7 +530,6 @@ class SingleSampleGSEA(GSEAbase):
         df.columns = ['gene_name','rank']
         df['rank2'] = df['rank']
 
-        print(df.head(10))
         # revmove rank2
         dat2 = df.set_index('gene_name')
         del dat2['rank2']
