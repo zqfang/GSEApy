@@ -118,26 +118,24 @@ def enrichment_score_ss(gene_set, expressions, weighted_score_type=0.25, esnull=
     """
 
     #first sort by normalized expression value, starting with the highest expressed genes first
-    keys_sorted = sorted(expressions, key=expressions.get, reverse=True) #returns the sorted list of keys
+    #returns the sorted list of keys
+    keys_sorted = sorted(expressions, key=expressions.get, reverse=True)
 
 
     #values representing the ECDF of genes in the geneset
     P_GW_numerator = 0
     P_GW_denominator = 0
+
     """
     #determining denominator value
     i =1
     for gene in keys_sorted:
-    if gene in gene_set:
-        P_GW_denominator += i ** weighted_score_type
-    i += 1
+        if gene in gene_set:
+            P_GW_denominator += expressions[gene] ** weighted_score_type
+        i += 1
     """
 
-    #determining denominator value
-    #values representing the ECDF of genes not in the gene_set
     P_NG_numerator = 0
-    P_NG_denominator = len(expressions) - len(gene_set)
-
     # transform the normalized expression data for a single sample into ranked (in decreasing order)
     # expression values
     if weighted_score_type == 0: 
@@ -146,9 +144,10 @@ def enrichment_score_ss(gene_set, expressions, weighted_score_type=0.25, esnull=
     elif weighted_score_type > 0: 
         # calculate z.score of normalized (e.g., ranked) expression values
         x=[]
-        for k in keys_sorted: x.append(expressions[k])
+        for gene in keys_sorted: 
+            x.append(expressions[gene])
         x = np.array(x)
-        ranked_index = (x- x.mean())/x.std()
+        ranked_expressions = (x- x.mean())/x.std()
     else:
         logging.warning("Using negative values of weighted_score_type, not allowed")
         sys.exit(0)
@@ -160,13 +159,13 @@ def enrichment_score_ss(gene_set, expressions, weighted_score_type=0.25, esnull=
     i = 1 #current rank stepping through listing of sorted genes
 
     for gene in keys_sorted:
-    if gene in gene_set:
-        P_GW_numerator += i ** weighted_score_type
-    else:
-        P_NG_numerator += 1
+        if gene in gene_set:
+            P_GW_numerator += expressions[gene] ** weighted_score_type
+        else:
+            P_NG_numerator += 1
 
-    RES.append(P_GW_numerator / P_GW_denominator - P_NG_numerator / P_NG_denominator)
-    i += 1
+        RES.append(P_GW_numerator / P_GW_denominator - P_NG_numerator / P_NG_denominator)
+        i += 1
     """
 
     axis = 0
@@ -177,7 +176,7 @@ def enrichment_score_ss(gene_set, expressions, weighted_score_type=0.25, esnull=
     Nh = len(gene_set)
     Nm =  N - Nh
     #index = np.arange(1, N+1)
-    index = ranked_index
+    index = np.abs(ranked_expressions)
     if esnull:
         axis=1
         tag_indicator = np.tile(tag_indicator, (esnull,1))
@@ -185,16 +184,16 @@ def enrichment_score_ss(gene_set, expressions, weighted_score_type=0.25, esnull=
         # gene list permutation
         for i in range(esnull):
             rs.shuffle(tag_indicator[i])
-        #temp = np.apply_along_axis(rs.shuffle, 1, tag_indicator)
-        P_GW_denominator = np.sum(tag_indicator*index** weighted_score_type, axis=axis, keepdims=True)
-    else:
-        P_GW_denominator = np.sum(tag_indicator*index** weighted_score_type, axis=axis)
+    #     #temp = np.apply_along_axis(rs.shuffle, 1, tag_indicator)
+    #   P_GW_denominator = np.sum(tag_indicator*index** weighted_score_type, axis=axis, keepdims=True)
+    # else:
+    #     P_GW_denominator = np.sum(tag_indicator*index** weighted_score_type, axis=axis)
 
-    P_GW_numerator = np.cumsum(tag_indicator*index** weighted_score_type, axis=axis)
-    P_NG_numerator = np.cumsum(np.invert(tag_indicator.astype(bool)), axis=axis)
-
-
-
+    # calculate numerator of each gene hits
+    P_GW_numerator = tag_indicator*index** weighted_score_type
+    P_GW_denominator = np.sum(tag_indicator*index** weighted_score_type, axis=axis, keepdims=True)
+    P_NG_numerator = 1 -tag_indicator 
+    P_NG_denominator = len(expressions) - len(gene_set)
     """
     This calculation is repeated for each signature and each sample in the data set.
     Note that the exponent of this quantity (α) is set to 1/4,
@@ -213,32 +212,14 @@ def enrichment_score_ss(gene_set, expressions, weighted_score_type=0.25, esnull=
     """
     
     RES = P_GW_numerator / P_GW_denominator - P_NG_numerator/ P_NG_denominator
+    REScumsum = np.cumsum(RES, axis=axis)
+    # keepdims=True?
     es = np.sum(RES, axis=axis)
-
-    
-    # # "up" represents the peaks in the mountain plot; i.e., increments in the running-sum
-    # up = ranked_index / P_GW_denominator
-    # # "gaps" contains the lengths of the gaps between ranked pathway genes
-    # gaps =P_NG_numerator
-    # # "down" contain the valleys in the mountain plot; i.e., the decrements in the running-sum
-    # down = gaps/ P_NG_denominator
-    # # calculate the cumulative sums at each of the ranked pathway genes
-    # RES = np.cumsum(c(up,up[Nh])-down)
- 
-    # valleys = RES[1:Nh]-up
-
-    # max_ES = np.max(RES)
-    # min_ES = np.min(valleys)    
-    # # calculates the area under RES by adding up areas of individual
-    # # rectangles + triangles
-    # gaps = gaps+1
-    # RES = c(valleys,0) * (gaps) + 0.5*( c(0,RES[1:Nh]) - c(valleys,0) ) * (gaps)
-    # ES = np.sum(RES)
 
     if esnull:
         return es.tolist()
 
-    return es.tolist(), hit_ind, RES.tolist() 
+    return es.tolist(), hit_ind, REScumsum.tolist() 
 
 
 def shuffle_list(gene_list, rand=np.random.RandomState()):

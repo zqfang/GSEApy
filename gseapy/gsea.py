@@ -92,10 +92,7 @@ class GSEAbase(object):
         elif isinstance(rnk, pd.Series):
             rank_metric = rnk.reset_index()
         elif os.path.isfile(rnk):
-            if rnk.endswith("gct"):
-                rank_metric = pd.read_table(rnk, skiprows=1, comment='#')
-            else:
-                rank_metric = pd.read_table(rnk, header=None, comment='#')
+            rank_metric = pd.read_table(rnk, header=None, comment='#')
         else:
             raise Exception('Error parsing gene ranking values!')
 
@@ -271,7 +268,11 @@ class GSEA(GSEAbase):
         if isinstance(self.data, pd.DataFrame) :
             df = self.data.copy()
         elif os.path.isfile(self.data) :
-            df = pd.read_table(self.data, comment='#')
+            # GCT input format?
+            if self.data.endswith("gct"):
+                df = pd.read_table(self.data, skiprows=1, comment='#') 
+            else:
+                df = pd.read_table(self.data, comment='#')
         else:
             raise Exception('Error parsing gene expression dataframe!')
             sys.exit(1)
@@ -400,7 +401,7 @@ class Prerank(GSEAbase):
 class SingleSampleGSEA(GSEAbase):
     """GSEA extention: single sample GSEA"""
     def __init__(self, data, gene_sets, outdir="GSEA_SingleSample", sample_norm_method='rank',
-                 min_size=2, max_size=2000, permutation_num=1000, weighted_score_type=0.25,
+                 min_size=15, max_size=2000, permutation_num=1000, weighted_score_type=0.25,
                  ascending=False, processes=1, figsize=[6.5,6], format='pdf',
                  graph_num=20, seed=None, verbose=False):
         self.data=data
@@ -427,6 +428,65 @@ class SingleSampleGSEA(GSEAbase):
     def setplot(self):
         """ranked genes' location plot
         """
+ 
+    def load_data(self):
+        #load data
+        rnk = self.data
+        if isinstance(rnk, pd.DataFrame):
+            rank_metric = rnk.copy()
+            # handle dataframe with gene_name as index.
+            loggging.debug("Input data is a DataFrame with gene names")
+            #handle index is not gene_names
+            if rank_metric.index.dtype != 'O':
+                rank_metric.set_index(keys=rank_metric.columns[0], inplace=True)
+
+            rank_metric = rank_metric.select_dtypes(include=[number])
+        elif isinstance(rnk, pd.Series):
+            #change to DataFrame
+            loggging.debug("Input data is a Series with gene names")
+            rank_metric = pd.DataFrame(rnk)
+        elif os.path.isfile(rnk):
+            # GCT input format?
+            if rnk.endswith("gct"):
+                rank_metric = pd.read_table(rnk, skiprows=1, comment='#', index_col=0) 
+            else:
+                #just rnk file input
+                rank_metric = pd.read_table(rnk, header=None, comment='#', index_col=0)
+            #select numbers 
+            rank_metric = rank_metric.select_dtypes(include=[number])
+        else:
+            raise Exception('Error parsing gene ranking values!')   
+        
+        if rank_metric.index.duplicates().sum() > 0:
+            logging.info("Warning: dropping duplicated gene names, only keep the first values")
+            rank_metric = rank_metric.loc[rank_metric.index.drop_duplicates(keep='first')]
+        # if single sample input, set ranking is not None for temp.
+        if rank_metric.shape[1] <= 2:
+            self.ranking=1
+        return rank_metric    
+
+    def norm_samples(self, dat):
+        """normalizatin samples"""
+
+        #set index of gene_names
+        #data = self.data.set_index(keys=data.columns[0], inplace=True)
+
+        if self.sample_norm_method == 'rank':
+            data = dat.rank(axis=0, method='average', na_option='bottom')
+            data = 10000*data / data.shape[0]
+        elif self.sample_norm_method == 'log_rank':
+            data = dat.rank(axis=0, method='average', na_option='bottom')
+            data = log(10000*data / data.shape[0] + exp(1))
+        elif self.sample_norm_method == 'log':
+            dat[dat < 1] = 1
+            data = log(dat + exp(1))
+        elif self.sample_norm_method == 'custom':
+            logging.info("Set user defined rank metric for ssGSEA")
+        else:
+            sys.stderr.write("No supported method: %s"%self.sample_norm_type)
+
+        return data
+
     def run(self):
         """
         """
@@ -434,28 +494,18 @@ class SingleSampleGSEA(GSEAbase):
         logger = self._log_init(module=self.module,
                                 log_level=logging.INFO if self.verbose else logging.WARNING)
         #load data
-        data = self._rank_metric(self.data)
+        data = self.load_data()
 
-        # normalized samples
-        if self.sample_norm_method == 'rank':
-            data = data.rank(axis=0, method='average', na_option='bottom')
-            data = 10000*data / data.shape[0]
-        elif self.sample_norm_method == 'log_rank':
-            data = data.rank(axis=0, method='average', na_option='bottom')
-            data = log(10000*data / data.shape[0] + exp(1))
-        elif self.sample_norm_method == 'log':
-            data[data < 1] = 1
-            data = log(data + exp(1))
-        else:
-            sys.stderr.write("No supported method: %s"%self.sample_norm_type)
-
+        # normalized samples, and rank
+        normdat = self.norm_samples(data)
+        print(normdat.head(10))
         # logic to process gct expression matrix
         if self.ranking is None:
             #gct expression matrix support for ssGSEA
-            self.runOnSamples(df=data)
+            self.runOnSamples(df=normdat)
         else:
             #only for one sample
-            self.runSample(df=data)
+            self.runSample(df=normdat)
 
     def runSample(self, df, gmt=None):
         """Single Sample GSEA workflow"""
@@ -463,8 +513,7 @@ class SingleSampleGSEA(GSEAbase):
         assert self.min_size <= self.max_size
 
         mkdirs(self.outdir)
-        #dat = self._rank_metric(df)
-        #assert len(dat) > 1
+
         #Start Analysis
         self._logger.info("Parsing data files for GSEA.............................")
         #select correct expression genes and values.
@@ -473,12 +522,15 @@ class SingleSampleGSEA(GSEAbase):
                 df = df.reset_index()
         elif isinstance(df, pd.Series):
             df = df.reset_index()
-            #sort ranking values from high to low or reverse
-            df.sort_values(by=df.columns[1], ascending=self.ascending, inplace=True)
-            df.columns = ['gene_name','rank']
-            df['rank2'] = df['rank']
         else:
             raise Exception('Error parsing gene ranking values!')
+
+        #sort ranking values from high to low or reverse
+        df.sort_values(by=df.columns[1], ascending=self.ascending, inplace=True)
+        df.columns = ['gene_name','rank']
+        df['rank2'] = df['rank']
+
+        print(df.head(10))
         # revmove rank2
         dat2 = df.set_index('gene_name')
         del dat2['rank2']
@@ -515,10 +567,8 @@ class SingleSampleGSEA(GSEAbase):
     def runOnSamples(self, df):
         """ssGSEA for gct expression matrix
         """
-        #filter out duplicates and NAs
-        df.set_index(keys=df.columns[0], inplace=True)
-        df = df.select_dtypes(include=[number])
-        #df = self.__parse_gct()
+        
+        # df.index.values are gene_names
         #filtering out gene sets and build gene sets dictionary
         gmt = gsea_gmt_parser(self.gene_sets,
                               min_size=self.min_size,
@@ -530,9 +580,9 @@ class SingleSampleGSEA(GSEAbase):
         outdir = self.outdir
         #run ssgsea for gct expression matrixs
         for name, ser in df.iteritems():
-            self.outdir= os.path.join(outdir, name)
+            self.outdir= os.path.join(outdir, str(name))
             self.runSample(df=ser, gmt=gmt)
-            self.resultsOnSamples[name] = self.results
+            self.resultsOnSamples[name] = self.res2d.es
 
         return
 
@@ -692,7 +742,7 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
     return gs
 
 
-def ssgsea(data, gene_sets, outdir="GSEA_SingleSample", sample_norm_method='rank', min_size=15, max_size=500,
+def ssgsea(data, gene_sets, outdir="GSEA_SingleSample", sample_norm_method='rank', min_size=15, max_size=2000,
            permutation_num=1000, weighted_score_type=0.25, ascending=False, processes=1,
            figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
     """Run Gene Set Enrichment Analysis with single sample GSEA tool
@@ -702,7 +752,7 @@ def ssgsea(data, gene_sets, outdir="GSEA_SingleSample", sample_norm_method='rank
     :param outdir: results output directory.
     :param str sample_norm_method: "Sample normalization method. Choose from {'rank', 'log', 'log_rank'}. Default: rank"
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Defaut: 15.
-    :param int max_size: Maximum allowed number of genes from gene set also the data set. Defaults: 500.
+    :param int max_size: Maximum allowed number of genes from gene set also the data set. Defaults: 2000.
     :param int permutation_num: Number of permutations for significance computation. Default: 1000.
     :param str weighted_score_type: Refer to :func:`algorithm.enrichment_socre`. Default:0.25.
     :param bool ascending: Sorting order of rankings. Default: False.

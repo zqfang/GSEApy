@@ -11,7 +11,7 @@ import argparse as ap
 # or args = argparser.parse_args() will throw bugs!!!
 
 
-__version__ = '0.8.6'
+__version__ = '0.8.7'
 
 def main():
     """The Main function/pipeline for GSEAPY."""
@@ -225,12 +225,12 @@ def add_singlesample_parser(subparsers):
     group_opt = argparser_gsea.add_argument_group("GSEA advanced arguments")
     group_opt.add_argument("--norm-method", dest = "norm", action="store", type=str,
                            default='rank', metavar='normalize', 
-                           choices=("rank", "log", "log_rank", ),
-                           help="Sample normalization method. Choose from {'rank', 'log', 'log_rank'}. Default: rank")
+                           choices=("rank", "log", "log_rank", "custom"),
+                           help="Sample normalization method. Choose from {'rank', 'log', 'log_rank','custom'}. Default: rank")
     group_opt.add_argument("-n", "--permu-num", dest = "n", action="store", type=int, default=1000, metavar='perNum',
                            help="Number of random permutations. For calculating esnulls. Default: 1000")
-    group_opt.add_argument("--min-size", dest="mins", action="store", type=int, default=2, metavar='int',
-                           help="Min size of input genes presented in Gene Sets. Default: 2")
+    group_opt.add_argument("--min-size", dest="mins", action="store", type=int, default=15, metavar='int',
+                           help="Min size of input genes presented in Gene Sets. Default: 15")
     group_opt.add_argument("--max-size", dest = "maxs", action="store", type=int, default=2000,metavar='int',
                            help="Max size of input genes presented in Gene Sets. Default: 2000")
     group_opt.add_argument("-w", "--weight", action='store', dest='weight', default=0.25, type=float, metavar='weight',
