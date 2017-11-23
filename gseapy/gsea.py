@@ -561,7 +561,7 @@ class SingleSampleGSEA(GSEAbase):
                        graph_num=self.graph_num, outdir=self.outdir,
                        figsize=self.figsize, format=self.format, module=self.module)
 
-        self._logger.info("Congratulations. GSEApy run successfully................")
+        self._logger.info("Congratulations. GSEApy run successfully................\n\n")
 
         return
 
@@ -582,9 +582,13 @@ class SingleSampleGSEA(GSEAbase):
         #run ssgsea for gct expression matrixs
         for name, ser in df.iteritems():
             self.outdir= os.path.join(outdir, str(name))
+            self._logger.info("Run Sample: %s "%name)
             self.runSample(df=ser, gmt=gmt)
             self.resultsOnSamples[name] = self.res2d.es
-
+        #save raw ES to one csv file
+        samplesRawES = pd.DataFrame(self.resultsOnSamples)
+        samplesRawES.index.name = 'Term'
+        samplesRawES.to_csv(os.path.join(outdir, "gseapy.samples.raw.es.csv"))
         return
 
 
