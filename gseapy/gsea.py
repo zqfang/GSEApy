@@ -270,7 +270,7 @@ class GSEA(GSEAbase):
         elif os.path.isfile(self.data) :
             # GCT input format?
             if self.data.endswith("gct"):
-                df = pd.read_table(self.data, skiprows=1, comment='#') 
+                df = pd.read_table(self.data, skiprows=1, comment='#')
             else:
                 df = pd.read_table(self.data, comment='#')
         else:
@@ -428,7 +428,7 @@ class SingleSampleGSEA(GSEAbase):
     def setplot(self):
         """ranked genes' location plot
         """
- 
+
     def load_data(self):
         #load data
         rnk = self.data
@@ -448,28 +448,28 @@ class SingleSampleGSEA(GSEAbase):
         elif os.path.isfile(rnk):
             # GCT input format?
             if rnk.endswith("gct"):
-                rank_metric = pd.read_table(rnk, skiprows=1, comment='#', index_col=0) 
+                rank_metric = pd.read_table(rnk, skiprows=1, comment='#', index_col=0)
             else:
                 #just rnk file input
                 rank_metric = pd.read_table(rnk, header=None, comment='#', index_col=0)
-            #select numbers 
+            #select numbers
             rank_metric = rank_metric.select_dtypes(include=[number])
         else:
-            raise Exception('Error parsing gene ranking values!')   
-        
+            raise Exception('Error parsing gene ranking values!')
+
         if rank_metric.index.duplicated().sum() > 0:
             logging.info("Warning: dropping duplicated gene names, only keep the first values")
             rank_metric = rank_metric.loc[rank_metric.index.drop_duplicates(keep='first')]
         # if single sample input, set ranking is not None for temp.
         if rank_metric.shape[1] <= 2:
             self.ranking=1
-        return rank_metric    
+        return rank_metric
 
     def norm_samples(self, dat):
         """normalizatin samples
            see here: http://rowley.mit.edu/caw_web/ssGSEAProjection/ssGSEAProjection.Library.R
         """
-        
+
         #set index of gene_names
         #data = self.data.set_index(keys=data.columns[0], inplace=True)
 
@@ -534,7 +534,7 @@ class SingleSampleGSEA(GSEAbase):
 
         # revmove rank2
         dat2 = df.set_index('gene_name')
-        del dat2['rank2']
+        dat2 = dat2['rank']
         #cpu numbers
         self._set_cores()
         #filtering out gene sets and build gene sets dictionary
@@ -568,7 +568,7 @@ class SingleSampleGSEA(GSEAbase):
     def runOnSamples(self, df):
         """ssGSEA for gct expression matrix
         """
-        
+
         # df.index.values are gene_names
         #filtering out gene sets and build gene sets dictionary
         gmt = gsea_gmt_parser(self.gene_sets,
