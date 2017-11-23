@@ -173,6 +173,13 @@ def enrichment_score_ss(gene_set, rnkseries, weighted_score_type=0.25, esnull=No
     # https://gist.github.com/gaoce/39e0907146c752c127728ad74e123b33
     es = np.sum(RES, axis=axis)/len(expressions)
 
+    # scale ES by RES interval
+    #   ## normalize enrichment scores by using the entire data set, as indicated
+    #   ## by Barbie et al., 2009, online methods, pg. 2
+    # max_ES = np.max(RES,)
+    # min_ES = np.min(RES,)
+    # es = np.sum(RES, axis=axis) / (max_ES - min_ES)
+
     if esnull:
         return es.tolist()
 

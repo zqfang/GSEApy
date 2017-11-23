@@ -452,6 +452,9 @@ class SingleSampleGSEA(GSEAbase):
             else:
                 #just rnk file input
                 rank_metric = pd.read_table(rnk, header=None, comment='#', index_col=0)
+                if rank_metric.shape[1] >=2:
+                    # txt file input
+                    rank_metric = pd.read_table(rnk, comment='#', index_col=0)
             #select numbers
             rank_metric = rank_metric.select_dtypes(include=[number])
         else:
