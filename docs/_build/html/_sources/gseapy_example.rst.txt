@@ -8,7 +8,7 @@ Examples to walk through ``GSEApy``
 1. Load essential packages
 --------------------------
 
-.. code:: ipython2
+.. code:: python
 
     %matplotlib inline
     import pandas as pd
@@ -17,7 +17,7 @@ Examples to walk through ``GSEApy``
 
 \*\* Check gseapy version \*\*
 
-.. code:: ipython2
+.. code:: python
 
     gp.__version__
 
@@ -36,7 +36,7 @@ See all gseapy supported enrichr library names
 Enrichr library could be used for ``gsea``, ``ssgsea``, and ``prerank``,
 too
 
-.. code:: ipython2
+.. code:: python
 
     names = gp.get_library_name()
     names[:10]
@@ -65,7 +65,7 @@ too
 1) Assign enrichr with ``pd.Series``, ``pd.DataFrame``, or ``list`` object
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: ipython2
+.. code:: python
 
     gene_list = pd.read_table("./gene_list.txt",header=None)
     gene_list.head()
@@ -123,7 +123,7 @@ too
 
 
 
-.. code:: ipython2
+.. code:: python
 
     type(gene_list)
 
@@ -136,7 +136,7 @@ too
 
 
 
-.. code:: ipython2
+.. code:: python
 
     # convert dataframe or series to list
     glist = gene_list.squeeze().tolist()
@@ -148,7 +148,7 @@ too
     ['CTLA2B', 'SCARA3', 'LOC100044683', 'CMBL', 'CLIC6', 'IL13RA1', 'TACSTD2', 'DKKL1', 'CSF1', 'CITED1']
 
 
-.. code:: ipython2
+.. code:: python
 
     # run enrichr
     # if you are only intrested in dataframe that enrichr returned, please set no_plot=True
@@ -163,7 +163,7 @@ too
                     )
 
 
-.. code:: ipython2
+.. code:: python
 
     enr.res2d.head()
 
@@ -275,7 +275,7 @@ You may also want to use enrichr in command line
 
 the option **-v** will print out the progress of your job
 
-.. code:: ipython2
+.. code:: python
 
     !gseapy enrichr -i ./gene_list.txt \
                    --description BP2017 \
@@ -305,7 +305,7 @@ the option **-v** will print out the progress of your job
 | Only contains two columns, or one cloumn with gene_name indexed when
   assign a ``DataFrame`` to prerank
 
-.. code:: ipython2
+.. code:: python
 
     rank = pd.read_table("./edb/gsea_data.gsea_data.rnk", header=None)
     rank.head()
@@ -369,7 +369,7 @@ the option **-v** will print out the progress of your job
 
 
 
-.. code:: ipython2
+.. code:: python
 
     # run prerank
     # enrichr libraries are supported by prerank module. Just provide the name
@@ -383,7 +383,7 @@ the option **-v** will print out the progress of your job
                              outdir='prerank_report_'+n,format='png')
         pre.append(pre_res)
 
-.. code:: ipython2
+.. code:: python
 
     #access results through res2d attribute
     pre[0].res2d.head()
@@ -457,7 +457,7 @@ the option **-v** will print out the progress of your job
 
 
 
-.. code:: ipython2
+.. code:: python
 
     pre_res = pre[0]
     prerank_results = pre_res.res2d
@@ -482,7 +482,7 @@ the option **-v** will print out the progress of your job
 
 You may also want to use prerank in command line
 
-.. code:: ipython2
+.. code:: python
 
     # ! gseapy prerank -r temp.rnk -g temp.gmt -o prerank_report_temp
 
@@ -494,11 +494,11 @@ You may also want to use prerank in command line
 
 and cls with a list object or just .cls format file
 
-.. code:: ipython2
+.. code:: python
 
     phenoA, phenoB, class_vector =  gp.parser.gsea_cls_parser("./P53.cls")
 
-.. code:: ipython2
+.. code:: python
 
     #class_vector used to indicate group attributes for each sample
     print(class_vector)
@@ -509,7 +509,7 @@ and cls with a list object or just .cls format file
     ['MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'WT', 'WT', 'WT', 'WT', 'WT', 'WT', 'WT', 'WT', 'WT', 'WT', 'WT', 'WT', 'WT', 'WT', 'WT', 'WT', 'WT']
 
 
-.. code:: ipython2
+.. code:: python
 
     gene_exp = pd.read_table("./P53_resampling_data.txt")
     gene_exp.head()
@@ -688,7 +688,7 @@ and cls with a list object or just .cls format file
 
 
 
-.. code:: ipython2
+.. code:: python
 
     print("positively correlated: ", phenoA)
 
@@ -698,7 +698,7 @@ and cls with a list object or just .cls format file
     ('positively correlated: ', 'MUT')
 
 
-.. code:: ipython2
+.. code:: python
 
     print("negtively correlated: ", phenoB)
 
@@ -708,7 +708,7 @@ and cls with a list object or just .cls format file
     ('negtively correlated: ', 'WT')
 
 
-.. code:: ipython2
+.. code:: python
 
     # run gsea
     # enrichr libraries are supported by gsea module. Just provide the name
@@ -723,7 +723,7 @@ and cls with a list object or just .cls format file
                      method='signal_to_noise', 
                      format='png')
 
-.. code:: ipython2
+.. code:: python
 
     #access the dataframe results throught res2d attribute
     gs_res.res2d.head()
@@ -827,7 +827,7 @@ and cls with a list object or just .cls format file
 
 
 
-.. code:: ipython2
+.. code:: python
 
     gsea_results= gs_res.res2d
     with plt.style.context('ggplot'):
@@ -845,7 +845,7 @@ and cls with a list object or just .cls format file
 The **gsea** module will generate heatmap for genes in each gene sets in
 the backgroud.
 
-.. code:: ipython2
+.. code:: python
 
     from IPython.display import Image
     
@@ -861,7 +861,7 @@ the backgroud.
 
 
 
-.. code:: ipython2
+.. code:: python
 
     #corresponding heatmap
     Image("./gsea_reprot/MAPK signaling pathway_Homo sapiens_hsa04010.heatmap.png")
@@ -878,7 +878,7 @@ the backgroud.
 
 You may also want to use gsea in command line
 
-.. code:: ipython2
+.. code:: python
 
     # !gseapy gsea -d ./P53_resampling_data.txt -g KEGG_2016 -c ./P53.cls -o gsea_reprot_2 -v -t phenotype
 
@@ -891,7 +891,7 @@ should be found in your expression table**
 1) Assign ssgsea() with a txt file, dataframe, or Seires(gene name as index).
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: ipython2
+.. code:: python
 
     # txt file input
     ss = gp.ssgsea(data="./testSet_rand1200.gct",
@@ -901,7 +901,7 @@ should be found in your expression table**
                    permutation_num=100, # reduce number to speed up test
                    processes=4, format='png')
 
-.. code:: ipython2
+.. code:: python
 
     # or assign a dataframe, or Series to ssgsea()
     ssdf = pd.read_table("./temp.txt",header=None)
@@ -966,7 +966,7 @@ should be found in your expression table**
 
 
 
-.. code:: ipython2
+.. code:: python
 
     # dataframe with one column is also supported by ssGSEA or Prerank
     # But you have to set gene_names as index
@@ -1030,7 +1030,7 @@ should be found in your expression table**
 
 
 
-.. code:: ipython2
+.. code:: python
 
     type(ssdf2)
 
@@ -1043,7 +1043,7 @@ should be found in your expression table**
 
 
 
-.. code:: ipython2
+.. code:: python
 
     ssSeries = ssdf2.squeeze()
     type(ssSeries)
@@ -1057,7 +1057,7 @@ should be found in your expression table**
 
 
 
-.. code:: ipython2
+.. code:: python
 
     #Series Example
     # supports dataframe and series
@@ -1068,7 +1068,7 @@ should be found in your expression table**
                        permutation_num=100, # reduce number to speed up test
                        processes=4, format='png')
 
-.. code:: ipython2
+.. code:: python
 
     ss.res2d.head(5)
 
@@ -1182,7 +1182,7 @@ should be found in your expression table**
 
 Take previous gene_exp dataframe for example
 
-.. code:: ipython2
+.. code:: python
 
     df = pd.read_table("./P53_resampling_data.txt")
     df.head()
@@ -1361,7 +1361,7 @@ Take previous gene_exp dataframe for example
 
 
 
-.. code:: ipython2
+.. code:: python
 
     # dataframe support for multisamples 
     ss = gp.ssgsea(data=df, 
@@ -1373,7 +1373,7 @@ Take previous gene_exp dataframe for example
 | Results for all samples are saves to a dataframe,
 | you can assces the reuslts through resultsOnSamples attribute.
 
-.. code:: ipython2
+.. code:: python
 
     # es results for all samples are saves to dict.
     # convert to dataframe 
@@ -1557,6 +1557,6 @@ Take previous gene_exp dataframe for example
 3) command line usage of single sample gsea
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: ipython2
+.. code:: python
 
     # !gseapy ssgsea -d ./testSet_rand1200.gct -g temp.gmt -o ssgsea_report2  -p 4
