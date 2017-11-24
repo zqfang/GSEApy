@@ -136,11 +136,10 @@ Installation
    # if you have conda
    $ conda install -c bioconda gseapy
 
-   # install lastest release
-   # and for windows users
+   # for windows users
    $ conda install -c bioninja gseapy
 
-   # or use pip to install the lastest release
+   # or use pip to install the latest release
    $ pip install gseapy
 
 | You may instead want to use the development version from Github, by running
@@ -225,7 +224,7 @@ Run gseapy inside python console:
 
 2. If you prefer to use Dataframe, dict, list in interactive python console, you could do this.
 
-see detail here: `Example <http://pythonhosted.org/gseapy/gseapy_example.html>`_
+see detail here: `Example <http://gseapy.readthedocs.io/en/master/gseapy_example.html>`_
 
 .. code:: python
 
@@ -311,4 +310,4 @@ If you would like to report any bugs when you running gseapy, don't hesitate to 
 To get help of GSEAPY
 ------------------------------------
 
-Visit the document site at https://pythonhosted.org/gseapy
+Visit the document site at http://gseapy.rtfd.io/

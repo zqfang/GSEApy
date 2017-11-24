@@ -8,16 +8,19 @@ Examples to walk through ``GSEApy``
 1. Load essential packages
 --------------------------
 
-.. code:: python
+.. code-block:: python
+    :linenos:
 
     %matplotlib inline
     import pandas as pd
     import gseapy as gp
     import matplotlib.pyplot as plt
 
-\*\* Check gseapy version \*\*
+**Check gseapy version**
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: python
+.. code-block:: python
+    :linenos:
 
     gp.__version__
 
@@ -36,7 +39,8 @@ See all gseapy supported enrichr library names
 Enrichr library could be used for ``gsea``, ``ssgsea``, and ``prerank``,
 too
 
-.. code:: python
+.. code-block:: python
+    :linenos:
 
     names = gp.get_library_name()
     names[:10]
@@ -65,7 +69,8 @@ too
 1) Assign enrichr with ``pd.Series``, ``pd.DataFrame``, or ``list`` object
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: python
+.. code-block:: python
+    :linenos:
 
     gene_list = pd.read_table("./gene_list.txt",header=None)
     gene_list.head()
@@ -80,11 +85,11 @@ too
         .dataframe thead tr:only-child th {
             text-align: right;
         }
-    
+
         .dataframe thead th {
             text-align: left;
         }
-    
+
         .dataframe tbody tr th {
             vertical-align: top;
         }
@@ -123,7 +128,8 @@ too
 
 
 
-.. code:: python
+.. code-block:: python
+    :linenos:
 
     type(gene_list)
 
@@ -136,7 +142,8 @@ too
 
 
 
-.. code:: python
+.. code-block:: python
+    :linenos:
 
     # convert dataframe or series to list
     glist = gene_list.squeeze().tolist()
@@ -148,22 +155,24 @@ too
     ['CTLA2B', 'SCARA3', 'LOC100044683', 'CMBL', 'CLIC6', 'IL13RA1', 'TACSTD2', 'DKKL1', 'CSF1', 'CITED1']
 
 
-.. code:: python
+.. code-block:: python
+    :linenos:
 
     # run enrichr
     # if you are only intrested in dataframe that enrichr returned, please set no_plot=True
-    
+
     # list, dataframe, series inputs are supported
-    enr = gp.enrichr(gene_list="./gene_list.txt", 
+    enr = gp.enrichr(gene_list="./gene_list.txt",
                      # or gene_list='./gene_list.txt', or gene_list=glist
-                     description='test_name', 
-                     gene_sets='KEGG_2016', 
-                     outdir='enrichr_kegg', 
+                     description='test_name',
+                     gene_sets='KEGG_2016',
+                     outdir='enrichr_kegg',
                      cutoff=0.5 # test dataset, use lower value of range(0,1)
                     )
 
 
-.. code:: python
+.. code-block:: python
+    :linenos:
 
     enr.res2d.head()
 
@@ -177,11 +186,11 @@ too
         .dataframe thead tr:only-child th {
             text-align: right;
         }
-    
+
         .dataframe thead th {
             text-align: left;
         }
-    
+
         .dataframe tbody tr th {
             vertical-align: top;
         }
@@ -275,10 +284,12 @@ You may also want to use enrichr in command line
 
 the option **-v** will print out the progress of your job
 
-.. code:: python
+.. code-block:: shell
+    :linenos:
 
-    !gseapy enrichr -i ./gene_list.txt \
-                   --description BP2017 \
+    #shell
+    gseapy enrichr -i ./gene_list.txt \
+                    --description BP2017 \
                    -g GO_Biological_Process_2017 \
                    -v -o enrichr_BP
 
@@ -291,7 +302,7 @@ the option **-v** will print out the progress of your job
     2017-11-24 13:12:04,922 Downloading file of enrichment results: Job Id:{'shortId': '350iz', 'userListId': 6127777}
     2017-11-24 13:12:08,329 Warning: No enrich terms using library GO_Biological_Process_2017 when cuttoff = 0.05
     2017-11-24 13:12:08,329 Done.
-    
+
 
 
 3. Prerank example
@@ -305,7 +316,8 @@ the option **-v** will print out the progress of your job
 | Only contains two columns, or one cloumn with gene_name indexed when
   assign a ``DataFrame`` to prerank
 
-.. code:: python
+.. code-block:: python
+    :linenos:
 
     rank = pd.read_table("./edb/gsea_data.gsea_data.rnk", header=None)
     rank.head()
@@ -320,11 +332,11 @@ the option **-v** will print out the progress of your job
         .dataframe thead tr:only-child th {
             text-align: right;
         }
-    
+
         .dataframe thead th {
             text-align: left;
         }
-    
+
         .dataframe tbody tr th {
             vertical-align: top;
         }
@@ -369,21 +381,24 @@ the option **-v** will print out the progress of your job
 
 
 
-.. code:: python
+  .. code-block:: python
+    :linenos:
 
     # run prerank
     # enrichr libraries are supported by prerank module. Just provide the name
     pre=[]
     for s, n in zip(['./genes.gmt', 'KEGG_2016'],['bp','kegg']):
         #use 4 process to acceralate the permutation speed
-        pre_res = gp.prerank(rnk=rank, 
-                             gene_sets=s, 
+        pre_res = gp.prerank(rnk=rank,
+                             gene_sets=s,
                              processes=4,
                              permutation_num=100, # reduce number to speed up test
                              outdir='prerank_report_'+n,format='png')
         pre.append(pre_res)
 
-.. code:: python
+
+.. code-block:: python
+    :linenos:
 
     #access results through res2d attribute
     pre[0].res2d.head()
@@ -398,11 +413,11 @@ the option **-v** will print out the progress of your job
         .dataframe thead tr:only-child th {
             text-align: right;
         }
-    
+
         .dataframe thead th {
             text-align: left;
         }
-    
+
         .dataframe tbody tr th {
             vertical-align: top;
         }
@@ -457,7 +472,8 @@ the option **-v** will print out the progress of your job
 
 
 
-.. code:: python
+.. code-block:: python
+    :linenos:
 
     pre_res = pre[0]
     prerank_results = pre_res.res2d
@@ -482,9 +498,10 @@ the option **-v** will print out the progress of your job
 
 You may also want to use prerank in command line
 
-.. code:: python
+.. code-block:: shell
+    :linenos:
 
-    # ! gseapy prerank -r temp.rnk -g temp.gmt -o prerank_report_temp
+    gseapy prerank -r temp.rnk -g temp.gmt -o prerank_report_temp
 
 4. GSEA Example
 ---------------
@@ -494,11 +511,14 @@ You may also want to use prerank in command line
 
 and cls with a list object or just .cls format file
 
-.. code:: python
+.. code-block:: python
+    :linenos:
 
     phenoA, phenoB, class_vector =  gp.parser.gsea_cls_parser("./P53.cls")
 
-.. code:: python
+
+.. code-block:: python
+    :linenos:
 
     #class_vector used to indicate group attributes for each sample
     print(class_vector)
@@ -509,7 +529,8 @@ and cls with a list object or just .cls format file
     ['MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'MUT', 'WT', 'WT', 'WT', 'WT', 'WT', 'WT', 'WT', 'WT', 'WT', 'WT', 'WT', 'WT', 'WT', 'WT', 'WT', 'WT', 'WT']
 
 
-.. code:: python
+.. code-block:: python
+    :linenos:
 
     gene_exp = pd.read_table("./P53_resampling_data.txt")
     gene_exp.head()
@@ -524,11 +545,11 @@ and cls with a list object or just .cls format file
         .dataframe thead tr:only-child th {
             text-align: right;
         }
-    
+
         .dataframe thead th {
             text-align: left;
         }
-    
+
         .dataframe tbody tr th {
             vertical-align: top;
         }
@@ -688,42 +709,38 @@ and cls with a list object or just .cls format file
 
 
 
-.. code:: python
+.. code-block:: python
+    :linenos:
 
     print("positively correlated: ", phenoA)
 
 
-.. parsed-literal::
-
-    ('positively correlated: ', 'MUT')
-
-
-.. code:: python
+.. code-block:: python
+    :linenos:
 
     print("negtively correlated: ", phenoB)
 
 
-.. parsed-literal::
 
-    ('negtively correlated: ', 'WT')
-
-
-.. code:: python
+.. code-block:: python
+    :linenos:
 
     # run gsea
     # enrichr libraries are supported by gsea module. Just provide the name
-    
+
     gs_res = gp.gsea(data=gene_exp, # or data='./P53_resampling_data.txt'
                      gene_sets='KEGG_2016', # enrichr library names
                      cls=class_vector, # or cls= './P53.cls'
                      #set permutation_type to phenotype if samples >=15
-                     permutation_type='phenotype', 
+                     permutation_type='phenotype',
                      permutation_num=100, # reduce number to speed up test
-                     outdir='gsea_reprot', 
-                     method='signal_to_noise', 
+                     outdir='gsea_reprot',
+                     method='signal_to_noise',
                      format='png')
 
-.. code:: python
+
+.. code-block:: python
+    :linenos:
 
     #access the dataframe results throught res2d attribute
     gs_res.res2d.head()
@@ -738,11 +755,11 @@ and cls with a list object or just .cls format file
         .dataframe thead tr:only-child th {
             text-align: right;
         }
-    
+
         .dataframe thead th {
             text-align: left;
         }
-    
+
         .dataframe tbody tr th {
             vertical-align: top;
         }
@@ -827,7 +844,8 @@ and cls with a list object or just .cls format file
 
 
 
-.. code:: python
+.. code-block:: python
+    :linenos:
 
     gsea_results= gs_res.res2d
     with plt.style.context('ggplot'):
@@ -848,7 +866,7 @@ the backgroud.
 .. code:: python
 
     from IPython.display import Image
-    
+
     #erich plot
     Image("./gsea_reprot/MAPK signaling pathway_Homo sapiens_hsa04010.gsea.png",width=650, height=600)
 
@@ -878,9 +896,11 @@ the backgroud.
 
 You may also want to use gsea in command line
 
-.. code:: python
+.. code-block:: shell
+    :linenos:
 
-    # !gseapy gsea -d ./P53_resampling_data.txt -g KEGG_2016 -c ./P53.cls -o gsea_reprot_2 -v -t phenotype
+    gseapy gsea -d ./P53_resampling_data.txt -g KEGG_2016 -c ./P53.cls -o gsea_reprot_2 -v -t phenotype
+
 
 5. Single Sample GSEA example
 -----------------------------
@@ -891,17 +911,21 @@ should be found in your expression table**
 1) Assign ssgsea() with a txt file, dataframe, or Seires(gene name as index).
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: python
+
+.. code-block:: python
+    :linenos:
 
     # txt file input
     ss = gp.ssgsea(data="./testSet_rand1200.gct",
-                   gene_sets="./randomSets.gmt", 
-                   outdir='ssgsea_report', 
-                   sample_norm_method='rank', # choose 'custom' for your own rank list 
+                   gene_sets="./randomSets.gmt",
+                   outdir='ssgsea_report',
+                   sample_norm_method='rank', # choose 'custom' for your own rank list
                    permutation_num=100, # reduce number to speed up test
                    processes=4, format='png')
 
-.. code:: python
+
+.. code-block:: python
+    :linenos:
 
     # or assign a dataframe, or Series to ssgsea()
     ssdf = pd.read_table("./temp.txt",header=None)
@@ -917,11 +941,11 @@ should be found in your expression table**
         .dataframe thead tr:only-child th {
             text-align: right;
         }
-    
+
         .dataframe thead th {
             text-align: left;
         }
-    
+
         .dataframe tbody tr th {
             vertical-align: top;
         }
@@ -966,7 +990,8 @@ should be found in your expression table**
 
 
 
-.. code:: python
+.. code-block:: python
+    :linenos:
 
     # dataframe with one column is also supported by ssGSEA or Prerank
     # But you have to set gene_names as index
@@ -983,11 +1008,11 @@ should be found in your expression table**
         .dataframe thead tr:only-child th {
             text-align: right;
         }
-    
+
         .dataframe thead th {
             text-align: left;
         }
-    
+
         .dataframe tbody tr th {
             vertical-align: top;
         }
@@ -1030,7 +1055,8 @@ should be found in your expression table**
 
 
 
-.. code:: python
+.. code-block:: python
+    :linenos:
 
     type(ssdf2)
 
@@ -1043,7 +1069,8 @@ should be found in your expression table**
 
 
 
-.. code:: python
+.. code-block:: python
+    :linenos:
 
     ssSeries = ssdf2.squeeze()
     type(ssSeries)
@@ -1057,18 +1084,21 @@ should be found in your expression table**
 
 
 
-.. code:: python
+.. code-block:: python
+    :linenos:
 
     #Series Example
     # supports dataframe and series
     for dat in [ssdf, ssdf2, ssSeries]:
-        ss = gp.ssgsea(data=ssdf, 
-                       gene_sets="./temp.gmt", 
+        ss = gp.ssgsea(data=ssdf,
+                       gene_sets="./temp.gmt",
                        outdir='ssgsea_report_series',
                        permutation_num=100, # reduce number to speed up test
                        processes=4, format='png')
 
-.. code:: python
+
+.. code-block:: python
+    :linenos:
 
     ss.res2d.head(5)
 
@@ -1082,11 +1112,11 @@ should be found in your expression table**
         .dataframe thead tr:only-child th {
             text-align: right;
         }
-    
+
         .dataframe thead th {
             text-align: left;
         }
-    
+
         .dataframe tbody tr th {
             vertical-align: top;
         }
@@ -1182,7 +1212,9 @@ should be found in your expression table**
 
 Take previous gene_exp dataframe for example
 
-.. code:: python
+
+.. code-block:: python
+    :linenos:
 
     df = pd.read_table("./P53_resampling_data.txt")
     df.head()
@@ -1197,11 +1229,11 @@ Take previous gene_exp dataframe for example
         .dataframe thead tr:only-child th {
             text-align: right;
         }
-    
+
         .dataframe thead th {
             text-align: left;
         }
-    
+
         .dataframe tbody tr th {
             vertical-align: top;
         }
@@ -1361,22 +1393,25 @@ Take previous gene_exp dataframe for example
 
 
 
-.. code:: python
+.. code-block:: python
+    :linenos:
 
-    # dataframe support for multisamples 
-    ss = gp.ssgsea(data=df, 
-                   gene_sets="edb/gene_sets.gmt", 
-                   outdir='ssgsea_df_test', 
+    # dataframe support for multisamples
+    ss = gp.ssgsea(data=df,
+                   gene_sets="edb/gene_sets.gmt",
+                   outdir='ssgsea_df_test',
                    permutation_num=100, # reduce number to speed up test
                    processes=4, format='png')
 
 | Results for all samples are saves to a dataframe,
 | you can assces the reuslts through resultsOnSamples attribute.
 
-.. code:: python
+
+.. code-block:: python
+    :linenos:
 
     # es results for all samples are saves to dict.
-    # convert to dataframe 
+    # convert to dataframe
     ss2 = pd.DataFrame(ss.resultsOnSamples)
     ss2.head()
 
@@ -1390,11 +1425,11 @@ Take previous gene_exp dataframe for example
         .dataframe thead tr:only-child th {
             text-align: right;
         }
-    
+
         .dataframe thead th {
             text-align: left;
         }
-    
+
         .dataframe tbody tr th {
             vertical-align: top;
         }
@@ -1557,6 +1592,7 @@ Take previous gene_exp dataframe for example
 3) command line usage of single sample gsea
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: python
+.. code-block:: shell
+    :linenos:
 
-    # !gseapy ssgsea -d ./testSet_rand1200.gct -g temp.gmt -o ssgsea_report2  -p 4
+    gseapy ssgsea -d ./testSet_rand1200.gct -g temp.gmt -o ssgsea_report2  -p 4
