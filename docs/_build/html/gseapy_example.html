@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>GSEAPY Example &mdash; GSEApy 0.8.4 documentation</title>
+  <title>GSEAPY Example &mdash; GSEApy 0.8.7 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="GSEApy 0.8.4 documentation" href="index.html"/>
+    <link rel="top" title="GSEApy 0.8.7 documentation" href="index.html"/>
         <link rel="prev" title="A Protocol to Prepare files for GSEAPY" href="gseapy_tutorial.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.8.4
+                0.8.7
               </div>
             
           
@@ -94,28 +94,35 @@
 <li class="toctree-l1"><a class="reference internal" href="run.html">How to Use GSEAPY</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gseapy_tutorial.html">A Protocol to Prepare files for GSEAPY</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">GSEAPY Example</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#examples-to-walk-through-gseapy-and-enrichr">Examples to walk through <code class="docutils literal"><span class="pre">GSEApy</span></code> and enrichr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#examples-to-walk-through-gseapy">Examples to walk through <code class="docutils literal"><span class="pre">GSEApy</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#load-essential-packages">1. Load essential packages</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="#load-essential-packages">1. Load essential packages</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#see-all-gseapy-supported-enrichr-library-names">See all gseapy supported enrichr library names</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#enrichr-example">2. Enrichr Example</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#i-assign-enrichr-with-gene-list-object">i. Assign enrichr with gene list object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#see-all-gseapy-supported-enrichr-library-names">See all gseapy supported enrichr library names</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#enrichr-example">2. Enrichr Example</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="#ii-command-line-usage">ii . Command line usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#prerank-example">3. Prerank example</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#i-assign-prank-with-a-pandas-dataframe">i. Assign prank() with a pandas DataFrame</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#assign-enrichr-with-pd-series-pd-dataframe-or-list-object">1) Assign enrichr with <code class="docutils literal"><span class="pre">pd.Series</span></code>, <code class="docutils literal"><span class="pre">pd.DataFrame</span></code>, or <code class="docutils literal"><span class="pre">list</span></code> object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#command-line-usage">2) Command line usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prerank-example">3. Prerank example</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="#id1">ii . Command line usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#gsea-example">4. GSEA Example</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#i-assign-gsea-with-a-pandas-dataframe">i. Assign gsea() with a pandas DataFrame</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#assign-prerank-with-a-pd-dataframe-pd-series-or-a-txt-file">1) Assign prerank() with a pd.DataFrame, pd.Series , or a txt file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">2) Command line usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#gsea-example">4. GSEA Example</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="#ii-show-the-gsea-plots">ii. Show the gsea plots</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#iii-command-line-usage">iii . Command line usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#single-sample-gsea-example">5. Single Sample GSEA example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#assign-gsea-with-a-pandas-dataframe-gct-format-file-or-a-text-file">1) Assign gsea() with a pandas DataFrame, .gct format file, or a text file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#show-the-gsea-plots">2) Show the gsea plots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">3) Command line usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#single-sample-gsea-example">5. Single Sample GSEA example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#assign-ssgsea-with-a-txt-file-dataframe-or-seires-gene-name-as-index">1) Assign ssgsea() with a txt file, dataframe, or Seires(gene name as index).</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ssgsea-supports-gene-expression-matix-in-gct-format">2) <code class="docutils literal"><span class="pre">ssgsea</span></code> supports gene expression matix in gct format.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#command-line-usage-of-single-sample-gsea">3) command line usage of single sample gsea</a></li>
+</ul>
+</li>
 </ul>
 
             
@@ -181,37 +188,38 @@
             
   <div class="section" id="gseapy-example">
 <h1>GSEAPY Example<a class="headerlink" href="#gseapy-example" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="examples-to-walk-through-gseapy-and-enrichr">
-<h2>Examples to walk through <code class="docutils literal"><span class="pre">GSEApy</span></code> and enrichr<a class="headerlink" href="#examples-to-walk-through-gseapy-and-enrichr" title="Permalink to this headline">¶</a></h2>
-</div>
-</div>
+<div class="section" id="examples-to-walk-through-gseapy">
+<h2>Examples to walk through <code class="docutils literal"><span class="pre">GSEApy</span></code><a class="headerlink" href="#examples-to-walk-through-gseapy" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="load-essential-packages">
-<h1>1. Load essential packages<a class="headerlink" href="#load-essential-packages" title="Permalink to this headline">¶</a></h1>
+<h3>1. Load essential packages<a class="headerlink" href="#load-essential-packages" title="Permalink to this headline">¶</a></h3>
 <p>** Check gseapy version **</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="s1">&#39;0.8.0&#39;</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="s1">&#39;0.8.7&#39;</span>
 </pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="see-all-gseapy-supported-enrichr-library-names">
-<h1>See all gseapy supported enrichr library names<a class="headerlink" href="#see-all-gseapy-supported-enrichr-library-names" title="Permalink to this headline">¶</a></h1>
-<p>Enrichr library could be used for <code class="docutils literal"><span class="pre">gsea</span></code> and <code class="docutils literal"><span class="pre">prerank</span></code>, too</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;Achilles_fitness_decrease&#39;</span><span class="p">,</span>
- <span class="s1">&#39;Achilles_fitness_increase&#39;</span><span class="p">,</span>
- <span class="s1">&#39;Aging_Perturbations_from_GEO_down&#39;</span><span class="p">,</span>
- <span class="s1">&#39;Aging_Perturbations_from_GEO_up&#39;</span><span class="p">,</span>
- <span class="s1">&#39;Allen_Brain_Atlas_down&#39;</span><span class="p">,</span>
- <span class="s1">&#39;Allen_Brain_Atlas_up&#39;</span><span class="p">,</span>
- <span class="s1">&#39;BioCarta_2013&#39;</span><span class="p">,</span>
- <span class="s1">&#39;BioCarta_2015&#39;</span><span class="p">,</span>
- <span class="s1">&#39;BioCarta_2016&#39;</span><span class="p">,</span>
- <span class="s1">&#39;CORUM&#39;</span><span class="p">]</span>
+<h2>See all gseapy supported enrichr library names<a class="headerlink" href="#see-all-gseapy-supported-enrichr-library-names" title="Permalink to this headline">¶</a></h2>
+<p>Enrichr library could be used for <code class="docutils literal"><span class="pre">gsea</span></code>, <code class="docutils literal"><span class="pre">ssgsea</span></code>, and <code class="docutils literal"><span class="pre">prerank</span></code>,
+too</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="sa">u</span><span class="s1">&#39;ARCHS4_Cell-lines&#39;</span><span class="p">,</span>
+ <span class="sa">u</span><span class="s1">&#39;ARCHS4_IDG_Coexp&#39;</span><span class="p">,</span>
+ <span class="sa">u</span><span class="s1">&#39;ARCHS4_Kinases_Coexp&#39;</span><span class="p">,</span>
+ <span class="sa">u</span><span class="s1">&#39;ARCHS4_TFs_Coexp&#39;</span><span class="p">,</span>
+ <span class="sa">u</span><span class="s1">&#39;ARCHS4_Tissues&#39;</span><span class="p">,</span>
+ <span class="sa">u</span><span class="s1">&#39;Achilles_fitness_decrease&#39;</span><span class="p">,</span>
+ <span class="sa">u</span><span class="s1">&#39;Achilles_fitness_increase&#39;</span><span class="p">,</span>
+ <span class="sa">u</span><span class="s1">&#39;Aging_Perturbations_from_GEO_down&#39;</span><span class="p">,</span>
+ <span class="sa">u</span><span class="s1">&#39;Aging_Perturbations_from_GEO_up&#39;</span><span class="p">,</span>
+ <span class="sa">u</span><span class="s1">&#39;Allen_Brain_Atlas_down&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
-</div>
 <div class="section" id="enrichr-example">
-<h1>2. Enrichr Example<a class="headerlink" href="#enrichr-example" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="i-assign-enrichr-with-gene-list-object">
-<h2>i. Assign enrichr with gene list object<a class="headerlink" href="#i-assign-enrichr-with-gene-list-object" title="Permalink to this headline">¶</a></h2>
+<h3>2. Enrichr Example<a class="headerlink" href="#enrichr-example" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="assign-enrichr-with-pd-series-pd-dataframe-or-list-object">
+<h2>1) Assign enrichr with <code class="docutils literal"><span class="pre">pd.Series</span></code>, <code class="docutils literal"><span class="pre">pd.DataFrame</span></code>, or <code class="docutils literal"><span class="pre">list</span></code> object<a class="headerlink" href="#assign-enrichr-with-pd-series-pd-dataframe-or-list-object" title="Permalink to this headline">¶</a></h2>
 <div>
 <style>
     .dataframe thead tr:only-child th {
@@ -256,7 +264,10 @@
     </tr>
   </tbody>
 </table>
-</div><div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;CTLA2B&#39;</span><span class="p">,</span> <span class="s1">&#39;SCARA3&#39;</span><span class="p">,</span> <span class="s1">&#39;LOC100044683&#39;</span><span class="p">,</span> <span class="s1">&#39;CMBL&#39;</span><span class="p">,</span> <span class="s1">&#39;CLIC6&#39;</span><span class="p">,</span> <span class="s1">&#39;IL13RA1&#39;</span><span class="p">,</span> <span class="s1">&#39;TACSTD2&#39;</span><span class="p">,</span> <span class="s1">&#39;DKKL1&#39;</span><span class="p">,</span> <span class="s1">&#39;CSF1&#39;</span><span class="p">,</span> <span class="s1">&#39;CITED1&#39;</span><span class="p">]</span>
+</div><div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pandas</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">DataFrame</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;CTLA2B&#39;</span><span class="p">,</span> <span class="s1">&#39;SCARA3&#39;</span><span class="p">,</span> <span class="s1">&#39;LOC100044683&#39;</span><span class="p">,</span> <span class="s1">&#39;CMBL&#39;</span><span class="p">,</span> <span class="s1">&#39;CLIC6&#39;</span><span class="p">,</span> <span class="s1">&#39;IL13RA1&#39;</span><span class="p">,</span> <span class="s1">&#39;TACSTD2&#39;</span><span class="p">,</span> <span class="s1">&#39;DKKL1&#39;</span><span class="p">,</span> <span class="s1">&#39;CSF1&#39;</span><span class="p">,</span> <span class="s1">&#39;CITED1&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
 <div>
@@ -283,6 +294,9 @@
       <th>Adjusted P-value</th>
       <th>Old P-value</th>
       <th>Old Adjusted P-value</th>
+      <th>Z-score</th>
+      <th>Combined Score</th>
+      <th>Genes</th>
     </tr>
   </thead>
   <tbody>
@@ -294,6 +308,9 @@
       <td>0.035223</td>
       <td>0.000436</td>
       <td>0.103734</td>
+      <td>-1.961363</td>
+      <td>17.295956</td>
+      <td>PDGFRB;CSF1;FLT4;VEGFC;ARAP3;LPAR4;ADCY7;ADCY6...</td>
     </tr>
     <tr>
       <th>1</th>
@@ -303,6 +320,9 @@
       <td>0.066282</td>
       <td>0.001816</td>
       <td>0.152127</td>
+      <td>-2.083086</td>
+      <td>15.046848</td>
+      <td>RET;LEF1;TGFA;LPAR4;ADCY7;ETS1;ADCY6;GLI2;FGF4...</td>
     </tr>
     <tr>
       <th>2</th>
@@ -312,6 +332,9 @@
       <td>0.066282</td>
       <td>0.002351</td>
       <td>0.152127</td>
+      <td>-1.956845</td>
+      <td>13.519663</td>
+      <td>PDGFRB;CSF1;FLT4;VEGFC;ETS1;GNG13;FGF4;PLD2;EF...</td>
     </tr>
     <tr>
       <th>3</th>
@@ -321,6 +344,9 @@
       <td>0.066282</td>
       <td>0.002557</td>
       <td>0.152127</td>
+      <td>-1.805957</td>
+      <td>12.280169</td>
+      <td>DES;SGCB;TPM2;TNNC1;LMNA;TPM1;ITGAV;ADCY7;ADCY...</td>
     </tr>
     <tr>
       <th>4</th>
@@ -330,28 +356,37 @@
       <td>0.083151</td>
       <td>0.003877</td>
       <td>0.184562</td>
+      <td>-1.843079</td>
+      <td>11.703417</td>
+      <td>PDGFRB;STAT5B;EGR1;JUN;CD40;FZD2;CRTC3;NFATC1;...</td>
     </tr>
   </tbody>
 </table>
 </div></div>
-</div>
-<div class="section" id="ii-command-line-usage">
-<h1>ii . Command line usage<a class="headerlink" href="#ii-command-line-usage" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="command-line-usage">
+<h2>2) Command line usage<a class="headerlink" href="#command-line-usage" title="Permalink to this headline">¶</a></h2>
 <p>You may also want to use enrichr in command line</p>
-<p>the option -v will print out the progress of your job</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>2017-05-29 19:03:12,897 Connecting to Enrichr Server to get latest library names
-2017-05-29 19:03:12,897 Analysis name: KEGG, Enrichr Library: KEGG_2016
-2017-05-29 19:03:14,585 Submitted gene list:{&#39;shortId&#39;: &#39;1hhp5&#39;, &#39;userListId&#39;: 3350650}
-2017-05-29 19:03:17,476 Downloading file of enrichment results: Job Id:{&#39;shortId&#39;: &#39;1hhp5&#39;, &#39;userListId&#39;: 3350650}
-2017-05-29 19:03:19,143 Enrichr: Job Done!
+<p>the option <strong>-v</strong> will print out the progress of your job</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mi">2017</span><span class="o">-</span><span class="mi">11</span><span class="o">-</span><span class="mi">24</span> <span class="mi">13</span><span class="p">:</span><span class="mi">11</span><span class="p">:</span><span class="mi">55</span><span class="p">,</span><span class="mi">413</span> <span class="n">Connecting</span> <span class="n">to</span> <span class="n">Enrichr</span> <span class="n">Server</span> <span class="n">to</span> <span class="n">get</span> <span class="n">latest</span> <span class="n">library</span> <span class="n">names</span>
+<span class="mi">2017</span><span class="o">-</span><span class="mi">11</span><span class="o">-</span><span class="mi">24</span> <span class="mi">13</span><span class="p">:</span><span class="mi">11</span><span class="p">:</span><span class="mi">56</span><span class="p">,</span><span class="mi">232</span> <span class="n">Analysis</span> <span class="n">name</span><span class="p">:</span> <span class="n">BP2017</span><span class="p">,</span> <span class="n">Enrichr</span> <span class="n">Library</span><span class="p">:</span> <span class="n">GO_Biological_Process_2017</span>
+<span class="mi">2017</span><span class="o">-</span><span class="mi">11</span><span class="o">-</span><span class="mi">24</span> <span class="mi">13</span><span class="p">:</span><span class="mi">11</span><span class="p">:</span><span class="mi">58</span><span class="p">,</span><span class="mi">805</span> <span class="n">Submitted</span> <span class="n">gene</span> <span class="nb">list</span><span class="p">:{</span><span class="s1">&#39;shortId&#39;</span><span class="p">:</span> <span class="s1">&#39;350iz&#39;</span><span class="p">,</span> <span class="s1">&#39;userListId&#39;</span><span class="p">:</span> <span class="mi">6127777</span><span class="p">}</span>
+<span class="mi">2017</span><span class="o">-</span><span class="mi">11</span><span class="o">-</span><span class="mi">24</span> <span class="mi">13</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="mi">04</span><span class="p">,</span><span class="mi">922</span> <span class="n">Downloading</span> <span class="n">file</span> <span class="n">of</span> <span class="n">enrichment</span> <span class="n">results</span><span class="p">:</span> <span class="n">Job</span> <span class="n">Id</span><span class="p">:{</span><span class="s1">&#39;shortId&#39;</span><span class="p">:</span> <span class="s1">&#39;350iz&#39;</span><span class="p">,</span> <span class="s1">&#39;userListId&#39;</span><span class="p">:</span> <span class="mi">6127777</span><span class="p">}</span>
+<span class="mi">2017</span><span class="o">-</span><span class="mi">11</span><span class="o">-</span><span class="mi">24</span> <span class="mi">13</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="mi">08</span><span class="p">,</span><span class="mi">329</span> <span class="ne">Warning</span><span class="p">:</span> <span class="n">No</span> <span class="n">enrich</span> <span class="n">terms</span> <span class="n">using</span> <span class="n">library</span> <span class="n">GO_Biological_Process_2017</span> <span class="n">when</span> <span class="n">cuttoff</span> <span class="o">=</span> <span class="mf">0.05</span>
+<span class="mi">2017</span><span class="o">-</span><span class="mi">11</span><span class="o">-</span><span class="mi">24</span> <span class="mi">13</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="mi">08</span><span class="p">,</span><span class="mi">329</span> <span class="n">Done</span><span class="o">.</span>
 </pre></div>
 </div>
-</div>
 <div class="section" id="prerank-example">
-<h1>3. Prerank example<a class="headerlink" href="#prerank-example" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="i-assign-prank-with-a-pandas-dataframe">
-<h2>i. Assign prank() with a pandas DataFrame<a class="headerlink" href="#i-assign-prank-with-a-pandas-dataframe" title="Permalink to this headline">¶</a></h2>
-<p>Do not include header !</p>
+<h3>3. Prerank example<a class="headerlink" href="#prerank-example" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="assign-prerank-with-a-pd-dataframe-pd-series-or-a-txt-file">
+<h2>1) Assign prerank() with a pd.DataFrame, pd.Series , or a txt file<a class="headerlink" href="#assign-prerank-with-a-pd-dataframe-pd-series-or-a-txt-file" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">Do not include header !</div>
+<div class="line">GSEApy will skip any comment lines startswith “#”.</div>
+<div class="line">Only contains two columns, or one cloumn with gene_name indexed when
+assign a <code class="docutils literal"><span class="pre">DataFrame</span></code> to prerank</div>
+</div>
 <div>
 <style>
     .dataframe thead tr:only-child th {
@@ -441,72 +476,42 @@
   </thead>
   <tbody>
     <tr>
-      <th>ES-SPECIFIC</th>
-      <td>-0.485630</td>
-      <td>-2.453782</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>25</td>
-      <td>25</td>
-      <td>DHX58,  NEDD9,  ACTA1,   PTRF,   EGR1, CORO1A,...</td>
+      <th>DvA_UpIN_A</th>
+      <td>0.405880</td>
+      <td>1.590404</td>
+      <td>0.015873</td>
+      <td>0.075188</td>
+      <td>284</td>
+      <td>19</td>
+      <td>ABHD14B,VNN1,NELF,MARVELD2,LAMB3,TMPRSS2,TM6SF...</td>
     </tr>
     <tr>
-      <th>OCT4 KD-SPECIFIC</th>
-      <td>0.474139</td>
-      <td>2.490872</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>60</td>
-      <td>60</td>
-      <td>TACSTD2,   DKKL1,    CSF1,  CITED1, TINAGL1,  ...</td>
-    </tr>
-    <tr>
-      <th>CDX2 OE-SPECIFIC</th>
-      <td>0.505286</td>
-      <td>2.251388</td>
-      <td>0.001312</td>
-      <td>0.000968</td>
-      <td>33</td>
-      <td>33</td>
-      <td>TACSTD2,        DKKL1,       CITED1,      TINA...</td>
-    </tr>
-    <tr>
-      <th>TS-SPECIFIC</th>
-      <td>0.446409</td>
-      <td>2.097644</td>
-      <td>0.000000</td>
-      <td>0.001291</td>
-      <td>39</td>
-      <td>39</td>
-      <td>TACSTD2,        DKKL1,      TINAGL1,        KR...</td>
-    </tr>
-    <tr>
-      <th>GATA3 OE-SPECIFIC</th>
-      <td>0.370833</td>
-      <td>1.730023</td>
-      <td>0.020161</td>
-      <td>0.029773</td>
-      <td>40</td>
-      <td>40</td>
-      <td>TACSTD2,        DKKL1,       CITED1,         K...</td>
+      <th>DvA_UpIN_D</th>
+      <td>0.166924</td>
+      <td>0.626715</td>
+      <td>0.842857</td>
+      <td>0.872180</td>
+      <td>236</td>
+      <td>21</td>
+      <td>PMP22,STBD1,DUSP14,RET,GPX8,CHRNB1,PRKD1,COL7A...</td>
     </tr>
   </tbody>
 </table>
-</div><div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">_subplots</span><span class="o">.</span><span class="n">AxesSubplot</span> <span class="n">at</span> <span class="mh">0x2869314a278</span><span class="o">&gt;</span>
+</div><div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">_subplots</span><span class="o">.</span><span class="n">AxesSubplot</span> <span class="n">at</span> <span class="mh">0x10dbb69d0</span><span class="o">&gt;</span>
 </pre></div>
 </div>
-<img alt="_images/output_19_1.png" src="_images/output_19_1.png" />
-</div>
+<img alt="_images/output_20_1.png" src="_images/output_20_1.png" />
 </div>
 <div class="section" id="id1">
-<h1>ii . Command line usage<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
-<p>You may also want to use prerank in commandline</p>
-</div>
+<h2>2) Command line usage<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>You may also want to use prerank in command line</p>
 <div class="section" id="gsea-example">
-<h1>4. GSEA Example<a class="headerlink" href="#gsea-example" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="i-assign-gsea-with-a-pandas-dataframe">
-<h2>i. Assign gsea() with a pandas DataFrame<a class="headerlink" href="#i-assign-gsea-with-a-pandas-dataframe" title="Permalink to this headline">¶</a></h2>
-<p>and cls with a list object</p>
+<h3>4. GSEA Example<a class="headerlink" href="#gsea-example" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="assign-gsea-with-a-pandas-dataframe-gct-format-file-or-a-text-file">
+<h2>1) Assign gsea() with a pandas DataFrame, .gct format file, or a text file<a class="headerlink" href="#assign-gsea-with-a-pandas-dataframe-gct-format-file-or-a-text-file" title="Permalink to this headline">¶</a></h2>
+<p>and cls with a list object or just .cls format file</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">,</span> <span class="s1">&#39;WT&#39;</span><span class="p">,</span> <span class="s1">&#39;WT&#39;</span><span class="p">,</span> <span class="s1">&#39;WT&#39;</span><span class="p">,</span> <span class="s1">&#39;WT&#39;</span><span class="p">,</span> <span class="s1">&#39;WT&#39;</span><span class="p">,</span> <span class="s1">&#39;WT&#39;</span><span class="p">,</span> <span class="s1">&#39;WT&#39;</span><span class="p">,</span> <span class="s1">&#39;WT&#39;</span><span class="p">,</span> <span class="s1">&#39;WT&#39;</span><span class="p">,</span> <span class="s1">&#39;WT&#39;</span><span class="p">,</span> <span class="s1">&#39;WT&#39;</span><span class="p">,</span> <span class="s1">&#39;WT&#39;</span><span class="p">,</span> <span class="s1">&#39;WT&#39;</span><span class="p">,</span> <span class="s1">&#39;WT&#39;</span><span class="p">,</span> <span class="s1">&#39;WT&#39;</span><span class="p">,</span> <span class="s1">&#39;WT&#39;</span><span class="p">,</span> <span class="s1">&#39;WT&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
@@ -675,7 +680,13 @@
   </tbody>
 </table>
 <p>5 rows × 51 columns</p>
-</div><div>
+</div><div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">(</span><span class="s1">&#39;positively correlated: &#39;</span><span class="p">,</span> <span class="s1">&#39;MUT&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">(</span><span class="s1">&#39;negtively correlated: &#39;</span><span class="p">,</span> <span class="s1">&#39;WT&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div>
 <style>
     .dataframe thead tr:only-child th {
         text-align: right;
@@ -716,83 +727,75 @@
     <tr>
       <th>MAPK signaling pathway_Homo sapiens_hsa04010</th>
       <td>-0.392928</td>
-      <td>-1.278503</td>
-      <td>0.135802</td>
-      <td>0.481584</td>
+      <td>-1.270760</td>
+      <td>0.166667</td>
+      <td>0.474684</td>
       <td>255</td>
       <td>18</td>
-      <td>GADD45B,    RRAS,    SOS2,   FGF17,  PPP3CC,TN...</td>
+      <td>GADD45B,RRAS,SOS2,FGF17,PPP3CC,TNFRSF1A,PDGFRB...</td>
     </tr>
     <tr>
       <th>HTLV-I infection_Homo sapiens_hsa05166</th>
       <td>-0.249752</td>
-      <td>-0.820821</td>
-      <td>0.734990</td>
-      <td>0.712707</td>
+      <td>-0.790485</td>
+      <td>0.818182</td>
+      <td>0.743671</td>
       <td>258</td>
       <td>19</td>
-      <td>FZD2,    ETS1,  STAT5B,    RRAS,    LTBR,  PPP...</td>
+      <td>FZD2,ETS1,STAT5B,RRAS,LTBR,PPP3CC,TNFRSF1A,EGR...</td>
     </tr>
     <tr>
       <th>Rap1 signaling pathway_Homo sapiens_hsa04015</th>
       <td>-0.285975</td>
-      <td>-0.932296</td>
-      <td>0.545455</td>
-      <td>0.827348</td>
+      <td>-0.914519</td>
+      <td>0.609756</td>
+      <td>0.873418</td>
       <td>211</td>
       <td>19</td>
-      <td>RRAS,  VEGFC,   CSF1,  FGF17, PDGFRB,   FGF4, ...</td>
+      <td>RRAS,VEGFC,CSF1,FGF17,PDGFRB,FGF4,PDGFC,SIPA1L...</td>
     </tr>
     <tr>
       <th>PI3K-Akt signaling pathway_Homo sapiens_hsa04151</th>
       <td>0.182245</td>
-      <td>0.583974</td>
-      <td>0.948435</td>
-      <td>0.957509</td>
+      <td>0.590397</td>
+      <td>0.978723</td>
+      <td>0.968750</td>
       <td>341</td>
       <td>22</td>
-      <td>GNG13, VEGFC,  GNB4,  CSF1,  SOS2, FGF17, THBS...</td>
+      <td>GNG13,VEGFC,GNB4,CSF1,SOS2,FGF17,THBS4,PDGFRB,...</td>
     </tr>
     <tr>
-      <th>Pathways in cancer_Homo sapiens_hsa05200</th>
-      <td>0.201838</td>
-      <td>0.655772</td>
-      <td>0.927509</td>
-      <td>1.206485</td>
-      <td>397</td>
-      <td>27</td>
-      <td>FZD2,   ETS1, STAT5B,  GNG13,  VEGFC,   GNB4, ...</td>
+      <th>Cytokine-cytokine receptor interaction_Homo sapiens_hsa04060</th>
+      <td>0.229069</td>
+      <td>0.670014</td>
+      <td>0.884615</td>
+      <td>1.000000</td>
+      <td>265</td>
+      <td>18</td>
+      <td>IL10RB,VEGFC,CSF1,TNFSF12,LTBR,CXCL10,TNFRSF1A...</td>
     </tr>
   </tbody>
 </table>
-</div><img alt="_images/output_29_0.png" src="_images/output_29_0.png" />
+</div><img alt="_images/output_32_0.png" src="_images/output_32_0.png" />
 </div>
-</div>
-<div class="section" id="ii-show-the-gsea-plots">
-<h1>ii. Show the gsea plots<a class="headerlink" href="#ii-show-the-gsea-plots" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="show-the-gsea-plots">
+<h2>2) Show the gsea plots<a class="headerlink" href="#show-the-gsea-plots" title="Permalink to this headline">¶</a></h2>
 <p>The <strong>gsea</strong> module will generate heatmap for genes in each gene sets in
 the backgroud.</p>
-<img alt="_images/output_31_0.png" src="_images/output_31_0.png" />
-<img alt="_images/output_32_0.png" src="_images/output_32_0.png" />
+<a class="reference internal image-reference" href="_images/output_34_0.png"><img alt="_images/output_34_0.png" src="_images/output_34_0.png" style="width: 650px; height: 600px;" /></a>
+<img alt="_images/output_35_0.png" src="_images/output_35_0.png" />
 </div>
-<div class="section" id="iii-command-line-usage">
-<h1>iii . Command line usage<a class="headerlink" href="#iii-command-line-usage" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id2">
+<h2>3) Command line usage<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
 <p>You may also want to use gsea in command line</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mi">2017</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">29</span> <span class="mi">19</span><span class="p">:</span><span class="mi">11</span><span class="p">:</span><span class="mi">41</span><span class="p">,</span><span class="mi">620</span> <span class="n">Parsing</span> <span class="n">data</span> <span class="n">files</span> <span class="k">for</span> <span class="n">GSEA</span><span class="o">.............................</span>
-<span class="mi">2017</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">29</span> <span class="mi">19</span><span class="p">:</span><span class="mi">11</span><span class="p">:</span><span class="mi">47</span><span class="p">,</span><span class="mi">771</span> <span class="mi">0007</span> <span class="n">gene_sets</span> <span class="n">used</span> <span class="k">for</span> <span class="n">further</span> <span class="n">statistical</span> <span class="n">testing</span><span class="o">.....</span>
-<span class="mi">2017</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">29</span> <span class="mi">19</span><span class="p">:</span><span class="mi">11</span><span class="p">:</span><span class="mi">47</span><span class="p">,</span><span class="mi">771</span> <span class="n">Start</span> <span class="n">to</span> <span class="n">run</span> <span class="n">GSEA</span><span class="o">...</span><span class="n">Might</span> <span class="n">take</span> <span class="n">a</span> <span class="k">while</span><span class="o">..................</span>
-<span class="mi">2017</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">29</span> <span class="mi">19</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="mi">27</span><span class="p">,</span><span class="mi">964</span> <span class="n">Start</span> <span class="n">to</span> <span class="n">generate</span> <span class="n">gseapy</span> <span class="n">reports</span><span class="p">,</span> <span class="ow">and</span> <span class="n">produce</span> <span class="n">figures</span><span class="o">...</span>
-<span class="mi">2017</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">29</span> <span class="mi">19</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="mi">41</span><span class="p">,</span><span class="mi">572</span> <span class="n">Congratulations</span><span class="o">.</span> <span class="n">GSEApy</span> <span class="n">run</span> <span class="n">successfully</span><span class="o">................</span>
-</pre></div>
-</div>
-</div>
 <div class="section" id="single-sample-gsea-example">
-<h1>5. Single Sample GSEA example<a class="headerlink" href="#single-sample-gsea-example" title="Permalink to this headline">¶</a></h1>
+<h3>5. Single Sample GSEA example<a class="headerlink" href="#single-sample-gsea-example" title="Permalink to this headline">¶</a></h3>
 <p><strong>Note: When you run ssGSEA, all genes names in your gene_sets file
 should be found in your expression table</strong></p>
-<ol class="lowerroman simple">
-<li>Assign ssgsea() with a txt file or a dataframe</li>
-</ol>
+</div>
+</div>
+<div class="section" id="assign-ssgsea-with-a-txt-file-dataframe-or-seires-gene-name-as-index">
+<h2>1) Assign ssgsea() with a txt file, dataframe, or Seires(gene name as index).<a class="headerlink" href="#assign-ssgsea-with-a-txt-file-dataframe-or-seires-gene-name-as-index" title="Permalink to this headline">¶</a></h2>
 <div>
 <style>
     .dataframe thead tr:only-child th {
@@ -861,6 +864,60 @@ should be found in your expression table</strong></p>
   <thead>
     <tr style="text-align: right;">
       <th></th>
+      <th>1</th>
+    </tr>
+    <tr>
+      <th>0</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>ATXN1</th>
+      <td>16.456753</td>
+    </tr>
+    <tr>
+      <th>UBQLN4</th>
+      <td>13.989493</td>
+    </tr>
+    <tr>
+      <th>CALM1</th>
+      <td>13.745533</td>
+    </tr>
+    <tr>
+      <th>DLG4</th>
+      <td>12.796588</td>
+    </tr>
+    <tr>
+      <th>MRE11A</th>
+      <td>12.787631</td>
+    </tr>
+  </tbody>
+</table>
+</div><div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pandas</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">DataFrame</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pandas</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">series</span><span class="o">.</span><span class="n">Series</span>
+</pre></div>
+</div>
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
       <th>es</th>
       <th>nes</th>
       <th>pval</th>
@@ -883,65 +940,404 @@ should be found in your expression table</strong></p>
   <tbody>
     <tr>
       <th>hsa05205</th>
-      <td>0.383288</td>
-      <td>6.271050</td>
+      <td>0.341007</td>
+      <td>13.452099</td>
       <td>0.0</td>
       <td>0.0</td>
       <td>203</td>
       <td>201</td>
-      <td>CTNNB1,  PRKACA,    GRB2,    EGFR,    RAC1,   ...</td>
+      <td>CTNNB1,PRKACA,GRB2,EGFR,RAC1,PRKCA,KRAS,CD44,M...</td>
     </tr>
     <tr>
       <th>hsa05412</th>
-      <td>0.355726</td>
-      <td>3.968830</td>
+      <td>0.290588</td>
+      <td>9.710331</td>
       <td>0.0</td>
       <td>0.0</td>
       <td>74</td>
       <td>74</td>
-      <td>CTNNB1,    ACTB,   ITGB1,  CACNG3,    RYR2,  C...</td>
+      <td>CTNNB1,ACTB,ITGB1,CACNG3,RYR2,CTNNA1,CACNA2D3,...</td>
     </tr>
     <tr>
       <th>hsa05410</th>
-      <td>0.297113</td>
-      <td>3.506836</td>
+      <td>0.270626</td>
+      <td>10.461864</td>
       <td>0.0</td>
       <td>0.0</td>
       <td>83</td>
       <td>83</td>
-      <td>ACTB,   ITGB1,    TPM3,  CACNG3,    RYR2,CACNA...</td>
+      <td>ACTB,ITGB1,TPM3,CACNG3,RYR2,CACNA2D3,ITGAV,ITG...</td>
     </tr>
     <tr>
       <th>hsa05323</th>
-      <td>0.227106</td>
-      <td>2.691233</td>
+      <td>0.166596</td>
+      <td>5.752460</td>
       <td>0.0</td>
       <td>0.0</td>
       <td>89</td>
       <td>89</td>
-      <td>JUN,    ITGB2, ATP6V1B2, ATP6V1E1,     IL1A,  ...</td>
+      <td>JUN,ITGB2,ATP6V1B2,ATP6V1E1,IL1A,TGFB1,TEK,ATP...</td>
     </tr>
     <tr>
       <th>hsa05322</th>
-      <td>0.241064</td>
-      <td>3.310251</td>
+      <td>0.176818</td>
+      <td>7.742502</td>
       <td>0.0</td>
       <td>0.0</td>
       <td>134</td>
       <td>134</td>
-      <td>GRIN2B,     H2AFX,     ACTN1,   HIST4H4,    SN...</td>
+      <td>GRIN2B,H2AFX,ACTN1,HIST4H4,SNRPD1,C3,GRIN2A,SS...</td>
     </tr>
   </tbody>
 </table>
-</div><ol class="lowerroman simple" start="2">
-<li>command line usage of single sample gsea</li>
-</ol>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mi">2017</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">29</span> <span class="mi">19</span><span class="p">:</span><span class="mi">27</span><span class="p">:</span><span class="mi">00</span><span class="p">,</span><span class="mi">483</span> <span class="n">Parsing</span> <span class="n">data</span> <span class="n">files</span> <span class="k">for</span> <span class="n">GSEA</span><span class="o">.............................</span>
-<span class="mi">2017</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">29</span> <span class="mi">19</span><span class="p">:</span><span class="mi">27</span><span class="p">:</span><span class="mi">02</span><span class="p">,</span><span class="mi">863</span> <span class="mi">0030</span> <span class="n">gene_sets</span> <span class="n">used</span> <span class="k">for</span> <span class="n">further</span> <span class="n">statistical</span> <span class="n">testing</span><span class="o">.....</span>
-<span class="mi">2017</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">29</span> <span class="mi">19</span><span class="p">:</span><span class="mi">27</span><span class="p">:</span><span class="mi">02</span><span class="p">,</span><span class="mi">863</span> <span class="n">Start</span> <span class="n">to</span> <span class="n">run</span> <span class="n">GSEA</span><span class="o">...</span><span class="n">Might</span> <span class="n">take</span> <span class="n">a</span> <span class="k">while</span><span class="o">..................</span>
-<span class="mi">2017</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">29</span> <span class="mi">19</span><span class="p">:</span><span class="mi">31</span><span class="p">:</span><span class="mi">28</span><span class="p">,</span><span class="mi">796</span> <span class="n">Start</span> <span class="n">to</span> <span class="n">generate</span> <span class="n">gseapy</span> <span class="n">reports</span><span class="p">,</span> <span class="ow">and</span> <span class="n">produce</span> <span class="n">figures</span><span class="o">...</span>
-<span class="mi">2017</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">29</span> <span class="mi">19</span><span class="p">:</span><span class="mi">31</span><span class="p">:</span><span class="mi">45</span><span class="p">,</span><span class="mi">879</span> <span class="n">Congratulations</span><span class="o">.</span> <span class="n">GSEApy</span> <span class="n">run</span> <span class="n">successfully</span><span class="o">................</span>
-</pre></div>
+</div></div>
+<div class="section" id="ssgsea-supports-gene-expression-matix-in-gct-format">
+<h2>2) <code class="docutils literal"><span class="pre">ssgsea</span></code> supports gene expression matix in gct format.<a class="headerlink" href="#ssgsea-supports-gene-expression-matix-in-gct-format" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">if gene expression matrix is provided, ssgsea works like pandas
+apply(),</div>
+<div class="line">which means it will compute NES,FDR … for every sample pairwise.</div>
+<div class="line">finally, you can assces the reuslts through <strong>resultsOnSamples</strong>
+attribute.</div>
+</div>
+<p>Take previous gene_exp dataframe for example</p>
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>NAME</th>
+      <th>786-0</th>
+      <th>BT-549</th>
+      <th>CCRF-CEM</th>
+      <th>COLO 205</th>
+      <th>EKVX</th>
+      <th>HCC-2998</th>
+      <th>HCT-15</th>
+      <th>HOP-62</th>
+      <th>HOP-92</th>
+      <th>...</th>
+      <th>MCF7</th>
+      <th>MOLT-4</th>
+      <th>NCI-H460</th>
+      <th>OVCAR-4</th>
+      <th>SF-539</th>
+      <th>SK-MEL-5</th>
+      <th>SR</th>
+      <th>UACC-257</th>
+      <th>UACC-62</th>
+      <th>UO-31</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>CTLA2B</td>
+      <td>111.19</td>
+      <td>86.22</td>
+      <td>121.85</td>
+      <td>75.19</td>
+      <td>208.62</td>
+      <td>130.59</td>
+      <td>124.72</td>
+      <td>324.09</td>
+      <td>242.71</td>
+      <td>...</td>
+      <td>163.76</td>
+      <td>59.50</td>
+      <td>134.12</td>
+      <td>152.09</td>
+      <td>197.46</td>
+      <td>137.79</td>
+      <td>81.53</td>
+      <td>123.37</td>
+      <td>81.41</td>
+      <td>180.78</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>SCARA3</td>
+      <td>460.30</td>
+      <td>558.34</td>
+      <td>183.55</td>
+      <td>37.29</td>
+      <td>158.00</td>
+      <td>43.61</td>
+      <td>80.83</td>
+      <td>300.08</td>
+      <td>1250.25</td>
+      <td>...</td>
+      <td>109.91</td>
+      <td>120.42</td>
+      <td>73.06</td>
+      <td>115.03</td>
+      <td>95.12</td>
+      <td>37.56</td>
+      <td>76.16</td>
+      <td>41.10</td>
+      <td>77.51</td>
+      <td>519.17</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>LOC100044683</td>
+      <td>97.25</td>
+      <td>118.94</td>
+      <td>81.17</td>
+      <td>119.51</td>
+      <td>119.88</td>
+      <td>107.73</td>
+      <td>165.57</td>
+      <td>203.97</td>
+      <td>135.43</td>
+      <td>...</td>
+      <td>222.84</td>
+      <td>124.98</td>
+      <td>114.75</td>
+      <td>141.66</td>
+      <td>170.19</td>
+      <td>147.70</td>
+      <td>157.48</td>
+      <td>152.18</td>
+      <td>98.89</td>
+      <td>118.06</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>CMBL</td>
+      <td>33.45</td>
+      <td>55.10</td>
+      <td>221.67</td>
+      <td>50.30</td>
+      <td>35.12</td>
+      <td>75.70</td>
+      <td>84.01</td>
+      <td>44.12</td>
+      <td>79.96</td>
+      <td>...</td>
+      <td>51.32</td>
+      <td>117.11</td>
+      <td>59.46</td>
+      <td>78.46</td>
+      <td>45.55</td>
+      <td>49.07</td>
+      <td>96.69</td>
+      <td>33.09</td>
+      <td>10.38</td>
+      <td>52.89</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>CLIC6</td>
+      <td>35.75</td>
+      <td>41.26</td>
+      <td>63.04</td>
+      <td>219.86</td>
+      <td>42.53</td>
+      <td>54.19</td>
+      <td>86.98</td>
+      <td>71.20</td>
+      <td>53.89</td>
+      <td>...</td>
+      <td>154.05</td>
+      <td>31.62</td>
+      <td>37.66</td>
+      <td>32.64</td>
+      <td>63.35</td>
+      <td>27.95</td>
+      <td>70.99</td>
+      <td>36.25</td>
+      <td>17.50</td>
+      <td>49.41</td>
+    </tr>
+  </tbody>
+</table>
+<p>5 rows × 51 columns</p>
+</div><div class="line-block">
+<div class="line">Results for all samples are saves to a dataframe,</div>
+<div class="line">you can assces the reuslts through resultsOnSamples attribute.</div>
+</div>
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>786-0</th>
+      <th>A498</th>
+      <th>A549/ATCC</th>
+      <th>ACHN</th>
+      <th>BT-549</th>
+      <th>CAKI-1</th>
+      <th>CCRF-CEM</th>
+      <th>COLO 205</th>
+      <th>EKVX</th>
+      <th>HCC-2998</th>
+      <th>...</th>
+      <th>SN12C</th>
+      <th>SNB-19</th>
+      <th>SNB-75</th>
+      <th>SR</th>
+      <th>SW-620</th>
+      <th>T-47D</th>
+      <th>U251</th>
+      <th>UACC-257</th>
+      <th>UACC-62</th>
+      <th>UO-31</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>CDX2 OE-SPECIFIC</th>
+      <td>0.029866</td>
+      <td>0.009337</td>
+      <td>0.009991</td>
+      <td>-0.006401</td>
+      <td>0.021200</td>
+      <td>0.004605</td>
+      <td>0.040562</td>
+      <td>-0.000645</td>
+      <td>-0.038442</td>
+      <td>0.034446</td>
+      <td>...</td>
+      <td>0.004149</td>
+      <td>0.070998</td>
+      <td>0.013445</td>
+      <td>0.024796</td>
+      <td>0.040438</td>
+      <td>0.020149</td>
+      <td>0.046420</td>
+      <td>0.068213</td>
+      <td>0.074007</td>
+      <td>0.004254</td>
+    </tr>
+    <tr>
+      <th>ES-SPECIFIC</th>
+      <td>-0.034765</td>
+      <td>-0.064445</td>
+      <td>-0.093547</td>
+      <td>-0.079831</td>
+      <td>-0.087688</td>
+      <td>-0.029811</td>
+      <td>-0.134692</td>
+      <td>-0.072833</td>
+      <td>-0.094930</td>
+      <td>-0.041915</td>
+      <td>...</td>
+      <td>-0.105478</td>
+      <td>-0.070089</td>
+      <td>-0.052564</td>
+      <td>-0.147355</td>
+      <td>-0.084841</td>
+      <td>-0.109212</td>
+      <td>-0.068695</td>
+      <td>-0.063946</td>
+      <td>-0.109282</td>
+      <td>-0.031117</td>
+    </tr>
+    <tr>
+      <th>GATA3 OE-SPECIFIC</th>
+      <td>0.006017</td>
+      <td>0.020498</td>
+      <td>-0.002182</td>
+      <td>-0.031979</td>
+      <td>0.019852</td>
+      <td>-0.013829</td>
+      <td>-0.000989</td>
+      <td>0.031977</td>
+      <td>0.016550</td>
+      <td>0.040318</td>
+      <td>...</td>
+      <td>0.006542</td>
+      <td>0.007366</td>
+      <td>-0.011697</td>
+      <td>0.000496</td>
+      <td>0.017734</td>
+      <td>0.018743</td>
+      <td>-0.013939</td>
+      <td>0.004336</td>
+      <td>0.010753</td>
+      <td>-0.029823</td>
+    </tr>
+    <tr>
+      <th>HDAC1 UNIQUE TARGETS</th>
+      <td>-0.031270</td>
+      <td>-0.003659</td>
+      <td>-0.012545</td>
+      <td>-0.042056</td>
+      <td>-0.025924</td>
+      <td>-0.037497</td>
+      <td>0.010344</td>
+      <td>-0.030242</td>
+      <td>-0.023006</td>
+      <td>-0.030458</td>
+      <td>...</td>
+      <td>-0.054006</td>
+      <td>-0.042326</td>
+      <td>-0.039184</td>
+      <td>-0.000971</td>
+      <td>-0.052314</td>
+      <td>-0.022150</td>
+      <td>-0.013882</td>
+      <td>0.028718</td>
+      <td>-0.010532</td>
+      <td>-0.036023</td>
+    </tr>
+    <tr>
+      <th>OCT4 KD-SPECIFIC</th>
+      <td>-0.032486</td>
+      <td>-0.041851</td>
+      <td>-0.032199</td>
+      <td>-0.041748</td>
+      <td>-0.007263</td>
+      <td>-0.033633</td>
+      <td>0.009335</td>
+      <td>-0.008391</td>
+      <td>-0.027491</td>
+      <td>-0.006586</td>
+      <td>...</td>
+      <td>-0.039470</td>
+      <td>-0.016508</td>
+      <td>-0.035164</td>
+      <td>0.025732</td>
+      <td>-0.008062</td>
+      <td>-0.011654</td>
+      <td>-0.022169</td>
+      <td>-0.009253</td>
+      <td>-0.010288</td>
+      <td>-0.047723</td>
+    </tr>
+  </tbody>
+</table>
+<p>5 rows × 50 columns</p>
+</div></div>
+<div class="section" id="command-line-usage-of-single-sample-gsea">
+<h2>3) command line usage of single sample gsea<a class="headerlink" href="#command-line-usage-of-single-sample-gsea" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 
@@ -987,7 +1383,7 @@ should be found in your expression table</strong></p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.8.4',
+            VERSION:'0.8.7',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

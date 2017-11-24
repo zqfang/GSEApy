@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>How to Use GSEAPY &mdash; GSEApy 0.8.4 documentation</title>
+  <title>How to Use GSEAPY &mdash; GSEApy 0.8.7 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="GSEApy 0.8.4 documentation" href="index.html"/>
+    <link rel="top" title="GSEApy 0.8.7 documentation" href="index.html"/>
         <link rel="next" title="A Protocol to Prepare files for GSEAPY" href="gseapy_tutorial.html"/>
         <link rel="prev" title="Welcome to GSEAPY’s documentation!" href="introduction.html"/> 
 
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                0.8.4
+                0.8.7
               </div>
             
           
@@ -109,16 +109,6 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="gseapy_tutorial.html">A Protocol to Prepare files for GSEAPY</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gseapy_example.html">GSEAPY Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#load-essential-packages">1. Load essential packages</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#see-all-gseapy-supported-enrichr-library-names">See all gseapy supported enrichr library names</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#enrichr-example">2. Enrichr Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#ii-command-line-usage">ii . Command line usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#prerank-example">3. Prerank example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#id1">ii . Command line usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#gsea-example">4. GSEA Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#ii-show-the-gsea-plots">ii. Show the gsea plots</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#iii-command-line-usage">iii . Command line usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#single-sample-gsea-example">5. Single Sample GSEA example</a></li>
 </ul>
 
             
@@ -415,8 +405,9 @@ where contains:</p>
 <li><strong>data</strong> – expression or pandas DataFrame. Same input with <code class="docutils literal"><span class="pre">GSEA</span></code> .rnk file.</li>
 <li><strong>gene_sets</strong> – Enrichr Library name or .gmt gene sets file. Same input with GSEA.</li>
 <li><strong>outdir</strong> – results output directory.</li>
+<li><strong>sample_norm_method</strong> (<em>str</em>) – “Sample normalization method. Choose from {‘rank’, ‘log’, ‘log_rank’}. Default: rank”</li>
 <li><strong>min_size</strong> (<em>int</em>) – Minimum allowed number of genes from gene set also the data set. Defaut: 15.</li>
-<li><strong>max_size</strong> (<em>int</em>) – Maximum allowed number of genes from gene set also the data set. Defaults: 500.</li>
+<li><strong>max_size</strong> (<em>int</em>) – Maximum allowed number of genes from gene set also the data set. Defaults: 2000.</li>
 <li><strong>permutation_num</strong> (<em>int</em>) – Number of permutations for significance computation. Default: 1000.</li>
 <li><strong>weighted_score_type</strong> (<em>str</em>) – Refer to <code class="xref py py-func docutils literal"><span class="pre">algorithm.enrichment_socre()</span></code>. Default:0.25.</li>
 <li><strong>ascending</strong> (<em>bool</em>) – Sorting order of rankings. Default: False.</li>
@@ -518,15 +509,15 @@ Because gmt file has already been filter.</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>gene_list</strong> – The ordered gene list gene_name_list, rank_metric[‘gene_name’]</li>
 <li><strong>gene_set</strong> – gene_sets in gmt file, please used gsea_gmt_parser to get gene_set.</li>
-<li><strong>weighted_score_type</strong> – It’s indentical to gsea’s weighted_score method. weighting by the correlation 
-is a very reasonable choice that allows significant gene sets with less than perfect coherence. 
-options: 0(classic),1,1.5,2. default:1. if one is interested in penalizing sets for lack of 
-coherence or to discover sets with any type of nonrandom distribution of tags, a value p &lt; 1 
-might be appropriate. On the other hand, if one uses sets with largenumber of genes and only 
-a small subset of those is expected to be coherent, then one could consider using p &gt; 1. 
-Our recommendation is to use p = 1 and use other settings only if you are very experienced 
+<li><strong>weighted_score_type</strong> – It’s indentical to gsea’s weighted_score method. weighting by the correlation
+is a very reasonable choice that allows significant gene sets with less than perfect coherence.
+options: 0(classic),1,1.5,2. default:1. if one is interested in penalizing sets for lack of
+coherence or to discover sets with any type of nonrandom distribution of tags, a value p &lt; 1
+might be appropriate. On the other hand, if one uses sets with largenumber of genes and only
+a small subset of those is expected to be coherent, then one could consider using p &gt; 1.
+Our recommendation is to use p = 1 and use other settings only if you are very experienced
 with the method and its behavior.</li>
-<li><strong>correl_vector</strong> – A vector with the correlations (e.g. signal to noise scores) corresponding to the genes in 
+<li><strong>correl_vector</strong> – A vector with the correlations (e.g. signal to noise scores) corresponding to the genes in
 the gene list. Or rankings, rank_metric[‘rank’].values</li>
 <li><strong>esnull</strong> – Only used this paramter when computing esnuall for statistial testing. set the esnull value
 equal to the permutation number.</li>
@@ -546,11 +537,11 @@ equal to the permutation number.</li>
 
 <dl class="function">
 <dt id="gseapy.algorithm.enrichment_score_ss">
-<code class="descclassname">gseapy.algorithm.</code><code class="descname">enrichment_score_ss</code><span class="sig-paren">(</span><em>gene_set</em>, <em>expressions</em>, <em>weighted_score_type=0.25</em>, <em>esnull=None</em>, <em>rs=&lt;mtrand.RandomState object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.algorithm.enrichment_score_ss" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.algorithm.</code><code class="descname">enrichment_score_ss</code><span class="sig-paren">(</span><em>gene_set</em>, <em>rnkseries</em>, <em>weighted_score_type=0.25</em>, <em>esnull=None</em>, <em>rs=&lt;mtrand.RandomState object&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.algorithm.enrichment_score_ss" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a gene set, a map of gene names to expression levels, and a weight score, returns the ssGSEA
 enrichment score for the gene set as described by <em>D. Barbie et al 2009</em></p>
 <p>ssGSEA  allows one to define an enrichment score that represents the degree of absolute enrichment
-of a gene set in each sample within a given data set.  
+of a gene set in each sample within a given data set.
 The  enrichment score was produced using the Empirical Cumulative Distribution Functions (ECDF)
 of the genes in the signature and the remaining genes.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -562,7 +553,7 @@ of the genes in the signature and the remaining genes.</p>
 </tr>
 <tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>gene_set</strong> – a list of gene_names in the gene_set given by gmt file.</li>
-<li><strong>expressions</strong> – dict, a dictionary mapping gene names to their absolute expression values</li>
+<li><strong>rnkseries</strong> – dict, a dictionary mapping gene names to their absolute expression values</li>
 <li><strong>weighted_score_type</strong> – the weighted exponent on the  term.</li>
 </ul>
 </td>
@@ -622,7 +613,7 @@ of the genes in the signature and the remaining genes.</p>
 <dd><p>Compute nominal p-value.</p>
 <p>From article (PNAS):
 estimate nominal p-value for S from esnull by using the positive
-or negative portion of the distribution corresponding to the sign 
+or negative portion of the distribution corresponding to the sign
 of the observed ES(S).</p>
 </dd></dl>
 
@@ -659,9 +650,9 @@ Others methods are:</p>
 The larger the signal-to-noise ratio, the larger the differences of the means (scaled by the standard deviations);
 that is, the more distinct the gene expression is in each phenotype and the more the gene acts as a “class marker.”</p>
 </li>
-<li>’t_test’<p>Uses the difference of means scaled by the standard deviation and number of samples. 
+<li>’t_test’<p>Uses the difference of means scaled by the standard deviation and number of samples.
 Note: You must have at least three samples for each phenotype to use this metric.
-The larger the tTest ratio, the more distinct the gene expression is in each phenotype 
+The larger the tTest ratio, the more distinct the gene expression is in each phenotype
 and the more the gene acts as a “class marker.”</p>
 </li>
 <li>’ratio_of_classes’ (also referred to as fold change).<p>Uses the ratio of class means to calculate fold change for natural scale data.</p>
@@ -941,12 +932,12 @@ if spines = []. remove all spines and ticks.</li>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>data2d</strong> – DataFrame to normalize.</li>
-<li><strong>axis</strong> – int, Which axis to normalize across. If 0, normalize across rows, 
+<li><strong>axis</strong> – int, Which axis to normalize across. If 0, normalize across rows,
 if 1, normalize across columns.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Normalized DataFrame. Noramlized data with a mean of 0 and variance of 1 
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Normalized DataFrame. Noramlized data with a mean of 0 and variance of 1
 across the specified axis.</p>
 </td>
 </tr>
@@ -1001,7 +992,7 @@ across the specified axis.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.8.4',
+            VERSION:'0.8.7',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
