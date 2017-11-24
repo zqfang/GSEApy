@@ -14,8 +14,8 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
 .. image:: https://travis-ci.org/BioNinja/GSEApy.svg?branch=master
     :target: https://travis-ci.org/BioNinja/GSEApy
 
-.. image:: http://readthedocs.org/projects/gseapy/badge/?version=latest
-    :target: http://gseapy.readthedocs.org/en/latest/?badge=latest
+.. image:: http://readthedocs.org/projects/gseapy/badge/?version=master
+    :target: http://gseapy.readthedocs.io/en/master/?badge=master
     :alt: Documentation Status
 
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg
@@ -32,7 +32,7 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
 
 The main documentation for GSEAPY can be found at http://gseapy.rtfd.io/
 
-An example to use gseapy, please click here: `Example <http://gseapy.readthedocs.io/en/latest/gseapy_example.html>`_
+An example to use gseapy, please click here: `Example <http://gseapy.readthedocs.io/en/master/gseapy_example.html>`_
 
 **Release notes** : https://github.com/BioNinja/gseapy/releases
 
