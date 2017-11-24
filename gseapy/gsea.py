@@ -435,7 +435,7 @@ class SingleSampleGSEA(GSEAbase):
         if isinstance(rnk, pd.DataFrame):
             rank_metric = rnk.copy()
             # handle dataframe with gene_name as index.
-            loggging.debug("Input data is a DataFrame with gene names")
+            self._logger.debug("Input data is a DataFrame with gene names")
             #handle index is not gene_names
             if rank_metric.index.dtype != 'O':
                 rank_metric.set_index(keys=rank_metric.columns[0], inplace=True)
@@ -443,7 +443,7 @@ class SingleSampleGSEA(GSEAbase):
             rank_metric = rank_metric.select_dtypes(include=[number])
         elif isinstance(rnk, pd.Series):
             #change to DataFrame
-            loggging.debug("Input data is a Series with gene names")
+            self._logger.debug("Input data is a Series with gene names")
             rank_metric = pd.DataFrame(rnk)
         elif os.path.isfile(rnk):
             # GCT input format?
@@ -461,7 +461,7 @@ class SingleSampleGSEA(GSEAbase):
             raise Exception('Error parsing gene ranking values!')
 
         if rank_metric.index.duplicated().sum() > 0:
-            logging.info("Warning: dropping duplicated gene names, only keep the first values")
+            self._logger.info("Warning: dropping duplicated gene names, only keep the first values")
             rank_metric = rank_metric.loc[rank_metric.index.drop_duplicates(keep='first')]
         # if single sample input, set ranking is not None for temp.
         if rank_metric.shape[1] <= 2:
@@ -486,9 +486,10 @@ class SingleSampleGSEA(GSEAbase):
             dat[dat < 1] = 1
             data = log(dat + exp(1))
         elif self.sample_norm_method == 'custom':
-            logging.info("Set user defined rank metric for ssGSEA")
+            self._logger.info("Set user defined rank metric for ssGSEA")
         else:
             sys.stderr.write("No supported method: %s"%self.sample_norm_type)
+            sys.exit(0)
 
         return data
 
