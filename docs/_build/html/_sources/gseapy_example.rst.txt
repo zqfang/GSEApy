@@ -3,7 +3,7 @@ GSEAPY Example
 ==============
 
 Examples to walk through ``GSEApy``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 1. Load essential packages
 --------------------------
@@ -11,13 +11,12 @@ Examples to walk through ``GSEApy``
 .. code-block:: python
     :linenos:
 
-    %matplotlib inline
     import pandas as pd
     import gseapy as gp
     import matplotlib.pyplot as plt
 
+
 **Check gseapy version**
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
     :linenos:
@@ -33,11 +32,10 @@ Examples to walk through ``GSEApy``
 
 
 
-See all gseapy supported enrichr library names
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+2. gseapy supported enrichr library names
+------------------------------------------
 
-Enrichr library could be used for ``gsea``, ``ssgsea``, and ``prerank``,
-too
+Enrichr library could be used for ``gsea``, ``ssgsea``, and ``prerank``, too
 
 .. code-block:: python
     :linenos:
@@ -63,7 +61,7 @@ too
 
 
 
-2. Enrichr Example
+3. Enrichr Example
 ------------------
 
 1) Assign enrichr with ``pd.Series``, ``pd.DataFrame``, or ``list`` object
@@ -74,8 +72,6 @@ too
 
     gene_list = pd.read_table("./gene_list.txt",header=None)
     gene_list.head()
-
-
 
 
 .. raw:: html
@@ -128,6 +124,7 @@ too
 
 
 
+
 .. code-block:: python
     :linenos:
 
@@ -153,6 +150,8 @@ too
 .. parsed-literal::
 
     ['CTLA2B', 'SCARA3', 'LOC100044683', 'CMBL', 'CLIC6', 'IL13RA1', 'TACSTD2', 'DKKL1', 'CSF1', 'CITED1']
+
+
 
 
 .. code-block:: python
@@ -277,6 +276,10 @@ too
 
 
 
+
+
+
+
 2) Command line usage
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -305,7 +308,7 @@ the option **-v** will print out the progress of your job
 
 
 
-3. Prerank example
+4. Prerank example
 ------------------
 
 1) Assign prerank() with a pd.DataFrame, pd.Series , or a txt file
@@ -378,6 +381,9 @@ the option **-v** will print out the progress of your job
       </tbody>
     </table>
     </div>
+
+
+
 
 
 
@@ -472,6 +478,7 @@ the option **-v** will print out the progress of your job
 
 
 
+
 .. code-block:: python
     :linenos:
 
@@ -504,7 +511,7 @@ You may also want to use prerank in command line
     #shell
     gseapy prerank -r temp.rnk -g temp.gmt -o prerank_report_temp
 
-4. GSEA Example
+5. GSEA Example
 ---------------
 
 1) Assign gsea() with a pandas DataFrame, .gct format file, or a text file
@@ -710,6 +717,8 @@ and cls with a list object or just .cls format file
 
 
 
+
+
 .. code-block:: python
     :linenos:
 
@@ -845,6 +854,8 @@ and cls with a list object or just .cls format file
 
 
 
+
+
 .. code-block:: python
     :linenos:
 
@@ -904,11 +915,11 @@ You may also want to use gsea in command line
     gseapy gsea -d ./P53_resampling_data.txt -g KEGG_2016 -c ./P53.cls -o gsea_reprot_2 -v -t phenotype
 
 
-5. Single Sample GSEA example
+6. Single Sample GSEA example
 -----------------------------
 
-**Note: When you run ssGSEA, all genes names in your gene_sets file
-should be found in your expression table**
+**Note:** When you run ssGSEA, all genes names in your gene_sets file
+should be found in your expression table
 
 1) Assign ssgsea() with a txt file, dataframe, or Seires(gene name as index).
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -992,6 +1003,8 @@ should be found in your expression table**
 
 
 
+
+
 .. code-block:: python
     :linenos:
 
@@ -1054,6 +1067,8 @@ should be found in your expression table**
       </tbody>
     </table>
     </div>
+
+
 
 
 
@@ -1203,6 +1218,8 @@ should be found in your expression table**
 
 
 
+
+
 2) ``ssgsea`` supports gene expression matix in gct format.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1211,6 +1228,8 @@ should be found in your expression table**
 | which means it will compute NES,FDR … for every sample pairwise.
 | finally, you can assces the reuslts through **resultsOnSamples**
   attribute.
+
+
 
 Take previous gene_exp dataframe for example
 
@@ -1392,6 +1411,8 @@ Take previous gene_exp dataframe for example
     </table>
     <p>5 rows × 51 columns</p>
     </div>
+
+
 
 
 
@@ -1588,6 +1609,8 @@ Take previous gene_exp dataframe for example
     </table>
     <p>5 rows × 50 columns</p>
     </div>
+
+
 
 
 
