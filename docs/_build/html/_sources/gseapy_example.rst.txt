@@ -381,7 +381,7 @@ the option **-v** will print out the progress of your job
 
 
 
-  .. code-block:: python
+.. code-block:: python
     :linenos:
 
     # run prerank
@@ -501,6 +501,7 @@ You may also want to use prerank in command line
 .. code-block:: shell
     :linenos:
 
+    #shell
     gseapy prerank -r temp.rnk -g temp.gmt -o prerank_report_temp
 
 4. GSEA Example
@@ -899,6 +900,7 @@ You may also want to use gsea in command line
 .. code-block:: shell
     :linenos:
 
+    #shell
     gseapy gsea -d ./P53_resampling_data.txt -g KEGG_2016 -c ./P53.cls -o gsea_reprot_2 -v -t phenotype
 
 
@@ -1595,4 +1597,5 @@ Take previous gene_exp dataframe for example
 .. code-block:: shell
     :linenos:
 
+    #shell
     gseapy ssgsea -d ./testSet_rand1200.gct -g temp.gmt -o ssgsea_report2  -p 4

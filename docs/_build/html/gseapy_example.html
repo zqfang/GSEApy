@@ -464,74 +464,80 @@ assign a <code class="docutils literal"><span class="pre">DataFrame</span></code
 <span class="n">rank</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </td></tr></table></div>
-  <div>
-  <style>
-      .dataframe thead tr:only-child th {
-          text-align: right;
-      }
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
 
-      .dataframe thead th {
-          text-align: left;
-      }
+    .dataframe thead th {
+        text-align: left;
+    }
 
-      .dataframe tbody tr th {
-          vertical-align: top;
-      }
-  </style>
-  <table border="1" class="dataframe">
-    <thead>
-      <tr style="text-align: right;">
-        <th></th>
-        <th>0</th>
-        <th>1</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <th>0</th>
-        <td>CTLA2B</td>
-        <td>2.502482</td>
-      </tr>
-      <tr>
-        <th>1</th>
-        <td>SCARA3</td>
-        <td>2.095578</td>
-      </tr>
-      <tr>
-        <th>2</th>
-        <td>LOC100044683</td>
-        <td>1.116398</td>
-      </tr>
-      <tr>
-        <th>3</th>
-        <td>CMBL</td>
-        <td>0.877640</td>
-      </tr>
-      <tr>
-        <th>4</th>
-        <td>CLIC6</td>
-        <td>0.822181</td>
-      </tr>
-    </tbody>
-  </table>
-  </div>
-
-
-
-.. code-block:: python
-  :linenos:
-
-  # run prerank
-  # enrichr libraries are supported by prerank module. Just provide the name
-  pre=[]
-  for s, n in zip(['./genes.gmt', 'KEGG_2016'],['bp','kegg']):
-      #use 4 process to acceralate the permutation speed
-      pre_res = gp.prerank(rnk=rank,
-                           gene_sets=s,
-                           processes=4,
-                           permutation_num=100, # reduce number to speed up test
-                           outdir='prerank_report_'+n,format='png')
-      pre.append(pre_res)<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>0</th>
+      <th>1</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>CTLA2B</td>
+      <td>2.502482</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>SCARA3</td>
+      <td>2.095578</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>LOC100044683</td>
+      <td>1.116398</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>CMBL</td>
+      <td>0.877640</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>CLIC6</td>
+      <td>0.822181</td>
+    </tr>
+  </tbody>
+</table>
+</div><div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># run prerank</span>
+<span class="c1"># enrichr libraries are supported by prerank module. Just provide the name</span>
+<span class="n">pre</span><span class="o">=</span><span class="p">[]</span>
+<span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="s1">&#39;./genes.gmt&#39;</span><span class="p">,</span> <span class="s1">&#39;KEGG_2016&#39;</span><span class="p">],[</span><span class="s1">&#39;bp&#39;</span><span class="p">,</span><span class="s1">&#39;kegg&#39;</span><span class="p">]):</span>
+    <span class="c1">#use 4 process to acceralate the permutation speed</span>
+    <span class="n">pre_res</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">prerank</span><span class="p">(</span><span class="n">rnk</span><span class="o">=</span><span class="n">rank</span><span class="p">,</span>
+                         <span class="n">gene_sets</span><span class="o">=</span><span class="n">s</span><span class="p">,</span>
+                         <span class="n">processes</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                         <span class="n">permutation_num</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="c1"># reduce number to speed up test</span>
+                         <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;prerank_report_&#39;</span><span class="o">+</span><span class="n">n</span><span class="p">,</span><span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
+    <span class="n">pre</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pre_res</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
 2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1">#access results through res2d attribute</span>
 <span class="n">pre</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">res2d</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
@@ -613,7 +619,9 @@ assign a <code class="docutils literal"><span class="pre">DataFrame</span></code
 <div class="section" id="id1">
 <h2>2) Command line usage<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <p>You may also want to use prerank in command line</p>
-<div class="highlight-shell"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span>gseapy prerank -r temp.rnk -g temp.gmt -o prerank_report_temp
+<div class="highlight-shell"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1">#shell</span>
+gseapy prerank -r temp.rnk -g temp.gmt -o prerank_report_temp
 </pre></div>
 </td></tr></table></div>
 <div class="section" id="gsea-example">
@@ -961,7 +969,9 @@ the backgroud.</p>
 <div class="section" id="id2">
 <h2>3) Command line usage<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
 <p>You may also want to use gsea in command line</p>
-<div class="highlight-shell"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span>gseapy gsea -d ./P53_resampling_data.txt -g KEGG_2016 -c ./P53.cls -o gsea_reprot_2 -v -t phenotype
+<div class="highlight-shell"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1">#shell</span>
+gseapy gsea -d ./P53_resampling_data.txt -g KEGG_2016 -c ./P53.cls -o gsea_reprot_2 -v -t phenotype
 </pre></div>
 </td></tr></table></div>
 <div class="section" id="single-sample-gsea-example">
@@ -1600,7 +1610,9 @@ attribute.</div>
 </div></div>
 <div class="section" id="command-line-usage-of-single-sample-gsea">
 <h2>3) command line usage of single sample gsea<a class="headerlink" href="#command-line-usage-of-single-sample-gsea" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-shell"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span>gseapy ssgsea -d ./testSet_rand1200.gct -g temp.gmt -o ssgsea_report2  -p <span class="m">4</span>
+<div class="highlight-shell"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1">#shell</span>
+gseapy ssgsea -d ./testSet_rand1200.gct -g temp.gmt -o ssgsea_report2  -p <span class="m">4</span>
 </pre></div>
 </td></tr></table></div>
 </div>
