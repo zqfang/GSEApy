@@ -161,14 +161,14 @@ def enrichment_score_ss(gene_set, rnkseries, weighted_score_type=0.25, esnull=No
             rs.shuffle(tag_indicator[i])
 
     # calculate numerator of each gene hits
-    rank_alpha = (tag_indicator*index)** weighted_score_type
-    P_GW_denominator = np.sum(rank_alpha, axis=axis, keepdims=True)
-    P_GW_numerator = np.cumsum(rank_alpha, axis=axis)
+    P_GW_numerator = (tag_indicator*index)** weighted_score_type
+    P_GW_denominator = np.sum(P_GW_numerator, axis=axis, keepdims=True)
+    #P_GW_numerator = np.cumsum(rank_alpha, axis=axis)
 
     P_NG_denominator = len(expressions) - len(gene_set)
-    P_NG_numerator = np.cumsum(1 -tag_indicator, axis=axis)
+    P_NG_numerator = 1 -tag_indicator
 
-    RES = P_GW_numerator / P_GW_denominator - P_NG_numerator/ P_NG_denominator
+    RES = np.cumsum(P_GW_numerator / P_GW_denominator - P_NG_numerator/ P_NG_denominator, axis=axis)
     # scale es by gene numbers ?
     # https://gist.github.com/gaoce/39e0907146c752c127728ad74e123b33
     es = np.sum(RES, axis=axis)/len(expressions)
