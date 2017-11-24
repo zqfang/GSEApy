@@ -322,7 +322,7 @@ class GSEA(GSEAbase):
                        figsize=self.figsize, format=self.format, module=self.module,
                        data=heat_dat, classes=cls_vector, phenoPos=phenoPos, phenoNeg=phenoNeg)
 
-        logger.info("Congratulations. GSEApy run successfully................")
+        logger.info("Congratulations. GSEApy run successfully................\n")
 
         return
 
@@ -393,7 +393,7 @@ class Prerank(GSEAbase):
                        figsize=self.figsize, format=self.format,
                        module=self.module, phenoPos=self.pheno_pos, phenoNeg=self.pheno_neg)
 
-        logger.info("Congratulations. GSEApy run successfully................")
+        logger.info("Congratulations. GSEApy run successfully................\n")
 
         return
 
@@ -564,7 +564,7 @@ class SingleSampleGSEA(GSEAbase):
                        graph_num=self.graph_num, outdir=self.outdir,
                        figsize=self.figsize, format=self.format, module=self.module)
 
-        self._logger.info("Congratulations. GSEApy run successfully................\n\n")
+        self._logger.info("Congratulations. GSEApy run successfully................\n")
 
         return
 
@@ -591,7 +591,16 @@ class SingleSampleGSEA(GSEAbase):
         #save raw ES to one csv file
         samplesRawES = pd.DataFrame(self.resultsOnSamples)
         samplesRawES.index.name = 'Term'
-        samplesRawES.to_csv(os.path.join(outdir, "gseapy.samples.raw.es.csv"))
+        samplesRawES.to_csv(os.path.join(outdir, "gseapy.samples.raw.es.txt"), sep='\t')
+
+        ## normalize enrichment scores by using the entire data set, as indicated
+        ## by Barbie et al., 2009, online methods, pg. 2
+        samplesNES = samplesRawES / (samplesRawES.values.max() - samplesRawES.values.min())
+        outNESfile = os.path.join(outdir, "gseapy.samples.normalized.es.txt")
+        with open(outNESfile, 'a') as f:
+            f.write('# normalize enrichment scores by using the entire data set\n')
+            f.write('# as indicated by Barbie et al., 2009, online methods, pg. 2\n')
+            samplesNES.to_csv(f, sep='\t')
         return
 
 
@@ -663,7 +672,7 @@ class Replot(GSEAbase):
                             fdr, RES, phenoPos, phenoNeg, self.figsize,
                             self.format, self.outdir, self.module)
 
-        logger.info("Congratulations! Your plots have been reproduced successfully!")
+        logger.info("Congratulations! Your plots have been reproduced successfully!\n")
 
 
 def call(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permutation_num=1000,

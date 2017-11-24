@@ -45,7 +45,7 @@ class Enrichr(GSEAbase):
             elif self.gene_list.shape[1] == 2:
                genes= self.gene_list.apply(lambda x: ",".join([str(i) for i in x]), axis=1).tolist()
             else:
-               genes = self.gene_list.squeeze().tolist()            
+               genes = self.gene_list.squeeze().tolist()
         elif isinstance(self.gene_list, Series):
             genes = self.gene_list.squeeze().tolist()
         else:
@@ -156,7 +156,7 @@ class Enrichr(GSEAbase):
             else:
                 fig.savefig(outfile.replace("txt", self.format),
                             bbox_inches='tight', dpi=300)
-
+        logger.info('Done.\n')
         return
 def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr',
             cutoff=0.05, format='pdf', figsize=(8,6), top_term=10, no_plot=False, verbose=False):
