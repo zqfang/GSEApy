@@ -1,0 +1,7 @@
+cython
+pytest
+numpydoc
+pyyaml
+sphinx
+nbsphinx
+sphinx_rtd_theme
