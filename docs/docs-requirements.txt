@@ -1,3 +1,5 @@
+ipython
+ipykernel
 cython
 pytest
 numpydoc
