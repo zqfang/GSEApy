@@ -82,7 +82,7 @@ do gene set enrichment analysis in python. So, here is my reason:
     introduction.rst
     run.rst
     gseapy_tutorial
-    gseapy_example
+    gseapy_example.ipynb
 	
 
 
@@ -97,4 +97,5 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
 

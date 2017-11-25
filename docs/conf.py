@@ -32,6 +32,7 @@ import shlex
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'nbsphinx',
 ]
 
 # Add any paths that contain templates here, relative to this directory.

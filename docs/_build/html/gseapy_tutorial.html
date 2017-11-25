@@ -108,6 +108,18 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="gseapy_example.html">GSEAPY Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#1.-Load-essential-packages">1. Load essential packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#See-all-gseapy-supported-enrichr-library-names">See all gseapy supported enrichr library names</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#2.-Enrichr-Example">2. Enrichr Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#2)-Command-line-usage">2) Command line usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#3.-Prerank-example">3. Prerank example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#2)-Command-line-usage">2) Command line usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#4.-GSEA-Example">4. GSEA Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#2)-Show-the-gsea-plots">2) Show the gsea plots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#3)-Command-line-usage">3) Command line usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#5.-Single-Sample-GSEA-example">5. Single Sample GSEA example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#2)-ssgsea-supports-gene-expression-matix-in-gct-format.">2) <code class="docutils literal"><span class="pre">ssgsea</span></code> supports gene expression matix in gct format.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#3)-command-line-usage-of-single-sample-gsea">3) command line usage of single sample gsea</a></li>
 </ul>
 
             
@@ -171,15 +183,49 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="a-protocol-to-prepare-files-for-gseapy">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="a-protocol-to-prepare-files-for-gseapy">
 <span id="tutorial"></span><h1>A Protocol to Prepare files for GSEAPY<a class="headerlink" href="#a-protocol-to-prepare-files-for-gseapy" title="Permalink to this headline">¶</a></h1>
 <p>As a biological reseacher, I like protocols, so as other reseachers, too.</p>
 <p>Here is an short tutorial to walk you through gseapy.</p>
 <p>In order to run gseapy successfully, install gseapy use pip.</p>
-<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">gseapy</span>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>pip install gseapy
 
 <span class="c1"># if you have conda</span>
-<span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">bioconda</span> <span class="n">gseapy</span>
+conda install -c bioconda gseapy
 </pre></div>
 </div>
 <div class="section" id="use-gsea-command-or-gsea">
@@ -192,7 +238,7 @@
 <p><strong>RNA-seq,ChIP-seq, Microarry data</strong> are all supported.</p>
 <p>Here is to see what the structure of expression table looks like, you don’t have to run
 commands below:</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s1">&#39;./test/gsea_data.txt&#39;</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 
@@ -271,8 +317,8 @@ commands below:</p>
 <h3>2. An cls file is also expected.<a class="headerlink" href="#an-cls-file-is-also-expected" title="Permalink to this headline">¶</a></h3>
 <p>This file is used to specify column attributes in step 1, just like <code class="docutils literal"><span class="pre">GSEA</span></code> asked.</p>
 <p>An example of cls file looks like below.</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;gsea/edb/C1OE.cls&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="bp">cls</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;gsea/edb/C1OE.cls&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="bp">cls</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
 
 <span class="c1"># or assign a list object to parameter &#39;cls&#39; like this</span>
 <span class="c1"># cls=[&#39;C1OE&#39;, &#39;C1OE&#39;, &#39;C1OE&#39;, &#39;Vector&#39;, &#39;Vector&#39;, &#39;Vector&#39;]</span>
@@ -296,8 +342,8 @@ commands below:</p>
 <p>If you would like to use you own gene_sets.gmts files, build such a file use excel,
 and then rename to gene_sets.gmt.</p>
 <p>An example of gmt file looks like below:</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;gsea/edb/gene_sets.gmt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">gmt</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">gmt</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;gsea/edb/gene_sets.gmt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">gmt</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">gmt</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
 </pre></div>
 </div>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">ES</span><span class="o">-</span><span class="n">SPECIFIC</span> <span class="n">Arid3a_used</span>     <span class="n">ACTA1</span>   <span class="n">CALML4</span>  <span class="n">CORO1A</span>  <span class="n">DHX58</span>   <span class="n">DPYS</span>    <span class="n">EGR1</span>    <span class="n">ESRRB</span>   <span class="n">GLI2</span>    <span class="n">GPX2</span>    <span class="n">HCK</span>     <span class="n">INHBB</span>
@@ -328,21 +374,21 @@ gseapy.gsea(data=’gsea_data.txt’, cls=’gsea.cls’, gmt=’gene_sets.gmt�
 a pre-ranked gene list dataset with correlation values, which in .rnk format,
 and gene_sets file in gmt format.  <code class="docutils literal"><span class="pre">prerank</span></code> module has the same API to <cite>GSEA</cite> pre-rank tools.</p>
 <p>After this, you can start to run gseapy.</p>
-<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">gseapy</span> <span class="n">prerank</span> <span class="o">-</span><span class="n">r</span> <span class="n">gsea_data</span><span class="o">.</span><span class="n">rnk</span> <span class="o">-</span><span class="n">g</span> <span class="n">gene_sets</span><span class="o">.</span><span class="n">gmt</span> <span class="o">-</span><span class="n">o</span> <span class="n">test</span>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>gseapy prerank -r gsea_data.rnk -g gene_sets.gmt -o <span class="nb">test</span>
 </pre></div>
 </div>
 <p>Or run inside python.</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gseapy</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gseapy</span>
 <span class="n">gseapy</span><span class="o">.</span><span class="n">prerank</span><span class="p">(</span><span class="n">rnk</span><span class="o">=</span><span class="s1">&#39;gsea_data.rnk&#39;</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span><span class="s1">&#39;gene_sets.gmt&#39;</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="use-ssgsea-command-or-ssgsea">
 <h2>Use <code class="docutils literal"><span class="pre">ssgsea</span></code> command, or <code class="xref py py-func docutils literal"><span class="pre">ssgsea()</span></code><a class="headerlink" href="#use-ssgsea-command-or-ssgsea" title="Permalink to this headline">¶</a></h2>
-<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">gseapy</span> <span class="n">ssgsea</span> <span class="o">-</span><span class="n">d</span> <span class="n">expression</span><span class="o">.</span><span class="n">txt</span> <span class="o">-</span><span class="n">g</span> <span class="n">gene_sets</span><span class="o">.</span><span class="n">gmt</span> <span class="o">-</span><span class="n">o</span> <span class="n">test</span>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>gseapy ssgsea -d expression.txt -g gene_sets.gmt -o <span class="nb">test</span>
 </pre></div>
 </div>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1">#ssGSEA</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1">#ssGSEA</span>
 <span class="n">gseapy</span><span class="o">.</span><span class="n">ssgsea</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s2">&quot;expression.txt&quot;</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span> <span class="s2">&quot;gene_sets.gmt&quot;</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -352,7 +398,7 @@ and gene_sets file in gmt format.  <code class="docutils literal"><span class="p
 <p>The only thing you need to prepeare is a gene list file.</p>
 <p><strong>Note</strong>: Enrichr uses a list of Entrez gene symbols as input.</p>
 <p>For <code class="docutils literal"><span class="pre">enrichr</span></code> , you could assign a list object</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># assign a list object to enrichr</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># assign a list object to enrichr</span>
 <span class="n">l</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;SCARA3&#39;</span><span class="p">,</span> <span class="s1">&#39;LOC100044683&#39;</span><span class="p">,</span> <span class="s1">&#39;CMBL&#39;</span><span class="p">,</span> <span class="s1">&#39;CLIC6&#39;</span><span class="p">,</span> <span class="s1">&#39;IL13RA1&#39;</span><span class="p">,</span> <span class="s1">&#39;TACSTD2&#39;</span><span class="p">,</span> <span class="s1">&#39;DKKL1&#39;</span><span class="p">,</span> <span class="s1">&#39;CSF1&#39;</span><span class="p">,</span>
      <span class="s1">&#39;SYNPO2L&#39;</span><span class="p">,</span> <span class="s1">&#39;TINAGL1&#39;</span><span class="p">,</span> <span class="s1">&#39;PTX3&#39;</span><span class="p">,</span> <span class="s1">&#39;BGN&#39;</span><span class="p">,</span> <span class="s1">&#39;HERC1&#39;</span><span class="p">,</span> <span class="s1">&#39;EFNA1&#39;</span><span class="p">,</span> <span class="s1">&#39;CIB2&#39;</span><span class="p">,</span> <span class="s1">&#39;PMP22&#39;</span><span class="p">,</span> <span class="s1">&#39;TMEM173&#39;</span><span class="p">]</span>
 
@@ -360,15 +406,15 @@ and gene_sets file in gmt format.  <code class="docutils literal"><span class="p
 </pre></div>
 </div>
 <p>or a gene list file in txt format(one gene id per row)</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">gseapy</span><span class="o">.</span><span class="n">enrichr</span><span class="p">(</span><span class="n">gene_list</span><span class="o">=</span><span class="s1">&#39;gene_list.txt&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;pathway&#39;</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span><span class="s1">&#39;KEGG_2016&#39;</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">gseapy</span><span class="o">.</span><span class="n">enrichr</span><span class="p">(</span><span class="n">gene_list</span><span class="o">=</span><span class="s1">&#39;gene_list.txt&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;pathway&#39;</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span><span class="s1">&#39;KEGG_2016&#39;</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Let’s see what the txt file looks like.</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;data/gene_list.txt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">genes</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">genes</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;data/gene_list.txt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">genes</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">genes</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
 </pre></div>
 </div>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">CTLA2B</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">CTLA2B</span>
 <span class="n">SCARA3</span>
 <span class="n">LOC100044683</span>
 <span class="n">CMBL</span>
@@ -384,13 +430,13 @@ and gene_sets file in gmt format.  <code class="docutils literal"><span class="p
 </pre></div>
 </div>
 <p>Select the library you want to do enrichment analysis. For a view all avilable libraries,run</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1">#s get_library_name(), it will print out all library names.</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1">#s get_library_name(), it will print out all library names.</span>
 <span class="kn">import</span> <span class="nn">gseapy</span>
 <span class="n">names</span> <span class="o">=</span> <span class="n">gseapy</span><span class="o">.</span><span class="n">get_library_name</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span> <span class="p">[</span><span class="s1">&#39;Genome_Browser_PWMs&#39;</span><span class="p">,</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span> <span class="p">[</span><span class="s1">&#39;Genome_Browser_PWMs&#39;</span><span class="p">,</span>
 <span class="s1">&#39;TRANSFAC_and_JASPAR_PWMs&#39;</span><span class="p">,</span>
 <span class="s1">&#39;ChEA_2013&#39;</span><span class="p">,</span>
 <span class="s1">&#39;Drug_Perturbations_from_GEO_2014&#39;</span><span class="p">,</span>
@@ -510,12 +556,12 @@ inside edb folder.The gsea document tree looks like this:</p>
 </pre></div>
 </div>
 <p>After this, you can start to run gseapy.</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gseapy</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gseapy</span>
 <span class="n">gseapy</span><span class="o">.</span><span class="n">replot</span><span class="p">(</span><span class="n">indir</span> <span class="o">=</span><span class="s1">&#39;gsea&#39;</span><span class="p">,</span> <span class="n">outdir</span> <span class="o">=</span> <span class="s1">&#39;gseapy_out&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>If you prefer to run in command line, it’s more simple.</p>
-<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">gseapy</span> <span class="n">replot</span> <span class="o">-</span><span class="n">i</span> <span class="n">gsea</span> <span class="o">-</span><span class="n">o</span> <span class="n">gseapy_out</span>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>gseapy replot -i gsea -o gseapy_out
 </pre></div>
 </div>
 <div class="line-block">
