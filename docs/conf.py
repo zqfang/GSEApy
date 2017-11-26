@@ -31,10 +31,10 @@ import shlex
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
-    'nbsphinx',
-    'sphinx.ext.mathjax',
-    'IPython.sphinxext.ipython_console_highlighting',
+    'sphinx.ext.autodoc', 'sphinx.ext.mathjax',
+    'sphinx.ext.doctest', 'sphinx.ext.todo',
+    'sphinx.ext.coverage', 'sphinx.ext.viewcode',
+    'nbsphinx', 'IPython.sphinxext.ipython_console_highlighting',
 ]
 
 # Add any paths that contain templates here, relative to this directory.

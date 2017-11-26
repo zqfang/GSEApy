@@ -22,4 +22,5 @@ tmp/
 # vim
 .*swp
 
-docs/_build
+docs/_build/doctest
+docs/_build/doctrees/*
