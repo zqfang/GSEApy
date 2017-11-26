@@ -21,20 +21,20 @@ The ``enrichr`` module will call enrichr-api. You need a gene_list file for inpu
 The ``replot`` module reproduce GSEA desktop version results. The only input for replot module is the location to GSEA results.
 
 .. code:: bash
-  
+
     # An example to reproduce figures using replot module.
     $ gseapy replot -i ./gsea -o gseapy_out
 
 
 
-The ``gsea`` module produce GSEAPY results. 
+The ``gsea`` module produce GSEAPY results.
 
 The input requries a txt file( FPKM, Expected Counts, TPM, et.al), a cls file,
 and gene_sets file in gmt format.
 
 
 .. code:: bash
-    
+
     # an example to compute using gseapy gsea module
     $ gseapy gsea -d gsea_data.txt -c test.cls -g gene_sets.gmt
 
@@ -49,8 +49,8 @@ and gene_sets file in gmt format.  ``prerank`` module is an API to `GSEA` pre-ra
     $ gseapy prerank -r gsea_data.rnk -g gene_sets.gmt -o test
 
 
-The input files' formats are identical to ``GSEA`` desktop version. 
-See :ref:`example` for details, or, see `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ documentation for more information.
+The input files' formats are identical to ``GSEA`` desktop version.
+See :ref:`Example <gseapy_example.ipynb>` for details, or, see `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ documentation for more information.
 
 
 
@@ -85,9 +85,9 @@ This will import the following:
 .. code:: python
 
    # An example to calculate es, nes, pval,fdrs, and produce figures using gseapy.
-   gseapy.gsea(data='gsea_dat.txt', gene_sets='gene_sets.gmt', cls='test.cls', outdir='gseapy_out', 
+   gseapy.gsea(data='gsea_dat.txt', gene_sets='gene_sets.gmt', cls='test.cls', outdir='gseapy_out',
              min_size=15, max_size=1000, permutation_n = 1000, weighted_score_type=1,
-             permutation_type = 'gene_set', method='log2_ratio_of_classes', ascending=False, 
+             permutation_type = 'gene_set', method='log2_ratio_of_classes', ascending=False,
              figsize=(6.5,6), format='png')
 
 
@@ -97,19 +97,19 @@ This will import the following:
 
    # An example to calculate es, nes, pval,fdrs, and produce figures using gseapy.
    gseapy.prerank(rnk='gsea_data.rnk', gene_sets='ene_sets.gmt', outdir='gseapy_out', min_size=15,
-                  max_size=1000, permutation_n=1000, weighted_score_type=1, ascending=False, 
+                  max_size=1000, permutation_n=1000, weighted_score_type=1, ascending=False,
                   figsize=(6.5,6), format='png')
 
-			 
+
 To See help information of GSEAPY
 --------------------------------------
 
 1. gseapy subcommands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. code:: bash
-   
-   $ gseapy --help 
-   
+
+   $ gseapy --help
+
     usage: gseapy [-h] [--version] {gsea,prerank,ssgsea,replot,enrichr} ...
 
     gseapy -- Gene Set Enrichment Analysis in Python
@@ -140,18 +140,18 @@ For command line options of each command, type: gseapy COMMAND -h
    $ gseapy gsea -h
    # or
    $ gseapy prerank -h
-   # or 
+   # or
    $ gseapy ssgsea -h
-   # or 
+   # or
    $ gseapy enrichr -h
 
 
 
-							
 
 
-							
-Module APIs 
+
+
+Module APIs
 ---------------------
 
 
@@ -168,7 +168,7 @@ Module APIs
 .. autofunction:: replot()
 
 
-Algorithm 
+Algorithm
 -------------------------
 
 
@@ -183,17 +183,15 @@ Enrichr
    :members:
 
 
-Parser 
+Parser
 --------------------------
 
 .. automodule:: gseapy.parser
    :members:
 
 
-Graph 
+Graph
 --------------------------
 
 .. automodule:: gseapy.plot
-   :members:   
-
-   
+   :members:

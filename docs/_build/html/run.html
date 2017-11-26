@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>How to Use GSEAPY &mdash; GSEApy 0.8.7 documentation</title>
+  <title>How to Use GSEAPY &mdash; GSEApy 0.8.8 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="GSEApy 0.8.7 documentation" href="index.html"/>
+    <link rel="top" title="GSEApy 0.8.8 documentation" href="index.html"/>
         <link rel="next" title="A Protocol to Prepare files for GSEAPY" href="gseapy_tutorial.html"/>
         <link rel="prev" title="Welcome to GSEAPY’s documentation!" href="introduction.html"/> 
 
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                0.8.7
+                0.8.8
               </div>
             
           
@@ -109,18 +109,6 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="gseapy_tutorial.html">A Protocol to Prepare files for GSEAPY</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gseapy_example.html">GSEAPY Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#1.-Load-essential-packages">1. Load essential packages</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#See-all-gseapy-supported-enrichr-library-names">See all gseapy supported enrichr library names</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#2.-Enrichr-Example">2. Enrichr Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#2)-Command-line-usage">2) Command line usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#3.-Prerank-example">3. Prerank example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#2)-Command-line-usage">2) Command line usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#4.-GSEA-Example">4. GSEA Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#2)-Show-the-gsea-plots">2) Show the gsea plots</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#3)-Command-line-usage">3) Command line usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#5.-Single-Sample-GSEA-example">5. Single Sample GSEA example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#2)-ssgsea-supports-gene-expression-matix-in-gct-format.">2) <code class="docutils literal"><span class="pre">ssgsea</span></code> supports gene expression matix in gct format.</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html#3)-command-line-usage-of-single-sample-gsea">3) command line usage of single sample gsea</a></li>
 </ul>
 
             
@@ -245,7 +233,7 @@ and gene_sets file in gmt format.  <code class="docutils literal"><span class="p
 </pre></div>
 </div>
 <p>The input files’ formats are identical to <code class="docutils literal"><span class="pre">GSEA</span></code> desktop version.
-See <span class="xref std std-ref">example</span> for details, or, see <a class="reference external" href="http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page">GSEA</a> documentation for more information.</p>
+See <a class="reference internal" href="gseapy_example.html"><span class="std std-ref">Example</span></a> for details, or, see <a class="reference external" href="http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page">GSEA</a> documentation for more information.</p>
 </div>
 <div class="section" id="run-gseapy-inside-python">
 <h2>Run gseapy inside python:<a class="headerlink" href="#run-gseapy-inside-python" title="Permalink to this headline">¶</a></h2>
@@ -600,7 +588,7 @@ of the genes in the signature and the remaining genes.</p>
 <tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>gene_set</strong> – a list of gene_names in the gene_set given by gmt file.</li>
 <li><strong>rnkseries</strong> – dict, a dictionary mapping gene names to their absolute expression values</li>
-<li><strong>weighted_score_type</strong> – the weighted exponent on the  term.</li>
+<li><strong>weighted_score_type</strong> – the weighted exponent on the <span class="math">\(P^W_G\)</span> term.</li>
 </ul>
 </td>
 </tr>
@@ -756,7 +744,7 @@ This is the recommended statistic for calculating fold change for log scale data
 <span id="enrichr"></span><h2>Enrichr<a class="headerlink" href="#module-gseapy.enrichr" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="gseapy.enrichr.Enrichr">
-<em class="property">class </em><code class="descclassname">gseapy.enrichr.</code><code class="descname">Enrichr</code><span class="sig-paren">(</span><em>gene_list</em>, <em>gene_sets</em>, <em>descriptions=’foo’</em>, <em>outdir=’Enrichr’</em>, <em>cutoff=0.05</em>, <em>format=’pdf’</em>, <em>figsize=(8</em>, <em>6)</em>, <em>top_term=10</em>, <em>no_plot=False</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.enrichr.Enrichr" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">gseapy.enrichr.</code><code class="descname">Enrichr</code><span class="sig-paren">(</span><em>gene_list</em>, <em>gene_sets</em>, <em>descriptions='foo'</em>, <em>outdir='Enrichr'</em>, <em>cutoff=0.05</em>, <em>format='pdf'</em>, <em>figsize=(8</em>, <em>6)</em>, <em>top_term=10</em>, <em>no_plot=False</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.enrichr.Enrichr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Enrichr API</p>
 <dl class="method">
 <dt id="gseapy.enrichr.Enrichr.run">
@@ -768,7 +756,7 @@ This is the recommended statistic for calculating fold change for log scale data
 
 <dl class="function">
 <dt id="gseapy.enrichr.enrichr">
-<code class="descclassname">gseapy.enrichr.</code><code class="descname">enrichr</code><span class="sig-paren">(</span><em>gene_list</em>, <em>gene_sets</em>, <em>description=’foo’</em>, <em>outdir=’Enrichr’</em>, <em>cutoff=0.05</em>, <em>format=’pdf’</em>, <em>figsize=(8</em>, <em>6)</em>, <em>top_term=10</em>, <em>no_plot=False</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.enrichr.enrichr" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.enrichr.</code><code class="descname">enrichr</code><span class="sig-paren">(</span><em>gene_list</em>, <em>gene_sets</em>, <em>description='foo'</em>, <em>outdir='Enrichr'</em>, <em>cutoff=0.05</em>, <em>format='pdf'</em>, <em>figsize=(8</em>, <em>6)</em>, <em>top_term=10</em>, <em>no_plot=False</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.enrichr.enrichr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Enrichr API.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -948,7 +936,7 @@ if spines = []. remove all spines and ticks.</li>
 
 <dl class="function">
 <dt id="gseapy.plot.heatmap">
-<code class="descclassname">gseapy.plot.</code><code class="descname">heatmap</code><span class="sig-paren">(</span><em>df</em>, <em>term</em>, <em>outdir</em>, <em>axis=0</em>, <em>figsize=(5</em>, <em>5)</em>, <em>format=’png’</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.plot.heatmap" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.plot.</code><code class="descname">heatmap</code><span class="sig-paren">(</span><em>df</em>, <em>term</em>, <em>outdir</em>, <em>axis=0</em>, <em>figsize=(5</em>, <em>5)</em>, <em>format='png'</em><span class="sig-paren">)</span><a class="headerlink" href="#gseapy.plot.heatmap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Visualize the dataframe.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1038,7 +1026,7 @@ across the specified axis.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.8.7',
+            VERSION:'0.8.8',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -1048,6 +1036,7 @@ across the specified axis.</p>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

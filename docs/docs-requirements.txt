@@ -1,9 +1,8 @@
 ipython
 ipykernel
+bash_kernel
 cython
-pytest
-numpydoc
 pyyaml
-sphinx
+sphinx>=1.4
 nbsphinx
 sphinx_rtd_theme

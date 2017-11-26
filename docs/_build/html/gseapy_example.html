@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>GSEAPY Example &mdash; GSEApy 0.8.7 documentation</title>
+  <title>GSEAPY Example &mdash; GSEApy 0.8.8 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="GSEApy 0.8.7 documentation" href="index.html"/>
+    <link rel="top" title="GSEApy 0.8.8 documentation" href="index.html"/>
         <link rel="prev" title="A Protocol to Prepare files for GSEAPY" href="gseapy_tutorial.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.8.7
+                0.8.8
               </div>
             
           
@@ -94,33 +94,32 @@
 <li class="toctree-l1"><a class="reference internal" href="run.html">How to Use GSEAPY</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gseapy_tutorial.html">A Protocol to Prepare files for GSEAPY</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">GSEAPY Example</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#Examples-to-walk-through-GSEApy">Examples to walk through <code class="docutils literal"><span class="pre">GSEApy</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Examples-to-walk-through-GSEApy">Examples to walk through <code class="docutils literal"><span class="pre">GSEApy</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#1.-Load-essential-packages">1. Load essential packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#2.-Enrichr-Example">2. Enrichr Example</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="#1.-Load-essential-packages">1. Load essential packages</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#See-all-gseapy-supported-enrichr-library-names">See all gseapy supported enrichr library names</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#2.-Enrichr-Example">2. Enrichr Example</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#1)-Assign-enrichr-with-pd.Series,-pd.DataFrame,-or-list-object">1) Assign enrichr with <code class="docutils literal"><span class="pre">pd.Series</span></code>, <code class="docutils literal"><span class="pre">pd.DataFrame</span></code>, or <code class="docutils literal"><span class="pre">list</span></code> object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#2)-Command-line-usage">2) Command line usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#3.-Prerank-example">3. Prerank example</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="#2)-Command-line-usage">2) Command line usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#3.-Prerank-example">3. Prerank example</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#1)-Assign-prerank()-with-a-pd.DataFrame,-pd.Series-,-or-a-txt-file">1) Assign prerank() with a pd.DataFrame, pd.Series , or a txt file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#2)-Command-line-usage">2) Command line usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#4.-GSEA-Example">4. GSEA Example</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="#2)-Command-line-usage">2) Command line usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#4.-GSEA-Example">4. GSEA Example</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#1)-Assign-gsea()-with-a-pandas-DataFrame,-.gct-format-file,-or-a-text-file">1) Assign gsea() with a pandas DataFrame, .gct format file, or a text file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#2)-Show-the-gsea-plots">2) Show the gsea plots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#3)-Command-line-usage">3) Command line usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#5.-Single-Sample-GSEA-example">5. Single Sample GSEA example</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="#2)-Show-the-gsea-plots">2) Show the gsea plots</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#3)-Command-line-usage">3) Command line usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#5.-Single-Sample-GSEA-example">5. Single Sample GSEA example</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#1)-Assign-ssgsea()-with-a-txt-file,-dataframe,-or-Seires(gene-name-as-index).">1) Assign ssgsea() with a txt file, dataframe, or Seires(gene name as index).</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#2)-ssgsea-supports-gene-expression-matix-in-gct-format.">2) <code class="docutils literal"><span class="pre">ssgsea</span></code> supports gene expression matix in gct format.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#3)-command-line-usage-of-single-sample-gsea">3) command line usage of single sample gsea</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="#2)-ssgsea-supports-gene-expression-matix-in-gct-format.">2) <code class="docutils literal"><span class="pre">ssgsea</span></code> supports gene expression matix in gct format.</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#3)-command-line-usage-of-single-sample-gsea">3) command line usage of single sample gsea</a></li>
 </ul>
 
             
@@ -386,31 +385,29 @@ div.nboutput div.output_area.stderr {
 <h1>GSEAPY Example<a class="headerlink" href="#GSEAPY-Example" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="Examples-to-walk-through-GSEApy">
 <h2>Examples to walk through <code class="docutils literal"><span class="pre">GSEApy</span></code><a class="headerlink" href="#Examples-to-walk-through-GSEApy" title="Permalink to this headline">¶</a></h2>
-</div>
-</div>
 <div class="section" id="1.-Load-essential-packages">
-<h1>1. Load essential packages<a class="headerlink" href="#1.-Load-essential-packages" title="Permalink to this headline">¶</a></h1>
+<h3>1. Load essential packages<a class="headerlink" href="#1.-Load-essential-packages" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
 <span></span>In [1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>%matplotlib inline
-import pandas as pd
-import gseapy as gp
-import matplotlib.pyplot as plt
+<span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">gseapy</span> <span class="kn">as</span> <span class="nn">gp</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
 </pre></div>
 </div>
 </div>
-<p>** Check gseapy version **</p>
+<p><strong>Check gseapy version</strong></p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
 <span></span>In [2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>gp.__version__
+<span></span><span class="n">gp</span><span class="o">.</span><span class="n">__version__</span>
 </pre></div>
 </div>
 </div>
@@ -424,9 +421,7 @@ import matplotlib.pyplot as plt
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="See-all-gseapy-supported-enrichr-library-names">
-<h1>See all gseapy supported enrichr library names<a class="headerlink" href="#See-all-gseapy-supported-enrichr-library-names" title="Permalink to this headline">¶</a></h1>
+<p><strong>See all gseapy supported enrichr library names</strong></p>
 <p>Enrichr library could be used for <code class="docutils literal"><span class="pre">gsea</span></code>, <code class="docutils literal"><span class="pre">ssgsea</span></code>, and <code class="docutils literal"><span class="pre">prerank</span></code>,
 too</p>
 <div class="nbinput docutils container">
@@ -435,8 +430,8 @@ too</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>names = gp.get_library_name()
-names[:10]
+<span></span><span class="n">names</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">get_library_name</span><span class="p">()</span>
+<span class="n">names</span><span class="p">[:</span><span class="mi">10</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -461,7 +456,9 @@ names[:10]
 </div>
 </div>
 <div class="section" id="2.-Enrichr-Example">
-<h1>2. Enrichr Example<a class="headerlink" href="#2.-Enrichr-Example" title="Permalink to this headline">¶</a></h1>
+<h3>2. Enrichr Example<a class="headerlink" href="#2.-Enrichr-Example" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
 <div class="section" id="1)-Assign-enrichr-with-pd.Series,-pd.DataFrame,-or-list-object">
 <h2>1) Assign enrichr with <code class="docutils literal"><span class="pre">pd.Series</span></code>, <code class="docutils literal"><span class="pre">pd.DataFrame</span></code>, or <code class="docutils literal"><span class="pre">list</span></code> object<a class="headerlink" href="#1)-Assign-enrichr-with-pd.Series,-pd.DataFrame,-or-list-object" title="Permalink to this headline">¶</a></h2>
 <div class="nbinput docutils container">
@@ -470,8 +467,8 @@ names[:10]
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>gene_list = pd.read_table(&quot;./gene_list.txt&quot;,header=None)
-gene_list.head()
+<span></span><span class="n">gene_list</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s2">&quot;./gene_list.txt&quot;</span><span class="p">,</span><span class="n">header</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+<span class="n">gene_list</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -533,7 +530,7 @@ gene_list.head()
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>type(gene_list)
+<span></span><span class="nb">type</span><span class="p">(</span><span class="n">gene_list</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -553,9 +550,9 @@ gene_list.head()
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span># convert dataframe or series to list
-glist = gene_list.squeeze().tolist()
-print(glist[:10])
+<span></span><span class="c1"># convert dataframe or series to list</span>
+<span class="n">glist</span> <span class="o">=</span> <span class="n">gene_list</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="k">print</span><span class="p">(</span><span class="n">glist</span><span class="p">[:</span><span class="mi">10</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -573,17 +570,17 @@ print(glist[:10])
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span># run enrichr
-# if you are only intrested in dataframe that enrichr returned, please set no_plot=True
+<span></span><span class="c1"># run enrichr</span>
+<span class="c1"># if you are only intrested in dataframe that enrichr returned, please set no_plot=True</span>
 
-# list, dataframe, series inputs are supported
-enr = gp.enrichr(gene_list=&quot;./gene_list.txt&quot;,
-                 # or gene_list=&#39;./gene_list.txt&#39;, or gene_list=glist
-                 description=&#39;test_name&#39;,
-                 gene_sets=&#39;KEGG_2016&#39;,
-                 outdir=&#39;enrichr_kegg&#39;,
-                 cutoff=0.5 # test dataset, use lower value of range(0,1)
-                )
+<span class="c1"># list, dataframe, series inputs are supported</span>
+<span class="n">enr</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">enrichr</span><span class="p">(</span><span class="n">gene_list</span><span class="o">=</span><span class="s2">&quot;./gene_list.txt&quot;</span><span class="p">,</span>
+                 <span class="c1"># or gene_list=&#39;./gene_list.txt&#39;, or gene_list=glist</span>
+                 <span class="n">description</span><span class="o">=</span><span class="s1">&#39;test_name&#39;</span><span class="p">,</span>
+                 <span class="n">gene_sets</span><span class="o">=</span><span class="s1">&#39;KEGG_2016&#39;</span><span class="p">,</span>
+                 <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;enrichr_kegg&#39;</span><span class="p">,</span>
+                 <span class="n">cutoff</span><span class="o">=</span><span class="mf">0.5</span> <span class="c1"># test dataset, use lower value of range(0,1)</span>
+                <span class="p">)</span>
 
 </pre></div>
 </div>
@@ -594,7 +591,7 @@ enr = gp.enrichr(gene_list=&quot;./gene_list.txt&quot;,
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>enr.res2d.head()
+<span></span><span class="n">enr</span><span class="o">.</span><span class="n">res2d</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -699,9 +696,8 @@ enr = gp.enrichr(gene_list=&quot;./gene_list.txt&quot;,
 </div></div>
 </div>
 </div>
-</div>
 <div class="section" id="2)-Command-line-usage">
-<h1>2) Command line usage<a class="headerlink" href="#2)-Command-line-usage" title="Permalink to this headline">¶</a></h1>
+<h2>2) Command line usage<a class="headerlink" href="#2)-Command-line-usage" title="Permalink to this headline">¶</a></h2>
 <p>You may also want to use enrichr in command line</p>
 <p>the option <strong>-v</strong> will print out the progress of your job</p>
 <div class="nbinput docutils container">
@@ -710,10 +706,10 @@ enr = gp.enrichr(gene_list=&quot;./gene_list.txt&quot;,
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>!gseapy enrichr -i ./gene_list.txt \
-               --description BP2017 \
-               -g GO_Biological_Process_2017 \
-               -v -o enrichr_BP
+<span></span><span class="o">!</span>gseapy enrichr -i ./gene_list.txt <span class="err">\</span>
+               <span class="o">--</span><span class="n">description</span> <span class="n">BP2017</span> \
+               <span class="o">-</span><span class="n">g</span> <span class="n">GO_Biological_Process_2017</span> \
+               <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">o</span> <span class="n">enrichr_BP</span>
 </pre></div>
 </div>
 </div>
@@ -731,9 +727,10 @@ enr = gp.enrichr(gene_list=&quot;./gene_list.txt&quot;,
 
 </pre></div></div>
 </div>
-</div>
 <div class="section" id="3.-Prerank-example">
-<h1>3. Prerank example<a class="headerlink" href="#3.-Prerank-example" title="Permalink to this headline">¶</a></h1>
+<h3>3. Prerank example<a class="headerlink" href="#3.-Prerank-example" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
 <div class="section" id="1)-Assign-prerank()-with-a-pd.DataFrame,-pd.Series-,-or-a-txt-file">
 <h2>1) Assign prerank() with a pd.DataFrame, pd.Series , or a txt file<a class="headerlink" href="#1)-Assign-prerank()-with-a-pd.DataFrame,-pd.Series-,-or-a-txt-file" title="Permalink to this headline">¶</a></h2>
 <div class="line-block">
@@ -748,8 +745,8 @@ assign a <code class="docutils literal"><span class="pre">DataFrame</span></code
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>rank = pd.read_table(&quot;./edb/gsea_data.gsea_data.rnk&quot;, header=None)
-rank.head()
+<span></span><span class="n">rank</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s2">&quot;./edb/gsea_data.gsea_data.rnk&quot;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+<span class="n">rank</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -817,17 +814,17 @@ rank.head()
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span># run prerank
-# enrichr libraries are supported by prerank module. Just provide the name
-pre=[]
-for s, n in zip([&#39;./genes.gmt&#39;, &#39;KEGG_2016&#39;],[&#39;bp&#39;,&#39;kegg&#39;]):
-    #use 4 process to acceralate the permutation speed
-    pre_res = gp.prerank(rnk=rank,
-                         gene_sets=s,
-                         processes=4,
-                         permutation_num=100, # reduce number to speed up test
-                         outdir=&#39;prerank_report_&#39;+n,format=&#39;png&#39;)
-    pre.append(pre_res)
+<span></span><span class="c1"># run prerank</span>
+<span class="c1"># enrichr libraries are supported by prerank module. Just provide the name</span>
+<span class="n">pre</span><span class="o">=</span><span class="p">[]</span>
+<span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="s1">&#39;./genes.gmt&#39;</span><span class="p">,</span> <span class="s1">&#39;KEGG_2016&#39;</span><span class="p">],[</span><span class="s1">&#39;bp&#39;</span><span class="p">,</span><span class="s1">&#39;kegg&#39;</span><span class="p">]):</span>
+    <span class="c1">#use 4 process to acceralate the permutation speed</span>
+    <span class="n">pre_res</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">prerank</span><span class="p">(</span><span class="n">rnk</span><span class="o">=</span><span class="n">rank</span><span class="p">,</span>
+                         <span class="n">gene_sets</span><span class="o">=</span><span class="n">s</span><span class="p">,</span>
+                         <span class="n">processes</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                         <span class="n">permutation_num</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="c1"># reduce number to speed up test</span>
+                         <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;prerank_report_&#39;</span><span class="o">+</span><span class="n">n</span><span class="p">,</span><span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
+    <span class="n">pre</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pre_res</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -837,8 +834,8 @@ for s, n in zip([&#39;./genes.gmt&#39;, &#39;KEGG_2016&#39;],[&#39;bp&#39;,&#39;
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>#access results through res2d attribute
-pre[0].res2d.head()
+<span></span><span class="c1">#access results through res2d attribute</span>
+<span class="n">pre</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">res2d</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -916,10 +913,10 @@ pre[0].res2d.head()
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>pre_res = pre[0]
-prerank_results = pre_res.res2d
-prerank_results = prerank_results.reset_index()
-prerank_results.head(5).plot.barh(y=&#39;fdr&#39;,x=&#39;Term&#39;,fontsize=16)
+<span></span><span class="n">pre_res</span> <span class="o">=</span> <span class="n">pre</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">prerank_results</span> <span class="o">=</span> <span class="n">pre_res</span><span class="o">.</span><span class="n">res2d</span>
+<span class="n">prerank_results</span> <span class="o">=</span> <span class="n">prerank_results</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+<span class="n">prerank_results</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="s1">&#39;fdr&#39;</span><span class="p">,</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;Term&#39;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -941,9 +938,8 @@ prerank_results.head(5).plot.barh(y=&#39;fdr&#39;,x=&#39;Term&#39;,fontsize=16)
 </div>
 </div>
 </div>
-</div>
 <div class="section" id="2)-Command-line-usage">
-<h1>2) Command line usage<a class="headerlink" href="#2)-Command-line-usage" title="Permalink to this headline">¶</a></h1>
+<h2>2) Command line usage<a class="headerlink" href="#2)-Command-line-usage" title="Permalink to this headline">¶</a></h2>
 <p>You may also want to use prerank in command line</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
@@ -951,13 +947,14 @@ prerank_results.head(5).plot.barh(y=&#39;fdr&#39;,x=&#39;Term&#39;,fontsize=16)
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span># ! gseapy prerank -r temp.rnk -g temp.gmt -o prerank_report_temp
+<span></span><span class="c1"># ! gseapy prerank -r temp.rnk -g temp.gmt -o prerank_report_temp</span>
 </pre></div>
 </div>
 </div>
-</div>
 <div class="section" id="4.-GSEA-Example">
-<h1>4. GSEA Example<a class="headerlink" href="#4.-GSEA-Example" title="Permalink to this headline">¶</a></h1>
+<h3>4. GSEA Example<a class="headerlink" href="#4.-GSEA-Example" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
 <div class="section" id="1)-Assign-gsea()-with-a-pandas-DataFrame,-.gct-format-file,-or-a-text-file">
 <h2>1) Assign gsea() with a pandas DataFrame, .gct format file, or a text file<a class="headerlink" href="#1)-Assign-gsea()-with-a-pandas-DataFrame,-.gct-format-file,-or-a-text-file" title="Permalink to this headline">¶</a></h2>
 <p>and cls with a list object or just .cls format file</p>
@@ -967,7 +964,7 @@ prerank_results.head(5).plot.barh(y=&#39;fdr&#39;,x=&#39;Term&#39;,fontsize=16)
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>phenoA, phenoB, class_vector =  gp.parser.gsea_cls_parser(&quot;./P53.cls&quot;)
+<span></span><span class="n">phenoA</span><span class="p">,</span> <span class="n">phenoB</span><span class="p">,</span> <span class="n">class_vector</span> <span class="o">=</span>  <span class="n">gp</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">gsea_cls_parser</span><span class="p">(</span><span class="s2">&quot;./P53.cls&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -977,8 +974,8 @@ prerank_results.head(5).plot.barh(y=&#39;fdr&#39;,x=&#39;Term&#39;,fontsize=16)
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>#class_vector used to indicate group attributes for each sample
-print(class_vector)
+<span></span><span class="c1">#class_vector used to indicate group attributes for each sample</span>
+<span class="k">print</span><span class="p">(</span><span class="n">class_vector</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -996,8 +993,8 @@ print(class_vector)
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>gene_exp = pd.read_table(&quot;./P53_resampling_data.txt&quot;)
-gene_exp.head()
+<span></span><span class="n">gene_exp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s2">&quot;./P53_resampling_data.txt&quot;</span><span class="p">)</span>
+<span class="n">gene_exp</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1180,7 +1177,7 @@ gene_exp.head()
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>print(&quot;positively correlated: &quot;, phenoA)
+<span></span><span class="k">print</span><span class="p">(</span><span class="s2">&quot;positively correlated: &quot;</span><span class="p">,</span> <span class="n">phenoA</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1198,7 +1195,7 @@ positively correlated:  MUT
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>print(&quot;negtively correlated: &quot;, phenoB)
+<span></span><span class="k">print</span><span class="p">(</span><span class="s2">&quot;negtively correlated: &quot;</span><span class="p">,</span> <span class="n">phenoB</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1216,18 +1213,18 @@ negtively correlated:  WT
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span># run gsea
-# enrichr libraries are supported by gsea module. Just provide the name
+<span></span><span class="c1"># run gsea</span>
+<span class="c1"># enrichr libraries are supported by gsea module. Just provide the name</span>
 
-gs_res = gp.gsea(data=gene_exp, # or data=&#39;./P53_resampling_data.txt&#39;
-                 gene_sets=&#39;KEGG_2016&#39;, # enrichr library names
-                 cls=class_vector, # or cls= &#39;./P53.cls&#39;
-                 #set permutation_type to phenotype if samples &gt;=15
-                 permutation_type=&#39;phenotype&#39;,
-                 permutation_num=100, # reduce number to speed up test
-                 outdir=&#39;gsea_reprot&#39;,
-                 method=&#39;signal_to_noise&#39;,
-                 format=&#39;png&#39;)
+<span class="n">gs_res</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">gsea</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gene_exp</span><span class="p">,</span> <span class="c1"># or data=&#39;./P53_resampling_data.txt&#39;</span>
+                 <span class="n">gene_sets</span><span class="o">=</span><span class="s1">&#39;KEGG_2016&#39;</span><span class="p">,</span> <span class="c1"># enrichr library names</span>
+                 <span class="bp">cls</span><span class="o">=</span><span class="n">class_vector</span><span class="p">,</span> <span class="c1"># or cls= &#39;./P53.cls&#39;</span>
+                 <span class="c1">#set permutation_type to phenotype if samples &gt;=15</span>
+                 <span class="n">permutation_type</span><span class="o">=</span><span class="s1">&#39;phenotype&#39;</span><span class="p">,</span>
+                 <span class="n">permutation_num</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="c1"># reduce number to speed up test</span>
+                 <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;gsea_reprot&#39;</span><span class="p">,</span>
+                 <span class="n">method</span><span class="o">=</span><span class="s1">&#39;signal_to_noise&#39;</span><span class="p">,</span>
+                 <span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1237,8 +1234,8 @@ gs_res = gp.gsea(data=gene_exp, # or data=&#39;./P53_resampling_data.txt&#39;
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>#access the dataframe results throught res2d attribute
-gs_res.res2d.head()
+<span></span><span class="c1">#access the dataframe results throught res2d attribute</span>
+<span class="n">gs_res</span><span class="o">.</span><span class="n">res2d</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1316,10 +1313,10 @@ gs_res.res2d.head()
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>gsea_results= gs_res.res2d
-with plt.style.context(&#39;ggplot&#39;):
-    gsea_results = gsea_results.reset_index()
-    gsea_results.head(5).plot.barh(y=&#39;fdr&#39;,x=&#39;Term&#39;,fontsize=16)
+<span></span><span class="n">gsea_results</span><span class="o">=</span> <span class="n">gs_res</span><span class="o">.</span><span class="n">res2d</span>
+<span class="k">with</span> <span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">context</span><span class="p">(</span><span class="s1">&#39;ggplot&#39;</span><span class="p">):</span>
+    <span class="n">gsea_results</span> <span class="o">=</span> <span class="n">gsea_results</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+    <span class="n">gsea_results</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="s1">&#39;fdr&#39;</span><span class="p">,</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;Term&#39;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1331,9 +1328,8 @@ with plt.style.context(&#39;ggplot&#39;):
 </div>
 </div>
 </div>
-</div>
 <div class="section" id="2)-Show-the-gsea-plots">
-<h1>2) Show the gsea plots<a class="headerlink" href="#2)-Show-the-gsea-plots" title="Permalink to this headline">¶</a></h1>
+<h2>2) Show the gsea plots<a class="headerlink" href="#2)-Show-the-gsea-plots" title="Permalink to this headline">¶</a></h2>
 <p>The <strong>gsea</strong> module will generate heatmap for genes in each gene sets in
 the backgroud.</p>
 <div class="nbinput docutils container">
@@ -1342,10 +1338,10 @@ the backgroud.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>from IPython.display import Image
+<span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span>
 
-#erich plot
-Image(&quot;./gsea_reprot/DvA_UpIN_A.gsea.png&quot;,width=650, height=600)
+<span class="c1">#erich plot</span>
+<span class="n">Image</span><span class="p">(</span><span class="s2">&quot;./gsea_reprot/DvA_UpIN_A.gsea.png&quot;</span><span class="p">,</span><span class="n">width</span><span class="o">=</span><span class="mi">650</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1364,8 +1360,8 @@ Image(&quot;./gsea_reprot/DvA_UpIN_A.gsea.png&quot;,width=650, height=600)
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>#corresponding heatmap
-Image(&quot;./gsea_reprot/DvA_UpIN_A.heatmap.png&quot;)
+<span></span><span class="c1">#corresponding heatmap</span>
+<span class="n">Image</span><span class="p">(</span><span class="s2">&quot;./gsea_reprot/DvA_UpIN_A.heatmap.png&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1380,7 +1376,7 @@ Image(&quot;./gsea_reprot/DvA_UpIN_A.heatmap.png&quot;)
 </div>
 </div>
 <div class="section" id="3)-Command-line-usage">
-<h1>3) Command line usage<a class="headerlink" href="#3)-Command-line-usage" title="Permalink to this headline">¶</a></h1>
+<h2>3) Command line usage<a class="headerlink" href="#3)-Command-line-usage" title="Permalink to this headline">¶</a></h2>
 <p>You may also want to use gsea in command line</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
@@ -1388,15 +1384,16 @@ Image(&quot;./gsea_reprot/DvA_UpIN_A.heatmap.png&quot;)
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span># !gseapy gsea -d ./P53_resampling_data.txt -g KEGG_2016 -c ./P53.cls -o gsea_reprot_2 -v -t phenotype
+<span></span><span class="c1"># !gseapy gsea -d ./P53_resampling_data.txt -g KEGG_2016 -c ./P53.cls -o gsea_reprot_2 -v -t phenotype</span>
 </pre></div>
 </div>
 </div>
-</div>
 <div class="section" id="5.-Single-Sample-GSEA-example">
-<h1>5. Single Sample GSEA example<a class="headerlink" href="#5.-Single-Sample-GSEA-example" title="Permalink to this headline">¶</a></h1>
+<h3>5. Single Sample GSEA example<a class="headerlink" href="#5.-Single-Sample-GSEA-example" title="Permalink to this headline">¶</a></h3>
 <p><strong>Note: When you run ssGSEA, all genes names in your gene_sets file
 should be found in your expression table</strong></p>
+</div>
+</div>
 <div class="section" id="1)-Assign-ssgsea()-with-a-txt-file,-dataframe,-or-Seires(gene-name-as-index).">
 <h2>1) Assign ssgsea() with a txt file, dataframe, or Seires(gene name as index).<a class="headerlink" href="#1)-Assign-ssgsea()-with-a-txt-file,-dataframe,-or-Seires(gene-name-as-index)." title="Permalink to this headline">¶</a></h2>
 <div class="nbinput nblast docutils container">
@@ -1405,13 +1402,13 @@ should be found in your expression table</strong></p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span># txt file input
-ss = gp.ssgsea(data=&quot;./testSet_rand1200.gct&quot;,
-               gene_sets=&quot;./randomSets.gmt&quot;,
-               outdir=&#39;ssgsea_report&#39;,
-               sample_norm_method=&#39;rank&#39;, # choose &#39;custom&#39; for your own rank list
-               permutation_num=100, # reduce number to speed up test
-               processes=4, format=&#39;png&#39;)
+<span></span><span class="c1"># txt file input</span>
+<span class="n">ss</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">ssgsea</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s2">&quot;./testSet_rand1200.gct&quot;</span><span class="p">,</span>
+               <span class="n">gene_sets</span><span class="o">=</span><span class="s2">&quot;./randomSets.gmt&quot;</span><span class="p">,</span>
+               <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;ssgsea_report&#39;</span><span class="p">,</span>
+               <span class="n">sample_norm_method</span><span class="o">=</span><span class="s1">&#39;rank&#39;</span><span class="p">,</span> <span class="c1"># choose &#39;custom&#39; for your own rank list</span>
+               <span class="n">permutation_num</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="c1"># reduce number to speed up test</span>
+               <span class="n">processes</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1421,9 +1418,9 @@ ss = gp.ssgsea(data=&quot;./testSet_rand1200.gct&quot;,
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span># or assign a dataframe, or Series to ssgsea()
-ssdf = pd.read_table(&quot;./temp.txt&quot;,header=None)
-ssdf.head()
+<span></span><span class="c1"># or assign a dataframe, or Series to ssgsea()</span>
+<span class="n">ssdf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s2">&quot;./temp.txt&quot;</span><span class="p">,</span><span class="n">header</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+<span class="n">ssdf</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1491,10 +1488,10 @@ ssdf.head()
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span># dataframe with one column is also supported by ssGSEA or Prerank
-# But you have to set gene_names as index
-ssdf2 = ssdf.set_index(0)
-ssdf2.head()
+<span></span><span class="c1"># dataframe with one column is also supported by ssGSEA or Prerank</span>
+<span class="c1"># But you have to set gene_names as index</span>
+<span class="n">ssdf2</span> <span class="o">=</span> <span class="n">ssdf</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">ssdf2</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1560,7 +1557,7 @@ ssdf2.head()
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>type(ssdf2)
+<span></span><span class="nb">type</span><span class="p">(</span><span class="n">ssdf2</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1580,8 +1577,8 @@ ssdf2.head()
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>ssSeries = ssdf2.squeeze()
-type(ssSeries)
+<span></span><span class="n">ssSeries</span> <span class="o">=</span> <span class="n">ssdf2</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+<span class="nb">type</span><span class="p">(</span><span class="n">ssSeries</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1601,14 +1598,14 @@ type(ssSeries)
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>#Series Example
-# supports dataframe and series
-for dat in [ssdf, ssdf2, ssSeries]:
-    ss = gp.ssgsea(data=ssdf,
-                   gene_sets=&quot;./temp.gmt&quot;,
-                   outdir=&#39;ssgsea_report_series&#39;,
-                   permutation_num=100, # reduce number to speed up test
-                   processes=4, format=&#39;png&#39;)
+<span></span><span class="c1">#Series Example</span>
+<span class="c1"># supports dataframe and series</span>
+<span class="k">for</span> <span class="n">dat</span> <span class="ow">in</span> <span class="p">[</span><span class="n">ssdf</span><span class="p">,</span> <span class="n">ssdf2</span><span class="p">,</span> <span class="n">ssSeries</span><span class="p">]:</span>
+    <span class="n">ss</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">ssgsea</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">ssdf</span><span class="p">,</span>
+                   <span class="n">gene_sets</span><span class="o">=</span><span class="s2">&quot;./temp.gmt&quot;</span><span class="p">,</span>
+                   <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;ssgsea_report_series&#39;</span><span class="p">,</span>
+                   <span class="n">permutation_num</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="c1"># reduce number to speed up test</span>
+                   <span class="n">processes</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1618,7 +1615,7 @@ for dat in [ssdf, ssdf2, ssSeries]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>ss.res2d.head(5)
+<span></span><span class="n">ss</span><span class="o">.</span><span class="n">res2d</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1721,9 +1718,8 @@ for dat in [ssdf, ssdf2, ssSeries]:
 </div></div>
 </div>
 </div>
-</div>
 <div class="section" id="2)-ssgsea-supports-gene-expression-matix-in-gct-format.">
-<h1>2) <code class="docutils literal"><span class="pre">ssgsea</span></code> supports gene expression matix in gct format.<a class="headerlink" href="#2)-ssgsea-supports-gene-expression-matix-in-gct-format." title="Permalink to this headline">¶</a></h1>
+<h2>2) <code class="docutils literal"><span class="pre">ssgsea</span></code> supports gene expression matix in gct format.<a class="headerlink" href="#2)-ssgsea-supports-gene-expression-matix-in-gct-format." title="Permalink to this headline">¶</a></h2>
 <div class="line-block">
 <div class="line">if gene expression matrix is provided, ssgsea works like pandas
 apply(),</div>
@@ -1738,8 +1734,8 @@ attribute.</div>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>df = pd.read_table(&quot;./P53_resampling_data.txt&quot;)
-df.head()
+<span></span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s2">&quot;./P53_resampling_data.txt&quot;</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1922,17 +1918,17 @@ df.head()
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span># dataframe support for multisamples
-ss = gp.ssgsea(data=df,
-               gene_sets=&quot;edb/gene_sets.gmt&quot;,
-               outdir=&#39;ssgsea_df_test&#39;,
-               permutation_num=100, # reduce number to speed up test
-               processes=4, format=&#39;png&#39;)
+<span></span><span class="c1"># dataframe support for multisamples</span>
+<span class="n">ss</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">ssgsea</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+               <span class="n">gene_sets</span><span class="o">=</span><span class="s2">&quot;edb/gene_sets.gmt&quot;</span><span class="p">,</span>
+               <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;ssgsea_df_test&#39;</span><span class="p">,</span>
+               <span class="n">permutation_num</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="c1"># reduce number to speed up test</span>
+               <span class="n">processes</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="line-block">
-<div class="line">Results for all samples are saves to a dataframe,</div>
+<div class="line">Results for all samples save to a dict,</div>
 <div class="line">you can assces the reuslts through resultsOnSamples attribute.</div>
 </div>
 <div class="nbinput docutils container">
@@ -1941,10 +1937,9 @@ ss = gp.ssgsea(data=df,
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span># es results for all samples are saves to dict.
-# convert to dataframe
-ss2 = pd.DataFrame(ss.resultsOnSamples)
-ss2.head()
+<span></span><span class="c1"># convert dict to dataframe</span>
+<span class="n">ss2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">ss</span><span class="o">.</span><span class="n">resultsOnSamples</span><span class="p">)</span>
+<span class="n">ss2</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -2123,15 +2118,16 @@ ss2.head()
 </div>
 </div>
 <div class="section" id="3)-command-line-usage-of-single-sample-gsea">
-<h1>3) command line usage of single sample gsea<a class="headerlink" href="#3)-command-line-usage-of-single-sample-gsea" title="Permalink to this headline">¶</a></h1>
+<h2>3) command line usage of single sample gsea<a class="headerlink" href="#3)-command-line-usage-of-single-sample-gsea" title="Permalink to this headline">¶</a></h2>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
 <span></span>In [36]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span># !gseapy ssgsea -d ./testSet_rand1200.gct -g temp.gmt -o ssgsea_report2  -p 4
+<span></span><span class="c1"># !gseapy ssgsea -d ./testSet_rand1200.gct -g temp.gmt -o ssgsea_report2  -p 4</span>
 </pre></div>
+</div>
 </div>
 </div>
 </div>
@@ -2178,7 +2174,7 @@ ss2.head()
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.8.7',
+            VERSION:'0.8.8',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -2188,6 +2184,7 @@ ss2.head()
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 
