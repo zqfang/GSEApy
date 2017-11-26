@@ -129,7 +129,7 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
 
     #in most case, we will have mangy plots, so do not display plots
     #It's also convinient to run this script on command line.
-    #plt.ioff()
+
     #GSEA Plots
     gs = plt.GridSpec(16,1)
     #fig = plt.figure(figsize=figsize)
@@ -137,8 +137,15 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     canvas = FigureCanvas(fig)
     #Ranked Metric Scores Plot
     ax1 =  fig.add_subplot(gs[11:])
-    ax1.fill_between(x, y1= rank_metric['rank'], y2=0, color='#C9D3DB')
-    ax1.set_ylabel("Ranked list metric", fontsize=14)
+    if module == 'ssgsea':
+        nes_label = 'ES: '+ "{:.3f}".format(float(nes))
+        pval_label=''
+        fdr_label=''
+        ax1.fill_between(x, y1= np.log(rank_metric['rank']), y2=0, color='#C9D3DB')
+        ax1.set_ylabel("log ranked metric", fontsize=14)
+    else:
+        ax1.fill_between(x, y1= rank_metric['rank'], y2=0, color='#C9D3DB')
+        ax1.set_ylabel("Ranked list metric", fontsize=14)
     ax1.text(.05, .9, phenoP_label, color='red', horizontalalignment='left', verticalalignment='top',
          transform=ax1.transAxes)
     ax1.text(.95, .05, phenoN_label, color='Blue', horizontalalignment='right', verticalalignment='bottom',

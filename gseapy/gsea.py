@@ -141,13 +141,14 @@ class GSEAbase(object):
 
         for gs in top_term:
             hit = results.get(gs)['hit_index']
+            NES = 'nes' if module != 'ssgsea' else 'es'
             """
             gsea_plot(rank_metric=rank_metric, enrich_term=gs, hit_ind=hit,
                       nes=results.get(gs)['nes'], pval=results.get(gs)['pval'], fdr=results.get(gs)['fdr'],
                       RES=results.get(gs)['rank_ES'], phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize,
                       format=format, outdir=outdir, module=module)
             """
-            pool.apply_async(gsea_plot, args=(rank_metric, gs, hit, results.get(gs)['nes'],
+            pool.apply_async(gsea_plot, args=(rank_metric, gs, hit, results.get(gs)[NES],
                                               results.get(gs)['pval'],results.get(gs)['fdr'],
                                               results.get(gs)['rank_ES'],
                                               phenoPos, phenoNeg, figsize, self.format,
@@ -419,7 +420,7 @@ class SingleSampleGSEA(GSEAbase):
         self.seed=seed
         self.verbose=verbose
         self.ranking=None
-        self.module='SingleSample'
+        self.module='ssgsea'
         self._processes=processes
 
     def corplot(self):
@@ -535,7 +536,8 @@ class SingleSampleGSEA(GSEAbase):
         df.sort_values(by=df.columns[1], ascending=self.ascending, inplace=True)
         df.columns = ['gene_name','rank']
         df['rank2'] = df['rank']
-
+        #reset interger index, or caused unwanted problems
+        df.reset_index(drop=True, inplace=True)
         # revmove rank2
         dat2 = df.set_index('gene_name')
         dat2 = dat2['rank']
