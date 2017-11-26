@@ -139,8 +139,8 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     ax1 =  fig.add_subplot(gs[11:])
     if module == 'ssgsea':
         nes_label = 'ES: '+ "{:.3f}".format(float(nes))
-        pval_label=''
-        fdr_label=''
+        #pval_label=''
+        #fdr_label=''
         ax1.fill_between(x, y1= np.log(rank_metric['rank']), y2=0, color='#C9D3DB')
         ax1.set_ylabel("log ranked metric", fontsize=14)
     else:
