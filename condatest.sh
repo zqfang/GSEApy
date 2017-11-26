@@ -61,5 +61,7 @@ log "run command test"
 #python setup.py test
 #nosetests
 coverage run setup.py test
+
 #doctests
+python setup.py install
 (cd docs && make clean && make doctest)
