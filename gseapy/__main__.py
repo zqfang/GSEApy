@@ -11,7 +11,7 @@ import argparse as ap
 # or args = argparser.parse_args() will throw bugs!!!
 
 
-__version__ = '0.8.7'
+__version__ = '0.8.8'
 
 def main():
     """The Main function/pipeline for GSEAPY."""
@@ -24,7 +24,7 @@ def main():
     if subcommand == "replot":
         # reproduce plots using GSEAPY
         from .gsea import Replot
-        rep = Replot(indir=args.indir, outdir=args.outdir, weighted_score_type=args.weight, 
+        rep = Replot(indir=args.indir, outdir=args.outdir, weighted_score_type=args.weight,
                      figsize=args.figsize, format=args.format, verbose=args.verbose)
         rep.run()
 
@@ -33,15 +33,15 @@ def main():
         # compute using GSEAPY
         from .gsea import GSEA
 
-        gs = GSEA(args.data, args.gmt, args.cls, args.outdir, 
+        gs = GSEA(args.data, args.gmt, args.cls, args.outdir,
                   args.mins, args.maxs, args.n, args.weight,
                   args.type, args.method, args.ascending, args.threads,
                   args.figsize, args.format, args.graph, args.seed, args.verbose)
         gs.run()
     elif subcommand == "prerank":
         from .gsea import Prerank
-        
-        pre = Prerank(args.rnk, args.gmt, args.outdir, args.label[0], args.label[1], 
+
+        pre = Prerank(args.rnk, args.gmt, args.outdir, args.label[0], args.label[1],
                       args.mins, args.maxs, args.n, args.weight, args.ascending, args.threads,
                       args.figsize, args.format, args.graph, args.seed, args.verbose)
         pre.run()
@@ -50,9 +50,9 @@ def main():
         from .gsea import SingleSampleGSEA
         ss = SingleSampleGSEA(data=args.data, gene_sets=args.gmt, outdir=args.outdir,
                               sample_norm_method=args.norm,
-                              min_size=args.mins, max_size=args.maxs, permutation_num=args.n, 
-                              weighted_score_type=args.weight, ascending=args.ascending, 
-                              processes=args.threads, figsize=args.figsize, format=args.format, 
+                              min_size=args.mins, max_size=args.maxs, permutation_num=args.n,
+                              weighted_score_type=args.weight, ascending=args.ascending,
+                              processes=args.threads, figsize=args.figsize, format=args.format,
                               graph_num=args.graph, seed=args.seed, verbose=args.verbose)
         ss.run()
 
@@ -61,8 +61,8 @@ def main():
         from .enrichr import Enrichr
         enr = Enrichr(gene_list= args.gene_list, descriptions=args.descrip, gene_sets=args.library,
                       outdir=args.outdir, format=args.format, cutoff=args.thresh, figsize=args.figsize,
-                      top_term=args.term, no_plot=args.no_plot, verbose=args.verbose)   
-        enr.run() 
+                      top_term=args.term, no_plot=args.no_plot, verbose=args.verbose)
+        enr.run()
     else:
         argparser.print_help()
         sys.exit(0)
@@ -125,7 +125,7 @@ def add_gsea_parser(subparsers):
 
     # group for input files
     group_input = argparser_gsea.add_argument_group("Input files arguments")
-    group_input.add_argument("-d", "--data", dest="data", action="store", type=str, required=True, 
+    group_input.add_argument("-d", "--data", dest="data", action="store", type=str, required=True,
                              help="Input gene expression dataset file in txt format.Same with GSEA.")
     group_input.add_argument("-c", "--cls", dest="cls", action="store", type=str, required=True,
                              help="Input class vector (phenotype) file in CLS format. Same with GSEA.")
@@ -165,7 +165,7 @@ def add_gsea_parser(subparsers):
                            help="Number of Processes you are going to use. Default: 1")
 
     return
-    
+
 def add_prerank_parser(subparsers):
     """Add function 'prerank' argument parsers."""
 
@@ -173,9 +173,9 @@ def add_prerank_parser(subparsers):
 
     # group for input files
     prerank_input = argparser_prerank.add_argument_group("Input files arguments")
-    prerank_input.add_argument("-r", "--rnk", dest="rnk", action="store", type=str, required=True,  
+    prerank_input.add_argument("-r", "--rnk", dest="rnk", action="store", type=str, required=True,
                              help="ranking dataset file in .rnk format.Same with GSEA.")
-    prerank_input.add_argument("-g", "--gmt", dest="gmt", action="store", type=str, required=True, 
+    prerank_input.add_argument("-g", "--gmt", dest="gmt", action="store", type=str, required=True,
                              help="Gene set database in GMT format. Same with GSEA.")
     prerank_input.add_argument("-l", "--label", action='store', nargs=2, dest='label',
                              metavar=('pos', 'neg'), type=str, default=('Pos','Neg'),
@@ -203,7 +203,7 @@ def add_prerank_parser(subparsers):
                              help="Number of random seed. Default: None")
     prerank_opt.add_argument("-p", "--threads", dest = "threads", action="store", type=int, default=1, metavar='procs',
                            help="Number of Processes you are going to use. Default: 1")
-    
+
     return
 
 def add_singlesample_parser(subparsers):
@@ -213,7 +213,7 @@ def add_singlesample_parser(subparsers):
 
     # group for input files
     group_input = argparser_gsea.add_argument_group("Input files arguments")
-    group_input.add_argument("-d", "--data", dest="data", action="store", type=str, required=True, 
+    group_input.add_argument("-d", "--data", dest="data", action="store", type=str, required=True,
                              help="Input gene expression dataset file in txt format. Same with GSEA.")
     group_input.add_argument("-g", "--gmt", dest="gmt", action="store", type=str, required=True,
                              help="Gene set database in GMT format. Same with GSEA.")
@@ -224,7 +224,7 @@ def add_singlesample_parser(subparsers):
     # group for General options.
     group_opt = argparser_gsea.add_argument_group("GSEA advanced arguments")
     group_opt.add_argument("--norm-method", dest = "norm", action="store", type=str,
-                           default='rank', metavar='normalize', 
+                           default='rank', metavar='normalize',
                            choices=("rank", "log", "log_rank", "custom"),
                            help="Sample normalization method. Choose from {'rank', 'log', 'log_rank','custom'}. Default: rank")
     group_opt.add_argument("-n", "--permu-num", dest = "n", action="store", type=int, default=1000, metavar='perNum',
@@ -264,7 +264,7 @@ def add_plot_parser(subparsers):
     return
 def add_enrichr_parser(subparsers):
     """Add function 'enrichr' argument parsers."""
-    
+
     argparser_enrichr = subparsers.add_parser("enrichr", help="Using enrichr API to perform GO analysis.")
 
     # group for required options.
@@ -275,14 +275,14 @@ def add_enrichr_parser(subparsers):
                               help="Enrichr library name required. see online tool for libary names.")
     enrichr_opt.add_argument("--description", action="store", dest="descrip", type=str, default='enrichr', metavar='strings',
                               help="It is recommended to enter a short description for your list so that multiple lists \
-                              can be differentiated from each other if you choose to save or share your list.") 
+                              can be differentiated from each other if you choose to save or share your list.")
     enrichr_opt.add_argument("--cut-off", action="store", dest="thresh", metavar='float', type=float, default=0.05,
                               help="Adjust-Pval cutoff, used for generating plots. Default: 0.05.")
     enrichr_opt.add_argument("-t", "--top-term", dest="term", action="store", type=int, default=10, metavar='int',
                               help="Numbers of top terms showed in the plot. Default: 10")
     #enrichr_opt.add_argument("--scale", dest = "scale", action="store", type=float, default=0.5, metavar='float',
-    #                          help="scatter dot scale in the dotplot. Default: 0.5")    
-    enrichr_opt.add_argument("--no-plot", action='store_true', dest='no_plot', default=False, 
+    #                          help="scatter dot scale in the dotplot. Default: 0.5")
+    enrichr_opt.add_argument("--no-plot", action='store_true', dest='no_plot', default=False,
                               help="Suppress the plot output.This is useful only if data are intrested. Default: False.")
 
 
