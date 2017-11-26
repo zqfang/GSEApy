@@ -1,6 +1,5 @@
 ipython
 ipykernel
-bash_kernel
 cython
 pyyaml
 sphinx>=1.4
