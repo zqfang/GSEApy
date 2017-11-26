@@ -16,11 +16,9 @@ dist
 *.tmp*
 .cache
 .DS_Store
-
 tmp/
-
 # vim
 .*swp
-
+# docs
 docs/_build/doctest
-docs/_build/doctrees/*
+
