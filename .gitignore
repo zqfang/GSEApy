@@ -22,3 +22,5 @@ tmp/
 # docs
 docs/_build/doctest
 
+# tests
+tests/.ipynb_checkpoints
