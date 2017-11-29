@@ -1,0 +1,2252 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>GSEAPY Example &mdash; GSEApy 0.8.9 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="GSEApy 0.8.9 documentation" href="index.html"/>
+        <link rel="prev" title="A Protocol to Prepare files for GSEAPY" href="gseapy_tutorial.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> GSEApy
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Welcome to GSEAPY’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="run.html">How to Use GSEAPY</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gseapy_tutorial.html">A Protocol to Prepare files for GSEAPY</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">GSEAPY Example</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Examples-to-walk-through-GSEApy">Examples to walk through <code class="docutils literal"><span class="pre">GSEApy</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#1.-Load-essential-packages">1. Load essential packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#2.-Enrichr-Example">2. Enrichr Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#1)-Assign-enrichr-with-pd.Series,-pd.DataFrame,-or-list-object">1) Assign enrichr with <code class="docutils literal"><span class="pre">pd.Series</span></code>, <code class="docutils literal"><span class="pre">pd.DataFrame</span></code>, or <code class="docutils literal"><span class="pre">list</span></code> object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#2)-Command-line-usage">2) Command line usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#3.-Prerank-example">3. Prerank example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#1)-Assign-prerank()-with-a-pd.DataFrame,-pd.Series-,-or-a-txt-file">1) Assign prerank() with a pd.DataFrame, pd.Series , or a txt file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#2)-Command-line-usage">2) Command line usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#4.-GSEA-Example">4. GSEA Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#1)-Assign-gsea()-with-a-pandas-DataFrame,-.gct-format-file,-or-a-text-file">1) Assign gsea() with a pandas DataFrame, .gct format file, or a text file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#2)-Show-the-gsea-plots">2) Show the gsea plots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#3)-Command-line-usage">3) Command line usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#5.-Single-Sample-GSEA-example">5. Single Sample GSEA example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#1)-Assign-ssgsea()-with-a-txt-file,-dataframe,-or-Seires(gene-name-as-index).">1) Assign ssgsea() with a txt file, dataframe, or Seires(gene name as index).</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#2)-ssgsea-supports-gene-expression-matix-in-gct-format.">2) <code class="docutils literal"><span class="pre">ssgsea</span></code> supports gene expression matix in gct format.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#3)-command-line-usage-of-single-sample-gsea">3) command line usage of single sample gsea</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GSEApy</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>GSEAPY Example</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/gseapy_example.ipynb.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #303F9F;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #D84315;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 8ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #cfcfcf;
+    border-radius: 2px;
+    background: #f7f7f7;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.pngmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="GSEAPY-Example">
+<h1>GSEAPY Example<a class="headerlink" href="#GSEAPY-Example" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="Examples-to-walk-through-GSEApy">
+<h2>Examples to walk through <code class="docutils literal"><span class="pre">GSEApy</span></code><a class="headerlink" href="#Examples-to-walk-through-GSEApy" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="1.-Load-essential-packages">
+<h3>1. Load essential packages<a class="headerlink" href="#1.-Load-essential-packages" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">gseapy</span> <span class="kn">as</span> <span class="nn">gp</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+</pre></div>
+</div>
+</div>
+<p><strong>Check gseapy version</strong></p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">gp</span><span class="o">.</span><span class="n">__version__</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[2]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>&#39;0.8.9&#39;
+</pre></div>
+</div>
+</div>
+<p><strong>See all gseapy supported enrichr library names</strong></p>
+<p>Enrichr library could be used for <code class="docutils literal"><span class="pre">gsea</span></code>, <code class="docutils literal"><span class="pre">ssgsea</span></code>, and <code class="docutils literal"><span class="pre">prerank</span></code>,
+too</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">names</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">get_library_name</span><span class="p">()</span>
+<span class="n">names</span><span class="p">[:</span><span class="mi">10</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[3]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>[&#39;ARCHS4_Cell-lines&#39;,
+ &#39;ARCHS4_IDG_Coexp&#39;,
+ &#39;ARCHS4_Kinases_Coexp&#39;,
+ &#39;ARCHS4_TFs_Coexp&#39;,
+ &#39;ARCHS4_Tissues&#39;,
+ &#39;Achilles_fitness_decrease&#39;,
+ &#39;Achilles_fitness_increase&#39;,
+ &#39;Aging_Perturbations_from_GEO_down&#39;,
+ &#39;Aging_Perturbations_from_GEO_up&#39;,
+ &#39;Allen_Brain_Atlas_down&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="2.-Enrichr-Example">
+<h3>2. Enrichr Example<a class="headerlink" href="#2.-Enrichr-Example" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="1)-Assign-enrichr-with-pd.Series,-pd.DataFrame,-or-list-object">
+<h2>1) Assign enrichr with <code class="docutils literal"><span class="pre">pd.Series</span></code>, <code class="docutils literal"><span class="pre">pd.DataFrame</span></code>, or <code class="docutils literal"><span class="pre">list</span></code> object<a class="headerlink" href="#1)-Assign-enrichr-with-pd.Series,-pd.DataFrame,-or-list-object" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">gene_list</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s2">&quot;./gene_list.txt&quot;</span><span class="p">,</span><span class="n">header</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+<span class="n">gene_list</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[4]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>0</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>CTLA2B</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>SCARA3</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>LOC100044683</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>CMBL</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>CLIC6</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="nb">type</span><span class="p">(</span><span class="n">gene_list</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[5]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>pandas.core.frame.DataFrame
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="c1"># convert dataframe or series to list</span>
+<span class="n">glist</span> <span class="o">=</span> <span class="n">gene_list</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="k">print</span><span class="p">(</span><span class="n">glist</span><span class="p">[:</span><span class="mi">10</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;CTLA2B&#39;, &#39;SCARA3&#39;, &#39;LOC100044683&#39;, &#39;CMBL&#39;, &#39;CLIC6&#39;, &#39;IL13RA1&#39;, &#39;TACSTD2&#39;, &#39;DKKL1&#39;, &#39;CSF1&#39;, &#39;CITED1&#39;]
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="c1"># run enrichr</span>
+<span class="c1"># if you are only intrested in dataframe that enrichr returned, please set no_plot=True</span>
+
+<span class="c1"># list, dataframe, series inputs are supported</span>
+<span class="n">enr</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">enrichr</span><span class="p">(</span><span class="n">gene_list</span><span class="o">=</span><span class="s2">&quot;./gene_list.txt&quot;</span><span class="p">,</span>
+                 <span class="c1"># or gene_list=&#39;./gene_list.txt&#39;, or gene_list=glist</span>
+                 <span class="n">description</span><span class="o">=</span><span class="s1">&#39;test_name&#39;</span><span class="p">,</span>
+                 <span class="n">gene_sets</span><span class="o">=</span><span class="s1">&#39;KEGG_2016&#39;</span><span class="p">,</span>
+                 <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;enrichr_kegg&#39;</span><span class="p">,</span>
+                 <span class="n">cutoff</span><span class="o">=</span><span class="mf">0.5</span> <span class="c1"># test dataset, use lower value of range(0,1)</span>
+                <span class="p">)</span>
+
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="c1"># access results throught res2d attr</span>
+<span class="n">enr</span><span class="o">.</span><span class="n">res2d</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[8]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Term</th>
+      <th>Overlap</th>
+      <th>P-value</th>
+      <th>Adjusted P-value</th>
+      <th>Old P-value</th>
+      <th>Old Adjusted P-value</th>
+      <th>Z-score</th>
+      <th>Combined Score</th>
+      <th>Genes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Rap1 signaling pathway_Homo sapiens_hsa04015</td>
+      <td>19/211</td>
+      <td>0.000148</td>
+      <td>0.035223</td>
+      <td>0.000436</td>
+      <td>0.103734</td>
+      <td>-1.961363</td>
+      <td>17.295956</td>
+      <td>PDGFRB;CSF1;FLT4;VEGFC;ARAP3;LPAR4;ADCY7;ADCY6...</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Pathways in cancer_Homo sapiens_hsa05200</td>
+      <td>27/397</td>
+      <td>0.000729</td>
+      <td>0.066282</td>
+      <td>0.001816</td>
+      <td>0.152127</td>
+      <td>-2.083086</td>
+      <td>15.046848</td>
+      <td>RET;LEF1;TGFA;LPAR4;ADCY7;ETS1;ADCY6;GLI2;FGF4...</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Ras signaling pathway_Homo sapiens_hsa04014</td>
+      <td>18/227</td>
+      <td>0.000999</td>
+      <td>0.066282</td>
+      <td>0.002351</td>
+      <td>0.152127</td>
+      <td>-1.956845</td>
+      <td>13.519663</td>
+      <td>PDGFRB;CSF1;FLT4;VEGFC;ETS1;GNG13;FGF4;PLD2;EF...</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Dilated cardiomyopathy_Homo sapiens_hsa05414</td>
+      <td>10/90</td>
+      <td>0.001114</td>
+      <td>0.066282</td>
+      <td>0.002557</td>
+      <td>0.152127</td>
+      <td>-1.805957</td>
+      <td>12.280169</td>
+      <td>DES;SGCB;TPM2;TNNC1;LMNA;TPM1;ITGAV;ADCY7;ADCY...</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>HTLV-I infection_Homo sapiens_hsa05166</td>
+      <td>19/258</td>
+      <td>0.001747</td>
+      <td>0.083151</td>
+      <td>0.003877</td>
+      <td>0.184562</td>
+      <td>-1.843079</td>
+      <td>11.703417</td>
+      <td>PDGFRB;STAT5B;EGR1;JUN;CD40;FZD2;CRTC3;NFATC1;...</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</div>
+<div class="section" id="2)-Command-line-usage">
+<h2>2) Command line usage<a class="headerlink" href="#2)-Command-line-usage" title="Permalink to this headline">¶</a></h2>
+<p>You may also want to use enrichr in command line</p>
+<p>the option <strong>-v</strong> will print out the progress of your job</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="o">!</span>gseapy enrichr -i ./gene_list.txt <span class="err">\</span>
+               <span class="o">--</span><span class="n">description</span> <span class="n">BP2017</span> \
+               <span class="o">-</span><span class="n">g</span> <span class="n">GO_Biological_Process_2017</span> \
+               <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">o</span> <span class="n">enrichr_BP</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2017-11-29 14:46:44,166 Connecting to Enrichr Server to get latest library names
+2017-11-29 14:46:45,098 Analysis name: BP2017, Enrichr Library: GO_Biological_Process_2017
+2017-11-29 14:46:47,915 Submitted gene list:{&#39;shortId&#39;: &#39;35l0h&#39;, &#39;userListId&#39;: 6154327}
+2017-11-29 14:46:53,387 Downloading file of enrichment results: Job Id:{&#39;shortId&#39;: &#39;35l0h&#39;, &#39;userListId&#39;: 6154327}
+2017-11-29 14:46:55,154 Warning: No enrich terms using library GO_Biological_Process_2017 when cuttoff = 0.05
+2017-11-29 14:46:55,154 Done.
+
+</pre></div></div>
+</div>
+<div class="section" id="3.-Prerank-example">
+<h3>3. Prerank example<a class="headerlink" href="#3.-Prerank-example" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="1)-Assign-prerank()-with-a-pd.DataFrame,-pd.Series-,-or-a-txt-file">
+<h2>1) Assign prerank() with a pd.DataFrame, pd.Series , or a txt file<a class="headerlink" href="#1)-Assign-prerank()-with-a-pd.DataFrame,-pd.Series-,-or-a-txt-file" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">Do not include header !</div>
+<div class="line">GSEApy will skip any comment lines startswith “#”.</div>
+<div class="line">Only contains two columns, or one cloumn with gene_name indexed when
+assign a <code class="docutils literal"><span class="pre">DataFrame</span></code> to prerank</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">rank</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s2">&quot;./edb/gsea_data.gsea_data.rnk&quot;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+<span class="n">rank</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[10]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>0</th>
+      <th>1</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>CTLA2B</td>
+      <td>2.502482</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>SCARA3</td>
+      <td>2.095578</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>LOC100044683</td>
+      <td>1.116398</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>CMBL</td>
+      <td>0.877640</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>CLIC6</td>
+      <td>0.822181</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="c1"># run prerank</span>
+<span class="c1"># enrichr libraries are supported by prerank module. Just provide the name</span>
+<span class="n">pre</span><span class="o">=</span><span class="p">[]</span>
+<span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="s1">&#39;./genes.gmt&#39;</span><span class="p">,</span> <span class="s1">&#39;KEGG_2016&#39;</span><span class="p">],[</span><span class="s1">&#39;bp&#39;</span><span class="p">,</span><span class="s1">&#39;kegg&#39;</span><span class="p">]):</span>
+    <span class="c1">#use 4 process to acceralate the permutation speed</span>
+    <span class="n">pre_res</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">prerank</span><span class="p">(</span><span class="n">rnk</span><span class="o">=</span><span class="n">rank</span><span class="p">,</span>
+                         <span class="n">gene_sets</span><span class="o">=</span><span class="n">s</span><span class="p">,</span>
+                         <span class="n">processes</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                         <span class="n">permutation_num</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="c1"># reduce number to speed up test</span>
+                         <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;prerank_report_&#39;</span><span class="o">+</span><span class="n">n</span><span class="p">,</span><span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
+    <span class="n">pre</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pre_res</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="c1">#access results through res2d attribute</span>
+<span class="n">pre</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">res2d</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[12]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>es</th>
+      <th>nes</th>
+      <th>pval</th>
+      <th>fdr</th>
+      <th>gene_set_size</th>
+      <th>matched_size</th>
+      <th>genes</th>
+    </tr>
+    <tr>
+      <th>Term</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>DvA_UpIN_A</th>
+      <td>0.405880</td>
+      <td>1.532994</td>
+      <td>0.064516</td>
+      <td>0.125000</td>
+      <td>284</td>
+      <td>19</td>
+      <td>ABHD14B,VNN1,NELF,MARVELD2,LAMB3,TMPRSS2,TM6SF...</td>
+    </tr>
+    <tr>
+      <th>DvA_UpIN_D</th>
+      <td>0.166924</td>
+      <td>0.665550</td>
+      <td>0.787879</td>
+      <td>0.828125</td>
+      <td>236</td>
+      <td>21</td>
+      <td>PMP22,STBD1,DUSP14,RET,GPX8,CHRNB1,PRKD1,COL7A...</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="c1"># plotting</span>
+<span class="n">pre_res</span> <span class="o">=</span> <span class="n">pre</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">prerank_results</span> <span class="o">=</span> <span class="n">pre_res</span><span class="o">.</span><span class="n">res2d</span>
+<span class="n">prerank_results</span> <span class="o">=</span> <span class="n">prerank_results</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+<span class="n">prerank_results</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="s1">&#39;fdr&#39;</span><span class="p">,</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;Term&#39;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[13]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>&lt;matplotlib.axes._subplots.AxesSubplot at 0x11a2987f0&gt;
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/gseapy_example_20_1.png" src="_images/gseapy_example_20_1.png" />
+</div>
+</div>
+</div>
+<div class="section" id="2)-Command-line-usage">
+<h2>2) Command line usage<a class="headerlink" href="#2)-Command-line-usage" title="Permalink to this headline">¶</a></h2>
+<p>You may also want to use prerank in command line</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="c1"># ! gseapy prerank -r temp.rnk -g temp.gmt -o prerank_report_temp</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="4.-GSEA-Example">
+<h3>4. GSEA Example<a class="headerlink" href="#4.-GSEA-Example" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="1)-Assign-gsea()-with-a-pandas-DataFrame,-.gct-format-file,-or-a-text-file">
+<h2>1) Assign gsea() with a pandas DataFrame, .gct format file, or a text file<a class="headerlink" href="#1)-Assign-gsea()-with-a-pandas-DataFrame,-.gct-format-file,-or-a-text-file" title="Permalink to this headline">¶</a></h2>
+<p>and cls with a list object or just .cls format file</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">phenoA</span><span class="p">,</span> <span class="n">phenoB</span><span class="p">,</span> <span class="n">class_vector</span> <span class="o">=</span>  <span class="n">gp</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">gsea_cls_parser</span><span class="p">(</span><span class="s2">&quot;./P53.cls&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="c1">#class_vector used to indicate group attributes for each sample</span>
+<span class="k">print</span><span class="p">(</span><span class="n">class_vector</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;MUT&#39;, &#39;WT&#39;, &#39;WT&#39;, &#39;WT&#39;, &#39;WT&#39;, &#39;WT&#39;, &#39;WT&#39;, &#39;WT&#39;, &#39;WT&#39;, &#39;WT&#39;, &#39;WT&#39;, &#39;WT&#39;, &#39;WT&#39;, &#39;WT&#39;, &#39;WT&#39;, &#39;WT&#39;, &#39;WT&#39;, &#39;WT&#39;]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">gene_exp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s2">&quot;./P53_resampling_data.txt&quot;</span><span class="p">)</span>
+<span class="n">gene_exp</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[17]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>NAME</th>
+      <th>786-0</th>
+      <th>BT-549</th>
+      <th>CCRF-CEM</th>
+      <th>COLO 205</th>
+      <th>EKVX</th>
+      <th>HCC-2998</th>
+      <th>HCT-15</th>
+      <th>HOP-62</th>
+      <th>HOP-92</th>
+      <th>...</th>
+      <th>MCF7</th>
+      <th>MOLT-4</th>
+      <th>NCI-H460</th>
+      <th>OVCAR-4</th>
+      <th>SF-539</th>
+      <th>SK-MEL-5</th>
+      <th>SR</th>
+      <th>UACC-257</th>
+      <th>UACC-62</th>
+      <th>UO-31</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>CTLA2B</td>
+      <td>111.19</td>
+      <td>86.22</td>
+      <td>121.85</td>
+      <td>75.19</td>
+      <td>208.62</td>
+      <td>130.59</td>
+      <td>124.72</td>
+      <td>324.09</td>
+      <td>242.71</td>
+      <td>...</td>
+      <td>163.76</td>
+      <td>59.50</td>
+      <td>134.12</td>
+      <td>152.09</td>
+      <td>197.46</td>
+      <td>137.79</td>
+      <td>81.53</td>
+      <td>123.37</td>
+      <td>81.41</td>
+      <td>180.78</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>SCARA3</td>
+      <td>460.30</td>
+      <td>558.34</td>
+      <td>183.55</td>
+      <td>37.29</td>
+      <td>158.00</td>
+      <td>43.61</td>
+      <td>80.83</td>
+      <td>300.08</td>
+      <td>1250.25</td>
+      <td>...</td>
+      <td>109.91</td>
+      <td>120.42</td>
+      <td>73.06</td>
+      <td>115.03</td>
+      <td>95.12</td>
+      <td>37.56</td>
+      <td>76.16</td>
+      <td>41.10</td>
+      <td>77.51</td>
+      <td>519.17</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>LOC100044683</td>
+      <td>97.25</td>
+      <td>118.94</td>
+      <td>81.17</td>
+      <td>119.51</td>
+      <td>119.88</td>
+      <td>107.73</td>
+      <td>165.57</td>
+      <td>203.97</td>
+      <td>135.43</td>
+      <td>...</td>
+      <td>222.84</td>
+      <td>124.98</td>
+      <td>114.75</td>
+      <td>141.66</td>
+      <td>170.19</td>
+      <td>147.70</td>
+      <td>157.48</td>
+      <td>152.18</td>
+      <td>98.89</td>
+      <td>118.06</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>CMBL</td>
+      <td>33.45</td>
+      <td>55.10</td>
+      <td>221.67</td>
+      <td>50.30</td>
+      <td>35.12</td>
+      <td>75.70</td>
+      <td>84.01</td>
+      <td>44.12</td>
+      <td>79.96</td>
+      <td>...</td>
+      <td>51.32</td>
+      <td>117.11</td>
+      <td>59.46</td>
+      <td>78.46</td>
+      <td>45.55</td>
+      <td>49.07</td>
+      <td>96.69</td>
+      <td>33.09</td>
+      <td>10.38</td>
+      <td>52.89</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>CLIC6</td>
+      <td>35.75</td>
+      <td>41.26</td>
+      <td>63.04</td>
+      <td>219.86</td>
+      <td>42.53</td>
+      <td>54.19</td>
+      <td>86.98</td>
+      <td>71.20</td>
+      <td>53.89</td>
+      <td>...</td>
+      <td>154.05</td>
+      <td>31.62</td>
+      <td>37.66</td>
+      <td>32.64</td>
+      <td>63.35</td>
+      <td>27.95</td>
+      <td>70.99</td>
+      <td>36.25</td>
+      <td>17.50</td>
+      <td>49.41</td>
+    </tr>
+  </tbody>
+</table>
+<p>5 rows × 51 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="k">print</span><span class="p">(</span><span class="s2">&quot;positively correlated: &quot;</span><span class="p">,</span> <span class="n">phenoA</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+positively correlated:  MUT
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="k">print</span><span class="p">(</span><span class="s2">&quot;negtively correlated: &quot;</span><span class="p">,</span> <span class="n">phenoB</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+negtively correlated:  WT
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="c1"># run gsea</span>
+<span class="c1"># enrichr libraries are supported by gsea module. Just provide the name</span>
+
+<span class="n">gs_res</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">gsea</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gene_exp</span><span class="p">,</span> <span class="c1"># or data=&#39;./P53_resampling_data.txt&#39;</span>
+                 <span class="n">gene_sets</span><span class="o">=</span><span class="s1">&#39;KEGG_2016&#39;</span><span class="p">,</span> <span class="c1"># enrichr library names</span>
+                 <span class="bp">cls</span><span class="o">=</span><span class="n">class_vector</span><span class="p">,</span> <span class="c1"># or cls= &#39;./P53.cls&#39;</span>
+                 <span class="c1">#set permutation_type to phenotype if samples &gt;=15</span>
+                 <span class="n">permutation_type</span><span class="o">=</span><span class="s1">&#39;phenotype&#39;</span><span class="p">,</span>
+                 <span class="n">permutation_num</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="c1"># reduce number to speed up test</span>
+                 <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;gsea_report&#39;</span><span class="p">,</span>
+                 <span class="n">method</span><span class="o">=</span><span class="s1">&#39;signal_to_noise&#39;</span><span class="p">,</span>
+                 <span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="c1">#access the dataframe results throught res2d attribute</span>
+<span class="n">gs_res</span><span class="o">.</span><span class="n">res2d</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[21]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>es</th>
+      <th>nes</th>
+      <th>pval</th>
+      <th>fdr</th>
+      <th>gene_set_size</th>
+      <th>matched_size</th>
+      <th>genes</th>
+    </tr>
+    <tr>
+      <th>Term</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>MAPK signaling pathway_Homo sapiens_hsa04010</th>
+      <td>-0.392928</td>
+      <td>-1.321358</td>
+      <td>0.127660</td>
+      <td>0.404908</td>
+      <td>255</td>
+      <td>18</td>
+      <td>GADD45B,RRAS,SOS2,FGF17,PPP3CC,TNFRSF1A,PDGFRB...</td>
+    </tr>
+    <tr>
+      <th>HTLV-I infection_Homo sapiens_hsa05166</th>
+      <td>-0.249752</td>
+      <td>-0.817838</td>
+      <td>0.765957</td>
+      <td>0.723926</td>
+      <td>258</td>
+      <td>19</td>
+      <td>FZD2,ETS1,STAT5B,RRAS,LTBR,PPP3CC,TNFRSF1A,EGR...</td>
+    </tr>
+    <tr>
+      <th>Rap1 signaling pathway_Homo sapiens_hsa04015</th>
+      <td>-0.285975</td>
+      <td>-0.977817</td>
+      <td>0.555556</td>
+      <td>0.740798</td>
+      <td>211</td>
+      <td>19</td>
+      <td>RRAS,VEGFC,CSF1,FGF17,PDGFRB,FGF4,PDGFC,SIPA1L...</td>
+    </tr>
+    <tr>
+      <th>PI3K-Akt signaling pathway_Homo sapiens_hsa04151</th>
+      <td>0.182245</td>
+      <td>0.537851</td>
+      <td>1.000000</td>
+      <td>0.986631</td>
+      <td>341</td>
+      <td>22</td>
+      <td>GNG13,VEGFC,GNB4,CSF1,SOS2,FGF17,THBS4,PDGFRB,...</td>
+    </tr>
+    <tr>
+      <th>Cytokine-cytokine receptor interaction_Homo sapiens_hsa04060</th>
+      <td>0.229069</td>
+      <td>0.581508</td>
+      <td>0.963636</td>
+      <td>1.000000</td>
+      <td>265</td>
+      <td>18</td>
+      <td>IL10RB,VEGFC,CSF1,TNFSF12,LTBR,CXCL10,TNFRSF1A...</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="c1"># plotting</span>
+<span class="n">gsea_results</span><span class="o">=</span> <span class="n">gs_res</span><span class="o">.</span><span class="n">res2d</span>
+<span class="k">with</span> <span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">context</span><span class="p">(</span><span class="s1">&#39;ggplot&#39;</span><span class="p">):</span>
+    <span class="n">gsea_results</span> <span class="o">=</span> <span class="n">gsea_results</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+    <span class="n">gsea_results</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="s1">&#39;fdr&#39;</span><span class="p">,</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;Term&#39;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/gseapy_example_32_0.png" src="_images/gseapy_example_32_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="2)-Show-the-gsea-plots">
+<h2>2) Show the gsea plots<a class="headerlink" href="#2)-Show-the-gsea-plots" title="Permalink to this headline">¶</a></h2>
+<p>The <strong>gsea</strong> module will generate heatmap for genes in each gene sets in
+the backgroud.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span>
+
+<span class="c1">#erich plot</span>
+<span class="n">Image</span><span class="p">(</span><span class="s2">&quot;./gsea_report/Pathways in cancer_Homo sapiens_hsa05200.gsea.png&quot;</span><span class="p">,</span><span class="n">width</span><span class="o">=</span><span class="mi">650</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[23]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="_images/gseapy_example_34_0.png" src="_images/gseapy_example_34_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="c1">#corresponding heatmap</span>
+<span class="n">Image</span><span class="p">(</span><span class="s2">&quot;./gsea_report/Pathways in cancer_Homo sapiens_hsa05200.heatmap.png&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[24]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="_images/gseapy_example_35_0.png" src="_images/gseapy_example_35_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="3)-Command-line-usage">
+<h2>3) Command line usage<a class="headerlink" href="#3)-Command-line-usage" title="Permalink to this headline">¶</a></h2>
+<p>You may also want to use gsea in command line</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="c1"># !gseapy gsea -d ./P53_resampling_data.txt -g KEGG_2016 -c ./P53.cls -o gsea_reprot_2 -v -t phenotype</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="5.-Single-Sample-GSEA-example">
+<h3>5. Single Sample GSEA example<a class="headerlink" href="#5.-Single-Sample-GSEA-example" title="Permalink to this headline">¶</a></h3>
+<p><strong>Note: When you run ssGSEA, all genes names in your gene_sets file
+should be found in your expression table</strong></p>
+</div>
+</div>
+<div class="section" id="1)-Assign-ssgsea()-with-a-txt-file,-dataframe,-or-Seires(gene-name-as-index).">
+<h2>1) Assign ssgsea() with a txt file, dataframe, or Seires(gene name as index).<a class="headerlink" href="#1)-Assign-ssgsea()-with-a-txt-file,-dataframe,-or-Seires(gene-name-as-index)." title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="c1"># txt file input</span>
+<span class="n">ss</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">ssgsea</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s2">&quot;./testSet_rand1200.gct&quot;</span><span class="p">,</span>
+               <span class="n">gene_sets</span><span class="o">=</span><span class="s2">&quot;./randomSets.gmt&quot;</span><span class="p">,</span>
+               <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;ssgsea_report&#39;</span><span class="p">,</span>
+               <span class="n">sample_norm_method</span><span class="o">=</span><span class="s1">&#39;rank&#39;</span><span class="p">,</span> <span class="c1"># choose &#39;custom&#39; for your own rank list</span>
+               <span class="n">permutation_num</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="c1"># reduce number to speed up test</span>
+               <span class="n">processes</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="c1"># or assign a dataframe, or Series to ssgsea()</span>
+<span class="n">ssdf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s2">&quot;./temp.txt&quot;</span><span class="p">,</span><span class="n">header</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+<span class="n">ssdf</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[27]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>0</th>
+      <th>1</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ATXN1</td>
+      <td>16.456753</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>UBQLN4</td>
+      <td>13.989493</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>CALM1</td>
+      <td>13.745533</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>DLG4</td>
+      <td>12.796588</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>MRE11A</td>
+      <td>12.787631</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="c1"># dataframe with one column is also supported by ssGSEA or Prerank</span>
+<span class="c1"># But you have to set gene_names as index</span>
+<span class="n">ssdf2</span> <span class="o">=</span> <span class="n">ssdf</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">ssdf2</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[28]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>1</th>
+    </tr>
+    <tr>
+      <th>0</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>ATXN1</th>
+      <td>16.456753</td>
+    </tr>
+    <tr>
+      <th>UBQLN4</th>
+      <td>13.989493</td>
+    </tr>
+    <tr>
+      <th>CALM1</th>
+      <td>13.745533</td>
+    </tr>
+    <tr>
+      <th>DLG4</th>
+      <td>12.796588</td>
+    </tr>
+    <tr>
+      <th>MRE11A</th>
+      <td>12.787631</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="nb">type</span><span class="p">(</span><span class="n">ssdf2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[29]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>pandas.core.frame.DataFrame
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">ssSeries</span> <span class="o">=</span> <span class="n">ssdf2</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+<span class="nb">type</span><span class="p">(</span><span class="n">ssSeries</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[30]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>pandas.core.series.Series
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="c1"># Series, DataFrame Example</span>
+<span class="c1"># supports dataframe and series</span>
+<span class="k">for</span> <span class="n">dat</span> <span class="ow">in</span> <span class="p">[</span><span class="n">ssdf</span><span class="p">,</span> <span class="n">ssdf2</span><span class="p">,</span> <span class="n">ssSeries</span><span class="p">]:</span>
+    <span class="n">ss</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">ssgsea</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">ssdf</span><span class="p">,</span>
+                   <span class="n">gene_sets</span><span class="o">=</span><span class="s2">&quot;./temp.gmt&quot;</span><span class="p">,</span>
+                   <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;ssgsea_report_series&#39;</span><span class="p">,</span>
+                   <span class="n">permutation_num</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="c1"># reduce number to speed up test</span>
+                   <span class="n">processes</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+/Users/bioninja/miniconda/envs/snakeflow/lib/python3.6/site-packages/gseapy-0.8.9-py3.6.egg/gseapy/algorithm.py:469: RuntimeWarning: divide by zero encountered in true_divide
+  choicelist = [np.sum(esnull &lt; es.reshape(len(es),1), axis=1)/ np.sum(esnull &lt; 0, axis=1),
+/Users/bioninja/miniconda/envs/snakeflow/lib/python3.6/site-packages/gseapy-0.8.9-py3.6.egg/gseapy/algorithm.py:522: RuntimeWarning: Mean of empty slice.
+  meanNeg = enrNull[enrNull &lt; 0 ].mean()
+/Users/bioninja/miniconda/envs/snakeflow/lib/python3.6/site-packages/numpy/core/_methods.py:80: RuntimeWarning: invalid value encountered in double_scalars
+  ret = ret.dtype.type(ret / rcount)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [32]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">ss</span><span class="o">.</span><span class="n">res2d</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[32]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>es</th>
+      <th>nes</th>
+      <th>pval</th>
+      <th>fdr</th>
+      <th>gene_set_size</th>
+      <th>matched_size</th>
+      <th>genes</th>
+    </tr>
+    <tr>
+      <th>Term</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>hsa05205</th>
+      <td>0.334921</td>
+      <td>6.003585</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>203</td>
+      <td>201</td>
+      <td>CTNNB1,PRKACA,GRB2,EGFR,RAC1,PRKCA,KRAS,CD44,M...</td>
+    </tr>
+    <tr>
+      <th>hsa05412</th>
+      <td>0.284838</td>
+      <td>4.873279</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>74</td>
+      <td>74</td>
+      <td>CTNNB1,ACTB,ITGB1,CACNG3,RYR2,CTNNA1,CACNA2D3,...</td>
+    </tr>
+    <tr>
+      <th>hsa05410</th>
+      <td>0.262569</td>
+      <td>4.575979</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>83</td>
+      <td>83</td>
+      <td>ACTB,ITGB1,TPM3,CACNG3,RYR2,CACNA2D3,ITGAV,ITG...</td>
+    </tr>
+    <tr>
+      <th>hsa05323</th>
+      <td>0.168541</td>
+      <td>3.080340</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>89</td>
+      <td>89</td>
+      <td>JUN,ITGB2,ATP6V1B2,ATP6V1E1,IL1A,TGFB1,TEK,ATP...</td>
+    </tr>
+    <tr>
+      <th>hsa05322</th>
+      <td>0.202544</td>
+      <td>3.710825</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>134</td>
+      <td>134</td>
+      <td>GRIN2B,H2AFX,ACTN1,HIST4H4,SNRPD1,C3,GRIN2A,SS...</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</div>
+<div class="section" id="2)-ssgsea-supports-gene-expression-matix-in-gct-format.">
+<h2>2) <code class="docutils literal"><span class="pre">ssgsea</span></code> supports gene expression matix in gct format.<a class="headerlink" href="#2)-ssgsea-supports-gene-expression-matix-in-gct-format." title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">if gene expression matrix is provided, ssgsea works like pandas
+apply(),</div>
+<div class="line">which means it will compute NES,FDR … for every sample pairwise.</div>
+<div class="line">finally, you can assces the reuslts through <strong>resultsOnSamples</strong>
+attribute.</div>
+</div>
+<p>Take previous gene_exp dataframe for example</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [33]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s2">&quot;./P53_resampling_data.txt&quot;</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[33]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>NAME</th>
+      <th>786-0</th>
+      <th>BT-549</th>
+      <th>CCRF-CEM</th>
+      <th>COLO 205</th>
+      <th>EKVX</th>
+      <th>HCC-2998</th>
+      <th>HCT-15</th>
+      <th>HOP-62</th>
+      <th>HOP-92</th>
+      <th>...</th>
+      <th>MCF7</th>
+      <th>MOLT-4</th>
+      <th>NCI-H460</th>
+      <th>OVCAR-4</th>
+      <th>SF-539</th>
+      <th>SK-MEL-5</th>
+      <th>SR</th>
+      <th>UACC-257</th>
+      <th>UACC-62</th>
+      <th>UO-31</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>CTLA2B</td>
+      <td>111.19</td>
+      <td>86.22</td>
+      <td>121.85</td>
+      <td>75.19</td>
+      <td>208.62</td>
+      <td>130.59</td>
+      <td>124.72</td>
+      <td>324.09</td>
+      <td>242.71</td>
+      <td>...</td>
+      <td>163.76</td>
+      <td>59.50</td>
+      <td>134.12</td>
+      <td>152.09</td>
+      <td>197.46</td>
+      <td>137.79</td>
+      <td>81.53</td>
+      <td>123.37</td>
+      <td>81.41</td>
+      <td>180.78</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>SCARA3</td>
+      <td>460.30</td>
+      <td>558.34</td>
+      <td>183.55</td>
+      <td>37.29</td>
+      <td>158.00</td>
+      <td>43.61</td>
+      <td>80.83</td>
+      <td>300.08</td>
+      <td>1250.25</td>
+      <td>...</td>
+      <td>109.91</td>
+      <td>120.42</td>
+      <td>73.06</td>
+      <td>115.03</td>
+      <td>95.12</td>
+      <td>37.56</td>
+      <td>76.16</td>
+      <td>41.10</td>
+      <td>77.51</td>
+      <td>519.17</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>LOC100044683</td>
+      <td>97.25</td>
+      <td>118.94</td>
+      <td>81.17</td>
+      <td>119.51</td>
+      <td>119.88</td>
+      <td>107.73</td>
+      <td>165.57</td>
+      <td>203.97</td>
+      <td>135.43</td>
+      <td>...</td>
+      <td>222.84</td>
+      <td>124.98</td>
+      <td>114.75</td>
+      <td>141.66</td>
+      <td>170.19</td>
+      <td>147.70</td>
+      <td>157.48</td>
+      <td>152.18</td>
+      <td>98.89</td>
+      <td>118.06</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>CMBL</td>
+      <td>33.45</td>
+      <td>55.10</td>
+      <td>221.67</td>
+      <td>50.30</td>
+      <td>35.12</td>
+      <td>75.70</td>
+      <td>84.01</td>
+      <td>44.12</td>
+      <td>79.96</td>
+      <td>...</td>
+      <td>51.32</td>
+      <td>117.11</td>
+      <td>59.46</td>
+      <td>78.46</td>
+      <td>45.55</td>
+      <td>49.07</td>
+      <td>96.69</td>
+      <td>33.09</td>
+      <td>10.38</td>
+      <td>52.89</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>CLIC6</td>
+      <td>35.75</td>
+      <td>41.26</td>
+      <td>63.04</td>
+      <td>219.86</td>
+      <td>42.53</td>
+      <td>54.19</td>
+      <td>86.98</td>
+      <td>71.20</td>
+      <td>53.89</td>
+      <td>...</td>
+      <td>154.05</td>
+      <td>31.62</td>
+      <td>37.66</td>
+      <td>32.64</td>
+      <td>63.35</td>
+      <td>27.95</td>
+      <td>70.99</td>
+      <td>36.25</td>
+      <td>17.50</td>
+      <td>49.41</td>
+    </tr>
+  </tbody>
+</table>
+<p>5 rows × 51 columns</p>
+</div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [34]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="c1"># dataframe support for multisamples</span>
+<span class="n">ss</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">ssgsea</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+               <span class="n">gene_sets</span><span class="o">=</span><span class="s2">&quot;edb/gene_sets.gmt&quot;</span><span class="p">,</span>
+               <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;ssgsea_df_test&#39;</span><span class="p">,</span>
+               <span class="n">permutation_num</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="c1"># reduce number to speed up test</span>
+               <span class="n">processes</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="line-block">
+<div class="line">Results for all samples save to a dict,</div>
+<div class="line">you can assces the reuslts through resultsOnSamples attribute.</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [35]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="c1"># convert dict to dataframe</span>
+<span class="n">ss2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">ss</span><span class="o">.</span><span class="n">resultsOnSamples</span><span class="p">)</span>
+<span class="n">ss2</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[35]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>786-0</th>
+      <th>A498</th>
+      <th>A549/ATCC</th>
+      <th>ACHN</th>
+      <th>BT-549</th>
+      <th>CAKI-1</th>
+      <th>CCRF-CEM</th>
+      <th>COLO 205</th>
+      <th>EKVX</th>
+      <th>HCC-2998</th>
+      <th>...</th>
+      <th>SN12C</th>
+      <th>SNB-19</th>
+      <th>SNB-75</th>
+      <th>SR</th>
+      <th>SW-620</th>
+      <th>T-47D</th>
+      <th>U251</th>
+      <th>UACC-257</th>
+      <th>UACC-62</th>
+      <th>UO-31</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>CDX2 OE-SPECIFIC</th>
+      <td>0.063312</td>
+      <td>0.048033</td>
+      <td>0.060661</td>
+      <td>0.037049</td>
+      <td>0.066525</td>
+      <td>0.054048</td>
+      <td>0.095978</td>
+      <td>0.055590</td>
+      <td>0.016074</td>
+      <td>0.075153</td>
+      <td>...</td>
+      <td>0.067791</td>
+      <td>0.100940</td>
+      <td>0.059777</td>
+      <td>0.084775</td>
+      <td>0.080548</td>
+      <td>0.060905</td>
+      <td>0.084223</td>
+      <td>0.083534</td>
+      <td>0.101644</td>
+      <td>0.040594</td>
+    </tr>
+    <tr>
+      <th>ES-SPECIFIC</th>
+      <td>0.004741</td>
+      <td>-0.014692</td>
+      <td>-0.043896</td>
+      <td>-0.006895</td>
+      <td>-0.017159</td>
+      <td>0.023932</td>
+      <td>-0.063195</td>
+      <td>-0.015735</td>
+      <td>-0.031965</td>
+      <td>0.013204</td>
+      <td>...</td>
+      <td>-0.019706</td>
+      <td>0.015909</td>
+      <td>0.003012</td>
+      <td>-0.092565</td>
+      <td>-0.035530</td>
+      <td>-0.039153</td>
+      <td>0.007243</td>
+      <td>-0.001316</td>
+      <td>-0.014034</td>
+      <td>0.009815</td>
+    </tr>
+    <tr>
+      <th>GATA3 OE-SPECIFIC</th>
+      <td>0.054428</td>
+      <td>0.065237</td>
+      <td>0.052884</td>
+      <td>0.034603</td>
+      <td>0.071058</td>
+      <td>0.051076</td>
+      <td>0.064590</td>
+      <td>0.068909</td>
+      <td>0.062935</td>
+      <td>0.082841</td>
+      <td>...</td>
+      <td>0.067162</td>
+      <td>0.064919</td>
+      <td>0.042293</td>
+      <td>0.073307</td>
+      <td>0.068217</td>
+      <td>0.076238</td>
+      <td>0.040121</td>
+      <td>0.056542</td>
+      <td>0.074962</td>
+      <td>0.025040</td>
+    </tr>
+    <tr>
+      <th>HDAC1 UNIQUE TARGETS</th>
+      <td>0.036120</td>
+      <td>0.050314</td>
+      <td>0.065173</td>
+      <td>0.033754</td>
+      <td>0.032440</td>
+      <td>0.037152</td>
+      <td>0.060862</td>
+      <td>0.018020</td>
+      <td>0.049175</td>
+      <td>0.034612</td>
+      <td>...</td>
+      <td>0.028117</td>
+      <td>0.041855</td>
+      <td>0.031641</td>
+      <td>0.052988</td>
+      <td>0.025374</td>
+      <td>0.060478</td>
+      <td>0.058104</td>
+      <td>0.096254</td>
+      <td>0.047768</td>
+      <td>0.025103</td>
+    </tr>
+    <tr>
+      <th>OCT4 KD-SPECIFIC</th>
+      <td>0.023301</td>
+      <td>0.024868</td>
+      <td>0.037356</td>
+      <td>0.019239</td>
+      <td>0.052082</td>
+      <td>0.029802</td>
+      <td>0.061182</td>
+      <td>0.051132</td>
+      <td>0.035378</td>
+      <td>0.057658</td>
+      <td>...</td>
+      <td>0.025439</td>
+      <td>0.046368</td>
+      <td>0.030731</td>
+      <td>0.087160</td>
+      <td>0.053855</td>
+      <td>0.050506</td>
+      <td>0.048906</td>
+      <td>0.045672</td>
+      <td>0.047296</td>
+      <td>0.020887</td>
+    </tr>
+  </tbody>
+</table>
+<p>5 rows × 50 columns</p>
+</div></div>
+</div>
+</div>
+<div class="section" id="3)-command-line-usage-of-single-sample-gsea">
+<h2>3) command line usage of single sample gsea<a class="headerlink" href="#3)-command-line-usage-of-single-sample-gsea" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [36]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="c1"># !gseapy ssgsea -d ./testSet_rand1200.gct -g temp.gmt -o ssgsea_report2  -p 4</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="gseapy_tutorial.html" class="btn btn-neutral" title="A Protocol to Prepare files for GSEAPY" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Zhuoqing Fang.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.8.9',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

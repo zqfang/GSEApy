@@ -1,0 +1,409 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>gseapy.parser &mdash; GSEApy 0.8.9 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="GSEApy 0.8.9 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> GSEApy
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Welcome to GSEAPY’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../run.html">How to Use GSEAPY</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gseapy_tutorial.html">A Protocol to Prepare files for GSEAPY</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gseapy_example.html">GSEAPY Example</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GSEApy</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>gseapy.parser</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for gseapy.parser</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">logging</span><span class="o">,</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">in1d</span>
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="k">import</span> <span class="n">read_table</span><span class="p">,</span> <span class="n">DataFrame</span>
+<span class="kn">from</span> <span class="nn">gseapy.utils</span> <span class="k">import</span> <span class="n">unique</span><span class="p">,</span> <span class="n">DEFAULT_LIBRARY</span>
+<span class="kn">from</span> <span class="nn">requests.packages.urllib3.util.retry</span> <span class="k">import</span> <span class="n">Retry</span>
+<span class="kn">from</span> <span class="nn">requests.adapters</span> <span class="k">import</span> <span class="n">HTTPAdapter</span>
+
+
+<div class="viewcode-block" id="gsea_cls_parser"><a class="viewcode-back" href="../../run.html#gseapy.parser.gsea_cls_parser">[docs]</a><span class="k">def</span> <span class="nf">gsea_cls_parser</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Extact class(phenotype) name from .cls file.</span>
+<span class="sd">    </span>
+<span class="sd">    :param cls: the a class list instance or .cls file which is identical to GSEA input .</span>
+<span class="sd">    :return: phenotype name and a list of class vector. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">classes</span> <span class="o">=</span> <span class="bp">cls</span>
+        <span class="n">sample_name</span><span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="n">classes</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="p">:</span>    
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="k">as</span> <span class="n">c</span><span class="p">:</span>
+            <span class="n">file</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+        <span class="n">classes</span> <span class="o">=</span> <span class="n">file</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+        <span class="n">sample_name</span> <span class="o">=</span> <span class="n">file</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;# &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Error parsing sample name!&#39;</span><span class="p">)</span>
+  
+    <span class="k">return</span> <span class="n">sample_name</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sample_name</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">classes</span></div>
+
+<div class="viewcode-block" id="gsea_edb_parser"><a class="viewcode-back" href="../../run.html#gseapy.parser.gsea_edb_parser">[docs]</a><span class="k">def</span> <span class="nf">gsea_edb_parser</span><span class="p">(</span><span class="n">results_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parse results.edb file stored under **edb** file folder.            </span>
+
+<span class="sd">    :param results_path: the .results file where lcoated inside edb folder.</span>
+<span class="sd">    :param index: gene_set index of gmt database, used for iterating items.   </span>
+<span class="sd">    :return: enrichment_term, hit_index,nes, pval, fdr.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">bs4</span> <span class="k">import</span> <span class="n">BeautifulSoup</span>
+    
+    <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">results_path</span><span class="p">),</span> <span class="n">features</span><span class="o">=</span><span class="s1">&#39;xml&#39;</span><span class="p">)</span>
+    <span class="n">tag</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">findAll</span><span class="p">(</span><span class="s1">&#39;DTG&#39;</span><span class="p">)</span>   
+    <span class="n">term</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">tag</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+    <span class="c1"># dict_keys([&#39;RANKED_LIST&#39;, &#39;GENESET&#39;, &#39;FWER&#39;, &#39;ES_PROFILE&#39;, </span>
+    <span class="c1"># &#39;HIT_INDICES&#39;, &#39;ES&#39;, &#39;NES&#39;, &#39;TEMPLATE&#39;, &#39;RND_ES&#39;, &#39;RANK_SCORE_AT_ES&#39;,</span>
+    <span class="c1">#&#39;NP&#39;, &#39;RANK_AT_ES&#39;, &#39;FDR&#39;])         </span>
+    <span class="n">enrich_term</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;GENESET&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">es_profile</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ES_PROFILE&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+    <span class="c1">#rank_es = term.get(&#39;RND_ES&#39;).split(&quot; &quot;)</span>
+    <span class="n">hit_ind</span> <span class="o">=</span><span class="n">term</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;HIT_INDICES&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+    <span class="n">es_profile</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">es_profile</span> <span class="p">]</span>
+    <span class="n">hit_ind</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">hit_ind</span> <span class="p">]</span>
+    <span class="c1">#rank_es = [float(i) for i in rank_es ]</span>
+    <span class="n">nes</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;NES&#39;</span><span class="p">)</span>
+    <span class="n">pval</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;NP&#39;</span><span class="p">)</span>
+    <span class="n">fdr</span> <span class="o">=</span>  <span class="n">term</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;FDR&#39;</span><span class="p">)</span>
+    <span class="c1">#fwer = term.get(&#39;FWER&#39;)   </span>
+    <span class="c1">#index_range = len(tag)-1</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Enriched Gene set is: &quot;</span><span class="o">+</span> <span class="n">enrich_term</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">enrich_term</span><span class="p">,</span> <span class="n">hit_ind</span><span class="p">,</span> <span class="n">nes</span><span class="p">,</span> <span class="n">pval</span><span class="p">,</span> <span class="n">fdr</span></div>
+    
+    
+<div class="viewcode-block" id="gsea_gmt_parser"><a class="viewcode-back" href="../../run.html#gseapy.parser.gsea_gmt_parser">[docs]</a><span class="k">def</span> <span class="nf">gsea_gmt_parser</span><span class="p">(</span><span class="n">gmt</span><span class="p">,</span> <span class="n">min_size</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">max_size</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">gene_list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parse gene_sets.gmt(gene set database) file or download from enrichr server.  </span>
+<span class="sd">    </span>
+<span class="sd">    :param gmt: the gene_sets.gmt file of GSEA input or an enrichr libary name.</span>
+<span class="sd">                checkout full enrichr library name here: http://amp.pharm.mssm.edu/Enrichr/#stats</span>
+<span class="sd">                </span>
+<span class="sd">    :param min_size: Minimum allowed number of genes from gene set also the data set. Default: 3. </span>
+<span class="sd">    :param max_size: Maximum allowed number of genes from gene set also the data set. Default: 5000.</span>
+<span class="sd">    :param gene_list: Used for filtering gene set. Only used this argument for :func:`call` method.</span>
+<span class="sd">    :return: Return a new filtered gene set database dictionary. </span>
+
+<span class="sd">    **DO NOT** filter gene sets, when use :func:`replot`. Because ``GSEA`` Desktop have already</span>
+<span class="sd">    do this for you.</span>
+<span class="sd">            </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">gmt</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.gmt&quot;</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;User Defined gene sets is given.......continue..........&quot;</span><span class="p">)</span> 
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">gmt</span><span class="p">)</span> <span class="k">as</span> <span class="n">genesets</span><span class="p">:</span>    
+             <span class="n">genesets_dict</span> <span class="o">=</span> <span class="p">{</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span> 
+                              <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">genesets</span><span class="o">.</span><span class="n">readlines</span><span class="p">()}</span>    
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Downloading and generating Enrichr library gene sets...&quot;</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="n">gmt</span> <span class="ow">in</span> <span class="n">DEFAULT_LIBRARY</span><span class="p">:</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="n">DEFAULT_LIBRARY</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="n">get_library_name</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">gmt</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            define max tries num</span>
+<span class="sd">            if the backoff_factor is 0.1, then sleep() will sleep for</span>
+<span class="sd">            [0.1s, 0.2s, 0.4s, ...] between retries. </span>
+<span class="sd">            It will also force a retry if the status code returned is 500, 502, 503 or 504.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
+            <span class="n">retries</span> <span class="o">=</span> <span class="n">Retry</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">backoff_factor</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+                            <span class="n">status_forcelist</span><span class="o">=</span><span class="p">[</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">502</span><span class="p">,</span> <span class="mi">503</span><span class="p">,</span> <span class="mi">504</span> <span class="p">])</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span><span class="s1">&#39;http://&#39;</span><span class="p">,</span> <span class="n">HTTPAdapter</span><span class="p">(</span><span class="n">max_retries</span><span class="o">=</span><span class="n">retries</span><span class="p">))</span>
+            <span class="c1">#queery string</span>
+            <span class="n">ENRICHR_URL</span> <span class="o">=</span> <span class="s1">&#39;http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary&#39;</span>
+            <span class="n">query_string</span> <span class="o">=</span> <span class="s1">&#39;?mode=text&amp;libraryName=</span><span class="si">%s</span><span class="s1">&#39;</span>
+            <span class="c1">#get</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span> <span class="n">ENRICHR_URL</span> <span class="o">+</span> <span class="n">query_string</span> <span class="o">%</span> <span class="n">gmt</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;gene_set files(.gmt) not found&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">response</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Error fetching enrichment results, check internet connection first.&#39;</span><span class="p">)</span>
+                     
+        <span class="n">genesets_dict</span> <span class="o">=</span> <span class="p">{</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span> 
+                          <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span> 
+                          <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">iter_lines</span><span class="p">(</span><span class="n">chunk_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">decode_unicode</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)}</span>    
+ 
+    
+
+    <span class="c1">#filtering dict</span>
+    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="p">:</span>
+        <span class="n">genesets_filter</span> <span class="o">=</span>  <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">genesets_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">min_size</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">max_size</span><span class="p">}</span>
+    <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">genesets_filter</span> <span class="o">=</span>  <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">genesets_dict</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">min_size</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">max_size</span><span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;System failure. Please Provide correct input files&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>    
+    <span class="k">if</span> <span class="n">gene_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">subsets</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">genesets_filter</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>             
+        <span class="k">for</span> <span class="n">subset</span> <span class="ow">in</span> <span class="n">subsets</span><span class="p">:</span>            
+            <span class="n">tag_indicator</span> <span class="o">=</span> <span class="n">in1d</span><span class="p">(</span><span class="n">gene_list</span><span class="p">,</span> <span class="n">genesets_filter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subset</span><span class="p">),</span> <span class="n">assume_unique</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">tag_len</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">tag_indicator</span><span class="p">)</span>      
+            <span class="k">if</span> <span class="n">tag_len</span> <span class="o">&lt;=</span> <span class="n">min_size</span> <span class="ow">or</span> <span class="n">tag_len</span> <span class="o">&gt;=</span> <span class="n">max_size</span><span class="p">:</span>                    
+                <span class="k">del</span> <span class="n">genesets_filter</span><span class="p">[</span><span class="n">subset</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">continue</span>
+    <span class="c1">#some_dict = {key: value for key, value in some_dict.items() if value != value_to_remove}</span>
+    <span class="c1">#use np.intersect1d() may be faster???    </span>
+    <span class="n">filsets_num</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">genesets_dict</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">genesets_filter</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%04d</span><span class="s2"> gene_sets have been filtered out when max_size=</span><span class="si">%s</span><span class="s2"> and min_size=</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">filsets_num</span><span class="p">,</span> <span class="n">max_size</span><span class="p">,</span> <span class="n">min_size</span><span class="p">))</span>
+    
+    <span class="k">if</span> <span class="n">filsets_num</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">genesets_dict</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;No gene sets passed throught filtering condition!!!, try new paramters again!</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>\
+                         <span class="s2">&quot;Note: Gene names for gseapy is case sensitive.&quot;</span> <span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">genesets_filter</span></div>
+    
+<div class="viewcode-block" id="get_library_name"><a class="viewcode-back" href="../../run.html#gseapy.parser.get_library_name">[docs]</a><span class="k">def</span> <span class="nf">get_library_name</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;return enrichr active enrichr library name. &quot;&quot;&quot;</span>
+
+    <span class="c1"># make a get request to get the gmt names and meta data from Enrichr</span>
+    <span class="sd">&quot;&quot;&quot;old code</span>
+<span class="sd">    #python 2</span>
+<span class="sd">    if sys.version_info[0] == 2 :</span>
+<span class="sd">        import urllib2</span>
+<span class="sd">        x = urllib2.urlopen(&#39;http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary?mode=meta&#39;)</span>
+<span class="sd">        response = x.read()</span>
+<span class="sd">        gmt_data = json.loads(response)</span>
+
+<span class="sd">    # python 3</span>
+<span class="sd">    elif sys.version_info[0] &gt;= 3:</span>
+<span class="sd">        import urllib</span>
+<span class="sd">        x = urllib.request.urlopen(&#39;http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary?mode=meta&#39;)</span>
+<span class="sd">        response = x.read()</span>
+<span class="sd">        gmt_data = json.loads(response.decode(&#39;utf-8&#39;))</span>
+<span class="sd">    else:</span>
+<span class="sd">        sys.stderr.write(&quot;System failure. Please Provide correct input files&quot;)</span>
+<span class="sd">        sys.exit(1) </span>
+<span class="sd">    # generate list of lib names </span>
+<span class="sd">    libs = []</span>
+
+<span class="sd">    # get library names </span>
+<span class="sd">    for inst_gmt in gmt_data[&#39;libraries&#39;]:</span>
+
+<span class="sd">        # only include active gmts </span>
+<span class="sd">        if inst_gmt[&#39;isActive&#39;] == True:</span>
+<span class="sd">            libs.append(inst_gmt[&#39;libraryName&#39;])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lib_url</span><span class="o">=</span><span class="s1">&#39;http://amp.pharm.mssm.edu/Enrichr/datasetStatistics&#39;</span>
+    <span class="n">libs_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">lib_url</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+    <span class="n">libs</span> <span class="o">=</span> <span class="p">[</span><span class="n">lib</span><span class="p">[</span><span class="s1">&#39;libraryName&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">lib</span> <span class="ow">in</span> <span class="n">libs_json</span><span class="p">[</span><span class="s1">&#39;statistics&#39;</span><span class="p">]]</span>    
+
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">libs</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Zhuoqing Fang.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8.9',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

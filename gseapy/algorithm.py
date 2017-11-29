@@ -93,7 +93,7 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
     return es.tolist(), hit_ind, RES.tolist()
 
 
-def enrichment_score_ss(gene_set, rnkseries, weighted_score_type=0.25, esnull=None, rs=np.random.RandomState()):
+def enrichment_score_ss(gene_set, rnkseries, weighted_score_type=0.25, scale=True, esnull=None, rs=np.random.RandomState()):
     """
     Given a gene set, a map of gene names to rank levels, and a weight score, returns the ssGSEA
     enrichment score for the gene set as described by *D. Barbie et al 2009*
@@ -107,7 +107,7 @@ def enrichment_score_ss(gene_set, rnkseries, weighted_score_type=0.25, esnull=No
     :param gene_set: a list of gene_names in the gene_set given by gmt file.
     :param rnkseries: pd.Series, an indexed series with rank values.
     :param weighted_score_type: the weighted exponent on the :math:`P^W_G` term.
-
+    :param scale: If True, normalize the scores by number of genes in the gene sets.
     :returns:
              ES: Enrichment score (real number between -1 and +1),take the sum of all values in the RES array .
 
@@ -167,10 +167,12 @@ def enrichment_score_ss(gene_set, rnkseries, weighted_score_type=0.25, esnull=No
     P_NG_numerator = np.cumsum(no_tag_indicator, axis=axis)
     P_NG_denominator = np.sum(no_tag_indicator, axis=axis, keepdims=True)
 
-    step_cdf_diff = P_GW_numerator / P_GW_denominator - P_NG_numerator / P_NG_denominator
+    RES = P_GW_numerator / P_GW_denominator - P_NG_numerator / P_NG_denominator
     # scale es by gene numbers ?
     # https://gist.github.com/gaoce/39e0907146c752c127728ad74e123b33
-    RES = step_cdf_diff / N
+    if scale:
+        RES = RES / N
+
     es = np.sum(RES, axis=axis)
 
     if esnull:
@@ -398,7 +400,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
 
     return gsea_significance(enrichment_scores, enrichment_nulls), hit_ind,rank_ES, subsets
 
-def gsea_compute_ss(data, gmt, n, weighted_score_type, seed, processes):
+def gsea_compute_ss(data, gmt, n, weighted_score_type, scale, seed, processes):
     """compute enrichment scores and enrichment nulls for single sample GSEA.
     """
 
@@ -417,7 +419,7 @@ def gsea_compute_ss(data, gmt, n, weighted_score_type, seed, processes):
     for subset in subsets:
         #
         rs = np.random.RandomState(seed)
-        es, ind, RES= enrichment_score_ss(gmt.get(subset), data, w, None,rs)
+        es, ind, RES= enrichment_score_ss(gmt.get(subset), data, w, scale, None,rs)
         enrichment_scores.append(es)
         rank_ES.append(RES)
         hit_ind.append(ind)
@@ -434,7 +436,7 @@ def gsea_compute_ss(data, gmt, n, weighted_score_type, seed, processes):
         #rs = np.random.RandomState(seed)
         rs = np.random.RandomState()
         temp_esnu.append(pool_esnu.apply_async(enrichment_score_ss, args=(gmt.get(subset), data,
-                                                                          w, n, rs)))
+                                                                          w, scale, n, rs)))
 
     pool_esnu.close()
     pool_esnu.join()
@@ -447,7 +449,7 @@ def gsea_compute_ss(data, gmt, n, weighted_score_type, seed, processes):
     # old single threading method
     for si,subset in enumerate(subsets):
         esn = enrichment_score_ss(gene_set=gmt.get(subset), rnkser=data,
-                              weighted_score_type=w, esnull=n, rs=rs)[0]
+                              weighted_score_type=w, scale=scale, esnull=n, rs=rs)[0]
         enrichment_nulls[si] = esn # esn is a list, don't need to use append method.
     """
     return gsea_significance(enrichment_scores, enrichment_nulls), hit_ind, rank_ES, subsets

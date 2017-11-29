@@ -11,7 +11,7 @@ import argparse as ap
 # or args = argparser.parse_args() will throw bugs!!!
 
 
-__version__ = '0.8.8'
+__version__ = '0.8.9'
 
 def main():
     """The Main function/pipeline for GSEAPY."""
@@ -51,8 +51,9 @@ def main():
         ss = SingleSampleGSEA(data=args.data, gene_sets=args.gmt, outdir=args.outdir,
                               sample_norm_method=args.norm,
                               min_size=args.mins, max_size=args.maxs, permutation_num=args.n,
-                              weighted_score_type=args.weight, ascending=args.ascending,
-                              processes=args.threads, figsize=args.figsize, format=args.format,
+                              weighted_score_type=args.weight, scale=args.scale,
+                              ascending=args.ascending, processes=args.threads,
+                              figsize=args.figsize, format=args.format,
                               graph_num=args.graph, seed=args.seed, verbose=args.verbose)
         ss.run()
 
@@ -235,6 +236,8 @@ def add_singlesample_parser(subparsers):
                            help="Max size of input genes presented in Gene Sets. Default: 2000")
     group_opt.add_argument("-w", "--weight", action='store', dest='weight', default=0.25, type=float, metavar='weight',
                            help='Weighted_score of rank_metrics.For weighting input genes.default: 0.25',)
+    group_opt.add_argument("--no-scale", action='store_false', dest='scale', default=True,
+                           help="Rank metric sorting order. If the flag was set, don't normalize the scores by number of genes in the gene sets.")
     group_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
                            help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
     group_opt.add_argument("--graph", dest = "graph", action="store", type=int, default=20, metavar='int',

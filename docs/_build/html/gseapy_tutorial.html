@@ -1,0 +1,634 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>A Protocol to Prepare files for GSEAPY &mdash; GSEApy 0.8.9 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="GSEApy 0.8.9 documentation" href="index.html"/>
+        <link rel="next" title="GSEAPY Example" href="gseapy_example.html"/>
+        <link rel="prev" title="How to Use GSEAPY" href="run.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> GSEApy
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Welcome to GSEAPY’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="run.html">How to Use GSEAPY</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">A Protocol to Prepare files for GSEAPY</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#use-gsea-command-or-gsea">Use <code class="docutils literal"><span class="pre">gsea</span></code> command, or <code class="docutils literal"><span class="pre">gsea()</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prepare-an-tabular-text-file-of-gene-expression-like-this">1. Prepare an tabular text file of gene expression like this:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#an-cls-file-is-also-expected">2. An cls file is also expected.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gene-sets-file-in-gmt-format">3. Gene_sets file in gmt format.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run-gseapy-inside-python">4. Run gseapy inside python</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#use-prerank-command-or-prerank">Use <code class="docutils literal"><span class="pre">prerank</span></code> Command, or <code class="docutils literal"><span class="pre">prerank()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#use-ssgsea-command-or-ssgsea">Use <code class="docutils literal"><span class="pre">ssgsea</span></code> command, or <code class="docutils literal"><span class="pre">ssgsea()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#use-enrichr-command-or-enrichr">Use <code class="docutils literal"><span class="pre">enrichr</span></code> command, or <code class="docutils literal"><span class="pre">enrichr()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#use-replot-command-or-replot">Use <code class="docutils literal"><span class="pre">replot</span></code> Command, or <code class="docutils literal"><span class="pre">replot()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html">GSEAPY Example</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GSEApy</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>A Protocol to Prepare files for GSEAPY</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/gseapy_tutorial.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="a-protocol-to-prepare-files-for-gseapy">
+<span id="tutorial"></span><h1>A Protocol to Prepare files for GSEAPY<a class="headerlink" href="#a-protocol-to-prepare-files-for-gseapy" title="Permalink to this headline">¶</a></h1>
+<p>As a biological reseacher, I like protocols, so as other reseachers, too.</p>
+<p>Here is an short tutorial to walk you through gseapy.</p>
+<p>In order to run gseapy successfully, install gseapy use pip.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>pip install gseapy
+
+<span class="c1"># if you have conda</span>
+conda install -c bioconda gseapy
+</pre></div>
+</div>
+<div class="section" id="use-gsea-command-or-gsea">
+<h2>Use <code class="docutils literal"><span class="pre">gsea</span></code> command, or <code class="xref py py-func docutils literal"><span class="pre">gsea()</span></code><a class="headerlink" href="#use-gsea-command-or-gsea" title="Permalink to this headline">¶</a></h2>
+<p>Follow the steps blow.</p>
+<p>One thing you should know is that the gseapy input files are totally the same as
+<code class="docutils literal"><span class="pre">GSEA</span></code> desktop requried. You can use these files below to run <code class="docutils literal"><span class="pre">GSEA</span></code> desktop, too.</p>
+<div class="section" id="prepare-an-tabular-text-file-of-gene-expression-like-this">
+<h3>1. Prepare an tabular text file of gene expression like this:<a class="headerlink" href="#prepare-an-tabular-text-file-of-gene-expression-like-this" title="Permalink to this headline">¶</a></h3>
+<p><strong>RNA-seq,ChIP-seq, Microarry data</strong> are all supported.</p>
+<p>Here is to see what the structure of expression table looks like, you don’t have to run
+commands below:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s1">&#39;./test/gsea_data.txt&#39;</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+
+<span class="c1">#or assign df to the paramter &#39;data&#39;</span>
+</pre></div>
+</div>
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Gene_Symbol</th>
+      <th>ACD2</th>
+      <th>BCD2</th>
+      <th>CCD2</th>
+      <th>APYD2</th>
+      <th>BPYD2</th>
+      <th>CPYD2</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>SCARA3</td>
+      <td>6.287</td>
+      <td>6.821</td>
+      <td>6.005</td>
+      <td>2.525</td>
+      <td>1.911</td>
+      <td>1.500</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>POU5F1</td>
+      <td>11.168</td>
+      <td>11.983</td>
+      <td>10.469</td>
+      <td>7.795</td>
+      <td>7.911</td>
+      <td>6.174</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>CTLA2B</td>
+      <td>4.362</td>
+      <td>5.708</td>
+      <td>4.633</td>
+      <td>1.493</td>
+      <td>0.000</td>
+      <td>1.369</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>CRYAB</td>
+      <td>11.339</td>
+      <td>11.662</td>
+      <td>11.714</td>
+      <td>7.698</td>
+      <td>7.928</td>
+      <td>7.779</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>PMP22</td>
+      <td>7.259</td>
+      <td>7.548</td>
+      <td>6.803</td>
+      <td>4.418</td>
+      <td>2.239</td>
+      <td>3.071</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+<div class="section" id="an-cls-file-is-also-expected">
+<h3>2. An cls file is also expected.<a class="headerlink" href="#an-cls-file-is-also-expected" title="Permalink to this headline">¶</a></h3>
+<p>This file is used to specify column attributes in step 1, just like <code class="docutils literal"><span class="pre">GSEA</span></code> asked.</p>
+<p>An example of cls file looks like below.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;gsea/edb/C1OE.cls&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="bp">cls</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+<span class="c1"># or assign a list object to parameter &#39;cls&#39; like this</span>
+<span class="c1"># cls=[&#39;C1OE&#39;, &#39;C1OE&#39;, &#39;C1OE&#39;, &#39;Vector&#39;, &#39;Vector&#39;, &#39;Vector&#39;]</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mi">6</span> <span class="mi">2</span> <span class="mi">1</span>
+<span class="c1"># C1OE Vector</span>
+<span class="n">C1OE</span> <span class="n">C1OE</span> <span class="n">C1OE</span> <span class="n">Vector</span> <span class="n">Vector</span> <span class="n">Vector</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">The first line specify the total samples and phenotype numbers. Leave number 1 alway be 1.</div>
+<div class="line">The second line specify the phenotype class(name).</div>
+<div class="line">The third line specify column attributes in setp 1.</div>
+</div>
+</div>
+<div class="section" id="gene-sets-file-in-gmt-format">
+<h3>3. Gene_sets file in gmt format.<a class="headerlink" href="#gene-sets-file-in-gmt-format" title="Permalink to this headline">¶</a></h3>
+<p>All you need to do is to download gene set database file from <code class="docutils literal"><span class="pre">GSEA</span></code> website.</p>
+<p>Or you could use enrichr library. In this case, just provide libarary name to parameter ‘gene_sets’</p>
+<p>If you would like to use you own gene_sets.gmts files, build such a file use excel,
+and then rename to gene_sets.gmt.</p>
+<p>An example of gmt file looks like below:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;gsea/edb/gene_sets.gmt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">gmt</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">gmt</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">ES</span><span class="o">-</span><span class="n">SPECIFIC</span> <span class="n">Arid3a_used</span>     <span class="n">ACTA1</span>   <span class="n">CALML4</span>  <span class="n">CORO1A</span>  <span class="n">DHX58</span>   <span class="n">DPYS</span>    <span class="n">EGR1</span>    <span class="n">ESRRB</span>   <span class="n">GLI2</span>    <span class="n">GPX2</span>    <span class="n">HCK</span>     <span class="n">INHBB</span>
+<span class="n">HDAC</span><span class="o">-</span><span class="n">UNIQUE</span>     <span class="n">Arid3a_used</span> <span class="mi">1700017</span><span class="n">B05RIK</span>   <span class="mi">8430427</span><span class="n">H17RIK</span>   <span class="n">ABCA3</span>   <span class="n">ANKRD44</span> <span class="n">ARL4A</span>   <span class="n">BNC2</span>    <span class="n">CLDN3</span>
+<span class="n">XEN</span><span class="o">-</span><span class="n">SPECIFIC</span>        <span class="n">Arid3a_used</span>     <span class="mi">1110036</span><span class="n">O03RIK</span>   <span class="n">A130022J15RIK</span>   <span class="n">B2M</span>     <span class="n">B3GALNT1</span>        <span class="n">CBX4</span>    <span class="n">CITED1</span>  <span class="n">CLU</span>     <span class="n">CTSH</span>    <span class="n">CYP26A1</span>
+<span class="n">GATA</span><span class="o">-</span><span class="n">SPECIFIC</span>       <span class="n">Arid3a_used</span>     <span class="mi">1200009</span><span class="n">I06RIK</span>   <span class="mi">5430407</span><span class="n">P10RIK</span>   <span class="n">BAIAP2L1</span>        <span class="n">BMP8B</span>   <span class="n">CITED1</span>  <span class="n">CLDN3</span>   <span class="n">COBLL1</span>  <span class="n">CORO1A</span>  <span class="n">CRYAB</span>   <span class="n">CTDSPL</span>  <span class="n">DKKL1</span>
+<span class="n">TS</span><span class="o">-</span><span class="n">SPECIFIC</span> <span class="n">Arid3a_used</span>     <span class="mi">5430407</span><span class="n">P10RIK</span>   <span class="n">AFAP1L1</span> <span class="n">AHNAK</span>   <span class="n">ANXA2</span>   <span class="n">ANXA3</span>   <span class="n">ANXA5</span>   <span class="n">B2M</span>     <span class="n">BIK</span>     <span class="n">BMP8B</span>   <span class="n">CAMK1D</span>  <span class="n">CBX4</span>    <span class="n">CLDN3</span>   <span class="n">CSRP1</span>   <span class="n">DKKL1</span>   <span class="n">DSC2</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="run-gseapy-inside-python">
+<h3>4. Run gseapy inside python<a class="headerlink" href="#run-gseapy-inside-python" title="Permalink to this headline">¶</a></h3>
+<p>At least 3 files are required to run gseapy.</p>
+<p>interactive python console
+.. code:: python</p>
+<blockquote>
+<div>import gseapy
+gseapy.gsea(data=’gsea_data.txt’, cls=’gsea.cls’, gmt=’gene_sets.gmt’, outdir=’gseapy_out’)</div></blockquote>
+<p>bash shell
+.. code:: bash</p>
+<blockquote>
+<div>gseapy gsea -d gsea_data.txt -c test.cls -g gene_sets.gmt -o gseapy_out</div></blockquote>
+</div>
+</div>
+<div class="section" id="use-prerank-command-or-prerank">
+<h2>Use <code class="docutils literal"><span class="pre">prerank</span></code> Command, or <code class="xref py py-func docutils literal"><span class="pre">prerank()</span></code><a class="headerlink" href="#use-prerank-command-or-prerank" title="Permalink to this headline">¶</a></h2>
+<p>If you would like to use a pre-ranked gene list to run GSEAPY, <code class="docutils literal"><span class="pre">prerank</span></code> module expects
+a pre-ranked gene list dataset with correlation values, which in .rnk format,
+and gene_sets file in gmt format.  <code class="docutils literal"><span class="pre">prerank</span></code> module has the same API to <cite>GSEA</cite> pre-rank tools.</p>
+<p>After this, you can start to run gseapy.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>gseapy prerank -r gsea_data.rnk -g gene_sets.gmt -o <span class="nb">test</span>
+</pre></div>
+</div>
+<p>Or run inside python.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gseapy</span>
+<span class="n">gseapy</span><span class="o">.</span><span class="n">prerank</span><span class="p">(</span><span class="n">rnk</span><span class="o">=</span><span class="s1">&#39;gsea_data.rnk&#39;</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span><span class="s1">&#39;gene_sets.gmt&#39;</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="use-ssgsea-command-or-ssgsea">
+<h2>Use <code class="docutils literal"><span class="pre">ssgsea</span></code> command, or <code class="xref py py-func docutils literal"><span class="pre">ssgsea()</span></code><a class="headerlink" href="#use-ssgsea-command-or-ssgsea" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>gseapy ssgsea -d expression.txt -g gene_sets.gmt -o <span class="nb">test</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1">#ssGSEA</span>
+<span class="n">gseapy</span><span class="o">.</span><span class="n">ssgsea</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s2">&quot;expression.txt&quot;</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span> <span class="s2">&quot;gene_sets.gmt&quot;</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="use-enrichr-command-or-enrichr">
+<h2>Use <code class="docutils literal"><span class="pre">enrichr</span></code> command, or <code class="xref py py-func docutils literal"><span class="pre">enrichr()</span></code><a class="headerlink" href="#use-enrichr-command-or-enrichr" title="Permalink to this headline">¶</a></h2>
+<p>The only thing you need to prepeare is a gene list file.</p>
+<p><strong>Note</strong>: Enrichr uses a list of Entrez gene symbols as input.</p>
+<p>For <code class="docutils literal"><span class="pre">enrichr</span></code> , you could assign a list object</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># assign a list object to enrichr</span>
+<span class="n">l</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;SCARA3&#39;</span><span class="p">,</span> <span class="s1">&#39;LOC100044683&#39;</span><span class="p">,</span> <span class="s1">&#39;CMBL&#39;</span><span class="p">,</span> <span class="s1">&#39;CLIC6&#39;</span><span class="p">,</span> <span class="s1">&#39;IL13RA1&#39;</span><span class="p">,</span> <span class="s1">&#39;TACSTD2&#39;</span><span class="p">,</span> <span class="s1">&#39;DKKL1&#39;</span><span class="p">,</span> <span class="s1">&#39;CSF1&#39;</span><span class="p">,</span>
+     <span class="s1">&#39;SYNPO2L&#39;</span><span class="p">,</span> <span class="s1">&#39;TINAGL1&#39;</span><span class="p">,</span> <span class="s1">&#39;PTX3&#39;</span><span class="p">,</span> <span class="s1">&#39;BGN&#39;</span><span class="p">,</span> <span class="s1">&#39;HERC1&#39;</span><span class="p">,</span> <span class="s1">&#39;EFNA1&#39;</span><span class="p">,</span> <span class="s1">&#39;CIB2&#39;</span><span class="p">,</span> <span class="s1">&#39;PMP22&#39;</span><span class="p">,</span> <span class="s1">&#39;TMEM173&#39;</span><span class="p">]</span>
+
+<span class="n">gseapy</span><span class="o">.</span><span class="n">enrichr</span><span class="p">(</span><span class="n">gene_list</span><span class="o">=</span><span class="n">l</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;pathway&#39;</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span><span class="s1">&#39;KEGG_2016&#39;</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>or a gene list file in txt format(one gene id per row)</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">gseapy</span><span class="o">.</span><span class="n">enrichr</span><span class="p">(</span><span class="n">gene_list</span><span class="o">=</span><span class="s1">&#39;gene_list.txt&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;pathway&#39;</span><span class="p">,</span> <span class="n">gene_sets</span><span class="o">=</span><span class="s1">&#39;KEGG_2016&#39;</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Let’s see what the txt file looks like.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;data/gene_list.txt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">genes</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">genes</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">CTLA2B</span>
+<span class="n">SCARA3</span>
+<span class="n">LOC100044683</span>
+<span class="n">CMBL</span>
+<span class="n">CLIC6</span>
+<span class="n">IL13RA1</span>
+<span class="n">TACSTD2</span>
+<span class="n">DKKL1</span>
+<span class="n">CSF1</span>
+<span class="n">CITED1</span>
+<span class="n">SYNPO2L</span>
+<span class="n">TINAGL1</span>
+<span class="n">PTX3</span>
+</pre></div>
+</div>
+<p>Select the library you want to do enrichment analysis. For a view all avilable libraries,run</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1">#s get_library_name(), it will print out all library names.</span>
+<span class="kn">import</span> <span class="nn">gseapy</span>
+<span class="n">names</span> <span class="o">=</span> <span class="n">gseapy</span><span class="o">.</span><span class="n">get_library_name</span><span class="p">()</span>
+<span class="k">print</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span> <span class="p">[</span><span class="s1">&#39;Genome_Browser_PWMs&#39;</span><span class="p">,</span>
+<span class="s1">&#39;TRANSFAC_and_JASPAR_PWMs&#39;</span><span class="p">,</span>
+<span class="s1">&#39;ChEA_2013&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Drug_Perturbations_from_GEO_2014&#39;</span><span class="p">,</span>
+<span class="s1">&#39;ENCODE_TF_ChIP-seq_2014&#39;</span><span class="p">,</span>
+<span class="s1">&#39;BioCarta_2013&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Reactome_2013&#39;</span><span class="p">,</span>
+<span class="s1">&#39;WikiPathways_2013&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Disease_Signatures_from_GEO_up_2014&#39;</span><span class="p">,</span>
+<span class="s1">&#39;KEGG_2013&#39;</span><span class="p">,</span>
+<span class="s1">&#39;TF-LOF_Expression_from_GEO&#39;</span><span class="p">,</span>
+<span class="s1">&#39;TargetScan_microRNA&#39;</span><span class="p">,</span>
+<span class="s1">&#39;PPI_Hub_Proteins&#39;</span><span class="p">,</span>
+<span class="s1">&#39;GO_Molecular_Function_2015&#39;</span><span class="p">,</span>
+<span class="s1">&#39;GeneSigDB&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Chromosome_Location&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Human_Gene_Atlas&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Mouse_Gene_Atlas&#39;</span><span class="p">,</span>
+<span class="s1">&#39;GO_Cellular_Component_2015&#39;</span><span class="p">,</span>
+<span class="s1">&#39;GO_Biological_Process_2015&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Human_Phenotype_Ontology&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Epigenomics_Roadmap_HM_ChIP-seq&#39;</span><span class="p">,</span>
+<span class="s1">&#39;KEA_2013&#39;</span><span class="p">,</span>
+<span class="s1">&#39;NURSA_Human_Endogenous_Complexome&#39;</span><span class="p">,</span>
+<span class="s1">&#39;CORUM&#39;</span><span class="p">,</span>
+<span class="s1">&#39;SILAC_Phosphoproteomics&#39;</span><span class="p">,</span>
+<span class="s1">&#39;MGI_Mammalian_Phenotype_Level_3&#39;</span><span class="p">,</span>
+<span class="s1">&#39;MGI_Mammalian_Phenotype_Level_4&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Old_CMAP_up&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Old_CMAP_down&#39;</span><span class="p">,</span>
+<span class="s1">&#39;OMIM_Disease&#39;</span><span class="p">,</span>
+<span class="s1">&#39;OMIM_Expanded&#39;</span><span class="p">,</span>
+<span class="s1">&#39;VirusMINT&#39;</span><span class="p">,</span>
+<span class="s1">&#39;MSigDB_Computational&#39;</span><span class="p">,</span>
+<span class="s1">&#39;MSigDB_Oncogenic_Signatures&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Disease_Signatures_from_GEO_down_2014&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Virus_Perturbations_from_GEO_up&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Virus_Perturbations_from_GEO_down&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Cancer_Cell_Line_Encyclopedia&#39;</span><span class="p">,</span>
+<span class="s1">&#39;NCI-60_Cancer_Cell_Lines&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Tissue_Protein_Expression_from_ProteomicsDB&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Tissue_Protein_Expression_from_Human_Proteome_Map&#39;</span><span class="p">,</span>
+<span class="s1">&#39;HMDB_Metabolites&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Pfam_InterPro_Domains&#39;</span><span class="p">,</span>
+<span class="s1">&#39;GO_Biological_Process_2013&#39;</span><span class="p">,</span>
+<span class="s1">&#39;GO_Cellular_Component_2013&#39;</span><span class="p">,</span>
+<span class="s1">&#39;GO_Molecular_Function_2013&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Allen_Brain_Atlas_up&#39;</span><span class="p">,</span>
+<span class="s1">&#39;ENCODE_TF_ChIP-seq_2015&#39;</span><span class="p">,</span>
+<span class="s1">&#39;ENCODE_Histone_Modifications_2015&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Phosphatase_Substrates_from_DEPOD&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Allen_Brain_Atlas_down&#39;</span><span class="p">,</span>
+<span class="s1">&#39;ENCODE_Histone_Modifications_2013&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Achilles_fitness_increase&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Achilles_fitness_decrease&#39;</span><span class="p">,</span>
+<span class="s1">&#39;MGI_Mammalian_Phenotype_2013&#39;</span><span class="p">,</span>
+<span class="s1">&#39;BioCarta_2015&#39;</span><span class="p">,</span>
+<span class="s1">&#39;HumanCyc_2015&#39;</span><span class="p">,</span>
+<span class="s1">&#39;KEGG_2015&#39;</span><span class="p">,</span>
+<span class="s1">&#39;NCI-Nature_2015&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Panther_2015&#39;</span><span class="p">,</span>
+<span class="s1">&#39;WikiPathways_2015&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Reactome_2015&#39;</span><span class="p">,</span>
+<span class="s1">&#39;ESCAPE&#39;</span><span class="p">,</span>
+<span class="s1">&#39;HomoloGene&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Disease_Perturbations_from_GEO_down&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Disease_Perturbations_from_GEO_up&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Drug_Perturbations_from_GEO_down&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Genes_Associated_with_NIH_Grants&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Drug_Perturbations_from_GEO_up&#39;</span><span class="p">,</span>
+<span class="s1">&#39;KEA_2015&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Single_Gene_Perturbations_from_GEO_up&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Single_Gene_Perturbations_from_GEO_down&#39;</span><span class="p">,</span>
+<span class="s1">&#39;ChEA_2015&#39;</span><span class="p">,</span>
+<span class="s1">&#39;dbGaP&#39;</span><span class="p">,</span>
+<span class="s1">&#39;LINCS_L1000_Chem_Pert_up&#39;</span><span class="p">,</span>
+<span class="s1">&#39;LINCS_L1000_Chem_Pert_down&#39;</span><span class="p">,</span>
+<span class="s1">&#39;GTEx_Tissue_Sample_Gene_Expression_Profiles_down&#39;</span><span class="p">,</span>
+<span class="s1">&#39;GTEx_Tissue_Sample_Gene_Expression_Profiles_up&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Ligand_Perturbations_from_GEO_down&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Aging_Perturbations_from_GEO_down&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Aging_Perturbations_from_GEO_up&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Ligand_Perturbations_from_GEO_up&#39;</span><span class="p">,</span>
+<span class="s1">&#39;MCF7_Perturbations_from_GEO_down&#39;</span><span class="p">,</span>
+<span class="s1">&#39;MCF7_Perturbations_from_GEO_up&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Microbe_Perturbations_from_GEO_down&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Microbe_Perturbations_from_GEO_up&#39;</span><span class="p">,</span>
+<span class="s1">&#39;LINCS_L1000_Ligand_Perturbations_down&#39;</span><span class="p">,</span>
+<span class="s1">&#39;LINCS_L1000_Ligand_Perturbations_up&#39;</span><span class="p">,</span>
+<span class="s1">&#39;LINCS_L1000_Kinase_Perturbations_down&#39;</span><span class="p">,</span>
+<span class="s1">&#39;LINCS_L1000_Kinase_Perturbations_up&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Reactome_2016&#39;</span><span class="p">,</span>
+<span class="s1">&#39;KEGG_2016&#39;</span><span class="p">,</span>
+<span class="s1">&#39;WikiPathways_2016&#39;</span><span class="p">,</span>
+<span class="s1">&#39;ENCODE_and_ChEA_Consensus_TFs_from_ChIP-X&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Kinase_Perturbations_from_GEO_down&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Kinase_Perturbations_from_GEO_up&#39;</span><span class="p">,</span>
+<span class="s1">&#39;BioCarta_2016&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Humancyc_2016&#39;</span><span class="p">,</span>
+<span class="s1">&#39;NCI-Nature_2016&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Panther_2016&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>for for details, please track the offical links: <a class="reference external" href="http://amp.pharm.mssm.edu/Enrichr/">http://amp.pharm.mssm.edu/Enrichr/</a></p>
+</div>
+<div class="section" id="use-replot-command-or-replot">
+<h2>Use <code class="docutils literal"><span class="pre">replot</span></code> Command, or <code class="xref py py-func docutils literal"><span class="pre">replot()</span></code><a class="headerlink" href="#use-replot-command-or-replot" title="Permalink to this headline">¶</a></h2>
+<p>You may also want to use <code class="xref py py-func docutils literal"><span class="pre">replot()</span></code> to reproduce <code class="docutils literal"><span class="pre">GSEA</span></code> desktop plots.</p>
+<p>The only input of <code class="xref py py-func docutils literal"><span class="pre">replot()</span></code> is the directory of <code class="docutils literal"><span class="pre">GSEA</span></code> desktop output.</p>
+<p>The input directory(e.g. gsea), must contained <strong>edb</strong> folder, gseapy need 4 data files
+inside edb folder.The gsea document tree looks like this:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>gsea
+└─edb
+    └─test.cls
+    └─gene_sets.gmt
+    └─gsea_data.rnk
+    └─results.edb
+</pre></div>
+</div>
+<p>After this, you can start to run gseapy.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gseapy</span>
+<span class="n">gseapy</span><span class="o">.</span><span class="n">replot</span><span class="p">(</span><span class="n">indir</span> <span class="o">=</span><span class="s1">&#39;gsea&#39;</span><span class="p">,</span> <span class="n">outdir</span> <span class="o">=</span> <span class="s1">&#39;gseapy_out&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you prefer to run in command line, it’s more simple.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>gseapy replot -i gsea -o gseapy_out
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">For advanced usage of library,see the <a class="reference internal" href="run.html#run"><span class="std std-ref">How to Use GSEAPY</span></a>.</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="gseapy_example.html" class="btn btn-neutral float-right" title="GSEAPY Example" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="run.html" class="btn btn-neutral" title="How to Use GSEAPY" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Zhuoqing Fang.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.8.9',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
