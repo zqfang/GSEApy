@@ -165,7 +165,7 @@ def enrichment_score_ss(gene_set, rnkseries, weighted_score_type=0.25, esnull=No
     P_GW_denominator = np.sum(rank_alpha, axis=axis, keepdims=True)
 
     P_NG_numerator = np.cumsum(no_tag_indicator, axis=axis)
-    P_NG_denominator = np.sum(no_tag_indicator, axis=axis)
+    P_NG_denominator = np.sum(no_tag_indicator, axis=axis, keepdims=True)
 
     step_cdf_diff = P_GW_numerator / P_GW_denominator - P_NG_numerator / P_NG_denominator
     # scale es by gene numbers ?
