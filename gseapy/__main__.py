@@ -237,7 +237,7 @@ def add_singlesample_parser(subparsers):
     group_opt.add_argument("-w", "--weight", action='store', dest='weight', default=0.25, type=float, metavar='weight',
                            help='Weighted_score of rank_metrics.For weighting input genes.default: 0.25',)
     group_opt.add_argument("--no-scale", action='store_false', dest='scale', default=True,
-                           help="Rank metric sorting order. If the flag was set, don't normalize the scores by number of genes in the gene sets.")
+                           help="If the flag was set, don't normalize the enrichment scores by number of genes in the gene sets.")
     group_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
                            help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
     group_opt.add_argument("--graph", dest = "graph", action="store", type=int, default=20, metavar='int',
