@@ -601,8 +601,17 @@ class SingleSampleGSEA(GSEAbase):
         #save raw ES to one csv file
         samplesRawES = pd.DataFrame(self.resultsOnSamples)
         samplesRawES.index.name = 'Term'
-        samplesRawES.to_csv(os.path.join(outdir, "gseapy.samples.raw.es.txt"), sep='\t')
-
+        # write es
+        outESfile=os.path.join(outdir, "gseapy.samples.raw.es.txt"
+        with open(outNESfile, 'a') as f:
+            if self.scale :
+                f.write('# scale the enrichment scores by number of genes in the gene sets\n')
+                f.write('# this normalization has not effects on the finall NES' +\
+                        'as indicated by Barbie et al., 2009, online methods, pg. 2\n')
+            else:
+                f.write('# raw enrichment scores of all data\n')
+                f.write('# no scale es by numbers of genes in the gene sets\n')
+            samplesRawES.to_csv(f, sep='\t')
         ## normalize enrichment scores by using the entire data set, as indicated
         ## by Barbie et al., 2009, online methods, pg. 2
         samplesNES = samplesRawES / (samplesRawES.values.max() - samplesRawES.values.min())
