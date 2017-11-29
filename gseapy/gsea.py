@@ -602,8 +602,8 @@ class SingleSampleGSEA(GSEAbase):
         samplesRawES = pd.DataFrame(self.resultsOnSamples)
         samplesRawES.index.name = 'Term'
         # write es
-        outESfile=os.path.join(outdir, "gseapy.samples.raw.es.txt"
-        with open(outNESfile, 'a') as f:
+        outESfile=os.path.join(outdir, "gseapy.samples.raw.es.txt")
+        with open(outESfile, 'a') as f:
             if self.scale :
                 f.write('# scale the enrichment scores by number of genes in the gene sets\n')
                 f.write('# this normalization has not effects on the finall NES' +\
