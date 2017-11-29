@@ -403,7 +403,7 @@ class SingleSampleGSEA(GSEAbase):
     """GSEA extention: single sample GSEA"""
     def __init__(self, data, gene_sets, outdir="GSEA_SingleSample", sample_norm_method='rank',
                  min_size=15, max_size=2000, permutation_num=1000, weighted_score_type=0.25,
-                 ascending=False, processes=1, figsize=[6.5,6], format='pdf',
+                 ascending=False, processes=1, figsize=[7,6], format='pdf',
                  graph_num=20, seed=None, verbose=False):
         self.data=data
         self.gene_sets=gene_sets
@@ -764,7 +764,7 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
 
 def ssgsea(data, gene_sets, outdir="GSEA_SingleSample", sample_norm_method='rank', min_size=15, max_size=2000,
            permutation_num=1000, weighted_score_type=0.25, ascending=False, processes=1,
-           figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
+           figsize=[7,6], format='pdf', graph_num=20, seed=None, verbose=False):
     """Run Gene Set Enrichment Analysis with single sample GSEA tool
 
     :param data: expression or pandas DataFrame. Same input with ``GSEA`` .rnk file.
