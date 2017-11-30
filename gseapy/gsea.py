@@ -715,7 +715,7 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
 	  ascending=False, processes=1, figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
     """ Run Gene Set Enrichment Analysis.
 
-    :param data: Gene expression data table or pandas DataFrame.
+    :param data: Gene expression data table, pandas DataFrame, gct file.
     :param gene_sets: Enrichr Library name or .gmt gene sets file. Same input with GSEA.
     :param cls: a list or a .cls file format required for GSEA.
     :param str outdir: Results output directory.
@@ -789,7 +789,7 @@ def ssgsea(data, gene_sets, outdir="GSEA_SingleSample", sample_norm_method='rank
            figsize=[7,6], format='pdf', graph_num=20, seed=None, verbose=False):
     """Run Gene Set Enrichment Analysis with single sample GSEA tool
 
-    :param data: expression or pandas DataFrame. Same input with ``GSEA`` .rnk file.
+    :param data: expression table, pd.Series, pd.DataFrame, GCT file, or .rnk file formate.
     :param gene_sets: Enrichr Library name or .gmt gene sets file. Same input with GSEA.
     :param outdir: results output directory.
     :param str sample_norm_method: "Sample normalization method. Choose from {'rank', 'log', 'log_rank'}. Default: rank.
