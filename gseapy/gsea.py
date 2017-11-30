@@ -792,31 +792,13 @@ def ssgsea(data, gene_sets, outdir="GSEA_SingleSample", sample_norm_method='rank
     :param data: expression or pandas DataFrame. Same input with ``GSEA`` .rnk file.
     :param gene_sets: Enrichr Library name or .gmt gene sets file. Same input with GSEA.
     :param outdir: results output directory.
-    :param str sample_norm_method: "Sample normalization method. Choose from {'rank', 'log', 'log_rank'}. Default: rank"
+    :param str sample_norm_method: "Sample normalization method. Choose from {'rank', 'log', 'log_rank'}. Default: rank.
 
-
-                                   1. 'rank'
-
-                                      Rank your expression data, and transformed by 10000*rank_dat/gene_numbers
-
-
-                                   2. 'log'
-
-                                      Do not rank, but transformed data by log(data + exp(1)), while  data = data[data<1] =1.
-
-
-                                   3. 'log_rank'
-
-                                      Rank your expression data, and transformed by log(10000*rank_dat/gene_numbers+ exp(1))
-
-
-                                   4. 'custom'
-
-                                       Do nothing, and use your own rank value to calulate enrichment score.
-
-
-                                   see here:http://rowley.mit.edu/caw_web/ssGSEAProjection/ssGSEAProjection.Library.R, line 86
-
+               1. 'rank': Rank your expression data, and transformed by 10000*rank_dat/gene_numbers
+               2. 'log' : Do not rank, but transformed data by log(data + exp(1)), while  data = data[data<1] =1.
+               3. 'log_rank': Rank your expression data, and transformed by log(10000*rank_dat/gene_numbers+ exp(1))
+               4. 'custom': Do nothing, and use your own rank value to calulate enrichment score.
+               see here: https://github.com/GSEA-MSigDB/ssGSEAProjection-gpmodule/blob/master/src/ssGSEAProjection.Library.R, line 86
 
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Defaut: 15.
     :param int max_size: Maximum allowed number of genes from gene set also the data set. Defaults: 2000.
