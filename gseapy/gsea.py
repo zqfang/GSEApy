@@ -26,7 +26,6 @@ class GSEAbase(object):
         self._processes=1
         self._logger=None
 
-
     def _log_init(self, module='GSEA', log_level=logging.INFO):
         """logging start"""
 
@@ -156,7 +155,6 @@ class GSEAbase(object):
         pool.close()
         pool.join()
 
-
         if module == 'gsea':
             width = len(classes) if len(classes) >= 6 else  5
             cls_booA =list(map(lambda x: True if x == phenoPos else False, classes))
@@ -175,8 +173,6 @@ class GSEAbase(object):
 
             pool_heat.close()
             pool_heat.join()
-
-
 
     def _save_results(self, zipdata, outdir, module, gmt, rank_metric, permutation_type):
         """reformat gsea results, and save to txt"""
@@ -203,7 +199,15 @@ class GSEAbase(object):
         res_df.index.name = 'Term'
         res_df.sort_values(by='fdr', inplace=True)
         res_df.drop(['rank_ES','hit_index'], axis=1, inplace=True)
-        res_df.to_csv('{a}/gseapy.{b}.{c}.report.csv'.format(a=outdir, b=module, c=permutation_type))
+
+        out = '{a}/gseapy.{b}.{c}.report.csv'.format(a=outdir, b=module, c=permutation_type)
+        if self.module == 'ssgsea':
+            with open(out, 'a') as f:
+                f.write('# normalize enrichment scores by random permutation procddure\n')
+                f.write("# Same method to the orignial GSEA method, and it's not proper to use these values in your publication\n")
+                res_df.to_csv(f, sep='\t')
+        else:
+            res_df.to_csv(out)
 
         self.res2d = res_df
         self.results  = res
@@ -215,6 +219,7 @@ class GSEAbase(object):
         libs_json = json.loads(requests.get(lib_url).text)
         libs = [lib['libraryName'] for lib in libs_json['statistics']]
         return sorted(libs)
+
 
 class GSEA(GSEAbase):
     """GSEA main tool"""
@@ -326,6 +331,7 @@ class GSEA(GSEAbase):
         logger.info("Congratulations. GSEApy run successfully................\n")
 
         return
+
 
 class Prerank(GSEAbase):
     """GSEA prerank tool"""
@@ -606,7 +612,7 @@ class SingleSampleGSEA(GSEAbase):
         with open(outESfile, 'a') as f:
             if self.scale :
                 f.write('# scale the enrichment scores by number of genes in the gene sets\n')
-                f.write('# this normalization has not effects on the finall NES' +\
+                f.write('# this normalization has not effects on the finall NES ' +\
                         'as indicated by Barbie et al., 2009, online methods, pg. 2\n')
             else:
                 f.write('# raw enrichment scores of all data\n')
@@ -787,6 +793,31 @@ def ssgsea(data, gene_sets, outdir="GSEA_SingleSample", sample_norm_method='rank
     :param gene_sets: Enrichr Library name or .gmt gene sets file. Same input with GSEA.
     :param outdir: results output directory.
     :param str sample_norm_method: "Sample normalization method. Choose from {'rank', 'log', 'log_rank'}. Default: rank"
+
+
+                                   1. 'rank'
+
+                                      Rank your expression data, and transformed by 10000*rank_dat/gene_numbers
+
+
+                                   2. 'log'
+
+                                      Do not rank, but transformed data by log(data + exp(1)), while  data = data[data<1] =1.
+
+
+                                   3. 'log_rank'
+
+                                      Rank your expression data, and transformed by log(10000*rank_dat/gene_numbers+ exp(1))
+
+
+                                   4. 'custom'
+
+                                       Do nothing, and use your own rank value to calulate enrichment score.
+
+
+                                   see here:http://rowley.mit.edu/caw_web/ssGSEAProjection/ssGSEAProjection.Library.R, line 86
+
+
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Defaut: 15.
     :param int max_size: Maximum allowed number of genes from gene set also the data set. Defaults: 2000.
     :param int permutation_num: Number of permutations for significance computation. Default: 1000.
