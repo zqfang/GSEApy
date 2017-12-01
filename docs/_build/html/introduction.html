@@ -1,0 +1,414 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Welcome to GSEAPY’s documentation! &mdash; GSEApy 0.8.9 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="GSEApy 0.8.9 documentation" href="index.html"/>
+        <link rel="next" title="How to Use GSEAPY" href="run.html"/>
+        <link rel="prev" title="Welcome to GSEAPY’s documentation!" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> GSEApy
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Welcome to GSEAPY’s documentation!</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#gseapy-gene-set-enrichment-analysis-in-python">GSEAPY: Gene Set Enrichment Analysis in Python.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gseapy-is-a-python-wrapper-for-gesa-and-enrichr">GSEAPY is a python wrapper for <strong>GESA</strong> and <strong>Enrichr</strong>.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#why-gseapy">Why GSEAPY</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gsea-java-version-output">GSEA Java version output:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gseapy-prerank-module-output">GSEAPY <code class="docutils literal"><span class="pre">Prerank</span></code> module output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gseapy-enrichr-module">GSEAPY <code class="docutils literal"><span class="pre">enrichr</span></code> module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dependency">Dependency</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mandatory">Mandatory</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="run.html">How to Use GSEAPY</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gseapy_tutorial.html">A Protocol to Prepare files for GSEAPY</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gseapy_example.html">GSEAPY Example</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GSEApy</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Welcome to GSEAPY’s documentation!</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/introduction.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="welcome-to-gseapy-s-documentation">
+<h1>Welcome to GSEAPY’s documentation!<a class="headerlink" href="#welcome-to-gseapy-s-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="gseapy-gene-set-enrichment-analysis-in-python">
+<h2>GSEAPY: Gene Set Enrichment Analysis in Python.<a class="headerlink" href="#gseapy-gene-set-enrichment-analysis-in-python" title="Permalink to this headline">¶</a></h2>
+<a class="reference external image-reference" href="https://badge.fury.io/py/gseapy"><img alt="https://badge.fury.io/py/gseapy.svg" src="https://badge.fury.io/py/gseapy.svg" /></a>
+<a class="reference external image-reference" href="http://bioconda.github.io"><img alt="https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat-square" src="https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat-square" /></a>
+<a class="reference external image-reference" href="https://travis-ci.org/BioNinja/GSEApy"><img alt="https://travis-ci.org/BioNinja/GSEApy.svg?branch=master" src="https://travis-ci.org/BioNinja/GSEApy.svg?branch=master" /></a>
+<a class="reference external image-reference" href="http://gseapy.readthedocs.org/en/latest/?badge=latest"><img alt="Documentation Status" src="http://readthedocs.org/projects/gseapy/badge/?version=latest" /></a>
+<a class="reference external image-reference" href="https://img.shields.io/badge/license-MIT-blue.svg"><img alt="https://img.shields.io/badge/license-MIT-blue.svg" src="https://img.shields.io/badge/license-MIT-blue.svg" /></a>
+<a class="reference external image-reference" href="https://img.shields.io/badge/python-3.5-blue.svg"><img alt="https://img.shields.io/badge/python-3.5-blue.svg" src="https://img.shields.io/badge/python-3.5-blue.svg" /></a>
+<a class="reference external image-reference" href="https://img.shields.io/badge/python-2.7-blue.svg"><img alt="https://img.shields.io/badge/python-2.7-blue.svg" src="https://img.shields.io/badge/python-2.7-blue.svg" /></a>
+</div>
+<div class="section" id="gseapy-is-a-python-wrapper-for-gesa-and-enrichr">
+<h2>GSEAPY is a python wrapper for <strong>GESA</strong> and <strong>Enrichr</strong>.<a class="headerlink" href="#gseapy-is-a-python-wrapper-for-gesa-and-enrichr" title="Permalink to this headline">¶</a></h2>
+<p>It’s used for convenient GO enrichments and produce <strong>publishable quality figures</strong> from python.</p>
+<p>GSEAPY could be used for <strong>RNA-seq, ChIP-seq, Microarry</strong> data.</p>
+<p><a class="reference external" href="http://software.broadinstitute.org/gsea/index.jsp">Gene Set Enrichment Analysis</a> (GSEA)
+is a computational method that determines whether an a priori defined set of genes shows
+statistically significant, concordant differences between two biological states (e.g. phenotypes).</p>
+<p>The full <code class="docutils literal"><span class="pre">GSEA</span></code> is far too extensive to describe here; see
+<a class="reference external" href="http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page">GSEA</a> documentation for more information.</p>
+<p>Enrichr is open source and freely available online at: <a class="reference external" href="http://amp.pharm.mssm.edu/Enrichr">http://amp.pharm.mssm.edu/Enrichr</a> .</p>
+</div>
+<div class="section" id="why-gseapy">
+<h2>Why GSEAPY<a class="headerlink" href="#why-gseapy" title="Permalink to this headline">¶</a></h2>
+<p>I would like to use Pandas to explore my data, but I did not find a  convenient tool to
+do gene set enrichment analysis in python. So, here is my reason:</p>
+<ul class="simple">
+<li><strong>Running inside python interactive console without switch to R!!!</strong></li>
+<li>User friendly for both wet and dry lab usrers.</li>
+<li>Produce pubilishable figures.</li>
+<li>Perform batch jobs easy(using for loops).</li>
+<li>Easy to use in bash shell or your  data analysis workflow, e.g. snakemake.</li>
+</ul>
+</div>
+<div class="section" id="gsea-java-version-output">
+<h2>GSEA Java version output:<a class="headerlink" href="#gsea-java-version-output" title="Permalink to this headline">¶</a></h2>
+<p>This is an example of GSEA desktop application output</p>
+<div class="figure">
+<img alt="_images/GSEA_OCT4_KD.png" src="_images/GSEA_OCT4_KD.png" />
+</div>
+</div>
+<div class="section" id="gseapy-prerank-module-output">
+<h2>GSEAPY <code class="docutils literal"><span class="pre">Prerank</span></code> module output<a class="headerlink" href="#gseapy-prerank-module-output" title="Permalink to this headline">¶</a></h2>
+<p>Using the same data from <code class="docutils literal"><span class="pre">GSEA</span></code>, GSEAPY reproduce the example above.</p>
+<p>Using <code class="docutils literal"><span class="pre">Prerank</span></code> or <code class="docutils literal"><span class="pre">replot</span></code> module will reproduce the same figure for GSEA Java desktop outputs</p>
+<div class="figure" id="id1">
+<img alt="_images/gseapy_OCT4_KD.png" src="_images/gseapy_OCT4_KD.png" />
+<p class="caption"><span class="caption-text">Generated by GSEAPY</span></p>
+<div class="legend">
+<p><strong>GSEAPY figures are supported by all matplotlib figure formats.</strong></p>
+<p>You can modify <code class="docutils literal"><span class="pre">GSEA</span></code> plots easily in .pdf files. Please Enjoy.</p>
+</div>
+</div>
+</div>
+<div class="section" id="gseapy-enrichr-module">
+<h2>GSEAPY <code class="docutils literal"><span class="pre">enrichr</span></code> module<a class="headerlink" href="#gseapy-enrichr-module" title="Permalink to this headline">¶</a></h2>
+<p>A graphical introduction of Enrichr</p>
+<div class="figure">
+<img alt="_images/enrichr.PNG" src="_images/enrichr.PNG" />
+</div>
+<p><strong>The only thing you need to prepeare is a gene list file in txt format(one gene id per row), or a python list object.</strong></p>
+<p><strong>Note</strong>: Enrichr uses a list of Entrez gene symbols as input. You should convert all gene names to uppercase.</p>
+<p>For example, both a list object and txt file are supported for <code class="docutils literal"><span class="pre">enrchr</span></code> API</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># if you perfer to run gseapy.enrchr() inside python console, you could assign a list object to</span>
+<span class="c1"># gseapy like this.</span>
+<span class="n">gene_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;SCARA3&#39;</span><span class="p">,</span> <span class="s1">&#39;LOC100044683&#39;</span><span class="p">,</span> <span class="s1">&#39;CMBL&#39;</span><span class="p">,</span> <span class="s1">&#39;CLIC6&#39;</span><span class="p">,</span> <span class="s1">&#39;IL13RA1&#39;</span><span class="p">,</span> <span class="s1">&#39;TACSTD2&#39;</span><span class="p">,</span> <span class="s1">&#39;DKKL1&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;CSF1&#39;</span><span class="p">,</span> <span class="s1">&#39;CITED1&#39;</span><span class="p">,</span> <span class="s1">&#39;SYNPO2L&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># an alternative way is that you could provide a gene list txt file which looks like this:</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;data/gene_list.txt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">genes</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">genes</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+
+<span class="n">CTLA2B</span>
+<span class="n">SCARA3</span>
+<span class="n">LOC100044683</span>
+<span class="n">CMBL</span>
+<span class="n">CLIC6</span>
+<span class="n">IL13RA1</span>
+<span class="n">TACSTD2</span>
+<span class="n">DKKL1</span>
+<span class="n">CSF1</span>
+<span class="n">CITED1</span>
+<span class="n">SYNPO2L</span>
+<span class="n">TINAGL1</span>
+<span class="n">PTX3</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">Install gseapy package from bioconda or pypi.</div>
+</div>
+<div class="highlight-shell"><div class="highlight"><pre><span></span><span class="c1"># if you have conda</span>
+$ conda install -c bioconda gseapy
+
+<span class="c1"># for windows users</span>
+$ conda install -c bioninja gseapy
+
+<span class="c1"># or use pip to install the lastest release</span>
+$ pip install gseapy
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">You may instead want to use the development version from Github, by running</div>
+</div>
+<div class="highlight-shell"><div class="highlight"><pre><span></span>$ pip install git+git://github.com/BioNinja/gseapy.git#egg<span class="o">=</span>gseapy
+</pre></div>
+</div>
+</div>
+<div class="section" id="dependency">
+<h2>Dependency<a class="headerlink" href="#dependency" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Python 2.7 or 3.4+</li>
+</ul>
+<div class="section" id="mandatory">
+<h3>Mandatory<a class="headerlink" href="#mandatory" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Numpy</li>
+<li>Pandas</li>
+<li>Matplotlib</li>
+<li>Beautifulsoup4</li>
+<li>Requests(for enrichr API)</li>
+</ul>
+<p>You may also need to install <strong>lxml, html5lib</strong>, if you could not parse xml files.</p>
+<p>For more information to use this library,see the <a class="reference internal" href="run.html#run"><span class="std std-ref">How to Use GSEAPY</span></a>.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="run.html" class="btn btn-neutral float-right" title="How to Use GSEAPY" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Welcome to GSEAPY’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Zhuoqing Fang.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.8.9',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

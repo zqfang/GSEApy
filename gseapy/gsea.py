@@ -26,7 +26,6 @@ class GSEAbase(object):
         self._processes=1
         self._logger=None
 
-
     def _log_init(self, module='GSEA', log_level=logging.INFO):
         """logging start"""
 
@@ -156,7 +155,6 @@ class GSEAbase(object):
         pool.close()
         pool.join()
 
-
         if module == 'gsea':
             width = len(classes) if len(classes) >= 6 else  5
             cls_booA =list(map(lambda x: True if x == phenoPos else False, classes))
@@ -175,8 +173,6 @@ class GSEAbase(object):
 
             pool_heat.close()
             pool_heat.join()
-
-
 
     def _save_results(self, zipdata, outdir, module, gmt, rank_metric, permutation_type):
         """reformat gsea results, and save to txt"""
@@ -203,7 +199,15 @@ class GSEAbase(object):
         res_df.index.name = 'Term'
         res_df.sort_values(by='fdr', inplace=True)
         res_df.drop(['rank_ES','hit_index'], axis=1, inplace=True)
-        res_df.to_csv('{a}/gseapy.{b}.{c}.report.csv'.format(a=outdir, b=module, c=permutation_type))
+
+        out = '{a}/gseapy.{b}.{c}.report.csv'.format(a=outdir, b=module, c=permutation_type)
+        if self.module == 'ssgsea':
+            with open(out, 'a') as f:
+                f.write('# normalize enrichment scores by random permutation procddure\n')
+                f.write("# Same method to the orignial GSEA method, and it's not proper to use these values in your publication\n")
+                res_df.to_csv(f, sep='\t')
+        else:
+            res_df.to_csv(out)
 
         self.res2d = res_df
         self.results  = res
@@ -215,6 +219,7 @@ class GSEAbase(object):
         libs_json = json.loads(requests.get(lib_url).text)
         libs = [lib['libraryName'] for lib in libs_json['statistics']]
         return sorted(libs)
+
 
 class GSEA(GSEAbase):
     """GSEA main tool"""
@@ -327,6 +332,7 @@ class GSEA(GSEAbase):
 
         return
 
+
 class Prerank(GSEAbase):
     """GSEA prerank tool"""
     def __init__(self, rnk, gene_sets, outdir='GSEA_prerank',
@@ -403,13 +409,14 @@ class SingleSampleGSEA(GSEAbase):
     """GSEA extention: single sample GSEA"""
     def __init__(self, data, gene_sets, outdir="GSEA_SingleSample", sample_norm_method='rank',
                  min_size=15, max_size=2000, permutation_num=1000, weighted_score_type=0.25,
-                 ascending=False, processes=1, figsize=[6.5,6], format='pdf',
+                 scale=True, ascending=False, processes=1, figsize=[7,6], format='pdf',
                  graph_num=20, seed=None, verbose=False):
         self.data=data
         self.gene_sets=gene_sets
         self.outdir=outdir
         self.sample_norm_method=sample_norm_method
         self.weighted_score_type=weighted_score_type
+        self.scale = scale
         self.min_size=min_size
         self.max_size=max_size
         self.permutation_num=permutation_num
@@ -422,6 +429,7 @@ class SingleSampleGSEA(GSEAbase):
         self.ranking=None
         self.module='ssgsea'
         self._processes=processes
+        self._imat=None
 
     def corplot(self):
         """NES Correlation plot
@@ -514,7 +522,7 @@ class SingleSampleGSEA(GSEAbase):
             #only for one sample
             self.runSample(df=normdat)
 
-    def runSample(self, df, gmt=None):
+    def runSample(self, df, gmt=None, multisamples=False):
         """Single Sample GSEA workflow"""
 
         assert self.min_size <= self.max_size
@@ -552,9 +560,12 @@ class SingleSampleGSEA(GSEAbase):
         self._logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
         self._logger.info("Start to run GSEA...Might take a while..................")
         #compute ES, NES, pval, FDR, RES
-        gsea_results, hit_ind, rank_ES, subsets = gsea_compute_ss(data=dat2, n=self.permutation_num, gmt=gmt,
+        gsea_results, hit_ind, rank_ES, subsets = gsea_compute_ss(data=dat2, n=self.permutation_num,
+                                                                  gmt=gmt,
                                                                   weighted_score_type=self.weighted_score_type,
-                                                                  seed=self.seed, processes=self._processes)
+                                                                  scale=self.scale,
+                                                                  seed=self.seed,
+                                                                  processes=self._processes)
 
         self._logger.info("Start to generate gseapy reports, and produce figures...")
         res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
@@ -563,9 +574,11 @@ class SingleSampleGSEA(GSEAbase):
                                    gmt=gmt, rank_metric=df, permutation_type="gene_sets")
 
         #Plotting
-        self._plotting(rank_metric=df, results=self.results, res2d=self.res2d,
-                       graph_num=self.graph_num, outdir=self.outdir,
-                       figsize=self.figsize, format=self.format, module=self.module)
+        self._imat = df
+        if not multisamples:
+            self._plotting(rank_metric=df, results=self.results, res2d=self.res2d,
+                           graph_num=self.graph_num, outdir=self.outdir,
+                           figsize=self.figsize, format=self.format, module=self.module)
 
         self._logger.info("Congratulations. GSEApy run successfully................\n")
 
@@ -594,8 +607,17 @@ class SingleSampleGSEA(GSEAbase):
         #save raw ES to one csv file
         samplesRawES = pd.DataFrame(self.resultsOnSamples)
         samplesRawES.index.name = 'Term'
-        samplesRawES.to_csv(os.path.join(outdir, "gseapy.samples.raw.es.txt"), sep='\t')
-
+        # write es
+        outESfile=os.path.join(outdir, "gseapy.samples.raw.es.txt")
+        with open(outESfile, 'a') as f:
+            if self.scale :
+                f.write('# scale the enrichment scores by number of genes in the gene sets\n')
+                f.write('# this normalization has not effects on the finall NES ' +\
+                        'as indicated by Barbie et al., 2009, online methods, pg. 2\n')
+            else:
+                f.write('# raw enrichment scores of all data\n')
+                f.write('# no scale es by numbers of genes in the gene sets\n')
+            samplesRawES.to_csv(f, sep='\t')
         ## normalize enrichment scores by using the entire data set, as indicated
         ## by Barbie et al., 2009, online methods, pg. 2
         samplesNES = samplesRawES / (samplesRawES.values.max() - samplesRawES.values.min())
@@ -693,7 +715,7 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
 	  ascending=False, processes=1, figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
     """ Run Gene Set Enrichment Analysis.
 
-    :param data: Gene expression data table or pandas DataFrame.
+    :param data: Gene expression data table, pandas DataFrame, gct file.
     :param gene_sets: Enrichr Library name or .gmt gene sets file. Same input with GSEA.
     :param cls: a list or a .cls file format required for GSEA.
     :param str outdir: Results output directory.
@@ -763,21 +785,29 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
 
 
 def ssgsea(data, gene_sets, outdir="GSEA_SingleSample", sample_norm_method='rank', min_size=15, max_size=2000,
-           permutation_num=1000, weighted_score_type=0.25, ascending=False, processes=1,
-           figsize=[6.5,6], format='pdf', graph_num=20, seed=None, verbose=False):
+           permutation_num=1000, weighted_score_type=0.25, scale=True, ascending=False, processes=1,
+           figsize=[7,6], format='pdf', graph_num=20, seed=None, verbose=False):
     """Run Gene Set Enrichment Analysis with single sample GSEA tool
 
-    :param data: expression or pandas DataFrame. Same input with ``GSEA`` .rnk file.
+    :param data: expression table, pd.Series, pd.DataFrame, GCT file, or .rnk file formate.
     :param gene_sets: Enrichr Library name or .gmt gene sets file. Same input with GSEA.
     :param outdir: results output directory.
-    :param str sample_norm_method: "Sample normalization method. Choose from {'rank', 'log', 'log_rank'}. Default: rank"
+    :param str sample_norm_method: "Sample normalization method. Choose from {'rank', 'log', 'log_rank'}. Default: rank.
+
+               1. 'rank': Rank your expression data, and transformed by 10000*rank_dat/gene_numbers
+               2. 'log' : Do not rank, but transformed data by log(data + exp(1)), while  data = data[data<1] =1.
+               3. 'log_rank': Rank your expression data, and transformed by log(10000*rank_dat/gene_numbers+ exp(1))
+               4. 'custom': Do nothing, and use your own rank value to calulate enrichment score.
+               see here: https://github.com/GSEA-MSigDB/ssGSEAProjection-gpmodule/blob/master/src/ssGSEAProjection.Library.R, line 86
+
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Defaut: 15.
     :param int max_size: Maximum allowed number of genes from gene set also the data set. Defaults: 2000.
     :param int permutation_num: Number of permutations for significance computation. Default: 1000.
     :param str weighted_score_type: Refer to :func:`algorithm.enrichment_socre`. Default:0.25.
+    :param bool scale: If True, normalize the scores by number of genes in the gene sets.
     :param bool ascending: Sorting order of rankings. Default: False.
     :param int processes: Number of Processes you are going to use. Default: 1.
-    :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
+    :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [7,6].
     :param str format: Matplotlib figure format. Default: 'pdf'.
     :param int graph_num: Plot graphs for top sets of each phenotype
     :param seed: Random seed. expect an interger. Defalut:None.
@@ -797,7 +827,7 @@ def ssgsea(data, gene_sets, outdir="GSEA_SingleSample", sample_norm_method='rank
     """
 
     ss = SingleSampleGSEA(data, gene_sets, outdir, sample_norm_method, min_size, max_size,
-                          permutation_num, weighted_score_type, ascending,
+                          permutation_num, weighted_score_type, scale, ascending,
                           processes, figsize, format, graph_num, seed, verbose)
     ss.run()
     return ss
