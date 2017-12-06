@@ -3,14 +3,15 @@
 
 import os,sys,logging,json
 import requests
+import numpy as np
 import pandas as pd
 from collections import OrderedDict
 from multiprocessing import Pool, cpu_count
-from numpy import number, log, exp
+from numpy import log, exp
 from gseapy.parser import *
 from gseapy.algorithm import enrichment_score, gsea_compute, gsea_compute_ss, ranking_metric
 from gseapy.plot import gsea_plot, heatmap
-from gseapy.utils import mkdirs
+from gseapy.utils import mkdirs, DEFAULT_LIBRARY
 
 
 class GSEAbase(object):
@@ -74,7 +75,7 @@ class GSEAbase(object):
         # have to be int if user input is float
         self._processes = int(cores)
 
-    def _rank_metric(self, rnk):
+    def _load_ranking(self, rnk):
         """Parse ranking file. This file contains ranking correlation vector( or expression values)
            and gene names or ids.
 
@@ -122,6 +123,74 @@ class GSEAbase(object):
             #use for plotting, need 2d array
             rank_metric['rank2'] = rank_metric['rank']
         return rank_metric
+
+    def parse_gmt(self, min_size = 1, max_size = 1000):
+        """gmt parser"""
+
+        gmt = self.gene_set
+        if gmt.lower().endswith(".gmt"):
+            logging.info("User Defined gene sets is given.......continue..........")
+            with open(gmt) as genesets:
+                 genesets_dict = { line.strip("\n").split("\t")[0]: line.strip("\n").split("\t")[2:]
+                                  for line in genesets.readlines()}
+        else:
+            logging.info("Downloading and generating Enrichr library gene sets...")
+            if gmt in DEFAULT_LIBRARY:
+                names = DEFAULT_LIBRARY
+            else:
+                names = self.get_libraries()
+
+            if gmt in names:
+                """
+                define max tries num
+                if the backoff_factor is 0.1, then sleep() will sleep for
+                [0.1s, 0.2s, 0.4s, ...] between retries.
+                It will also force a retry if the status code returned is 500, 502, 503 or 504.
+                """
+                s = requests.Session()
+                retries = Retry(total=5, backoff_factor=0.1,
+                                status_forcelist=[ 500, 502, 503, 504 ])
+                s.mount('http://', HTTPAdapter(max_retries=retries))
+                #queery string
+                ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary'
+                query_string = '?mode=text&libraryName=%s'
+                #get
+                response = s.get( ENRICHR_URL + query_string % gmt, timeout=None)
+            else:
+                raise Exception("gene_set files(.gmt) not found")
+
+            if not response.ok:
+                raise Exception('Error fetching enrichment results, check internet connection first.')
+            ### reformat to dict and wirte to disk
+            genesets_dict = {}
+            with open(os.path.join(self.outdir,"gene_sets.gmt"),"w") as g:
+                for line in response.iter_lines(chunk_size=1024, decode_unicode='utf-8'):
+                    g.write(line)
+                    genesets_dict.update({ line.split("\t")[0]:
+                                           list(map(lambda x: x.split(",")[0], line.split("\t")[2:-1]))})
+
+
+        return genesets_dict
+
+    def tag_indi_mat(self, gsets_dict, cor_keys, min_size=1, max_size=1000):
+        """build geneset to gene_keys matrix """
+
+        keys = sorted(gsets_dict.keys())
+        tag_indicator = np.vstack([np.in1d(cor_keys, gsets_dict[key], assume_unique=True) for key in keys])
+        #filtering gene sets
+        Nhits = tag_indicator.sum(axis=1)
+        # python keyword ``and`` is not work for ndarray
+        mask = (min_size <= Nhits) & (Nhits <= max_size)
+        tag_mat = tag_indicator[mask]
+        filsets_num = tag_indicator.shape[0] - tag_mat.shape[0]
+        logging.info("%04d gene_sets have been filtered out when max_size=%s and min_size=%s"%(filsets_num, max_size, min_size))
+
+        if filsets_num == len(keys):
+            logging.error("No gene sets passed throught filtering condition!!!, try new paramters again!\n" +\
+                             "Note: Gene names for GSEApy is case sensitive." )
+            sys.exit(1)
+
+        return tag_mat
 
     def _plotting(self, rank_metric, results, res2d,
                  graph_num, outdir, format, figsize, module=None, data=None,
@@ -249,52 +318,58 @@ class GSEA(GSEAbase):
         self.verbose=verbose
         self.module='gsea'
         self.ranking=None
-    def __drop_dat(self, df, cls_vector):
+
+    def load_data(self, cls_vec):
         """pre-processed the data frame.new filtering methods will be implement here.
         """
+        # read data in
+        if isinstance(self.data, pd.DataFrame) :
+            exprs = self.data.copy()
+        elif os.path.isfile(self.data) :
+            # GCT input format?
+            if self.data.endswith("gct"):
+                exprs = pd.read_table(self.data, skiprows=1, comment='#')
+            else:
+                exprs = pd.read_table(self.data, comment='#')
+        else:
+            raise Exception('Error parsing gene expression dataframe!')
+            sys.exit(1)
 
-        df.drop_duplicates(subset=df.columns[0], inplace=True) #drop duplicate gene_names.
-        df.set_index(keys=df.columns[0], inplace=True)
-        df.dropna(how='all', inplace=True)                     #drop rows with all NAs
-        df2 = df.select_dtypes(include=[number])
-
-        #drop any genes which std ==0
-        df_std =  df2.groupby(by=cls_vector, axis=1).std()
-        df2 =  df2[~df_std.isin([0]).any(axis=1)]
-        df2 = df2 + 0.00001 # we don't like zeros!!!
-
-        return df2
+        #drop duplicated gene names
+        if exprs.iloc[:,0].duplicated().sum() > 0:
+            self._logger.warning("Warning: dropping duplicated gene names, only keep the first values")
+            exprs.drop_duplicates(subset=exprs.columns[0], inplace=True) #drop duplicate gene_names.
+        if exprs.isnull().any().sum() > 0:
+            self._logger.warning("Warning: Input data contains NA, filled NA with 0")
+            exprs.dropna(how='all', inplace=True) #drop rows with all NAs
+            exprs = exprs.fillna(0)
+        # set gene name as index
+        exprs.set_index(keys=exprs.columns[0], inplace=True)
+        # select numberic columns
+        df = exprs.select_dtypes(include=[np.number])
+        # drop any genes which std ==0
+        df_std =  df.groupby(by=cls_vec, axis=1).std()
+        df =  df[~df_std.isin([0]).any(axis=1)]
+        df = df + 0.00001 # we don't like zeros!!!
+        return df
 
     def run(self):
         """GSEA main procedure"""
 
         assert self.permutation_type in ["phenotype", "gene_set"]
         assert self.min_size <= self.max_size
-
-        if isinstance(self.data, pd.DataFrame) :
-            df = self.data.copy()
-        elif os.path.isfile(self.data) :
-            # GCT input format?
-            if self.data.endswith("gct"):
-                df = pd.read_table(self.data, skiprows=1, comment='#')
-            else:
-                df = pd.read_table(self.data, comment='#')
-        else:
-            raise Exception('Error parsing gene expression dataframe!')
-            sys.exit(1)
-        #data frame must have lenght > 1
-        assert len(df) > 1
         # creat output dirs
         mkdirs(self.outdir)
         logger = self._log_init(module=self.module,
                                log_level=logging.INFO if self.verbose else logging.WARNING)
         #Start Analysis
         logger.info("Parsing data files for GSEA.............................")
-
         # phenotype labels parsing
         phenoPos, phenoNeg, cls_vector = gsea_cls_parser(self.classes)
         #select correct expression genes and values.
-        dat = self.__drop_dat(df, cls_vector)
+        dat = self.load_data(cls_vector)
+        #data frame must have lenght > 1
+        assert len(dat) > 1
         #ranking metrics calculation.
         dat2 = ranking_metric(df=dat, method=self.method, phenoPos=phenoPos, phenoNeg=phenoNeg,
                               classes=cls_vector, ascending=self.ascending)
@@ -369,7 +444,7 @@ class Prerank(GSEAbase):
         logger = self._log_init(module=self.module,
                                log_level=logging.INFO if self.verbose else logging.WARNING)
         #parsing rankings
-        dat2 = self._rank_metric(self.rnk)
+        dat2 = self._load_ranking(self.rnk)
         assert len(dat2) > 1
 
         #cpu numbers
@@ -440,41 +515,45 @@ class SingleSampleGSEA(GSEAbase):
 
     def load_data(self):
         #load data
-        rnk = self.data
-        if isinstance(rnk, pd.DataFrame):
-            rank_metric = rnk.copy()
+        exprs = self.data
+        if isinstance(exprs, pd.DataFrame):
+            rank_metric = exprs.copy()
             # handle dataframe with gene_name as index.
             self._logger.debug("Input data is a DataFrame with gene names")
             #handle index is not gene_names
             if rank_metric.index.dtype != 'O':
                 rank_metric.set_index(keys=rank_metric.columns[0], inplace=True)
 
-            rank_metric = rank_metric.select_dtypes(include=[number])
-        elif isinstance(rnk, pd.Series):
+            rank_metric = rank_metric.select_dtypes(include=[np.number])
+        elif isinstance(exprs, pd.Series):
             #change to DataFrame
             self._logger.debug("Input data is a Series with gene names")
-            rank_metric = pd.DataFrame(rnk)
-        elif os.path.isfile(rnk):
+            rank_metric = pd.DataFrame(exprs)
+        elif os.path.isfile(exprs):
             # GCT input format?
-            if rnk.endswith("gct"):
-                rank_metric = pd.read_table(rnk, skiprows=1, comment='#', index_col=0)
+            if exprs.endswith("gct"):
+                rank_metric = pd.read_table(exprs, skiprows=1, comment='#', index_col=0)
             else:
                 #just rnk file input
-                rank_metric = pd.read_table(rnk, header=None, comment='#', index_col=0)
+                rank_metric = pd.read_table(exprs, header=None, comment='#', index_col=0)
                 if rank_metric.shape[1] >=2:
                     # txt file input
-                    rank_metric = pd.read_table(rnk, comment='#', index_col=0)
+                    rank_metric = pd.read_table(exprs, comment='#', index_col=0)
             #select numbers
-            rank_metric = rank_metric.select_dtypes(include=[number])
+            rank_metric = rank_metric.select_dtypes(include=[np.number])
         else:
             raise Exception('Error parsing gene ranking values!')
 
         if rank_metric.index.duplicated().sum() > 0:
-            self._logger.info("Warning: dropping duplicated gene names, only keep the first values")
+            self._logger.warning("Warning: dropping duplicated gene names, only keep the first values")
             rank_metric = rank_metric.loc[rank_metric.index.drop_duplicates(keep='first')]
+            rank_metric = rank_metric.loc[rank_metric.index.dropna()]
+        if rank_metric.isnull().any().sum() > 0:
+            self._logger.warning("Warning: Input data contains NA, filled NA with 0")
+            rank_metric = rank_metric.fillna(0)
         # if single sample input, set ranking is not None for temp.
-        if rank_metric.shape[1] <= 2:
-            self.ranking=1
+        if rank_metric.shape[1] <= 2: self.ranking=1
+
         return rank_metric
 
     def norm_samples(self, dat):
@@ -677,7 +756,7 @@ class Replot(GSEAbase):
         #obtain gene sets
         gene_set_dict = gsea_gmt_parser(gene_set_path, min_size=self.min_size, max_size=self.max_size)
         #obtain rank_metrics
-        rank_metric = self._rank_metric(rank_path)
+        rank_metric = self._load_ranking(rank_path)
         correl_vector =  rank_metric['rank'].values
         gene_list = rank_metric['gene_name']
         #extract each enriment term in the results.edb files and plot.
