@@ -373,7 +373,6 @@ class GSEA(GSEAbase):
         #ranking metrics calculation.
         dat2 = ranking_metric(df=dat, method=self.method, phenoPos=phenoPos, phenoNeg=phenoNeg,
                               classes=cls_vector, ascending=self.ascending)
-
         #filtering out gene sets and build gene sets dictionary
         gmt = gsea_gmt_parser(self.gene_sets, min_size=self.min_size, max_size=self.max_size,
                               gene_list=dat2['gene_name'].values)
@@ -444,7 +443,8 @@ class Prerank(GSEAbase):
         logger = self._log_init(module=self.module,
                                log_level=logging.INFO if self.verbose else logging.WARNING)
         #parsing rankings
-        dat2 = self._load_ranking(self.rnk)
+        dat = self._load_ranking(self.rnk)
+        dat2 = dat.set_index("gene_name")
         assert len(dat2) > 1
 
         #cpu numbers
@@ -453,7 +453,7 @@ class Prerank(GSEAbase):
         logger.info("Parsing data files for GSEA.............................")
         #filtering out gene sets and build gene sets dictionary
         gmt = gsea_gmt_parser(self.gene_sets, min_size=self.min_size, max_size=self.max_size,
-                              gene_list=dat2['gene_name'].values)
+                              gene_list=dat['gene_name'].values)
         logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
         logger.info("Start to run GSEA...Might take a while..................")
         #compute ES, NES, pval, FDR, RES
@@ -467,10 +467,10 @@ class Prerank(GSEAbase):
         logger.info("Start to generate gseapy reports, and produce figures...")
         res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
         self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
-                                   gmt=gmt, rank_metric=dat2, permutation_type="gene_sets")
+                                   gmt=gmt, rank_metric=dat, permutation_type="gene_sets")
 
         #Plotting
-        self._plotting(rank_metric=dat2, results=self.results, res2d=self.res2d,
+        self._plotting(rank_metric=dat, results=self.results, res2d=self.res2d,
                        graph_num=self.graph_num, outdir=self.outdir,
                        figsize=self.figsize, format=self.format,
                        module=self.module, phenoPos=self.pheno_pos, phenoNeg=self.pheno_neg)

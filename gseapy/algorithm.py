@@ -122,11 +122,11 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
 
     cor_mat = np.abs(cor_mat)
 
-    if keys_sorted.ndim ==1:
+    if cor_mat.ndim ==1:
         # ssGSEA or Prerank
         # M genestes by N genes
-        N, M = len(keys_sorted), len(keys)
-        tag_indicator = np.vstack([np.in1d(keys_sorted, gene_sets[key], assume_unique=True) for key in keys])
+        N, M = len(gene_mat), len(keys)
+        tag_indicator = np.vstack([np.in1d(gene_mat, gene_sets[key], assume_unique=True) for key in keys])
         #index of hits
         hit_ind = [ np.flatnonzero(tag).tolist() for tag in tag_indicator ]
         # generate permutation matrix
@@ -138,19 +138,18 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
         # calculate numerator, denominator of each gene hits
         rank_alpha = (perm_tag_tensor*cor_mat[np.newaxis,:,np.newaxis])** weighted_score_type
 
-    elif keys_sorted.ndim == 2:
+    elif cor_mat.ndim == 2:
         # GSEA
         # 2d array of keys_sorted, shuffled already
-        # dims are correct ?
-        # (M,N,nperm+1)
-        perm_tag_tensor = np.dstack([np.isin(keys_sorted, gene_sets[key], assume_unique=True) for key in keys])
+        cor_mat = cor_mat.T
+        # genesets -> (M, N, nperm+1)
+        perm_tag_tensor = np.stack([np.isin(gene_mat, gene_sets[key], assume_unique=True).T for key in keys], axis=0)
         #index of hits
-        # [row,col,depth] ?
         hit_ind = [ np.flatnonzero(tag).tolist() for tag in perm_tag_tensor[:,:,-1] ]
         # nohits
         no_tag_tensor = 1 - perm_tag_tensor
         # calculate numerator, denominator of each gene hits
-        rank_alpha = (perm_tag_tensor*cor_mat[:,:,np.newaxis])** weighted_score_type
+        rank_alpha = (perm_tag_tensor*cor_mat[np.newaxis,:,:])** weighted_score_type
     else:
         logging.error("Program die because of unsupported input")
         sys.exit(0)
@@ -327,7 +326,7 @@ def _rnknull(df, method, phenoPos, phenoNeg, classes, ascending):
     return ranking2, gene_list2
 
 def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
-                 phenoPos, phenoNeg, classes, ascending, seed, processes, scale=False, prerank=False):
+                 phenoPos, phenoNeg, classes, ascending, seed, processes, prerank=False):
     """compute enrichment scores and enrichment nulls.
 
     :param data: prepreocessed expression dataframe or a pre-ranked file if prerank=True.
@@ -351,11 +350,11 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
 
     """
 
-    es = []
-    RES = []
-    hit_ind = []
     subsets = sorted(gmt.keys())
     rs = np.random.RandomState(seed)
+    # es = []
+    # RES = []
+    # hit_ind = []
     # for subset in subsets:
     #     e, ind, RES = enrichment_score(gene_list, gmt.get(subset), w, ranking, None, rs)
     #     es.append(e)
@@ -436,7 +435,7 @@ def gsea_compute_ss(data, gmt, n, weighted_score_type, scale, seed, processes=1)
     es, esnull, hit_ind, RES = enrichment_score_tensor(gene_mat=keys_sorted,cor_mat=cor_vec,
                                                        gene_sets=gmt,
                                                        weighted_score_type=weighted_score_type,
-                                                       nperm=n, scale=False,
+                                                       nperm=n, scale=scale,
                                                        single=True, rs=rs)
 
     return gsea_significance(es, esnull), hit_ind, RES, subsets
