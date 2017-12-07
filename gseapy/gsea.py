@@ -382,7 +382,8 @@ class GSEA(GSEAbase):
         #cpu numbers
         self._set_cores()
         #compute ES, NES, pval, FDR, RES
-        gsea_results,hit_ind,rank_ES, subsets = gsea_compute(data=dat, n=self.permutation_num, gmt=gmt,
+        dataset = dat if self.permutation_type =='phenotype' else dat2
+        gsea_results,hit_ind,rank_ES, subsets = gsea_compute(data=dataset, n=self.permutation_num, gmt=gmt,
                                                              weighted_score_type=self.weighted_score_type,
                                                              permutation_type=self.permutation_type,
                                                              method=self.method,
@@ -462,7 +463,7 @@ class Prerank(GSEAbase):
                                                               permutation_type='gene_set', method=None,
                                                               phenoPos=self.pheno_pos, phenoNeg=self.pheno_neg,
                                                               classes=None, ascending=self.ascending, seed=self.seed,
-                                                              processes=self._processes, prerank=True)
+                                                              processes=self._processes)
 
         logger.info("Start to generate gseapy reports, and produce figures...")
         res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)

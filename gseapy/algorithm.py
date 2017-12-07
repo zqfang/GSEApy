@@ -77,12 +77,12 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
     es = np.where(np.abs(max_ES) > np.abs(min_ES), max_ES, min_ES)
 
     if esnull:
-        return es.tolist()
+        return es
 
-    return es.tolist(), hit_ind, RES.tolist()
+    return es, hit_ind, RES
 
 def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, nperm=1000,
-                            scale=True, single=False, rs=np.random.RandomState()):
+                            scale=False, single=False, rs=np.random.RandomState()):
     """
     Given a gene set, a map of gene names to rank levels, and a weight score, returns the ssGSEA
     enrichment score for the gene set as described by *D. Barbie et al 2009*
@@ -107,7 +107,6 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
     """
 
     # gene_mat -> 1d: prerank, ssSSEA or 2d: GSEA
-    keys_sorted = gene_mat
     keys = sorted(gene_sets.keys())
 
     if weighted_score_type == 0:
@@ -119,9 +118,7 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
         logging.error("Using negative values of weighted_score_type, not allowed")
         sys.exit(0)
 
-
     cor_mat = np.abs(cor_mat)
-
     if cor_mat.ndim ==1:
         # ssGSEA or Prerank
         # M genestes by N genes
@@ -162,7 +159,7 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
     REStensor = np.cumsum(rank_alpha / P_GW_denominator - no_tag_tensor / P_NG_denominator, axis=axis)
     # scale es by gene numbers ?
     # https://gist.github.com/gaoce/39e0907146c752c127728ad74e123b33
-    if scale: REStensor = REStensor / len(keys_sorted)
+    if scale: REStensor = REStensor / len(gene_mat)
     if single:
         #ssGSEA
         esmatrix = np.sum(REStensor, axis=axis)
@@ -216,17 +213,15 @@ def rank_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
         logging.error("Please provide correct method name!!!")
         sys.exit(0)
 
+
     # return matix[nperm+1, perm_cors]
-    if ascending:
-        cor_mat_ind = cor_mat.argsort(axis=1)
-        # use .take method to use 2d indices
-        genes_mat = perm_genes_mat.take(cor_mat_ind)
-        cor_mat = cor_mat.take(cor_mat_ind)
-    else:
-        cor_mat_ind = cor_mat.argsort(axis=1)
-        # use .take method to use 2d indices
-        genes_mat = perm_genes_mat.take(cor_mat_ind)[:,::-1]
-        cor_mat = cor_mat.take(cor_mat_ind)[:,::-1]
+    cor_mat_ind = cor_mat.argsort()
+    cor_mat.sort()
+    genes_mat = genes.take(cor_mat_ind)
+    if ascending: return genes_mat, cor_mat
+    # descending order of ranking and genes
+    genes_mat = genes_mat[:,::-1]
+    cor_mat = cor_mat[:,::-1]
 
     return genes_mat, cor_mat
 
@@ -326,7 +321,7 @@ def _rnknull(df, method, phenoPos, phenoNeg, classes, ascending):
     return ranking2, gene_list2
 
 def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
-                 phenoPos, phenoNeg, classes, ascending, seed, processes, prerank=False):
+                 phenoPos, phenoNeg, classes, ascending, seed, processes):
     """compute enrichment scores and enrichment nulls.
 
     :param data: prepreocessed expression dataframe or a pre-ranked file if prerank=True.
@@ -397,9 +392,6 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type, method,
         #         esnull[si].append(esn)
     else:
         keys_sorted = data.index.values
-        if not prerank:
-            data = ranking_metric(df=data, method=method, phenoPos=phenoPos,
-                                     phenoNeg=phenoNeg, classes=classes, ascending=ascending)
         cor_vec = data['rank'].values
         es, esnull, hit_ind, RES = enrichment_score_tensor(gene_mat=keys_sorted, cor_mat=cor_vec,
                                                            gene_sets=gmt,
