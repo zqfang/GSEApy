@@ -382,7 +382,7 @@ class GSEA(GSEAbase):
         #cpu numbers
         self._set_cores()
         #compute ES, NES, pval, FDR, RES
-        dataset = dat if self.permutation_type =='phenotype' else dat2
+        dataset = dat if self.permutation_type =='phenotype' else dat2.set_index("gene_name")
         gsea_results,hit_ind,rank_ES, subsets = gsea_compute(data=dataset, n=self.permutation_num, gmt=gmt,
                                                              weighted_score_type=self.weighted_score_type,
                                                              permutation_type=self.permutation_type,
@@ -394,7 +394,7 @@ class GSEA(GSEAbase):
         logger.info("Start to generate gseapy reports, and produce figures...")
         res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
         self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
-                                   gmt=gmt, rank_metric=dat2, permutation_type="gene_sets")
+                                   gmt=gmt, rank_metric=dat2, permutation_type=self.permutation_type)
 
         #Plotting
         heat_dat = dat.loc[dat2.gene_name]
