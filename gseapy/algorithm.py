@@ -6,7 +6,6 @@ import sys, logging
 import numpy as np
 from functools import reduce
 from multiprocessing import Pool
-from copy import deepcopy
 
 def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=None, esnull=None, rs=np.random.RandomState()):
     """This is the most important function of GSEAPY. It has the same algorithm with GSEA.
@@ -348,14 +347,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
 
     subsets = sorted(gmt.keys())
     rs = np.random.RandomState(seed)
-    # es = []
-    # RES = []
-    # hit_ind = []
-    # for subset in subsets:
-    #     e, ind, RES = enrichment_score(gene_list, gmt.get(subset), w, ranking, None, rs)
-    #     es.append(e)
-    #     rank_ES.append(RES)
-    #     hit_ind.append(ind)
+
     logging.debug("Start to compute enrichment socres......................")
 
     if permutation_type == "phenotype":
@@ -365,55 +357,22 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
                                                 pos=phenoPos, neg=phenoNeg, classes=classes,
                                                 ascending=ascending, rs=rs)
         # compute es, esnulls. hits, RES
-        # gene_mat, cor_mat, gene_sets, weighted_score_type, nperm=1000,
         es, esnull, hit_ind, RES = enrichment_score_tensor(gene_mat=genes_mat,cor_mat=cor_mat,
                                                            gene_sets=gmt,
                                                            weighted_score_type=weighted_score_type,
                                                            nperm=n, scale=False,
                                                            single=False, rs=rs)
-        # rank_nulls=[]
-        # pool_rnkn = Pool(processes=processes)
-        # for i in range(n):
-        #     #you have to reseed, or all your processes are sharing the same seed value
-        #     #rs = np.random.RandomState(seed)
-        #     rs = np.random.RandomState()
-        #     rs.shuffle(l2)
-        #     l3 = deepcopy(l2)
-        #     rank_nulls.append(pool_rnkn.apply_async(_rnknull, args=(dat2, method,
-        #                                                           phenoPos, phenoNeg,
-        #                                                           l3, ascending)))
-        # pool_rnkn.close()
-        # pool_rnkn.join()
-        #
-        # for temp_rnk in rank_nulls:
-        #     rnkn, gl = temp_rnk.get()
-        #     for si, subset in enumerate(subsets):
-        #         esn = enrichment_score(gene_list=gl, gene_set=gmt.get(subset),
-        #                                weighted_score_type=w, correl_vector=rnkn, esnull=None, rs=rs)[0]
-        #         esnull[si].append(esn)
+
     else:
-        keys_sorted = data.index.values
+        #Prerank, ssGSEA, GSEA with gene_set permutation
+        genes_sorted = data.index.values
         cor_vec = data.values
-        es, esnull, hit_ind, RES = enrichment_score_tensor(gene_mat=keys_sorted, cor_mat=cor_vec,
+        es, esnull, hit_ind, RES = enrichment_score_tensor(gene_mat=genes_sorted, cor_mat=cor_vec,
                                                            gene_sets=gmt,
                                                            weighted_score_type=weighted_score_type,
                                                            nperm=n, scale=scale,
                                                            single=single, rs=rs)
-        # #multi-threading for esnulls.
-        # temp_esnu=[]
-        # pool_esnu = Pool(processes=processes)
-        # for subset in subsets:
-        #     #you have to reseed, or all your processes are sharing the same seed value
-        #     #rs = np.random.RandomState(seed)
-        #     rs = np.random.RandomState()
-        #     temp_esnu.append(pool_esnu.apply_async(enrichment_score, args=(gene_list, gmt.get(subset), w,
-        #                                                                    ranking, n, rs)))
-        #
-        # pool_esnu.close()
-        # pool_esnu.join()
-        # # esn is a list, don't need to use append method.
-        # for si, temp in enumerate(temp_esnu):
-        #     enrichment_nulls[si] = temp.get()
+
     return gsea_significance(es, esnull), hit_ind, RES, subsets
 
 def gsea_pval(es, esnull):
@@ -437,8 +396,6 @@ def gsea_pval(es, esnull):
     return pval
     #except:
     #    return np.repeat(1.0 ,len(es))
-
-
 
 def normalize(es, enrNull):
     """normalize the ES(S,pi) and the observed ES(S), separetely rescaling
