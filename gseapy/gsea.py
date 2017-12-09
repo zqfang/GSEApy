@@ -8,6 +8,9 @@ import pandas as pd
 from collections import OrderedDict
 from multiprocessing import Pool, cpu_count
 from numpy import log, exp
+from requests.packages.urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
+
 from gseapy.parser import *
 from gseapy.algorithm import enrichment_score, gsea_compute, ranking_metric
 from gseapy.plot import gsea_plot, heatmap
@@ -124,14 +127,14 @@ class GSEAbase(object):
         # return series
         return rankser
 
-    def parse_gmt(self, min_size = 1, max_size = 1000):
+    def parse_gmt(self, min_size=1, max_size=1000):
         """gmt parser"""
 
         gmt = self.gene_set
         if gmt.lower().endswith(".gmt"):
             logging.info("User Defined gene sets is given.......continue..........")
             with open(gmt) as genesets:
-                 genesets_dict = { line.strip("\n").split("\t")[0]: line.strip("\n").split("\t")[2:]
+                 genesets_dict = { line.strip().split("\t")[0]: line.strip("\n").split("\t")[2:]
                                   for line in genesets.readlines()}
         else:
             logging.info("Downloading and generating Enrichr library gene sets...")
@@ -141,56 +144,46 @@ class GSEAbase(object):
                 names = self.get_libraries()
 
             if gmt in names:
-                """
-                define max tries num
-                if the backoff_factor is 0.1, then sleep() will sleep for
-                [0.1s, 0.2s, 0.4s, ...] between retries.
-                It will also force a retry if the status code returned is 500, 502, 503 or 504.
-                """
-                s = requests.Session()
-                retries = Retry(total=5, backoff_factor=0.1,
-                                status_forcelist=[ 500, 502, 503, 504 ])
-                s.mount('http://', HTTPAdapter(max_retries=retries))
-                #queery string
-                ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary'
-                query_string = '?mode=text&libraryName=%s'
-                #get
-                response = s.get( ENRICHR_URL + query_string % gmt, timeout=None)
-            else:
-                raise Exception("gene_set files(.gmt) not found")
-
-            if not response.ok:
-                raise Exception('Error fetching enrichment results, check internet connection first.')
-            ### reformat to dict and wirte to disk
-            genesets_dict = {}
-            with open(os.path.join(self.outdir,"gene_sets.gmt"),"w") as g:
-                for line in response.iter_lines(chunk_size=1024, decode_unicode='utf-8'):
-                    g.write(line)
-                    genesets_dict.update({ line.split("\t")[0]:
-                                           list(map(lambda x: x.split(",")[0], line.split("\t")[2:-1]))})
-
+                genesets_dict = self.download_libraries(gmt)
 
         return genesets_dict
 
-    def tag_indi_mat(self, gsets_dict, cor_keys, min_size=1, max_size=1000):
-        """build geneset to gene_keys matrix """
+    def get_libraries(self):
+        """return enrichr active enrichr library name.Offical API """
+        lib_url='http://amp.pharm.mssm.edu/Enrichr/datasetStatistics'
+        libs_json = json.loads(requests.get(lib_url).text)
+        libs = [lib['libraryName'] for lib in libs_json['statistics']]
+        return sorted(libs)
 
-        keys = sorted(gsets_dict.keys())
-        tag_indicator = np.vstack([np.in1d(cor_keys, gsets_dict[key], assume_unique=True) for key in keys])
-        #filtering gene sets
-        Nhits = tag_indicator.sum(axis=1)
-        # python keyword ``and`` is not work for ndarray
-        mask = (min_size <= Nhits) & (Nhits <= max_size)
-        tag_mat = tag_indicator[mask]
-        filsets_num = tag_indicator.shape[0] - tag_mat.shape[0]
-        logging.info("%04d gene_sets have been filtered out when max_size=%s and min_size=%s"%(filsets_num, max_size, min_size))
+    def download_libraries(self, libname, outname="gene_sets.gmt"):
+        """ download enrichr libraries.
 
-        if filsets_num == len(keys):
-            logging.error("No gene sets passed throught filtering condition!!!, try new paramters again!\n" +\
-                             "Note: Gene names for GSEApy is case sensitive." )
-            sys.exit(1)
+            define max tries num
+            if the backoff_factor is 0.1, then sleep() will sleep for
+            [0.1s, 0.2s, 0.4s, ...] between retries.
+            It will also force a retry if the status code returned is 500, 502, 503 or 504.
+        """
+        s = requests.Session()
+        retries = Retry(total=5, backoff_factor=0.1,
+                        status_forcelist=[ 500, 502, 503, 504 ])
+        s.mount('http://', HTTPAdapter(max_retries=retries))
+        #queery string
+        ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary'
+        query_string = '?mode=text&libraryName=%s'
+        #get
+        response = s.get( ENRICHR_URL + query_string % libname, timeout=None)
+        if not response.ok:
+            raise Exception('Error fetching enrichment results, check internet connection first.')
+        ### reformat to dict and wirte to disk
+        genesets_dict = {}
+        with open(os.path.join(self.outdir, outname),"w") as g:
+            for line in response.iter_lines(chunk_size=1024, decode_unicode='utf-8'):
+                line=line.strip()
+                g.write(line)
+                genesets_dict.update({ line.split("\t")[0]:
+                                       list(map(lambda x: x.split(",")[0], line.split("\t")[2:]))})
 
-        return tag_mat
+       return genesets_dict
 
     def _plotting(self, rank_metric, results, res2d,
                  graph_num, outdir, format, figsize, module=None, data=None,
@@ -280,14 +273,6 @@ class GSEAbase(object):
         self.res2d = res_df
         self.results  = res
         return
-
-    def get_libraries(self):
-        """return enrichr active enrichr library name.Offical API """
-        lib_url='http://amp.pharm.mssm.edu/Enrichr/datasetStatistics'
-        libs_json = json.loads(requests.get(lib_url).text)
-        libs = [lib['libraryName'] for lib in libs_json['statistics']]
-        return sorted(libs)
-
 
 class GSEA(GSEAbase):
     """GSEA main tool"""
