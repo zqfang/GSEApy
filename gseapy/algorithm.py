@@ -112,7 +112,7 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
 
     if weighted_score_type == 0:
         # don't bother doing calcuation, just set to 1
-        cor_mat = np.repeat(1, N)
+        cor_mat = np.ones(cor_mat.shape)
     elif weighted_score_type > 0:
         pass
     else:
