@@ -178,8 +178,8 @@ class GSEAbase(object):
         genesets_dict = {}
         with open(os.path.join(self.outdir, outname),"w") as g:
             for line in response.iter_lines(chunk_size=1024, decode_unicode='utf-8'):
-                line=line.strip()
                 g.write(line)
+                line=line.strip()
                 genesets_dict.update({ line.split("\t")[0]:
                                        list(map(lambda x: x.split(",")[0], line.split("\t")[2:]))})
 
