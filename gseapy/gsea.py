@@ -9,7 +9,7 @@ from collections import OrderedDict
 from multiprocessing import Pool, cpu_count
 from numpy import log, exp
 from gseapy.parser import *
-from gseapy.algorithm import enrichment_score, gsea_compute, gsea_compute_ss, ranking_metric
+from gseapy.algorithm import enrichment_score, gsea_compute, ranking_metric
 from gseapy.plot import gsea_plot, heatmap
 from gseapy.utils import mkdirs, DEFAULT_LIBRARY
 
@@ -389,7 +389,7 @@ class GSEA(GSEAbase):
                                                              method=self.method,
                                                              phenoPos=phenoPos, phenoNeg=phenoNeg,
                                                              classes=cls_vector, ascending=self.ascending,
-                                                             seed=self.seed, processes=self._processes)
+                                                             seed=self.seed)
 
         logger.info("Start to generate gseapy reports, and produce figures...")
         res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
@@ -462,8 +462,8 @@ class Prerank(GSEAbase):
                                                               weighted_score_type=self.weighted_score_type,
                                                               permutation_type='gene_set', method=None,
                                                               phenoPos=self.pheno_pos, phenoNeg=self.pheno_neg,
-                                                              classes=None, ascending=self.ascending, seed=self.seed,
-                                                              processes=self._processes)
+                                                              classes=None, ascending=self.ascending,
+                                                              seed=self.seed)
 
         logger.info("Start to generate gseapy reports, and produce figures...")
         res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
@@ -628,7 +628,6 @@ class SingleSampleGSEA(GSEAbase):
         df.reset_index(drop=True, inplace=True)
         # revmove rank2
         dat2 = df.set_index('gene_name')
-        dat2 = dat2['rank']
         #cpu numbers
         self._set_cores()
         #filtering out gene sets and build gene sets dictionary
@@ -640,12 +639,12 @@ class SingleSampleGSEA(GSEAbase):
         self._logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
         self._logger.info("Start to run GSEA...Might take a while..................")
         #compute ES, NES, pval, FDR, RES
-        gsea_results, hit_ind, rank_ES, subsets = gsea_compute_ss(data=dat2, n=self.permutation_num,
-                                                                  gmt=gmt,
-                                                                  weighted_score_type=self.weighted_score_type,
-                                                                  scale=self.scale,
-                                                                  seed=self.seed,
-                                                                  processes=self._processes)
+        gsea_results, hit_ind,rank_ES, subsets = gsea_compute(data=dat2, n=self.permutation_num, gmt=gmt,
+                                                              weighted_score_type=self.weighted_score_type,
+                                                              permutation_type='gene_set', method=None,
+                                                              phenoPos=self.pheno_pos, phenoNeg=self.pheno_neg,
+                                                              classes=None, ascending=self.ascending,
+                                                              seed=self.seed, scale=self.scale, single=True)
 
         self._logger.info("Start to generate gseapy reports, and produce figures...")
         res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
