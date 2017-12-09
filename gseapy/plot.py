@@ -99,9 +99,9 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
               phenoPos, phenoNeg, figsize, format, outdir, module):
     """This is the main function for reproducing the gsea plot.
 
-    :param rank_metric: rankings, rank_metric['rank'].values.
+    :param rank_metric: pd.Series for rankings, rank_metric.values.
     :param enrich_term: gene_set name
-    :param hit_ind: hit indexs of rank_metric['gene_name'] presented in gene set S.
+    :param hit_ind: hit indexs of rank_metric.index presented in gene set S.
     :param nes: Normalized enrichment scores.
     :param pval: nominal p-value.
     :param fdr: false discoveray rate.
@@ -116,16 +116,17 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     norm = _MidpointNormalize(midpoint=0)
 
     #dataFrame of ranked matrix scores
-    x = rank_metric.index.values
+    x = np.arange(len(rank_metric))
+    rankings = rank_metric.values
     #figsize = (6,6)
     phenoP_label = phenoPos + ' (Positively Correlated)'
     phenoN_label = phenoNeg + ' (Negatively Correlated)'
-    zero_score_ind = rank_metric['rank'].abs().values.argmin()
+    zero_score_ind = np.abs(rankings).argmin()
     z_score_label = 'Zero score at ' + str(zero_score_ind)
     nes_label = 'NES: '+ "{:.3f}".format(float(nes))
     pval_label = 'Pval: '+ "{:.3f}".format(float(pval))
     fdr_label = 'FDR: '+ "{:.3f}".format(float(fdr))
-    im_matrix = rank_metric.ix[:,1:].T
+    im_matrix = np.tile(rankings, (2,1))
 
     #output truetype
     plt.rcParams.update({'pdf.fonttype':42,'ps.fonttype':42})
@@ -143,10 +144,10 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
         nes_label = 'ES: '+ "{:.3f}".format(float(nes))
         pval_label='Pval: '
         fdr_label='FDR: '
-        ax1.fill_between(x, y1= np.log(rank_metric['rank']), y2=0, color='#C9D3DB')
+        ax1.fill_between(x, y1=np.log(rankings), y2=0, color='#C9D3DB')
         ax1.set_ylabel("log ranked metric", fontsize=14)
     else:
-        ax1.fill_between(x, y1= rank_metric['rank'], y2=0, color='#C9D3DB')
+        ax1.fill_between(x, y1=rankings, y2=0, color='#C9D3DB')
         ax1.set_ylabel("Ranked list metric", fontsize=14)
     ax1.text(.05, .9, phenoP_label, color='red', horizontalalignment='left', verticalalignment='top',
          transform=ax1.transAxes)

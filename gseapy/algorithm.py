@@ -288,8 +288,8 @@ def ranking_metric(df, method, phenoPos, phenoNeg, classes, ascending):
    :param phenoNeg: one of lable of phenotype's names.
    :param classes:  a list of phenotype labels, to specify which column of dataframe belongs to what catogry of phenotype.
    :param ascending:  bool or list of bool. Sort ascending vs. descending.
-   :return: returns correlation to class of each variable. same format with .rnk file. gene_name in first coloum,
-            correlation in second column.
+   :return: returns a pd.Series of correlation to class of each variable. same format with .rnk file. gene_name is index,
+            correlation is value.
 
     visit here for more docs: http://software.broadinstitute.org/gsea/doc/GSEAUserGuideFrame.html
     """
@@ -303,34 +303,22 @@ def ranking_metric(df, method, phenoPos, phenoNeg, classes, ascending):
 
 
     if method == 'signal_to_noise':
-        sr = (df_mean[A] - df_mean[B])/(df_std[A] + df_std[B])
+        ser = (df_mean[A] - df_mean[B])/(df_std[A] + df_std[B])
     elif method == 't_test':
-        sr = (df_mean[A] - df_mean[B])/ np.sqrt(df_std[A]**2/len(df_std)+df_std[B]**2/len(df_std) )
+        ser = (df_mean[A] - df_mean[B])/ np.sqrt(df_std[A]**2/len(df_std)+df_std[B]**2/len(df_std) )
     elif method == 'ratio_of_classes':
-        sr = df_mean[A] / df_mean[B]
+        ser = df_mean[A] / df_mean[B]
     elif method == 'diff_of_classes':
-        sr  = df_mean[A] - df_mean[B]
+        ser  = df_mean[A] - df_mean[B]
     elif method == 'log2_ratio_of_classes':
-        sr  =  np.log2(df_mean[A] / df_mean[B])
+        ser  =  np.log2(df_mean[A] / df_mean[B])
     else:
         logging.error("Please provide correct method name!!!")
         sys.exit()
-    sr.sort_values(ascending=ascending, inplace=True)
-    df3 = sr.to_frame().reset_index()
-    df3.columns = ['gene_name','rank']
-    df3['rank2'] = df3['rank']
+    ser = ser.sort_values(ascending=ascending)
 
-    return df3
+    return ser
 
-def _rnknull(df, method, phenoPos, phenoNeg, classes, ascending):
-    """For multiprocessing
-    """
-    r2 = ranking_metric(df=df, method=method, phenoPos=phenoPos,
-                        phenoNeg=phenoNeg, classes=classes, ascending=ascending)
-    ranking2=r2['rank'].values
-    gene_list2=r2['gene_name'].values
-
-    return ranking2, gene_list2
 
 def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
                  method, phenoPos, phenoNeg, classes, ascending,
@@ -405,7 +393,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
         #         esnull[si].append(esn)
     else:
         keys_sorted = data.index.values
-        cor_vec = data['rank'].values
+        cor_vec = data.values
         es, esnull, hit_ind, RES = enrichment_score_tensor(gene_mat=keys_sorted, cor_mat=cor_vec,
                                                            gene_sets=gmt,
                                                            weighted_score_type=weighted_score_type,
