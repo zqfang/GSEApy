@@ -183,7 +183,7 @@ class GSEAbase(object):
                 genesets_dict.update({ line.split("\t")[0]:
                                        list(map(lambda x: x.split(",")[0], line.split("\t")[2:]))})
 
-       return genesets_dict
+        return genesets_dict
 
     def _plotting(self, rank_metric, results, res2d,
                  graph_num, outdir, format, figsize, module=None, data=None,
