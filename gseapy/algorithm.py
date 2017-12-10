@@ -249,7 +249,7 @@ def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
 
     return genes_mat, cor_mat
 
-def ranking_metric(df, method, phenoPos, phenoNeg, classes, ascending):
+def ranking_metric(df, method, pos, neg, classes, ascending):
     """The main function to rank an expression table.
 
    :param df:      gene_expression DataFrame.
@@ -293,24 +293,21 @@ def ranking_metric(df, method, phenoPos, phenoNeg, classes, ascending):
     visit here for more docs: http://software.broadinstitute.org/gsea/doc/GSEAUserGuideFrame.html
     """
 
-    A = phenoPos
-    B = phenoNeg
-
     #exclude any zero stds.
     df_mean = df.groupby(by=classes, axis=1).mean()
     df_std =  df.groupby(by=classes, axis=1).std()
 
 
     if method == 'signal_to_noise':
-        ser = (df_mean[A] - df_mean[B])/(df_std[A] + df_std[B])
+        ser = (df_mean[pos] - df_mean[neg])/(df_std[pos] + df_std[neg])
     elif method == 't_test':
-        ser = (df_mean[A] - df_mean[B])/ np.sqrt(df_std[A]**2/len(df_std)+df_std[B]**2/len(df_std) )
+        ser = (df_mean[pos] - df_mean[neg])/ np.sqrt(df_std[pos]**2/len(df_std)+df_std[neg]**2/len(df_std) )
     elif method == 'ratio_of_classes':
-        ser = df_mean[A] / df_mean[B]
+        ser = df_mean[pos] / df_mean[neg]
     elif method == 'diff_of_classes':
-        ser  = df_mean[A] - df_mean[B]
+        ser  = df_mean[pos] - df_mean[neg]
     elif method == 'log2_ratio_of_classes':
-        ser  =  np.log2(df_mean[A] / df_mean[B])
+        ser  =  np.log2(df_mean[pos] / df_mean[neg])
     else:
         logging.error("Please provide correct method name!!!")
         sys.exit()
@@ -320,7 +317,7 @@ def ranking_metric(df, method, phenoPos, phenoNeg, classes, ascending):
 
 
 def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
-                 method, phenoPos, phenoNeg, classes, ascending,
+                 method, pheno_pos, pheno_neg, classes, ascending,
                  seed, scale=False, single=False):
     """compute enrichment scores and enrichment nulls.
 
@@ -328,8 +325,8 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
     :param gmt: all gene sets in .gmt file. need to call gsea_gmt_parser() to get results.
     :param n: permutation number. default: 1000.
     :param method: ranking_metric method. see above.
-    :param phenoPos: one of lables of phenotype's names.
-    :param phenoNeg: one of lable of phenotype's names.
+    :param pheno_pos: one of lables of phenotype's names.
+    :param pheno_neg: one of lable of phenotype's names.
     :param classes: a list of phenotype labels, to specify which column of dataframe belongs to what catogry of phenotype.
     :param weighted_score_type: default:1
     :param ascending: sorting order of rankings. Default: False.
@@ -354,7 +351,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
         #shuffling classes and generate raondom correlation rankings
         genes_mat, cor_mat = ranking_metric_tensor(exprs=data, method=method,
                                                 permutation_num=n,
-                                                pos=phenoPos, neg=phenoNeg, classes=classes,
+                                                pos=pheno_pos, neg=pheno_neg, classes=classes,
                                                 ascending=ascending, rs=rs)
         # compute es, esnulls. hits, RES
         es, esnull, hit_ind, RES = enrichment_score_tensor(gene_mat=genes_mat,cor_mat=cor_mat,

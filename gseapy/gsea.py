@@ -134,17 +134,15 @@ class GSEAbase(object):
         for subset in subsets:
             tag_indicator = np.in1d(gene_list, genesets_dict.get(subset), assume_unique=True)
             tag_len = tag_indicator.sum()
-            if tag_len <= self.min_size or tag_len >= self.max_size:
-                del genesets_dict[subset]
-            else:
-                continue
+            if  self.min_size <= tag_len <= self.max_size: continue
+            del genesets_dict[subset]
 
         filsets_num = len(subsets) - len(genesets_dict)
         self._logger.info("%04d gene_sets have been filtered out when max_size=%s and min_size=%s"%(filsets_num, self.max_size, self.min_size))
 
         if filsets_num == len(subsets):
             self._logger.error("No gene sets passed throught filtering condition!!!, try new paramters again!\n" +\
-                             "Note: Gene names for gseapy is case sensitive." )
+                               "Note: Gene names for gseapy is case sensitive." )
             sys.exit(0)
 
         self._gmtdct=genesets_dict
@@ -154,7 +152,7 @@ class GSEAbase(object):
         """gmt parser"""
 
         if gmt.lower().endswith(".gmt"):
-            logging.info("User Defined gene sets is given.......continue..........")
+            self._logger.info("User Defined gene sets is given.......continue..........")
             with open(gmt) as genesets:
                  genesets_dict = { line.strip().split("\t")[0]: line.strip("\n").split("\t")[2:]
                                   for line in genesets.readlines()}
@@ -219,7 +217,7 @@ class GSEAbase(object):
                  graph_num, outdir, format, figsize, module=None, data=None,
                  classes=None, phenoPos='', phenoNeg=''):
         """
-        :param rank_metric: dat2.
+        :param rank_metric: sorted pd.Series with rankings values.
         :param results: self.results
         :param data: preprocessed expression table
 
@@ -294,9 +292,9 @@ class GSEAbase(object):
         out = '{a}/gseapy.{b}.{c}.report.csv'.format(a=outdir, b=module, c=permutation_type)
         if self.module == 'ssgsea':
             with open(out, 'a') as f:
-                f.write('# normalize enrichment scores by random permutation procddure\n')
-                f.write("# Same method to the orignial GSEA method, and it's not proper to use these values in your publication\n")
-                res_df.to_csv(f, sep='\t')
+                f.write('# normalize enrichment scores by random permutation procedure\n')
+                f.write("# Same statical testing method with the orignial GSEA method, might not proper for publication\n")
+                res_df.to_csv(f)
         else:
             res_df.to_csv(out)
 
@@ -386,11 +384,9 @@ class GSEA(GSEAbase):
         #data frame must have lenght > 1
         assert len(dat) > 1
         #ranking metrics calculation.
-        dat2 = ranking_metric(df=dat, method=self.method, phenoPos=phenoPos, phenoNeg=phenoNeg,
+        dat2 = ranking_metric(df=dat, method=self.method, pos=phenoPos, neg=phenoNeg,
                               classes=cls_vector, ascending=self.ascending)
         #filtering out gene sets and build gene sets dictionary
-        # gmt = gsea_gmt_parser(self.gene_sets, min_size=self.min_size, max_size=self.max_size,
-        #                       gene_list=dat2.index.values)
         gmt = self.load_gmt(gene_list=dat2.index.values, gmt=self.gene_sets)
 
         self._logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
@@ -403,7 +399,7 @@ class GSEA(GSEAbase):
                                                              weighted_score_type=self.weighted_score_type,
                                                              permutation_type=self.permutation_type,
                                                              method=self.method,
-                                                             phenoPos=phenoPos, phenoNeg=phenoNeg,
+                                                             pheno_pos=phenoPos, pheno_neg=phenoNeg,
                                                              classes=cls_vector, ascending=self.ascending,
                                                              seed=self.seed)
 
@@ -479,7 +475,7 @@ class Prerank(GSEAbase):
         gsea_results, hit_ind,rank_ES, subsets = gsea_compute(data=dat2, n=self.permutation_num, gmt=gmt,
                                                               weighted_score_type=self.weighted_score_type,
                                                               permutation_type='gene_set', method=None,
-                                                              phenoPos=self.pheno_pos, phenoNeg=self.pheno_neg,
+                                                              pheno_pos=self.pheno_pos, pheno_neg=self.pheno_neg,
                                                               classes=None, ascending=self.ascending,
                                                               seed=self.seed)
 
@@ -654,7 +650,7 @@ class SingleSampleGSEA(GSEAbase):
         gsea_results, hit_ind,rank_ES, subsets = gsea_compute(data=dat2, n=self.permutation_num, gmt=gmt,
                                                               weighted_score_type=self.weighted_score_type,
                                                               permutation_type='gene_set', method=None,
-                                                              phenoPos='', phenoNeg='',
+                                                              pheno_pos='', pheno_neg='',
                                                               classes=None, ascending=self.ascending,
                                                               seed=self.seed, scale=self.scale, single=True)
 
@@ -700,7 +696,7 @@ class SingleSampleGSEA(GSEAbase):
         with open(outESfile, 'a') as f:
             if self.scale :
                 f.write('# scale the enrichment scores by number of genes in the gene sets\n')
-                f.write('# this normalization has not effects on the finall NES ' +\
+                f.write('# this normalization has not effects on the final NES, ' +\
                         'as indicated by Barbie et al., 2009, online methods, pg. 2\n')
             else:
                 f.write('# raw enrichment scores of all data\n')
@@ -761,9 +757,7 @@ class Replot(GSEAbase):
             phenoPos, phenoNeg = '',''
         #start reploting
         self.gene_sets=gene_set_path
-
         #obtain gene sets
-        gene_set_dict = gsea_gmt_parser(gene_set_path, min_size=self.min_size, max_size=self.max_size)
         gene_set_dict = self.parse_gmt(gmt=gene_set_path)
         #obtain rank_metrics
         rank_metric = self._load_ranking(rank_path)
