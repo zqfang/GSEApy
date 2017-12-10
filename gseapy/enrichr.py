@@ -30,7 +30,10 @@ class Enrichr(GSEAbase):
         self.module="enrichr"
         self.res2d=None
         self._processes=1
-
+        # init logger
+        mkdirs(self.outdir)
+        self._log_init(module=self.module,
+                      log_level=logging.INFO if self.verbose else logging.WARNING)
 
     def parse_input(self):
         if isinstance(self.gene_list, list):
@@ -60,7 +63,7 @@ class Enrichr(GSEAbase):
     def run(self):
         """run enrichr"""
 
-        mkdirs(self.outdir)
+
 
         #read input file
         genes_str=self.parse_input()
@@ -70,11 +73,8 @@ class Enrichr(GSEAbase):
 
         #library validaty confirmationi
         gene_set = str(self.gene_sets)
-        #logging start
-        logger = self._log_init(module=self.module,
-                                log_level=logging.INFO if self.verbose else logging.WARNING)
 
-        logger.info("Connecting to Enrichr Server to get latest library names")
+        self._logger.info("Connecting to Enrichr Server to get latest library names")
         if gene_set in DEFAULT_LIBRARY:
             enrichr_library = DEFAULT_LIBRARY
         else:
@@ -84,7 +84,7 @@ class Enrichr(GSEAbase):
                 sys.stdout.write("Hint: use get_library_name() to veiw full list of supported names")
                 sys.exit(1)
 
-        logger.info('Analysis name: %s, Enrichr Library: %s'%(description, gene_set))
+        self._logger.info('Analysis name: %s, Enrichr Library: %s'%(description, gene_set))
 
         ## enrichr url
         ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/addList'
@@ -101,7 +101,7 @@ class Enrichr(GSEAbase):
         sleep(1)
         job_id = json.loads(response.text)
 
-        logger.debug('Job ID:'+ str(job_id))
+        self._logger.debug('Job ID:'+ str(job_id))
         ENRICHR_URL_A = 'http://amp.pharm.mssm.edu/Enrichr/view?userListId=%s'
         user_list_id = job_id['userListId']
         response_gene_list = requests.get(ENRICHR_URL_A % str(user_list_id), timeout=None)
@@ -109,7 +109,7 @@ class Enrichr(GSEAbase):
         if not response_gene_list.ok:
             raise Exception('Error getting gene list')
 
-        logger.info('Submitted gene list:' + str(job_id))
+        self._logger.info('Submitted gene list:' + str(job_id))
         # Get enrichment results
         ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/enrich'
         query_string = '?userListId=%s&backgroundType=%s'
@@ -119,7 +119,7 @@ class Enrichr(GSEAbase):
         if not response.ok:
             raise Exception('Error fetching enrichment results')
 
-        logger.debug('Get enrichment results: Job Id:'+ str(job_id))
+        self._logger.debug('Get enrichment results: Job Id:'+ str(job_id))
         ## Download file of enrichment results
         ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/export'
         query_string = '?userListId=%s&filename=%s&backgroundType=%s'
@@ -134,7 +134,7 @@ class Enrichr(GSEAbase):
         s.mount('http://', HTTPAdapter(max_retries=retries))
         response = s.get(url, stream=True, timeout=None)
 
-        logger.info('Downloading file of enrichment results: Job Id:'+ str(job_id))
+        self._logger.info('Downloading file of enrichment results: Job Id:'+ str(job_id))
         outfile="%s/%s.%s.%s.reports.txt"%(self.outdir, gene_set, description, self.module)
 
         with open(outfile, 'wb') as f:
@@ -142,7 +142,7 @@ class Enrichr(GSEAbase):
                 if chunk:
                     f.write(chunk)
 
-        logger.debug('Results written to: ' + outfile)
+        self._logger.debug('Results written to: ' + outfile)
         #save results
         df =  read_table(outfile)
         self.res2d = df
@@ -152,12 +152,14 @@ class Enrichr(GSEAbase):
             fig = barplot(df=df, cutoff=self.cutoff,
                         figsize=self.figsize, top_term=self.__top_term,)
             if fig is None:
-                logger.warning("Warning: No enrich terms using library %s when cuttoff = %s"%(gene_set, self.cutoff))
+                self._logger.warning("Warning: No enrich terms using library %s when cuttoff = %s"%(gene_set, self.cutoff))
             else:
                 fig.savefig(outfile.replace("txt", self.format),
                             bbox_inches='tight', dpi=300)
-        logger.info('Done.\n')
+        self._logger.info('Done.\n')
         return
+
+    
 def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr',
             cutoff=0.05, format='pdf', figsize=(8,6), top_term=10, no_plot=False, verbose=False):
     """Enrichr API.
