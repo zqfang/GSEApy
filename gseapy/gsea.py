@@ -55,7 +55,7 @@ class GSEAbase(object):
         logger = logging.getLogger("")
         #logger.setLevel(log_level)
         self._logger=logger
-        return logger
+        return
 
     def _log_stop(self):
         """log stop"""
@@ -100,8 +100,7 @@ class GSEAbase(object):
             raise Exception('Error parsing gene ranking values!')
 
         #sort ranking values from high to low
-        if rank_metric.shape[1] == 2: # if cols > 2, means this is a expression matrixs of gct format
-            rank_metric.sort_values(by=rank_metric.columns[1], ascending=self.ascending, inplace=True)
+        rank_metric.sort_values(by=rank_metric.columns[1], ascending=self.ascending, inplace=True)
         #drop na values
         if rank_metric.isnull().any(axis=1).sum() >0:
             self._logger.warning("Input gene rankings contains NA values(gene name and ranking value), drop them all!")
@@ -118,35 +117,65 @@ class GSEAbase(object):
             rank_metric.drop_duplicates(subset=rank_metric.columns[0], inplace=True, keep='first')
 
 
-        if rank_metric.shape[1] == 2:
-            #reset ranking index, because you have sort values and drop duplicates.
-            rank_metric.reset_index(drop=True, inplace=True)
-            rank_metric.columns = ['gene_name','rank']
-            rankser = rank_metric.set_index('gene_name')['rank']
-            self.ranking = rankser
+
+        #reset ranking index, because you have sort values and drop duplicates.
+        rank_metric.reset_index(drop=True, inplace=True)
+        rank_metric.columns = ['gene_name','rank']
+        rankser = rank_metric.set_index('gene_name')['rank']
+        self.ranking = rankser
         # return series
         return rankser
 
-    def parse_gmt(self, min_size=1, max_size=1000):
+    def load_gmt(self, gene_list, gmt):
+        """load gene set dict"""
+
+        genesets_dict = self.parse_gmt(gmt)
+        subsets = list(genesets_dict.keys())
+        for subset in subsets:
+            tag_indicator = np.in1d(gene_list, genesets_dict.get(subset), assume_unique=True)
+            tag_len = tag_indicator.sum()
+            if tag_len <= self.min_size or tag_len >= self.max_size:
+                del genesets_dict[subset]
+            else:
+                continue
+
+        filsets_num = len(subsets) - len(genesets_dict)
+        self._logger.info("%04d gene_sets have been filtered out when max_size=%s and min_size=%s"%(filsets_num, self.max_size, self.min_size))
+
+        if filsets_num == len(subsets):
+            self._logger.error("No gene sets passed throught filtering condition!!!, try new paramters again!\n" +\
+                             "Note: Gene names for gseapy is case sensitive." )
+            sys.exit(0)
+
+        self._gmtdct=genesets_dict
+        return genesets_dict
+
+    def parse_gmt(self, gmt):
         """gmt parser"""
 
-        gmt = self.gene_set
         if gmt.lower().endswith(".gmt"):
             logging.info("User Defined gene sets is given.......continue..........")
             with open(gmt) as genesets:
                  genesets_dict = { line.strip().split("\t")[0]: line.strip("\n").split("\t")[2:]
                                   for line in genesets.readlines()}
+            return genesets_dict
+
+        elif gmt in DEFAULT_LIBRARY:
+            pass
+        elif gmt in self.get_libraries():
+            pass
         else:
-            logging.info("Downloading and generating Enrichr library gene sets...")
-            if gmt in DEFAULT_LIBRARY:
-                names = DEFAULT_LIBRARY
-            else:
-                names = self.get_libraries()
+            self._logger.error("No supported gene_sets: %s"%gmt)
+            sys.exit(0)
 
-            if gmt in names:
-                genesets_dict = self.download_libraries(gmt)
-
-        return genesets_dict
+        self._logger.info("Downloading and generating Enrichr library gene sets...")
+        tmpname = "enrichr." + gmt + ".gmt"
+        tempath = os.path.join(self.outdir, tmpname)
+        # if file already download
+        if os.path.isfile(tempath):
+            return self.parse_gmt(tempath)
+        else:
+            return self.download_libraries(gmt)
 
     def get_libraries(self):
         """return enrichr active enrichr library name.Offical API """
@@ -155,7 +184,7 @@ class GSEAbase(object):
         libs = [lib['libraryName'] for lib in libs_json['statistics']]
         return sorted(libs)
 
-    def download_libraries(self, libname, outname="gene_sets.gmt"):
+    def download_libraries(self, libname):
         """ download enrichr libraries.
 
             define max tries num
@@ -176,6 +205,7 @@ class GSEAbase(object):
             raise Exception('Error fetching enrichment results, check internet connection first.')
         ### reformat to dict and wirte to disk
         genesets_dict = {}
+        outname = "enrichr.%s.gmt"%libname
         with open(os.path.join(self.outdir, outname),"w") as g:
             for line in response.iter_lines(chunk_size=1024, decode_unicode='utf-8'):
                 g.write(line)
@@ -302,6 +332,10 @@ class GSEA(GSEAbase):
         self.verbose=bool(verbose)
         self.module='gsea'
         self.ranking=None
+        #init logger
+        mkdirs(self.outdir)
+        self._log_init(module=self.module,
+                       log_level=logging.INFO if self.verbose else logging.WARNING)
 
     def load_data(self, cls_vec):
         """pre-processed the data frame.new filtering methods will be implement here.
@@ -342,12 +376,9 @@ class GSEA(GSEAbase):
 
         assert self.permutation_type in ["phenotype", "gene_set"]
         assert self.min_size <= self.max_size
-        # creat output dirs
-        mkdirs(self.outdir)
-        logger = self._log_init(module=self.module,
-                               log_level=logging.INFO if self.verbose else logging.WARNING)
+
         #Start Analysis
-        logger.info("Parsing data files for GSEA.............................")
+        self._logger.info("Parsing data files for GSEA.............................")
         # phenotype labels parsing
         phenoPos, phenoNeg, cls_vector = gsea_cls_parser(self.classes)
         #select correct expression genes and values.
@@ -358,11 +389,12 @@ class GSEA(GSEAbase):
         dat2 = ranking_metric(df=dat, method=self.method, phenoPos=phenoPos, phenoNeg=phenoNeg,
                               classes=cls_vector, ascending=self.ascending)
         #filtering out gene sets and build gene sets dictionary
-        gmt = gsea_gmt_parser(self.gene_sets, min_size=self.min_size, max_size=self.max_size,
-                              gene_list=dat2.index.values)
+        # gmt = gsea_gmt_parser(self.gene_sets, min_size=self.min_size, max_size=self.max_size,
+        #                       gene_list=dat2.index.values)
+        gmt = self.load_gmt(gene_list=dat2.index.values, gmt=self.gene_sets)
 
-        logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
-        logger.info("Start to run GSEA...Might take a while..................")
+        self._logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
+        self._logger.info("Start to run GSEA...Might take a while..................")
         #cpu numbers
         self._set_cores()
         #compute ES, NES, pval, FDR, RES
@@ -375,7 +407,7 @@ class GSEA(GSEAbase):
                                                              classes=cls_vector, ascending=self.ascending,
                                                              seed=self.seed)
 
-        logger.info("Start to generate gseapy reports, and produce figures...")
+        self._logger.info("Start to generate gseapy reports, and produce figures...")
         res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
         self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
                                    gmt=gmt, rank_metric=dat2, permutation_type=self.permutation_type)
@@ -387,7 +419,7 @@ class GSEA(GSEAbase):
                        figsize=self.figsize, format=self.format, module=self.module,
                        data=heat_dat, classes=cls_vector, phenoPos=phenoPos, phenoNeg=phenoNeg)
 
-        logger.info("Congratulations. GSEApy run successfully................\n")
+        self._logger.info("Congratulations. GSEApy run successfully................\n")
 
         return
 
@@ -418,15 +450,16 @@ class Prerank(GSEAbase):
         self.ranking=None
         self.module='prerank'
         self._processes=processes
-
+        # init logger
+        mkdirs(self.outdir)
+        self._log_init(module=self.module,
+                      log_level=logging.INFO if self.verbose else logging.WARNING)
 
     def run(self):
         """GSEA prerank workflow"""
 
         assert self.min_size <= self.max_size
-        mkdirs(self.outdir)
-        logger = self._log_init(module=self.module,
-                               log_level=logging.INFO if self.verbose else logging.WARNING)
+
         #parsing rankings
         dat2 = self._load_ranking(self.rnk)
         assert len(dat2) > 1
@@ -434,12 +467,14 @@ class Prerank(GSEAbase):
         #cpu numbers
         self._set_cores()
         #Start Analysis
-        logger.info("Parsing data files for GSEA.............................")
+        self._logger.info("Parsing data files for GSEA.............................")
         #filtering out gene sets and build gene sets dictionary
-        gmt = gsea_gmt_parser(self.gene_sets, min_size=self.min_size, max_size=self.max_size,
-                              gene_list=dat2.index.values)
-        logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
-        logger.info("Start to run GSEA...Might take a while..................")
+        # gmt = gsea_gmt_parser(self.gene_sets, min_size=self.min_size, max_size=self.max_size,
+        #                       gene_list=dat2.index.values)
+        gmt = self.load_gmt(gene_list=dat2.index.values, gmt=self.gene_sets)
+
+        self._logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
+        self._logger.info("Start to run GSEA...Might take a while..................")
         #compute ES, NES, pval, FDR, RES
         gsea_results, hit_ind,rank_ES, subsets = gsea_compute(data=dat2, n=self.permutation_num, gmt=gmt,
                                                               weighted_score_type=self.weighted_score_type,
@@ -448,7 +483,7 @@ class Prerank(GSEAbase):
                                                               classes=None, ascending=self.ascending,
                                                               seed=self.seed)
 
-        logger.info("Start to generate gseapy reports, and produce figures...")
+        self._logger.info("Start to generate gseapy reports, and produce figures...")
         res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
         self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
                                    gmt=gmt, rank_metric=dat2, permutation_type="gene_sets")
@@ -459,7 +494,7 @@ class Prerank(GSEAbase):
                        figsize=self.figsize, format=self.format,
                        module=self.module, phenoPos=self.pheno_pos, phenoNeg=self.pheno_neg)
 
-        logger.info("Congratulations. GSEApy run successfully................\n")
+        self._logger.info("Congratulations. GSEApy run successfully................\n")
 
         return
 
@@ -489,7 +524,10 @@ class SingleSampleGSEA(GSEAbase):
         self.module='ssgsea'
         self._processes=processes
         self._imat=None
-
+        # init logger
+        mkdirs(self.outdir)
+        self._log_init(module=self.module,
+                      log_level=logging.INFO if self.verbose else logging.WARNING)
     def corplot(self):
         """NES Correlation plot
         """
@@ -568,9 +606,6 @@ class SingleSampleGSEA(GSEAbase):
     def run(self):
         """
         """
-        mkdirs(self.outdir)
-        logger = self._log_init(module=self.module,
-                                log_level=logging.INFO if self.verbose else logging.WARNING)
         #load data
         data = self.load_data()
 
@@ -611,10 +646,8 @@ class SingleSampleGSEA(GSEAbase):
         self._set_cores()
         #filtering out gene sets and build gene sets dictionary
         if gmt is None:
-            gmt = gsea_gmt_parser(self.gene_sets,
-                                  min_size=self.min_size,
-                                  max_size=self.max_size,
-                                  gene_list=dat2.index.values)
+            gmt = self.load_gmt(gene_list=dat2.index.values, gmt=self.gene_sets)
+
         self._logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
         self._logger.info("Start to run GSEA...Might take a while..................")
         #compute ES, NES, pval, FDR, RES
@@ -648,10 +681,7 @@ class SingleSampleGSEA(GSEAbase):
 
         # df.index.values are gene_names
         #filtering out gene sets and build gene sets dictionary
-        gmt = gsea_gmt_parser(self.gene_sets,
-                              min_size=self.min_size,
-                              max_size=self.max_size,
-                              gene_list=df.index.values)
+        gmt = self.load_gmt(gene_list=df.index.values, gmt=self.gene_sets)
 
         #Save each sample results to ordereddict
         self.resultsOnSamples = {}
@@ -700,9 +730,12 @@ class Replot(GSEAbase):
         self.format=format
         self.verbose=bool(verbose)
         self.module='replot'
-        self.gene_sets=None
+        self.gene_sets='run'
         self.ascending=False
-
+        # init logger
+        mkdirs(self.outdir)
+        self._log_init(module=self.module,
+                      log_level=logging.INFO if self.verbose else logging.WARNING)
     def run(self):
         """main replot function"""
         assert self.min_size <= self.max_size
@@ -728,12 +761,10 @@ class Replot(GSEAbase):
             phenoPos, phenoNeg = '',''
         #start reploting
         self.gene_sets=gene_set_path
-        mkdirs(self.outdir)
-        logger = self._log_init(module=self.module,
-                                log_level=logging.INFO if self.verbose else logging.WARNING)
 
         #obtain gene sets
         gene_set_dict = gsea_gmt_parser(gene_set_path, min_size=self.min_size, max_size=self.max_size)
+        gene_set_dict = self.parse_gmt(gmt=gene_set_path)
         #obtain rank_metrics
         rank_metric = self._load_ranking(rank_path)
         correl_vector =  rank_metric.values
@@ -755,7 +786,7 @@ class Replot(GSEAbase):
                             fdr, RES, phenoPos, phenoNeg, self.figsize,
                             self.format, self.outdir, self.module)
 
-        logger.info("Congratulations! Your plots have been reproduced successfully!\n")
+        self._logger.info("Congratulations! Your plots have been reproduced successfully!\n")
 
 
 
