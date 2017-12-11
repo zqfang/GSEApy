@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>GSEAPY Example &mdash; GSEApy 0.8.9 documentation</title>
+  <title>GSEAPY Example &mdash; GSEApy 0.9.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="GSEApy 0.8.9 documentation" href="index.html"/>
+    <link rel="top" title="GSEApy 0.9.0 documentation" href="index.html"/>
         <link rel="prev" title="A Protocol to Prepare files for GSEAPY" href="gseapy_tutorial.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.8.9
+                0.9.0
               </div>
             
           
@@ -117,7 +117,11 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#1)-Assign-ssgsea()-with-a-txt-file,-dataframe,-or-Seires(gene-name-as-index).">1) Assign ssgsea() with a txt file, dataframe, or Seires(gene name as index).</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#2)-ssgsea-supports-gene-expression-matix-in-gct-format.">2) <code class="docutils literal"><span class="pre">ssgsea</span></code> supports gene expression matix in gct format.</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#3)-command-line-usage-of-single-sample-gsea">3) command line usage of single sample gsea</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#3)-command-line-usage-of-single-sample-gsea">3) command line usage of single sample gsea</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#6.-Replot-Example">6. Replot Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#1)-command-line-usage-of-replot">1) command line usage of replot</a></li>
 </ul>
 </li>
 </ul>
@@ -417,7 +421,7 @@ div.nboutput div.output_area.stderr {
 </pre></div>
 </div>
 <div class="output_area highlight-none"><div class="highlight"><pre>
-<span></span>&#39;0.8.9&#39;
+<span></span>&#39;0.9.0&#39;
 </pre></div>
 </div>
 </div>
@@ -467,7 +471,7 @@ too</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">gene_list</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s2">&quot;./gene_list.txt&quot;</span><span class="p">,</span><span class="n">header</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+<span></span><span class="n">gene_list</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s2">&quot;./data/gene_list.txt&quot;</span><span class="p">,</span><span class="n">header</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
 <span class="n">gene_list</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -574,11 +578,11 @@ too</p>
 <span class="c1"># if you are only intrested in dataframe that enrichr returned, please set no_plot=True</span>
 
 <span class="c1"># list, dataframe, series inputs are supported</span>
-<span class="n">enr</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">enrichr</span><span class="p">(</span><span class="n">gene_list</span><span class="o">=</span><span class="s2">&quot;./gene_list.txt&quot;</span><span class="p">,</span>
+<span class="n">enr</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">enrichr</span><span class="p">(</span><span class="n">gene_list</span><span class="o">=</span><span class="s2">&quot;./data/gene_list.txt&quot;</span><span class="p">,</span>
                  <span class="c1"># or gene_list=&#39;./gene_list.txt&#39;, or gene_list=glist</span>
                  <span class="n">description</span><span class="o">=</span><span class="s1">&#39;test_name&#39;</span><span class="p">,</span>
                  <span class="n">gene_sets</span><span class="o">=</span><span class="s1">&#39;KEGG_2016&#39;</span><span class="p">,</span>
-                 <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;enrichr_kegg&#39;</span><span class="p">,</span>
+                 <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;test/enrichr_kegg&#39;</span><span class="p">,</span>
                  <span class="n">cutoff</span><span class="o">=</span><span class="mf">0.5</span> <span class="c1"># test dataset, use lower value of range(0,1)</span>
                 <span class="p">)</span>
 
@@ -707,10 +711,10 @@ too</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="o">!</span>gseapy enrichr -i ./gene_list.txt <span class="err">\</span>
+<span></span><span class="o">!</span>gseapy enrichr -i ./data/gene_list.txt <span class="err">\</span>
                <span class="o">--</span><span class="n">description</span> <span class="n">BP2017</span> \
                <span class="o">-</span><span class="n">g</span> <span class="n">GO_Biological_Process_2017</span> \
-               <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">o</span> <span class="n">enrichr_BP</span>
+               <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">o</span> <span class="n">test</span><span class="o">/</span><span class="n">enrichr_BP</span>
 </pre></div>
 </div>
 </div>
@@ -719,12 +723,12 @@ too</p>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2017-11-29 14:46:44,166 Connecting to Enrichr Server to get latest library names
-2017-11-29 14:46:45,098 Analysis name: BP2017, Enrichr Library: GO_Biological_Process_2017
-2017-11-29 14:46:47,915 Submitted gene list:{&#39;shortId&#39;: &#39;35l0h&#39;, &#39;userListId&#39;: 6154327}
-2017-11-29 14:46:53,387 Downloading file of enrichment results: Job Id:{&#39;shortId&#39;: &#39;35l0h&#39;, &#39;userListId&#39;: 6154327}
-2017-11-29 14:46:55,154 Warning: No enrich terms using library GO_Biological_Process_2017 when cuttoff = 0.05
-2017-11-29 14:46:55,154 Done.
+2017-12-10 16:30:16,782 Connecting to Enrichr Server to get latest library names
+2017-12-10 16:30:17,580 Analysis name: BP2017, Enrichr Library: GO_Biological_Process_2017
+2017-12-10 16:30:20,398 Submitted gene list:{u&#39;userListId&#39;: 6188114, u&#39;shortId&#39;: u&#39;36b30&#39;}
+2017-12-10 16:30:26,645 Downloading file of enrichment results: Job Id:{u&#39;userListId&#39;: 6188114, u&#39;shortId&#39;: u&#39;36b30&#39;}
+2017-12-10 16:30:27,923 Warning: No enrich terms using library GO_Biological_Process_2017 when cuttoff = 0.05
+2017-12-10 16:30:27,923 Done.
 
 </pre></div></div>
 </div>
@@ -746,7 +750,7 @@ assign a <code class="docutils literal"><span class="pre">DataFrame</span></code
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">rank</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s2">&quot;./edb/gsea_data.gsea_data.rnk&quot;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+<span></span><span class="n">rank</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s2">&quot;./data/edb/gsea_data.gsea_data.rnk&quot;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
 <span class="n">rank</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -818,13 +822,13 @@ assign a <code class="docutils literal"><span class="pre">DataFrame</span></code
 <span></span><span class="c1"># run prerank</span>
 <span class="c1"># enrichr libraries are supported by prerank module. Just provide the name</span>
 <span class="n">pre</span><span class="o">=</span><span class="p">[]</span>
-<span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="s1">&#39;./genes.gmt&#39;</span><span class="p">,</span> <span class="s1">&#39;KEGG_2016&#39;</span><span class="p">],[</span><span class="s1">&#39;bp&#39;</span><span class="p">,</span><span class="s1">&#39;kegg&#39;</span><span class="p">]):</span>
+<span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="s1">&#39;./data/genes.gmt&#39;</span><span class="p">,</span> <span class="s1">&#39;KEGG_2016&#39;</span><span class="p">],[</span><span class="s1">&#39;bp&#39;</span><span class="p">,</span><span class="s1">&#39;kegg&#39;</span><span class="p">]):</span>
     <span class="c1">#use 4 process to acceralate the permutation speed</span>
     <span class="n">pre_res</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">prerank</span><span class="p">(</span><span class="n">rnk</span><span class="o">=</span><span class="n">rank</span><span class="p">,</span>
                          <span class="n">gene_sets</span><span class="o">=</span><span class="n">s</span><span class="p">,</span>
                          <span class="n">processes</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
                          <span class="n">permutation_num</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="c1"># reduce number to speed up test</span>
-                         <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;prerank_report_&#39;</span><span class="o">+</span><span class="n">n</span><span class="p">,</span><span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
+                         <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;test/prerank_report_&#39;</span><span class="o">+</span><span class="n">n</span><span class="p">,</span><span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
     <span class="n">pre</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pre_res</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -868,7 +872,7 @@ assign a <code class="docutils literal"><span class="pre">DataFrame</span></code
       <th>nes</th>
       <th>pval</th>
       <th>fdr</th>
-      <th>gene_set_size</th>
+      <th>geneset_size</th>
       <th>matched_size</th>
       <th>genes</th>
     </tr>
@@ -887,9 +891,9 @@ assign a <code class="docutils literal"><span class="pre">DataFrame</span></code
     <tr>
       <th>DvA_UpIN_A</th>
       <td>0.405880</td>
-      <td>1.532994</td>
-      <td>0.064516</td>
-      <td>0.125000</td>
+      <td>1.500712</td>
+      <td>0.067568</td>
+      <td>0.148649</td>
       <td>284</td>
       <td>19</td>
       <td>ABHD14B,VNN1,NELF,MARVELD2,LAMB3,TMPRSS2,TM6SF...</td>
@@ -897,9 +901,9 @@ assign a <code class="docutils literal"><span class="pre">DataFrame</span></code
     <tr>
       <th>DvA_UpIN_D</th>
       <td>0.166924</td>
-      <td>0.665550</td>
-      <td>0.787879</td>
-      <td>0.828125</td>
+      <td>0.598651</td>
+      <td>0.918919</td>
+      <td>0.905405</td>
       <td>236</td>
       <td>21</td>
       <td>PMP22,STBD1,DUSP14,RET,GPX8,CHRNB1,PRKD1,COL7A...</td>
@@ -928,7 +932,7 @@ assign a <code class="docutils literal"><span class="pre">DataFrame</span></code
 </pre></div>
 </div>
 <div class="output_area highlight-none"><div class="highlight"><pre>
-<span></span>&lt;matplotlib.axes._subplots.AxesSubplot at 0x11a2987f0&gt;
+<span></span>&lt;matplotlib.axes._subplots.AxesSubplot at 0x11753e0b8&gt;
 </pre></div>
 </div>
 </div>
@@ -966,7 +970,7 @@ assign a <code class="docutils literal"><span class="pre">DataFrame</span></code
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">phenoA</span><span class="p">,</span> <span class="n">phenoB</span><span class="p">,</span> <span class="n">class_vector</span> <span class="o">=</span>  <span class="n">gp</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">gsea_cls_parser</span><span class="p">(</span><span class="s2">&quot;./P53.cls&quot;</span><span class="p">)</span>
+<span></span><span class="n">phenoA</span><span class="p">,</span> <span class="n">phenoB</span><span class="p">,</span> <span class="n">class_vector</span> <span class="o">=</span>  <span class="n">gp</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">gsea_cls_parser</span><span class="p">(</span><span class="s2">&quot;./data/P53.cls&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -995,7 +999,7 @@ assign a <code class="docutils literal"><span class="pre">DataFrame</span></code
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">gene_exp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s2">&quot;./P53_resampling_data.txt&quot;</span><span class="p">)</span>
+<span></span><span class="n">gene_exp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s2">&quot;./data/P53_resampling_data.txt&quot;</span><span class="p">)</span>
 <span class="n">gene_exp</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -1209,7 +1213,7 @@ positively correlated:  MUT
 negtively correlated:  WT
 </pre></div></div>
 </div>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
 <span></span>In [20]:
 </pre></div>
@@ -1224,11 +1228,19 @@ negtively correlated:  WT
                  <span class="c1">#set permutation_type to phenotype if samples &gt;=15</span>
                  <span class="n">permutation_type</span><span class="o">=</span><span class="s1">&#39;phenotype&#39;</span><span class="p">,</span>
                  <span class="n">permutation_num</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="c1"># reduce number to speed up test</span>
-                 <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;gsea_report&#39;</span><span class="p">,</span>
+                 <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;test/gsea_report&#39;</span><span class="p">,</span>
                  <span class="n">method</span><span class="o">=</span><span class="s1">&#39;signal_to_noise&#39;</span><span class="p">,</span>
                  <span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+2017-12-10 16:30:36,298 Warning: dropping duplicated gene names, only keep the first values
+</pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
@@ -1269,7 +1281,7 @@ negtively correlated:  WT
       <th>nes</th>
       <th>pval</th>
       <th>fdr</th>
-      <th>gene_set_size</th>
+      <th>geneset_size</th>
       <th>matched_size</th>
       <th>genes</th>
     </tr>
@@ -1286,54 +1298,54 @@ negtively correlated:  WT
   </thead>
   <tbody>
     <tr>
-      <th>MAPK signaling pathway_Homo sapiens_hsa04010</th>
-      <td>-0.392928</td>
-      <td>-1.321358</td>
-      <td>0.127660</td>
-      <td>0.404908</td>
-      <td>255</td>
-      <td>18</td>
-      <td>GADD45B,RRAS,SOS2,FGF17,PPP3CC,TNFRSF1A,PDGFRB...</td>
-    </tr>
-    <tr>
-      <th>HTLV-I infection_Homo sapiens_hsa05166</th>
-      <td>-0.249752</td>
-      <td>-0.817838</td>
-      <td>0.765957</td>
-      <td>0.723926</td>
-      <td>258</td>
-      <td>19</td>
-      <td>FZD2,ETS1,STAT5B,RRAS,LTBR,PPP3CC,TNFRSF1A,EGR...</td>
+      <th>Focal adhesion_Homo sapiens_hsa04510</th>
+      <td>-0.275712</td>
+      <td>-0.773969</td>
+      <td>0.666667</td>
+      <td>0.793388</td>
+      <td>202</td>
+      <td>15</td>
+      <td>ILK,VEGFC,SOS2,ERBB2,THBS4,PDGFRB,PDGFC,ITGAV,...</td>
     </tr>
     <tr>
       <th>Rap1 signaling pathway_Homo sapiens_hsa04015</th>
-      <td>-0.285975</td>
-      <td>-0.977817</td>
-      <td>0.555556</td>
-      <td>0.740798</td>
+      <td>-0.286127</td>
+      <td>-0.941143</td>
+      <td>0.573770</td>
+      <td>0.895317</td>
       <td>211</td>
       <td>19</td>
       <td>RRAS,VEGFC,CSF1,FGF17,PDGFRB,FGF4,PDGFC,SIPA1L...</td>
     </tr>
     <tr>
-      <th>PI3K-Akt signaling pathway_Homo sapiens_hsa04151</th>
-      <td>0.182245</td>
-      <td>0.537851</td>
-      <td>1.000000</td>
-      <td>0.986631</td>
-      <td>341</td>
-      <td>22</td>
-      <td>GNG13,VEGFC,GNB4,CSF1,SOS2,FGF17,THBS4,PDGFRB,...</td>
+      <th>MAPK signaling pathway_Homo sapiens_hsa04010</th>
+      <td>-0.393386</td>
+      <td>-1.252423</td>
+      <td>0.142857</td>
+      <td>0.919421</td>
+      <td>255</td>
+      <td>18</td>
+      <td>GADD45B,RRAS,SOS2,FGF17,PPP3CC,TNFRSF1A,PDGFRB...</td>
     </tr>
     <tr>
-      <th>Cytokine-cytokine receptor interaction_Homo sapiens_hsa04060</th>
-      <td>0.229069</td>
-      <td>0.581508</td>
-      <td>0.963636</td>
-      <td>1.000000</td>
-      <td>265</td>
-      <td>18</td>
-      <td>IL10RB,VEGFC,CSF1,TNFSF12,LTBR,CXCL10,TNFRSF1A...</td>
+      <th>PI3K-Akt signaling pathway_Homo sapiens_hsa04151</th>
+      <td>0.181505</td>
+      <td>0.631472</td>
+      <td>0.888889</td>
+      <td>0.944712</td>
+      <td>341</td>
+      <td>22</td>
+      <td>CLIC6,VEGFC,GNB4,CSF1,SOS2,FGF17,THBS4,PDGFRB,...</td>
+    </tr>
+    <tr>
+      <th>HTLV-I infection_Homo sapiens_hsa05166</th>
+      <td>-0.250191</td>
+      <td>-0.777790</td>
+      <td>0.739130</td>
+      <td>0.973657</td>
+      <td>258</td>
+      <td>19</td>
+      <td>FZD2,ETS1,STAT5B,RRAS,LTBR,PPP3CC,TNFRSF1A,EGR...</td>
     </tr>
   </tbody>
 </table>
@@ -1374,7 +1386,7 @@ the backgroud.</p>
 <span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span>
 
 <span class="c1">#erich plot</span>
-<span class="n">Image</span><span class="p">(</span><span class="s2">&quot;./gsea_report/Pathways in cancer_Homo sapiens_hsa05200.gsea.png&quot;</span><span class="p">,</span><span class="n">width</span><span class="o">=</span><span class="mi">650</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
+<span class="n">Image</span><span class="p">(</span><span class="s2">&quot;./test/gsea_report/Pathways in cancer_Homo sapiens_hsa05200.gsea.png&quot;</span><span class="p">,</span><span class="n">width</span><span class="o">=</span><span class="mi">650</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1394,7 +1406,7 @@ the backgroud.</p>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
 <span></span><span class="c1">#corresponding heatmap</span>
-<span class="n">Image</span><span class="p">(</span><span class="s2">&quot;./gsea_report/Pathways in cancer_Homo sapiens_hsa05200.heatmap.png&quot;</span><span class="p">)</span>
+<span class="n">Image</span><span class="p">(</span><span class="s2">&quot;./test/gsea_report/Pathways in cancer_Homo sapiens_hsa05200.heatmap.png&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1417,7 +1429,7 @@ the backgroud.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="c1"># !gseapy gsea -d ./P53_resampling_data.txt -g KEGG_2016 -c ./P53.cls -o gsea_reprot_2 -v -t phenotype</span>
+<span></span><span class="c1"># !gseapy gsea -d ./data/P53_resampling_data.txt -g KEGG_2016 -c ./data/P53.cls -o test/gsea_reprot_2 -v -t phenotype</span>
 </pre></div>
 </div>
 </div>
@@ -1436,9 +1448,9 @@ should be found in your expression table</strong></p>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
 <span></span><span class="c1"># txt file input</span>
-<span class="n">ss</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">ssgsea</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s2">&quot;./testSet_rand1200.gct&quot;</span><span class="p">,</span>
-               <span class="n">gene_sets</span><span class="o">=</span><span class="s2">&quot;./randomSets.gmt&quot;</span><span class="p">,</span>
-               <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;ssgsea_report&#39;</span><span class="p">,</span>
+<span class="n">ss</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">ssgsea</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s2">&quot;./data/testSet_rand1200.gct&quot;</span><span class="p">,</span>
+               <span class="n">gene_sets</span><span class="o">=</span><span class="s2">&quot;./data/randomSets.gmt&quot;</span><span class="p">,</span>
+               <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;test/ssgsea_report&#39;</span><span class="p">,</span>
                <span class="n">sample_norm_method</span><span class="o">=</span><span class="s1">&#39;rank&#39;</span><span class="p">,</span> <span class="c1"># choose &#39;custom&#39; for your own rank list</span>
                <span class="n">permutation_num</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="c1"># reduce number to speed up test</span>
                <span class="n">processes</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
@@ -1452,7 +1464,7 @@ should be found in your expression table</strong></p>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
 <span></span><span class="c1"># or assign a dataframe, or Series to ssgsea()</span>
-<span class="n">ssdf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s2">&quot;./temp.txt&quot;</span><span class="p">,</span><span class="n">header</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+<span class="n">ssdf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s2">&quot;./data/temp.txt&quot;</span><span class="p">,</span><span class="n">header</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
 <span class="n">ssdf</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -1635,9 +1647,9 @@ should be found in your expression table</strong></p>
 <span class="c1"># supports dataframe and series</span>
 <span class="k">for</span> <span class="n">dat</span> <span class="ow">in</span> <span class="p">[</span><span class="n">ssdf</span><span class="p">,</span> <span class="n">ssdf2</span><span class="p">,</span> <span class="n">ssSeries</span><span class="p">]:</span>
     <span class="n">ss</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">ssgsea</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">ssdf</span><span class="p">,</span>
-                   <span class="n">gene_sets</span><span class="o">=</span><span class="s2">&quot;./temp.gmt&quot;</span><span class="p">,</span>
-                   <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;ssgsea_report_series&#39;</span><span class="p">,</span>
-                   <span class="n">permutation_num</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="c1"># reduce number to speed up test</span>
+                   <span class="n">gene_sets</span><span class="o">=</span><span class="s2">&quot;./data/temp.gmt&quot;</span><span class="p">,</span>
+                   <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;test/ssgsea_report_series&#39;</span><span class="p">,</span>
+                   <span class="n">permutation_num</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="c1"># reduce number to speed up test</span>
                    <span class="n">processes</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -1647,9 +1659,9 @@ should be found in your expression table</strong></p>
 </div>
 <div class="stderr output_area docutils container">
 <div class="highlight"><pre>
-/Users/bioninja/miniconda/envs/snakeflow/lib/python3.6/site-packages/gseapy-0.8.9-py3.6.egg/gseapy/algorithm.py:469: RuntimeWarning: divide by zero encountered in true_divide
+/Users/bioninja/miniconda/envs/snakeflow/lib/python3.6/site-packages/gseapy-0.9.0-py3.6.egg/gseapy/algorithm.py:389: RuntimeWarning: divide by zero encountered in true_divide
   choicelist = [np.sum(esnull &lt; es.reshape(len(es),1), axis=1)/ np.sum(esnull &lt; 0, axis=1),
-/Users/bioninja/miniconda/envs/snakeflow/lib/python3.6/site-packages/gseapy-0.8.9-py3.6.egg/gseapy/algorithm.py:522: RuntimeWarning: Mean of empty slice.
+/Users/bioninja/miniconda/envs/snakeflow/lib/python3.6/site-packages/gseapy-0.9.0-py3.6.egg/gseapy/algorithm.py:440: RuntimeWarning: Mean of empty slice.
   meanNeg = enrNull[enrNull &lt; 0 ].mean()
 /Users/bioninja/miniconda/envs/snakeflow/lib/python3.6/site-packages/numpy/core/_methods.py:80: RuntimeWarning: invalid value encountered in double_scalars
   ret = ret.dtype.type(ret / rcount)
@@ -1693,7 +1705,7 @@ should be found in your expression table</strong></p>
       <th>nes</th>
       <th>pval</th>
       <th>fdr</th>
-      <th>gene_set_size</th>
+      <th>geneset_size</th>
       <th>matched_size</th>
       <th>genes</th>
     </tr>
@@ -1712,7 +1724,7 @@ should be found in your expression table</strong></p>
     <tr>
       <th>hsa05205</th>
       <td>0.334921</td>
-      <td>6.003585</td>
+      <td>6.044095</td>
       <td>0.0</td>
       <td>0.0</td>
       <td>203</td>
@@ -1722,7 +1734,7 @@ should be found in your expression table</strong></p>
     <tr>
       <th>hsa05412</th>
       <td>0.284838</td>
-      <td>4.873279</td>
+      <td>4.457055</td>
       <td>0.0</td>
       <td>0.0</td>
       <td>74</td>
@@ -1732,7 +1744,7 @@ should be found in your expression table</strong></p>
     <tr>
       <th>hsa05410</th>
       <td>0.262569</td>
-      <td>4.575979</td>
+      <td>4.429039</td>
       <td>0.0</td>
       <td>0.0</td>
       <td>83</td>
@@ -1742,7 +1754,7 @@ should be found in your expression table</strong></p>
     <tr>
       <th>hsa05323</th>
       <td>0.168541</td>
-      <td>3.080340</td>
+      <td>3.260088</td>
       <td>0.0</td>
       <td>0.0</td>
       <td>89</td>
@@ -1751,8 +1763,8 @@ should be found in your expression table</strong></p>
     </tr>
     <tr>
       <th>hsa05322</th>
-      <td>0.202544</td>
-      <td>3.710825</td>
+      <td>0.202494</td>
+      <td>3.460019</td>
       <td>0.0</td>
       <td>0.0</td>
       <td>134</td>
@@ -1780,7 +1792,7 @@ attribute.</div>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s2">&quot;./P53_resampling_data.txt&quot;</span><span class="p">)</span>
+<span></span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s2">&quot;./data/P53_resampling_data.txt&quot;</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -1958,7 +1970,7 @@ attribute.</div>
 <p>5 rows × 51 columns</p>
 </div></div>
 </div>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
 <span></span>In [34]:
 </pre></div>
@@ -1966,12 +1978,20 @@ attribute.</div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
 <span></span><span class="c1"># dataframe support for multisamples</span>
 <span class="n">ss</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">ssgsea</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
-               <span class="n">gene_sets</span><span class="o">=</span><span class="s2">&quot;edb/gene_sets.gmt&quot;</span><span class="p">,</span>
-               <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;ssgsea_df_test&#39;</span><span class="p">,</span>
+               <span class="n">gene_sets</span><span class="o">=</span><span class="s2">&quot;data/edb/gene_sets.gmt&quot;</span><span class="p">,</span>
+               <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;test/ssgsea_df_test&#39;</span><span class="p">,</span>
                <span class="n">permutation_num</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="c1"># reduce number to speed up test</span>
                <span class="n">processes</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="stderr output_area docutils container">
+<div class="highlight"><pre>
+2017-12-10 16:32:09,476 Warning: dropping duplicated gene names, only keep the first values
+</pre></div></div>
 </div>
 <div class="line-block">
 <div class="line">Results for all samples save to a dict,</div>
@@ -2039,123 +2059,123 @@ attribute.</div>
   <tbody>
     <tr>
       <th>CDX2 OE-SPECIFIC</th>
-      <td>0.063312</td>
-      <td>0.048033</td>
-      <td>0.060661</td>
-      <td>0.037049</td>
-      <td>0.066525</td>
-      <td>0.054048</td>
-      <td>0.095978</td>
-      <td>0.055590</td>
-      <td>0.016074</td>
-      <td>0.075153</td>
+      <td>0.055284</td>
+      <td>0.045989</td>
+      <td>0.066603</td>
+      <td>0.029307</td>
+      <td>0.064584</td>
+      <td>0.047966</td>
+      <td>0.087221</td>
+      <td>0.048271</td>
+      <td>0.011876</td>
+      <td>0.070659</td>
       <td>...</td>
-      <td>0.067791</td>
-      <td>0.100940</td>
-      <td>0.059777</td>
-      <td>0.084775</td>
-      <td>0.080548</td>
-      <td>0.060905</td>
-      <td>0.084223</td>
-      <td>0.083534</td>
-      <td>0.101644</td>
-      <td>0.040594</td>
+      <td>0.066388</td>
+      <td>0.103779</td>
+      <td>0.045882</td>
+      <td>0.076371</td>
+      <td>0.077464</td>
+      <td>0.050755</td>
+      <td>0.079187</td>
+      <td>0.082081</td>
+      <td>0.099589</td>
+      <td>0.035357</td>
     </tr>
     <tr>
       <th>ES-SPECIFIC</th>
-      <td>0.004741</td>
-      <td>-0.014692</td>
-      <td>-0.043896</td>
-      <td>-0.006895</td>
-      <td>-0.017159</td>
-      <td>0.023932</td>
-      <td>-0.063195</td>
-      <td>-0.015735</td>
-      <td>-0.031965</td>
-      <td>0.013204</td>
+      <td>0.005227</td>
+      <td>-0.014497</td>
+      <td>-0.044143</td>
+      <td>-0.006360</td>
+      <td>-0.017111</td>
+      <td>0.024189</td>
+      <td>-0.062965</td>
+      <td>-0.015323</td>
+      <td>-0.031755</td>
+      <td>0.013577</td>
       <td>...</td>
-      <td>-0.019706</td>
-      <td>0.015909</td>
-      <td>0.003012</td>
-      <td>-0.092565</td>
-      <td>-0.035530</td>
-      <td>-0.039153</td>
-      <td>0.007243</td>
-      <td>-0.001316</td>
-      <td>-0.014034</td>
-      <td>0.009815</td>
+      <td>-0.019745</td>
+      <td>0.015568</td>
+      <td>0.003718</td>
+      <td>-0.092205</td>
+      <td>-0.035278</td>
+      <td>-0.038705</td>
+      <td>0.007308</td>
+      <td>-0.001290</td>
+      <td>-0.013822</td>
+      <td>0.010201</td>
     </tr>
     <tr>
       <th>GATA3 OE-SPECIFIC</th>
-      <td>0.054428</td>
-      <td>0.065237</td>
-      <td>0.052884</td>
-      <td>0.034603</td>
-      <td>0.071058</td>
-      <td>0.051076</td>
-      <td>0.064590</td>
-      <td>0.068909</td>
-      <td>0.062935</td>
-      <td>0.082841</td>
+      <td>0.048134</td>
+      <td>0.062670</td>
+      <td>0.058269</td>
+      <td>0.028236</td>
+      <td>0.069247</td>
+      <td>0.046038</td>
+      <td>0.058508</td>
+      <td>0.062448</td>
+      <td>0.057640</td>
+      <td>0.078927</td>
       <td>...</td>
-      <td>0.067162</td>
-      <td>0.064919</td>
-      <td>0.042293</td>
-      <td>0.073307</td>
-      <td>0.068217</td>
-      <td>0.076238</td>
-      <td>0.040121</td>
-      <td>0.056542</td>
-      <td>0.074962</td>
-      <td>0.025040</td>
+      <td>0.065980</td>
+      <td>0.069088</td>
+      <td>0.031576</td>
+      <td>0.066708</td>
+      <td>0.065999</td>
+      <td>0.067239</td>
+      <td>0.037795</td>
+      <td>0.056351</td>
+      <td>0.074067</td>
+      <td>0.021169</td>
     </tr>
     <tr>
       <th>HDAC1 UNIQUE TARGETS</th>
-      <td>0.036120</td>
-      <td>0.050314</td>
-      <td>0.065173</td>
-      <td>0.033754</td>
-      <td>0.032440</td>
-      <td>0.037152</td>
-      <td>0.060862</td>
-      <td>0.018020</td>
-      <td>0.049175</td>
-      <td>0.034612</td>
+      <td>0.028317</td>
+      <td>0.047847</td>
+      <td>0.071622</td>
+      <td>0.025061</td>
+      <td>0.032140</td>
+      <td>0.031022</td>
+      <td>0.052935</td>
+      <td>0.011902</td>
+      <td>0.042577</td>
+      <td>0.031479</td>
       <td>...</td>
-      <td>0.028117</td>
-      <td>0.041855</td>
-      <td>0.031641</td>
-      <td>0.052988</td>
-      <td>0.025374</td>
-      <td>0.060478</td>
-      <td>0.058104</td>
-      <td>0.096254</td>
-      <td>0.047768</td>
-      <td>0.025103</td>
+      <td>0.028887</td>
+      <td>0.049088</td>
+      <td>0.017285</td>
+      <td>0.045378</td>
+      <td>0.024702</td>
+      <td>0.048457</td>
+      <td>0.053754</td>
+      <td>0.093732</td>
+      <td>0.048204</td>
+      <td>0.019998</td>
     </tr>
     <tr>
       <th>OCT4 KD-SPECIFIC</th>
-      <td>0.023301</td>
-      <td>0.024868</td>
-      <td>0.037356</td>
-      <td>0.019239</td>
-      <td>0.052082</td>
-      <td>0.029802</td>
-      <td>0.061182</td>
-      <td>0.051132</td>
-      <td>0.035378</td>
-      <td>0.057658</td>
+      <td>0.019658</td>
+      <td>0.024214</td>
+      <td>0.041537</td>
+      <td>0.015177</td>
+      <td>0.051409</td>
+      <td>0.026923</td>
+      <td>0.057230</td>
+      <td>0.047114</td>
+      <td>0.032468</td>
+      <td>0.055335</td>
       <td>...</td>
-      <td>0.025439</td>
-      <td>0.046368</td>
-      <td>0.030731</td>
-      <td>0.087160</td>
-      <td>0.053855</td>
-      <td>0.050506</td>
-      <td>0.048906</td>
-      <td>0.045672</td>
-      <td>0.047296</td>
-      <td>0.020887</td>
+      <td>0.025882</td>
+      <td>0.049775</td>
+      <td>0.023426</td>
+      <td>0.082372</td>
+      <td>0.052761</td>
+      <td>0.044801</td>
+      <td>0.047005</td>
+      <td>0.045773</td>
+      <td>0.047395</td>
+      <td>0.018375</td>
     </tr>
   </tbody>
 </table>
@@ -2171,7 +2191,43 @@ attribute.</div>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span><span class="c1"># !gseapy ssgsea -d ./testSet_rand1200.gct -g temp.gmt -o ssgsea_report2  -p 4</span>
+<span></span><span class="c1"># !gseapy ssgsea -d ./data/testSet_rand1200.gct -g data/temp.gmt -o test/ssgsea_report2  -p 4</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="6.-Replot-Example">
+<h3>6. Replot Example<a class="headerlink" href="#6.-Replot-Example" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal"><span class="pre">replot</span></code> module need to find edb folder to work properly. keep the
+file tree like this:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">data</span>
+ <span class="o">|---</span> <span class="n">edb</span>
+ <span class="o">|</span>    <span class="o">|---</span> <span class="n">C1OE</span><span class="o">.</span><span class="n">cls</span>
+ <span class="o">|</span>    <span class="o">|---</span> <span class="n">gene_sets</span><span class="o">.</span><span class="n">gmt</span>
+ <span class="o">|</span>    <span class="o">|---</span> <span class="n">gsea_data</span><span class="o">.</span><span class="n">gsea_data</span><span class="o">.</span><span class="n">rnk</span>
+ <span class="o">|</span>    <span class="o">|---</span> <span class="n">results</span><span class="o">.</span><span class="n">edb</span>
+</pre></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [37]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="n">rep</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">replot</span><span class="p">(</span><span class="n">indir</span><span class="o">=</span><span class="s2">&quot;./data&quot;</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s2">&quot;test/replot_test&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="1)-command-line-usage-of-replot">
+<h2>1) command line usage of replot<a class="headerlink" href="#1)-command-line-usage-of-replot" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [38]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span><span class="c1"># !gseapy replot -i data -o test/replot_test</span>
 </pre></div>
 </div>
 </div>
@@ -2220,7 +2276,7 @@ attribute.</div>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.8.9',
+            VERSION:'0.9.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

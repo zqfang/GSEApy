@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>How to Use GSEAPY &mdash; GSEApy 0.8.9 documentation</title>
+  <title>How to Use GSEAPY &mdash; GSEApy 0.9.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="GSEApy 0.8.9 documentation" href="index.html"/>
+    <link rel="top" title="GSEApy 0.9.0 documentation" href="index.html"/>
         <link rel="next" title="A Protocol to Prepare files for GSEAPY" href="gseapy_tutorial.html"/>
         <link rel="prev" title="Welcome to GSEAPY’s documentation!" href="introduction.html"/> 
 
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                0.8.9
+                0.9.0
               </div>
             
           
@@ -325,7 +325,7 @@ $ gseapy enrichr -h
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>data</strong> – Gene expression data table or pandas DataFrame.</li>
+<li><strong>data</strong> – Gene expression data table, pandas DataFrame, gct file.</li>
 <li><strong>gene_sets</strong> – Enrichr Library name or .gmt gene sets file. Same input with GSEA.</li>
 <li><strong>cls</strong> – a list or a .cls file format required for GSEA.</li>
 <li><strong>outdir</strong> (<em>str</em>) – Results output directory.</li>
@@ -436,17 +436,26 @@ where contains:</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>data</strong> – expression or pandas DataFrame. Same input with <code class="docutils literal"><span class="pre">GSEA</span></code> .rnk file.</li>
+<li><strong>data</strong> – expression table, pd.Series, pd.DataFrame, GCT file, or .rnk file formate.</li>
 <li><strong>gene_sets</strong> – Enrichr Library name or .gmt gene sets file. Same input with GSEA.</li>
 <li><strong>outdir</strong> – results output directory.</li>
-<li><strong>sample_norm_method</strong> (<em>str</em>) – “Sample normalization method. Choose from {‘rank’, ‘log’, ‘log_rank’}. Default: rank”</li>
+<li><strong>sample_norm_method</strong> (<em>str</em>) – <p>“Sample normalization method. Choose from {‘rank’, ‘log’, ‘log_rank’}. Default: rank.</p>
+<ol class="arabic">
+<li>’rank’: Rank your expression data, and transformed by 10000*rank_dat/gene_numbers</li>
+<li>’log’ : Do not rank, but transformed data by log(data + exp(1)), while  data = data[data&lt;1] =1.</li>
+<li>’log_rank’: Rank your expression data, and transformed by log(10000*rank_dat/gene_numbers+ exp(1))</li>
+</ol>
+<p>4. ‘custom’: Do nothing, and use your own rank value to calulate enrichment score.
+see here: <a class="reference external" href="https://github.com/GSEA-MSigDB/ssGSEAProjection-gpmodule/blob/master/src/ssGSEAProjection.Library.R">https://github.com/GSEA-MSigDB/ssGSEAProjection-gpmodule/blob/master/src/ssGSEAProjection.Library.R</a>, line 86</p>
+</li>
 <li><strong>min_size</strong> (<em>int</em>) – Minimum allowed number of genes from gene set also the data set. Defaut: 15.</li>
 <li><strong>max_size</strong> (<em>int</em>) – Maximum allowed number of genes from gene set also the data set. Defaults: 2000.</li>
 <li><strong>permutation_num</strong> (<em>int</em>) – Number of permutations for significance computation. Default: 1000.</li>
 <li><strong>weighted_score_type</strong> (<em>str</em>) – Refer to <code class="xref py py-func docutils literal"><span class="pre">algorithm.enrichment_socre()</span></code>. Default:0.25.</li>
+<li><strong>scale</strong> (<em>bool</em>) – If True, normalize the scores by number of genes in the gene sets.</li>
 <li><strong>ascending</strong> (<em>bool</em>) – Sorting order of rankings. Default: False.</li>
 <li><strong>processes</strong> (<em>int</em>) – Number of Processes you are going to use. Default: 1.</li>
-<li><strong>figsize</strong> (<em>list</em>) – Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].</li>
+<li><strong>figsize</strong> (<em>list</em>) – Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [7,6].</li>
 <li><strong>format</strong> (<em>str</em>) – Matplotlib figure format. Default: ‘pdf’.</li>
 <li><strong>graph_num</strong> (<em>int</em>) – Plot graphs for top sets of each phenotype</li>
 <li><strong>seed</strong> – Random seed. expect an interger. Defalut:None.</li>
@@ -571,8 +580,8 @@ equal to the permutation number.</li>
 
 <dl class="function">
 <dt id="gseapy.algorithm.enrichment_score_ss">
-<code class="descclassname">gseapy.algorithm.</code><code class="descname">enrichment_score_ss</code><span class="sig-paren">(</span><em>gene_set</em>, <em>rnkseries</em>, <em>weighted_score_type=0.25</em>, <em>esnull=None</em>, <em>rs=&lt;mtrand.RandomState object&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#enrichment_score_ss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.enrichment_score_ss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given a gene set, a map of gene names to expression levels, and a weight score, returns the ssGSEA
+<code class="descclassname">gseapy.algorithm.</code><code class="descname">enrichment_score_ss</code><span class="sig-paren">(</span><em>gene_set</em>, <em>rnkseries</em>, <em>weighted_score_type=0.25</em>, <em>scale=True</em>, <em>esnull=None</em>, <em>rs=&lt;mtrand.RandomState object&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#enrichment_score_ss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.enrichment_score_ss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a gene set, a map of gene names to rank levels, and a weight score, returns the ssGSEA
 enrichment score for the gene set as described by <em>D. Barbie et al 2009</em></p>
 <p>ssGSEA  allows one to define an enrichment score that represents the degree of absolute enrichment
 of a gene set in each sample within a given data set.
@@ -582,13 +591,14 @@ of the genes in the signature and the remaining genes.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><p class="first">every member of gene_set is a key in expressions</p>
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body"><p class="first">every member of gene_set is a key in rnkseries</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>gene_set</strong> – a list of gene_names in the gene_set given by gmt file.</li>
-<li><strong>rnkseries</strong> – dict, a dictionary mapping gene names to their absolute expression values</li>
+<li><strong>rnkseries</strong> – pd.Series, an indexed series with rank values.</li>
 <li><strong>weighted_score_type</strong> – the weighted exponent on the <span class="math">\(P^W_G\)</span> term.</li>
+<li><strong>scale</strong> – If True, normalize the scores by number of genes in the gene sets.</li>
 </ul>
 </td>
 </tr>
@@ -637,7 +647,7 @@ of the genes in the signature and the remaining genes.</p>
 
 <dl class="function">
 <dt id="gseapy.algorithm.gsea_compute_ss">
-<code class="descclassname">gseapy.algorithm.</code><code class="descname">gsea_compute_ss</code><span class="sig-paren">(</span><em>data</em>, <em>gmt</em>, <em>n</em>, <em>weighted_score_type</em>, <em>seed</em>, <em>processes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#gsea_compute_ss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.gsea_compute_ss" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">gseapy.algorithm.</code><code class="descname">gsea_compute_ss</code><span class="sig-paren">(</span><em>data</em>, <em>gmt</em>, <em>n</em>, <em>weighted_score_type</em>, <em>scale</em>, <em>seed</em>, <em>processes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gseapy/algorithm.html#gsea_compute_ss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gseapy.algorithm.gsea_compute_ss" title="Permalink to this definition">¶</a></dt>
 <dd><p>compute enrichment scores and enrichment nulls for single sample GSEA.</p>
 </dd></dl>
 
@@ -1026,7 +1036,7 @@ across the specified axis.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.8.9',
+            VERSION:'0.9.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

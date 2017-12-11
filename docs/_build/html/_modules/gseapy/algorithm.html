@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>gseapy.algorithm &mdash; GSEApy 0.8.9 documentation</title>
+  <title>gseapy.algorithm &mdash; GSEApy 0.9.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="GSEApy 0.8.9 documentation" href="../../index.html"/>
+    <link rel="top" title="GSEApy 0.9.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.8.9
+                0.9.0
               </div>
             
           
@@ -253,9 +253,9 @@
     <span class="k">return</span> <span class="n">es</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">hit_ind</span><span class="p">,</span> <span class="n">RES</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="enrichment_score_ss"><a class="viewcode-back" href="../../run.html#gseapy.algorithm.enrichment_score_ss">[docs]</a><span class="k">def</span> <span class="nf">enrichment_score_ss</span><span class="p">(</span><span class="n">gene_set</span><span class="p">,</span> <span class="n">rnkseries</span><span class="p">,</span> <span class="n">weighted_score_type</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">esnull</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rs</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">()):</span>
+<div class="viewcode-block" id="enrichment_score_ss"><a class="viewcode-back" href="../../run.html#gseapy.algorithm.enrichment_score_ss">[docs]</a><span class="k">def</span> <span class="nf">enrichment_score_ss</span><span class="p">(</span><span class="n">gene_set</span><span class="p">,</span> <span class="n">rnkseries</span><span class="p">,</span> <span class="n">weighted_score_type</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">esnull</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rs</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">()):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Given a gene set, a map of gene names to expression levels, and a weight score, returns the ssGSEA</span>
+<span class="sd">    Given a gene set, a map of gene names to rank levels, and a weight score, returns the ssGSEA</span>
 <span class="sd">    enrichment score for the gene set as described by *D. Barbie et al 2009*</span>
 
 <span class="sd">    ssGSEA  allows one to define an enrichment score that represents the degree of absolute enrichment</span>
@@ -263,11 +263,11 @@
 <span class="sd">    The  enrichment score was produced using the Empirical Cumulative Distribution Functions (ECDF)</span>
 <span class="sd">    of the genes in the signature and the remaining genes.</span>
 
-<span class="sd">    :requires: every member of gene_set is a key in expressions</span>
+<span class="sd">    :requires: every member of gene_set is a key in rnkseries</span>
 <span class="sd">    :param gene_set: a list of gene_names in the gene_set given by gmt file.</span>
-<span class="sd">    :param rnkseries: dict, a dictionary mapping gene names to their absolute expression values</span>
+<span class="sd">    :param rnkseries: pd.Series, an indexed series with rank values.</span>
 <span class="sd">    :param weighted_score_type: the weighted exponent on the :math:`P^W_G` term.</span>
-
+<span class="sd">    :param scale: If True, normalize the scores by number of genes in the gene sets.</span>
 <span class="sd">    :returns:</span>
 <span class="sd">             ES: Enrichment score (real number between -1 and +1),take the sum of all values in the RES array .</span>
 
@@ -277,30 +277,24 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1">#first sort by normalized expression value, starting with the highest expressed genes first</span>
-    <span class="c1">#returns the sorted list of keys</span>
-    <span class="c1">#keys_sorted = sorted(expressions, key=expressions.get, reverse=True)</span>
     <span class="c1"># input is a pd.Series, already sorted ?</span>
     <span class="n">rnkseries</span> <span class="o">=</span> <span class="n">rnkseries</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">expressions</span> <span class="o">=</span> <span class="n">rnkseries</span><span class="o">.</span><span class="n">values</span>
     <span class="n">keys_sorted</span> <span class="o">=</span> <span class="n">rnkseries</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span>
-    <span class="c1">#values representing the ECDF of genes in the geneset</span>
-    <span class="n">P_GW_numerator</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">P_GW_denominator</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">P_NG_numerator</span> <span class="o">=</span> <span class="mi">0</span>
+
     <span class="c1"># transform the normalized expression data for a single sample into ranked (in decreasing order)</span>
     <span class="c1"># expression values</span>
     <span class="c1"># see: http://rowley.mit.edu/caw_web/ssGSEAProjection/ssGSEAProjection.Library.R</span>
     <span class="k">if</span> <span class="n">weighted_score_type</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="c1"># don&#39;t bother doing calcuation, just set to 1</span>
-        <span class="n">ranked_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">expressions</span><span class="p">))</span>
+        <span class="n">ranked_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">weighted_score_type</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="c1"># calculate z.score of normalized (e.g., ranked) expression values</span>
-        <span class="n">ranked_expressions</span> <span class="o">=</span> <span class="p">(</span><span class="n">expressions</span><span class="o">-</span> <span class="n">expressions</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span><span class="o">/</span><span class="n">expressions</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+        <span class="c1"># used by ssGSEAProjection</span>
+        <span class="c1"># _ranked = (rnkseries- rnkseries.mean())/rnkseries.std()</span>
+        <span class="n">_ranked</span> <span class="o">=</span> <span class="n">rnkseries</span><span class="o">.</span><span class="n">values</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Using negative values of weighted_score_type, not allowed&quot;</span><span class="p">)</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-
 
     <span class="c1">#integrate different in P_GW and P_NG</span>
     <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span>
@@ -308,37 +302,38 @@
     <span class="n">tag_indicator</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">keys_sorted</span><span class="p">,</span> <span class="n">gene_set</span><span class="p">,</span> <span class="n">assume_unique</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
     <span class="n">hit_ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="n">tag_indicator</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
     <span class="n">N</span> <span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">tag_indicator</span><span class="p">)</span>
-    <span class="n">Nh</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">gene_set</span><span class="p">)</span>
-    <span class="n">Nm</span> <span class="o">=</span>  <span class="n">N</span> <span class="o">-</span> <span class="n">Nh</span>
-    <span class="c1">#index = np.arange(1, N+1)</span>
-    <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ranked_expressions</span><span class="p">)</span>
+    <span class="n">Nhint</span> <span class="o">=</span> <span class="n">tag_indicator</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">Nm</span> <span class="o">=</span>  <span class="n">N</span> <span class="o">-</span> <span class="n">Nhint</span>
+
+    <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">_ranked</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">esnull</span><span class="p">:</span>
         <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
         <span class="n">tag_indicator</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">tag_indicator</span><span class="p">,</span> <span class="p">(</span><span class="n">esnull</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
-        <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">index</span><span class="p">,(</span><span class="n">esnull</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="p">(</span><span class="n">esnull</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+
         <span class="c1"># gene list permutation</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">esnull</span><span class="p">):</span>
             <span class="n">rs</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">tag_indicator</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="c1"># genes not in the input rnkseries</span>
+    <span class="n">no_tag_indicator</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">tag_indicator</span>
 
-    <span class="c1"># calculate numerator of each gene hits</span>
-    <span class="n">P_GW_numerator</span> <span class="o">=</span> <span class="p">(</span><span class="n">tag_indicator</span><span class="o">*</span><span class="n">index</span><span class="p">)</span><span class="o">**</span> <span class="n">weighted_score_type</span>
-    <span class="n">P_GW_denominator</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">P_GW_numerator</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="c1">#P_GW_numerator = np.cumsum(rank_alpha, axis=axis)</span>
+    <span class="c1"># calculate numerator, denominator of each gene hits</span>
+    <span class="n">rank_alpha</span> <span class="o">=</span> <span class="p">(</span><span class="n">tag_indicator</span><span class="o">*</span><span class="n">index</span><span class="p">)</span><span class="o">**</span> <span class="n">weighted_score_type</span>
 
-    <span class="n">P_NG_denominator</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">expressions</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">gene_set</span><span class="p">)</span>
-    <span class="n">P_NG_numerator</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span><span class="n">tag_indicator</span>
+    <span class="n">P_GW_numerator</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">rank_alpha</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+    <span class="n">P_GW_denominator</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">rank_alpha</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="n">RES</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">P_GW_numerator</span> <span class="o">/</span> <span class="n">P_GW_denominator</span> <span class="o">-</span> <span class="n">P_NG_numerator</span><span class="o">/</span> <span class="n">P_NG_denominator</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+    <span class="n">P_NG_numerator</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">no_tag_indicator</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+    <span class="n">P_NG_denominator</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">no_tag_indicator</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">RES</span> <span class="o">=</span> <span class="n">P_GW_numerator</span> <span class="o">/</span> <span class="n">P_GW_denominator</span> <span class="o">-</span> <span class="n">P_NG_numerator</span> <span class="o">/</span> <span class="n">P_NG_denominator</span>
     <span class="c1"># scale es by gene numbers ?</span>
     <span class="c1"># https://gist.github.com/gaoce/39e0907146c752c127728ad74e123b33</span>
-    <span class="n">es</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">RES</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">expressions</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">scale</span><span class="p">:</span>
+        <span class="n">RES</span> <span class="o">=</span> <span class="n">RES</span> <span class="o">/</span> <span class="n">N</span>
 
-    <span class="c1"># scale ES by RES interval</span>
-    <span class="c1">#   ## normalize enrichment scores by using the entire data set, as indicated</span>
-    <span class="c1">#   ## by Barbie et al., 2009, online methods, pg. 2</span>
-    <span class="c1"># max_ES = np.max(RES,)</span>
-    <span class="c1"># min_ES = np.min(RES,)</span>
-    <span class="c1"># es = np.sum(RES, axis=axis) / (max_ES - min_ES)</span>
+    <span class="n">es</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">RES</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">esnull</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">es</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
@@ -565,7 +560,7 @@
 
     <span class="k">return</span> <span class="n">gsea_significance</span><span class="p">(</span><span class="n">enrichment_scores</span><span class="p">,</span> <span class="n">enrichment_nulls</span><span class="p">),</span> <span class="n">hit_ind</span><span class="p">,</span><span class="n">rank_ES</span><span class="p">,</span> <span class="n">subsets</span></div>
 
-<div class="viewcode-block" id="gsea_compute_ss"><a class="viewcode-back" href="../../run.html#gseapy.algorithm.gsea_compute_ss">[docs]</a><span class="k">def</span> <span class="nf">gsea_compute_ss</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">gmt</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">weighted_score_type</span><span class="p">,</span> <span class="n">seed</span><span class="p">,</span> <span class="n">processes</span><span class="p">):</span>
+<div class="viewcode-block" id="gsea_compute_ss"><a class="viewcode-back" href="../../run.html#gseapy.algorithm.gsea_compute_ss">[docs]</a><span class="k">def</span> <span class="nf">gsea_compute_ss</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">gmt</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">weighted_score_type</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">seed</span><span class="p">,</span> <span class="n">processes</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;compute enrichment scores and enrichment nulls for single sample GSEA.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -584,7 +579,7 @@
     <span class="k">for</span> <span class="n">subset</span> <span class="ow">in</span> <span class="n">subsets</span><span class="p">:</span>
         <span class="c1">#</span>
         <span class="n">rs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
-        <span class="n">es</span><span class="p">,</span> <span class="n">ind</span><span class="p">,</span> <span class="n">RES</span><span class="o">=</span> <span class="n">enrichment_score_ss</span><span class="p">(</span><span class="n">gmt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subset</span><span class="p">),</span> <span class="n">data</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span><span class="n">rs</span><span class="p">)</span>
+        <span class="n">es</span><span class="p">,</span> <span class="n">ind</span><span class="p">,</span> <span class="n">RES</span><span class="o">=</span> <span class="n">enrichment_score_ss</span><span class="p">(</span><span class="n">gmt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subset</span><span class="p">),</span> <span class="n">data</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span><span class="n">rs</span><span class="p">)</span>
         <span class="n">enrichment_scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">es</span><span class="p">)</span>
         <span class="n">rank_ES</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">RES</span><span class="p">)</span>
         <span class="n">hit_ind</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
@@ -601,7 +596,7 @@
         <span class="c1">#rs = np.random.RandomState(seed)</span>
         <span class="n">rs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">()</span>
         <span class="n">temp_esnu</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pool_esnu</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span><span class="n">enrichment_score_ss</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">gmt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subset</span><span class="p">),</span> <span class="n">data</span><span class="p">,</span>
-                                                                          <span class="n">w</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">rs</span><span class="p">)))</span>
+                                                                          <span class="n">w</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">rs</span><span class="p">)))</span>
 
     <span class="n">pool_esnu</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
     <span class="n">pool_esnu</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
@@ -613,8 +608,8 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    # old single threading method</span>
 <span class="sd">    for si,subset in enumerate(subsets):</span>
-<span class="sd">        esn = enrichment_score_ss(gene_set=gmt.get(subset), expressions=exp_dict,</span>
-<span class="sd">                              weighted_score_type=w, esnull=n, rs=rs)[0]</span>
+<span class="sd">        esn = enrichment_score_ss(gene_set=gmt.get(subset), rnkser=data,</span>
+<span class="sd">                              weighted_score_type=w, scale=scale, esnull=n, rs=rs)[0]</span>
 <span class="sd">        enrichment_nulls[si] = esn # esn is a list, don&#39;t need to use append method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">gsea_significance</span><span class="p">(</span><span class="n">enrichment_scores</span><span class="p">,</span> <span class="n">enrichment_nulls</span><span class="p">),</span> <span class="n">hit_ind</span><span class="p">,</span> <span class="n">rank_ES</span><span class="p">,</span> <span class="n">subsets</span></div>
@@ -782,7 +777,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'0.8.9',
+            VERSION:'0.9.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

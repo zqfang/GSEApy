@@ -75,8 +75,7 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
     max_ES, min_ES =  np.max(RES, axis=axis), np.min(RES, axis=axis)
     es = np.where(np.abs(max_ES) > np.abs(min_ES), max_ES, min_ES)
 
-    if esnull:
-        return es
+    if esnull: return es
 
     return es, hit_ind, RES
 
@@ -96,10 +95,11 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
         :param rs:              Random state for initialize gene list shuffling.
                                 Default: np.random.RandomState(seed=None)
         :return:
-                 ES: Enrichment score (real number between -1 and +1), it's true for ssGSEA, only scaled
-                 ESNULL: Enrichment score calcualted from random permutation
+                 ES: Enrichment score (real number between -1 and +1), it's true for ssGSEA, when only scaled
+                     by gene number.
+                 ESNULL: Enrichment score calcualted from random permutation.
                  Hits_Indices: Indices of genes if genes are included in gene_set.
-                 RES: The running enrichment score for all locations in the gene list .
+                 RES: The running enrichment score for all locations in the gene list.
 
     """
     # gene_mat -> 1d: prerank, ssSSEA or 2d: GSEA
@@ -194,9 +194,9 @@ def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
                              dataframe belongs to what catogry of phenotype.
        :param bool ascending:  bool. Sort ascending vs. descending.
 
-       :return: returns two 2d ndarry with shape (nperm, gene_num):
-                genes_mat: sorted and permuated (exclude last row) gene name matrix
-                cor_mat: sorted and permuated (exclude last row) ranking matrix
+       :return: returns two 2d ndarry with shape (nperm, gene_num).
+                genes_mat: sorted and permuated (exclude last row) gene name matrix.
+                cor_mat: sorted and permuated (exclude last row) ranking matrix.
 
     """
     # S: samples, G: gene number
@@ -276,14 +276,15 @@ def ranking_metric(df, method, pos, neg, classes, ascending):
                           This is the recommended statistic for calculating fold change for log scale data.
 
 
-       :param pos: one of lables of phenotype's names.
-       :param neg: one of lable of phenotype's names.
-       :param classes:  a list of phenotype labels, to specify which column of dataframe belongs to what catogry of phenotype.
-       :param ascending:  bool or list of bool. Sort ascending vs. descending.
-       :return: returns a pd.Series of correlation to class of each variable. same format with .rnk file. gene_name is index,
-                correlation is value.
+       :param str pos: one of lables of phenotype's names.
+       :param str neg: one of lable of phenotype's names.
+       :param list classes:  a list of phenotype labels, to specify which column of dataframe belongs to what catogry of phenotype.
+       :param bool ascending:  bool or list of bool. Sort ascending vs. descending.
+       :return:
 
-        visit here for more docs: http://software.broadinstitute.org/gsea/doc/GSEAUserGuideFrame.html
+            returns a pd.Series of correlation to class of each variable. Gene_name is index, and value is rankings.
+
+            visit here for more docs: http://software.broadinstitute.org/gsea/doc/GSEAUserGuideFrame.html
     """
 
     #exclude any zero stds.
@@ -315,16 +316,16 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
     """compute enrichment scores and enrichment nulls.
 
         :param data: prepreocessed expression dataframe or a pre-ranked file if prerank=True.
-        :param gmt: all gene sets in .gmt file. need to call load_gmt() to get results.
-        :param n: permutation number. default: 1000.
-        :param method: ranking_metric method. see above.
-        :param pheno_pos: one of lables of phenotype's names.
-        :param pheno_neg: one of lable of phenotype's names.
-        :param classes: a list of phenotype labels, to specify which column of dataframe belongs to what catogry of phenotype.
-        :param weighted_score_type: default:1
-        :param ascending: sorting order of rankings. Default: False.
+        :param dict gmt: all gene sets in .gmt file. need to call load_gmt() to get results.
+        :param int n: permutation number. default: 1000.
+        :param str method: ranking_metric method. see above.
+        :param str pheno_pos: one of lables of phenotype's names.
+        :param str pheno_neg: one of lable of phenotype's names.
+        :param list classes: a list of phenotype labels, to specify which column of dataframe belongs to what catogry of phenotype.
+        :param float weighted_score_type: default:1
+        :param bool ascending: sorting order of rankings. Default: False.
         :param seed: random seed. Default: np.random.RandomState()
-        :param scale: if true, scale es by gene number.
+        :param bool scale: if true, scale es by gene number.
 
         :return: a tuple contains::
 

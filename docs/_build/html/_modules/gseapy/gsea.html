@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>gseapy.gsea &mdash; GSEApy 0.8.9 documentation</title>
+  <title>gseapy.gsea &mdash; GSEApy 0.9.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="GSEApy 0.8.9 documentation" href="../../index.html"/>
+    <link rel="top" title="GSEApy 0.9.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.8.9
+                0.9.0
               </div>
             
           
@@ -185,7 +185,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_processes</span><span class="o">=</span><span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">=</span><span class="kc">None</span>
-
 
     <span class="k">def</span> <span class="nf">_log_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s1">&#39;GSEA&#39;</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;logging start&quot;&quot;&quot;</span>
@@ -316,7 +315,6 @@
         <span class="n">pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="n">pool</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
 
-
         <span class="k">if</span> <span class="n">module</span> <span class="o">==</span> <span class="s1">&#39;gsea&#39;</span><span class="p">:</span>
             <span class="n">width</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">classes</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">classes</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">6</span> <span class="k">else</span>  <span class="mi">5</span>
             <span class="n">cls_booA</span> <span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="n">phenoPos</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span> <span class="n">classes</span><span class="p">))</span>
@@ -335,8 +333,6 @@
 
             <span class="n">pool_heat</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
             <span class="n">pool_heat</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
-
-
 
     <span class="k">def</span> <span class="nf">_save_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zipdata</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">gmt</span><span class="p">,</span> <span class="n">rank_metric</span><span class="p">,</span> <span class="n">permutation_type</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;reformat gsea results, and save to txt&quot;&quot;&quot;</span>
@@ -363,7 +359,15 @@
         <span class="n">res_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Term&#39;</span>
         <span class="n">res_df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;fdr&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">res_df</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s1">&#39;rank_ES&#39;</span><span class="p">,</span><span class="s1">&#39;hit_index&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">res_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{a}</span><span class="s1">/gseapy.</span><span class="si">{b}</span><span class="s1">.</span><span class="si">{c}</span><span class="s1">.report.csv&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">outdir</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">permutation_type</span><span class="p">))</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{a}</span><span class="s1">/gseapy.</span><span class="si">{b}</span><span class="s1">.</span><span class="si">{c}</span><span class="s1">.report.csv&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">outdir</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">permutation_type</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">==</span> <span class="s1">&#39;ssgsea&#39;</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;# normalize enrichment scores by random permutation procddure</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;# Same method to the orignial GSEA method, and it&#39;s not proper to use these values in your publication</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">res_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">res_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">res2d</span> <span class="o">=</span> <span class="n">res_df</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">results</span>  <span class="o">=</span> <span class="n">res</span>
@@ -375,6 +379,7 @@
         <span class="n">libs_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">lib_url</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
         <span class="n">libs</span> <span class="o">=</span> <span class="p">[</span><span class="n">lib</span><span class="p">[</span><span class="s1">&#39;libraryName&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">lib</span> <span class="ow">in</span> <span class="n">libs_json</span><span class="p">[</span><span class="s1">&#39;statistics&#39;</span><span class="p">]]</span>
         <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">libs</span><span class="p">)</span>
+
 
 <span class="k">class</span> <span class="nc">GSEA</span><span class="p">(</span><span class="n">GSEAbase</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;GSEA main tool&quot;&quot;&quot;</span>
@@ -487,6 +492,7 @@
 
         <span class="k">return</span>
 
+
 <span class="k">class</span> <span class="nc">Prerank</span><span class="p">(</span><span class="n">GSEAbase</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;GSEA prerank tool&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rnk</span><span class="p">,</span> <span class="n">gene_sets</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s1">&#39;GSEA_prerank&#39;</span><span class="p">,</span>
@@ -563,13 +569,14 @@
     <span class="sd">&quot;&quot;&quot;GSEA extention: single sample GSEA&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">gene_sets</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s2">&quot;GSEA_SingleSample&quot;</span><span class="p">,</span> <span class="n">sample_norm_method</span><span class="o">=</span><span class="s1">&#39;rank&#39;</span><span class="p">,</span>
                  <span class="n">min_size</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">permutation_num</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">weighted_score_type</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>
-                 <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mf">6.5</span><span class="p">,</span><span class="mi">6</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;pdf&#39;</span><span class="p">,</span>
+                 <span class="n">scale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">7</span><span class="p">,</span><span class="mi">6</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;pdf&#39;</span><span class="p">,</span>
                  <span class="n">graph_num</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">=</span><span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gene_sets</span><span class="o">=</span><span class="n">gene_sets</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">outdir</span><span class="o">=</span><span class="n">outdir</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sample_norm_method</span><span class="o">=</span><span class="n">sample_norm_method</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">weighted_score_type</span><span class="o">=</span><span class="n">weighted_score_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="n">scale</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">min_size</span><span class="o">=</span><span class="n">min_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_size</span><span class="o">=</span><span class="n">max_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">permutation_num</span><span class="o">=</span><span class="n">permutation_num</span>
@@ -582,6 +589,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ranking</span><span class="o">=</span><span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">=</span><span class="s1">&#39;ssgsea&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_processes</span><span class="o">=</span><span class="n">processes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_imat</span><span class="o">=</span><span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">corplot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;NES Correlation plot</span>
@@ -674,7 +682,7 @@
             <span class="c1">#only for one sample</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">runSample</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">normdat</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">runSample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">gmt</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">runSample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">gmt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">multisamples</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Single Sample GSEA workflow&quot;&quot;&quot;</span>
 
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_size</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_size</span>
@@ -712,9 +720,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%04d</span><span class="s2"> gene_sets used for further statistical testing.....&quot;</span><span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">gmt</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Start to run GSEA...Might take a while..................&quot;</span><span class="p">)</span>
         <span class="c1">#compute ES, NES, pval, FDR, RES</span>
-        <span class="n">gsea_results</span><span class="p">,</span> <span class="n">hit_ind</span><span class="p">,</span> <span class="n">rank_ES</span><span class="p">,</span> <span class="n">subsets</span> <span class="o">=</span> <span class="n">gsea_compute_ss</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">dat2</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">permutation_num</span><span class="p">,</span> <span class="n">gmt</span><span class="o">=</span><span class="n">gmt</span><span class="p">,</span>
+        <span class="n">gsea_results</span><span class="p">,</span> <span class="n">hit_ind</span><span class="p">,</span> <span class="n">rank_ES</span><span class="p">,</span> <span class="n">subsets</span> <span class="o">=</span> <span class="n">gsea_compute_ss</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">dat2</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">permutation_num</span><span class="p">,</span>
+                                                                  <span class="n">gmt</span><span class="o">=</span><span class="n">gmt</span><span class="p">,</span>
                                                                   <span class="n">weighted_score_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">weighted_score_type</span><span class="p">,</span>
-                                                                  <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_processes</span><span class="p">)</span>
+                                                                  <span class="n">scale</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">,</span>
+                                                                  <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">,</span>
+                                                                  <span class="n">processes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_processes</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Start to generate gseapy reports, and produce figures...&quot;</span><span class="p">)</span>
         <span class="n">res_zip</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">subsets</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">gsea_results</span><span class="p">),</span> <span class="n">hit_ind</span><span class="p">,</span> <span class="n">rank_ES</span><span class="p">)</span>
@@ -723,9 +734,11 @@
                                    <span class="n">gmt</span><span class="o">=</span><span class="n">gmt</span><span class="p">,</span> <span class="n">rank_metric</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">permutation_type</span><span class="o">=</span><span class="s2">&quot;gene_sets&quot;</span><span class="p">)</span>
 
         <span class="c1">#Plotting</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_plotting</span><span class="p">(</span><span class="n">rank_metric</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">,</span> <span class="n">res2d</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">res2d</span><span class="p">,</span>
-                       <span class="n">graph_num</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">graph_num</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">outdir</span><span class="p">,</span>
-                       <span class="n">figsize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">figsize</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_imat</span> <span class="o">=</span> <span class="n">df</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">multisamples</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_plotting</span><span class="p">(</span><span class="n">rank_metric</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">,</span> <span class="n">res2d</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">res2d</span><span class="p">,</span>
+                           <span class="n">graph_num</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">graph_num</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">outdir</span><span class="p">,</span>
+                           <span class="n">figsize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">figsize</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Congratulations. GSEApy run successfully................</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -754,8 +767,17 @@
         <span class="c1">#save raw ES to one csv file</span>
         <span class="n">samplesRawES</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resultsOnSamples</span><span class="p">)</span>
         <span class="n">samplesRawES</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Term&#39;</span>
-        <span class="n">samplesRawES</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="s2">&quot;gseapy.samples.raw.es.txt&quot;</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
-
+        <span class="c1"># write es</span>
+        <span class="n">outESfile</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="s2">&quot;gseapy.samples.raw.es.txt&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outESfile</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;# scale the enrichment scores by number of genes in the gene sets</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;# this normalization has not effects on the finall NES &#39;</span> <span class="o">+</span>\
+                        <span class="s1">&#39;as indicated by Barbie et al., 2009, online methods, pg. 2</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;# raw enrichment scores of all data</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;# no scale es by numbers of genes in the gene sets</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">samplesRawES</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="c1">## normalize enrichment scores by using the entire data set, as indicated</span>
         <span class="c1">## by Barbie et al., 2009, online methods, pg. 2</span>
         <span class="n">samplesNES</span> <span class="o">=</span> <span class="n">samplesRawES</span> <span class="o">/</span> <span class="p">(</span><span class="n">samplesRawES</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">samplesRawES</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
@@ -853,7 +875,7 @@
 	  <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mf">6.5</span><span class="p">,</span><span class="mi">6</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;pdf&#39;</span><span class="p">,</span> <span class="n">graph_num</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Run Gene Set Enrichment Analysis.</span>
 
-<span class="sd">    :param data: Gene expression data table or pandas DataFrame.</span>
+<span class="sd">    :param data: Gene expression data table, pandas DataFrame, gct file.</span>
 <span class="sd">    :param gene_sets: Enrichr Library name or .gmt gene sets file. Same input with GSEA.</span>
 <span class="sd">    :param cls: a list or a .cls file format required for GSEA.</span>
 <span class="sd">    :param str outdir: Results output directory.</span>
@@ -923,21 +945,29 @@
 
 
 <div class="viewcode-block" id="ssgsea"><a class="viewcode-back" href="../../run.html#gseapy.ssgsea">[docs]</a><span class="k">def</span> <span class="nf">ssgsea</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">gene_sets</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="s2">&quot;GSEA_SingleSample&quot;</span><span class="p">,</span> <span class="n">sample_norm_method</span><span class="o">=</span><span class="s1">&#39;rank&#39;</span><span class="p">,</span> <span class="n">min_size</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
-           <span class="n">permutation_num</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">weighted_score_type</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-           <span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mf">6.5</span><span class="p">,</span><span class="mi">6</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;pdf&#39;</span><span class="p">,</span> <span class="n">graph_num</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+           <span class="n">permutation_num</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">weighted_score_type</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">processes</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+           <span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">7</span><span class="p">,</span><span class="mi">6</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;pdf&#39;</span><span class="p">,</span> <span class="n">graph_num</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Run Gene Set Enrichment Analysis with single sample GSEA tool</span>
 
-<span class="sd">    :param data: expression or pandas DataFrame. Same input with ``GSEA`` .rnk file.</span>
+<span class="sd">    :param data: expression table, pd.Series, pd.DataFrame, GCT file, or .rnk file formate.</span>
 <span class="sd">    :param gene_sets: Enrichr Library name or .gmt gene sets file. Same input with GSEA.</span>
 <span class="sd">    :param outdir: results output directory.</span>
-<span class="sd">    :param str sample_norm_method: &quot;Sample normalization method. Choose from {&#39;rank&#39;, &#39;log&#39;, &#39;log_rank&#39;}. Default: rank&quot;</span>
+<span class="sd">    :param str sample_norm_method: &quot;Sample normalization method. Choose from {&#39;rank&#39;, &#39;log&#39;, &#39;log_rank&#39;}. Default: rank.</span>
+
+<span class="sd">               1. &#39;rank&#39;: Rank your expression data, and transformed by 10000*rank_dat/gene_numbers</span>
+<span class="sd">               2. &#39;log&#39; : Do not rank, but transformed data by log(data + exp(1)), while  data = data[data&lt;1] =1.</span>
+<span class="sd">               3. &#39;log_rank&#39;: Rank your expression data, and transformed by log(10000*rank_dat/gene_numbers+ exp(1))</span>
+<span class="sd">               4. &#39;custom&#39;: Do nothing, and use your own rank value to calulate enrichment score.</span>
+<span class="sd">               see here: https://github.com/GSEA-MSigDB/ssGSEAProjection-gpmodule/blob/master/src/ssGSEAProjection.Library.R, line 86</span>
+
 <span class="sd">    :param int min_size: Minimum allowed number of genes from gene set also the data set. Defaut: 15.</span>
 <span class="sd">    :param int max_size: Maximum allowed number of genes from gene set also the data set. Defaults: 2000.</span>
 <span class="sd">    :param int permutation_num: Number of permutations for significance computation. Default: 1000.</span>
 <span class="sd">    :param str weighted_score_type: Refer to :func:`algorithm.enrichment_socre`. Default:0.25.</span>
+<span class="sd">    :param bool scale: If True, normalize the scores by number of genes in the gene sets.</span>
 <span class="sd">    :param bool ascending: Sorting order of rankings. Default: False.</span>
 <span class="sd">    :param int processes: Number of Processes you are going to use. Default: 1.</span>
-<span class="sd">    :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].</span>
+<span class="sd">    :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [7,6].</span>
 <span class="sd">    :param str format: Matplotlib figure format. Default: &#39;pdf&#39;.</span>
 <span class="sd">    :param int graph_num: Plot graphs for top sets of each phenotype</span>
 <span class="sd">    :param seed: Random seed. expect an interger. Defalut:None.</span>
@@ -957,7 +987,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">ss</span> <span class="o">=</span> <span class="n">SingleSampleGSEA</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">gene_sets</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="n">sample_norm_method</span><span class="p">,</span> <span class="n">min_size</span><span class="p">,</span> <span class="n">max_size</span><span class="p">,</span>
-                          <span class="n">permutation_num</span><span class="p">,</span> <span class="n">weighted_score_type</span><span class="p">,</span> <span class="n">ascending</span><span class="p">,</span>
+                          <span class="n">permutation_num</span><span class="p">,</span> <span class="n">weighted_score_type</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">ascending</span><span class="p">,</span>
                           <span class="n">processes</span><span class="p">,</span> <span class="n">figsize</span><span class="p">,</span> <span class="nb">format</span><span class="p">,</span> <span class="n">graph_num</span><span class="p">,</span> <span class="n">seed</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
     <span class="n">ss</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">ss</span></div>
@@ -1063,7 +1093,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'0.8.9',
+            VERSION:'0.9.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
