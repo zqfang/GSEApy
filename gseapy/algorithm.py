@@ -84,26 +84,22 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
                             scale=False, single=False, rs=np.random.RandomState()):
     """Next generation algorithm of GSEA and ssGSEA.
 
-    :param gene_mat:        the ordered gene list(vector) or gene matrix.
-    :param cor_mat:         correlation vector or matrix  (e.g. signal to noise scores)
-                            corresponding to the genes in the gene list or matrix.
-    :param dict gene_sets:  gmt file dict.
-    :param float weighted_score_type:     weighting by the correlation.
-                            options: 0(classic), 1, 1.5, 2. default:1 for GSEA and 0.25 for ssGSEA.
-    :param int nperm:       permutation times.
-    :param bool scale:      If True, normalize the scores by number of genes_mat.
-    :param bool single:     If True, use ssGSEA algorithm, otherwise use GSEA.
-    :param rs:              Random state for initialize gene list shuffling.
-                            Default: np.random.RandomState(seed=None)
-    :return:
-             ES: Enrichment score (real number between -1 and +1), it's true for ssGSEA, only scaled
-
-             ESNULL: Enrichment score calcualted from random permutation
-
-             Hits_Indices: Indices of genes if genes are included in gene_set.
-
-             RES: Numerical vector containing the running enrichment score for
-                  all locations in the gene list .
+        :param gene_mat:        the ordered gene list(vector) or gene matrix.
+        :param cor_mat:         correlation vector or matrix  (e.g. signal to noise scores)
+                                corresponding to the genes in the gene list or matrix.
+        :param dict gene_sets:  gmt file dict.
+        :param float weighted_score_type:     weighting by the correlation.
+                                options: 0(classic), 1, 1.5, 2. default:1 for GSEA and 0.25 for ssGSEA.
+        :param int nperm:       permutation times.
+        :param bool scale:      If True, normalize the scores by number of genes_mat.
+        :param bool single:     If True, use ssGSEA algorithm, otherwise use GSEA.
+        :param rs:              Random state for initialize gene list shuffling.
+                                Default: np.random.RandomState(seed=None)
+        :return:
+                 ES: Enrichment score (real number between -1 and +1), it's true for ssGSEA, only scaled
+                 ESNULL: Enrichment score calcualted from random permutation
+                 Hits_Indices: Indices of genes if genes are included in gene_set.
+                 RES: The running enrichment score for all locations in the gene list .
 
     """
     # gene_mat -> 1d: prerank, ssSSEA or 2d: GSEA
@@ -169,7 +165,7 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
     if scale: REStensor = REStensor / len(gene_mat)
     if single:
         #ssGSEA
-        esmatrix = np.sum(REStensor, axis=axis)
+        esmatrix = REStensor.sum(axis=axis)
     else:
         #GSEA
         esmax, esmin = REStensor.max(axis=axis), REStensor.min(axis=axis)
@@ -181,26 +177,26 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
 
 
 def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
-                       ascending, rs=np.random.RandomState()):
+                          ascending, rs=np.random.RandomState()):
     """Build shuffled ranking matrix when permutation_type eq to phenotype.
-   :param exprs:   gene_expression DataFrame, gene_name indexed.
-   :param str method:  calculate correlation or ranking. methods including:
-                       1. 'signal_to_noise'
-                       2. 't_test'
-                       3. 'ratio_of_classes' (also referred to as fold change).
-                       4. 'diff_of_classes'
-                       5. 'log2_ratio_of_classes'
+       :param exprs:   gene_expression DataFrame, gene_name indexed.
+       :param str method:  calculate correlation or ranking. methods including:
+                           1. 'signal_to_noise'
+                           2. 't_test'
+                           3. 'ratio_of_classes' (also referred to as fold change).
+                           4. 'diff_of_classes'
+                           5. 'log2_ratio_of_classes'
 
-   :param int permuation_num: how many times of classes is being shuffled
-   :param str pos: one of lables of phenotype's names.
-   :param str neg: one of lable of phenotype's names.
-   :param list classes:  a list of phenotype labels, to specify which column of
-                         dataframe belongs to what catogry of phenotype.
-   :param bool ascending:  bool. Sort ascending vs. descending.
+       :param int permuation_num: how many times of classes is being shuffled
+       :param str pos: one of lables of phenotype's names.
+       :param str neg: one of lable of phenotype's names.
+       :param list classes:  a list of phenotype labels, to specify which column of
+                             dataframe belongs to what catogry of phenotype.
+       :param bool ascending:  bool. Sort ascending vs. descending.
 
-   :return: returns two 2d ndarry with shape (nperm, gene_num):
-            genes_mat: sorted and permuated (exclude last row) gene name matrix
-            cor_mat: sorted and permuated (exclude last row) ranking matrix
+       :return: returns two 2d ndarry with shape (nperm, gene_num):
+                genes_mat: sorted and permuated (exclude last row) gene name matrix
+                cor_mat: sorted and permuated (exclude last row) ranking matrix
 
     """
     # S: samples, G: gene number
@@ -208,12 +204,9 @@ def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
     genes = exprs.index.values
     expr_mat = exprs.values.T
     # for 3d tensor, 1st dim is depth, 2nd dim is row, 3rd dim is column
-    # so shape attr of ndarry on the 3d tensor, is (depth, rows, columns)
-    # while axis is (0,1,2) and slcing order is [0, 1, 2]
     perm_genes_mat = np.tile(genes, (permutation_num+1,1))
     perm_cor_tensor = np.tile(expr_mat, (permutation_num+1,1,1))
-    # random shuffle on the first dim along the depth dim
-    # shuffle matrix, last matrix is not shuffled
+    # random shuffle on the first dim, last matrix is not shuffled
     for arr in perm_cor_tensor[:-1]: rs.shuffle(arr)
     classes = np.array(classes)
     pos = classes == pos
@@ -252,45 +245,45 @@ def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
 def ranking_metric(df, method, pos, neg, classes, ascending):
     """The main function to rank an expression table.
 
-   :param df:      gene_expression DataFrame.
-   :param method:  The method used to calculate a correlation or ranking. Default: 'log2_ratio_of_classes'.
-                   Others methods are:
+       :param df:      gene_expression DataFrame.
+       :param method:  The method used to calculate a correlation or ranking. Default: 'log2_ratio_of_classes'.
+                       Others methods are:
 
-                   1. 'signal_to_noise'
+                       1. 'signal_to_noise'
 
-                      You must have at least three samples for each phenotype to use this metric.
-                      The larger the signal-to-noise ratio, the larger the differences of the means (scaled by the standard deviations);
-                      that is, the more distinct the gene expression is in each phenotype and the more the gene acts as a “class marker.”
+                          You must have at least three samples for each phenotype to use this metric.
+                          The larger the signal-to-noise ratio, the larger the differences of the means (scaled by the standard deviations);
+                          that is, the more distinct the gene expression is in each phenotype and the more the gene acts as a “class marker.”
 
-                   2. 't_test'
+                       2. 't_test'
 
-                      Uses the difference of means scaled by the standard deviation and number of samples.
-                      Note: You must have at least three samples for each phenotype to use this metric.
-                      The larger the tTest ratio, the more distinct the gene expression is in each phenotype
-                      and the more the gene acts as a “class marker.”
+                          Uses the difference of means scaled by the standard deviation and number of samples.
+                          Note: You must have at least three samples for each phenotype to use this metric.
+                          The larger the tTest ratio, the more distinct the gene expression is in each phenotype
+                          and the more the gene acts as a “class marker.”
 
-                   3. 'ratio_of_classes' (also referred to as fold change).
+                       3. 'ratio_of_classes' (also referred to as fold change).
 
-                      Uses the ratio of class means to calculate fold change for natural scale data.
+                          Uses the ratio of class means to calculate fold change for natural scale data.
 
-                   4. 'diff_of_classes'
+                       4. 'diff_of_classes'
 
-                      Uses the difference of class means to calculate fold change for natureal scale data
+                          Uses the difference of class means to calculate fold change for natureal scale data
 
-                   5. 'log2_ratio_of_classes'
+                       5. 'log2_ratio_of_classes'
 
-                      Uses the log2 ratio of class means to calculate fold change for natural scale data.
-                      This is the recommended statistic for calculating fold change for log scale data.
+                          Uses the log2 ratio of class means to calculate fold change for natural scale data.
+                          This is the recommended statistic for calculating fold change for log scale data.
 
 
-   :param phenoPos: one of lables of phenotype's names.
-   :param phenoNeg: one of lable of phenotype's names.
-   :param classes:  a list of phenotype labels, to specify which column of dataframe belongs to what catogry of phenotype.
-   :param ascending:  bool or list of bool. Sort ascending vs. descending.
-   :return: returns a pd.Series of correlation to class of each variable. same format with .rnk file. gene_name is index,
-            correlation is value.
+       :param pos: one of lables of phenotype's names.
+       :param neg: one of lable of phenotype's names.
+       :param classes:  a list of phenotype labels, to specify which column of dataframe belongs to what catogry of phenotype.
+       :param ascending:  bool or list of bool. Sort ascending vs. descending.
+       :return: returns a pd.Series of correlation to class of each variable. same format with .rnk file. gene_name is index,
+                correlation is value.
 
-    visit here for more docs: http://software.broadinstitute.org/gsea/doc/GSEAUserGuideFrame.html
+        visit here for more docs: http://software.broadinstitute.org/gsea/doc/GSEAUserGuideFrame.html
     """
 
     #exclude any zero stds.
@@ -318,27 +311,27 @@ def ranking_metric(df, method, pos, neg, classes, ascending):
 
 def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
                  method, pheno_pos, pheno_neg, classes, ascending,
-                 seed, scale=False, single=False):
+                 seed=None, scale=False, single=False):
     """compute enrichment scores and enrichment nulls.
 
-    :param data: prepreocessed expression dataframe or a pre-ranked file if prerank=True.
-    :param gmt: all gene sets in .gmt file. need to call gsea_gmt_parser() to get results.
-    :param n: permutation number. default: 1000.
-    :param method: ranking_metric method. see above.
-    :param pheno_pos: one of lables of phenotype's names.
-    :param pheno_neg: one of lable of phenotype's names.
-    :param classes: a list of phenotype labels, to specify which column of dataframe belongs to what catogry of phenotype.
-    :param weighted_score_type: default:1
-    :param ascending: sorting order of rankings. Default: False.
-    :param seed: random seed. Default: np.random.RandomState()
-    :param scale: if true, scale es by gene number.
+        :param data: prepreocessed expression dataframe or a pre-ranked file if prerank=True.
+        :param gmt: all gene sets in .gmt file. need to call load_gmt() to get results.
+        :param n: permutation number. default: 1000.
+        :param method: ranking_metric method. see above.
+        :param pheno_pos: one of lables of phenotype's names.
+        :param pheno_neg: one of lable of phenotype's names.
+        :param classes: a list of phenotype labels, to specify which column of dataframe belongs to what catogry of phenotype.
+        :param weighted_score_type: default:1
+        :param ascending: sorting order of rankings. Default: False.
+        :param seed: random seed. Default: np.random.RandomState()
+        :param scale: if true, scale es by gene number.
 
-    :return:
-      zipped results of es, nes, pval, fdr. Used for generating reportes and plotting.
+        :return: a tuple contains::
 
-      a nested list of hit indexs of input gene_list. Used for plotting.
-
-      a nested list of ranked enrichment score of each input gene_sets. Used for plotting.
+                | zipped results of es, nes, pval, fdr.
+                | nested list of hit indexs of input gene_list.
+                | nested list of ranked enrichment score of each input gene_sets.
+                | list of enriched terms
 
     """
 
@@ -394,7 +387,7 @@ def gsea_pval(es, esnull):
     #except:
     #    return np.repeat(1.0 ,len(es))
 
-def normalize(es, enrNull):
+def normalize(es, esnull):
     """normalize the ES(S,pi) and the observed ES(S), separetely rescaling
        the positive and negative scores by divident by the mean of the ES(S,pi).
     """
@@ -403,11 +396,11 @@ def normalize(es, enrNull):
         if es == 0:
             return 0.0
         if es >= 0:
-            meanPos = np.mean([a for a in enrNull if a >= 0])
+            meanPos = np.mean([a for a in esnull if a >= 0])
             #print es, meanPos
             return es/meanPos
         else:
-            meanNeg = np.mean([a for a in enrNull if a < 0])
+            meanNeg = np.mean([a for a in esnull if a < 0])
             #print es, meanNeg
             return -es/meanNeg
     except:

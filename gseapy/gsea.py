@@ -82,8 +82,8 @@ class GSEAbase(object):
         """Parse ranking file. This file contains ranking correlation vector( or expression values)
            and gene names or ids.
 
-        :param rnk: the .rnk file of GSEA input or a pandas DataFrame, Series instance.
-        :return: a pandas DataFrame with 3 columns names are: 'gene_name','rank',rank2'
+            :param rnk: the .rnk file of GSEA input or a pandas DataFrame, Series instance.
+            :return: a pandas Series with gene name indexed rankings
 
         """
         #load data
@@ -173,7 +173,7 @@ class GSEAbase(object):
         if os.path.isfile(tempath):
             return self.parse_gmt(tempath)
         else:
-            return self.download_libraries(gmt)
+            return self._download_libraries(gmt)
 
     def get_libraries(self):
         """return enrichr active enrichr library name.Offical API """
@@ -182,7 +182,7 @@ class GSEAbase(object):
         libs = [lib['libraryName'] for lib in libs_json['statistics']]
         return sorted(libs)
 
-    def download_libraries(self, libname):
+    def _download_libraries(self, libname):
         """ download enrichr libraries.
 
             define max tries num
@@ -216,10 +216,10 @@ class GSEAbase(object):
     def _plotting(self, rank_metric, results, res2d,
                  graph_num, outdir, format, figsize, module=None, data=None,
                  classes=None, phenoPos='', phenoNeg=''):
-        """
-        :param rank_metric: sorted pd.Series with rankings values.
-        :param results: self.results
-        :param data: preprocessed expression table
+        """ Plotting API.
+            :param rank_metric: sorted pd.Series with rankings values.
+            :param results: self.results
+            :param data: preprocessed expression table
 
         """
         #Plotting
@@ -465,8 +465,6 @@ class Prerank(GSEAbase):
         #Start Analysis
         self._logger.info("Parsing data files for GSEA.............................")
         #filtering out gene sets and build gene sets dictionary
-        # gmt = gsea_gmt_parser(self.gene_sets, min_size=self.min_size, max_size=self.max_size,
-        #                       gene_list=dat2.index.values)
         gmt = self.load_gmt(gene_list=dat2.index.values, gmt=self.gene_sets)
 
         self._logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
@@ -600,8 +598,7 @@ class SingleSampleGSEA(GSEAbase):
         return data
 
     def run(self):
-        """
-        """
+        """run entry"""
         #load data
         data = self.load_data()
 
@@ -858,7 +855,7 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
     return gs
 
 
-def ssgsea(data, gene_sets, outdir="GSEA_SingleSample", sample_norm_method='rank', min_size=15, max_size=2000,
+def ssgsea(data, gene_sets, outdir="ssGSEA_", sample_norm_method='rank', min_size=15, max_size=2000,
            permutation_num=1000, weighted_score_type=0.25, scale=True, ascending=False, processes=1,
            figsize=[7,6], format='pdf', graph_num=20, seed=None, verbose=False):
     """Run Gene Set Enrichment Analysis with single sample GSEA tool
@@ -887,7 +884,7 @@ def ssgsea(data, gene_sets, outdir="GSEA_SingleSample", sample_norm_method='rank
     :param seed: Random seed. expect an interger. Defalut:None.
     :param bool verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
 
-    :return: Return a ssGSEA obj. All results store to  a dictionary, obj.results,
+    :return: Return a ssGSEA obj. All results store to  a dictionary, obj.results(or obj.resultsOnSamples)
              where contains::
 
                  | {es: enrichment score,
