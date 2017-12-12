@@ -299,7 +299,7 @@ class GSEA(GSEAbase):
         # init logger
         mkdirs(self.outdir)
         _gset =os.path.split(self.gene_sets)[-1].lower().rstrip(".gmt")
-        outlog = "%s/gseapy.%s.%s.log"%(self.outdir, self.module, _gset)
+        outlog = os.path.join(self.outdir,"gseapy.%s.%s.log"%(self.module, _gset))
         self._logger = log_init(outlog=outlog,
                                 log_level=logging.INFO if self.verbose else logging.WARNING)
 
@@ -309,6 +309,9 @@ class GSEA(GSEAbase):
         # read data in
         if isinstance(self.data, pd.DataFrame) :
             exprs = self.data.copy()
+            # handle index is gene_names
+            if exprs.index.dtype == 'O':
+                exprs = exprs.reset_index()
         elif os.path.isfile(self.data) :
             # GCT input format?
             if self.data.endswith("gct"):
@@ -417,7 +420,7 @@ class Prerank(GSEAbase):
         # init logger
         mkdirs(self.outdir)
         _gset =os.path.split(self.gene_sets)[-1].lower().rstrip(".gmt")
-        outlog = "%s/gseapy.%s.%s.log"%(self.outdir, self.module, _gset)
+        outlog = os.path.join(self.outdir,"gseapy.%s.%s.log"%(self.module, _gset))
         self._logger = log_init(outlog=outlog,
                                 log_level=logging.INFO if self.verbose else logging.WARNING)
 
@@ -491,7 +494,7 @@ class SingleSampleGSEA(GSEAbase):
         # init logger
         mkdirs(self.outdir)
         _gset =os.path.split(self.gene_sets)[-1].lower().rstrip(".gmt")
-        outlog = "%s/gseapy.%s.%s.log"%(self.outdir, self.module, _gset)
+        outlog = os.path.join(self.outdir,"gseapy.%s.%s.log"%(self.module, _gset))
         self._logger = log_init(outlog=outlog,
                                 log_level=logging.INFO if self.verbose else logging.WARNING)
 
@@ -710,16 +713,15 @@ class Replot(GSEAbase):
         import glob
         from bs4 import BeautifulSoup
 
-        #parsing files.......
+        # parsing files.......
         try:
             results_path = glob.glob(self.indir+'*/edb/results.edb')[0]
             rank_path =  glob.glob(self.indir+'*/edb/*.rnk')[0]
             gene_set_path =  glob.glob(self.indir+'*/edb/gene_sets.gmt')[0]
         except IndexError as e:
-            #logger.debug(e)
             sys.stderr.write("Could not locate GSEA files in the given directory!")
             sys.exit(1)
-        #extract sample names from .cls file
+        # extract sample names from .cls file
         cls_path = glob.glob(self.indir+'*/edb/*.cls')
         if cls_path:
             phenoPos, phenoNeg, classes = gsea_cls_parser(cls_path[0])

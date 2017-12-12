@@ -34,7 +34,7 @@ class Enrichr(object):
         # init logger
         mkdirs(self.outdir)
         _gset =os.path.split(self.gene_sets)[-1].lower().rstrip(".gmt")
-        outlog = os.path.join(self.outdir,"gseapy.%s.%s.log"%(self.module,_gset))
+        outlog = os.path.join(self.outdir,"gseapy.%s.%s.log"%(self.module, _gset))
         self._logger = log_init(outlog=outlog,
                                 log_level=logging.INFO if self.verbose else logging.WARNING)
 
