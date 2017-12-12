@@ -722,12 +722,13 @@ class Replot(GSEAbase):
         self.format=format
         self.verbose=bool(verbose)
         self.module='replot'
-        self.gene_sets='run'
+        self.gene_sets=None
         self.ascending=False
         # init logger
         mkdirs(self.outdir)
-        self._log_init(module=self.module,
-                      log_level=logging.INFO if self.verbose else logging.WARNING)
+        outlog = os.path.join(self.outdir,"gseapy.%s.%s.log"%(self.module,"run"))
+        self._logger = log_init(outlog=outlog,
+                                log_level=logging.INFO if self.verbose else logging.WARNING)
     def run(self):
         """main replot function"""
         assert self.min_size <= self.max_size
