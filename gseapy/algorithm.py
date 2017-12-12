@@ -96,10 +96,10 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
                                 Default: np.random.RandomState(seed=None)
         :return: a tuple contains::
 
-                 |ES: Enrichment score (real number between -1 and +1), for ssGSEA, set scale eq to True.
-                 |ESNULL: Enrichment score calcualted from random permutation.
-                 |Hits_Indices: Indices of genes if genes are included in gene_set.
-                 |RES: The running enrichment score for all locations in the gene list.
+                 | ES: Enrichment score (real number between -1 and +1), for ssGSEA, set scale eq to True.
+                 | ESNULL: Enrichment score calcualted from random permutation.
+                 | Hits_Indices: Indices of genes if genes are included in gene_set.
+                 | RES: The running enrichment score for all locations in the gene list.
 
     """
     # gene_mat -> 1d: prerank, ssSSEA or 2d: GSEA

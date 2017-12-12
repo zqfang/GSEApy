@@ -8,6 +8,8 @@ As a biological reseacher, I like protocols, so as other reseachers, too.
 
 Here is an short tutorial to walk you through gseapy.
 
+For file format explaination, please see `here <http://software.broadinstitute.org/gsea/doc/GSEAUserGuideFrame.html.>`_
+
 In order to run gseapy successfully, install gseapy use pip.
 
 .. code:: bash
@@ -120,7 +122,7 @@ commands below:
 
 
 
-2. An cls file is also expected. 
+2. An cls file is also expected.
 -----------------------------------------------
 
 This file is used to specify column attributes in step 1, just like ``GSEA`` asked.
@@ -140,17 +142,17 @@ An example of cls file looks like below.
     6 2 1
     # C1OE Vector
     C1OE C1OE C1OE Vector Vector Vector
-    
-    
+
+
 | The first line specify the total samples and phenotype numbers. Leave number 1 alway be 1.
 | The second line specify the phenotype class(name).
-| The third line specify column attributes in setp 1.     
+| The third line specify column attributes in setp 1.
 
 
 
 
 
-3. Gene_sets file in gmt format. 
+3. Gene_sets file in gmt format.
 -----------------------------------------------------
 
 All you need to do is to download gene set database file from ``GSEA`` website.
@@ -171,13 +173,13 @@ An example of gmt file looks like below:
 
 .. parsed-literal::
 
-    ES-SPECIFIC	Arid3a_used	ACTA1	CALML4	CORO1A	DHX58	DPYS	EGR1	ESRRB	GLI2	GPX2	HCK	INHBB	
-    HDAC-UNIQUE     Arid3a_used	1700017B05RIK	8430427H17RIK	ABCA3	ANKRD44	ARL4A	BNC2	CLDN3	
-    XEN-SPECIFIC	Arid3a_used	1110036O03RIK	A130022J15RIK	B2M	B3GALNT1	CBX4	CITED1	CLU	CTSH	CYP26A1	
+    ES-SPECIFIC	Arid3a_used	ACTA1	CALML4	CORO1A	DHX58	DPYS	EGR1	ESRRB	GLI2	GPX2	HCK	INHBB
+    HDAC-UNIQUE     Arid3a_used	1700017B05RIK	8430427H17RIK	ABCA3	ANKRD44	ARL4A	BNC2	CLDN3
+    XEN-SPECIFIC	Arid3a_used	1110036O03RIK	A130022J15RIK	B2M	B3GALNT1	CBX4	CITED1	CLU	CTSH	CYP26A1
     GATA-SPECIFIC	Arid3a_used	1200009I06RIK	5430407P10RIK	BAIAP2L1	BMP8B	CITED1	CLDN3	COBLL1	CORO1A	CRYAB	CTDSPL	DKKL1
-    TS-SPECIFIC	Arid3a_used	5430407P10RIK	AFAP1L1	AHNAK	ANXA2	ANXA3	ANXA5	B2M	BIK	BMP8B	CAMK1D	CBX4	CLDN3	CSRP1	DKKL1	DSC2	
-    
-    
+    TS-SPECIFIC	Arid3a_used	5430407P10RIK	AFAP1L1	AHNAK	ANXA2	ANXA3	ANXA5	B2M	BIK	BMP8B	CAMK1D	CBX4	CLDN3	CSRP1	DKKL1	DSC2
+
+
 
 4. Run gseapy inside python
 -------------------------------------------------------
@@ -186,10 +188,10 @@ At least 3 files are required to run gseapy.
 
 interactive python console
 .. code:: python
-     
+
     import gseapy
     gseapy.gsea(data='gsea_data.txt', cls='gsea.cls', gmt='gene_sets.gmt', outdir='gseapy_out')
-    
+
 
 bash shell
 .. code:: bash
@@ -207,7 +209,7 @@ and gene_sets file in gmt format.  ``prerank`` module has the same API to `GSEA`
 After this, you can start to run gseapy.
 
 .. code:: bash
- 
+
     gseapy prerank -r gsea_data.rnk -g gene_sets.gmt -o test
 
 
@@ -227,7 +229,7 @@ Use ``ssgsea`` command, or :func:`ssgsea`
 
 
 .. code:: bash
- 
+
     gseapy ssgsea -d expression.txt -g gene_sets.gmt -o test
 
 
@@ -246,23 +248,23 @@ The only thing you need to prepeare is a gene list file.
 **Note**: Enrichr uses a list of Entrez gene symbols as input.
 
 
-For ``enrichr`` , you could assign a list object 
+For ``enrichr`` , you could assign a list object
 
 .. code:: python
 
     # assign a list object to enrichr
-    l = ['SCARA3', 'LOC100044683', 'CMBL', 'CLIC6', 'IL13RA1', 'TACSTD2', 'DKKL1', 'CSF1', 
-         'SYNPO2L', 'TINAGL1', 'PTX3', 'BGN', 'HERC1', 'EFNA1', 'CIB2', 'PMP22', 'TMEM173'] 
+    l = ['SCARA3', 'LOC100044683', 'CMBL', 'CLIC6', 'IL13RA1', 'TACSTD2', 'DKKL1', 'CSF1',
+         'SYNPO2L', 'TINAGL1', 'PTX3', 'BGN', 'HERC1', 'EFNA1', 'CIB2', 'PMP22', 'TMEM173']
 
     gseapy.enrichr(gene_list=l, description='pathway', gene_sets='KEGG_2016', outfile='test')
 
 
 
 
-or a gene list file in txt format(one gene id per row) 
+or a gene list file in txt format(one gene id per row)
 
 .. code:: python
-   
+
    gseapy.enrichr(gene_list='gene_list.txt', description='pathway', gene_sets='KEGG_2016', outfile='test')
 
 
@@ -274,7 +276,7 @@ Let's see what the txt file looks like.
         print(genes.read())
 
 .. code:: python
-    
+
     CTLA2B
     SCARA3
     LOC100044683
@@ -288,12 +290,12 @@ Let's see what the txt file looks like.
     SYNPO2L
     TINAGL1
     PTX3
-       
+
 
 Select the library you want to do enrichment analysis. For a view all avilable libraries,run
 
 .. code:: python
-   
+
    #s get_library_name(), it will print out all library names.
    import gseapy
    names = gseapy.get_library_name()
@@ -443,4 +445,4 @@ If you prefer to run in command line, it's more simple.
    gseapy replot -i gsea -o gseapy_out
 
 
-| For advanced usage of library,see the :ref:`run`. 
+| For advanced usage of library,see the :ref:`run`.
