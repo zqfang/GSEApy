@@ -27,7 +27,7 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
                             equal to the permutation number.
     :param rs:              Random state for initialize gene list shuffling. Default: np.random.RandomState(seed=None)
 
-    :return: 
+    :return:
 
      ES: Enrichment score (real number between -1 and +1)
 
@@ -196,17 +196,9 @@ def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
 
        :return:
                 returns two 2d ndarry with shape (nperm, gene_num).
-<<<<<<< HEAD
-<<<<<<< HEAD
 
                 | genes_mat: sorted and permuated (exclude last row) gene name matrix.
                 | cor_mat: sorted and permuated (exclude last row) ranking matrix.
-=======
-=======
->>>>>>> 8d7a498886c4c53b7ded2cfd959dedded51e1db3
-                genes_mat: sorted and permuated (exclude last row) gene name matrix.
-                cor_mat: sorted and permuated (exclude last row) ranking matrix.
->>>>>>> 8d7a498886c4c53b7ded2cfd959dedded51e1db3
 
     """
     # S: samples, G: gene number
