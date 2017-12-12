@@ -197,10 +197,13 @@ def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
        :return:
                 returns two 2d ndarry with shape (nperm, gene_num).
 <<<<<<< HEAD
+<<<<<<< HEAD
 
                 | genes_mat: sorted and permuated (exclude last row) gene name matrix.
                 | cor_mat: sorted and permuated (exclude last row) ranking matrix.
 =======
+=======
+>>>>>>> 8d7a498886c4c53b7ded2cfd959dedded51e1db3
                 genes_mat: sorted and permuated (exclude last row) gene name matrix.
                 cor_mat: sorted and permuated (exclude last row) ranking matrix.
 >>>>>>> 8d7a498886c4c53b7ded2cfd959dedded51e1db3
