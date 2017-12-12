@@ -28,6 +28,10 @@ def geneGMT():
     return "tests/data/genes.gmt"
 
 @pytest.fixture
+def ssGMT():
+    return "tests/data/randomSets.gmt"
+
+@pytest.fixture
 def ssGCT():
     return "tests/data/testSet_rand1200.gct"
 
@@ -36,7 +40,8 @@ def test_gsea(gseaGCT, gseaCLS, geneGMT):
     # doesnt't check the image
     tmpdir= TemporaryDirectory(dir="tests")
     gsea(data=gseaGCT, gene_sets=geneGMT, cls=gseaCLS,
-         outdir=tmpdir.name,permutation_type='phenotype')
+         outdir=tmpdir.name, permutation_type='phenotype',
+         permutation_num=10)
     tmpdir.cleanup()
 
 
@@ -44,14 +49,14 @@ def test_prerank(prernk, geneGMT):
     # Only tests of the command runs successfully,
     # doesnt't check the image
     tmpdir= TemporaryDirectory(dir="tests")
-    prerank(prernk, geneGMT, tmpdir.name)
+    prerank(prernk, geneGMT, tmpdir.name, permutation_num=10)
     tmpdir.cleanup()
 
 def test_ssgsea(ssGCT, geneGMT):
     # Only tests of the command runs successfully,
     # doesnt't check the image
     tmpdir= TemporaryDirectory(dir="tests")
-    ssgsea(ssGCT, geneGMT, tmpdir.name)
+    ssgsea(ssGCT, geneGMT, tmpdir.name, permutation_num=100)
     tmpdir.cleanup()
 
 def test_enrichr(genelist):
