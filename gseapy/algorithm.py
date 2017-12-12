@@ -194,9 +194,11 @@ def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
                              dataframe belongs to what catogry of phenotype.
        :param bool ascending:  bool. Sort ascending vs. descending.
 
-       :return: returns two 2d ndarry with shape (nperm, gene_num).
-                genes_mat: sorted and permuated (exclude last row) gene name matrix.
-                cor_mat: sorted and permuated (exclude last row) ranking matrix.
+       :return:
+                returns two 2d ndarry with shape (nperm, gene_num).
+
+                | genes_mat: sorted and permuated (exclude last row) gene name matrix.
+                | cor_mat: sorted and permuated (exclude last row) ranking matrix.
 
     """
     # S: samples, G: gene number

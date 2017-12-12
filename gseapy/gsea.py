@@ -30,32 +30,6 @@ class GSEAbase(object):
         self._processes=1
         self._logger=None
 
-    def _log_init(self, module='GSEA', log_level=logging.INFO):
-        """logging start"""
-
-        # clear old root logger handlers
-        logging.getLogger("").handlers = []
-        # log file naming rules
-        gene_set =os.path.split(self.gene_sets)[-1].lower().rstrip(".gmt")
-        # init a root logger
-        logging.basicConfig(level    = logging.DEBUG,
-                            format   = 'LINE %(lineno)-4d: %(asctime)s [%(levelname)-8s] %(message)s',
-                            filename = "%s/gseapy.%s.%s.log"%(self.outdir, module, gene_set),
-                            filemode = 'w')
-
-        # define a Handler which writes INFO messages or higher to the sys.stderr
-        console = logging.StreamHandler()
-        console.setLevel(log_level)
-        # set a format which is simpler for console use
-        formatter = logging.Formatter('%(asctime)s %(message)s')
-        # tell the handler to use this format
-        console.setFormatter(formatter)
-        # add handlers
-        logging.getLogger("").addHandler(console)
-        logger = logging.getLogger("")
-        #logger.setLevel(log_level)
-        self._logger=logger
-        return
 
     def _set_cores(self):
         """set cpu numbers to be used"""
