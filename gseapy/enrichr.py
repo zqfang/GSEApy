@@ -6,13 +6,14 @@ import sys, json, os, logging
 import requests
 from time import sleep
 from pandas import read_table, DataFrame, Series
-from gseapy.gsea import GSEAbase
+
 from gseapy.plot import barplot
+from gseapy.parser import get_library_name
 from gseapy.utils import *
 from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 
-class Enrichr(GSEAbase):
+class Enrichr(object):
     """Enrichr API"""
     def __init__(self, gene_list, gene_sets, descriptions='foo', outdir='Enrichr',
             cutoff=0.05, format='pdf', figsize=(8,6), top_term=10, no_plot=False, verbose=False):
@@ -24,16 +25,18 @@ class Enrichr(GSEAbase):
         self.cutoff=cutoff
         self.format=format
         self.figsize=figsize
-        self.__top_term=top_term
+        self.__top_term=int(top_term)
         self.__no_plot=no_plot
-        self.verbose=verbose
+        self.verbose=bool(verbose)
         self.module="enrichr"
         self.res2d=None
         self._processes=1
         # init logger
         mkdirs(self.outdir)
-        self._log_init(module=self.module,
-                      log_level=logging.INFO if self.verbose else logging.WARNING)
+        _gset =os.path.split(self.gene_sets)[-1].lower().rstrip(".gmt")
+        outlog = "%s/gseapy.%s.%s.log"%(self.outdir, self.module, _gset)
+        self._logger = log_init(outlog=outlog,
+                                log_level=logging.INFO if self.verbose else logging.WARNING)
 
     def parse_input(self):
         if isinstance(self.gene_list, list):
@@ -78,7 +81,7 @@ class Enrichr(GSEAbase):
         if gene_set in DEFAULT_LIBRARY:
             enrichr_library = DEFAULT_LIBRARY
         else:
-            enrichr_library = self.get_libraries()
+            enrichr_library = get_library_name()
             if gene_set not in enrichr_library:
                 sys.stderr.write("%s is not a enrichr library name\n"%gene_set)
                 sys.stdout.write("Hint: use get_library_name() to veiw full list of supported names")
@@ -159,7 +162,7 @@ class Enrichr(GSEAbase):
         self._logger.info('Done.\n')
         return
 
-    
+
 def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr',
             cutoff=0.05, format='pdf', figsize=(8,6), top_term=10, no_plot=False, verbose=False):
     """Enrichr API.

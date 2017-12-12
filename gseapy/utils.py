@@ -1,5 +1,36 @@
 
-import os, errno
+import os, errno, logging
+
+DEFAULT_LIBRARY=['GO_Biological_Process_2013',
+				 'GO_Biological_Process_2015',
+				 'GO_Cellular_Component_2013',
+				 'GO_Cellular_Component_2015',
+				 'GO_Molecular_Function_2013',
+				 'GO_Molecular_Function_2015',
+				 'GeneSigDB',
+				 'HumanCyc_2015',
+				 'Human_Gene_Atlas',
+				 'Human_Phenotype_Ontology',
+				 'Humancyc_2016',
+				 'KEGG_2013',
+				 'KEGG_2015',
+				 'KEGG_2016',
+				 'MGI_Mammalian_Phenotype_2013',
+				 'MGI_Mammalian_Phenotype_Level_3',
+				 'MGI_Mammalian_Phenotype_Level_4',
+				 'MSigDB_Computational',
+				 'MSigDB_Oncogenic_Signatures',
+				 'Mouse_Gene_Atlas',
+				 'Panther_2015',
+				 'Panther_2016',
+				 'Reactome_2013',
+				 'Reactome_2015',
+				 'Reactome_2016',
+				 'WikiPathways_2013',
+				 'WikiPathways_2015',
+				 'WikiPathways_2016']
+
+
 
 def unique(seq):
     """Remove duplicates from a list in Python while preserving order.
@@ -30,32 +61,34 @@ def mkdirs(outdir):
             raise exc
         pass
 
+def log_init(outlog, log_level=logging.INFO):
+    """logging start"""
 
-DEFAULT_LIBRARY=['GO_Biological_Process_2013',
-				 'GO_Biological_Process_2015',
-				 'GO_Cellular_Component_2013',
-				 'GO_Cellular_Component_2015',
-				 'GO_Molecular_Function_2013',
-				 'GO_Molecular_Function_2015',
-				 'GeneSigDB',
-				 'HumanCyc_2015',
-				 'Human_Gene_Atlas',
-				 'Human_Phenotype_Ontology',
-				 'Humancyc_2016',
-				 'KEGG_2013',
-				 'KEGG_2015',
-				 'KEGG_2016',
-				 'MGI_Mammalian_Phenotype_2013',
-				 'MGI_Mammalian_Phenotype_Level_3',
-				 'MGI_Mammalian_Phenotype_Level_4',
-				 'MSigDB_Computational',
-				 'MSigDB_Oncogenic_Signatures',
-				 'Mouse_Gene_Atlas',
-				 'Panther_2015',
-				 'Panther_2016',
-				 'Reactome_2013',
-				 'Reactome_2015',
-				 'Reactome_2016',
-				 'WikiPathways_2013',
-				 'WikiPathways_2015',
-				 'WikiPathways_2016']
+    # clear old root logger handlers
+    logging.getLogger("").handlers = []
+    # init a root logger
+    logging.basicConfig(level    = logging.DEBUG,
+                        format   = 'LINE %(lineno)-4d: %(asctime)s [%(levelname)-8s] %(message)s',
+                        filename = outlog,
+                        filemode = 'w')
+
+    # define a Handler which writes INFO messages or higher to the sys.stderr
+    console = logging.StreamHandler()
+    console.setLevel(log_level)
+    # set a format which is simpler for console use
+    formatter = logging.Formatter('%(asctime)s %(message)s')
+    # tell the handler to use this format
+    console.setFormatter(formatter)
+    # add handlers
+    logging.getLogger("").addHandler(console)
+    logger = logging.getLogger("")
+    #logger.setLevel(log_level)
+    return logger
+
+def log_stop(logger):
+    """log stop"""
+
+    handlers = logger.handlers[:]
+    for handler in handlers:
+        handler.close()
+        logger.removeHandler(handler)

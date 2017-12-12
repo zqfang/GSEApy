@@ -14,7 +14,7 @@ from requests.adapters import HTTPAdapter
 from gseapy.parser import *
 from gseapy.algorithm import enrichment_score, gsea_compute, ranking_metric
 from gseapy.plot import gsea_plot, heatmap
-from gseapy.utils import mkdirs, DEFAULT_LIBRARY
+from gseapy.utils import mkdirs, log_init, DEFAULT_LIBRARY
 
 
 class GSEAbase(object):
@@ -56,14 +56,6 @@ class GSEAbase(object):
         #logger.setLevel(log_level)
         self._logger=logger
         return
-
-    def _log_stop(self):
-        """log stop"""
-
-        handlers = self._logger.handlers[:]
-        for handler in handlers:
-            handler.close()
-            self._logger.removeHandler(handler)
 
     def _set_cores(self):
         """set cpu numbers to be used"""
@@ -330,10 +322,12 @@ class GSEA(GSEAbase):
         self.verbose=bool(verbose)
         self.module='gsea'
         self.ranking=None
-        #init logger
+        # init logger
         mkdirs(self.outdir)
-        self._log_init(module=self.module,
-                       log_level=logging.INFO if self.verbose else logging.WARNING)
+        _gset =os.path.split(self.gene_sets)[-1].lower().rstrip(".gmt")
+        outlog = "%s/gseapy.%s.%s.log"%(self.outdir, self.module, _gset)
+        self._logger = log_init(outlog=outlog,
+                                log_level=logging.INFO if self.verbose else logging.WARNING)
 
     def load_data(self, cls_vec):
         """pre-processed the data frame.new filtering methods will be implement here.
@@ -448,8 +442,10 @@ class Prerank(GSEAbase):
         self._processes=processes
         # init logger
         mkdirs(self.outdir)
-        self._log_init(module=self.module,
-                      log_level=logging.INFO if self.verbose else logging.WARNING)
+        _gset =os.path.split(self.gene_sets)[-1].lower().rstrip(".gmt")
+        outlog = "%s/gseapy.%s.%s.log"%(self.outdir, self.module, _gset)
+        self._logger = log_init(outlog=outlog,
+                                log_level=logging.INFO if self.verbose else logging.WARNING)
 
     def run(self):
         """GSEA prerank workflow"""
@@ -520,8 +516,11 @@ class SingleSampleGSEA(GSEAbase):
         self._imat=None
         # init logger
         mkdirs(self.outdir)
-        self._log_init(module=self.module,
-                      log_level=logging.INFO if self.verbose else logging.WARNING)
+        _gset =os.path.split(self.gene_sets)[-1].lower().rstrip(".gmt")
+        outlog = "%s/gseapy.%s.%s.log"%(self.outdir, self.module, _gset)
+        self._logger = log_init(outlog=outlog,
+                                log_level=logging.INFO if self.verbose else logging.WARNING)
+
     def corplot(self):
         """NES Correlation plot
         """
