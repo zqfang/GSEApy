@@ -27,11 +27,11 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
                             equal to the permutation number.
     :param rs:              Random state for initialize gene list shuffling. Default: np.random.RandomState(seed=None)
 
-    :return:
+    :return: 
 
      ES: Enrichment score (real number between -1 and +1)
 
-     hit_index: index of a gene in gene_list, if gene included in gene_set.
+     Hits_Indices: index of a gene in gene_list, if gene included in gene_set.
 
      RES: Numerical vector containing the running enrichment score for all locations in the gene list .
 
@@ -94,12 +94,12 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
         :param bool single:     If True, use ssGSEA algorithm, otherwise use GSEA.
         :param rs:              Random state for initialize gene list shuffling.
                                 Default: np.random.RandomState(seed=None)
-        :return:
-                 ES: Enrichment score (real number between -1 and +1), it's true for ssGSEA, when only scaled
-                     by gene number.
-                 ESNULL: Enrichment score calcualted from random permutation.
-                 Hits_Indices: Indices of genes if genes are included in gene_set.
-                 RES: The running enrichment score for all locations in the gene list.
+        :return: a tuple contains::
+
+                 |ES: Enrichment score (real number between -1 and +1), for ssGSEA, set scale eq to True.
+                 |ESNULL: Enrichment score calcualted from random permutation.
+                 |Hits_Indices: Indices of genes if genes are included in gene_set.
+                 |RES: The running enrichment score for all locations in the gene list.
 
     """
     # gene_mat -> 1d: prerank, ssSSEA or 2d: GSEA
@@ -179,14 +179,14 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
 def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
                           ascending, rs=np.random.RandomState()):
     """Build shuffled ranking matrix when permutation_type eq to phenotype.
+
        :param exprs:   gene_expression DataFrame, gene_name indexed.
        :param str method:  calculate correlation or ranking. methods including:
-                           1. 'signal_to_noise'
-                           2. 't_test'
+                           1. 'signal_to_noise'.
+                           2. 't_test'.
                            3. 'ratio_of_classes' (also referred to as fold change).
-                           4. 'diff_of_classes'
-                           5. 'log2_ratio_of_classes'
-
+                           4. 'diff_of_classes'.
+                           5. 'log2_ratio_of_classes'.
        :param int permuation_num: how many times of classes is being shuffled
        :param str pos: one of lables of phenotype's names.
        :param str neg: one of lable of phenotype's names.
@@ -196,9 +196,14 @@ def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
 
        :return:
                 returns two 2d ndarry with shape (nperm, gene_num).
+<<<<<<< HEAD
 
                 | genes_mat: sorted and permuated (exclude last row) gene name matrix.
                 | cor_mat: sorted and permuated (exclude last row) ranking matrix.
+=======
+                genes_mat: sorted and permuated (exclude last row) gene name matrix.
+                cor_mat: sorted and permuated (exclude last row) ranking matrix.
+>>>>>>> 8d7a498886c4c53b7ded2cfd959dedded51e1db3
 
     """
     # S: samples, G: gene number
