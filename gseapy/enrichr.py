@@ -41,8 +41,6 @@ class Enrichr(object):
     def parse_input(self):
         if isinstance(self.gene_list, list):
             genes = [str(gene) for gene in self.gene_list]
-            genes_str = '\n'.join(genes)
-
         elif isinstance(self.gene_list, DataFrame):
             #input type is bed file
             if self.gene_list.shape[1] >=3:
@@ -56,11 +54,12 @@ class Enrichr(object):
             genes = self.gene_list.squeeze().tolist()
         else:
             # get gene lists or bed file, or gene list with weighted values.
+            genes=[]
             with open(self.gene_list) as f:
-                genes = f.read()
+                for gene in f:
+                    genes.append(gene.strip())
 
-        genes_str = str(genes)
-
+        genes_str = '\n'.join(genes)
         return genes_str
 
     def run(self):
