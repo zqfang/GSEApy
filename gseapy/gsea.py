@@ -108,7 +108,7 @@ class GSEAbase(object):
 
         if filsets_num == len(subsets):
             self._logger.error("No gene sets passed throught filtering condition!!!, try new paramters again!\n" +\
-                               "Note: Gene names for gseapy is case sensitive." )
+                               "Note: check gene name, gmt file format, or filtering size." )
             sys.exit(0)
 
         self._gmtdct=genesets_dict
@@ -120,7 +120,7 @@ class GSEAbase(object):
         if gmt.lower().endswith(".gmt"):
             self._logger.info("User Defined gene sets is given.......continue..........")
             with open(gmt) as genesets:
-                 genesets_dict = { line.strip().split("\t")[0]: line.strip("\n").split("\t")[2:]
+                 genesets_dict = { line.strip().split("\t")[0]: line.strip().split("\t")[2:]
                                   for line in genesets.readlines()}
             return genesets_dict
 
@@ -132,11 +132,12 @@ class GSEAbase(object):
             self._logger.error("No supported gene_sets: %s"%gmt)
             sys.exit(0)
 
-        self._logger.info("Downloading and generating Enrichr library gene sets...")
+        self._logger.info("Downloading and generating Enrichr library gene sets......")
         tmpname = "enrichr." + gmt + ".gmt"
         tempath = os.path.join(self.outdir, tmpname)
         # if file already download
         if os.path.isfile(tempath):
+            self._logger.info("Enrichr library gene sets already downloaded, use local file")
             return self.parse_gmt(tempath)
         else:
             return self._download_libraries(gmt)
@@ -170,12 +171,15 @@ class GSEAbase(object):
         ### reformat to dict and wirte to disk
         genesets_dict = {}
         outname = "enrichr.%s.gmt"%libname
-        with open(os.path.join(self.outdir, outname),"w") as g:
-            for line in response.iter_lines(chunk_size=1024, decode_unicode='utf-8'):
-                g.write(line)
-                line=line.strip()
-                genesets_dict.update({ line.split("\t")[0]:
-                                       list(map(lambda x: x.split(",")[0], line.split("\t")[2:]))})
+        gmtout = open(os.path.join(self.outdir, outname),"w")
+        for line in response.iter_lines(chunk_size=1024, decode_unicode='utf-8'):
+            line=line.strip()
+            k = line.split("\t")[0]
+            v = list(map(lambda x: x.split(",")[0], line.split("\t")[2:]))
+            genesets_dict.update({ k: v})
+            outline = "%s\t\t%s\n"%(k, "\t".join(v))
+            gmtout.write(outline)
+        gmtout.close()
 
         return genesets_dict
 
