@@ -195,25 +195,25 @@ class GSEAbase(object):
         #Plotting
         top_term = res2d.head(graph_num).index
 
-        #multi-threading
-        pool = Pool(processes=self._processes)
+        # multi-threading
+        # pool = Pool(processes=self._processes)
 
         for gs in top_term:
             hit = results.get(gs)['hits_indices']
             NES = 'nes' if module != 'ssgsea' else 'es'
-            """
+
             gsea_plot(rank_metric=rank_metric, enrich_term=gs, hit_ind=hit,
-                      nes=results.get(gs)['nes'], pval=results.get(gs)['pval'], fdr=results.get(gs)['fdr'],
-                      RES=results.get(gs)['rank_ES'], phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize,
-                      format=format, outdir=outdir, module=module)
-            """
-            pool.apply_async(gsea_plot, args=(rank_metric, gs, hit, results.get(gs)[NES],
-                                              results.get(gs)['pval'],results.get(gs)['fdr'],
-                                              results.get(gs)['RES'],
-                                              phenoPos, phenoNeg, figsize, self.format,
-                                              self.outdir,self.module))
-        pool.close()
-        pool.join()
+                      nes=results.get(gs)[NES], pval=results.get(gs)['pval'], fdr=results.get(gs)['fdr'],
+                      RES=results.get(gs)['RES'], phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize,
+                      format=self.format, outdir=self.outdir, module=self.module)
+
+            # pool.apply_async(gsea_plot, args=(rank_metric, gs, hit, results.get(gs)[NES],
+            #                                   results.get(gs)['pval'],results.get(gs)['fdr'],
+            #                                   results.get(gs)['RES'],
+            #                                   phenoPos, phenoNeg, figsize, self.format,
+            #                                   self.outdir,self.module))
+        # pool.close()
+        # pool.join()
 
         if module == 'gsea':
             width = len(classes) if len(classes) >= 6 else  5
@@ -222,17 +222,16 @@ class GSEAbase(object):
             datA = data.loc[:, cls_booA]
             datB = data.loc[:, cls_booB]
             datAB=pd.concat([datA,datB], axis=1)
-            pool_heat = Pool(self._processes)
+            # pool_heat = Pool(self._processes)
 
             #no values need to be returned
             for gs in top_term:
                 hit = results.get(gs)['hits_indices']
-                pool_heat.apply_async(heatmap, args=(datAB.iloc[hit], gs, outdir, 0,
-                                                    (width, len(hit)/2), format))
-                #heatmap(datAB.iloc[hit], gs, outdir, 0, (width, len(hit)/2), format)
-
-            pool_heat.close()
-            pool_heat.join()
+                # pool_heat.apply_async(heatmap, args=(datAB.iloc[hit], gs, outdir, 0,
+                #                                     (width, len(hit)/2), format))
+                heatmap(datAB.iloc[hit], gs, outdir, 0, (width, len(hit)/2), format)
+            # pool_heat.close()
+            # pool_heat.join()
 
     def _save_results(self, zipdata, outdir, module, gmt, rank_metric, permutation_type):
         """reformat gsea results, and save to txt"""
@@ -615,8 +614,6 @@ class SingleSampleGSEA(GSEAbase):
         dat2 = df.sort_values(ascending=self.ascending)
         #reset interger index, or caused unwanted problems
         # df.reset_index(drop=True, inplace=True)
-        #cpu numbers
-        self._set_cores()
         #filtering out gene sets and build gene sets dictionary
         if gmt is None:
             gmt = self.load_gmt(gene_list=dat2.index.values, gmt=self.gene_sets)
@@ -639,13 +636,13 @@ class SingleSampleGSEA(GSEAbase):
 
         # plotting
         # self._imat = dat2
-        if not multisamples:
-            self._plotting(rank_metric=dat2, results=self.results, res2d=self.res2d,
-                           graph_num=self.graph_num, outdir=self.outdir,
-                           figsize=self.figsize, format=self.format, module=self.module)
+        self._plotting(rank_metric=dat2, results=self.results, res2d=self.res2d,
+                       graph_num=self.graph_num, outdir=self.outdir,
+                       figsize=self.figsize, format=self.format, module=self.module)
 
         self._logger.info("Congratulations. GSEApy run successfully................\n")
 
+        if multisamples: return self.res2d.es
         return
 
     def runOnSamples(self, df):
@@ -655,7 +652,7 @@ class SingleSampleGSEA(GSEAbase):
         # df.index.values are gene_names
         #filtering out gene sets and build gene sets dictionary
         gmt = self.load_gmt(gene_list=df.index.values, gmt=self.gene_sets)
-
+        self._set_cores()
         #Save each sample results to ordereddict
         self.resultsOnSamples = {}
         outdir = self.outdir
@@ -665,9 +662,28 @@ class SingleSampleGSEA(GSEAbase):
             self._logger.info("Run Sample: %s "%name)
             self.runSample(df=ser, gmt=gmt)
             self.resultsOnSamples[name] = self.res2d.es
+
+        #multi-threading
+        # tempes=[]
+        # names=[]
+        # pool = Pool(processes=self._processes)
+        #
+        # for name, ser in df.iteritems():
+        #     self.outdir= os.path.join(outdir, str(name))
+        #     self._logger.info("Run Sample: %s "%name)
+        #     names.append(name)
+        #     tempes.append(pool.apply_async(self.runSample, args=(ser, gmt, True)))
+        #
+        # pool.close()
+        # pool.join()
+        # for name, temp in zip(names, tempes):
+        #     es = temp.get()
+        #     self.resultsOnSamples[name] = es
+
         #save raw ES to one csv file
         samplesRawES = pd.DataFrame(self.resultsOnSamples)
         samplesRawES.index.name = 'Term'
+
         # write es
         outESfile=os.path.join(outdir, "gseapy.samples.raw.es.txt")
         with open(outESfile, 'a') as f:
