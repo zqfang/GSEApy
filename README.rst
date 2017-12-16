@@ -47,7 +47,7 @@ GSEAPY has five sub-commands available: ``gsea``, ``prerank``, ``ssgsea``, ``rep
 
 :gsea:    The ``gsea`` module produce `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ results.The input requries a txt file(FPKM, Expected Counts, TPM, et.al), a cls file, and gene_sets file in gmt format.
 :prerank: The ``prerank`` module produce **Prerank tool** results.  The input expects a pre-ranked gene list dataset with correlation values, which in .rnk format, and gene_sets file in gmt format.  ``prerank`` module is an API to `GSEA` pre-rank tools.
-:ssgsea: The ``ssgsea`` module perform **single sample GSEA(ssGSEA)** analysis.  The input expects a gene list, gct file, or dataframe with expression values(same format with ``.rnk`` file, and gene_sets file in gmt format. For multi sample input, ssGSEA reconigze gct format, too. ssGSEA enrichment score for the gene set as described by `D. Barbie et al 2009 <http://www.nature.com/nature/journal/v462/n7269/abs/nature08460.html>`_.
+:ssgsea: The ``ssgsea`` module perform **single sample GSEA(ssGSEA)** analysis.  The input expects a pd.Series (indexed by gene name), or pd.DataFrame (include ``GCT`` file) with expression values and ``GMT`` file. For multi sample input, ssGSEA reconigze gct format, too. ssGSEA enrichment score for the gene set as described by `D. Barbie et al 2009 <http://www.nature.com/nature/journal/v462/n7269/abs/nature08460.html>`_.
 
 :replot: The ``replot`` module reproduce GSEA desktop version results.  The only input for GSEAPY is the location to ``GSEA`` Desktop output results.
 
