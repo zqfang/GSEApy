@@ -155,7 +155,7 @@ Dependency
 Mandatory
 ~~~~~~~~~
 
-* Numpy
+* Numpy >= 1.13.0
 * Pandas
 * Matplotlib
 * Beautifulsoup4
