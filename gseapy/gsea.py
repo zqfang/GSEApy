@@ -1,5 +1,6 @@
 #! python
 # -*- coding: utf-8 -*-
+from __future__ import  division
 
 import os,sys,logging,json
 import requests
@@ -12,8 +13,8 @@ from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 
 from gseapy.parser import *
-from gseapy.algorithm import *
-#from gseapy.algorithm import enrichment_score, gsea_compute, ranking_metric
+from gseapy.algorithm import enrichment_score, gsea_compute, ranking_metric
+from gseapy.algorithm import enrichment_score_tensor, gsea_significance
 from gseapy.plot import gsea_plot, heatmap
 from gseapy.utils import mkdirs, log_init, DEFAULT_LIBRARY
 
@@ -570,7 +571,7 @@ class SingleSampleGSEA(GSEAbase):
             dat[dat < 1] = 1
             data = log(dat + exp(1))
         elif self.sample_norm_method == 'custom':
-            self._logger.info("Set user defined rank metric for ssGSEA")
+            self._logger.info("Use custom rank metric for ssGSEA")
         else:
             sys.stderr.write("No supported method: %s"%self.sample_norm_type)
             sys.exit(0)
@@ -583,21 +584,24 @@ class SingleSampleGSEA(GSEAbase):
         data = self.load_data()
         # normalized samples, and rank
         normdat = self.norm_samples(data)
+        #filtering out gene sets and build gene sets dictionary
+        gmt = self.load_gmt(gene_list=normdat.index.values, gmt=self.gene_sets)
+        self._logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
+        # set cpu numbers
+        self._set_cores()
         # logic to process gct expression matrix
         if self.ranking is None:
             #gct expression matrix support for ssGSEA
-            self.runOnSamples(df=normdat)
+            self.runOnSamples(df=normdat, gmt=gmt)
         else:
             #only for one sample
-            self.runSample(df=normdat)
+            self.runSample(df=normdat, gmt=gmt)
 
     def runSample(self, df, gmt=None):
         """Single Sample GSEA workflow"""
 
         assert self.min_size <= self.max_size
-
         mkdirs(self.outdir)
-
         #Start Analysis
         self._logger.info("Parsing data files for GSEA.............................")
         #select correct expression genes and values.
@@ -608,16 +612,10 @@ class SingleSampleGSEA(GSEAbase):
             pass
         else:
             raise Exception('Error parsing gene ranking values!')
-
         #sort ranking values from high to low or reverse
         dat2 = df.sort_values(ascending=self.ascending)
         #reset interger index, or caused unwanted problems
         # df.reset_index(drop=True, inplace=True)
-        #filtering out gene sets and build gene sets dictionary
-        if gmt is None:
-            gmt = self.load_gmt(gene_list=dat2.index.values, gmt=self.gene_sets)
-
-        self._logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
         self._logger.info("Start to run GSEA...Might take a while..................")
         #compute ES, NES, pval, FDR, RES
         gsea_results, hit_ind,rank_ES, subsets = gsea_compute(data=dat2, n=self.permutation_num, gmt=gmt,
@@ -626,57 +624,45 @@ class SingleSampleGSEA(GSEAbase):
                                                               pheno_pos='', pheno_neg='',
                                                               classes=None, ascending=self.ascending,
                                                               seed=self.seed, scale=self.scale, single=True)
-
         self._logger.info("Start to generate gseapy reports, and produce figures...")
         res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
-
         self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
                                    gmt=gmt, rank_metric=dat2, permutation_type="gene_sets")
-
         # plotting
-        # self._imat = dat2
         self._plotting(rank_metric=dat2, results=self.results, res2d=self.res2d,
                        graph_num=self.graph_num, outdir=self.outdir,
                        figsize=self.figsize, format=self.format, module=self.module)
-
         self._logger.info("Congratulations. GSEApy run successfully................\n")
 
         return
 
-    def runOnSamples(self, df):
-        """ssGSEA for gct expression matrix
+    def runOnSamples(self, df, gmt=None):
+        """ssGSEA for gct expression matrix.
+
+           multiprocessing untility on samples.
         """
 
         # df.index.values are gene_names
-        #filtering out gene sets and build gene sets dictionary
-        gmt = self.load_gmt(gene_list=df.index.values, gmt=self.gene_sets)
-        self._set_cores()
         #Save each sample results to ordereddict
         self.resultsOnSamples = {}
         outdir = self.outdir
         # run ssgsea for gct expression matrixs
-        # for name, ser in df.iteritems():
-        #     self.outdir= os.path.join(outdir, str(name))
-        #     self._logger.info("Run Sample: %s "%name)
-        #     self.runSample(df=ser, gmt=gmt)
-        #     self.resultsOnSamples[name] = self.res2d.es
-
         # #multiprocessing
-        self._logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
         self._logger.info("Start to run GSEA...Might take a while..................")
         #multi-threading
+        subsets = sorted(gmt.keys())
         tempes=[]
         names=[]
         rankings=[]
         pool = Pool(processes=self._processes)
-        subsets = sorted(gmt.keys())
-
         for name, ser in df.iteritems():
-            names.append(name)
+            #prepare input
             dat = ser.sort_values(ascending=self.ascending)
             rankings.append(dat)
+            names.append(name)
             genes_sorted, cor_vec = dat.index.values, dat.values
             rs = np.random.RandomState(self.seed)
+            # apply_async
             tempes.append(pool.apply_async(enrichment_score_tensor,
                                            args=(genes_sorted, cor_vec, gmt,
                                                self.weighted_score_type,
@@ -687,7 +673,6 @@ class SingleSampleGSEA(GSEAbase):
         pool.join()
         # save results and plotting
         self._logger.info("Start to generate gseapy reports, and produce figures...")
-
         for i, temp in enumerate(tempes):
             es, esnull, hit_ind, RES = temp.get()
             # extract ES, NES, pval, FDR, RES
@@ -706,7 +691,7 @@ class SingleSampleGSEA(GSEAbase):
             self._plotting(rank_metric=rnk, results=self.results, res2d=self.res2d,
                            graph_num=self.graph_num, outdir=self.outdir,
                            figsize=self.figsize, format=self.format, module=self.module)
-            self._logger.info("Finished computing Sample: %s "%name)
+            self._logger.info("Finished Sample: %s "%name)
 
         # save raw ES to one csv file
         samplesRawES = pd.DataFrame(self.resultsOnSamples)
@@ -731,6 +716,9 @@ class SingleSampleGSEA(GSEAbase):
             f.write('# normalize enrichment scores by using the entire data set\n')
             f.write('# as indicated by Barbie et al., 2009, online methods, pg. 2\n')
             samplesNES.to_csv(f, sep='\t')
+
+        self._logger.info("Congratulations. GSEApy run successfully................\n")
+
         return
 
 
