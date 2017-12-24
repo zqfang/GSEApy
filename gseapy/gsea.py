@@ -663,22 +663,43 @@ class SingleSampleGSEA(GSEAbase):
             self.runSample(df=ser, gmt=gmt)
             self.resultsOnSamples[name] = self.res2d.es
 
-        #multi-threading
+        # #multiprocessing
+        # self._logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
+        # self._logger.info("Start to run GSEA...Might take a while..................")
+        # #multi-threading
         # tempes=[]
         # names=[]
+        # rankings=[]
         # pool = Pool(processes=self._processes)
         #
         # for name, ser in df.iteritems():
         #     self.outdir= os.path.join(outdir, str(name))
         #     self._logger.info("Run Sample: %s "%name)
         #     names.append(name)
-        #     tempes.append(pool.apply_async(self.runSample, args=(ser, gmt, True)))
+        #     dat2 = ser.sort_values(ascending=self.ascending)
+        #     rankings.append(dat2)
+        #     tempes.append(pool.apply_async(gsea_compute, args=(dat2, self.permutation_num, gmt,
+        #                                                        self.weighted_score_type,
+        #                                                        'gene_set', None,
+        #                                                        '', '', None, self.ascending,
+        #                                                        self.seed, self.scale,True)))
         #
         # pool.close()
         # pool.join()
-        # for name, temp in zip(names, tempes):
-        #     es = temp.get()
+        # self._logger.info("Start to generate gseapy reports, and produce figures...")
+        # for name, rnk, temp in zip(names, rankings, tempes):
+        #     # extract ES, NES, pval, FDR, RES
+        #     gsea_results, hit_ind,rank_ES, subsets = temp.get()
         #     self.resultsOnSamples[name] = es
+        #     res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
+        #
+        #     self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
+        #                                gmt=gmt, rank_metric=rnk, permutation_type="gene_sets")
+        #
+        #     # plotting
+        #     self._plotting(rank_metric=rnk, results=self.results, res2d=self.res2d,
+        #                    graph_num=self.graph_num, outdir=self.outdir,
+        #                    figsize=self.figsize, format=self.format, module=self.module)
 
         #save raw ES to one csv file
         samplesRawES = pd.DataFrame(self.resultsOnSamples)
