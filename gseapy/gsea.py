@@ -580,10 +580,8 @@ class SingleSampleGSEA(GSEAbase):
         """run entry"""
         #load data
         data = self.load_data()
-
         # normalized samples, and rank
         normdat = self.norm_samples(data)
-
         # logic to process gct expression matrix
         if self.ranking is None:
             #gct expression matrix support for ssGSEA
@@ -592,7 +590,7 @@ class SingleSampleGSEA(GSEAbase):
             #only for one sample
             self.runSample(df=normdat)
 
-    def runSample(self, df, gmt=None, multisamples=False):
+    def runSample(self, df, gmt=None):
         """Single Sample GSEA workflow"""
 
         assert self.min_size <= self.max_size
@@ -642,7 +640,6 @@ class SingleSampleGSEA(GSEAbase):
 
         self._logger.info("Congratulations. GSEApy run successfully................\n")
 
-        if multisamples: return self.res2d.es
         return
 
     def runOnSamples(self, df):
@@ -656,52 +653,57 @@ class SingleSampleGSEA(GSEAbase):
         #Save each sample results to ordereddict
         self.resultsOnSamples = {}
         outdir = self.outdir
-        #run ssgsea for gct expression matrixs
-        for name, ser in df.iteritems():
-            self.outdir= os.path.join(outdir, str(name))
-            self._logger.info("Run Sample: %s "%name)
-            self.runSample(df=ser, gmt=gmt)
-            self.resultsOnSamples[name] = self.res2d.es
-
-        # #multiprocessing
-        # self._logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
-        # self._logger.info("Start to run GSEA...Might take a while..................")
-        # #multi-threading
-        # tempes=[]
-        # names=[]
-        # rankings=[]
-        # pool = Pool(processes=self._processes)
-        #
+        # run ssgsea for gct expression matrixs
         # for name, ser in df.iteritems():
         #     self.outdir= os.path.join(outdir, str(name))
         #     self._logger.info("Run Sample: %s "%name)
-        #     names.append(name)
-        #     dat2 = ser.sort_values(ascending=self.ascending)
-        #     rankings.append(dat2)
-        #     tempes.append(pool.apply_async(gsea_compute, args=(dat2, self.permutation_num, gmt,
-        #                                                        self.weighted_score_type,
-        #                                                        'gene_set', None,
-        #                                                        '', '', None, self.ascending,
-        #                                                        self.seed, self.scale,True)))
-        #
-        # pool.close()
-        # pool.join()
-        # self._logger.info("Start to generate gseapy reports, and produce figures...")
-        # for name, rnk, temp in zip(names, rankings, tempes):
-        #     # extract ES, NES, pval, FDR, RES
-        #     gsea_results, hit_ind,rank_ES, subsets = temp.get()
-        #     self.resultsOnSamples[name] = es
-        #     res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
-        #
-        #     self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
-        #                                gmt=gmt, rank_metric=rnk, permutation_type="gene_sets")
-        #
-        #     # plotting
-        #     self._plotting(rank_metric=rnk, results=self.results, res2d=self.res2d,
-        #                    graph_num=self.graph_num, outdir=self.outdir,
-        #                    figsize=self.figsize, format=self.format, module=self.module)
+        #     self.runSample(df=ser, gmt=gmt)
+        #     self.resultsOnSamples[name] = self.res2d.es
 
-        #save raw ES to one csv file
+        # #multiprocessing
+        self._logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
+        self._logger.info("Start to run GSEA...Might take a while..................")
+        #multi-threading
+        tempes=[]
+        names=[]
+        rankings=[]
+        pool = Pool(processes=self._processes)
+        for name, ser in df.iteritems():
+            names.append(name)
+            dat = ser.sort_values(ascending=self.ascending)
+            rankings.append(dat)
+            tempes.append(pool.apply_async(gsea_compute,
+                                          args=(dat, self.permutation_num, gmt,
+                                               self.weighted_score_type,
+                                               'gene_set', None,
+                                               '', '', None, self.ascending,
+                                               self.seed, self.scale,True)))
+
+        pool.close()
+        pool.join()
+        # save results and plotting
+        self._logger.info("Start to generate gseapy reports, and produce figures...")
+
+        for name, rnk, temp in zip(names, rankings, tempes):
+            # extract ES, NES, pval, FDR, RES
+            gsea_results, hit_ind, RES, subsets = temp.get()
+            res_zip = zip(subsets, list(gsea_results), hit_ind, RES)
+            #
+            #name, rnk = names[i], rankings[i]
+            # create results subdir
+            self.outdir= os.path.join(outdir, str(name))
+            mkdirs(self.outdir)
+            # save results
+            self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
+                               gmt=gmt, rank_metric=rnk, permutation_type="gene_sets")
+            self.resultsOnSamples[name] = self.res2d.es
+            # plotting
+            self._plotting(rank_metric=rnk, results=self.results, res2d=self.res2d,
+                           graph_num=self.graph_num, outdir=self.outdir,
+                           figsize=self.figsize, format=self.format, module=self.module)
+            self._logger.info("Finished computing Sample: %s "%name)
+
+        # save raw ES to one csv file
         samplesRawES = pd.DataFrame(self.resultsOnSamples)
         samplesRawES.index.name = 'Term'
 
