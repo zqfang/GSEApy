@@ -53,12 +53,12 @@ def heatmap(df, term, outdir, axis=0, figsize=(5,5), format='png'):
     :param df: DataFrame from expression table.
     :param term: gene set name.
     :param outdir: path to save heatmap.
-    :param axis: z_score axis.
+    :param axis: z_score axis. If None, do not standerize row or column.
     :param figsize: heatmap figsize.
     :param format: Matplotlib supported figure formats.
 
     """
-    df = z_score(df, axis=axis)
+    if axis is not None: df = z_score(df, axis=axis)
     df = df.iloc[::-1]
     # Get the positions and used label for the ticks
     nx, ny = df.T.shape
@@ -79,9 +79,6 @@ def heatmap(df, term, outdir, axis=0, figsize=(5,5), format='png'):
     ax.set_title("%s\nHeatmap of the Analyzed GeneSet"%term, fontsize=24)
     ax.tick_params(axis='both', which='both', bottom='off', top='off',
                    right='off', left='off')
-
-
-
     #fig.colorbar(matrix, ax=ax)
     cax=fig.add_axes([0.93,0.25,0.05,0.20])
     cbar = fig.colorbar(matrix, cax=cax)
@@ -105,7 +102,7 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     :param nes: Normalized enrichment scores.
     :param pval: nominal p-value.
     :param fdr: false discoveray rate.
-    :param RES: ranking enrichment scores of all genes in rank_metric['gene_name'].
+    :param RES: running enrichment scores.
     :param phenoPos: phenotype lable, positive correlated.
     :param phenoNeg: phenotype lable, negative correlated.
     :param figsize: matplotlib figsize.
