@@ -7,6 +7,8 @@ import numpy as np
 from functools import reduce
 from multiprocessing import Pool
 
+np.seterr(divide='ignore')
+
 def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=None, esnull=None, rs=np.random.RandomState()):
     """This is the most important function of GSEAPY. It has the same algorithm with GSEA.
 
