@@ -241,10 +241,7 @@ def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
     genes_mat = genes.take(cor_mat_ind)
     if ascending: return genes_mat, cor_mat
     # descending order of ranking and genes
-    genes_mat = genes_mat[:,::-1]
-    cor_mat = cor_mat[:,::-1]
-
-    return genes_mat, cor_mat
+    return genes_mat[:,::-1], cor_mat[:,::-1]
 
 def ranking_metric(df, method, pos, neg, classes, ascending):
     """The main function to rank an expression table.
@@ -308,7 +305,7 @@ def ranking_metric(df, method, pos, neg, classes, ascending):
         ser  =  np.log2(df_mean[pos] / df_mean[neg])
     else:
         logging.error("Please provide correct method name!!!")
-        sys.exit()
+        sys.exit(0)
     ser = ser.sort_values(ascending=ascending)
 
     return ser
@@ -334,7 +331,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
         :return: a tuple contains::
 
                 | zipped results of es, nes, pval, fdr.
-                | nested list of hit indexs of input gene_list.
+                | nested list of hit indices of input gene_list.
                 | nested list of ranked enrichment score of each input gene_sets.
                 | list of enriched terms
 
