@@ -263,8 +263,8 @@ class GSEAbase(object):
         out = '{a}/gseapy.{b}.{c}.report.csv'.format(a=outdir, b=module, c=permutation_type)
         if self.module == 'ssgsea':
             with open(out, 'a') as f:
-                f.write('# normalize enrichment scores by random permutation procedure\n')
-                f.write("# Same statical testing method with the orignial GSEA method, might not proper for publication\n")
+                f.write('# normalize enrichment scores by random permutation procedure (GSEA method)\n')
+                f.write("# might not proper for publication\n")
                 res_df.to_csv(f)
         else:
             res_df.to_csv(out)
@@ -672,8 +672,8 @@ class SingleSampleGSEA(GSEAbase):
         pool.close()
         pool.join()
         # save results and plotting
-        self._logger.info("Start to generate gseapy reports, and produce figures...")
         for i, temp in enumerate(tempes):
+            self._logger.info("Run Sample: %s "%name)
             es, esnull, hit_ind, RES = temp.get()
             # extract ES, NES, pval, FDR, RES
             gsea_results = gsea_significance(es, esnull)
@@ -691,8 +691,7 @@ class SingleSampleGSEA(GSEAbase):
             self._plotting(rank_metric=rnk, results=self.results, res2d=self.res2d,
                            graph_num=self.graph_num, outdir=self.outdir,
                            figsize=self.figsize, format=self.format, module=self.module)
-            self._logger.info("Finished Sample: %s "%name)
-
+        self._logger.info("Finish producing figures................................")
         # save raw ES to one csv file
         samplesRawES = pd.DataFrame(self.resultsOnSamples)
         samplesRawES.index.name = 'Term'
