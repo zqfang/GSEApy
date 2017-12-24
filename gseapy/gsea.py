@@ -12,7 +12,8 @@ from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 
 from gseapy.parser import *
-from gseapy.algorithm import enrichment_score, gsea_compute, ranking_metric
+from gseapy.algorithm import *
+#from gseapy.algorithm import enrichment_score, gsea_compute, ranking_metric
 from gseapy.plot import gsea_plot, heatmap
 from gseapy.utils import mkdirs, log_init, DEFAULT_LIBRARY
 
@@ -668,28 +669,32 @@ class SingleSampleGSEA(GSEAbase):
         names=[]
         rankings=[]
         pool = Pool(processes=self._processes)
+        subsets = sorted(gmt.keys())
+
         for name, ser in df.iteritems():
             names.append(name)
             dat = ser.sort_values(ascending=self.ascending)
             rankings.append(dat)
-            tempes.append(pool.apply_async(gsea_compute,
-                                          args=(dat, self.permutation_num, gmt,
+            genes_sorted, cor_vec = dat.index.values, dat.values
+            rs = np.random.RandomState(self.seed)
+            tempes.append(pool.apply_async(enrichment_score_tensor,
+                                           args=(genes_sorted, cor_vec, gmt,
                                                self.weighted_score_type,
-                                               'gene_set', None,
-                                               '', '', None, self.ascending,
-                                               self.seed, self.scale,True)))
+                                               self.permutation_num, self.scale,
+                                               True,rs)))
 
         pool.close()
         pool.join()
         # save results and plotting
         self._logger.info("Start to generate gseapy reports, and produce figures...")
 
-        for name, rnk, temp in zip(names, rankings, tempes):
+        for i, temp in enumerate(tempes):
+            es, esnull, hit_ind, RES = temp.get()
             # extract ES, NES, pval, FDR, RES
-            gsea_results, hit_ind, RES, subsets = temp.get()
+            gsea_results = gsea_significance(es, esnull)
             res_zip = zip(subsets, list(gsea_results), hit_ind, RES)
             #
-            #name, rnk = names[i], rankings[i]
+            name, rnk = names[i], rankings[i]
             # create results subdir
             self.outdir= os.path.join(outdir, str(name))
             mkdirs(self.outdir)
