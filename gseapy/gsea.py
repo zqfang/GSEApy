@@ -13,7 +13,7 @@ from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 
 from gseapy.parser import *
-from gseapy.algorithm import enrichment_score, gsea_compute, ranking_metric
+from gseapy.algorithm import enrichment_score, gsea_compute, ranking_metric, gsea_compute_ss
 from gseapy.algorithm import enrichment_score_tensor, gsea_significance
 from gseapy.plot import gsea_plot, heatmap
 from gseapy.utils import mkdirs, log_init, DEFAULT_LIBRARY
@@ -262,10 +262,11 @@ class GSEAbase(object):
 
         out = '{a}/gseapy.{b}.{c}.report.csv'.format(a=outdir, b=module, c=permutation_type)
         if self.module == 'ssgsea':
+            out = out.replace(".csv",".txt")
             with open(out, 'a') as f:
                 f.write('# normalize enrichment scores by random permutation procedure (GSEA method)\n')
                 f.write("# might not proper for publication\n")
-                res_df.to_csv(f)
+                res_df.to_csv(f, sep='\t')
         else:
             res_df.to_csv(out)
 
@@ -618,12 +619,20 @@ class SingleSampleGSEA(GSEAbase):
         # df.reset_index(drop=True, inplace=True)
         self._logger.info("Start to run GSEA...Might take a while..................")
         #compute ES, NES, pval, FDR, RES
-        gsea_results, hit_ind,rank_ES, subsets = gsea_compute(data=dat2, n=self.permutation_num, gmt=gmt,
-                                                              weighted_score_type=self.weighted_score_type,
-                                                              permutation_type='gene_set', method=None,
-                                                              pheno_pos='', pheno_neg='',
-                                                              classes=None, ascending=self.ascending,
-                                                              seed=self.seed, scale=self.scale, single=True)
+        # gsea_results, hit_ind,rank_ES, subsets = gsea_compute(data=dat2, n=self.permutation_num, gmt=gmt,
+        #                                                       weighted_score_type=self.weighted_score_type,
+        #                                                       permutation_type='gene_set', method=None,
+        #                                                       pheno_pos='', pheno_neg='',
+        #                                                       classes=None, ascending=self.ascending,
+        #                                                       seed=self.seed, scale=self.scale, single=True)
+
+        gsea_results, hit_ind, rank_ES, subsets = gsea_compute_ss(data=dat2, n=self.permutation_num,
+                                                                  gmt=gmt,
+                                                                  weighted_score_type=self.weighted_score_type,
+                                                                  scale=self.scale,
+                                                                  seed=self.seed,
+                                                                  processes=self._processes)
+
         self._logger.info("Start to generate gseapy reports, and produce figures...")
         res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
         self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
@@ -647,51 +656,56 @@ class SingleSampleGSEA(GSEAbase):
         self.resultsOnSamples = {}
         outdir = self.outdir
         # run ssgsea for gct expression matrixs
-        # #multiprocessing
-        self._logger.info("Start to run GSEA...Might take a while..................")
-        #multi-threading
-        subsets = sorted(gmt.keys())
-        tempes=[]
-        names=[]
-        rankings=[]
-        pool = Pool(processes=self._processes)
         for name, ser in df.iteritems():
-            #prepare input
-            dat = ser.sort_values(ascending=self.ascending)
-            rankings.append(dat)
-            names.append(name)
-            genes_sorted, cor_vec = dat.index.values, dat.values
-            rs = np.random.RandomState(self.seed)
-            # apply_async
-            tempes.append(pool.apply_async(enrichment_score_tensor,
-                                           args=(genes_sorted, cor_vec, gmt,
-                                               self.weighted_score_type,
-                                               self.permutation_num, self.scale,
-                                               True,rs)))
-
-        pool.close()
-        pool.join()
-        # save results and plotting
-        for i, temp in enumerate(tempes):
-            self._logger.info("Run Sample: %s "%name)
-            es, esnull, hit_ind, RES = temp.get()
-            # extract ES, NES, pval, FDR, RES
-            gsea_results = gsea_significance(es, esnull)
-            res_zip = zip(subsets, list(gsea_results), hit_ind, RES)
-            #
-            name, rnk = names[i], rankings[i]
-            # create results subdir
             self.outdir= os.path.join(outdir, str(name))
-            mkdirs(self.outdir)
-            # save results
-            self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
-                               gmt=gmt, rank_metric=rnk, permutation_type="gene_sets")
+            self._logger.info("Run Sample: %s "%name)
+            self.runSample(df=ser, gmt=gmt)
             self.resultsOnSamples[name] = self.res2d.es
-            # plotting
-            self._plotting(rank_metric=rnk, results=self.results, res2d=self.res2d,
-                           graph_num=self.graph_num, outdir=self.outdir,
-                           figsize=self.figsize, format=self.format, module=self.module)
-        self._logger.info("Finish producing figures................................")
+        # # #multiprocessing
+        # self._logger.info("Start to run GSEA...Might take a while..................")
+        # #multi-threading
+        # subsets = sorted(gmt.keys())
+        # tempes=[]
+        # names=[]
+        # rankings=[]
+        # pool = Pool(processes=self._processes)
+        # for name, ser in df.iteritems():
+        #     #prepare input
+        #     dat = ser.sort_values(ascending=self.ascending)
+        #     rankings.append(dat)
+        #     names.append(name)
+        #     genes_sorted, cor_vec = dat.index.values, dat.values
+        #     rs = np.random.RandomState(self.seed)
+        #     # apply_async
+        #     tempes.append(pool.apply_async(enrichment_score_tensor,
+        #                                    args=(genes_sorted, cor_vec, gmt,
+        #                                        self.weighted_score_type,
+        #                                        self.permutation_num, self.scale,
+        #                                        True,rs)))
+        #
+        # pool.close()
+        # pool.join()
+        # # save results and plotting
+        # for i, temp in enumerate(tempes):
+        #     self._logger.info("Run Sample: %s "%name)
+        #     es, esnull, hit_ind, RES = temp.get()
+        #     # extract ES, NES, pval, FDR, RES
+        #     gsea_results = gsea_significance(es, esnull)
+        #     res_zip = zip(subsets, list(gsea_results), hit_ind, RES)
+        #     #
+        #     name, rnk = names[i], rankings[i]
+        #     # create results subdir
+        #     self.outdir= os.path.join(outdir, str(name))
+        #     mkdirs(self.outdir)
+        #     # save results
+        #     self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
+        #                        gmt=gmt, rank_metric=rnk, permutation_type="gene_sets")
+        #     self.resultsOnSamples[name] = self.res2d.es
+        #     # plotting
+        #     self._plotting(rank_metric=rnk, results=self.results, res2d=self.res2d,
+        #                    graph_num=self.graph_num, outdir=self.outdir,
+        #                    figsize=self.figsize, format=self.format, module=self.module)
+        # self._logger.info("Finish producing figures................................")
         # save raw ES to one csv file
         samplesRawES = pd.DataFrame(self.resultsOnSamples)
         samplesRawES.index.name = 'Term'
@@ -717,7 +731,7 @@ class SingleSampleGSEA(GSEAbase):
             samplesNES.to_csv(f, sep='\t')
 
         self._logger.info("Congratulations. GSEApy run successfully................\n")
-
+        self._logger.info("All work done!\n")
         return
 
 

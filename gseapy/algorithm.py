@@ -9,7 +9,8 @@ from multiprocessing import Pool
 
 np.seterr(divide='ignore')
 
-def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=None, esnull=None, rs=np.random.RandomState()):
+def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=None,
+                     esnull=None, rs=np.random.RandomState(), single=False, scale=False):
     """This is the most important function of GSEAPY. It has the same algorithm with GSEA.
 
     :param gene_list:       The ordered gene list gene_name_list, rank_metric['gene_name']
@@ -74,8 +75,13 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
     norm_no_tag = 1.0/Nmiss
 
     RES = np.cumsum(tag_indicator * correl_vector * norm_tag - no_tag_indicator * norm_no_tag, axis=axis)
-    max_ES, min_ES =  np.max(RES, axis=axis), np.min(RES, axis=axis)
-    es = np.where(np.abs(max_ES) > np.abs(min_ES), max_ES, min_ES)
+
+    if scale: RES = RES / N
+    if single:
+        es = np.sum(RES, axis=axis)
+    else:
+        max_ES, min_ES =  np.max(RES, axis=axis), np.min(RES, axis=axis)
+        es = np.where(np.abs(max_ES) > np.abs(min_ES), max_ES, min_ES)
 
     if esnull: return es
 
@@ -366,6 +372,48 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
                                                            single=single, rs=rs)
 
     return gsea_significance(es, esnull), hit_ind, RES, subsets
+
+def gsea_compute_ss(data, gmt, n, weighted_score_type, scale, seed, processes):
+    """compute enrichment scores and enrichment nulls for single sample GSEA.
+    """
+
+    w = weighted_score_type
+    subsets = sorted(gmt.keys())
+    enrichment_scores = []
+    rank_ES=[]
+    hit_ind=[]
+    logging.debug("Start to compute enrichment socres......................")
+    gl, cor_vec = data.index.values, data.values
+    for subset in subsets:
+        rs = np.random.RandomState(seed)
+        es, ind, RES= enrichment_score(gl, gmt.get(subset),
+                                       w, cor_vec, None, rs, scale, True)
+        enrichment_scores.append(es)
+        rank_ES.append(RES)
+        hit_ind.append(ind)
+
+    logging.debug("Start to compute esnulls...............................")
+    enrichment_nulls = [ [] for a in range(len(subsets)) ]
+    temp_esnu=[]
+    pool_esnu = Pool(processes=processes)
+    for subset in subsets:
+        #you have to reseed, or all your processes are sharing the same seed value
+        #rs = np.random.RandomState(seed)
+        rs = np.random.RandomState()
+        temp_esnu.append(pool_esnu.apply_async(enrichment_score,
+                                               args=(gl, gmt.get(subset), w,
+                                                     cor_vec, n, rs,
+                                                     scale, True))))
+
+    pool_esnu.close()
+    pool_esnu.join()
+
+    # esn is a list, don't need to use append method.
+    for si, temp in enumerate(temp_esnu):
+        enrichment_nulls[si] = temp.get()
+
+    return gsea_significance(enrichment_scores, enrichment_nulls), hit_ind, rank_ES, subsets
+
 
 def gsea_pval(es, esnull):
     """Compute nominal p-value.
