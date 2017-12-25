@@ -13,7 +13,7 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
                      esnull=None, rs=np.random.RandomState(), single=False, scale=False):
     """This is the most important function of GSEAPY. It has the same algorithm with GSEA.
 
-    :param gene_list:       The ordered gene list gene_name_list, rank_metric['gene_name']
+    :param gene_list:       The ordered gene list gene_name_list, rank_metric.index.values
     :param gene_set:        gene_sets in gmt file, please used gsea_gmt_parser to get gene_set.
     :param weighted_score_type:  It's indentical to gsea's weighted_score method. weighting by the correlation
                             is a very reasonable choice that allows significant gene sets with less than perfect coherence.
@@ -25,7 +25,7 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
                             with the method and its behavior.
 
     :param correl_vector:   A vector with the correlations (e.g. signal to noise scores) corresponding to the genes in
-                            the gene list. Or rankings, rank_metric['rank'].values
+                            the gene list. Or rankings, rank_metric.values
     :param esnull:          Only used this paramter when computing esnuall for statistial testing. set the esnull value
                             equal to the permutation number.
     :param rs:              Random state for initialize gene list shuffling. Default: np.random.RandomState(seed=None)
@@ -537,6 +537,6 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
         except:
             fdrs.append(1000000000.0)
 
-    logging.debug("Statistial testing finished.............................")
+    logging.debug("Statistical testing finished.............................")
 
     return zip(enrichment_scores, nEnrichmentScores, enrichmentPVals, fdrs)
