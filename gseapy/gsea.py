@@ -260,7 +260,7 @@ class GSEAbase(object):
         res_df.sort_values(by='fdr', inplace=True)
         res_df.drop(['RES','hits_indices'], axis=1, inplace=True)
 
-        out = '{a}/gseapy.{b}.{c}.report.csv'.format(a=outdir, b=module, c=permutation_type)
+        out = os.path.join(outdir,'gseapy.{b}.{c}.report.csv'.format(b=module, c=permutation_type))
         if self.module == 'ssgsea':
             out = out.replace(".csv",".txt")
             with open(out, 'a') as f:

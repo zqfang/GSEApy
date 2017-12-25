@@ -54,7 +54,6 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
 
     #get indices of tag_indicator
     hit_ind = np.flatnonzero(tag_indicator).tolist()
-
     # if used for compute esnull, set esnull equal to permutation number, e.g. 1000
     # else just compute enrichment scores
     if esnull:
@@ -66,7 +65,7 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
         for i in range(esnull): rs.shuffle(tag_indicator[i])
         # np.apply_along_axis(rs.shuffle, 1, tag_indicator)
 
-    Nhint = np.sum(tag_indicator, axis=axis, keepdims=True)
+    Nhint = tag_indicator.sum(axis=axis, keepdims=True)
     sum_correl_tag = np.sum(correl_vector*tag_indicator, axis=axis, keepdims=True)
     #compute ES score, the code below is identical to gsea enrichment_score method.
     no_tag_indicator = 1 - tag_indicator
