@@ -7,11 +7,10 @@ import numpy as np
 from functools import reduce
 from multiprocessing import Pool
 
-np.seterr(divide='ignore')
 
 def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=None,
                      esnull=None, rs=np.random.RandomState(), single=False, scale=False):
-    """This is the most important function of GSEAPY. It has the same algorithm with GSEA.
+    """This is the most important function of GSEApy. It has the same algorithm with GSEA and ssGSEA.
 
     :param gene_list:       The ordered gene list gene_name_list, rank_metric.index.values
     :param gene_set:        gene_sets in gmt file, please used gsea_gmt_parser to get gene_set.
@@ -34,13 +33,14 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
 
      ES: Enrichment score (real number between -1 and +1)
 
+     ESNULL: Enrichment score calcualted from random permutation.
+
      Hits_Indices: index of a gene in gene_list, if gene included in gene_set.
 
      RES: Numerical vector containing the running enrichment score for all locations in the gene list .
 
     """
 
-    axis = 0
     N = len(gene_list)
     #Test whether each element of a 1-D array is also present in a second array
     #It's more intuitived here than orginal enrichment_score source code.
@@ -56,14 +56,13 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
     hit_ind = np.flatnonzero(tag_indicator).tolist()
     # if used for compute esnull, set esnull equal to permutation number, e.g. 1000
     # else just compute enrichment scores
-    if esnull:
-        # set axis to 1, because we have 2 dimentional array
-        axis = 1
-        tag_indicator = np.tile(tag_indicator, (esnull,1))
-        correl_vector = np.tile(correl_vector,(esnull,1))
-        # gene list permutation
-        for i in range(esnull): rs.shuffle(tag_indicator[i])
-        # np.apply_along_axis(rs.shuffle, 1, tag_indicator)
+    # set axis to 1, because we have 2 dimentional array
+    axis = 1
+    tag_indicator = np.tile(tag_indicator, (esnull+1,1))
+    correl_vector = np.tile(correl_vector,(esnull+1,1))
+    # gene list permutation
+    for i in range(esnull): rs.shuffle(tag_indicator[i])
+    #np.apply_along_axis(rs.shuffle, 1, tag_indicator)
 
     Nhint = tag_indicator.sum(axis=axis, keepdims=True)
     sum_correl_tag = np.sum(correl_vector*tag_indicator, axis=axis, keepdims=True)
@@ -81,10 +80,12 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
     else:
         max_ES, min_ES =  np.max(RES, axis=axis), np.min(RES, axis=axis)
         es = np.where(np.abs(max_ES) > np.abs(min_ES), max_ES, min_ES)
+    #extract values
+    es, esnull, RES = es[-1], es[:-1], RES[-1,:]
 
-    if esnull: return es
+    return es, esnull, hit_ind, RES
 
-    return es, hit_ind, RES
+
 
 def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, nperm=1000,
                             scale=False, single=False, rs=np.random.RandomState()):
@@ -381,24 +382,15 @@ def gsea_compute_ss(data, gmt, n, weighted_score_type, scale, seed, processes):
     enrichment_scores = []
     rank_ES=[]
     hit_ind=[]
-    logging.debug("Start to compute enrichment socres......................")
-    gl, cor_vec = data.index.values, data.values
-    for subset in subsets:
-        rs = np.random.RandomState(seed)
-        es, ind, RES= enrichment_score(gl, gmt.get(subset),
-                                       w, cor_vec, None, rs, scale, True)
-        enrichment_scores.append(es)
-        rank_ES.append(RES)
-        hit_ind.append(ind)
-
-    logging.debug("Start to compute esnulls...............................")
     enrichment_nulls = [ [] for a in range(len(subsets)) ]
+    gl, cor_vec = data.index.values, data.values
+
+    logging.debug("Start to compute es and esnulls........................")
     temp_esnu=[]
     pool_esnu = Pool(processes=processes)
     for subset in subsets:
         #you have to reseed, or all your processes are sharing the same seed value
-        #rs = np.random.RandomState(seed)
-        rs = np.random.RandomState()
+        rs = np.random.RandomState(seed)
         temp_esnu.append(pool_esnu.apply_async(enrichment_score,
                                                args=(gl, gmt.get(subset), w,
                                                      cor_vec, n, rs,
@@ -406,10 +398,13 @@ def gsea_compute_ss(data, gmt, n, weighted_score_type, scale, seed, processes):
 
     pool_esnu.close()
     pool_esnu.join()
-
     # esn is a list, don't need to use append method.
     for si, temp in enumerate(temp_esnu):
-        enrichment_nulls[si] = temp.get()
+        es, esnull, hit, RES = temp.get()
+        enrichment_nulls[si] = esnull
+        enrichment_scores.append(es)
+        rank_ES.append(RES)
+        hit_ind.append(hit)
 
     return gsea_significance(enrichment_scores, enrichment_nulls), hit_ind, rank_ES, subsets
 

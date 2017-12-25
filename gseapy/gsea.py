@@ -14,7 +14,7 @@ from requests.adapters import HTTPAdapter
 
 from gseapy.parser import *
 from gseapy.algorithm import enrichment_score, gsea_compute, ranking_metric, gsea_compute_ss
-from gseapy.algorithm import enrichment_score_tensor, gsea_significance
+#from gseapy.algorithm import enrichment_score_tensor, gsea_significance
 from gseapy.plot import gsea_plot, heatmap
 from gseapy.utils import mkdirs, log_init, DEFAULT_LIBRARY
 
@@ -796,7 +796,7 @@ class Replot(GSEAbase):
             #calculate enrichment score
             RES = enrichment_score(gene_list=gene_list, gene_set=gene_set,
                                    weighted_score_type=self.weighted_score_type,
-                                   correl_vector=correl_vector)[2]
+                                   correl_vector=correl_vector, esnull=0)[-1]
             #plotting
             gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval,
                             fdr, RES, phenoPos, phenoNeg, self.figsize,
