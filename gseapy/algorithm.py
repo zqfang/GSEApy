@@ -403,7 +403,7 @@ def gsea_compute_ss(data, gmt, n, weighted_score_type, scale, seed, processes):
         temp_esnu.append(pool_esnu.apply_async(enrichment_score,
                                                args=(gl, gmt.get(subset), w,
                                                      cor_vec, n, rs,
-                                                     scale, True))))
+                                                     scale, True)))
 
     pool_esnu.close()
     pool_esnu.join()
