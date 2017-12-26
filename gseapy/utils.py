@@ -82,7 +82,7 @@ def log_init(outlog, log_level=logging.INFO):
     # add handlers
     logging.getLogger("").addHandler(console)
     logger = logging.getLogger("")
-    #logger.setLevel(log_level)
+    # logger.setLevel(log_level)
     return logger
 
 def log_stop(logger):

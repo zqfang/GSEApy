@@ -24,8 +24,8 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
 
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg
     :target:  https://img.shields.io/badge/license-MIT-blue.svg
-.. image:: https://img.shields.io/badge/python-3.5-blue.svg
-    :target:   https://img.shields.io/badge/python-3.5-blue.svg
+.. image:: https://img.shields.io/badge/python-3.6-blue.svg
+    :target:   https://img.shields.io/badge/python-3.6-blue.svg
 .. image:: https://img.shields.io/badge/python-2.7-blue.svg
     :target:  https://img.shields.io/badge/python-2.7-blue.svg
 
@@ -69,8 +69,8 @@ I would like to use Pandas to explore my data, but I did not find a  convenient 
 do gene set enrichment analysis in python. So, here is my reason: 
 
 * **Running inside python interactive console without switch to R!!!**
-* User friendly for both wet and dry lab usrers.
-* Produce and reproduce pubilishable figures.
+* User friendly for both wet and dry lab users.
+* Produce and reproduce publishable figures.
 * Perform batch jobs easy(using for loops).
 * Easy to use in bash shell or your  data analysis workflow, e.g. snakemake.  
 

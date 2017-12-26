@@ -3,6 +3,7 @@
 *.eggs
 *.EGG
 *.EGG-INFO
+*.idea
 bin
 build
 develop-eggs

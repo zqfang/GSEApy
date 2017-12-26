@@ -14,7 +14,7 @@ import argparse as ap
 __version__ = '0.9.1'
 
 def main():
-    """The Main function/pipeline for GSEAPY."""
+    """The Main function/pipeline for GSEApy."""
 
     # Parse options...
     argparser = prepare_argparser()
@@ -175,7 +175,7 @@ def add_prerank_parser(subparsers):
     # group for input files
     prerank_input = argparser_prerank.add_argument_group("Input files arguments")
     prerank_input.add_argument("-r", "--rnk", dest="rnk", action="store", type=str, required=True,
-                             help="ranking dataset file in .rnk format.Same with GSEA.")
+                             help="ranking metric file in .rnk format.Same with GSEA.")
     prerank_input.add_argument("-g", "--gmt", dest="gmt", action="store", type=str, required=True,
                              help="Gene set database in GMT format. Same with GSEA.")
     prerank_input.add_argument("-l", "--label", action='store', nargs=2, dest='label',
@@ -224,11 +224,11 @@ def add_singlesample_parser(subparsers):
 
     # group for General options.
     group_opt = argparser_gsea.add_argument_group("GSEA advanced arguments")
-    group_opt.add_argument("--norm-method", dest = "norm", action="store", type=str,
+    group_opt.add_argument("--nm", "--norm-method", dest = "norm", action="store", type=str,
                            default='rank', metavar='normalize',
                            choices=("rank", "log", "log_rank", "custom"),
                            help="Sample normalization method. Choose from {'rank', 'log', 'log_rank','custom'}. Default: rank")
-    group_opt.add_argument("--no-scale", action='store_false', dest='scale', default=True,
+    group_opt.add_argument("--ns", "--no-scale", action='store_false', dest='scale', default=True,
                            help="If the flag was set, don't normalize the enrichment scores by number of genes.")
     group_opt.add_argument("-n", "--permu-num", dest = "n", action="store", type=int, default=1000, metavar='perNum',
                            help="Number of random permutations. For calculating esnulls. Default: 1000")
@@ -275,18 +275,18 @@ def add_enrichr_parser(subparsers):
     enrichr_opt.add_argument("-i", "--input-list", action="store", dest="gene_list", type=str, required=True, metavar='geneSymbols',
                               help="Enrichr uses a list of Entrez gene symbols as input.")
     enrichr_opt.add_argument("-g", "--gene-sets", action="store", dest="library", type=str, required=True, metavar='gmt',
-                              help="Enrichr library name required. see online tool for libary names.")
-    enrichr_opt.add_argument("--description", action="store", dest="descrip", type=str, default='enrichr', metavar='strings',
+                              help="Enrichr library name required. see online tool for library names.")
+    enrichr_opt.add_argument("--ds", "--description", action="store", dest="descrip", type=str, default='enrichr', metavar='strings',
                               help="It is recommended to enter a short description for your list so that multiple lists \
                               can be differentiated from each other if you choose to save or share your list.")
-    enrichr_opt.add_argument("--cut-off", action="store", dest="thresh", metavar='float', type=float, default=0.05,
+    enrichr_opt.add_argument("--cut", "--cut-off", action="store", dest="thresh", metavar='float', type=float, default=0.05,
                               help="Adjust-Pval cutoff, used for generating plots. Default: 0.05.")
     enrichr_opt.add_argument("-t", "--top-term", dest="term", action="store", type=int, default=10, metavar='int',
                               help="Numbers of top terms showed in the plot. Default: 10")
     #enrichr_opt.add_argument("--scale", dest = "scale", action="store", type=float, default=0.5, metavar='float',
     #                          help="scatter dot scale in the dotplot. Default: 0.5")
     enrichr_opt.add_argument("--no-plot", action='store_true', dest='no_plot', default=False,
-                              help="Suppress the plot output.This is useful only if data are intrested. Default: False.")
+                              help="Suppress the plot output.This is useful only if data are interested. Default: False.")
 
 
     enrichr_output = argparser_enrichr.add_argument_group("Output figure arguments")

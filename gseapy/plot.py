@@ -23,14 +23,14 @@ class _MidpointNormalize(Normalize):
 
 
 def z_score(data2d, axis=0):
-    """Standarize the mean and variance of the data axis Parameters.
+    """Standardize the mean and variance of the data axis Parameters.
 
     :param data2d: DataFrame to normalize.
     :param axis: int, Which axis to normalize across. If 0, normalize across rows,
                   if 1, normalize across columns.
 
 
-    :Returns: Normalized DataFrame. Noramlized data with a mean of 0 and variance of 1
+    :Returns: Normalized DataFrame. Normalized data with a mean of 0 and variance of 1
               across the specified axis.
 
     """
@@ -53,7 +53,7 @@ def heatmap(df, term, outdir, axis=0, figsize=(5,5), format='png'):
     :param df: DataFrame from expression table.
     :param term: gene set name.
     :param outdir: path to save heatmap.
-    :param axis: z_score axis. If None, do not standerize row or column.
+    :param axis: z_score axis. If None, do not standardize row or column.
     :param figsize: heatmap figsize.
     :param format: Matplotlib supported figure formats.
 
@@ -65,7 +65,7 @@ def heatmap(df, term, outdir, axis=0, figsize=(5,5), format='png'):
     xticks = np.arange(0, nx, 1) + .5
     yticks = np.arange(0, ny, 1) + .5
 
-    #If working on commandline, don't show figure
+    # If working on commandline, don't show figure
     fig = Figure(figsize=figsize)
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(111)
@@ -79,7 +79,7 @@ def heatmap(df, term, outdir, axis=0, figsize=(5,5), format='png'):
     ax.set_title("%s\nHeatmap of the Analyzed GeneSet"%term, fontsize=24)
     ax.tick_params(axis='both', which='both', bottom='off', top='off',
                    right='off', left='off')
-    #fig.colorbar(matrix, ax=ax)
+    # fig.colorbar(matrix, ax=ax)
     cax=fig.add_axes([0.93,0.25,0.05,0.20])
     cbar = fig.colorbar(matrix, cax=cax)
     cbar.ax.tick_params(axis='both', which='both', bottom='off', top='off',
@@ -87,7 +87,7 @@ def heatmap(df, term, outdir, axis=0, figsize=(5,5), format='png'):
     for side in ["top", "right", "left", "bottom"]:
         ax.spines[side].set_visible(False)
         cbar.ax.spines[side].set_visible(False)
-    #cbar.ax.set_title('',loc='left')
+    # cbar.ax.set_title('',loc='left')
     term = term.replace('/','_').replace(":","_")
     canvas.print_figure("{a}/{b}.heatmap.{c}".format(a=outdir, b=term, c=format),
                         bbox_inches='tight')
@@ -98,13 +98,13 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
 
     :param rank_metric: pd.Series for rankings, rank_metric.values.
     :param enrich_term: gene_set name
-    :param hit_ind: hit indexs of rank_metric.index presented in gene set S.
+    :param hit_ind: hits indices of rank_metric.index presented in gene set S.
     :param nes: Normalized enrichment scores.
     :param pval: nominal p-value.
-    :param fdr: false discoveray rate.
+    :param fdr: false discovery rate.
     :param RES: running enrichment scores.
-    :param phenoPos: phenotype lable, positive correlated.
-    :param phenoNeg: phenotype lable, negative correlated.
+    :param phenoPos: phenotype label, positive correlated.
+    :param phenoNeg: phenotype label, negative correlated.
     :param figsize: matplotlib figsize.
     :return:
     """
@@ -115,7 +115,7 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     #dataFrame of ranked matrix scores
     x = np.arange(len(rank_metric))
     rankings = rank_metric.values
-    #figsize = (6,6)
+    # figsize = (6,6)
     phenoP_label = phenoPos + ' (Positively Correlated)'
     phenoN_label = phenoNeg + ' (Negatively Correlated)'
     zero_score_ind = np.abs(rankings).argmin()
@@ -125,17 +125,17 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     fdr_label = 'FDR: '+ "{:.3f}".format(float(fdr))
     im_matrix = np.tile(rankings, (2,1))
 
-    #output truetype
+    # output truetype
     plt.rcParams.update({'pdf.fonttype':42,'ps.fonttype':42})
-    #in most case, we will have mangy plots, so do not display plots
-    #It's also convinient to run this script on command line.
+    # in most case, we will have mangy plots, so do not display plots
+    # It's also convinient to run this script on command line.
 
-    #GSEA Plots
+    # GSEA Plots
     gs = plt.GridSpec(16,1)
-    #fig = plt.figure(figsize=figsize)
+    # fig = plt.figure(figsize=figsize)
     fig = Figure(figsize=figsize)
     canvas = FigureCanvas(fig)
-    #Ranked Metric Scores Plot
+    # Ranked Metric Scores Plot
     ax1 =  fig.add_subplot(gs[11:])
     if module == 'ssgsea':
         nes_label = 'ES: '+ "{:.3f}".format(float(nes))
@@ -165,9 +165,9 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     ax1.yaxis.set_major_formatter(plt.FuncFormatter(lambda tick_loc,tick_num :  '{:.1f}'.format(tick_loc) ))
 
     # use round method to control float number
-    #ax1.yaxis.set_major_formatter(plt.FuncFormatter(lambda tick_loc,tick_num :  round(tick_loc, 1) ))
+    # ax1.yaxis.set_major_formatter(plt.FuncFormatter(lambda tick_loc,tick_num :  round(tick_loc, 1) ))
 
-    #gene hits
+    # gene hits
     ax2 = fig.add_subplot(gs[8:10], sharex=ax1)
 
     # the x coords of this transformation are data, and the y coord are axes
@@ -176,7 +176,7 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     ax2.spines['bottom'].set_visible(False)
     ax2.tick_params(axis='both', which='both', bottom='off', top='off',
                     labelbottom='off', right='off', left='off', labelleft='off')
-    #colormap
+    # colormap
     ax3 =  fig.add_subplot(gs[10], sharex=ax1)
     ax3.imshow(im_matrix, aspect='auto', norm=norm, cmap=plt.cm.seismic, interpolation='none') # cm.coolwarm
     ax3.spines['bottom'].set_visible(False)
@@ -200,11 +200,11 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     # FuncFormatter need two argment, I don't know why. this lambda function used to format yaxis tick labels.
     ax4.yaxis.set_major_formatter(plt.FuncFormatter(lambda tick_loc,tick_num :  '{:.1f}'.format(tick_loc)) )
 
-    #fig adjustment
+    # fig adjustment
     fig.suptitle(enrich_term, fontsize=16)
     fig.subplots_adjust(hspace=0)
-    #fig.tight_layout()
-    #plt.close(fig)
+    # fig.tight_layout()
+    # plt.close(fig)
     enrich_term = enrich_term.replace('/','_').replace(":","_")
     canvas.print_figure('{0}/{1}.{2}.{3}'.format(outdir, enrich_term, module, format),
                          bbox_inches='tight', dpi=300,)
@@ -222,11 +222,11 @@ def dotplot(df, cutoff=0.05, figsize=(3.5,6), top_term=10, scale=1):
     """
 
     if 'fdr' in df.columns:
-        #gsea results
+        # gsea results
         df.rename(columns={'fdr':'Adjusted P-value',}, inplace=True)
         df['hits_ratio'] =  df['matched_size'] / df['gene_set_size']
     else:
-        #enrichr results
+        # enrichr results
         df['Count'] = df['Overlap'].str.split("/").str[0].astype(int)
         df['Background'] = df['Overlap'].str.split("/").str[1].astype(int)
         df['hits_ratio'] =  df['Count'] / df['Background']
@@ -237,7 +237,7 @@ def dotplot(df, cutoff=0.05, figsize=(3.5,6), top_term=10, scale=1):
     if len(df) < 1:
         logging.warning("Warning: No enrich terms when cuttoff = %s"%cutoff )
         return None
-    #sorting the dataframe for better visualization
+    # sorting the dataframe for better visualization
     df = df.sort_values(by='Adjusted P-value', ascending=False)
     df = df.head(top_term)
     # x axis values
@@ -250,12 +250,12 @@ def dotplot(df, cutoff=0.05, figsize=(3.5,6), top_term=10, scale=1):
 
     area = np.pi * (df['Count'] *scale) **2
 
-    #creat scatter plot
+    # creat scatter plot
     if hasattr(sys, 'ps1'):
-        #working inside python console, show figure
+        # working inside python console, show figure
         fig, ax = plt.subplots(figsize=figsize)
     else:
-        #If working on commandline, don't show figure
+        # If working on commandline, don't show figure
         fig = Figure(figsize=figsize)
         canvas = FigureCanvas(fig)
         ax = fig.add_subplot(111)
@@ -267,18 +267,14 @@ def dotplot(df, cutoff=0.05, figsize=(3.5,6), top_term=10, scale=1):
     ax.yaxis.set_major_locator(plt.FixedLocator(y))
     ax.yaxis.set_major_formatter(plt.FixedFormatter(labels))
     ax.set_yticklabels(labels, fontsize=16)
-    #ax.set_ylim([-1, len(df)])
+    # ax.set_ylim([-1, len(df)])
     ax.grid()
-
-    #colorbar
+    # colorbar
     cax=fig.add_axes([0.93,0.20,0.07,0.22])
     cbar = fig.colorbar(sc, cax=cax,)
     cbar.ax.tick_params(right='off')
     cbar.ax.set_title('Com-\nscore',loc='left', fontsize=12)
-
-
-
-    #for terms less than 3
+    # for terms less than 3
     if len(df) >= 3:
 
         # find the index of the closest value to the median
@@ -288,9 +284,9 @@ def dotplot(df, cutoff=0.05, figsize=(3.5,6), top_term=10, scale=1):
     else:
         x2 =  [0]*len(df)
         idx = df.index
-    #scale of dots
+    # scale of dots
     ax2 =fig.add_axes([0.93,0.55,0.09,0.06*len(idx)])
-    #s=area[idx]
+    # s=area[idx]
     l1 = ax2.scatter([],[], s=10, edgecolors='none')
     l2 = ax2.scatter([],[], s=50, edgecolors='none')
     l3 = ax2.scatter([],[], s=100, edgecolors='none')
@@ -299,7 +295,7 @@ def dotplot(df, cutoff=0.05, figsize=(3.5,6), top_term=10, scale=1):
                      handlelength=2, loc = 8, borderpad = 1.8,
                      handletextpad=1, title='Gene\nRatio', scatterpoints = 1)
 
-    #canvas.print_figure('test', bbox_inches='tight')
+    # canvas.print_figure('test', bbox_inches='tight')
     return fig
 
 def barplot(df, cutoff=0.05, figsize=(6.5,6), top_term=10):
@@ -319,10 +315,10 @@ def barplot(df, cutoff=0.05, figsize=(6.5,6), top_term=10):
     bar = dd.plot.barh(x='Term', y='logAP', color="salmon", alpha=0.75, fontsize=24, ax=ax)
     bar.set_xlabel("-log$_{10}$ Adjust P-value", fontsize=24)
     bar.set_ylabel("")
-    #bar.set_title("Enrichr",fontsize=32)
+    # bar.set_title("Enrichr",fontsize=32)
     bar.legend(loc=4)
-    #fig.savefig(png, bbox_inches='tight')
-    #fig.savefig(pdf, bbox_inches='tight')
+    # fig.savefig(png, bbox_inches='tight')
+    # fig.savefig(pdf, bbox_inches='tight')
     return fig
 
 def adjust_spines(ax, spines):
