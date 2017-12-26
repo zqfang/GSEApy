@@ -125,7 +125,7 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
     cor_mat = np.abs(cor_mat)
     if cor_mat.ndim ==1:
         # ssGSEA or Prerank
-        #genestes->M, genes->N, perm-> axis=2
+        # genestes->M, genes->N, perm-> axis=2
         N, M = len(gene_mat), len(keys)
         # generate gene hits matrix
         # for 1d ndarray of gene_mat, set assume_unique=True,
@@ -213,8 +213,6 @@ def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
     G, S = exprs.shape
     genes = exprs.index.values
     expr_mat = exprs.values.T
-    # for 3d tensor, 1st dim is depth, 2nd dim is row, 3rd dim is column
-    perm_genes_mat = np.tile(genes, (permutation_num+1,1))
     perm_cor_tensor = np.tile(expr_mat, (permutation_num+1,1,1))
     # random shuffle on the first dim, last matrix is not shuffled
     for arr in perm_cor_tensor[:-1]: rs.shuffle(arr)
@@ -294,7 +292,7 @@ def ranking_metric(df, method, pos, neg, classes, ascending):
             visit here for more docs: http://software.broadinstitute.org/gsea/doc/GSEAUserGuideFrame.html
     """
 
-    #exclude any zero stds.
+    # exclude any zero stds.
     df_mean = df.groupby(by=classes, axis=1).mean()
     df_std =  df.groupby(by=classes, axis=1).std()
 
@@ -349,7 +347,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
     logging.debug("Start to compute enrichment socres......................")
 
     if permutation_type == "phenotype":
-        #shuffling classes and generate raondom correlation rankings
+        # shuffling classes and generate raondom correlation rankings
         genes_mat, cor_mat = ranking_metric_tensor(exprs=data, method=method,
                                                 permutation_num=n,
                                                 pos=pheno_pos, neg=pheno_neg, classes=classes,
@@ -362,7 +360,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
                                                            single=False, rs=rs)
 
     else:
-        #Prerank, ssGSEA, GSEA with gene_set permutation
+        # Prerank, ssGSEA, GSEA with gene_set permutation
         genes_sorted = data.index.values
         cor_vec = data.values
         es, esnull, hit_ind, RES = enrichment_score_tensor(gene_mat=genes_sorted, cor_mat=cor_vec,
@@ -389,7 +387,7 @@ def gsea_compute_ss(data, gmt, n, weighted_score_type, scale, seed, processes):
     temp_esnu=[]
     pool_esnu = Pool(processes=processes)
     for subset in subsets:
-        #you have to reseed, or all your processes are sharing the same seed value
+        # you have to reseed, or all your processes are sharing the same seed value
         rs = np.random.RandomState(seed)
         temp_esnu.append(pool_esnu.apply_async(enrichment_score,
                                                args=(gl, gmt.get(subset), w,
@@ -421,14 +419,14 @@ def gsea_pval(es, esnull):
     # to speed up, using numpy function to compute pval in parallel.
     es = np.array(es)
     esnull = np.array(esnull)
-    #try:
+    # try:
     condlist = [ es < 0, es >=0]
     choicelist = [np.sum(esnull < es.reshape(len(es),1), axis=1)/ np.sum(esnull < 0, axis=1),
                   np.sum(esnull >= es.reshape(len(es),1), axis=1)/ np.sum(esnull >= 0, axis=1)]
     pval = np.select(condlist, choicelist)
 
     return pval
-    #except:
+    # except:
     #    return np.repeat(1.0 ,len(es))
 
 def normalize(es, esnull):
@@ -460,10 +458,10 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
     """
 
     logging.debug("Start to compute pvals..................................")
-    #compute pvals.
+    # compute pvals.
     enrichmentPVals = gsea_pval(enrichment_scores, enrichment_nulls).tolist()
 
-    #new normalize enrichment score calculating method. this could speed up significantly.
+    # new normalize enrichment score calculating method. this could speed up significantly.
     esnull_meanPos = []
     esnull_meanNeg = []
 
@@ -480,7 +478,7 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
     pos = np.array(esnull_meanPos).reshape(len(es), 1)
     neg = np.array(esnull_meanNeg).reshape(len(es), 1)
 
-    #compute normalized enrichment score and normalized esnull
+    # compute normalized enrichment score and normalized esnull
     logging.debug("Compute normalized enrichment score and normalized esnull")
 
     try:
@@ -499,9 +497,9 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
 
     logging.debug("start to compute fdrs..................................")
 
-    #FDR null distribution histogram
-    #create a histogram of all NES(S,pi) over all S and pi
-    #Use this null distribution to compute an FDR q value,
+    # FDR null distribution histogram
+    # create a histogram of all NES(S,pi) over all S and pi
+    # Use this null distribution to compute an FDR q value,
     # vals = reduce(lambda x,y: x+y, nEnrichmentNulls, [])
     # nvals = np.array(sorted(vals))
     # or

@@ -44,19 +44,19 @@ def gsea_edb_parser(results_path, index=0):
     term = dict(tag[index].attrs)
     # dict_keys(['RANKED_LIST', 'GENESET', 'FWER', 'ES_PROFILE',
     # 'HIT_INDICES', 'ES', 'NES', 'TEMPLATE', 'RND_ES', 'RANK_SCORE_AT_ES',
-    #'NP', 'RANK_AT_ES', 'FDR'])
+    # 'NP', 'RANK_AT_ES', 'FDR'])
     enrich_term = term.get('GENESET').split("#")[1]
     es_profile = term.get('ES_PROFILE').split(" ")
-    #rank_es = term.get('RND_ES').split(" ")
+    # rank_es = term.get('RND_ES').split(" ")
     hit_ind =term.get('HIT_INDICES').split(" ")
     es_profile = [float(i) for i in es_profile ]
     hit_ind = [float(i) for i in hit_ind ]
-    #rank_es = [float(i) for i in rank_es ]
+    #r ank_es = [float(i) for i in rank_es ]
     nes = term.get('NES')
     pval = term.get('NP')
     fdr =  term.get('FDR')
-    #fwer = term.get('FWER')
-    #index_range = len(tag)-1
+    # fwer = term.get('FWER')
+    # index_range = len(tag)-1
     logging.debug("Enriched Gene set is: "+ enrich_term)
 
     return enrich_term, hit_ind, nes, pval, fdr
@@ -100,10 +100,10 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
             retries = Retry(total=5, backoff_factor=0.1,
                             status_forcelist=[ 500, 502, 503, 504 ])
             s.mount('http://', HTTPAdapter(max_retries=retries))
-            #queery string
+            # queery string
             ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary'
             query_string = '?mode=text&libraryName=%s'
-            #get
+            # get
             response = s.get( ENRICHR_URL + query_string % gmt, timeout=None)
         else:
             raise Exception("gene_set files(.gmt) not found")
@@ -116,7 +116,7 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
 
 
 
-    #filtering dict
+    # filtering dict
     if sys.version_info[0] >= 3 :
         genesets_filter =  {k: v for k, v in genesets_dict.items() if len(v) >= min_size and len(v) <= max_size}
     elif sys.version_info[0] == 2:
@@ -133,8 +133,8 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
                 del genesets_filter[subset]
             else:
                 continue
-    #some_dict = {key: value for key, value in some_dict.items() if value != value_to_remove}
-    #use np.intersect1d() may be faster???
+    # some_dict = {key: value for key, value in some_dict.items() if value != value_to_remove}
+    # use np.intersect1d() may be faster???
     filsets_num = len(genesets_dict) - len(genesets_filter)
     logging.info("%04d gene_sets have been filtered out when max_size=%s and min_size=%s"%(filsets_num, max_size, min_size))
 

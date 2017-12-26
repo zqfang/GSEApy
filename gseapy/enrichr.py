@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# python
+# -*- coding: utf-8 -*-
 # see: http://amp.pharm.mssm.edu/Enrichr/help#api for API docs
 
 import sys, json, os, logging
@@ -42,7 +42,7 @@ class Enrichr(object):
         if isinstance(self.gene_list, list):
             genes = [str(gene) for gene in self.gene_list]
         elif isinstance(self.gene_list, DataFrame):
-            #input type is bed file
+            # input type is bed file
             if self.gene_list.shape[1] >=3:
                 genes= self.gene_list.iloc[:,:3].apply(lambda x: "\t".join([str(i) for i in x]), axis=1).tolist()
             # input type with weight values
@@ -67,7 +67,7 @@ class Enrichr(object):
 
 
 
-        #read input file
+        # read input file
         genes_str=self.parse_input()
 
         # name of analysis or list
