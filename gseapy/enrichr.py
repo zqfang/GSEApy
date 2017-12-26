@@ -72,8 +72,6 @@ class Enrichr(object):
 
         # name of analysis or list
         description = str(self.descriptions)
-
-        #library validaty confirmationi
         gene_set = str(self.gene_sets)
 
         self._logger.info("Connecting to Enrichr Server to get latest library names")
@@ -122,7 +120,7 @@ class Enrichr(object):
             raise Exception('Error fetching enrichment results')
 
         self._logger.debug('Get enrichment results: Job Id:'+ str(job_id))
-        ## Download file of enrichment results
+        # Download file of enrichment results
         ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/export'
         query_string = '?userListId=%s&filename=%s&backgroundType=%s'
         user_list_id = str(job_id['userListId'])
@@ -145,11 +143,11 @@ class Enrichr(object):
                     f.write(chunk)
 
         self._logger.debug('Results written to: ' + outfile)
-        #save results
+        # save results
         df =  read_table(outfile)
         self.res2d = df
 
-        #plotting
+        # plotting
         if not self.__no_plot:
             fig = barplot(df=df, cutoff=self.cutoff,
                         figsize=self.figsize, top_term=self.__top_term,)
@@ -168,7 +166,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr',
 
     :param gene_list: Flat file with list of genes, one gene id per row, or a python list object
     :param gene_sets: Enrichr Library to query. Required enrichr library name
-    :param description: name of analysis. optinal.
+    :param description: name of analysis. optional.
     :param outdir: Output file directory
     :param float cutoff: Adjust P-value cutoff, for plotting. Default: 0.05
     :param str format: Output figure format supported by matplotlib,('pdf','png','eps'...). Default: 'pdf'.

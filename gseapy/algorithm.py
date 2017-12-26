@@ -9,23 +9,23 @@ from multiprocessing import Pool
 
 
 def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=None,
-                     esnull=None, rs=np.random.RandomState(), single=False, scale=False):
+                     nperm=1000, rs=np.random.RandomState(), single=False, scale=False):
     """This is the most important function of GSEApy. It has the same algorithm with GSEA and ssGSEA.
 
     :param gene_list:       The ordered gene list gene_name_list, rank_metric.index.values
     :param gene_set:        gene_sets in gmt file, please used gsea_gmt_parser to get gene_set.
-    :param weighted_score_type:  It's indentical to gsea's weighted_score method. weighting by the correlation
+    :param weighted_score_type:  It's same with gsea's weighted_score method. weighting by the correlation
                             is a very reasonable choice that allows significant gene sets with less than perfect coherence.
                             options: 0(classic),1,1.5,2. default:1. if one is interested in penalizing sets for lack of
                             coherence or to discover sets with any type of nonrandom distribution of tags, a value p < 1
-                            might be appropriate. On the other hand, if one uses sets with largenumber of genes and only
+                            might be appropriate. On the other hand, if one uses sets with large number of genes and only
                             a small subset of those is expected to be coherent, then one could consider using p > 1.
                             Our recommendation is to use p = 1 and use other settings only if you are very experienced
                             with the method and its behavior.
 
     :param correl_vector:   A vector with the correlations (e.g. signal to noise scores) corresponding to the genes in
                             the gene list. Or rankings, rank_metric.values
-    :param esnull:          Only used this paramter when computing esnuall for statistial testing. set the esnull value
+    :param nperm:           Only used this parameter when computing esnull for statistical testing. set the esnull value
                             equal to the permutation number.
     :param rs:              Random state for initialize gene list shuffling. Default: np.random.RandomState(seed=None)
 
@@ -33,7 +33,7 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
 
      ES: Enrichment score (real number between -1 and +1)
 
-     ESNULL: Enrichment score calcualted from random permutation.
+     ESNULL: Enrichment score calculated from random permutation.
 
      Hits_Indices: index of a gene in gene_list, if gene included in gene_set.
 
@@ -42,31 +42,31 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
     """
 
     N = len(gene_list)
-    #Test whether each element of a 1-D array is also present in a second array
-    #It's more intuitived here than orginal enrichment_score source code.
-    #use .astype to covert bool to intergers
+    # Test whether each element of a 1-D array is also present in a second array
+    # It's more intuitived here than orginal enrichment_score source code.
+    # use .astype to covert bool to intergers
     tag_indicator = np.in1d(gene_list, gene_set, assume_unique=True)  # notice that the sign is 0 (no tag) or 1 (tag)
 
-    if (weighted_score_type == 0 ):
+    if weighted_score_type == 0 :
         correl_vector = np.repeat(1, N)
     else:
         correl_vector = np.abs(correl_vector)**weighted_score_type
 
-    #get indices of tag_indicator
+    # get indices of tag_indicator
     hit_ind = np.flatnonzero(tag_indicator).tolist()
     # if used for compute esnull, set esnull equal to permutation number, e.g. 1000
     # else just compute enrichment scores
     # set axis to 1, because we have 2 dimentional array
     axis = 1
-    tag_indicator = np.tile(tag_indicator, (esnull+1,1))
-    correl_vector = np.tile(correl_vector,(esnull+1,1))
+    tag_indicator = np.tile(tag_indicator, (nperm+1,1))
+    correl_vector = np.tile(correl_vector,(nperm+1,1))
     # gene list permutation
-    for i in range(esnull): rs.shuffle(tag_indicator[i])
-    #np.apply_along_axis(rs.shuffle, 1, tag_indicator)
+    for i in range(nperm): rs.shuffle(tag_indicator[i])
+    # np.apply_along_axis(rs.shuffle, 1, tag_indicator)
 
     Nhint = tag_indicator.sum(axis=axis, keepdims=True)
     sum_correl_tag = np.sum(correl_vector*tag_indicator, axis=axis, keepdims=True)
-    #compute ES score, the code below is identical to gsea enrichment_score method.
+    # compute ES score, the code below is identical to gsea enrichment_score method.
     no_tag_indicator = 1 - tag_indicator
     Nmiss =  N - Nhint
     norm_tag =  1.0/sum_correl_tag
@@ -76,12 +76,12 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
 
     if scale: RES = RES / N
     if single:
-        es = np.sum(RES, axis=axis)
+        es_vec = RES.sum(axis=axis)
     else:
-        max_ES, min_ES =  np.max(RES, axis=axis), np.min(RES, axis=axis)
-        es = np.where(np.abs(max_ES) > np.abs(min_ES), max_ES, min_ES)
-    #extract values
-    es, esnull, RES = es[-1], es[:-1], RES[-1,:]
+        max_ES, min_ES =  RES.max(axis=axis), RES.min(axis=axis)
+        es_vec = np.where(np.abs(max_ES) > np.abs(min_ES), max_ES, min_ES)
+    # extract values
+    es, esnull, RES = es_vec[-1], es_vec[:-1], RES[-1,:]
 
     return es, esnull, hit_ind, RES
 
@@ -105,7 +105,7 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
         :return: a tuple contains::
 
                  | ES: Enrichment score (real number between -1 and +1), for ssGSEA, set scale eq to True.
-                 | ESNULL: Enrichment score calcualted from random permutation.
+                 | ESNULL: Enrichment score calculated from random permutation.
                  | Hits_Indices: Indices of genes if genes are included in gene_set.
                  | RES: The running enrichment score for all locations in the gene list.
 
@@ -196,17 +196,17 @@ def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
                            4. 'diff_of_classes'.
                            5. 'log2_ratio_of_classes'.
        :param int permuation_num: how many times of classes is being shuffled
-       :param str pos: one of lables of phenotype's names.
-       :param str neg: one of lable of phenotype's names.
+       :param str pos: one of labels of phenotype's names.
+       :param str neg: one of labels of phenotype's names.
        :param list classes:  a list of phenotype labels, to specify which column of
-                             dataframe belongs to what catogry of phenotype.
+                             dataframe belongs to what class of phenotype.
        :param bool ascending:  bool. Sort ascending vs. descending.
 
        :return:
                 returns two 2d ndarry with shape (nperm, gene_num).
 
-                | genes_mat: sorted and permuated (exclude last row) gene name matrix.
-                | cor_mat: sorted and permuated (exclude last row) ranking matrix.
+                | genes_mat: sorted and permutated (exclude last row) gene name matrix.
+                | cor_mat: sorted and permutated (exclude last row) ranking matrix.
 
     """
     # S: samples, G: gene number
@@ -275,7 +275,7 @@ def ranking_metric(df, method, pos, neg, classes, ascending):
 
                        4. 'diff_of_classes'
 
-                          Uses the difference of class means to calculate fold change for natureal scale data
+                          Uses the difference of class means to calculate fold change for natural scale data
 
                        5. 'log2_ratio_of_classes'
 
@@ -283,9 +283,9 @@ def ranking_metric(df, method, pos, neg, classes, ascending):
                           This is the recommended statistic for calculating fold change for log scale data.
 
 
-       :param str pos: one of lables of phenotype's names.
-       :param str neg: one of lable of phenotype's names.
-       :param list classes:  a list of phenotype labels, to specify which column of dataframe belongs to what catogry of phenotype.
+       :param str pos: one of labels of phenotype's names.
+       :param str neg: one of labels of phenotype's names.
+       :param list classes:  a list of phenotype labels, to specify which column of dataframe belongs to what category of phenotype.
        :param bool ascending:  bool or list of bool. Sort ascending vs. descending.
        :return:
 
@@ -322,13 +322,13 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
                  seed=None, scale=False, single=False):
     """compute enrichment scores and enrichment nulls.
 
-        :param data: prepreocessed expression dataframe or a pre-ranked file if prerank=True.
+        :param data: preprocessed expression dataframe or a pre-ranked file if prerank=True.
         :param dict gmt: all gene sets in .gmt file. need to call load_gmt() to get results.
         :param int n: permutation number. default: 1000.
         :param str method: ranking_metric method. see above.
-        :param str pheno_pos: one of lables of phenotype's names.
-        :param str pheno_neg: one of lable of phenotype's names.
-        :param list classes: a list of phenotype labels, to specify which column of dataframe belongs to what catogry of phenotype.
+        :param str pheno_pos: one of labels of phenotype's names.
+        :param str pheno_neg: one of labels of phenotype's names.
+        :param list classes: a list of phenotype labels, to specify which column of dataframe belongs to what category of phenotype.
         :param float weighted_score_type: default:1
         :param bool ascending: sorting order of rankings. Default: False.
         :param seed: random seed. Default: np.random.RandomState()
@@ -432,8 +432,8 @@ def gsea_pval(es, esnull):
     #    return np.repeat(1.0 ,len(es))
 
 def normalize(es, esnull):
-    """normalize the ES(S,pi) and the observed ES(S), separetely rescaling
-       the positive and negative scores by divident by the mean of the ES(S,pi).
+    """normalize the ES(S,pi) and the observed ES(S), separately rescaling
+       the positive and negative scores by dividing the mean of the ES(S,pi).
     """
 
     try:
@@ -452,9 +452,9 @@ def normalize(es, esnull):
 
 
 def gsea_significance(enrichment_scores, enrichment_nulls):
-    """Compute nominal p-vals, normalized ES, and FDR q value.
+    """Compute nominal pvals, normalized ES, and FDR q value.
 
-        For a given NES(S) = NES* >= 0. The FDR is the ratio of the percantage of all (S,pi) with
+        For a given NES(S) = NES* >= 0. The FDR is the ratio of the percentage of all (S,pi) with
         NES(S,pi) >= 0, whose NES(S,pi) >= NES*, divided by the percentage of
         observed S wih NES(S) >= 0, whose NES(S) >= NES*, and similarly if NES(S) = NES* <= 0.
     """

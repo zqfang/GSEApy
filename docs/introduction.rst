@@ -21,8 +21,8 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
 
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg
     :target:  https://img.shields.io/badge/license-MIT-blue.svg
-.. image:: https://img.shields.io/badge/python-3.5-blue.svg
-    :target:   https://img.shields.io/badge/python-3.5-blue.svg
+.. image:: https://img.shields.io/badge/python-3.6-blue.svg
+    :target:   https://img.shields.io/badge/python-3.6-blue.svg
 .. image:: https://img.shields.io/badge/python-2.7-blue.svg
     :target:  https://img.shields.io/badge/python-2.7-blue.svg
 
@@ -56,7 +56,7 @@ do gene set enrichment analysis in python. So, here is my reason:
 
 * **Running inside python interactive console without switch to R!!!**
 * User friendly for both wet and dry lab usrers.
-* Produce pubilishable figures.
+* Produce publishable figures.
 * Perform batch jobs easy(using for loops).
 * Easy to use in bash shell or your  data analysis workflow, e.g. snakemake.  
 
@@ -101,11 +101,11 @@ A graphical introduction of Enrichr
 
 **Note**: Enrichr uses a list of Entrez gene symbols as input. You should convert all gene names to uppercase.
 
-For example, both a list object and txt file are supported for ``enrchr`` API
+For example, both a list object and txt file are supported for ``enrichr`` API
 
 .. code:: python
 
-    # if you perfer to run gseapy.enrchr() inside python console, you could assign a list object to 
+    # if you prefer to run gseapy.enrchr() inside python console, you could assign a list object to
     # gseapy like this.
     gene_list = ['SCARA3', 'LOC100044683', 'CMBL', 'CLIC6', 'IL13RA1', 'TACSTD2', 'DKKL1',
                     'CSF1', 'CITED1', 'SYNPO2L']
@@ -148,7 +148,7 @@ Installation
    # for windows users 
    $ conda install -c bioninja gseapy
 
-   # or use pip to install the lastest release 
+   # or use pip to install the latest release
    $ pip install gseapy
 
 | You may instead want to use the development version from Github, by running

@@ -23,14 +23,14 @@ class _MidpointNormalize(Normalize):
 
 
 def z_score(data2d, axis=0):
-    """Standarize the mean and variance of the data axis Parameters.
+    """Standardize the mean and variance of the data axis Parameters.
 
     :param data2d: DataFrame to normalize.
     :param axis: int, Which axis to normalize across. If 0, normalize across rows,
                   if 1, normalize across columns.
 
 
-    :Returns: Normalized DataFrame. Noramlized data with a mean of 0 and variance of 1
+    :Returns: Normalized DataFrame. Normalized data with a mean of 0 and variance of 1
               across the specified axis.
 
     """
@@ -53,7 +53,7 @@ def heatmap(df, term, outdir, axis=0, figsize=(5,5), format='png'):
     :param df: DataFrame from expression table.
     :param term: gene set name.
     :param outdir: path to save heatmap.
-    :param axis: z_score axis. If None, do not standerize row or column.
+    :param axis: z_score axis. If None, do not standardize row or column.
     :param figsize: heatmap figsize.
     :param format: Matplotlib supported figure formats.
 
@@ -98,13 +98,13 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
 
     :param rank_metric: pd.Series for rankings, rank_metric.values.
     :param enrich_term: gene_set name
-    :param hit_ind: hit indexs of rank_metric.index presented in gene set S.
+    :param hit_ind: hits indices of rank_metric.index presented in gene set S.
     :param nes: Normalized enrichment scores.
     :param pval: nominal p-value.
-    :param fdr: false discoveray rate.
+    :param fdr: false discovery rate.
     :param RES: running enrichment scores.
-    :param phenoPos: phenotype lable, positive correlated.
-    :param phenoNeg: phenotype lable, negative correlated.
+    :param phenoPos: phenotype label, positive correlated.
+    :param phenoNeg: phenotype label, negative correlated.
     :param figsize: matplotlib figsize.
     :return:
     """

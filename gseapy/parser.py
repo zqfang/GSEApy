@@ -11,7 +11,7 @@ from requests.adapters import HTTPAdapter
 
 
 def gsea_cls_parser(cls):
-    """Extact class(phenotype) name from .cls file.
+    """Extract class(phenotype) name from .cls file.
 
     :param cls: the a class list instance or .cls file which is identical to GSEA input .
     :return: phenotype name and a list of class vector.
@@ -65,7 +65,7 @@ def gsea_edb_parser(results_path, index=0):
 def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
     """Parse gene_sets.gmt(gene set database) file or download from enrichr server.
 
-    :param gmt: the gene_sets.gmt file of GSEA input or an enrichr libary name.
+    :param gmt: the gene_sets.gmt file of GSEA input or an enrichr library name.
                 checkout full enrichr library name here: http://amp.pharm.mssm.edu/Enrichr/#stats
 
     :param min_size: Minimum allowed number of genes from gene set also the data set. Default: 3.

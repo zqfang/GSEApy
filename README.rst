@@ -30,7 +30,7 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
 
 
 
-The main documentation for GSEAPY can be found at http://gseapy.rtfd.io/
+The main documentation for GSEApy can be found at http://gseapy.rtfd.io/
 
 An example to use gseapy, please click here: `Example <http://gseapy.readthedocs.io/en/master/gseapy_example.html>`_
 
@@ -39,7 +39,7 @@ An example to use gseapy, please click here: `Example <http://gseapy.readthedocs
 GSEAPY is a python wrapper for **GSEA** and **Enrichr**.
 --------------------------------------------------------------------------------------------
 
-GSEAPY could be used for **RNA-seq, ChIP-seq, Microarry** data. It's used for convenient GO enrichments and produce **publishable quality figures** in python.
+GSEAPY could be used for **RNA-seq, ChIP-seq, Microarry** data. It's used for convenient GO enrichment and produce **publishable quality figures** in python.
 
 
 GSEAPY has five sub-commands available: ``gsea``, ``prerank``, ``ssgsea``, ``replot`` ``enrichr``.
@@ -49,7 +49,7 @@ GSEAPY has five sub-commands available: ``gsea``, ``prerank``, ``ssgsea``, ``rep
 :prerank: The ``prerank`` module produce **Prerank tool** results.  The input expects a pre-ranked gene list dataset with correlation values, which in .rnk format, and gene_sets file in gmt format.  ``prerank`` module is an API to `GSEA` pre-rank tools.
 :ssgsea: The ``ssgsea`` module perform **single sample GSEA(ssGSEA)** analysis.  The input expects a pd.Series (indexed by gene name), or pd.DataFrame (include ``GCT`` file) with expression values and ``GMT`` file. For multi sample input, ssGSEA reconigze gct format, too. ssGSEA enrichment score for the gene set as described by `D. Barbie et al 2009 <http://www.nature.com/nature/journal/v462/n7269/abs/nature08460.html>`_.
 
-:replot: The ``replot`` module reproduce GSEA desktop version results.  The only input for GSEAPY is the location to ``GSEA`` Desktop output results.
+:replot: The ``replot`` module reproduce GSEA desktop version results.  The only input for GSEApy is the location to ``GSEA`` Desktop output results.
 
 :enrichr: The ``enrichr`` module enable you perform gene set enrichment analysis using ``Enrichr`` API. Enrichr is open source and freely available online at: http://amp.pharm.mssm.edu/Enrichr . It runs very fast.
 
@@ -71,7 +71,7 @@ do gene set enrichment analysis in python. So, here is my reason:
 
 * **Running inside python interactive console without switch to R!!!**
 * User friendly for both wet and dry lab usrers.
-* Produce or reproduce pubilishable figures.
+* Produce or reproduce publishable figures.
 * Perform batch jobs easy.
 * Easy to use in bash shell or your  data analysis workflow, e.g. snakemake.
 
@@ -229,12 +229,12 @@ see detail here: `Example <http://gseapy.readthedocs.io/en/master/gseapy_example
 .. code:: python
 
 
-    # assign dataframe, and use enrichr libary data set 'KEGG_2016'
+    # assign dataframe, and use enrichr library data set 'KEGG_2016'
     expression_dataframe = pd.DataFrame()
 
     sample_name = ['A','A','A','B','B','B'] # always only two group,any names you like
 
-    # assign gene_sets parameter with enrichr library name or gmt file on your local computor.
+    # assign gene_sets parameter with enrichr library name or gmt file on your local computer.
     gseapy.gsea(data=expression_dataframe, gene_sets='KEGG_2016', cls= sample_names, outdir='test')
 
     # using prerank tool
@@ -263,7 +263,7 @@ see detail here: `Example <http://gseapy.readthedocs.io/en/master/gseapy_example
 GSEAPY supported gene set libaries :
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To see the full list of gseapy supported gene set librarys, please click here: `Library <http://amp.pharm.mssm.edu/Enrichr/#stats>`_
+To see the full list of gseapy supported gene set libraries, please click here: `Library <http://amp.pharm.mssm.edu/Enrichr/#stats>`_
 
 Or use ``get_library_name`` function inside python console.
 

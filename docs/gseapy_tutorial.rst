@@ -4,11 +4,11 @@
 A Protocol to Prepare files for GSEAPY
 ======================================
 
-As a biological reseacher, I like protocols, so as other reseachers, too.
+As a biological researcher, I like protocols, so as other researchers, too.
 
 Here is an short tutorial to walk you through gseapy.
 
-For file format explaination, please see `here <http://software.broadinstitute.org/gsea/doc/GSEAUserGuideFrame.html.>`_
+For file format explanation, please see `here <http://software.broadinstitute.org/gsea/doc/GSEAUserGuideFrame.html.>`_
 
 In order to run gseapy successfully, install gseapy use pip.
 
@@ -27,7 +27,7 @@ Use ``gsea`` command, or :func:`gsea`
 Follow the steps blow.
 
 One thing you should know is that the gseapy input files are totally the same as
-``GSEA`` desktop requried. You can use these files below to run ``GSEA`` desktop, too.
+``GSEA`` desktop required. You can use these files below to run ``GSEA`` desktop, too.
 
 
 1. Prepare an tabular text file of gene expression like this:
@@ -44,7 +44,7 @@ commands below:
     df = pd.read_table('./test/gsea_data.txt')
     df.head()
 
-    #or assign df to the paramter 'data'
+    #or assign df to the parameter 'data'
 
 
 .. raw:: html
@@ -157,7 +157,7 @@ An example of cls file looks like below.
 
 All you need to do is to download gene set database file from ``GSEA`` website.
 
-Or you could use enrichr library. In this case, just provide libarary name to parameter 'gene_sets'
+Or you could use enrichr library. In this case, just provide library name to parameter 'gene_sets'
 
 If you would like to use you own gene_sets.gmts files, build such a file use excel,
 and then rename to gene_sets.gmt.
@@ -243,7 +243,7 @@ Use ``ssgsea`` command, or :func:`ssgsea`
 Use ``enrichr`` command, or :func:`enrichr`
 ===============================================================
 
-The only thing you need to prepeare is a gene list file.
+The only thing you need to prepare is a gene list file.
 
 **Note**: Enrichr uses a list of Entrez gene symbols as input.
 
