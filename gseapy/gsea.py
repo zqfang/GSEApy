@@ -3,20 +3,17 @@
 from __future__ import  division
 
 import os,sys,logging,json
-import requests
 import numpy as np
 import pandas as pd
 from collections import OrderedDict
 from multiprocessing import Pool, cpu_count
 from numpy import log, exp
-from requests.packages.urllib3.util.retry import Retry
-from requests.adapters import HTTPAdapter
 
 from gseapy.parser import *
 from gseapy.algorithm import enrichment_score, gsea_compute, ranking_metric, gsea_compute_ss
 #from gseapy.algorithm import enrichment_score_tensor, gsea_significance
 from gseapy.plot import gsea_plot, heatmap
-from gseapy.utils import mkdirs, log_init, DEFAULT_LIBRARY
+from gseapy.utils import mkdirs, log_init, retry, DEFAULT_LIBRARY
 
 
 class GSEAbase(object):
@@ -54,7 +51,7 @@ class GSEAbase(object):
             :return: a pandas Series with gene name indexed rankings
 
         """
-        #load data
+        # load data
         if isinstance(rnk, pd.DataFrame):
             rank_metric = rnk.copy()
             # handle dataframe with gene_name as index.
@@ -67,26 +64,26 @@ class GSEAbase(object):
         else:
             raise Exception('Error parsing gene ranking values!')
 
-        #sort ranking values from high to low
+        # sort ranking values from high to low
         rank_metric.sort_values(by=rank_metric.columns[1], ascending=self.ascending, inplace=True)
-        #drop na values
+        # drop na values
         if rank_metric.isnull().any(axis=1).sum() >0:
             self._logger.warning("Input gene rankings contains NA values(gene name and ranking value), drop them all!")
-            #print out NAs
+            # print out NAs
             NAs = rank_metric[rank_metric.isnull().any(axis=1)]
             self._logger.debug('NAs list:\n'+NAs.to_string())
             rank_metric.dropna(how='any', inplace=True)
-        #drop duplicate IDs, keep the first
+        # drop duplicate IDs, keep the first
         if rank_metric.duplicated(subset=rank_metric.columns[0]).sum() >0:
             self._logger.warning("Input gene rankings contains duplicated IDs, Only use the duplicated ID with highest value!")
-            #print out duplicated IDs.
+            # print out duplicated IDs.
             dups = rank_metric[rank_metric.duplicated(subset=rank_metric.columns[0])]
             self._logger.debug('Dups list:\n'+dups.to_string())
             rank_metric.drop_duplicates(subset=rank_metric.columns[0], inplace=True, keep='first')
 
 
 
-        #reset ranking index, because you have sort values and drop duplicates.
+        # reset ranking index, because you have sort values and drop duplicates.
         rank_metric.reset_index(drop=True, inplace=True)
         rank_metric.columns = ['gene_name','rank']
         rankser = rank_metric.set_index('gene_name')['rank']
@@ -152,25 +149,16 @@ class GSEAbase(object):
         return sorted(libs)
 
     def _download_libraries(self, libname):
-        """ download enrichr libraries.
-
-            define max tries num
-            if the backoff_factor is 0.1, then sleep() will sleep for
-            [0.1s, 0.2s, 0.4s, ...] between retries.
-            It will also force a retry if the status code returned is 500, 502, 503 or 504.
-        """
-        s = requests.Session()
-        retries = Retry(total=5, backoff_factor=0.1,
-                        status_forcelist=[ 500, 502, 503, 504 ])
-        s.mount('http://', HTTPAdapter(max_retries=retries))
-        #queery string
+        """ download enrichr libraries."""
+        s = retry(5)
+        # queery string
         ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary'
         query_string = '?mode=text&libraryName=%s'
-        #get
+        # get
         response = s.get( ENRICHR_URL + query_string % libname, timeout=None)
         if not response.ok:
             raise Exception('Error fetching enrichment results, check internet connection first.')
-        ### reformat to dict and wirte to disk
+        # reformat to dict and wirte to disk
         genesets_dict = {}
         outname = "enrichr.%s.gmt"%libname
         gmtout = open(os.path.join(self.outdir, outname),"w")
@@ -352,25 +340,25 @@ class GSEA(GSEAbase):
         assert self.permutation_type in ["phenotype", "gene_set"]
         assert self.min_size <= self.max_size
 
-        #Start Analysis
+        # Start Analysis
         self._logger.info("Parsing data files for GSEA.............................")
         # phenotype labels parsing
         phenoPos, phenoNeg, cls_vector = gsea_cls_parser(self.classes)
-        #select correct expression genes and values.
+        # select correct expression genes and values.
         dat = self.load_data(cls_vector)
-        #data frame must have lenght > 1
+        # data frame must have lenght > 1
         assert len(dat) > 1
-        #ranking metrics calculation.
+        # ranking metrics calculation.
         dat2 = ranking_metric(df=dat, method=self.method, pos=phenoPos, neg=phenoNeg,
                               classes=cls_vector, ascending=self.ascending)
-        #filtering out gene sets and build gene sets dictionary
+        # filtering out gene sets and build gene sets dictionary
         gmt = self.load_gmt(gene_list=dat2.index.values, gmt=self.gene_sets)
 
         self._logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
         self._logger.info("Start to run GSEA...Might take a while..................")
-        #cpu numbers
+        # cpu numbers
         self._set_cores()
-        #compute ES, NES, pval, FDR, RES
+        # compute ES, NES, pval, FDR, RES
         dataset = dat if self.permutation_type =='phenotype' else dat2
         gsea_results,hit_ind,rank_ES, subsets = gsea_compute(data=dataset, n=self.permutation_num, gmt=gmt,
                                                              weighted_score_type=self.weighted_score_type,
@@ -385,7 +373,7 @@ class GSEA(GSEAbase):
         self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
                                    gmt=gmt, rank_metric=dat2, permutation_type=self.permutation_type)
 
-        #Plotting
+        # Plotting
         heat_dat = dat.loc[dat2.index]
         self._plotting(rank_metric=dat2, results=self.results, res2d=self.res2d,
                        graph_num=self.graph_num, outdir=self.outdir,
@@ -435,20 +423,20 @@ class Prerank(GSEAbase):
 
         assert self.min_size <= self.max_size
 
-        #parsing rankings
+        # parsing rankings
         dat2 = self._load_ranking(self.rnk)
         assert len(dat2) > 1
 
-        #cpu numbers
+        # cpu numbers
         self._set_cores()
-        #Start Analysis
+        # Start Analysis
         self._logger.info("Parsing data files for GSEA.............................")
-        #filtering out gene sets and build gene sets dictionary
+        # filtering out gene sets and build gene sets dictionary
         gmt = self.load_gmt(gene_list=dat2.index.values, gmt=self.gene_sets)
 
         self._logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
         self._logger.info("Start to run GSEA...Might take a while..................")
-        #compute ES, NES, pval, FDR, RES
+        # compute ES, NES, pval, FDR, RES
         gsea_results, hit_ind,rank_ES, subsets = gsea_compute(data=dat2, n=self.permutation_num, gmt=gmt,
                                                               weighted_score_type=self.weighted_score_type,
                                                               permutation_type='gene_set', method=None,
@@ -461,7 +449,7 @@ class Prerank(GSEAbase):
         self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
                                    gmt=gmt, rank_metric=dat2, permutation_type="gene_sets")
 
-        #Plotting
+        # Plotting
         self._plotting(rank_metric=dat2, results=self.results, res2d=self.res2d,
                        graph_num=self.graph_num, outdir=self.outdir,
                        figsize=self.figsize, format=self.format,
@@ -518,13 +506,13 @@ class SingleSampleGSEA(GSEAbase):
             rank_metric = exprs.copy()
             # handle dataframe with gene_name as index.
             self._logger.debug("Input data is a DataFrame with gene names")
-            #handle index is not gene_names
+            # handle index is not gene_names
             if rank_metric.index.dtype != 'O':
                 rank_metric.set_index(keys=rank_metric.columns[0], inplace=True)
 
             rank_metric = rank_metric.select_dtypes(include=[np.number])
         elif isinstance(exprs, pd.Series):
-            #change to DataFrame
+            # change to DataFrame
             self._logger.debug("Input data is a Series with gene names")
             rank_metric = pd.DataFrame(exprs)
         elif os.path.isfile(exprs):
@@ -532,12 +520,12 @@ class SingleSampleGSEA(GSEAbase):
             if exprs.endswith("gct"):
                 rank_metric = pd.read_table(exprs, skiprows=1, comment='#', index_col=0)
             else:
-                #just rnk file input
+                # just rnk file input
                 rank_metric = pd.read_table(exprs, header=None, comment='#', index_col=0)
                 if rank_metric.shape[1] >=2:
                     # txt file input
                     rank_metric = pd.read_table(exprs, comment='#', index_col=0)
-            #select numbers
+            # select numbers
             rank_metric = rank_metric.select_dtypes(include=[np.number])
         else:
             raise Exception('Error parsing gene ranking values!')
@@ -581,21 +569,21 @@ class SingleSampleGSEA(GSEAbase):
 
     def run(self):
         """run entry"""
-        #load data
+        # load data
         data = self.load_data()
         # normalized samples, and rank
         normdat = self.norm_samples(data)
-        #filtering out gene sets and build gene sets dictionary
+        # filtering out gene sets and build gene sets dictionary
         gmt = self.load_gmt(gene_list=normdat.index.values, gmt=self.gene_sets)
         self._logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
         # set cpu numbers
         self._set_cores()
         # logic to process gct expression matrix
         if self.ranking is None:
-            #gct expression matrix support for ssGSEA
+            # gct expression matrix support for ssGSEA
             self.runOnSamples(df=normdat, gmt=gmt)
         else:
-            #only for one sample
+            # only for one sample
             self.runSample(df=normdat, gmt=gmt)
 
     def runSample(self, df, gmt=None):
@@ -603,9 +591,9 @@ class SingleSampleGSEA(GSEAbase):
 
         assert self.min_size <= self.max_size
         mkdirs(self.outdir)
-        #Start Analysis
+        # Start Analysis
         self._logger.info("Parsing data files for GSEA.............................")
-        #select correct expression genes and values.
+        # select correct expression genes and values.
         if isinstance(df, pd.DataFrame):
             if df.shape[1] == 1:
                 df = df.squeeze() # convert to series
@@ -613,12 +601,12 @@ class SingleSampleGSEA(GSEAbase):
             pass
         else:
             raise Exception('Error parsing gene ranking values!')
-        #sort ranking values from high to low or reverse
+        # sort ranking values from high to low or reverse
         dat2 = df.sort_values(ascending=self.ascending)
-        #reset interger index, or caused unwanted problems
+        # reset interger index, or caused unwanted problems
         # df.reset_index(drop=True, inplace=True)
         self._logger.info("Start to run GSEA...Might take a while..................")
-        #compute ES, NES, pval, FDR, RES
+        # compute ES, NES, pval, FDR, RES
         # gsea_results, hit_ind,rank_ES, subsets = gsea_compute(data=dat2, n=self.permutation_num, gmt=gmt,
         #                                                       weighted_score_type=self.weighted_score_type,
         #                                                       permutation_type='gene_set', method=None,
@@ -652,7 +640,7 @@ class SingleSampleGSEA(GSEAbase):
         """
 
         # df.index.values are gene_names
-        #Save each sample results to ordereddict
+        # Save each sample results to ordereddict
         self.resultsOnSamples = {}
         outdir = self.outdir
         # run ssgsea for gct expression matrixs
@@ -721,8 +709,8 @@ class SingleSampleGSEA(GSEAbase):
                 f.write('# raw enrichment scores of all data\n')
                 f.write('# no scale es by numbers of genes in the gene sets\n')
             samplesRawES.to_csv(f, sep='\t')
-        ## normalize enrichment scores by using the entire data set, as indicated
-        ## by Barbie et al., 2009, online methods, pg. 2
+        # normalize enrichment scores by using the entire data set, as indicated
+        # by Barbie et al., 2009, online methods, pg. 2
         samplesNES = samplesRawES / (samplesRawES.values.max() - samplesRawES.values.min())
         outNESfile = os.path.join(outdir, "gseapy.samples.normalized.es.txt")
         with open(outNESfile, 'a') as f:
@@ -777,27 +765,27 @@ class Replot(GSEAbase):
         else:
             # logic for prerank results
             phenoPos, phenoNeg = '',''
-        #start reploting
+        # start reploting
         self.gene_sets=gene_set_path
-        #obtain gene sets
+        # obtain gene sets
         gene_set_dict = self.parse_gmt(gmt=gene_set_path)
-        #obtain rank_metrics
+        # obtain rank_metrics
         rank_metric = self._load_ranking(rank_path)
         correl_vector =  rank_metric.values
         gene_list = rank_metric.index.values
-        #extract each enriment term in the results.edb files and plot.
+        # extract each enriment term in the results.edb files and plot.
         database = BeautifulSoup(open(results_path), features='xml')
         length = len(database.findAll('DTG'))
 
         for idx in range(length):
-            #extract statistical resutls from results.edb file
+            # extract statistical resutls from results.edb file
             enrich_term, hit_ind, nes, pval, fdr= gsea_edb_parser(results_path, index=idx)
             gene_set = gene_set_dict.get(enrich_term)
-            #calculate enrichment score
+            # calculate enrichment score
             RES = enrichment_score(gene_list=gene_list, gene_set=gene_set,
                                    weighted_score_type=self.weighted_score_type,
                                    correl_vector=correl_vector, nperm=0)[-1]
-            #plotting
+            # plotting
             gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval,
                             fdr, RES, phenoPos, phenoNeg, self.figsize,
                             self.format, self.outdir, self.module)

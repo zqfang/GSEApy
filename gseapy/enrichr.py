@@ -4,14 +4,11 @@
 
 import sys, json, os, logging
 import requests
-from time import sleep
 from pandas import read_table, DataFrame, Series
-
 from gseapy.plot import barplot
 from gseapy.parser import get_library_name
 from gseapy.utils import *
-from requests.packages.urllib3.util.retry import Retry
-from requests.adapters import HTTPAdapter
+
 
 class Enrichr(object):
     """Enrichr API"""
@@ -65,8 +62,6 @@ class Enrichr(object):
     def run(self):
         """run enrichr"""
 
-
-
         # read input file
         genes_str=self.parse_input()
 
@@ -86,7 +81,7 @@ class Enrichr(object):
 
         self._logger.info('Analysis name: %s, Enrichr Library: %s'%(description, gene_set))
 
-        ## enrichr url
+        # enrichr url
         ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/addList'
         # payload
         payload = {
@@ -98,7 +93,6 @@ class Enrichr(object):
         if not response.ok:
             raise Exception('Error analyzing gene list')
 
-        sleep(1)
         job_id = json.loads(response.text)
 
         self._logger.debug('Job ID:'+ str(job_id))
@@ -113,7 +107,7 @@ class Enrichr(object):
         # Get enrichment results
         ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/enrich'
         query_string = '?userListId=%s&backgroundType=%s'
-        ## get id data
+        # get id data
         user_list_id = job_id['userListId']
         response = requests.get(ENRICHR_URL + query_string % (str(user_list_id), gene_set))
         if not response.ok:
@@ -128,10 +122,7 @@ class Enrichr(object):
         url = ENRICHR_URL + query_string % (user_list_id, filename, gene_set)
 
         # set max retries num =5
-        s = requests.Session()
-        retries = Retry(total=5, backoff_factor=0.1,
-                        status_forcelist=[ 500, 502, 503, 504 ])
-        s.mount('http://', HTTPAdapter(max_retries=retries))
+        s = retry(num=5)
         response = s.get(url, stream=True, timeout=None)
 
         self._logger.info('Downloading file of enrichment results: Job Id:'+ str(job_id))

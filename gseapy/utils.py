@@ -1,6 +1,11 @@
 
 import os, errno, logging
+import requests
+from requests.packages.urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
 
+
+# CONSTANT
 DEFAULT_LIBRARY=['GO_Biological_Process_2013',
 				 'GO_Biological_Process_2015',
 				 'GO_Cellular_Component_2013',
@@ -29,8 +34,6 @@ DEFAULT_LIBRARY=['GO_Biological_Process_2013',
 				 'WikiPathways_2013',
 				 'WikiPathways_2015',
 				 'WikiPathways_2016']
-
-
 
 def unique(seq):
     """Remove duplicates from a list in Python while preserving order.
@@ -92,3 +95,20 @@ def log_stop(logger):
     for handler in handlers:
         handler.close()
         logger.removeHandler(handler)
+
+
+def retry(num=5):
+    """"retry connection.
+    
+        define max tries num
+        if the backoff_factor is 0.1, then sleep() will sleep for
+        [0.1s, 0.2s, 0.4s, ...] between retries.
+        It will also force a retry if the status code returned is 500, 502, 503 or 504.    
+    
+    """
+    s = requests.Session()
+    retries = Retry(total=num, backoff_factor=0.1,
+                    status_forcelist=[500, 502, 503, 504])
+    s.mount('http://', HTTPAdapter(max_retries=retries))
+
+    return s
