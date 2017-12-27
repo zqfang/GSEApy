@@ -224,14 +224,14 @@ def add_singlesample_parser(subparsers):
 
     # group for General options.
     group_opt = argparser_gsea.add_argument_group("GSEA advanced arguments")
-    group_opt.add_argument("--nm", "--norm-method", dest = "norm", action="store", type=str,
+    group_opt.add_argument("--sn", "--sample-norm", dest = "norm", action="store", type=str,
                            default='rank', metavar='normalize',
                            choices=("rank", "log", "log_rank", "custom"),
                            help="Sample normalization method. Choose from {'rank', 'log', 'log_rank','custom'}. Default: rank")
     group_opt.add_argument("--ns", "--no-scale", action='store_false', dest='scale', default=True,
                            help="If the flag was set, don't normalize the enrichment scores by number of genes.")
-    group_opt.add_argument("-n", "--permu-num", dest = "n", action="store", type=int, default=1000, metavar='perNum',
-                           help="Number of random permutations. For calculating esnulls. Default: 1000")
+    group_opt.add_argument("-n", "--permu-num", dest = "n", action="store", type=int, default=0, metavar='perNum',
+                           help="Number of random permutations. For calculating esnulls. Default: 0")
     group_opt.add_argument("--min-size", dest="mins", action="store", type=int, default=15, metavar='int',
                            help="Min size of input genes presented in Gene Sets. Default: 15")
     group_opt.add_argument("--max-size", dest = "maxs", action="store", type=int, default=2000,metavar='int',

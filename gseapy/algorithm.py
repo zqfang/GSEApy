@@ -136,8 +136,8 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
         hit_ind = [ np.flatnonzero(tag).tolist() for tag in tag_indicator ]
         # generate permutated hits matrix
         perm_tag_tensor = np.repeat(tag_indicator, nperm+1).reshape((M,N,nperm+1))
-        # shuffle matrix, last matrix is not shuffled
-        np.apply_along_axis(lambda x: np.apply_along_axis(rs.shuffle,0,x),1, perm_tag_tensor[:,:,:-1])
+        # shuffle matrix, last matrix is not shuffled when nperm > 0
+        if nperm: np.apply_along_axis(lambda x: np.apply_along_axis(rs.shuffle,0,x),1, perm_tag_tensor[:,:,:-1])
         # missing hits
         no_tag_tensor = 1 - perm_tag_tensor
         # calculate numerator, denominator of each gene hits

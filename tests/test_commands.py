@@ -52,11 +52,18 @@ def test_prerank(prernk, geneGMT):
     prerank(prernk, geneGMT, tmpdir.name, permutation_num=10)
     tmpdir.cleanup()
 
-def test_ssgsea(ssGCT, geneGMT):
+def test_ssgsea1(ssGCT, geneGMT):
     # Only tests of the command runs successfully,
     # doesnt't check the image
     tmpdir= TemporaryDirectory(dir="tests")
     ssgsea(ssGCT, geneGMT, tmpdir.name, permutation_num=100)
+    tmpdir.cleanup()
+
+def test_ssgsea2(ssGCT, geneGMT):
+    # Only tests of the command runs successfully,
+    # doesnt't check the image
+    tmpdir= TemporaryDirectory(dir="tests")
+    ssgsea(ssGCT, geneGMT, tmpdir.name, permutation_num=0)
     tmpdir.cleanup()
 
 def test_enrichr(genelist):
