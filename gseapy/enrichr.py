@@ -4,6 +4,7 @@
 
 import sys, json, os, logging
 import requests
+from time import sleep
 from pandas import read_table, DataFrame, Series
 from gseapy.plot import barplot
 from gseapy.parser import get_library_name
@@ -99,7 +100,8 @@ class Enrichr(object):
         ENRICHR_URL_A = 'http://amp.pharm.mssm.edu/Enrichr/view?userListId=%s'
         user_list_id = job_id['userListId']
         response_gene_list = requests.get(ENRICHR_URL_A % str(user_list_id), timeout=None)
-
+        # wait for 1s
+        sleep(1)
         if not response_gene_list.ok:
             raise Exception('Error getting gene list')
 

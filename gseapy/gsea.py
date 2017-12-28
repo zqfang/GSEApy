@@ -572,9 +572,10 @@ class SingleSampleGSEA(GSEAbase):
         self._logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
         # set cpu numbers
         self._set_cores()
-        # logic to process gct expression matrix
+        # start analsis
+        self._logger.info("Start to run GSEA...Might take a while..................")
         if self.permutation_num == 0 :
-            # gct expression matrix support for ssGSEA
+            # ssGSEA without permutation
             self.runSamples(df=normdat, gmt=gmt)
         else:
             # run permutation procedure and calculate pvals, fdrs
@@ -587,9 +588,7 @@ class SingleSampleGSEA(GSEAbase):
         mkdirs(self.outdir)
         self.resultsOnSamples = OrderedDict()
         outdir = self.outdir
-        # Start Analysis
-        self._logger.info("Start to run GSEA...Might take a while..................")
-        # select correct expression genes and values.
+        # iter throught each sample
         for name, ser in df.iteritems():
             self.outdir = os.path.join(outdir, str(name))
             self._logger.info("Run Sample: %s " % name)
