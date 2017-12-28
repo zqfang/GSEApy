@@ -640,8 +640,6 @@ class SingleSampleGSEA(GSEAbase):
         self.resultsOnSamples = OrderedDict()
         outdir = self.outdir
         # run ssgsea for gct expression matrix
-        # #multiprocessing
-        self._logger.info("Start to run GSEA...Might take a while..................")
         #multi-threading
         subsets = sorted(gmt.keys())
         tempes=[]
