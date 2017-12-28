@@ -55,15 +55,13 @@ class GSEAbase(object):
         if isinstance(rnk, pd.DataFrame):
             rank_metric = rnk.copy()
             # handle dataframe with gene_name as index.
-            if rnk.shape[1] == 1:
-                rank_metric = rnk.reset_index()
+            if rnk.shape[1] == 1: rank_metric = rnk.reset_index()
         elif isinstance(rnk, pd.Series):
             rank_metric = rnk.reset_index()
         elif os.path.isfile(rnk):
             rank_metric = pd.read_table(rnk, header=None, comment='#')
         else:
             raise Exception('Error parsing gene ranking values!')
-
         # sort ranking values from high to low
         rank_metric.sort_values(by=rank_metric.columns[1], ascending=self.ascending, inplace=True)
         # drop na values
@@ -80,9 +78,6 @@ class GSEAbase(object):
             dups = rank_metric[rank_metric.duplicated(subset=rank_metric.columns[0])]
             self._logger.debug('Dups list:\n'+dups.to_string())
             rank_metric.drop_duplicates(subset=rank_metric.columns[0], inplace=True, keep='first')
-
-
-
         # reset ranking index, because you have sort values and drop duplicates.
         rank_metric.reset_index(drop=True, inplace=True)
         rank_metric.columns = ['gene_name','rank']
@@ -514,9 +509,9 @@ class SingleSampleGSEA(GSEAbase):
         elif isinstance(exprs, pd.Series):
             # change to DataFrame
             self._logger.debug("Input data is a Series with gene names")
-            # rename series if name attr is none
-            if not exprs.name: exprs.rename("sample1")
             rank_metric = pd.DataFrame(exprs)
+            # rename col if name attr is none
+            exprs.columns = ["sample1"]
         elif os.path.isfile(exprs):
             # GCT input format?
             if exprs.endswith("gct"):
@@ -672,7 +667,7 @@ class SingleSampleGSEA(GSEAbase):
         # save results and plotting
         for i, temp in enumerate(tempes):
             name, rnk = names[i], rankings[i]
-            self._logger.info("Run Sample: %s "%name)
+            self._logger.info("Calculate Enrichment Score for Sample: %s "%name)
             es, esnull, hit_ind, RES = temp.get()
             # create results subdir
             self.outdir= os.path.join(outdir, str(name))
