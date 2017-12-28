@@ -512,7 +512,7 @@ class SingleSampleGSEA(GSEAbase):
             self._logger.debug("Input data is a Series with gene names")
             rank_metric = pd.DataFrame(exprs)
             # rename col if name attr is none
-            exprs.columns = ["sample1"]
+            rank_metric.columns = ["sample1"]
         elif os.path.isfile(exprs):
             # GCT input format?
             if exprs.endswith("gct"):
@@ -574,12 +574,13 @@ class SingleSampleGSEA(GSEAbase):
         # set cpu numbers
         self._set_cores()
         # start analsis
-        self._logger.info("Start to run GSEA...Might take a while..................")
+        self._logger.info("Start to run ssGSEA...Might take a while................")
         if self.permutation_num == 0 :
             # ssGSEA without permutation
             self.runSamples(df=normdat, gmt=gmt)
         else:
             # run permutation procedure and calculate pvals, fdrs
+            self._logger.info("run ssGSEA with permutation procedure, might take a while")
             self.runSamplesPermu(df=normdat, gmt=gmt)
 
     def runSamplesPermu(self, df, gmt=None):
@@ -687,7 +688,7 @@ class SingleSampleGSEA(GSEAbase):
         """save es and stats"""
         # save raw ES to one csv file
         samplesRawES = pd.DataFrame(self.resultsOnSamples)
-        samplesRawES.index.name = 'Term'
+        samplesRawES.index.name = 'Term|ES'
         # write es
         outESfile = os.path.join(outdir, "gseapy.samples.raw.es.txt")
         with open(outESfile, 'a') as f:
@@ -702,12 +703,13 @@ class SingleSampleGSEA(GSEAbase):
         # normalize enrichment scores by using the entire data set, as indicated
         # by Barbie et al., 2009, online methods, pg. 2
         samplesNES = samplesRawES / (samplesRawES.values.max() - samplesRawES.values.min())
+        samplesNES = samplesNES.copy()
+        samplesNES.index.rename('Term|NES', inplace=True)
         outNESfile = os.path.join(outdir, "gseapy.samples.normalized.es.txt")
         with open(outNESfile, 'a') as f:
             f.write('# normalize enrichment scores by using the entire data set\n')
             f.write('# as indicated by Barbie et al., 2009, online methods, pg. 2\n')
             samplesNES.to_csv(f, sep='\t')
-        samplesRawES.index.name = 'Term|NES'
         self.res2d = samplesNES
         self._logger.info("Congratulations. GSEApy run successfully................\n")
 
