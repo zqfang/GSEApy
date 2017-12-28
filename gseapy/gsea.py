@@ -1,17 +1,18 @@
 #! python
 # -*- coding: utf-8 -*-
-from __future__ import  division
+from __future__ import division
 
-import os,sys,logging,json
-import numpy as np
-import pandas as pd
+import os
 from collections import OrderedDict
 from multiprocessing import Pool, cpu_count
+
+import numpy as np
+import pandas as pd
 from numpy import log, exp
 
-from gseapy.parser import *
 from gseapy.algorithm import enrichment_score, gsea_compute, ranking_metric
 from gseapy.algorithm import enrichment_score_tensor, gsea_compute_ss
+from gseapy.parser import *
 from gseapy.plot import gsea_plot, heatmap
 from gseapy.utils import mkdirs, log_init, retry, DEFAULT_LIBRARY
 
@@ -708,7 +709,8 @@ class SingleSampleGSEA(GSEAbase):
             f.write('# normalize enrichment scores by using the entire data set\n')
             f.write('# as indicated by Barbie et al., 2009, online methods, pg. 2\n')
             samplesNES.to_csv(f, sep='\t')
-
+        samplesRawES.index.name = 'Term|NES'
+        self.res2d = samplesNES
         self._logger.info("Congratulations. GSEApy run successfully................\n")
 
         return
