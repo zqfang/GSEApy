@@ -265,7 +265,7 @@ class GSEA(GSEAbase):
                  weighted_score_type=1, permutation_type='gene_set',
                  method='log2_ratio_of_classes', ascending=False,
                  processes=1, figsize=(6.5,6), format='pdf', graph_num=20,
-                 seed=None, verbose=False):
+                 no_plot=False, seed=None, verbose=False):
 
         self.data = data
         self.gene_sets=gene_sets
@@ -286,6 +286,7 @@ class GSEA(GSEAbase):
         self.verbose=bool(verbose)
         self.module='gsea'
         self.ranking=None
+        self._noplot=no_plot
         # init logger
         mkdirs(self.outdir)
         _gset =os.path.split(self.gene_sets)[-1].lower().rstrip(".gmt")
@@ -370,11 +371,12 @@ class GSEA(GSEAbase):
                                    gmt=gmt, rank_metric=dat2, permutation_type=self.permutation_type)
 
         # Plotting
-        heat_dat = dat.loc[dat2.index]
-        self._plotting(rank_metric=dat2, results=self.results, res2d=self.res2d,
-                       graph_num=self.graph_num, outdir=self.outdir,
-                       figsize=self.figsize, format=self.format, module=self.module,
-                       data=heat_dat, classes=cls_vector, phenoPos=phenoPos, phenoNeg=phenoNeg)
+        if not self._noplot:
+            heat_dat = dat.loc[dat2.index]
+            self._plotting(rank_metric=dat2, results=self.results, res2d=self.res2d,
+                           graph_num=self.graph_num, outdir=self.outdir,
+                           figsize=self.figsize, format=self.format, module=self.module,
+                           data=heat_dat, classes=cls_vector, phenoPos=phenoPos, phenoNeg=phenoNeg)
 
         self._logger.info("Congratulations. GSEApy run successfully................\n")
 
@@ -387,7 +389,7 @@ class Prerank(GSEAbase):
                  pheno_pos='Pos', pheno_neg='Neg', min_size=15, max_size=500,
                  permutation_num=1000, weighted_score_type=1,
                  ascending=False, processes=1, figsize=(6.5,6), format='pdf',
-                 graph_num=20, seed=None, verbose=False):
+                 graph_num=20, no_plot=False, seed=None, verbose=False):
 
         self.rnk =rnk
         self.gene_sets=gene_sets
@@ -407,6 +409,7 @@ class Prerank(GSEAbase):
         self.ranking=None
         self.module='prerank'
         self._processes=processes
+        self._noplot=no_plot
         # init logger
         mkdirs(self.outdir)
         _gset =os.path.split(self.gene_sets)[-1].lower().rstrip(".gmt")
@@ -446,10 +449,11 @@ class Prerank(GSEAbase):
                                    gmt=gmt, rank_metric=dat2, permutation_type="gene_sets")
 
         # Plotting
-        self._plotting(rank_metric=dat2, results=self.results, res2d=self.res2d,
-                       graph_num=self.graph_num, outdir=self.outdir,
-                       figsize=self.figsize, format=self.format,
-                       module=self.module, phenoPos=self.pheno_pos, phenoNeg=self.pheno_neg)
+        if not self._noplot:
+            self._plotting(rank_metric=dat2, results=self.results, res2d=self.res2d,
+                           graph_num=self.graph_num, outdir=self.outdir,
+                           figsize=self.figsize, format=self.format,
+                           module=self.module, phenoPos=self.pheno_pos, phenoNeg=self.pheno_neg)
 
         self._logger.info("Congratulations. GSEApy run successfully................\n")
 
@@ -461,7 +465,7 @@ class SingleSampleGSEA(GSEAbase):
     def __init__(self, data, gene_sets, outdir="GSEA_SingleSample", sample_norm_method='rank',
                  min_size=15, max_size=2000, permutation_num=0, weighted_score_type=0.25,
                  scale=True, ascending=False, processes=1, figsize=(7,6), format='pdf',
-                 graph_num=20, seed=None, verbose=False):
+                 graph_num=20, no_plot=False, seed=None, verbose=False):
         self.data=data
         self.gene_sets=gene_sets
         self.outdir=outdir
@@ -480,7 +484,7 @@ class SingleSampleGSEA(GSEAbase):
         self.ranking=None
         self.module='ssgsea'
         self._processes=processes
-        self._imat=None
+        self._noplot=no_plot
         # init logger
         mkdirs(self.outdir)
         _gset =os.path.split(self.gene_sets)[-1].lower().rstrip(".gmt")
@@ -621,6 +625,7 @@ class SingleSampleGSEA(GSEAbase):
                                        gmt=gmt, rank_metric=dat2, permutation_type="gene_sets")
             self.resultsOnSamples[name] = self.res2d.es
             # plotting
+            if self._noplot: continue
             self._logger.info("Plotting Sample: %s \n" % name)
             self._plotting(rank_metric=dat2, results=self.results, res2d=self.res2d,
                            graph_num=self.graph_num, outdir=self.outdir,
@@ -674,6 +679,7 @@ class SingleSampleGSEA(GSEAbase):
             # save results
             self.resultsOnSamples[name] = pd.Series(data=es, index=subsets, name=name)
             # plotting
+            if self._noplot: continue
             self._logger.info("Plotting Sample: %s \n" % name)
             for i, term in enumerate(subsets):
                 gsea_plot(rnk,term, hit_ind[i], es[i], 1, 1, RES[i],
@@ -788,7 +794,8 @@ class Replot(GSEAbase):
 
 def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permutation_num=1000,
           weighted_score_type=1,permutation_type='gene_set', method='log2_ratio_of_classes',
-	      ascending=False, processes=1, figsize=(6.5,6), format='pdf', graph_num=20, seed=None, verbose=False):
+	      ascending=False, processes=1, figsize=(6.5,6), format='pdf',
+          graph_num=20, no_plot=False, seed=None, verbose=False):
     """ Run Gene Set Enrichment Analysis.
 
     :param data: Gene expression data table, pandas DataFrame, gct file.
@@ -854,7 +861,7 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
     """
     gs = GSEA(data, gene_sets, cls, outdir, min_size, max_size, permutation_num,
               weighted_score_type, permutation_type, method, ascending, processes,
-               figsize, format, graph_num, seed, verbose)
+               figsize, format, graph_num, no_plot, seed, verbose)
     gs.run()
 
     return gs
@@ -862,7 +869,7 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
 
 def ssgsea(data, gene_sets, outdir="ssGSEA_", sample_norm_method='rank', min_size=15, max_size=2000,
            permutation_num=0, weighted_score_type=0.25, scale=True, ascending=False, processes=1,
-           figsize=(7,6), format='pdf', graph_num=20, seed=None, verbose=False):
+           figsize=(7,6), format='pdf', graph_num=20, no_plot=False, seed=None, verbose=False):
     """Run Gene Set Enrichment Analysis with single sample GSEA tool
 
     :param data: expression table, pd.Series, pd.DataFrame, GCT file, or .rnk file format.
@@ -904,7 +911,7 @@ def ssgsea(data, gene_sets, outdir="ssGSEA_", sample_norm_method='rank', min_siz
 
     ss = SingleSampleGSEA(data, gene_sets, outdir, sample_norm_method, min_size, max_size,
                           permutation_num, weighted_score_type, scale, ascending,
-                          processes, figsize, format, graph_num, seed, verbose)
+                          processes, figsize, format, graph_num, no_plot, seed, verbose)
     ss.run()
     return ss
 
@@ -912,7 +919,7 @@ def ssgsea(data, gene_sets, outdir="ssGSEA_", sample_norm_method='rank', min_siz
 def prerank(rnk, gene_sets, outdir='GSEA_Prerank', pheno_pos='Pos', pheno_neg='Neg',
             min_size=15, max_size=500, permutation_num=1000, weighted_score_type=1,
             ascending=False, processes=1, figsize=(6.5,6), format='pdf',
-            graph_num=20, seed=None, verbose=False):
+            graph_num=20, no_plot=False, seed=None, verbose=False):
     """ Run Gene Set Enrichment Analysis with pre-ranked correlation defined by user.
 
     :param rnk: pre-ranked correlation table or pandas DataFrame. Same input with ``GSEA`` .rnk file.
@@ -944,7 +951,7 @@ def prerank(rnk, gene_sets, outdir='GSEA_Prerank', pheno_pos='Pos', pheno_neg='N
     """
     pre = Prerank(rnk, gene_sets, outdir, pheno_pos, pheno_neg,
                   min_size, max_size, permutation_num, weighted_score_type,
-                  ascending, processes, figsize, format, graph_num, seed, verbose)
+                  ascending, processes, figsize, format, graph_num, no_plot, seed, verbose)
     pre.run()
     return pre
 

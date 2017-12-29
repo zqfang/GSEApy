@@ -36,14 +36,14 @@ def main():
         gs = GSEA(args.data, args.gmt, args.cls, args.outdir,
                   args.mins, args.maxs, args.n, args.weight,
                   args.type, args.method, args.ascending, args.threads,
-                  args.figsize, args.format, args.graph, args.seed, args.verbose)
+                  args.figsize, args.format, args.graph, args.noplot, args.seed, args.verbose)
         gs.run()
     elif subcommand == "prerank":
         from .gsea import Prerank
 
         pre = Prerank(args.rnk, args.gmt, args.outdir, args.label[0], args.label[1],
                       args.mins, args.maxs, args.n, args.weight, args.ascending, args.threads,
-                      args.figsize, args.format, args.graph, args.seed, args.verbose)
+                      args.figsize, args.format, args.graph, args.noplot, args.seed, args.verbose)
         pre.run()
 
     elif subcommand == "ssgsea":
@@ -53,8 +53,8 @@ def main():
                               min_size=args.mins, max_size=args.maxs, permutation_num=args.n,
                               weighted_score_type=args.weight, scale=args.scale,
                               ascending=args.ascending, processes=args.threads,
-                              figsize=args.figsize, format=args.format,
-                              graph_num=args.graph, seed=args.seed, verbose=args.verbose)
+                              figsize=args.figsize, format=args.format, graph_num=args.graph,
+                              no_plot=args.noplot, seed=args.seed, verbose=args.verbose)
         ss.run()
 
     elif subcommand == "enrichr":
@@ -62,7 +62,7 @@ def main():
         from .enrichr import Enrichr
         enr = Enrichr(gene_list= args.gene_list, descriptions=args.descrip, gene_sets=args.library,
                       outdir=args.outdir, format=args.format, cutoff=args.thresh, figsize=args.figsize,
-                      top_term=args.term, no_plot=args.no_plot, verbose=args.verbose)
+                      top_term=args.term, no_plot=args.noplot, verbose=args.verbose)
         enr.run()
     else:
         argparser.print_help()
@@ -104,6 +104,9 @@ def add_output_option(parser):
     parser.add_argument("--figsize", action='store', nargs=2, dest='figsize',
                         metavar=('width', 'height'),type=float, default=(6.5, 6),
                         help="The figsize keyword argument need two parameter to define. Default: (6.5, 6)")
+    parser.add_argument("--no-plot", action='store_true', dest='noplot', default=False,
+                              help="Speed up computing by suppressing the plot output."+\
+                                   "This is useful only if data are interested. Default: False.")
     parser.add_argument("-v", "--verbose", action="store_true", default=False, dest='verbose',
                         help="increase output verbosity, print out progress of your job", )
 def add_output_group(parser, required=True):
@@ -114,8 +117,6 @@ def add_output_group(parser, required=True):
                               help="Output file name. Mutually exclusive with --o-prefix.")
     output_group.add_argument("--o-prefix", dest="ofile", type=str, default='GSEApy_reports',
                               help="Output file prefix. Mutually exclusive with -o/--ofile.")
-
-
 
 
 
@@ -285,9 +286,8 @@ def add_enrichr_parser(subparsers):
                               help="Numbers of top terms showed in the plot. Default: 10")
     #enrichr_opt.add_argument("--scale", dest = "scale", action="store", type=float, default=0.5, metavar='float',
     #                          help="scatter dot scale in the dotplot. Default: 0.5")
-    enrichr_opt.add_argument("--no-plot", action='store_true', dest='no_plot', default=False,
-                              help="Suppress the plot output.This is useful only if data are interested. Default: False.")
-
+    # enrichr_opt.add_argument("--no-plot", action='store_true', dest='no_plot', default=False,
+    #                           help="Suppress the plot output.This is useful only if data are interested. Default: False.")
 
     enrichr_output = argparser_enrichr.add_argument_group("Output figure arguments")
     add_output_option(enrichr_output)
