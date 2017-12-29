@@ -2,9 +2,6 @@
 # coding: utf-8
 
 # In[2]:
-
-
-get_ipython().magic('matplotlib inline')
 import numpy as np
 import pandas as pd
 import gseapy as gp
@@ -38,7 +35,7 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
     :return:
              ES: Enrichment score (real number between -1 and +1), it's true for ssGSEA, only scaled
 
-             ESNULL: Enrichment score calcualted from random permutation
+             ESNULL: Enrichment score calculated from random permutation
 
              Hits_Indices: Indices of genes if genes are included in gene_set.
 
@@ -72,8 +69,8 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
         hit_ind = [ np.flatnonzero(tag).tolist() for tag in tag_indicator ]
         # generate permutated hits matrix
         perm_tag_tensor = np.repeat(tag_indicator, nperm+1).reshape((M,N,nperm+1))
-        # shuffle matrix, last matrix is not shuffled
-        np.apply_along_axis(lambda x: np.apply_along_axis(rs.shuffle,0,x),1, perm_tag_tensor[:,:,:-1])
+        # shuffle matrix, last matrix is not shuffled when nperm > 0
+        if nperm: np.apply_along_axis(lambda x: np.apply_along_axis(rs.shuffle,0,x),1, perm_tag_tensor[:,:,:-1])
         # missing hits
         no_tag_tensor = 1 - perm_tag_tensor
         # calculate numerator, denominator of each gene hits
@@ -175,7 +172,7 @@ for name, ser in gexrnk.iteritems():
 
 # In[25]:
 
-
+print("Scaled Enrichment Scores (ES)\n")
 for n, e  in zip(names, es):
     print(n, ": ", e)
 
@@ -204,6 +201,7 @@ for name, ser in gexrnk.iteritems():
 ## no scale es values and norm by all samples
 es = np.array(es)
 nes = es/(es.max() -es.min())
+print("Normalized Enrichment Scores (NES) \n")
 for n, e  in zip(names, nes):
     print(n, ": ", e)
 
