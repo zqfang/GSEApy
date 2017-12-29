@@ -16,7 +16,7 @@ gp.__version__
 
 # In[15]:
 
-
+# identical function with gseapy.algorithm.enrichment_score_tensor
 def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, nperm=1000,
                             scale=False, single=False, rs=np.random.RandomState()):
     """Next generation algorithm of GSEA and ssGSEA.
@@ -122,13 +122,6 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
 
 gex = pd.read_table("./data/P53_resampling_data2.txt", index_col=0)
 
-
-# In[17]:
-
-
-gex.head()
-
-
 # In[18]:
 
 
@@ -149,7 +142,7 @@ gm = gmt['random2']
 
 # In[21]:
 
-
+print("Input gene set")
 print(gm)
 
 
@@ -164,15 +157,15 @@ gexrnk = gex.rank(axis=0, method='average', na_option='bottom')
 for name, ser in gexrnk.iteritems():
     ser = ser.sort_values(ascending=False)
     est = enrichment_score_tensor(gene_mat=ser.index.values, cor_mat=ser.values, gene_sets={'random2':gm},
-                                  weighted_score_type=0.25, nperm=10, 
+                                  weighted_score_type=0.25, nperm=0,
                                   scale=True, single=True, rs=rs)[0]
     es.append(est)
     names.append(name)
 
 
 # In[25]:
-
-print("Scaled Enrichment Scores (ES)\n")
+print("\n\n\n")
+print("Scaled Enrichment Scores (ES):")
 for n, e  in zip(names, es):
     print(n, ": ", e)
 
@@ -189,7 +182,7 @@ gexrnk = gex.rank(axis=0, method='average', na_option='bottom')
 for name, ser in gexrnk.iteritems():
     ser = ser.sort_values(ascending=False)
     est = enrichment_score_tensor(gene_mat=ser.index.values, cor_mat=ser.values, gene_sets={'random2':gm},
-                                  weighted_score_type=0.25, nperm=100, 
+                                  weighted_score_type=0.25, nperm=100,
                                   scale=True, single=True, rs=rs)[0]
     es.append(est)
     names.append(name)
@@ -201,7 +194,7 @@ for name, ser in gexrnk.iteritems():
 ## no scale es values and norm by all samples
 es = np.array(es)
 nes = es/(es.max() -es.min())
-print("Normalized Enrichment Scores (NES) \n")
+print("\n\n\n")
+print("Normalized Enrichment Scores (NES):")
 for n, e  in zip(names, nes):
     print(n, ": ", e)
-

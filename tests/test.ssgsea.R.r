@@ -9,18 +9,18 @@
 #'
 #' @examples
 #' # Create a fake matrix
-m = 100
-n = 100
+# m = 100
+# n = 100
+# set.seed(1)
+# X = matrix(rnorm(m*n), m, n)
+# # # Assign 'gene symbols' to row names
+# rownames(X) = 1:m
+# # Create 3 gene sets
+# gene_sets = list(a = sample(m, 5), b = sample(m, 5), c = sample(m, 5))
+# system.time(assign('a', GSVA::gsva(X, gene_sets, method = 'ssgsea')))
+# system.time(assign('b', ssgsea(X, gene_sets, scale = F, norm = T)))
+# identical(a, b)
 set.seed(1)
-X = matrix(rnorm(m*n), m, n)
-# # Assign 'gene symbols' to row names
-rownames(X) = 1:m
-# Create 3 gene sets
-gene_sets = list(a = sample(m, 5), b = sample(m, 5), c = sample(m, 5))
-system.time(assign('a', GSVA::gsva(X, gene_sets, method = 'ssgsea')))
-system.time(assign('b', ssgsea(X, gene_sets, scale = F, norm = T)))
-identical(a, b)
-
 ssgsea = function(X, gene_sets, alpha = 0.25, scale = T, norm = F, single = T) {
   row_names = rownames(X)
   num_genes = nrow(X)
@@ -153,33 +153,30 @@ gm = c('GRB14',
       'TMEM85')
 
 gene_sets = list(raondom2=gm)
+print("Input gene set")
+print(gene_sets)
+print("\n\n\n")
 
-gene_sets
-
+print("R implement of ssgsea with high speed:")
 es = ssgsea(X3, gene_sets)
-
-length(es)
-
 for (i in 1:length(es)){
-
     outv = paste(i, colnames(es)[i], "-ES:", es[i], sep=" ")
     print(outv)
 }
 
 system.time(assign('a', GSVA::gsva(X3, gene_sets, method = 'ssgsea')))
-
 system.time(assign('b', ssgsea(X3, gene_sets, scale = F, norm = T)))
-system.time(assign('b2', ssgsea(X3, gene_sets, scale = T, norm = T)))
+system.time(assign('b2', ssgsea(X3, gene_sets, scale = T, norm = F)))
 
 identical(a, b)
 
 print("TEST with GSVA::gsva(method='ssgsea')")
 print(a)
 
-print("\n")
-print("TEST with ssgsea, scaled ES")
+print("\n\n\n")
+print("TEST with ssgsea, NES")
 print(b)
 
-print("\n")
-print("TEST with ssgsea, NES")
+print("\n\n\n")
+print("TEST with ssgsea, Scaled ES")
 print(b2)
