@@ -71,105 +71,19 @@ ssgsea = function(X, gene_sets, alpha = 0.25, scale = T, norm = F, single = T) {
   return(es)
 }
 
-
 # setwd("~/github/GSEApy/tests/data")
-
 # comparison with gseapy.ssgsea
+X2 = read.table("./data/testSet_rand1200.gct", row.names = 1, header = T,
+                comment='#', sep="\t", stringsAsFactors = F)
+X3 = as.matrix.data.frame(X2[,-1])
+gene_sets = fgsea::gmtPathways("./data/randomSets.gmt")
 
-X2 = read.table("./data/P53_resampling_data2.txt", row.names = 1, header = T,sep="\t", stringsAsFactors = F)
-X3 = as.matrix.data.frame(X2)
-
-gm = c('GRB14',
-      'KAZALD1',
-      'POLR2I',
-      'C7orf26',
-      'MYOZ3',
-      'CRYBA4',
-      'C9orf85',
-      'PRPS1',
-      'C9',
-      'GTF2H4',
-      'PSME2',
-      'HAUS4',
-      'VPS16',
-      'SCOC',
-      'RHAG',
-      'AIF1',
-      'RPL41',
-      'C16orf5',
-      'LCT',
-      'C1orf83',
-      'GFAP',
-      'NUDCD3',
-      'ROGDI',
-      'HEATR1',
-      'MST1R',
-      'ZMPSTE24',
-      'HDAC1',
-      'NEO1',
-      'POLR3A',
-      'VPS54',
-      'F5',
-      'QKI',
-      'ITFG2',
-      'PPP2R3A',
-      'LIMS2',
-      'PCDH15',
-      'STOML2',
-      'FLT3',
-      'GABRR1',
-      'GNPDA2',
-      'PHLDA3',
-      'RARS',
-      'MRPS33',
-      'LCK',
-      'PTN',
-      'HRG',
-      'EIF3I',
-      'PMVK',
-      'UBOX5',
-      'VN2R1P',
-      'STAP2',
-      'CCNB3',
-      'ADAM8',
-      'LHCGR',
-      'PERP',
-      'COL1A2',
-      'ZSWIM1',
-      'BCAP29',
-      'PTP4A3',
-      'PIP4K2A',
-      'PRRX2',
-      'UHRF1',
-      'CEBPZ',
-      'UBE2J1',
-      'WFDC2',
-      'SGK2',
-      'ZBED3',
-      'CCDC82',
-      'TMOD1',
-      'CD2AP',
-      'C6orf203',
-      'TMEM85')
-
-gene_sets = list(raondom2=gm)
-print("Input gene set")
-print(gene_sets)
-print("\n\n\n")
-
-print("R implement of ssgsea with high speed:")
-es = ssgsea(X3, gene_sets)
-for (i in 1:length(es)){
-    outv = paste(i, colnames(es)[i], "-ES:", es[i], sep=" ")
-    print(outv)
-}
-
+# test
 system.time(assign('a', GSVA::gsva(X3, gene_sets, method = 'ssgsea')))
 system.time(assign('b', ssgsea(X3, gene_sets, scale = F, norm = T)))
 system.time(assign('b2', ssgsea(X3, gene_sets, scale = T, norm = F)))
 
 identical(a, b)
-
 print("TEST with GSVA::gsva(method='ssgsea')")
 print(a)
 

@@ -9,10 +9,8 @@ import logging
 
 
 # In[3]:
-
-
-gp.__version__
-
+np.seterr(divide='ignore')
+print("GSEApy version: %s"%gp.__version__)
 
 # In[15]:
 
@@ -118,83 +116,46 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
 
 
 # In[16]:
-
-
-gex = pd.read_table("./data/P53_resampling_data2.txt", index_col=0)
-
+gex = pd.read_table("./data/testSet_rand1200.gct", comment='#', index_col=0)
 # In[18]:
-
-
 gmt = gp.parser.gsea_gmt_parser("./data/randomSets.gmt")
-
-
-# In[19]:
-
-
-gmt.keys()
-
-
-# In[20]:
-
-
-gm = gmt['random2']
-
-
-# In[21]:
-
-print("Input gene set")
-print(gm)
-
-
 # In[24]:
 
 
-names=[]
-es = []
-hits = []
+
+df = pd.DataFrame(index=sorted(gmt.keys()))
 rs = np.random.RandomState(0)
 gexrnk = gex.rank(axis=0, method='average', na_option='bottom')
 for name, ser in gexrnk.iteritems():
     ser = ser.sort_values(ascending=False)
-    est = enrichment_score_tensor(gene_mat=ser.index.values, cor_mat=ser.values, gene_sets={'random2':gm},
+    est = enrichment_score_tensor(gene_mat=ser.index.values, cor_mat=ser.values, gene_sets=gmt,
                                   weighted_score_type=0.25, nperm=0,
                                   scale=True, single=True, rs=rs)[0]
-    es.append(est)
-    names.append(name)
+    df[name]=est
+
 
 
 # In[25]:
 print("\n\n\n")
 print("Scaled Enrichment Scores (ES):")
-for n, e  in zip(names, es):
-    print(n, ": ", e)
-
-
-# In[26]:
-
+print(df)
 
 ## no scale es
-names=[]
-es = []
-hits = []
+df2 = pd.DataFrame(index=sorted(gmt.keys()))
 rs = np.random.RandomState(0)
 gexrnk = gex.rank(axis=0, method='average', na_option='bottom')
 for name, ser in gexrnk.iteritems():
     ser = ser.sort_values(ascending=False)
-    est = enrichment_score_tensor(gene_mat=ser.index.values, cor_mat=ser.values, gene_sets={'random2':gm},
-                                  weighted_score_type=0.25, nperm=100,
+    est = enrichment_score_tensor(gene_mat=ser.index.values, cor_mat=ser.values, gene_sets=gmt,
+                                  weighted_score_type=0.25, nperm=0,
                                   scale=True, single=True, rs=rs)[0]
-    es.append(est)
-    names.append(name)
-
+    df2[name]=est
 
 # In[27]:
-
-
 ## no scale es values and norm by all samples
-es = np.array(es)
-nes = es/(es.max() -es.min())
+nes = df2/(df2.values.max() -df2.values.min())
 print("\n\n\n")
 print("Normalized Enrichment Scores (NES):")
-for n, e  in zip(names, nes):
-    print(n, ": ", e)
+# for n, e  in zip(names, nes):
+#     print(n, ": ", e)
+print(df2)
