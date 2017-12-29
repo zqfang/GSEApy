@@ -143,7 +143,7 @@ def add_gsea_parser(subparsers):
 
      # group for General options.
     group_opt = argparser_gsea.add_argument_group("GSEA advanced arguments")
-    group_opt.add_argument("-n", "--permu-num", dest = "n", action="store", type=int, default=1000, metavar='perNum',
+    group_opt.add_argument("-n", "--permu-num", dest = "n", action="store", type=int, default=1000, metavar='nperm',
                            help="Number of random permutations. For calculating esnulls. Default: 1000")
     group_opt.add_argument("--min-size",  dest="mins", action="store", type=int, default=15, metavar='int',
                            help="Min size of input genes presented in Gene Sets. Default: 15")
@@ -189,7 +189,7 @@ def add_prerank_parser(subparsers):
 
      # group for General options.
     prerank_opt = argparser_prerank.add_argument_group("GSEA advanced arguments")
-    prerank_opt.add_argument("-n", "--permu-num", dest = "n", action="store", type=int, default=1000, metavar='perNum',
+    prerank_opt.add_argument("-n", "--permu-num", dest = "n", action="store", type=int, default=1000, metavar='nperm',
                              help="Number of random permutations. For calculating esnulls. Default: 1000")
     prerank_opt.add_argument("--min-size",  dest="mins", action="store", type=int, default=15, metavar='int',
                              help="Min size of input genes presented in Gene Sets. Default: 15")
@@ -231,7 +231,7 @@ def add_singlesample_parser(subparsers):
                            help="Sample normalization method. Choose from {'rank', 'log', 'log_rank','custom'}. Default: rank")
     group_opt.add_argument("--ns", "--no-scale", action='store_false', dest='scale', default=True,
                            help="If the flag was set, don't normalize the enrichment scores by number of genes.")
-    group_opt.add_argument("-n", "--permu-num", dest = "n", action="store", type=int, default=0, metavar='perNum',
+    group_opt.add_argument("-n", "--permu-num", dest = "n", action="store", type=int, default=0, metavar='nperm',
                            help="Number of random permutations. For calculating esnulls. Default: 0")
     group_opt.add_argument("--min-size", dest="mins", action="store", type=int, default=15, metavar='int',
                            help="Min size of input genes presented in Gene Sets. Default: 15")
