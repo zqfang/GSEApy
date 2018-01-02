@@ -25,7 +25,8 @@ def main():
         # reproduce plots using GSEAPY
         from .gsea import Replot
         rep = Replot(indir=args.indir, outdir=args.outdir, weighted_score_type=args.weight,
-                     figsize=args.figsize, format=args.format, verbose=args.verbose)
+                     figsize=args.figsize, graph_num=args.graph,
+                     format=args.format, verbose=args.verbose)
         rep.run()
 
 
@@ -104,6 +105,8 @@ def add_output_option(parser):
     parser.add_argument("--figsize", action='store', nargs=2, dest='figsize',
                         metavar=('width', 'height'),type=float, default=(6.5, 6),
                         help="The figsize keyword argument need two parameter to define. Default: (6.5, 6)")
+    parser.add_argument("--graph", dest = "graph", action="store", type=int, default=20, metavar='int',
+                           help="Numbers of top graphs produced. Default: 20")
     parser.add_argument("--no-plot", action='store_true', dest='noplot', default=False,
                               help="Speed up computing by suppressing the plot output."+\
                                    "This is useful only if data are interested. Default: False.")
@@ -159,8 +162,6 @@ def add_gsea_parser(subparsers):
                            Default: 'log2_ratio_of_classes'")
     group_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
                            help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
-    group_opt.add_argument("--graph", dest = "graph", action="store", type=int, default=20, metavar='int',
-                           help="Numbers of top graphs produced. Default: 20")
     group_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=None, metavar='',
                            help="Number of random seed. Default: None")
     group_opt.add_argument("-p", "--threads", dest = "threads", action="store", type=int, default=1, metavar='procs',
@@ -199,8 +200,6 @@ def add_prerank_parser(subparsers):
                              help='Weighted_score of rank_metrics.For weighting input genes. Choose from {0, 1, 1.5, 2},default: 1',)
     prerank_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
                              help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
-    prerank_opt.add_argument("--graph", dest = "graph", action="store", type=int, default=20, metavar='int',
-                             help="Numbers of top graphs produced. Default: 20")
     prerank_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=None, metavar='',
                              help="Number of random seed. Default: None")
     prerank_opt.add_argument("-p", "--threads", dest = "threads", action="store", type=int, default=1, metavar='procs',
@@ -241,8 +240,6 @@ def add_singlesample_parser(subparsers):
                            help='Weighted_score of rank_metrics.For weighting input genes.default: 0.25',)
     group_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
                            help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
-    group_opt.add_argument("--graph", dest = "graph", action="store", type=int, default=20, metavar='int',
-                           help="Numbers of top graphs produced. Default: 20")
     group_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=None, metavar='',
                            help="Number of random seed. Default: None")
     group_opt.add_argument("-p", "--threads", dest = "threads", action="store", type=int, default=1, metavar='procs',
