@@ -843,7 +843,8 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
     :param int processes: Number of Processes you are going to use. Default: 1.
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
     :param str format: Matplotlib figure format. Default: 'pdf'.
-    :param int graph_num: Plot graphs for top sets of each phenotype
+    :param int graph_num: Plot graphs for top sets of each phenotype.
+    :param bool no_plot: if equal to True, no figure will be draw. Default: False.
     :param seed: Random seed. expect an integer. Default:None.
     :param bool verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
 
@@ -892,12 +893,15 @@ def ssgsea(data, gene_sets, outdir="ssGSEA_", sample_norm_method='rank', min_siz
     :param int processes: Number of Processes you are going to use. Default: 1.
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [7,6].
     :param str format: Matplotlib figure format. Default: 'pdf'.
-    :param int graph_num: Plot graphs for top sets of each phenotype
+    :param int graph_num: Plot graphs for top sets of each phenotype.
+    :param bool no_plot: if equal to True, no figure will be draw. Default: False.
     :param seed: Random seed. expect an integer. Default:None.
     :param bool verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
 
-    :return: Return a ssGSEA obj. All results store to  a dictionary, obj.results(or obj.resultsOnSamples)
-             where contains::
+    :return: Return a ssGSEA obj. 
+             All results store to  a dictionary, access enrichment score by obj.resultsOnSamples,
+             and normalized enrichment score by obj.res2d.
+             if permutation_num > 0, additional results contain::
 
                  | {es: enrichment score,
                  |  nes: normalized enrichment score,
@@ -933,7 +937,8 @@ def prerank(rnk, gene_sets, outdir='GSEA_Prerank', pheno_pos='Pos', pheno_neg='N
     :param int processes: Number of Processes you are going to use. Default: 1.
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
     :param str format: Matplotlib figure format. Default: 'pdf'.
-    :param int graph_num: Plot graphs for top sets of each phenotype
+    :param int graph_num: Plot graphs for top sets of each phenotype.
+    :param bool no_plot: if equal to True, no figure will be draw. Default: False.
     :param seed: Random seed. expect an integer. Default:None.
     :param bool verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
 

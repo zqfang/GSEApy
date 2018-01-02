@@ -164,7 +164,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr',
     :param float cutoff: Adjust P-value cutoff, for plotting. Default: 0.05
     :param str format: Output figure format supported by matplotlib,('pdf','png','eps'...). Default: 'pdf'.
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. (width,height). Default: (6.5,6).
-    :param bool no_plot: if equal to True, no figure will be draw. This is useful only if data are interested. Default: False.
+    :param bool no_plot: if equal to True, no figure will be draw. Default: False.
     :param bool verbose: Increase output verbosity, print out progress of your job, Default: False.
 
     :return: An Enrichr object, which obj.res2d contains your enrichr query.
