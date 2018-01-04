@@ -317,7 +317,7 @@ def ranking_metric(df, method, pos, neg, classes, ascending):
 
 def gsea_compute_tensor(data, gmt, n, weighted_score_type, permutation_type,
                  method, pheno_pos, pheno_neg, classes, ascending,
-                 seed=None, single=False, scale=False):
+                 processes=1, seed=None, single=False, scale=False):
     """compute enrichment scores and enrichment nulls.
 
         :param data: preprocessed expression dataframe or a pre-ranked file if prerank=True.
@@ -340,18 +340,20 @@ def gsea_compute_tensor(data, gmt, n, weighted_score_type, permutation_type,
                 | list of enriched terms
 
     """
-
+    w = weighted_score_type
     subsets = sorted(gmt.keys())
     rs = np.random.RandomState(seed)
-    logging.debug("Start to compute enrichment socres......................")
+    logging.debug("Start to compute es and esnulls........................")
 
     if permutation_type == "phenotype":
-        # shuffling classes and generate raondom correlation rankings
+        # shuffling classes and generate random correlation rankings
+        logging.debug("Start to permutate classes..............................")
         genes_mat, cor_mat = ranking_metric_tensor(exprs=data, method=method,
                                                 permutation_num=n,
                                                 pos=pheno_pos, neg=pheno_neg, classes=classes,
                                                 ascending=ascending, rs=rs)
         # compute es, esnulls. hits, RES
+        logging.debug("Start to compute enrichment nulls.......................")
         es, esnull, hit_ind, RES = enrichment_score_tensor(gene_mat=genes_mat,cor_mat=cor_mat,
                                                            gene_sets=gmt,
                                                            weighted_score_type=weighted_score_type,
@@ -360,8 +362,8 @@ def gsea_compute_tensor(data, gmt, n, weighted_score_type, permutation_type,
     else:
         # Prerank, ssGSEA, GSEA with gene_set permutation
         genes_sorted, cor_vec = data.index.values, data.values
-        base = 10 if data.shape[0] >= 5000 else 20
-        block = ceil(subsets/base)        
+        base = 5 if data.shape[0] >= 5000 else 10
+        block = ceil(len(subsets)/base)
         es = []
         RES=[]
         hit_ind=[]
@@ -385,7 +387,7 @@ def gsea_compute_tensor(data, gmt, n, weighted_score_type, permutation_type,
         # esn is a list, don't need to use append method.
         for si, temp in enumerate(temp_esnu):
             e, enu, hit, rune = temp.get()
-            esnull.append = enu
+            esnull.append(enu)
             es.append(e)
             RES.append(rune)
             hit_ind += hit

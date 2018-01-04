@@ -11,7 +11,7 @@ import pandas as pd
 from numpy import log, exp
 
 from gseapy.algorithm import enrichment_score, gsea_compute, ranking_metric
-from gseapy.algorithm import enrichment_score_tensor
+from gseapy.algorithm import enrichment_score_tensor, gsea_compute_tensor
 from gseapy.parser import *
 from gseapy.plot import gsea_plot, heatmap
 from gseapy.utils import mkdirs, log_init, retry, DEFAULT_LIBRARY
