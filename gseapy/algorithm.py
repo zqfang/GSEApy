@@ -443,7 +443,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
         # esn is a list, don't need to use append method.
         for si, temp in enumerate(temp_esnu):
             e, enu, hit, rune = temp.get()
-            esull[si] = enu
+            esnull[si] = enu
             es.append(e)
             RES.append(rune)
             hit_ind.append(hit)
