@@ -6,7 +6,7 @@ import sys, logging
 import numpy as np
 from functools import reduce
 from multiprocessing import Pool
-
+from math import ceil
 
 def enrichment_score(gene_list, correl_vector, gene_set, weighted_score_type=1, 
                      nperm=1000, rs=np.random.RandomState(), single=False, scale=False):
@@ -343,7 +343,6 @@ def gsea_compute_tensor(data, gmt, n, weighted_score_type, permutation_type,
 
     subsets = sorted(gmt.keys())
     rs = np.random.RandomState(seed)
-
     logging.debug("Start to compute enrichment socres......................")
 
     if permutation_type == "phenotype":
@@ -360,13 +359,39 @@ def gsea_compute_tensor(data, gmt, n, weighted_score_type, permutation_type,
                                                            single=False, scale=False)
     else:
         # Prerank, ssGSEA, GSEA with gene_set permutation
-        genes_sorted = data.index.values
-        cor_vec = data.values
-        es, esnull, hit_ind, RES = enrichment_score_tensor(gene_mat=genes_sorted, cor_mat=cor_vec,
-                                                           gene_sets=gmt,
-                                                           weighted_score_type=weighted_score_type,
-                                                           nperm=n, rs=rs, 
-                                                           single=single, scale=scale)
+        genes_sorted, cor_vec = data.index.values, data.values
+        base = 10 if data.shape[0] >= 5000 else 20
+        block = ceil(subsets/base)        
+        es = []
+        RES=[]
+        hit_ind=[]
+        esnull = []
+        temp_esnu=[]
+        # split large array into smaller blocks to avoid memory overflow
+        pool_esnu = Pool(processes=processes)
+        i, m= 1, 0
+        while i <= block:
+            # you have to reseed, or all your processes are sharing the same seed value
+            rs = np.random.RandomState(seed)           
+            gmtrim = { k: gmt.get(k) for k in subsets[m:base*i]}
+            temp_esnu.append(pool_esnu.apply_async(enrichment_score_tensor,
+                                                   args=(genes_sorted, cor_vec, 
+                                                         gmtrim, w, n, rs, 
+                                                         single, scale)))
+            m = base*i
+            i +=1
+        pool_esnu.close()
+        pool_esnu.join()
+        # esn is a list, don't need to use append method.
+        for si, temp in enumerate(temp_esnu):
+            e, enu, hit, rune = temp.get()
+            esnull.append = enu
+            es.append(e)
+            RES.append(rune)
+            hit_ind += hit
+        # concate results    
+        es, esnull, RES = np.hstack(es), np.vstack(esnull), np.vstack(RES)
+
 
     return gsea_significance(es, esnull), hit_ind, RES, subsets
 
@@ -405,7 +430,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
     hit_ind=[]
     esnull = [ [] for a in range(len(subsets)) ]
 
-    logging.debug("Start to compute enrichment socres......................")
+    logging.debug("Start to compute enrichment scores......................")
 
     if permutation_type == "phenotype":
         logging.debug("Start to permutate classes..............................")
@@ -418,6 +443,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
                                                 ascending=ascending, rs=rs)
 
         # compute es, esnulls. hits, RES
+        logging.debug("Start to compute enrichment nulls.......................")
         es, esnull, hit_ind, RES = enrichment_score_tensor(gene_mat=genes_mat,
                                                            cor_mat=cor_mat,
                                                            gene_sets=gmt,
@@ -443,7 +469,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
         # esn is a list, don't need to use append method.
         for si, temp in enumerate(temp_esnu):
             e, enu, hit, rune = temp.get()
-            esull[si] = enu
+            esnull[si] = enu
             es.append(e)
             RES.append(rune)
             hit_ind.append(hit)
