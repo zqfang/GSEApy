@@ -8,7 +8,7 @@ from functools import reduce
 from multiprocessing import Pool
 
 
-def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=None,
+def enrichment_score(gene_list, correl_vector, gene_set, weighted_score_type=1, 
                      nperm=1000, rs=np.random.RandomState(), single=False, scale=False):
     """This is the most important function of GSEApy. It has the same algorithm with GSEA and ssGSEA.
 
@@ -88,7 +88,7 @@ def enrichment_score(gene_list, gene_set, weighted_score_type=1, correl_vector=N
 
 
 def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, nperm=1000,
-                            scale=False, single=False, rs=np.random.RandomState()):
+                            rs=np.random.RandomState(), single=False, scale=False):
     """Next generation algorithm of GSEA and ssGSEA.
 
         :param gene_mat:        the ordered gene list(vector) or gene matrix.
@@ -315,9 +315,9 @@ def ranking_metric(df, method, pos, neg, classes, ascending):
     return ser
 
 
-def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
+def gsea_compute_tensor(data, gmt, n, weighted_score_type, permutation_type,
                  method, pheno_pos, pheno_neg, classes, ascending,
-                 seed=None, scale=False, single=False):
+                 seed=None, single=False, scale=False):
     """compute enrichment scores and enrichment nulls.
 
         :param data: preprocessed expression dataframe or a pre-ranked file if prerank=True.
@@ -356,9 +356,8 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
         es, esnull, hit_ind, RES = enrichment_score_tensor(gene_mat=genes_mat,cor_mat=cor_mat,
                                                            gene_sets=gmt,
                                                            weighted_score_type=weighted_score_type,
-                                                           nperm=n, scale=False,
-                                                           single=False, rs=rs)
-
+                                                           nperm=n, rs=rs, 
+                                                           single=False, scale=False)
     else:
         # Prerank, ssGSEA, GSEA with gene_set permutation
         genes_sorted = data.index.values
@@ -366,46 +365,90 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
         es, esnull, hit_ind, RES = enrichment_score_tensor(gene_mat=genes_sorted, cor_mat=cor_vec,
                                                            gene_sets=gmt,
                                                            weighted_score_type=weighted_score_type,
-                                                           nperm=n, scale=scale,
-                                                           single=single, rs=rs)
+                                                           nperm=n, rs=rs, 
+                                                           single=single, scale=scale)
 
     return gsea_significance(es, esnull), hit_ind, RES, subsets
 
-def gsea_compute_ss(data, gmt, n, weighted_score_type, scale, seed, processes):
-    """compute enrichment scores and enrichment nulls for single sample GSEA.
-    """
 
+
+def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
+                 method, pheno_pos, pheno_neg, classes, ascending,
+                 processes=1, seed=None, single=False, scale=False):
+    """compute enrichment scores and enrichment nulls.
+
+        :param data: preprocessed expression dataframe or a pre-ranked file if prerank=True.
+        :param dict gmt: all gene sets in .gmt file. need to call load_gmt() to get results.
+        :param int n: permutation number. default: 1000.
+        :param str method: ranking_metric method. see above.
+        :param str pheno_pos: one of labels of phenotype's names.
+        :param str pheno_neg: one of labels of phenotype's names.
+        :param list classes: a list of phenotype labels, to specify which column of dataframe belongs to what category of phenotype.
+        :param float weighted_score_type: default:1
+        :param bool ascending: sorting order of rankings. Default: False.
+        :param seed: random seed. Default: np.random.RandomState()
+        :param bool scale: if true, scale es by gene number.
+
+        :return: a tuple contains::
+
+                | zipped results of es, nes, pval, fdr.
+                | nested list of hit indices of input gene_list.
+                | nested list of ranked enrichment score of each input gene_sets.
+                | list of enriched terms
+
+    """
+    
     w = weighted_score_type
     subsets = sorted(gmt.keys())
-    enrichment_scores = []
-    rank_ES=[]
+    es = []
+    RES=[]
     hit_ind=[]
-    enrichment_nulls = [ [] for a in range(len(subsets)) ]
-    gl, cor_vec = data.index.values, data.values
+    esnull = [ [] for a in range(len(subsets)) ]
 
-    logging.debug("Start to compute es and esnulls........................")
-    temp_esnu=[]
-    pool_esnu = Pool(processes=processes)
-    for subset in subsets:
-        # you have to reseed, or all your processes are sharing the same seed value
+    logging.debug("Start to compute enrichment socres......................")
+
+    if permutation_type == "phenotype":
+        logging.debug("Start to permutate classes..............................")
+        # shuffling classes and generate raondom correlation rankings
         rs = np.random.RandomState(seed)
-        temp_esnu.append(pool_esnu.apply_async(enrichment_score,
-                                               args=(gl, gmt.get(subset), w,
-                                                     cor_vec, n, rs,
-                                                     scale, True)))
+        genes_mat, cor_mat = ranking_metric_tensor(exprs=data, method=method,
+                                                permutation_num=n,
+                                                pos=pheno_pos, neg=pheno_neg,
+                                                classes=classes,
+                                                ascending=ascending, rs=rs)
 
-    pool_esnu.close()
-    pool_esnu.join()
-    # esn is a list, don't need to use append method.
-    for si, temp in enumerate(temp_esnu):
-        es, esnull, hit, RES = temp.get()
-        enrichment_nulls[si] = esnull
-        enrichment_scores.append(es)
-        rank_ES.append(RES)
-        hit_ind.append(hit)
+        # compute es, esnulls. hits, RES
+        es, esnull, hit_ind, RES = enrichment_score_tensor(gene_mat=genes_mat,
+                                                           cor_mat=cor_mat,
+                                                           gene_sets=gmt,
+                                                           weighted_score_type=w,
+                                                           nperm=n, scale=False,
+                                                           single=False, rs=rs)
 
-    return gsea_significance(enrichment_scores, enrichment_nulls), hit_ind, rank_ES, subsets
+    else:
+        # Prerank, ssGSEA, GSEA with gene_set permutation
+        gl, cor_vec = data.index.values, data.values
+        logging.debug("Start to compute es and esnulls........................")
+        temp_esnu=[]
+        pool_esnu = Pool(processes=processes)
+        for subset in subsets:
+            # you have to reseed, or all your processes are sharing the same seed value
+            rs = np.random.RandomState(seed)
+            temp_esnu.append(pool_esnu.apply_async(enrichment_score,
+                                                   args=(gl, cor_vec, gmt.get(subset), w,
+                                                         n, rs, single, scale)))
 
+        pool_esnu.close()
+        pool_esnu.join()
+        # esn is a list, don't need to use append method.
+        for si, temp in enumerate(temp_esnu):
+            e, enu, hit, rune = temp.get()
+            esull[si] = enu
+            es.append(e)
+            RES.append(rune)
+            hit_ind.append(hit)
+
+    return gsea_significance(es, esnull), hit_ind, RES, subsets
 
 def gsea_pval(es, esnull):
     """Compute nominal p-value.

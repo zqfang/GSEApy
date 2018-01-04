@@ -11,7 +11,7 @@ import pandas as pd
 from numpy import log, exp
 
 from gseapy.algorithm import enrichment_score, gsea_compute, ranking_metric
-from gseapy.algorithm import enrichment_score_tensor, gsea_compute_ss
+from gseapy.algorithm import enrichment_score_tensor
 from gseapy.parser import *
 from gseapy.plot import gsea_plot, heatmap
 from gseapy.utils import mkdirs, log_init, retry, DEFAULT_LIBRARY
@@ -357,14 +357,21 @@ class GSEA(GSEAbase):
         self._set_cores()
         # compute ES, NES, pval, FDR, RES
         dataset = dat if self.permutation_type =='phenotype' else dat2
-        gsea_results,hit_ind,rank_ES, subsets = gsea_compute(data=dataset, n=self.permutation_num, gmt=gmt,
+        # gsea_results,hit_ind,rank_ES, subsets = gsea_compute_tensor(data=dataset, n=self.permutation_num, gmt=gmt,
+        #                                                      weighted_score_type=self.weighted_score_type,
+        #                                                      permutation_type=self.permutation_type,
+        #                                                      method=self.method,
+        #                                                      pheno_pos=phenoPos, pheno_neg=phenoNeg,
+        #                                                      classes=cls_vector, ascending=self.ascending,
+        #                                                      seed=self.seed)
+        gsea_results,hit_ind,rank_ES, subsets = gsea_compute(data=dataset, gmt=gmt, n=self.permutation_num,
                                                              weighted_score_type=self.weighted_score_type,
                                                              permutation_type=self.permutation_type,
                                                              method=self.method,
                                                              pheno_pos=phenoPos, pheno_neg=phenoNeg,
                                                              classes=cls_vector, ascending=self.ascending,
-                                                             seed=self.seed)
-
+                                                             processes=self._processes, seed=self.seed)
+        
         self._logger.info("Start to generate gseapy reports, and produce figures...")
         res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
         self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
@@ -441,8 +448,7 @@ class Prerank(GSEAbase):
                                                               permutation_type='gene_set', method=None,
                                                               pheno_pos=self.pheno_pos, pheno_neg=self.pheno_neg,
                                                               classes=None, ascending=self.ascending,
-                                                              seed=self.seed)
-
+                                                              processes=self._processes, seed=self.seed)
         self._logger.info("Start to generate gseapy reports, and produce figures...")
         res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
         self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
@@ -605,20 +611,14 @@ class SingleSampleGSEA(GSEAbase):
             # df.reset_index(drop=True, inplace=True)
 
             # compute ES, NES, pval, FDR, RES
-            # gsea_results, hit_ind,rank_ES, subsets = gsea_compute(data=dat2, n=self.permutation_num, gmt=gmt,
-            #                                                       weighted_score_type=self.weighted_score_type,
-            #                                                       permutation_type='gene_set', method=None,
-            #                                                       pheno_pos='', pheno_neg='',
-            #                                                       classes=None, ascending=self.ascending,
-            #                                                       seed=self.seed, scale=self.scale, single=True)
+            gsea_results, hit_ind,rank_ES, subsets = gsea_compute(data=dat2, n=self.permutation_num, gmt=gmt,
+                                                                  weighted_score_type=self.weighted_score_type,
+                                                                  permutation_type='gene_set', method=None,
+                                                                  pheno_pos='', pheno_neg='',
+                                                                  classes=None, ascending=self.ascending,
+                                                                  processes=self._processes,
+                                                                  seed=self.seed, single=True, scale=self.scale)
 
-            gsea_results, hit_ind, rank_ES, subsets = gsea_compute_ss(data=dat2,
-                                                                      n=self.permutation_num,
-                                                                      gmt=gmt,
-                                                                      weighted_score_type=self.weighted_score_type,
-                                                                      scale=self.scale,
-                                                                      seed=self.seed,
-                                                                      processes=self._processes)
             # write file
             res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
             self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
@@ -781,9 +781,11 @@ class Replot(GSEAbase):
             enrich_term, hit_ind, nes, pval, fdr= gsea_edb_parser(results_path, index=idx)
             gene_set = gene_set_dict.get(enrich_term)
             # calculate enrichment score
-            RES = enrichment_score(gene_list=gene_list, gene_set=gene_set,
+            RES = enrichment_score(gene_list=gene_list, 
+                                   correl_vector=correl_vector,
+                                   gene_set=gene_set, 
                                    weighted_score_type=self.weighted_score_type,
-                                   correl_vector=correl_vector, nperm=0)[-1]
+                                   nperm=0)[-1]
             # plotting
             gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval,
                             fdr, RES, phenoPos, phenoNeg, self.figsize,
