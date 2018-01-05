@@ -654,9 +654,8 @@ class SingleSampleGSEA(GSEAbase):
             tempes.append(pool.apply_async(enrichment_score_tensor,
                                            args=(genes_sorted, cor_vec, gmt,
                                                self.weighted_score_type,
-                                               self.permutation_num, self.scale,
-                                               True,rs)))
-
+                                               self.permutation_num, rs, True,
+                                               self.scale)))
         pool.close()
         pool.join()
         # save results and plotting
