@@ -182,24 +182,22 @@ class GSEAbase(object):
         top_term = res2d.head(graph_num).index
 
         # multi-threading
-        # pool = Pool(processes=self._processes)
+        pool = Pool(processes=self._processes)
 
         for gs in top_term:
             hit = results.get(gs)['hits_indices']
             NES = 'nes' if module != 'ssgsea' else 'es'
-
-            gsea_plot(rank_metric=rank_metric, enrich_term=gs, hit_ind=hit,
-                      nes=results.get(gs)[NES], pval=results.get(gs)['pval'], fdr=results.get(gs)['fdr'],
-                      RES=results.get(gs)['RES'], phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize,
-                      format=self.format, outdir=self.outdir, module=self.module)
-
-            # pool.apply_async(gsea_plot, args=(rank_metric, gs, hit, results.get(gs)[NES],
-            #                                   results.get(gs)['pval'],results.get(gs)['fdr'],
-            #                                   results.get(gs)['RES'],
-            #                                   phenoPos, phenoNeg, figsize, self.format,
-            #                                   self.outdir,self.module))
-        # pool.close()
-        # pool.join()
+            # gsea_plot(rank_metric=rank_metric, enrich_term=gs, hit_ind=hit,
+            #           nes=results.get(gs)[NES], pval=results.get(gs)['pval'], fdr=results.get(gs)['fdr'],
+            #           RES=results.get(gs)['RES'], phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize,
+            #           format=self.format, outdir=self.outdir, module=self.module)
+            pool.apply_async(gsea_plot, args=(rank_metric, gs, hit, results.get(gs)[NES],
+                                              results.get(gs)['pval'],results.get(gs)['fdr'],
+                                              results.get(gs)['RES'],
+                                              phenoPos, phenoNeg, figsize, self.format,
+                                              self.outdir,self.module))
+        pool.close()
+        pool.join()
 
         if module == 'gsea':
             width = len(classes) if len(classes) >= 6 else  5
@@ -208,16 +206,16 @@ class GSEAbase(object):
             datA = data.loc[:, cls_booA]
             datB = data.loc[:, cls_booB]
             datAB=pd.concat([datA,datB], axis=1)
-            # pool_heat = Pool(self._processes)
+            pool_heat = Pool(self._processes)
 
-            #no values need to be returned
+            # no values need to be returned
             for gs in top_term:
                 hit = results.get(gs)['hits_indices']
-                # pool_heat.apply_async(heatmap, args=(datAB.iloc[hit], gs, outdir, 0,
-                #                                     (width, len(hit)/2), format))
-                heatmap(datAB.iloc[hit], gs, outdir, 0, (width, len(hit)/2), format)
-            # pool_heat.close()
-            # pool_heat.join()
+                pool_heat.apply_async(heatmap, args=(datAB.iloc[hit], gs, outdir, 0,
+                                                    (width, len(hit)/2), format))
+                # heatmap(datAB.iloc[hit], gs, outdir, 0, (width, len(hit)/2), format)
+            pool_heat.close()
+            pool_heat.join()
 
     def _save_results(self, zipdata, outdir, module, gmt, rank_metric, permutation_type):
         """reformat gsea results, and save to txt"""
@@ -357,14 +355,7 @@ class GSEA(GSEAbase):
         self._set_cores()
         # compute ES, NES, pval, FDR, RES
         dataset = dat if self.permutation_type =='phenotype' else dat2
-        # gsea_results,hit_ind,rank_ES, subsets = gsea_compute_tensor(data=dataset, n=self.permutation_num, gmt=gmt,
-        #                                                      weighted_score_type=self.weighted_score_type,
-        #                                                      permutation_type=self.permutation_type,
-        #                                                      method=self.method,
-        #                                                      pheno_pos=phenoPos, pheno_neg=phenoNeg,
-        #                                                      classes=cls_vector, ascending=self.ascending,
-        #                                                      seed=self.seed)
-        gsea_results,hit_ind,rank_ES, subsets = gsea_compute(data=dataset, gmt=gmt, n=self.permutation_num,
+        gsea_results,hit_ind,rank_ES, subsets = gsea_compute_tensor(data=dataset, gmt=gmt, n=self.permutation_num,
                                                              weighted_score_type=self.weighted_score_type,
                                                              permutation_type=self.permutation_type,
                                                              method=self.method,

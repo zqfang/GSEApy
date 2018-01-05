@@ -91,7 +91,7 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
                             rs=np.random.RandomState(), single=False, scale=False):
     """Next generation algorithm of GSEA and ssGSEA.
 
-        :param gene_mat:        the ordered gene list(vector) or gene matrix.
+        :param gene_mat:        the ordered gene list(vector) with or without gene indices matrix.
         :param cor_mat:         correlation vector or matrix  (e.g. signal to noise scores)
                                 corresponding to the genes in the gene list or matrix.
         :param dict gene_sets:  gmt file dict.
@@ -132,6 +132,7 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
         # means the input arrays are both assumed to be unique,
         # which can speed up the calculation.
         tag_indicator = np.vstack([np.in1d(gene_mat, gene_sets[key], assume_unique=True) for key in keys])
+        tag_indicator = tag_indicator.astype(int)
         # index of hits
         hit_ind = [ np.flatnonzero(tag).tolist() for tag in tag_indicator ]
         # generate permutated hits matrix
@@ -147,11 +148,15 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
         # GSEA
         # 2d ndarray, gene_mat and cor_mat are shuffled already
         # reshape matrix
-        cor_mat, gene_mat = cor_mat.T, gene_mat.T
+        cor_mat = cor_mat.T
+        # gene_mat is a tuple contains (gene_name, permuate_gene_name_indices)
+        genes, genes_ind = gene_mat
         # genestes->M, genes->N, perm-> axis=2
         # don't use assume_unique=True in 2d array when use np.isin().
         # elements in gene_mat are not unique, or will cause unwanted results
-        perm_tag_tensor = np.stack([np.isin(gene_mat, gene_sets[key]) for key in keys], axis=0)
+        tag_indicator = np.vstack([np.in1d(genes, gene_sets[key], assume_unique=True) for key in keys])
+        tag_indicator = tag_indicator.astype(int)
+        perm_tag_tensor = np.stack([tag.take(genes_ind).T for tag in tag_indicator], axis=0)
         #index of hits
         hit_ind = [ np.flatnonzero(tag).tolist() for tag in perm_tag_tensor[:,:,-1] ]
         # nohits
@@ -203,15 +208,15 @@ def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
        :param bool ascending:  bool. Sort ascending vs. descending.
 
        :return:
-                returns two 2d ndarry with shape (nperm, gene_num).
+                returns two 2d ndarray with shape (nperm, gene_num).
 
-                | genes_mat: sorted and permutated (exclude last row) gene name matrix.
-                | cor_mat: sorted and permutated (exclude last row) ranking matrix.
+                | cor_mat_indices: the indices of sorted and permutate (exclude last row) ranking matrix.
+                | cor_mat: sorted and permutate (exclude last row) ranking matrix.
 
     """
     # S: samples, G: gene number
     G, S = exprs.shape
-    genes = exprs.index.values
+    # genes = exprs.index.values
     expr_mat = exprs.values.T
     perm_cor_tensor = np.tile(expr_mat, (permutation_num+1,1,1))
     # random shuffle on the first dim, last matrix is not shuffled
@@ -242,10 +247,11 @@ def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
     cor_mat_ind = cor_mat.argsort()
     # ndarray: sort in place
     cor_mat.sort()
-    genes_mat = genes.take(cor_mat_ind)
-    if ascending: return genes_mat, cor_mat
+    # genes_mat = genes.take(cor_mat_ind)
+    if ascending: return cor_mat_ind, cor_mat
     # descending order of ranking and genes
-    return genes_mat[:,::-1], cor_mat[:,::-1]
+    # return genes_mat[:,::-1], cor_mat[:,::-1]
+    return cor_mat_ind[:, ::-1], cor_mat[:, ::-1]
 
 def ranking_metric(df, method, pos, neg, classes, ascending):
     """The main function to rank an expression table.
@@ -314,6 +320,41 @@ def ranking_metric(df, method, pos, neg, classes, ascending):
 
     return ser
 
+def block_compute(base, block, processes, seed, gene_mat,
+                  cor_mat, gmt, w, nperm, single=False, scale=False):
+    """"block computing for enrichment_score_tensor"""
+    es = []
+    RES = []
+    hit_ind = []
+    esnull = []
+    temp_esnu = []
+    pool_esnu = Pool(processes=processes)
+    subsets = sorted(gmt.keys())
+    # split large array into smaller blocks to avoid memory overflow
+    i, m = 1, 0
+    while i <= block:
+        # you have to reseed, or all your processes are sharing the same seed value
+        rs = np.random.RandomState(seed)
+        gmtrim = {k: gmt.get(k) for k in subsets[m:base * i]}
+        temp_esnu.append(pool_esnu.apply_async(enrichment_score_tensor,
+                                               args=(gene_mat, cor_mat,
+                                                     gmtrim, w, nperm, rs,
+                                                     single, scale)))
+        m = base * i
+        i += 1
+    pool_esnu.close()
+    pool_esnu.join()
+    # esn is a list, don't need to use append method.
+    for si, temp in enumerate(temp_esnu):
+        e, enu, hit, rune = temp.get()
+        esnull.append(enu)
+        es.append(e)
+        RES.append(rune)
+        hit_ind += hit
+    # concate results
+    es, esnull, RES = np.hstack(es), np.vstack(esnull), np.vstack(RES)
+
+    return es, esnull, hit_ind, RES
 
 def gsea_compute_tensor(data, gmt, n, weighted_score_type, permutation_type,
                  method, pheno_pos, pheno_neg, classes, ascending,
@@ -343,57 +384,72 @@ def gsea_compute_tensor(data, gmt, n, weighted_score_type, permutation_type,
     w = weighted_score_type
     subsets = sorted(gmt.keys())
     rs = np.random.RandomState(seed)
-    logging.debug("Start to compute es and esnulls........................")
+    genes_mat, cor_mat = data.index.values, data.values
+    base = 5 if data.shape[0] >= 5000 else 10
+    block = ceil(len(subsets) / base)
 
     if permutation_type == "phenotype":
         # shuffling classes and generate random correlation rankings
         logging.debug("Start to permutate classes..............................")
-        genes_mat, cor_mat = ranking_metric_tensor(exprs=data, method=method,
-                                                permutation_num=n,
-                                                pos=pheno_pos, neg=pheno_neg, classes=classes,
-                                                ascending=ascending, rs=rs)
-        # compute es, esnulls. hits, RES
-        logging.debug("Start to compute enrichment nulls.......................")
-        es, esnull, hit_ind, RES = enrichment_score_tensor(gene_mat=genes_mat,cor_mat=cor_mat,
-                                                           gene_sets=gmt,
-                                                           weighted_score_type=weighted_score_type,
-                                                           nperm=n, rs=rs, 
-                                                           single=False, scale=False)
-    else:
-        # Prerank, ssGSEA, GSEA with gene_set permutation
-        genes_sorted, cor_vec = data.index.values, data.values
-        base = 5 if data.shape[0] >= 5000 else 10
-        block = ceil(len(subsets)/base)
-        es = []
-        RES=[]
-        hit_ind=[]
-        esnull = []
-        temp_esnu=[]
+        genes_ind = []
+        cor_mat = []
+        temp_rnk = []
+        pool_rnk = Pool(processes=processes)
         # split large array into smaller blocks to avoid memory overflow
-        pool_esnu = Pool(processes=processes)
-        i, m= 1, 0
+        i=1
         while i <= block:
-            # you have to reseed, or all your processes are sharing the same seed value
-            rs = np.random.RandomState(seed)           
-            gmtrim = { k: gmt.get(k) for k in subsets[m:base*i]}
-            temp_esnu.append(pool_esnu.apply_async(enrichment_score_tensor,
-                                                   args=(genes_sorted, cor_vec, 
-                                                         gmtrim, w, n, rs, 
-                                                         single, scale)))
-            m = base*i
+            rs = np.random.RandomState(seed)
+            temp_rnk.append(pool_rnk.apply_async(ranking_metric_tensor,
+                                         args=(data, method, base, pheno_pos, pheno_neg, classes,
+                                                ascending, rs)))
             i +=1
-        pool_esnu.close()
-        pool_esnu.join()
-        # esn is a list, don't need to use append method.
-        for si, temp in enumerate(temp_esnu):
-            e, enu, hit, rune = temp.get()
-            esnull.append(enu)
-            es.append(e)
-            RES.append(rune)
-            hit_ind += hit
-        # concate results    
-        es, esnull, RES = np.hstack(es), np.vstack(esnull), np.vstack(RES)
+        pool_rnk.close()
+        pool_rnk.join()
 
+        for k, temp in enumerate(temp_rnk):
+            gi, cor = temp.get()
+            if k+1 == block:
+               genes_ind.append(gi)
+               cor_mat.append(cor)
+            else:
+                genes_ind.append(gi[:-1])
+                cor_mat.append(cor[:-1])
+
+        genes_ind, cor_mat = np.vstack(genes_ind), np.vstack(cor_mat)
+        # convert to tuple
+        genes_mat = (data.index.values, genes_ind)
+
+    logging.debug("Start to compute es and esnulls........................")
+    # Prerank, ssGSEA, GSEA
+    es = []
+    RES = []
+    hit_ind = []
+    esnull = []
+    temp_esnu = []
+    pool_esnu = Pool(processes=processes)
+    # split large array into smaller blocks to avoid memory overflow
+    i, m = 1, 0
+    while i <= block:
+        # you have to reseed, or all your processes are sharing the same seed value
+        rs = np.random.RandomState(seed)
+        gmtrim = {k: gmt.get(k) for k in subsets[m:base * i]}
+        temp_esnu.append(pool_esnu.apply_async(enrichment_score_tensor,
+                                               args=(genes_mat, cor_mat,
+                                                     gmtrim, w, n, rs,
+                                                     single, scale)))
+        m = base * i
+        i += 1
+    pool_esnu.close()
+    pool_esnu.join()
+    # esn is a list, don't need to use append method.
+    for si, temp in enumerate(temp_esnu):
+        e, enu, hit, rune = temp.get()
+        esnull.append(enu)
+        es.append(e)
+        RES.append(rune)
+        hit_ind += hit
+    # concate results
+    es, esnull, RES = np.hstack(es), np.vstack(esnull), np.vstack(RES)
 
     return gsea_significance(es, esnull), hit_ind, RES, subsets
 
