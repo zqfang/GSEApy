@@ -320,41 +320,6 @@ def ranking_metric(df, method, pos, neg, classes, ascending):
 
     return ser
 
-def block_compute(base, block, processes, seed, gene_mat,
-                  cor_mat, gmt, w, nperm, single=False, scale=False):
-    """"block computing for enrichment_score_tensor"""
-    es = []
-    RES = []
-    hit_ind = []
-    esnull = []
-    temp_esnu = []
-    pool_esnu = Pool(processes=processes)
-    subsets = sorted(gmt.keys())
-    # split large array into smaller blocks to avoid memory overflow
-    i, m = 1, 0
-    while i <= block:
-        # you have to reseed, or all your processes are sharing the same seed value
-        rs = np.random.RandomState(seed)
-        gmtrim = {k: gmt.get(k) for k in subsets[m:base * i]}
-        temp_esnu.append(pool_esnu.apply_async(enrichment_score_tensor,
-                                               args=(gene_mat, cor_mat,
-                                                     gmtrim, w, nperm, rs,
-                                                     single, scale)))
-        m = base * i
-        i += 1
-    pool_esnu.close()
-    pool_esnu.join()
-    # esn is a list, don't need to use append method.
-    for si, temp in enumerate(temp_esnu):
-        e, enu, hit, rune = temp.get()
-        esnull.append(enu)
-        es.append(e)
-        RES.append(rune)
-        hit_ind += hit
-    # concate results
-    es, esnull, RES = np.hstack(es), np.vstack(esnull), np.vstack(RES)
-
-    return es, esnull, hit_ind, RES
 
 def gsea_compute_tensor(data, gmt, n, weighted_score_type, permutation_type,
                  method, pheno_pos, pheno_neg, classes, ascending,
@@ -495,10 +460,10 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
         # shuffling classes and generate raondom correlation rankings
         rs = np.random.RandomState(seed)
         genes_mat, cor_mat = ranking_metric_tensor(exprs=data, method=method,
-                                                permutation_num=n,
-                                                pos=pheno_pos, neg=pheno_neg,
-                                                classes=classes,
-                                                ascending=ascending, rs=rs)
+                                                   permutation_num=n,
+                                                   pos=pheno_pos, neg=pheno_neg,
+                                                   classes=classes,
+                                                   ascending=ascending, rs=rs)
 
         # compute es, esnulls. hits, RES
         logging.debug("Start to compute enrichment nulls.......................")
@@ -506,13 +471,21 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
                                                            cor_mat=cor_mat,
                                                            gene_sets=gmt,
                                                            weighted_score_type=w,
-                                                           nperm=n, scale=False,
-                                                           single=False, rs=rs)
+                                                           nperm=n, rs=rs,
+                                                           single=False, scale=False,)
 
     else:
         # Prerank, ssGSEA, GSEA with gene_set permutation
         gl, cor_vec = data.index.values, data.values
         logging.debug("Start to compute es and esnulls........................")
+        # es, esnull, hit_ind, RES = enrichment_score_tensor(gene_mat=gl,
+        #                                                    cor_mat=cor_mat,
+        #                                                    gene_sets=gmt,
+        #                                                    weighted_score_type=w,
+        #                                                    nperm=n, rs=rs
+        #                                                    single=single, scale=scale)
+
+        # split large array into smaller blocks to avoid memory overflow
         temp_esnu=[]
         pool_esnu = Pool(processes=processes)
         for subset in subsets:
