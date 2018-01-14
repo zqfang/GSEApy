@@ -5,262 +5,153 @@ GSEAPY
 GSEAPY: Gene Set Enrichment Analysis in Python.
 ------------------------------------------------
 
-.. image:: https://badge.fury.io/py/gseapy.svg
-    :target: https://badge.fury.io/py/gseapy
+This is a fork of `GSEApy <https://github.com/BioNinja/GSEApy>`_ (`original documentation here <http://gseapy.rtfd.io/>`_). We have added a new tool ``GSEA_PEN`` which runs the GSEAPreranked algorithm but uses a background set of ranked lists to calculate an empirical null distribution for informing the permutation procedure.
 
-.. image:: https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat-square
-    :target: http://bioconda.github.io
+See below for examples on running the GSEA-PEN algorithm.
 
-.. image:: https://travis-ci.org/BioNinja/GSEApy.svg?branch=master
-    :target: https://travis-ci.org/BioNinja/GSEApy
-
-.. image:: http://readthedocs.org/projects/gseapy/badge/?version=master
-    :target: http://gseapy.readthedocs.io/en/master/?badge=master
-    :alt: Documentation Status
-
-.. image:: https://img.shields.io/badge/license-MIT-blue.svg
-    :target:  https://img.shields.io/badge/license-MIT-blue.svg
-.. image:: https://img.shields.io/badge/python-3.6-blue.svg
-    :target:   https://img.shields.io/badge/python-3.6-blue.svg
-.. image:: https://img.shields.io/badge/python-2.7-blue.svg
-    :target:  https://img.shields.io/badge/python-2.7-blue.svg
+For examples using the original GSEApy library, `visit this page <http://gseapy.readthedocs.io/en/master/gseapy_example.html>`_.
 
 
-
-
-
-
-The main documentation for GSEApy can be found at http://gseapy.rtfd.io/
-
-An example to use gseapy, please click here: `Example <http://gseapy.readthedocs.io/en/master/gseapy_example.html>`_
-
-**Release notes** : https://github.com/BioNinja/gseapy/releases
-
-GSEAPY is a python wrapper for **GSEA** and **Enrichr**.
+GSEAPY and GSEA-PEN
 --------------------------------------------------------------------------------------------
 
-GSEAPY could be used for **RNA-seq, ChIP-seq, Microarry** data. It's used for convenient GO enrichment and produce **publishable quality figures** in python.
+GSEAPY can be used for RNA-seq, ChIP-seq, and microarry data. It's used for convenient GO enrichment and produces publishable quality figures in Python.
 
 
-GSEAPY has five sub-commands available: ``gsea``, ``prerank``, ``ssgsea``, ``replot`` ``enrichr``.
+Original GSEAPY offers five sub-commands: ``gsea``, ``prerank``, ``ssgsea``, ``replot`` ``enrichr``.
+We have added one additional sub-command: ``gsea_pen``.
 
 
-:gsea:    The ``gsea`` module produce `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ results.The input requries a txt file(FPKM, Expected Counts, TPM, et.al), a cls file, and gene_sets file in gmt format.
-:prerank: The ``prerank`` module produce **Prerank tool** results.  The input expects a pre-ranked gene list dataset with correlation values, which in .rnk format, and gene_sets file in gmt format.  ``prerank`` module is an API to `GSEA` pre-rank tools.
-:ssgsea: The ``ssgsea`` module perform **single sample GSEA(ssGSEA)** analysis.  The input expects a pd.Series (indexed by gene name), or pd.DataFrame (include ``GCT`` file) with expression values and ``GMT`` file. For multi sample input, ssGSEA reconigze gct format, too. ssGSEA enrichment score for the gene set as described by `D. Barbie et al 2009 <http://www.nature.com/nature/journal/v462/n7269/abs/nature08460.html>`_.
+:prerank: The ``prerank`` module produces **GSEAPreranked** results.  Required inputs: a pre-ranked gene list dataset with correlation values in .rnk format, and gene_sets file in gmt format.  The ``prerank`` module is an API to the `GSEA` pre-rank tools.
 
-:replot: The ``replot`` module reproduce GSEA desktop version results.  The only input for GSEApy is the location to ``GSEA`` Desktop output results.
+:gsea_pen:    The ``gsea_pen`` module **uses an informed permutation strategy** when running the GSEAPreranked algorithm.  Required inputs: a pre-ranked gene list dataset with correlation values in .rnk format, a gene_sets file in gmt format, and a path to a directory containing .rnk lists to be used as the background distribution.
+
+:replot: The ``replot`` module reproduces GSEA desktop version results.  The only input for GSEApy is the location to ``GSEA`` Desktop output results.
 
 :enrichr: The ``enrichr`` module enable you perform gene set enrichment analysis using ``Enrichr`` API. Enrichr is open source and freely available online at: http://amp.pharm.mssm.edu/Enrichr . It runs very fast.
 
+Please use 'gseapy COMMAND -h' to see the detail description for each option of each module. For descriptions of the other commands, see the original `GSEApy <https://github.com/BioNinja/GSEApy>`_ repository.
 
-Please use 'gseapy COMMAND -h' to see the detail description for each option of each module.
 
-
-The full ``GSEA`` is far too extensive to describe here; see
+The full ``GSEA`` is too extensive to describe here; see
 `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ documentation for more information. All files' formats for GSEApy are identical to ``GSEA`` desktop version.
 
 
-**If you use gseapy in your research, you should cite the original ``GSEA`` and ``Enrichr`` paper.**
-
-Why GSEAPY
+About GSEA-PEN
 -----------------------------------------------------
 
-I would like to use Pandas to explore my data, but I did not find a  convenient tool to
-do gene set enrichment analysis in python. So, here is my reason:
-
-* **Running inside python interactive console without switch to R!!!**
-* User friendly for both wet and dry lab usrers.
-* Produce or reproduce publishable figures.
-* Perform batch jobs easy.
-* Easy to use in bash shell or your  data analysis workflow, e.g. snakemake.
-
-
-GSEA Java version output:
--------------------------------------------------
-This is an example of GSEA desktop application output
-
-.. figure:: docs/GSEA_OCT4_KD.png
-
-
-
-
-
-
-GSEAPY ``Prerank`` module output
------------------------------------------------
-Using the same data from ``GSEA``, GSEAPY reproduce the example above.
-
-Using ``Prerank`` or ``replot`` module will reproduce the same figure for GSEA Java desktop outputs
-
-.. figure:: docs/gseapy_OCT4_KD.png
-
-
-
-
-
-   Generated by GSEAPY
-
-   **GSEAPY figures are supported by all matplotlib figure formats.**
-
-   You can modify ``GSEA`` plots easily in .pdf files. Please Enjoy.
-
-
-
-GSEAPY ``enrichr`` module
------------------------------------------------
-**note:** For now, enrichr module download enriched results only.
-
-**TODO:** Save enriched table, grids, networks, bar graphs from website server using ``phantomJS`` and ``selenium``.
-
-A graphical introduction of Enrichr
-
-.. figure:: docs/enrichr.PNG
-    :height: 300px
-    :width: 600px
-    :align: center
-
-
-**Note**: Enrichr uses a list of Entrez gene symbols as input. You should convert all gene names to uppercase.
-
+TODO add descriptions and pseudo-code
 
 
 Installation
 ------------
 
-| Install gseapy package from bioconda or pypi.
+| To install the gseapy package with the GSEA-PEN extended functionality:
 
 
 .. code:: shell
 
-   # if you have conda
-   $ conda install -c bioconda gseapy
+   $ pip install git+git://github.com/CostelloLab/gseapy.git#egg=gseapy
 
-   # for windows users
-   $ conda install -c bioninja gseapy
 
-   # or use pip to install the latest release
-   $ pip install gseapy
-
-| You may instead want to use the development version from Github, by running
-
-.. code:: shell
-
-   $ pip install git+git://github.com/BioNinja/gseapy.git#egg=gseapy
-
-Dependency
+Dependencies & Requirements
 --------------
 * Python 2.7 or 3.4+
-
-Mandatory
-~~~~~~~~~
-
 * Numpy >= 1.13.0
 * Pandas
 * Matplotlib
 * Beautifulsoup4
-* Requests(for enrichr API)
+* Requests (for enrichr API)
 
-You may also need to install **lxml, html5lib**, if you could not parse xml files.
+You may also need to install lxml and html5lib to parse xml files.
 
 
-
-Run GSEAPY
+Running GSEAPY and GSEA-PEN
 -----------------
 
 Before you start:
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Unless you know exactly how GSEA works, you should **convert all gene symobl names to uppercase first.**
+Convert all gene symbol names to uppercase. The ranked lists input to ``prerank`` or ``gsea_pen`` can be supplied as file paths (.rnk) or a two-column Pandas DataFrame (columns ``gene_name`` and ``fold_change``). The background ranked lists input to ``gsea_pen`` can be supplied as a path to a directory containing the desired .rnk files, or as a Pandas DataFrame with each column containing the rank-ordered list of genes for a given background experiment.
 
 
 For command line usage:
 ~~~~~~~~~~~~~~~~~~~~~~~
 
+| Test installation of GSEAPY:
+
 .. code:: bash
 
 
-  # An example to reproduce figures using replot module.
-  $ gseapy replot -i ./Gsea.reports -o test
+  # Test the prerank module
+  $ gseapy prerank -r data/example_expt1.rnk -g gene_sets.gmt -o test
+
+  # Test the gsea_pen module 
+  $ gseapy prerank -r data/example_expt1.rnk -g gene_sets.gmt -o test
+
+| Run GSEAPreranked or GSEA-PEN
+
+.. code:: bash
 
 
-  # An example to run GSEA using gseapy gsea module
-  $ gseapy gsea -d exptable.txt -c test.cls -g gene_sets.gmt -o test
+  # Run GSEAPreranked with the prerank module
+  $ gseapy prerank -r data/example_expt1.rnk -g gene_sets.gmt
 
-  # An example to run Prerank using gseapy prerank module
-  $ gseapy prerank -r gsea_data.rnk -g gene_sets.gmt -o test
-
-  # An example to run ssGSEA using gseapy ssgsea module
-  $ gseapy ssgsea -d expression.txt -g gene_sets.gmt -o test
-
-  # An example to use enrichr api
-  # see details of -g below, -d  is optional
-  $ gseapy enrichr -i gene_list.txt -g KEGG_2016 -d pathway_enrichment -o test
+  # Run GSEA-PEN with the gsea_pen module 
+  $ gseapy gsea_pen -r data/example_expt1.rnk -g gene_sets.gmt -b data/example_background_rnks
 
 
-
-Run gseapy inside python console:
+Run GSEAPY inside python console:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-1. Prepare expression.txt, gene_sets.gmt and test.cls required by GSEA, you could do this
+| Running GSEA, GSEAPreranked or GSEA-PEN in Python using file paths as input
 
 .. code:: python
 
     import gseapy
 
-    # run GSEA.
+    # Run GSEA
     gseapy.gsea(data='expression.txt', gene_sets='gene_sets.gmt', cls='test.cls', outdir='test')
 
-    # run prerank
+    # Run GSEA Prerank
     gseapy.prerank(rnk='gsea_data.rnk', gene_sets='gene_sets.gmt', outdir='test')
 
-    # run ssGSEA
-    gseapy.ssgsea(data="expression.txt", gene_sets= "gene_sets.gmt", outdir='test')
+    # Run GSEA-PEN
+    gseapy.gsea_pen(rnk='gsea_data.rnk', gene_sets='gene_sets.gmt', backround_rnks = 'background_dir', outdir='test')
 
-
-    # An example to reproduce figures using replot module.
+    # Plot figures using replot module.
     gseapy.replot(indir='./Gsea.reports', outdir='test')
 
 
-2. If you prefer to use Dataframe, dict, list in interactive python console, you could do this.
-
-see detail here: `Example <http://gseapy.readthedocs.io/en/master/gseapy_example.html>`_
+| Running GSEA, GSEAPreranked or GSEA-PEN in Python using DataFrames as input
 
 .. code:: python
 
 
-    # assign dataframe, and use enrichr library data set 'KEGG_2016'
+    # TODO finish small reproducible examples
+    
+    gene_ranked_dataframe = pd.DataFrame()
+
+    # Run GSEA (using local gene set file)
     expression_dataframe = pd.DataFrame()
+    sample_names = ['Expt1','Expt1','Expt1','Ctrl','Ctrl','Ctrl'] # must contain exactly two groups
+    gseapy.gsea(data=expression_dataframe, gene_sets='gene_set.gmt', cls=sample_names, outdir='test')
 
-    sample_name = ['A','A','A','B','B','B'] # always only two group,any names you like
-
-    # assign gene_sets parameter with enrichr library name or gmt file on your local computer.
-    gseapy.gsea(data=expression_dataframe, gene_sets='KEGG_2016', cls= sample_names, outdir='test')
-
-    # using prerank tool
+    # Run GSEAPreranked (using Enrichr to find gene sets)
     gene_ranked_dataframe = pd.DataFrame()
     gseapy.prerank(rnk=gene_ranked_dataframe, gene_sets='KEGG_2016', outdir='test')
 
-    # using ssGSEA
-    gseapy.ssgsea(data=ssGSEA_dataframe, gene_sets='KEGG_2016', outdir='test')
+    # Run GSEA-PEN (using directory path for background rnk lists)
+    gene_ranked_dataframe = pd.DataFrame()
+    gseapy.gsea_pen(rnk=gene_ranked_dataframe, gene_sets='KEGG_2016', background_rnks = 'background_dir' outdir='test')
+
+    # Run GSEA-PEN (using DataFrame for background rnk lists)
+    gene_ranked_dataframe = pd.DataFrame()
+    bg_ranked_dataframe = pd.DataFrame()
+    gseapy.gsea_pen(rnk=gene_ranked_dataframe, gene_sets='KEGG_2016', background_rnks = bg_ranked_dataframe, outdir='test')
 
 
-3. For ``enrichr`` , you could assign a list, pd.Series, pd.DataFrame object, or a txt file (should be one gene name per row.)
-
-.. code:: python
-
-    # assign a list object to enrichr
-    gl = ['SCARA3', 'LOC100044683', 'CMBL', 'CLIC6', 'IL13RA1', 'TACSTD2', 'DKKL1', 'CSF1',
-         'SYNPO2L', 'TINAGL1', 'PTX3', 'BGN', 'HERC1', 'EFNA1', 'CIB2', 'PMP22', 'TMEM173']
-
-    gseapy.enrichr(gene_list=gl, description='pathway', gene_sets='KEGG_2016', outdir='test')
-
-    # or a txt file path.
-    gseapy.enrichr(gene_list='gene_list.txt', description='pathway', gene_sets='KEGG_2016',
-                   outdir='test', cutoff=0.05, format='png' )
-
-
-GSEAPY supported gene set libaries :
+GSEAPY / Enrichr supported gene set libaries :
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To see the full list of gseapy supported gene set libraries, please click here: `Library <http://amp.pharm.mssm.edu/Enrichr/#stats>`_
@@ -269,10 +160,10 @@ Or use ``get_library_name`` function inside python console.
 
 .. code:: python
 
-    #see full list of latest enrichr library names, which will pass to -g parameter:
+    # See full list of latest enrichr library names
     names = gseapy.get_library_name()
 
-    # show top 20 entries.
+    # Preview top 20 entries
     print(names[:20])
 
 
@@ -299,15 +190,7 @@ Or use ``get_library_name`` function inside python console.
    'Human_Phenotype_Ontology',]
 
 
-
-
-Bug Report
+Bug Reports
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you would like to report any bugs when you running gseapy, don't hesitate to create an issue on github here, or email me: fangzhuoqing@sibs.ac.cn
-
-
-To get help of GSEAPY
-------------------------------------
-
-Visit the document site at http://gseapy.rtfd.io/
+If you would like to report any bugs when you running the ``gsea_pen`` module, please create an issue on GitHub here. For issues relating to other modules, you may wish to visit the `original GSEAPY repo <https://github.com/BioNinja/GSEApy>`_.
