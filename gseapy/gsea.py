@@ -98,41 +98,33 @@ class GSEAbase(object):
 
 		:param background_rnks: either a txt file containing paths to the .rnk files or a pandas DataFrame 
 			with each column being a rank-ordered list of genes
-		:returns: a pandas DataFrame with gene name indexed rankings
+		:returns: a list of lists, each element is a rank-ordered list of genes from an experiment
 		"""
 
-		# Load data
-		if isinstance(rnk, pd.DataFrame):
-			rank_metric = rnk.copy()
-			# handle dataframe with gene_name as index.
-			if rnk.shape[1] == 1: rank_metric = rnk.reset_index()
-		elif os.path.isfile(rnk):
-			rank_metric = pd.read_table(rnk, header=None, comment='#')
+		bg_rnks = None
+		if isinstance(rnks, pd.DataFrame):
+			bg_rnks = rnks.values.tolist()
+			if rnks.shape[1] < 3:
+				self._logger.warning("Not recommended to use less than 3 background rnk lists")
+		elif os.path.isfile(rnks):
+			f = pd.read_table(rnks, header=None, comment='#')
+			bg_rnks = f.values.tolist()
+		elif os.path.isdir(rnks):
+			compiled_rnks = []
+			for i, f in enumerate(os.listdir(rnks)):
+				if f.endswith(".rnk"):
+					rnk = pd.read_table(os.path.join(rnks, f), header=None, comment='#')
+					if rnk.shape[1] >= 2:
+						compiled_rnks.append(rnk[0].values.tolist())
+					else:
+						self._logger.warning("rnk file has too many columns")
+			bg_rnks = compiled_rnks
 		else:
 			raise Exception('Error parsing gene ranking values!')
-		# sort ranking values from high to low
-		rank_metric.sort_values(by=rank_metric.columns[1], ascending=self.ascending, inplace=True)
-		# drop na values
-		if rank_metric.isnull().any(axis=1).sum() >0:
-			self._logger.warning("Input gene rankings contains NA values(gene name and ranking value), drop them all!")
-			# print out NAs
-			NAs = rank_metric[rank_metric.isnull().any(axis=1)]
-			self._logger.debug('NAs list:\n'+NAs.to_string())
-			rank_metric.dropna(how='any', inplace=True)
+
 		# drop duplicate IDs, keep the first
-		if rank_metric.duplicated(subset=rank_metric.columns[0]).sum() >0:
-			self._logger.warning("Input gene rankings contains duplicated IDs, Only use the duplicated ID with highest value!")
-			# print out duplicated IDs.
-			dups = rank_metric[rank_metric.duplicated(subset=rank_metric.columns[0])]
-			self._logger.debug('Dups list:\n'+dups.to_string())
-			rank_metric.drop_duplicates(subset=rank_metric.columns[0], inplace=True, keep='first')
-		# reset ranking index, because you have sort values and drop duplicates.
-		rank_metric.reset_index(drop=True, inplace=True)
-		rank_metric.columns = ['gene_name','rank']
-		rankser = rank_metric.set_index('gene_name')['rank']
-		self.ranking = rankser
-		# return series
-		return rankser
+		cleaned_rnks = [list(dict.fromkeys(lst)) for lst in bg_rnks]
+		return cleaned_rnks
 
 	def load_gmt(self, gene_list, gmt):
 		"""Load gene set dict."""
@@ -548,9 +540,13 @@ class GSEA_PEN(GSEAbase):
 
 		assert self.min_size <= self.max_size
 
-		# parsing rankings
+		# parse rankings
 		dat2 = self._load_ranking(self.rnk)
 		assert len(dat2) > 1
+
+		# parse background gene lists
+		bg_lists = self._load_background_ranking(self.background_rnks)
+		assert len(bg_lists) > 3
 
 		# cpu numbers
 		self._set_cores()
@@ -561,13 +557,14 @@ class GSEA_PEN(GSEAbase):
 
 		self._logger.info("%04d gene_sets used for further statistical testing" % len(gmt))
 		self._logger.info("Running GSEA-PEN (Might take a while)")
+
 		# compute ES, NES, pval, FDR, RES
 		gsea_results, hit_ind,rank_ES, subsets = gsea_compute(data=dat2, n=self.permutation_num, gmt=gmt,
-															  weighted_score_type=self.weighted_score_type,
-															  permutation_type='gene_set', method=None,
-															  pheno_pos=self.pheno_pos, pheno_neg=self.pheno_neg,
-															  classes=None, ascending=self.ascending,
-															  processes=self._processes, seed=self.seed)
+			weighted_score_type=self.weighted_score_type, method=None, pheno_pos=self.pheno_pos, 
+			pheno_neg=self.pheno_neg, classes=None, ascending=self.ascending, processes=self._processes, 
+			seed=self.seed, bg_lists=bg_lists, permutation_type='gsea_pen')  
+			# bg_lists, permutation_type determine whether GSEA-PEN algorithm is used
+
 		self._logger.info("Generating GSEAPY reports figures in %s" % outdir)
 		res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
 		self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
@@ -1034,8 +1031,8 @@ def gsea_pen(rnk, gene_sets, background_rnks, outdir='GSEA_PEN', pheno_pos='Pos'
 			graph_num=20, no_plot=False, seed=None, verbose=False):
 	""" Run GSEA-PEN, which is GSEAPreranked but using a background set of experiments defined by user.
 
-	:param rnk: pre-ranked correlation table or pandas DataFrame. Same input with ``GSEA`` .rnk file.
-	:param gene_sets: Enrichr Library name or .gmt gene sets file. Same input with GSEA.
+	:param rnk: pre-ranked correlation table or pandas DataFrame. Same input as ``GSEA`` .rnk file.
+	:param gene_sets: Enrichr Library name or .gmt gene sets file. Same input as GSEA.
 	:param background_rnks: directory path or pandas DataFrame.
 
 	:param outdir: results output directory.
