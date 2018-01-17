@@ -5,6 +5,7 @@ from __future__ import division
 import os, sys, logging, json
 from collections import OrderedDict
 from multiprocessing import Pool, cpu_count
+import csv
 
 import numpy as np
 import pandas as pd
@@ -556,7 +557,13 @@ class GSEA_PEN(GSEAbase):
 		assert len(dat2) > 1
 
 		# parse background gene lists
-		bg_lists = self._load_background_ranking(self.background_rnks)
+		if self.background_rnks.endswith('.csv'):
+			with open(self.background_rnks, "r") as f:
+				reader = csv.reader(f)
+				bg_lists = list(reader)
+			print(len(bg_lists))
+		else:
+			bg_lists = self._load_background_ranking(self.background_rnks)
 		assert len(bg_lists) > 3
 
 		# cpu numbers
