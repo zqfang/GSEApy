@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 from numpy import log, exp
 
-from gseapy.algorithm import enrichment_score, gsea_compute, ranking_metric
+from gseapy.algorithm import enrichment_score, enrichment_score_pen, gsea_compute, ranking_metric
 from gseapy.algorithm import enrichment_score_tensor, gsea_compute_tensor
 from gseapy.parser import *
 from gseapy.plot import gsea_plot, heatmap
@@ -90,7 +90,7 @@ class GSEAbase(object):
 		# return series
 		return rankser
 
-	def _load_background_ranking(self, background_rnks):
+	def _load_background_ranking(self, rnks):
 		"""Parse background ranking files.
 
 		Load the gene ranking lists for all experiments to be used as the null background set during the
@@ -102,28 +102,39 @@ class GSEAbase(object):
 		"""
 
 		bg_rnks = None
+
 		if isinstance(rnks, pd.DataFrame):
-			bg_rnks = rnks.values.tolist()
-			if rnks.shape[1] < 3:
-				self._logger.warning("Not recommended to use less than 3 background rnk lists")
+			bg_rnks = rnks.transpose().values.tolist()
 		elif os.path.isfile(rnks):
 			f = pd.read_table(rnks, header=None, comment='#')
-			bg_rnks = f.values.tolist()
+			if f.shape[1] == 1:
+				compiled_rnks = []
+				for r in f[0].values.tolist():
+					if r.endswith(".rnk"):
+						rnk = pd.read_table(r, header=None, comment='#')
+						if rnk.shape[1] == 2:
+							compiled_rnks.append(rnk[0].values.tolist())
+				bg_rnks = compiled_rnks
+			else:
+				bg_rnks = f.transpose().values.tolist()
 		elif os.path.isdir(rnks):
 			compiled_rnks = []
-			for i, f in enumerate(os.listdir(rnks)):
+			for f in os.listdir(rnks):
 				if f.endswith(".rnk"):
 					rnk = pd.read_table(os.path.join(rnks, f), header=None, comment='#')
 					if rnk.shape[1] >= 2:
 						compiled_rnks.append(rnk[0].values.tolist())
-					else:
-						self._logger.warning("rnk file has too many columns")
 			bg_rnks = compiled_rnks
 		else:
 			raise Exception('Error parsing gene ranking values!')
 
+		# remove NA values (v!=v only for NaN)
+		for i in range(len(bg_rnks)):
+			bg_rnks[i] = filter(lambda v: v==v, bg_rnks[i])
+
 		# drop duplicate IDs, keep the first
 		cleaned_rnks = [list(dict.fromkeys(lst)) for lst in bg_rnks]
+		self._logger.debug('Background rank files used: %i' % len(cleaned_rnks))
 		return cleaned_rnks
 
 	def load_gmt(self, gene_list, gmt):
@@ -565,7 +576,7 @@ class GSEA_PEN(GSEAbase):
 			seed=self.seed, bg_lists=bg_lists, permutation_type='gsea_pen')  
 			# bg_lists, permutation_type determine whether GSEA-PEN algorithm is used
 
-		self._logger.info("Generating GSEAPY reports figures in %s" % outdir)
+		self._logger.info("Generating GSEAPY reports figures in %s" % self.outdir)
 		res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
 		self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
 								   gmt=gmt, rank_metric=dat2, permutation_type="gene_sets")
@@ -795,7 +806,7 @@ class SingleSampleGSEA(GSEAbase):
 			# save results
 			self.resultsOnSamples[name] = pd.Series(data=es, index=subsets, name=name)
 		# plotting
-		if self._noplot: continue
+		#if self._noplot: continue
 		self._logger.info("Plotting Sample: %s \n" % name)
 		for i, term in enumerate(subsets):
 			gsea_plot(rnk,term, hit_ind[i], es[i], 1, 1, RES[i],

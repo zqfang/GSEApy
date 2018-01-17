@@ -7,6 +7,8 @@ import numpy as np
 from functools import reduce
 from multiprocessing import Pool
 from math import ceil
+from collections import defaultdict
+from numpy.random import choice
 
 def enrichment_score(gene_list, correl_vector, gene_set, weighted_score_type=1, 
 					 nperm=1000, rs=np.random.RandomState(), single=False, scale=False):
@@ -83,9 +85,42 @@ def enrichment_score(gene_list, correl_vector, gene_set, weighted_score_type=1,
 
 	return es, esnull, hit_ind, RES
 
+def make_background_dist(background_rnk_lists, nperm):
+	"""Given a list of ranked gene lists, expand to number of permutations
+	Avoid doing this multiple times
+	"""
 
-def enrichment_score_pen(gene_list, correl_vector, gene_set, background_gene_lists,
-	weighted_score_type=1, nperm=1000, rs=np.random.RandomState(), single=False, scale=False):
+	# First gather all existing indices for each gene in the background lists
+	gene_dists = defaultdict(list)
+	for lst in background_rnk_lists:
+		for i, gene in enumerate(lst):
+			gene_dists[gene].append(i)
+
+	# Then make n permutations of that
+	n_genes = len(background_rnk_lists[0])
+	tag_indicator = []
+	logging.debug("permutation #")
+	
+	for i in range(nperm):
+		logging.debug(i)
+		unseen_idx = list(range(n_genes))
+		genes = [None] * n_genes
+		for gene in gene_dists.keys():
+			gene_dist = gene_dists[gene]
+			gene_idx = int(choice(gene_dist, 1))
+			if gene_idx not in unseen_idx:
+				diffs = [abs(gene_idx - us) for us in unseen_idx]
+				gene_idx = unseen_idx[diffs.index(min(diffs))]
+			unseen_idx.remove(gene_idx)
+			genes[gene_idx] = gene
+		tag_indicator.append(genes)
+		assert len(unseen_idx) == 0
+
+	return tag_indicator
+
+
+def enrichment_score_pen(rnk_list, correl_vector, gene_set, background_dist,
+	weighted_score_type=1, nperm=1000, rs=np.random.RandomState()):
 	"""This is the most important function of GSEApy. It has the same algorithm with GSEA and ssGSEA.
 
 	:param gene_list: The ordered gene list gene_name_list, rank_metric.index.values
@@ -116,11 +151,10 @@ def enrichment_score_pen(gene_list, correl_vector, gene_set, background_gene_lis
 		RES: Numerical vector containing the running enrichment score for all locations in the gene list.
 	"""
 
-	N = len(gene_list)
+	logging.debug("Calculating es")
+	N = len(rnk_list)
 	# Test whether each element of a 1-D array is also present in a second array
-	# It's more intuitived here than orginal enrichment_score source code.
-	# use .astype to covert bool to intergers
-	tag_indicator = np.in1d(gene_list, gene_set, assume_unique=True)  # notice that the sign is 0 (no tag) or 1 (tag)
+	tag_indicator = np.in1d(rnk_list, gene_set, assume_unique=True)
 
 	if weighted_score_type == 0 :
 		correl_vector = np.repeat(1, N)
@@ -131,16 +165,30 @@ def enrichment_score_pen(gene_list, correl_vector, gene_set, background_gene_lis
 	hit_ind = np.flatnonzero(tag_indicator).tolist()
 	# if used for compute esnull, set esnull equal to permutation number, e.g. 1000
 	# else just compute enrichment scores
-	# set axis to 1, because we have 2 dimentional array
+	# set axis to 1, because we have 2 dimensional array
 	axis = 1
-	tag_indicator = np.tile(tag_indicator, (nperm+1,1))
-	correl_vector = np.tile(correl_vector,(nperm+1,1))
+		
+	# Our GSEA is actually going to calculate the hit indexes for bg experiments
+	correl_vector = np.tile(correl_vector, (nperm,1))
+	gene_indicator = np.array(background_dist)
+	tag_indicator = np.array([np.in1d(gl, gene_set, assume_unique=True) for gl in gene_indicator])
 	
-	# TODO gene list permutation
-	# for i in range(nperm): rs.shuffle(tag_indicator[i])
-	# np.apply_along_axis(rs.shuffle, 1, tag_indicator)
+	Nhint = tag_indicator.sum(axis=axis, keepdims=True)
+	sum_correl_tag = np.sum(correl_vector*tag_indicator, axis=axis, keepdims=True)
+	no_tag_indicator = 1 - tag_indicator
 
-	return True
+	Nmiss =  N - Nhint
+	norm_tag =  1.0/sum_correl_tag
+	norm_no_tag = 1.0/Nmiss
+		
+	RES = np.cumsum(tag_indicator * correl_vector * norm_tag - no_tag_indicator * norm_no_tag, axis=axis)
+
+	max_ES, min_ES =  RES.max(axis=axis), RES.min(axis=axis)
+	es_vec = np.where(np.abs(max_ES) > np.abs(min_ES), max_ES, min_ES)
+	# extract values
+	es, esnull, RES = es_vec[-1], es_vec[:-1], RES[-1,:]
+
+	return es, esnull, hit_ind, RES
 
 
 def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, nperm=1000,
@@ -531,6 +579,8 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
 	elif permutation_type == "gsea_pen":
 		# Prerank with informed null permutation
 		gl, cor_vec = data.index.values, data.values
+		logging.debug("Computing background distribution........................")
+		bg_dist = make_background_dist(bg_lists, n)
 		logging.debug("Start to compute es and esnulls........................")
 
 		# split large array into smaller blocks to avoid memory overflow
@@ -539,7 +589,8 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
 		for subset in subsets:
 			rs = np.random.RandomState(seed)
 			temp_esnu.append(pool_esnu.apply_async(enrichment_score_pen,
-				args=(gl, cor_vec, gmt.get(subset), bg_lists, w, n, rs, single, scale)))
+				args=(gl, cor_vec, gmt.get(subset), bg_dist, w, n, rs)))
+
 		pool_esnu.close()
 		pool_esnu.join()
 		# esn is a list, don't need to use append method.
