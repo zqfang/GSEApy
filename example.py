@@ -6,6 +6,7 @@ from collections import defaultdict
 import csv
 import sys, logging
 
+"""
 def make_background_dist(background_rnk_lists, nperm):
 
 	# First gather all existing indices for each gene in the background lists
@@ -81,18 +82,20 @@ prerank_results = gseapy.prerank(
 	rnk='data/rnk_lists/GSE11791_DEG_Expt1_Control_vs_Group1_gene.rnk',  # MCF7 estradiol
 	gene_sets='data/gene_sets/hallmarks.gmt', 
 	outdir='out/MCF7_prerank', 
-	permutation_num=1000, 
+	permutation_num=100, 
+	graph_num=50,
 	processes=4
 )
 
-
+"""
 # Run GSEA preranked on a certain rnk list
 gseapen_results = gseapy.gsea_pen(
 	rnk='data/rnk_lists/GSE11791_DEG_Expt1_Control_vs_Group1_gene.rnk',  # MCF7 estradiol
 	gene_sets='data/gene_sets/hallmarks.gmt', 
-	background_rnks='data/bg_rnk_lists/mcf7_estrogen.txt', 
+	background_rnks='out/MCF7_22_background_lists_permuted_x100.csv', 
 	outdir='out/MCF7_gseapen', 
-	permutation_num=1, 
+	permutation_num=100,
+	graph_num=50,
 	processes=4
 )
 

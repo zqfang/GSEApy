@@ -66,6 +66,7 @@ def enrichment_score(gene_list, correl_vector, gene_set, weighted_score_type=1,
 
 	Nhint = tag_indicator.sum(axis=axis, keepdims=True)
 	sum_correl_tag = np.sum(correl_vector*tag_indicator, axis=axis, keepdims=True)
+
 	# compute ES score, the code below is identical to gsea enrichment_score method.
 	no_tag_indicator = 1 - tag_indicator
 	Nmiss =  N - Nhint
@@ -151,7 +152,6 @@ def enrichment_score_pen(rnk_list, correl_vector, gene_set, background_dist,
 		RES: Numerical vector containing the running enrichment score for all locations in the gene list.
 	"""
 
-	logging.debug("Calculating es")
 	N = len(rnk_list)
 	# Test whether each element of a 1-D array is also present in a second array
 	tag_indicator = np.in1d(rnk_list, gene_set, assume_unique=True)
@@ -169,14 +169,15 @@ def enrichment_score_pen(rnk_list, correl_vector, gene_set, background_dist,
 	axis = 1
 		
 	# Our GSEA is actually going to calculate the hit indexes for bg experiments
-	correl_vector = np.tile(correl_vector, (nperm,1))
+	correl_vector = np.tile(correl_vector, (nperm+1,1))
 	gene_indicator = np.array(background_dist)
-	tag_indicator = np.array([np.in1d(gl, gene_set, assume_unique=True) for gl in gene_indicator])
+	tag_indicator = np.append(np.array([np.in1d(gl, gene_set, assume_unique=True) for gl in gene_indicator]), 
+		[tag_indicator], axis = 0)
 	
 	Nhint = tag_indicator.sum(axis=axis, keepdims=True)
 	sum_correl_tag = np.sum(correl_vector*tag_indicator, axis=axis, keepdims=True)
-	no_tag_indicator = 1 - tag_indicator
 
+	no_tag_indicator = 1 - tag_indicator
 	Nmiss =  N - Nhint
 	norm_tag =  1.0/sum_correl_tag
 	norm_no_tag = 1.0/Nmiss
@@ -580,7 +581,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
 		# Prerank with informed null permutation
 		gl, cor_vec = data.index.values, data.values
 		logging.debug("Computing background distribution........................")
-		bg_dist = make_background_dist(bg_lists, n)
+		#bg_dist = make_background_dist(bg_lists, n)
 		logging.debug("Start to compute es and esnulls........................")
 
 		# split large array into smaller blocks to avoid memory overflow
@@ -589,7 +590,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
 		for subset in subsets:
 			rs = np.random.RandomState(seed)
 			temp_esnu.append(pool_esnu.apply_async(enrichment_score_pen,
-				args=(gl, cor_vec, gmt.get(subset), bg_dist, w, n, rs)))
+				args=(gl, cor_vec, gmt.get(subset), bg_lists, w, n, rs)))
 
 		pool_esnu.close()
 		pool_esnu.join()
