@@ -8,7 +8,7 @@ from functools import reduce
 from multiprocessing import Pool
 from math import ceil
 from collections import defaultdict
-from numpy.random import choice
+from numpy.random import choice, normal
 
 def enrichment_score(gene_list, correl_vector, gene_set, weighted_score_type=1, 
 					 nperm=1000, rs=np.random.RandomState(), single=False, scale=False):
@@ -40,7 +40,6 @@ def enrichment_score(gene_list, correl_vector, gene_set, weighted_score_type=1,
 
 		RES: Numerical vector containing the running enrichment score for all locations in the gene list.
 	"""
-
 	N = len(gene_list)
 	# Test whether each element of a 1-D array is also present in a second array
 	# It's more intuitived here than orginal enrichment_score source code.
@@ -60,6 +59,7 @@ def enrichment_score(gene_list, correl_vector, gene_set, weighted_score_type=1,
 	axis = 1
 	tag_indicator = np.tile(tag_indicator, (nperm+1,1))
 	correl_vector = np.tile(correl_vector,(nperm+1,1))
+
 	# gene list permutation
 	for i in range(nperm): rs.shuffle(tag_indicator[i])
 	# np.apply_along_axis(rs.shuffle, 1, tag_indicator)
@@ -96,6 +96,11 @@ def make_background_dist(background_rnk_lists, nperm):
 	for lst in background_rnk_lists:
 		for i, gene in enumerate(lst):
 			gene_dists[gene].append(i)
+	for gene in gene_dists.keys():
+		dist = gene_dists[gene]
+		rand_ints = normal(loc=np.mean(dist), scale=np.std(dist), size=5)
+		rand_ints = [round(i, 0) for i in rand_ints]
+		gene_dists[gene].extend([int(r) if r > 0 else 0 for r in rand_ints])
 
 	# Then make n permutations of that
 	n_genes = len(background_rnk_lists[0])
