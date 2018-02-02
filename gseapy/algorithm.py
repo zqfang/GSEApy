@@ -4,6 +4,7 @@ from __future__ import  division
 
 import sys, logging
 import numpy as np
+import itertools as it
 from functools import reduce
 from multiprocessing import Pool
 from math import ceil
@@ -98,7 +99,8 @@ def make_background_dist(background_rnk_lists, nperm):
 			gene_dists[gene].append(i)
 	for gene in gene_dists.keys():
 		dist = gene_dists[gene]
-		rand_ints = normal(loc=np.mean(dist), scale=np.std(dist), size=5)
+		h = np.median([abs(i[0]-i[1]) for i in it.product(dist, dist)])
+		rand_ints = normal(loc=np.mean(dist), scale=h, size=nperm)
 		rand_ints = [round(i, 0) for i in rand_ints]
 		gene_dists[gene].extend([int(r) if r > 0 else 0 for r in rand_ints])
 
@@ -125,9 +127,10 @@ def make_background_dist(background_rnk_lists, nperm):
 	return tag_indicator
 
 
-def enrichment_score_pen(rnk_list, correl_vector, gene_set, background_dist,
+def enrichment_score_incontext(rnk_list, correl_vector, gene_set, background_dist,
 	weighted_score_type=1, nperm=1000, rs=np.random.RandomState()):
-	"""This is the most important function of GSEApy. It has the same algorithm with GSEA and ssGSEA.
+	"""Calculate enrichment score as in GSEA. Test for significance against a null distribution of enrichment scores
+	created from permuted gene sets based on a user-defined background set of experiments.
 
 	:param gene_list: The ordered gene list gene_name_list, rank_metric.index.values
 	:param gene_set: Gene_sets in gmt file, used gsea_gmt_parser to get gene_set
@@ -582,11 +585,9 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
 														   nperm=n, rs=rs,
 														   single=False, scale=False,)
 
-	elif permutation_type == "gsea_pen":
+	elif permutation_type == "incontext":
 		# Prerank with informed null permutation
 		gl, cor_vec = data.index.values, data.values
-		logging.debug("Computing background distribution........................")
-		#bg_dist = make_background_dist(bg_lists, n)
 		logging.debug("Start to compute es and esnulls........................")
 
 		# split large array into smaller blocks to avoid memory overflow
@@ -594,7 +595,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
 		pool_esnu = Pool(processes=processes)
 		for subset in subsets:
 			rs = np.random.RandomState(seed)
-			temp_esnu.append(pool_esnu.apply_async(enrichment_score_pen,
+			temp_esnu.append(pool_esnu.apply_async(enrichment_score_incontext,
 				args=(gl, cor_vec, gmt.get(subset), bg_lists, w, n, rs)))
 
 		pool_esnu.close()

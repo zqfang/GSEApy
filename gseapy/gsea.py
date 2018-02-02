@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 from numpy import log, exp
 
-from gseapy.algorithm import enrichment_score, enrichment_score_pen, gsea_compute, ranking_metric
+from gseapy.algorithm import enrichment_score, enrichment_score_incontext, gsea_compute, ranking_metric
 from gseapy.algorithm import enrichment_score_tensor, gsea_compute_tensor
 from gseapy.parser import *
 from gseapy.plot import gsea_plot, heatmap
@@ -511,10 +511,10 @@ class Prerank(GSEAbase):
 		return
 
 
-class GSEA_PEN(GSEAbase):
-	"""GSEA-PEN algorithm: GSEAPreranked using background experiments as the null"""
+class GSEA_InContext(GSEAbase):
+	"""GSEA-InContext algorithm: GSEAPreranked using background experiments as the null"""
 
-	def __init__(self, rnk, gene_sets, background_rnks, outdir='GSEA_PEN',
+	def __init__(self, rnk, gene_sets, background_rnks, outdir='GSEA_InContext',
 				 pheno_pos='Pos', pheno_neg='Neg', min_size=15, max_size=500,
 				 permutation_num=1000, weighted_score_type=1,
 				 ascending=False, processes=1, figsize=(6.5,6), format='pdf',
@@ -537,7 +537,7 @@ class GSEA_PEN(GSEAbase):
 		self.seed=seed
 		self.verbose=bool(verbose)
 		self.ranking=None
-		self.module='gsea_pen'
+		self.module='incontext'
 		self._processes=processes
 		self._noplot=no_plot
 		# init logger
@@ -569,21 +569,21 @@ class GSEA_PEN(GSEAbase):
 		# cpu numbers
 		self._set_cores()
 		# Start Analysis
-		self._logger.info("Parsing data files for GSEA")
+		self._logger.info("Parsing data files for GSEA-InContext")
 		# filtering out gene sets and build gene sets dictionary
 		gmt = self.load_gmt(gene_list=dat2.index.values, gmt=self.gene_sets)
 
 		self._logger.info("%04d gene_sets used for further statistical testing" % len(gmt))
-		self._logger.info("Running GSEA-PEN (Might take a while)")
+		self._logger.info("Running GSEA-InContext")
 
 		# compute ES, NES, pval, FDR, RES
 		gsea_results, hit_ind,rank_ES, subsets = gsea_compute(data=dat2, n=self.permutation_num, gmt=gmt,
 			weighted_score_type=self.weighted_score_type, method=None, pheno_pos=self.pheno_pos, 
 			pheno_neg=self.pheno_neg, classes=None, ascending=self.ascending, processes=self._processes, 
-			seed=self.seed, bg_lists=bg_lists, permutation_type='gsea_pen')  
-			# bg_lists, permutation_type determine whether GSEA-PEN algorithm is used
+			seed=self.seed, bg_lists=bg_lists, permutation_type='incontext')  
+			# bg_lists, permutation_type determine whether GSEA-InContext algorithm is used
 
-		self._logger.info("Generating GSEAPY reports figures in %s" % self.outdir)
+		self._logger.info("Generating GSEA-InContext reports figures in %s" % self.outdir)
 		res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
 		self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
 								   gmt=gmt, rank_metric=dat2, permutation_type="gene_sets")
@@ -595,7 +595,7 @@ class GSEA_PEN(GSEAbase):
 						   figsize=self.figsize, format=self.format,
 						   module=self.module, phenoPos=self.pheno_pos, phenoNeg=self.pheno_neg)
 
-		self._logger.info("Done! GSEA-PEN run successfully.\n")
+		self._logger.info("Done! GSEA-InContext run successfully.\n")
 
 		return
 
@@ -1043,11 +1043,11 @@ def prerank(rnk, gene_sets, outdir='GSEA_Prerank', pheno_pos='Pos', pheno_neg='N
 	return pre
 
 
-def gsea_pen(rnk, gene_sets, background_rnks, outdir='GSEA_PEN', pheno_pos='Pos', pheno_neg='Neg',
+def incontext(rnk, gene_sets, background_rnks, outdir='GSEA_PEN', pheno_pos='Pos', pheno_neg='Neg',
 			min_size=15, max_size=500, permutation_num=1000, weighted_score_type=1,
 			ascending=False, processes=1, figsize=(6.5,6), mpl_format='pdf',
 			graph_num=20, no_plot=False, seed=None, verbose=False):
-	""" Run GSEA-PEN, which is GSEAPreranked but using a background set of experiments defined by user.
+	""" Run GSEA-InContext, which is GSEAPreranked but using a background set of experiments defined by user.
 
 	:param rnk: pre-ranked correlation table or pandas DataFrame. Same input as ``GSEA`` .rnk file.
 	:param gene_sets: Enrichr Library name or .gmt gene sets file. Same input as GSEA.
@@ -1078,11 +1078,11 @@ def gsea_pen(rnk, gene_sets, background_rnks, outdir='GSEA_PEN', pheno_pos='Pos'
 			| matched_size: genes matched to the data,
 			| genes: gene names from the data set}
 	"""
-	pen = GSEA_PEN(rnk, gene_sets, background_rnks, outdir, pheno_pos, pheno_neg,
+	ic = GSEA_InContext(rnk, gene_sets, background_rnks, outdir, pheno_pos, pheno_neg,
 				  min_size, max_size, permutation_num, weighted_score_type,
 				  ascending, processes, figsize, mpl_format, graph_num, no_plot, seed, verbose)
-	pen.run()
-	return pen
+	ic.run()
+	return ic
 
 
 def ssgsea(data, gene_sets, outdir="ssGSEA_", sample_norm_method='rank', min_size=15, max_size=2000,

@@ -47,6 +47,14 @@ def main():
                       args.figsize, args.format, args.graph, args.noplot, args.seed, args.verbose)
         pre.run()
 
+    elif subcommand == "incontext":
+        from .gsea import GSEA_InContext
+
+        ic = GSEA_InContext(args.rnk, args.gmt, args.bg_rnks, args.outdir, args.label[0], args.label[1],
+                      args.mins, args.maxs, args.n, args.weight, args.ascending, args.threads,
+                      args.figsize, args.format, args.graph, args.noplot, args.seed, args.verbose)
+        ic.run()
+
     elif subcommand == "ssgsea":
         from .gsea import SingleSampleGSEA
         ss = SingleSampleGSEA(data=args.data, gene_sets=args.gmt, outdir=args.outdir,
@@ -84,6 +92,8 @@ def prepare_argparser():
     add_gsea_parser(subparsers)
     # command for 'prerank'
     add_prerank_parser(subparsers)
+    # command for 'incontext'
+    add_incontext_parser(subparsers)
     # command for 'ssgsea'
     add_singlesample_parser(subparsers)
     # command for 'plot'
@@ -203,6 +213,46 @@ def add_prerank_parser(subparsers):
     prerank_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=None, metavar='',
                              help="Number of random seed. Default: None")
     prerank_opt.add_argument("-p", "--threads", dest = "threads", action="store", type=int, default=1, metavar='procs',
+                           help="Number of Processes you are going to use. Default: 1")
+
+    return
+
+def add_incontext_parser(subparsers):
+    """Add function 'incontext' argument parsers."""
+
+    argparser_incontext = subparsers.add_parser("incontext", help="Run GSEA-InContext tool on preranked gene list and background gene lists.")
+
+    # group for input files
+    incontext_input = argparser_incontext.add_argument_group("Input files arguments")
+    incontext_input.add_argument("-r", "--rnk", dest="rnk", action="store", type=str, required=True,
+                             help="ranking metric file in .rnk format.Same with GSEA.")
+    incontext_input.add_argument("-r", "--bg_rnks", dest="bg_rnks", action="store", type=str, required=True,
+                             help="Single column file with all")
+    incontext_input.add_argument("-g", "--gmt", dest="gmt", action="store", type=str, required=True,
+                             help="Gene set database in GMT format. Same with GSEA.")
+    incontext_input.add_argument("-l", "--label", action='store', nargs=2, dest='label',
+                             metavar=('pos', 'neg'), type=str, default=('Pos','Neg'),
+                             help="The phenotype label argument need two parameter to define. Default: ('Pos','Neg')")
+
+    # group for output files
+    incontext_output = argparser_incontext.add_argument_group("Output arguments")
+    add_output_option(incontext_output)
+
+     # group for General options.
+    incontext_opt = argparser_incontext.add_argument_group("GSEA-InContext advanced arguments")
+    incontext_opt.add_argument("-n", "--permu-num", dest = "n", action="store", type=int, default=1000, metavar='nperm',
+                             help="Number of random permutations. For calculating esnulls. Default: 1000")
+    incontext_opt.add_argument("--min-size",  dest="mins", action="store", type=int, default=15, metavar='int',
+                             help="Min size of input genes presented in Gene Sets. Default: 15")
+    incontext_opt.add_argument("--max-size", dest = "maxs", action="store", type=int, default=500, metavar='int',
+                             help="Max size of input genes presented in Gene Sets. Default: 500")
+    incontext_opt.add_argument("-w", "--weight", action='store', dest='weight', default=1.0, type=float, metavar='float',
+                             help='Weighted_score of rank_metrics.For weighting input genes. Choose from {0, 1, 1.5, 2},default: 1',)
+    incontext_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
+                             help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
+    incontext_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=None, metavar='',
+                             help="Number of random seed. Default: None")
+    incontext_opt.add_argument("-p", "--threads", dest = "threads", action="store", type=int, default=1, metavar='procs',
                            help="Number of Processes you are going to use. Default: 1")
 
     return
