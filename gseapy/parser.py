@@ -150,28 +150,12 @@ def get_library_name():
 
     # make a get request to get the gmt names and meta data from Enrichr
     """old code
-    #python 2
-    if sys.version_info[0] == 2 :
-        import urllib2
-        x = urllib2.urlopen('http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary?mode=meta')
-        response = x.read()
-        gmt_data = json.loads(response)
-
-    # python 3
-    elif sys.version_info[0] >= 3:
-        import urllib
-        x = urllib.request.urlopen('http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary?mode=meta')
-        response = x.read()
-        gmt_data = json.loads(response.decode('utf-8'))
-    else:
-        sys.stderr.write("System failure. Please Provide correct input files")
-        sys.exit(1)
+    response = requests.get('http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary?mode=meta')
+    gmt_data = response.json()
     # generate list of lib names
     libs = []
-
     # get library names
     for inst_gmt in gmt_data['libraries']:
-
         # only include active gmts
         if inst_gmt['isActive'] == True:
             libs.append(inst_gmt['libraryName'])
