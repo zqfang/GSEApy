@@ -557,8 +557,10 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
         observed S wih NES(S) >= 0, whose NES(S) >= NES*, and similarly if NES(S) = NES* <= 0.
     """
     # For a zero by zero division (undetermined, results in a NaN),
-    np.seterr(divide='ignore', invalid='ignore')
-
+    # np.seterr(divide='ignore', invalid='ignore')
+    import warnings
+    warnings.simplefilter("ignore")
+    
     logging.debug("Start to compute pvals..................................")
     # compute pvals.
     enrichmentPVals = gsea_pval(enrichment_scores, enrichment_nulls).tolist()
