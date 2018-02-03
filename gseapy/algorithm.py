@@ -45,7 +45,7 @@ def enrichment_score(gene_list, correl_vector, gene_set, weighted_score_type=1,
     # Test whether each element of a 1-D array is also present in a second array
     # It's more intuitived here than orginal enrichment_score source code.
     # use .astype to covert bool to intergers
-    tag_indicator = np.in1d(gene_list, gene_set, assume_unique=True).asytpe(int)  # notice that the sign is 0 (no tag) or 1 (tag)
+    tag_indicator = np.in1d(gene_list, gene_set, assume_unique=True).astype(int)  # notice that the sign is 0 (no tag) or 1 (tag)
 
     if weighted_score_type == 0 :
         correl_vector = np.repeat(1, N)
@@ -556,6 +556,8 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
         NES(S,pi) >= 0, whose NES(S,pi) >= NES*, divided by the percentage of
         observed S wih NES(S) >= 0, whose NES(S) >= NES*, and similarly if NES(S) = NES* <= 0.
     """
+    # For a zero by zero division (undetermined, results in a NaN),
+    np.seterr(divide='ignore', invalid='ignore')
 
     logging.debug("Start to compute pvals..................................")
     # compute pvals.
