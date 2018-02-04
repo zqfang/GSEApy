@@ -2,6 +2,8 @@
 GSEA-InContext: Gene Set Enrichment Analysis In Context
 ========
 
+Our BioRxiv preprint is now available! `Read it here <https://www.biorxiv.org/content/early/2018/02/04/259440>`_ for the full details on GSEA-InContext.
+
 Gene Set Enrichment Analysis (GSEA) is routinely used to analyze and interpret coordinate changes in transcriptomics experiments. For an experiment where less than seven samples per condition are compared, GSEA employs a competitive null hypothesis to test significance. A gene set enrichment score is tested against a null distribution of enrichment scores generated from permuted gene sets, where genes are randomly selected from the input experiment. Looking across a variety of biological conditions, however, genes are not randomly distributed with many showing consistent patterns of up- or down-regulation. As a result, common patterns of positively and negatively enriched gene sets are observed across experiments. Placing a single experiment into the context of a relevant set of background experiments allows us to identify both the common and experiment-specific patterns of gene set enrichment. We developed the GSEA-InContext method to allow a user to account for gene expression patterns within a defined background set of experiments to identify statistically significantly enriched gene sets in their own experiment.
 
 See below for examples on running the GSEA-InContext algorithm.
