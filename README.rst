@@ -40,7 +40,7 @@ Running GSEApy and GSEA-InContext
 Before you start:
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Convert all gene symbol names to uppercase. The ranked lists input to ``prerank`` or ``gsea_pen`` can be supplied as file paths (.rnk) or a two-column Pandas DataFrame (columns ``gene_name`` and ``fold_change``). The background ranked lists input to ``gsea_pen`` can be supplied as a path to a directory containing the desired .rnk files, or as a Pandas DataFrame with each column containing the rank-ordered list of genes for a given background experiment.
+Convert all gene symbol names to uppercase. The ranked lists input to ``prerank`` or ``incontext`` can be supplied as file paths (.rnk) or a two-column Pandas DataFrame (columns ``gene_name`` and ``fold_change``). The background ranked lists input to ``incontext`` is supplied as a text file containing the list of .rnk files to use in permutation, or as a .csv file containing pre-permuted gene lists created with the ``make_background_dist()`` function.
 
 
 Run GSEAPY inside Python console:
@@ -53,10 +53,12 @@ Run GSEAPY inside Python console:
     import gseapy
 
     # Run GSEA Prerank
-    gseapy.prerank(rnk='gsea_data.rnk', gene_sets='gene_sets.gmt', outdir='test')
+    gseapy.prerank(rnk='gsea_data.rnk', gene_sets='gene_sets.gmt', outdir='out')
 
     # Run GSEA-InContext
-    gseapy.incontext(rnk='gsea_data.rnk', gene_sets='gene_sets.gmt', backround_rnks = 'permuted_background.csv', outdir='test')
+    gseapy.incontext(rnk='gsea_data.rnk', gene_sets='gene_sets.gmt', backround_rnks = 'permuted_background.csv', outdir='out')
+
+A full example can be seen in ``run_example.py``. The full analysis of Kegg and Hallmarks gene sets was run with ``run_all_442.py``.
 
 
 Bug Reports
