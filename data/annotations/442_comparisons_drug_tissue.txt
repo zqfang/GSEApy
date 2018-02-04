@@ -1,0 +1,443 @@
+gse	rnk_list	drug	tissue_type	cell_type	cell_line	moa	MAFF_rank	CCNE2_rank	MAFF_logFC	CCNE2_logFC
+GSE10299	GSE10299_DEG_Expt1_Control_vs_Group1	Go6976	epithelial	cell line	SQ20B	PKC inhibitor	11807	10353	-0.059271033	-0.029908546
+GSE10299	GSE10299_DEG_Expt1_Control_vs_Group2	Go6976	epithelial	cell line	SQ20B	PKC inhibitor	251	16638	0.615273141	-0.714168669
+GSE10311	GSE10311_DEG_Expt1_Control_vs_Group1	dexamethasone	bone	primary		glucocorticoid receptor agonist	15676	1043	-0.388180375	0.52634354
+GSE10410	GSE10410_DEG_Expt1_Control_vs_Group1	myclobutanil	liver	primary		Other	7464	12037	0.024855376	-0.080133735
+GSE10410	GSE10410_DEG_Expt1_Control_vs_Group2	triadimefon	liver	primary		Other	9	11285	1.63713132	-0.088455295
+GSE10592	GSE10592_DEG_Expt1_Control_vs_Group1	azithromycin	epithelial	primary		antibiotics	99	16817	0.357775148	-0.519047015
+GSE10592	GSE10592_DEG_Expt2_Control_vs_Group1	azithromycin	epithelial	primary		antibiotics	3	16807	0.888271779	-0.320124344
+GSE11142	GSE11142_DEG_Expt1_Control_vs_Group1	nicotine	"blood, lymphoid"	cell line	CEM	acetylcholine receptor agonist	13955	4863	-0.094745283	0.057908411
+GSE11285	GSE11285_DEG_Expt1_Control_vs_Group1	enzastaurin	brain	cell line	U251	PKC inhibitor	12954	16771	-0.0795041	-0.353929562
+GSE11285	GSE11285_DEG_Expt2_Control_vs_Group1	enzastaurin	brain	cell line	U251	PKC inhibitor	15829	10139	-0.212152221	-0.027292756
+GSE11285	GSE11285_DEG_Expt3_Control_vs_Group1	enzastaurin	brain	cell line	U251	PKC inhibitor	14057	250	-0.113134132	0.51182436
+GSE11336	GSE11336_DEG_Expt1_Control_vs_Group1	dexamethasone	"blood, lymphoid"	cell line	CCRF-CEM-C7H2	glucocorticoid receptor agonist	363	1753	0.337933724	0.172821558
+GSE11336	GSE11336_DEG_Expt2_Control_vs_Group1	dexamethasone	"blood, lymphoid"	cell line	CCRF-CEM-C7H2	glucocorticoid receptor agonist	1905	3520	0.328159459	0.160345893
+GSE11352	GSE11352_DEG_Expt1_Control_vs_Group1	estradiol	breast	cell line	MCF7	estrogen receptor agonist	90	15160	0.897816909	-0.277189312
+GSE11352	GSE11352_DEG_Expt2_Control_vs_Group1	estradiol	breast	cell line	MCF7	estrogen receptor agonist	43	6025	1.364757486	0.086638778
+GSE11352	GSE11352_DEG_Expt3_Control_vs_Group1	estradiol	breast	cell line	MCF7	estrogen receptor agonist	1667	648	0.243132557	0.399853606
+GSE11428	GSE11428_DEG_Expt1_Control_vs_Group1	DHT	prostate	cell line	LNCaP	androgen receptor agonist	7828	16865	0.004273712	-1.089917094
+GSE11428	GSE11428_DEG_Expt1_Control_vs_Group2	DHT	prostate	cell line	LNCaP	androgen receptor agonist	9032	6999	-0.03007732	0.008519414
+GSE11506	GSE11506_DEG_Expt1_Control_vs_Group1	estradiol	breast	cell line	MCF7	estrogen receptor agonist	9585	3697	-0.026455444	0.066659871
+GSE11550	GSE11550_DEG_Expt1_Control_vs_Group1	elesclomol	skin	cell line	294T	oxidative stress inducer	122	16626	1.238342835	-0.735512336
+GSE11551	GSE11551_DEG_Expt1_Control_vs_Group1	elesclomol	skin	cell line	294T	oxidative stress inducer	75	16756	1.607993062	-1.225819345
+GSE11791	GSE11791_DEG_Expt1_Control_vs_Group1	estradiol	breast	cell line	MCF7	estrogen receptor agonist	4087	34	0.095839766	2.07556058
+GSE11959	GSE11959_DEG_Expt1_Control_vs_Group1	h10H5	brain	cell line	SK-N-AS	IGF1R inhibitor	2917	16894	0.133259979	-2.079912452
+GSE12261	GSE12261_DEG_Expt1_Control_vs_Group1	2-methoxyestradiol	muscle	primary		hypoxia inducible factor inhibitor	2757	16378	0.113332525	-0.224678271
+GSE12261	GSE12261_DEG_Expt2_Control_vs_Group1	2-methoxyestradiol	muscle	primary		hypoxia inducible factor inhibitor	15367	15887	-0.160326183	-0.193348689
+GSE13762	GSE13762_DEG_Expt1_Control_vs_Group1	vitamin D3	"blood, myeloid"	primary		"Vitamin,mineral,metabolite"	16366	8573	-0.590461843	0.005404454
+GSE13762	GSE13762_DEG_Expt2_Control_vs_Group1	vitamin D3	"blood, myeloid"	primary		"Vitamin,mineral,metabolite"	239	2794	1.277080626	0.24466679
+GSE13818	GSE13818_DEG_Expt1_Control_vs_Group1	HIF-2a inhibitors	kidney	cell line	786-O	PPAR receptor agonist	12656	16703	-0.097073051	-0.769673675
+GSE13818	GSE13818_DEG_Expt1_Control_vs_Group2	HIF-2a inhibitors	kidney	cell line	786-O	PPAR receptor agonist	5358	16683	0.056338567	-0.655591508
+GSE13818	GSE13818_DEG_Expt1_Control_vs_Group3	HIF-2a inhibitors	kidney	cell line	786-O	PPAR receptor agonist	8526	15471	-0.006006055	-0.200807184
+GSE13818	GSE13818_DEG_Expt1_Control_vs_Group4	HIF-2a inhibitors	kidney	cell line	786-O	PPAR receptor agonist	1286	11656	0.189164872	-0.062240544
+GSE13987	GSE13987_DEG_Expt1_Control_vs_Group1	rolipram	"blood, lymphoid"	primary		phosphodiesterase inhibitor	529	9279	0.540402672	-0.023327212
+GSE13987	GSE13987_DEG_Expt2_Control_vs_Group1	rolipram	"blood, lymphoid"	primary		phosphodiesterase inhibitor	650	165	0.42021798	0.718286989
+GSE13987	GSE13987_DEG_Expt3_Control_vs_Group1	rolipram	"blood, lymphoid"	primary		phosphodiesterase inhibitor	50	15249	0.620136516	-0.137581883
+GSE14103	GSE14103_DEG_Expt1_Control_vs_Group1	nocodazole	colorectal	cell line	HCT116	microtubule inhibitor	14428	16894	-0.308286907	-2.436990598
+GSE14385	GSE14385_DEG_Expt1_Control_vs_Group1	5-aza	epithelial	cell line	BEAS-2B	DNA methyltransferase inhibitor	453	16542	1.137123347	-1.270675005
+GSE14986	GSE14986_DEG_Expt1_Control_vs_Group1	fulvestrant	breast	cell line	MCF7	estrogen receptor antagonist	6959	16892	0.067904194	-3.50173933
+GSE14986	GSE14986_DEG_Expt2_Control_vs_Group1	fulvestrant	breast	cell line	MCF7	estrogen receptor antagonist	8912	16872	0.012020754	-2.281083085
+GSE15389	GSE15389_DEG_Expt1_Control_vs_Group1	R547	"blood, PBMCs"	primary		CDK inhibitor	7888	12904	0.008937614	-0.079702971
+GSE15389	GSE15389_DEG_Expt1_Control_vs_Group2	R547	"blood, PBMCs"	primary		CDK inhibitor	2364	12883	0.151744277	-0.123691984
+GSE15389	GSE15389_DEG_Expt2_Control_vs_Group1	R547	"blood, PBMCs"	primary		CDK inhibitor	3787	16020	0.07554975	-0.190849616
+GSE15389	GSE15389_DEG_Expt2_Control_vs_Group2	R547	"blood, PBMCs"	primary		CDK inhibitor	11365	14737	-0.047530898	-0.326489453
+GSE15392	GSE15392_DEG_Expt1_Control_vs_Group2	R547	prostate	cell line	DU145	CDK inhibitor	44	2477	0.898766946	0.15618143
+GSE15392	GSE15392_DEG_Expt1_Control_vs_Group3	R547	prostate	cell line	DU145	CDK inhibitor	2	37	4.270057527	2.416366354
+GSE15392	GSE15392_DEG_Expt2_Control_vs_Group1	R547	prostate	cell line	DU145	CDK inhibitor	16677	15805	-1.115583433	-0.395292187
+GSE15392	GSE15392_DEG_Expt2_Control_vs_Group2	R547	prostate	cell line	DU145	CDK inhibitor	132	16775	0.223699863	-0.354529486
+GSE15392	GSE15392_DEG_Expt2_Control_vs_Group3	R547	prostate	cell line	DU145	CDK inhibitor	16618	16220	-1.024121837	-0.57607725
+GSE15392	GSE15392_DEG_Expt3_Control_vs_Group1	R547	prostate	cell line	DU145	CDK inhibitor	15173	16749	-0.908172128	-3.012236651
+GSE15392	GSE15392_DEG_Expt3_Control_vs_Group3	R547	prostate	cell line	DU145	CDK inhibitor	26	16853	1.564577298	-3.379788681
+GSE15395	GSE15395_DEG_Expt1_Control_vs_Group1	R547	colon	cell line	HCT116	CDK inhibitor	16805	16723	-0.803900919	-0.635663002
+GSE15395	GSE15395_DEG_Expt1_Control_vs_Group2	R547	colon	cell line	HCT116	CDK inhibitor	16113	16037	-0.312167201	-0.291513665
+GSE15395	GSE15395_DEG_Expt1_Control_vs_Group3	R547	colon	cell line	HCT116	CDK inhibitor	16873	16767	-0.888810609	-0.595018634
+GSE15395	GSE15395_DEG_Expt2_Control_vs_Group1	R547	colon	cell line	HCT116	CDK inhibitor	8149	16874	0.051452137	-3.512431109
+GSE15395	GSE15395_DEG_Expt2_Control_vs_Group2	R547	colon	cell line	HCT116	CDK inhibitor	16184	1556	-0.362556092	0.235050028
+GSE15395	GSE15395_DEG_Expt2_Control_vs_Group3	R547	colon	cell line	HCT116	CDK inhibitor	13021	16743	-0.113963407	-0.864825292
+GSE15395	GSE15395_DEG_Expt3_Control_vs_Group2	R547	colon	cell line	HCT116	CDK inhibitor	9980	16893	-0.026691561	-1.235151716
+GSE15395	GSE15395_DEG_Expt3_Control_vs_Group3	R547	colon	cell line	HCT116	CDK inhibitor	16710	16874	-0.855473728	-1.274669122
+GSE15395	GSE15395_DEG_Expt4_Control_vs_Group1	R547	colon	cell line	HCT116	CDK inhibitor	16191	16892	-0.896002792	-2.873364455
+GSE15395	GSE15395_DEG_Expt4_Control_vs_Group2	R547	colon	cell line	HCT116	CDK inhibitor	16339	16894	-0.335983956	-1.79014752
+GSE15395	GSE15395_DEG_Expt4_Control_vs_Group3	R547	colon	cell line	HCT116	CDK inhibitor	14188	16894	-0.251813943	-2.309176592
+GSE15395	GSE15395_DEG_Expt5_Control_vs_Group2	R547	colon	cell line	HCT116	CDK inhibitor	16439	16894	-0.53678075	-1.911284542
+GSE15918	GSE15918_DEG_Expt1_Control_vs_Group1	CP-529414	adrenal	cell line	H295R	cholesteryl ester transfer protein inhibitor	24	13258	2.094964515	-0.079861316
+GSE15918	GSE15918_DEG_Expt1_Control_vs_Group2	angiotensin II	adrenal	cell line	H295R	vasoconstrictor	172	13926	0.408221361	-0.131292353
+GSE15947	GSE15947_DEG_Expt1_Control_vs_Group1	vitamin D3	prostate	cell line	RWPE1	"Vitamin,mineral,metabolite"	6476	16032	0.086554871	-0.525568939
+GSE15947	GSE15947_DEG_Expt2_Control_vs_Group1	vitamin D3	prostate	cell line	RWPE1	"Vitamin,mineral,metabolite"	16458	16086	-0.361106296	-0.274394326
+GSE15947	GSE15947_DEG_Expt3_Control_vs_Group1	vitamin D3	prostate	cell line	RWPE1	"Vitamin,mineral,metabolite"	159	13056	0.820709977	-0.089402701
+GSE16179	GSE16179_DEG_Expt1_Control_vs_Group1	foretinib	breast	cell line	BT474-J4	VEGFR inhibitor	16886	6283	-1.320791899	0.029550794
+GSE16385	GSE16385_DEG_Expt1_Control_vs_Group1	rosiglitazone	"blood, myeloid"	primary		PPAR receptor agonist	9736	13	-0.024775715	0.652570314
+GSE16683	GSE16683_DEG_Expt1_Control_vs_Group1	estradiol	endothelial	cell line	HUVEC	estrogen receptor agonist	15144	15999	-0.276787902	-0.38189071
+GSE17044	GSE17044_DEG_Expt1_Control_vs_Group1	R1881	prostate	cell line	LNCaP	androgen receptor agonist	19	16368	3.244999048	-0.730480698
+GSE17785	GSE17785_DEG_Expt1_Control_vs_Group1	GDC-0941	breast	cell line	MCF10A	PI3K inhibitor	13	15997	1.011699956	-0.218301023
+GSE17785	GSE17785_DEG_Expt2_Control_vs_Group1	GDC-0941	breast	cell line	MCF10A	PI3K inhibitor	120	16081	0.782709017	-0.383148704
+GSE18198	GSE18198_DEG_Expt1_Control_vs_Group1	SAHM1	"blood, lymphoid"	cell line	KOPT	Notch inhibitor	12764	5239	-0.182813056	0.0978843
+GSE18198	GSE18198_DEG_Expt2_Control_vs_Group1	SAHM1	"blood, lymphoid"	cell line	HPB	Notch inhibitor	2853	3223	0.15509449	0.137999561
+GSE18571	GSE18571_DEG_Expt1_Control_vs_Group1	rapamycin	breast	cell line	MDA-MB-468	mTOR inhibitor	30	16470	0.828713839	-0.322420178
+GSE18571	GSE18571_DEG_Expt2_Control_vs_Group1	rapamycin	breast	cell line	MDA-MB-468	mTOR inhibitor	2207	5937	0.12900391	0.05027619
+GSE18571	GSE18571_DEG_Expt3_Control_vs_Group1	rapamycin	breast	cell line	MDA-MB-468	mTOR inhibitor	1784	16443	0.171101031	-0.243738307
+GSE18668	GSE18668_DEG_Expt1_Control_vs_Group1	trichostatin	skin	cell line	TC-797	HDAC inhibitor	332	16688	2.482991798	-2.340336614
+GSE18668	GSE18668_DEG_Expt2_Control_vs_Group1	trichostatin	skin	cell line	PER-403	HDAC inhibitor	2889	16843	0.339763599	-1.856708588
+GSE19510	GSE19510_DEG_Expt1_Control_vs_Group1	benzo[a]pyrene diol epoxide	lung	primary		Carcinogen	271	16880	0.757134501	-2.761833055
+GSE19510	GSE19510_DEG_Expt1_Control_vs_Group2	benzo[a]pyrene diol epoxide	lung	primary		Carcinogen	131	16846	1.233509872	-2.091899067
+GSE19510	GSE19510_DEG_Expt1_Control_vs_Group3	benzo[a]pyrene diol epoxide	lung	primary		Carcinogen	381	16727	0.729561901	-0.983167206
+GSE19519	GSE19519_DEG_Expt1_Control_vs_Group1	tunicamycin	"blood, lymphoid"	primary		antibiotics	518	16892	0.594478778	-1.517957224
+GSE21270	GSE21270_DEG_Expt1_Control_vs_Group1	MNNG	epithelial	primary		Carcinogen	84	127	0.662672827	0.605554464
+GSE21270	GSE21270_DEG_Expt2_Control_vs_Group1	MNNG	epithelial	primary		Carcinogen	15353	15785	-0.3207456	-0.390020921
+GSE21270	GSE21270_DEG_Expt3_Control_vs_Group1	MNNG	epithelial	primary		Carcinogen	15412	11077	-0.233166601	-0.054368339
+GSE22152	GSE22152_DEG_Expt1_Control_vs_Group1	dexamethasone	"blood, lymphoid"	cell line	CCRF-CEM	glucocorticoid receptor agonist	6485	4302	0.020255174	0.06464896
+GSE22152	GSE22152_DEG_Expt2_Control_vs_Group1	dexamethasone	"blood, lymphoid"	cell line	CCRF-CEM	glucocorticoid receptor agonist	7480	8520	0.007073119	-0.013393185
+GSE22606	GSE22606_DEG_Expt1_Control_vs_Group1	R1881	prostate	cell line	LNCaP	androgen receptor agonist	85	16800	2.145373787	-1.696043696
+GSE23610	GSE23610_DEG_Expt1_Control_vs_Group1	estradiol	breast	cell line	MCF7	estrogen receptor agonist	538	551	0.495456991	0.489078267
+GSE23610	GSE23610_DEG_Expt1_Control_vs_Group2	ferulic acid	breast	cell line	MCF7	antioxidant	607	6670	0.163250704	0.01359782
+GSE23610	GSE23610_DEG_Expt1_Control_vs_Group3	ferulic acid	breast	cell line	MCF7	antioxidant	8943	212	0.000720337	0.247199105
+GSE23610	GSE23610_DEG_Expt1_Control_vs_Group4	ferulic acid	breast	cell line	MCF7	antioxidant	7514	810	0.009885329	0.157656525
+GSE23984	GSE23984_DEG_Expt1_Control_vs_Group1	TX527	lymph	primary		"Vitamin,mineral,metabolite"	16724	4246	-0.767700821	0.063720852
+GSE24468	GSE24468_DEG_Expt1_Control_vs_Group1	R5020	breast	primary		Progesterone receptor agonists	13850	1511	-0.152074075	0.35520922
+GSE24869	GSE24869_DEG_Expt1_Control_vs_Group1	LTB4	"blood, myeloid"	primary		leukocyte activator	36	8865	0.725324284	-0.000273557
+GSE25547	GSE25547_DEG_Expt1_Control_vs_Group1	GW7647	liver	cell line	HEPG2	PPAR receptor agonist	599	67	0.240912417	0.492315384
+GSE25547	GSE25547_DEG_Expt1_Control_vs_Group2	GW7647	liver	cell line	HEPG2	PPAR receptor agonist	237	16275	0.464133466	-0.265730645
+GSE26114	GSE26114_DEG_Expt1_Control_vs_Group1	ABT-869	"blood, myeloid"	cell line	MV4-11	VEGFR inhibitor	16874	11	-1.413421775	1.188211713
+GSE26114	GSE26114_DEG_Expt1_Control_vs_Group2	SAHA	"blood, myeloid"	cell line	MV4-11	HDAC inhibitor	16863	260	-1.067561552	0.822161281
+GSE26114	GSE26114_DEG_Expt1_Control_vs_Group3	ABT-869|SAHA	"blood, myeloid"	cell line	MV4-11	VEGFR inhibitor|HDAC inhibitor	16884	256	-2.21474798	0.957627628
+GSE26114	GSE26114_DEG_Expt2_Control_vs_Group1	ABT-869	"blood, myeloid"	cell line	MOLM-14	VEGFR inhibitor	16879	5128	-0.853438328	0.072496141
+GSE26114	GSE26114_DEG_Expt2_Control_vs_Group2	SAHA	"blood, myeloid"	cell line	MOLM-14	HDAC inhibitor	925	16866	0.534157827	-1.075668489
+GSE26114	GSE26114_DEG_Expt2_Control_vs_Group3	ABT-869|SAHA	"blood, myeloid"	cell line	MOLM-14	VEGFR inhibitor|HDAC inhibitor	10383	16891	-0.082234068	-2.021836949
+GSE26351	GSE26351_DEG_Expt1_Control_vs_Group1	BIO	"blood, PBMCs"	primary		Wnt activator	70	16516	0.617690835	-0.294472332
+GSE26351	GSE26351_DEG_Expt1_Control_vs_Group2	rhBMP4	"blood, PBMCs"	primary		Other	3976	14411	0.094869088	-0.122359439
+GSE26599	GSE26599_DEG_Expt1_Control_vs_Group1	doxorubicin	breast	cell line	HB4a	topoisomerase inhibitor	395	16809	0.616589309	-0.722801733
+GSE26599	GSE26599_DEG_Expt1_Control_vs_Group2	rapamycin	breast	cell line	HB4a	mTOR inhibitor	16	1368	1.388983267	0.380132337
+GSE26599	GSE26599_DEG_Expt1_Control_vs_Group3	doxorubicin|rapamycin	breast	cell line	HB4a	topoisomerase inhibitor|mTOR inhibitor	17	11737	1.735871242	-0.083923911
+GSE26599	GSE26599_DEG_Expt2_Control_vs_Group1	doxorubicin	breast	cell line	C5.2	topoisomerase inhibitor	638	16424	1.198457601	-0.58666029
+GSE26599	GSE26599_DEG_Expt2_Control_vs_Group2	rapamycin	breast	cell line	C5.2	mTOR inhibitor	3	3108	2.262779865	0.626883836
+GSE26599	GSE26599_DEG_Expt2_Control_vs_Group3	doxorubicin|rapamycin	breast	cell line	C5.2	topoisomerase inhibitor|mTOR inhibitor	5	13347	2.389413546	-0.254669611
+GSE26599	GSE26599_DEG_Expt3_Control_vs_Group1	doxorubicin	breast	cell line	SKBR3	topoisomerase inhibitor	6049	600	0.041069317	0.277018058
+GSE26599	GSE26599_DEG_Expt3_Control_vs_Group2	rapamycin	breast	cell line	SKBR3	mTOR inhibitor	90	16840	0.781202105	-1.279702103
+GSE26599	GSE26599_DEG_Expt3_Control_vs_Group3	doxorubicin|rapamycin	breast	cell line	SKBR3	topoisomerase inhibitor|mTOR inhibitor	59	16850	0.956662131	-1.306088217
+GSE28645	GSE28645_DEG_Expt1_Control_vs_Group1	tamoxifen	breast	cell line	LY2	estrogen receptor antagonist	156	2924	0.303298808	0.091568585
+GSE28995	GSE28995_DEG_Expt1_Control_vs_Group1	retinoic acid	"blood, myeloid"	cell line	THP-1	retinoid receptor ligand	6959	14405	0.023485541	-0.601657854
+GSE28995	GSE28995_DEG_Expt1_Control_vs_Group2	TNF-alpha	"blood, myeloid"	cell line	THP-1	immunomodulator	33	11719	2.534908145	-0.14366749
+GSE28995	GSE28995_DEG_Expt1_Control_vs_Group3	retinoic acid|TNF-alpha	"blood, myeloid"	cell line	THP-1	retinoid receptor ligand|immunomodulator	24	544	3.369136491	0.763084779
+GSE29828	GSE29828_DEG_Expt1_Control_vs_Group1	EPZ004777	"blood, myeloid"	cell line	MV4-11	histone lysine methyltransferase inhibitor	16890	4952	-0.961131647	0.081195098
+GSE29828	GSE29828_DEG_Expt2_Control_vs_Group1	EPZ004777	"blood, myeloid"	cell line	MV4-11	histone lysine methyltransferase inhibitor	16889	14929	-3.175124766	-0.230630049
+GSE29828	GSE29828_DEG_Expt3_Control_vs_Group1	EPZ004777	"blood, myeloid"	cell line	MV4-11	histone lysine methyltransferase inhibitor	16888	16204	-2.225635689	-0.585811788
+GSE29828	GSE29828_DEG_Expt4_Control_vs_Group1	EPZ004777	"blood, myeloid"	cell line	MOLM-13	histone lysine methyltransferase inhibitor	16741	10203	-1.203752431	0.002019207
+GSE29868	GSE29868_DEG_Expt1_Control_vs_Group1	atorvastatin	liver	primary		HMGCR inhibitor	16832	16644	-0.637767305	-0.41233541
+GSE29868	GSE29868_DEG_Expt2_Control_vs_Group1	atorvastatin	liver	primary		HMGCR inhibitor	16796	14441	-0.434639659	-0.12645355
+GSE29868	GSE29868_DEG_Expt3_Control_vs_Group1	atorvastatin	liver	primary		HMGCR inhibitor	2644	16651	0.163741453	-0.489342372
+GSE29868	GSE29868_DEG_Expt4_Control_vs_Group1	atorvastatin	liver	primary		HMGCR inhibitor	34	16531	0.861219264	-0.555759411
+GSE29868	GSE29868_DEG_Expt5_Control_vs_Group1	atorvastatin	liver	primary		HMGCR inhibitor	4	12400	2.112777507	-0.104157938
+GSE29881	GSE29881_DEG_Expt1_Control_vs_Group1	estradiol	endothelial	cell line	HUAEC	estrogen receptor agonist	681	627	0.212475434	0.218233214
+GSE29881	GSE29881_DEG_Expt1_Control_vs_Group2	oxLDL	endothelial	cell line	HUAEC	Other	1095	459	0.179194006	0.25724684
+GSE29881	GSE29881_DEG_Expt1_Control_vs_Group3	estradiol|oxLDL	endothelial	cell line	HUAEC	estrogen receptor agonist|Other	2894	204	0.098464409	0.336164374
+GSE30188	GSE30188_DEG_Expt1_Control_vs_Group1	CCG-1423	prostate	cell line	PC-3	RhoA  inhibitor	316	16836	1.355629523	-3.086771296
+GSE30188	GSE30188_DEG_Expt1_Control_vs_Group2	DRB	prostate	cell line	PC-3	Transcription factor inhibitor	333	16638	1.309300785	-1.549632497
+GSE30531	GSE30531_DEG_Expt1_Control_vs_Group1	MLN4924	skin	cell line	A375	nedd activating enzyme inhibitor	3254	701	0.084832274	0.16775976
+GSE30531	GSE30531_DEG_Expt2_Control_vs_Group1	MLN4924	skin	cell line	A375	nedd activating enzyme inhibitor	348	160	0.245681179	0.322986933
+GSE30531	GSE30531_DEG_Expt3_Control_vs_Group1	MLN4924	skin	cell line	A375	nedd activating enzyme inhibitor	229	286	0.392396751	0.350417485
+GSE30531	GSE30531_DEG_Expt4_Control_vs_Group1	MLN4924	skin	cell line	A375	nedd activating enzyme inhibitor	75	626	0.979335283	0.479867161
+GSE30531	GSE30531_DEG_Expt5_Control_vs_Group1	MLN4924	skin	cell line	A375	nedd activating enzyme inhibitor	43	2439	2.003078805	0.306562898
+GSE32547	GSE32547_DEG_Expt1_Control_vs_Group1	pitavastatin	endothelial	cell line	HUVEC	HMGCR inhibitor	16643	16609	-0.28852856	-0.274091177
+GSE33143	GSE33143_DEG_Expt1_Control_vs_Group1	SAH-BCL9	colorectal	cell line	DLD1	Wnt pathway inhibitor	1441	651	0.276573078	0.381097702
+GSE33643	GSE33643_DEG_Expt1_Control_vs_Group1	BKM120	skin	cell line	A2058	PI3K inhibitor	6688	15420	0.053817204	-0.200598358
+GSE33643	GSE33643_DEG_Expt1_Control_vs_Group2	BKM120	skin	cell line	A2058	PI3K inhibitor	4183	6977	0.129288865	0.058013304
+GSE33643	GSE33643_DEG_Expt1_Control_vs_Group3	BKM120	skin	cell line	A2058	PI3K inhibitor	297	16828	0.813353616	-1.089264156
+GSE33643	GSE33643_DEG_Expt1_Control_vs_Group4	BEZ235	skin	cell line	A2058	PI3K inhibitor	432	15624	0.741412494	-0.352584463
+GSE33643	GSE33643_DEG_Expt1_Control_vs_Group5	BEZ235	skin	cell line	A2058	PI3K inhibitor	1544	16399	0.540343919	-0.752563116
+GSE33643	GSE33643_DEG_Expt1_Control_vs_Group6	BEZ235	skin	cell line	A2058	PI3K inhibitor	970	16407	0.760971499	-0.828651038
+GSE33643	GSE33643_DEG_Expt1_Control_vs_Group7	GDC-0941	skin	cell line	A2058	PI3K inhibitor	8383	14660	0.009213815	-0.144456554
+GSE33643	GSE33643_DEG_Expt1_Control_vs_Group8	GDC-0941	skin	cell line	A2058	PI3K inhibitor	2890	13483	0.194775676	-0.116333254
+GSE33643	GSE33643_DEG_Expt1_Control_vs_Group9	GDC-0941	skin	cell line	A2058	PI3K inhibitor	1157	15854	0.527473613	-0.420399218
+GSE34331	GSE34331_DEG_Expt1_Control_vs_Group1	F05	breast	cell line	MCF7	Other	38	16326	0.314454711	-0.15554077
+GSE35428	GSE35428_DEG_Expt1_Control_vs_Group1	4-hydroxytamoxifen	breast	cell line	MCF7	estrogen receptor antagonist	7147	14194	0.010420319	-0.080319663
+GSE35428	GSE35428_DEG_Expt1_Control_vs_Group10	lasofoxifene	breast	cell line	MCF7	selective estrogen receptor modulator (SERM)	7558	16881	0.017899689	-0.949606577
+GSE35428	GSE35428_DEG_Expt1_Control_vs_Group11	estradiol|lasofoxifene	breast	cell line	MCF7	estrogen receptor agonist|selective estrogen receptor modulator (SERM)	9646	16499	-0.016187316	-0.278242327
+GSE35428	GSE35428_DEG_Expt1_Control_vs_Group2	fulvestrant	breast	cell line	MCF7	estrogen receptor antagonist	1830	16881	0.114032327	-1.438499015
+GSE35428	GSE35428_DEG_Expt1_Control_vs_Group3	bazedoxifene	breast	cell line	MCF7	selective estrogen receptor modulator (SERM)	14039	16890	-0.067428576	-1.355401526
+GSE35428	GSE35428_DEG_Expt1_Control_vs_Group4	raloxifene	breast	cell line	MCF7	estrogen receptor antagonist	15131	16888	-0.108049818	-1.117884925
+GSE35428	GSE35428_DEG_Expt1_Control_vs_Group5	estradiol	breast	cell line	MCF7	estrogen receptor agonist	11636	118	-0.077646259	1.660876142
+GSE35428	GSE35428_DEG_Expt1_Control_vs_Group6	estradiol|4-hydroxytamoxifen	breast	cell line	MCF7	estrogen receptor agonist|estrogen receptor antagonist	6682	103	0.025047024	0.726838026
+GSE35428	GSE35428_DEG_Expt1_Control_vs_Group7	estradiol|fulvestrant	breast	cell line	MCF7	estrogen receptor agonist|estrogen receptor antagonist	568	16884	0.16220251	-1.083143284
+GSE35428	GSE35428_DEG_Expt1_Control_vs_Group8	estradiol|bazedoxifene	breast	cell line	MCF7	estrogen receptor agonist|selective estrogen receptor modulator (SERM)	10648	16890	-0.008102986	-1.216009927
+GSE35428	GSE35428_DEG_Expt1_Control_vs_Group9	estradiol|raloxifene	breast	cell line	MCF7	estrogen receptor agonist|estrogen receptor antagonist	11916	16887	-0.033753051	-0.786243018
+GSE36176	GSE36176_DEG_Expt1_Control_vs_Group1	RO4929097 	lung	cell line	A549	gamma secretase inhibitor	6019	83	0.081623013	0.481137123
+GSE36176	GSE36176_DEG_Expt2_Control_vs_Group1	RO4929097 	lung	cell line	A549	gamma secretase inhibitor	12639	16689	-0.065931409	-0.315939416
+GSE36176	GSE36176_DEG_Expt3_Control_vs_Group1	RO4929097 	lung	cell line	H460a	gamma secretase inhibitor	1006	5890	0.197137366	0.046070427
+GSE36176	GSE36176_DEG_Expt4_Control_vs_Group1	RO4929097 	lung	cell line	H460a	gamma secretase inhibitor	7750	16318	0.004618881	-0.18725915
+GSE39354	GSE39354_DEG_Expt1_Control_vs_Group1	DHT	prostate	cell line	VCaP	androgen receptor agonist	3794	15745	0.150273415	-0.459544594
+GSE39354	GSE39354_DEG_Expt2_Control_vs_Group1	DHT	prostate	cell line	LNCaP	androgen receptor agonist	12708	16705	-0.138992123	-1.051919696
+GSE40512	GSE40512_DEG_Expt1_Control_vs_Group1	PD0332991	"blood, lymphoid"	cell line	KOPTK1	CDK inhibitor	2557	16821	0.294252512	-2.630434392
+GSE40794	GSE40794_DEG_Expt1_Control_vs_Group1	DHT	prostate	cell line	LNCaP	androgen receptor agonist	16340	75	-0.294834572	0.509880412
+GSE41315	GSE41315_DEG_Expt1_Control_vs_Group1	EI1	"blood, lymphoid"	cell line	DLBCL	PRC2 inhibitor	9600	11463	-0.023242348	-0.048813263
+GSE41315	GSE41315_DEG_Expt2_Control_vs_Group1	EI1	"blood, lymphoid"	cell line	DLBCL	PRC2 inhibitor	16805	15684	-0.373432692	-0.218325248
+GSE41315	GSE41315_DEG_Expt3_Control_vs_Group1	EI1	"blood, lymphoid"	cell line	DLBCL	PRC2 inhibitor	16720	16083	-0.533554552	-0.338619717
+GSE41315	GSE41315_DEG_Expt4_Control_vs_Group1	EI1	"blood, lymphoid"	cell line	DLBCL	PRC2 inhibitor	16618	16702	-1.094895048	-1.22198454
+GSE41364	GSE41364_DEG_Expt1_Control_vs_Group1	5-Aza	colon	cell line	HT-29	DNA methyltransferase inhibitor	1294	46	0.545939159	2.748480011
+GSE41364	GSE41364_DEG_Expt1_Control_vs_Group2	5-Aza	colon	cell line	HT-29	DNA methyltransferase inhibitor	6849	7	0.04153766	2.394601906
+GSE42344	GSE42344_DEG_Expt1_Control_vs_Group1	JS-K	"blood, lymphoid"	cell line	unknown	NO donor 	23	318	1.291949415	0.431086027
+GSE42344	GSE42344_DEG_Expt1_Control_vs_Group2	JS-K	"blood, lymphoid"	cell line	unknown	NO donor 	12	121	2.093172758	0.942638024
+GSE42344	GSE42344_DEG_Expt1_Control_vs_Group3	JS-K	"blood, lymphoid"	cell line	unknown	NO donor 	18	16314	2.852392629	-1.08494318
+GSE42762	GSE42762_DEG_Expt1_Control_vs_Group1	PI-103	brain	cell line	SY5Y-TetR-FOXO3A	PI3K inhibitor	433	16391	0.458420463	-0.394628063
+GSE43010	GSE43010_DEG_Expt1_Control_vs_Group1	vorinostat	skin	cell line	BJ	HDAC inhibitor	16198	16623	-1.112088685	-1.656597601
+GSE43010	GSE43010_DEG_Expt2_Control_vs_Group1	vorinostat	skin	cell line	BJ	HDAC inhibitor	15311	13488	-0.755141123	-0.286827444
+GSE43010	GSE43010_DEG_Expt3_Control_vs_Group1	vorinostat	skin	cell line	BJ	HDAC inhibitor	12314	16080	-0.121559356	-0.622591076
+GSE43998	GSE43998_DEG_Expt1_Control_vs_Group1	estradiol	"blood, myeloid"	cell line	K562	estrogen receptor agonist	206	194	0.75957781	0.792484877
+GSE44596	GSE44596_DEG_Expt1_Control_vs_Group1	SsnB	endothelial	cell line	HUVEC	Other	333	16808	0.445522676	-1.556767699
+GSE44905	GSE44905_DEG_Expt1_Control_vs_Group1	DHT	prostate	cell line	LNCaP	androgen receptor agonist	8547	16872	0.007484405	-1.621453936
+GSE44905	GSE44905_DEG_Expt1_Control_vs_Group2	enzalutamide	prostate	cell line	LNCaP	androgen receptor antagonist	3295	15324	0.131550695	-0.256005427
+GSE44905	GSE44905_DEG_Expt1_Control_vs_Group3	enzalutamide	prostate	cell line	LNCaP	androgen receptor antagonist	5107	16490	0.069108034	-0.372038492
+GSE44905	GSE44905_DEG_Expt1_Control_vs_Group4	DHT|enzalutamide	prostate	cell line	LNCaP	androgen receptor agonist|androgen receptor antagonist	9541	16806	-0.022255454	-0.766297186
+GSE44905	GSE44905_DEG_Expt1_Control_vs_Group5	DHT|enzalutamide	prostate	cell line	LNCaP	androgen receptor agonist|androgen receptor antagonist	10868	16746	-0.055737236	-0.536886042
+GSE44946	GSE44946_DEG_Expt1_Control_vs_Group1	BRD7552	pancreatic	cell line	PANC-1	PDX1 inducer	16031	14017	-0.43933624	-0.237910613
+GSE45029	GSE45029_DEG_Expt1_Control_vs_Group1	doxycycline	breast	cell line	MCF12A	metalloproteinase inhibitor	2850	16414	0.080706171	-0.174464247
+GSE45197	GSE45197_DEG_Expt1_Control_vs_Group1	AGI-5198	brain	cell line	TS603	isocitrate dehydrogenase inhibitor	5076	12559	0.066891915	-0.085122251
+GSE45197	GSE45197_DEG_Expt2_Control_vs_Group1	AGI-5198	brain	cell line	TS603	isocitrate dehydrogenase inhibitor	5328	533	0.0580628	0.316899873
+GSE45197	GSE45197_DEG_Expt2_Control_vs_Group2	AGI-5198	brain	cell line	TS603	isocitrate dehydrogenase inhibitor	7866	2325	0.031290471	0.167664014
+GSE45417	GSE45417_DEG_Expt1_Control_vs_Group1	PMA	lymph	cell line	U937	PKC activator	95	16714	3.186167734	-1.959359627
+GSE46819	GSE46819_DEG_Expt1_Control_vs_Group1	BV6	"blood, myeloid"	primary		IAP antagonist	136	16378	0.642126985	-1.016174245
+GSE46924	GSE46924_DEG_Expt1_Control_vs_Group1	E2	breast	cell line	MCF7	estrogen receptor agonist	7773	145	0.00654829	1.477838126
+GSE4773	GSE4773_DEG_Expt1_Control_vs_Group1	rotenone	brain	cell line	SK-N-MC	Other	126	59	0.562705999	0.700800644
+GSE48573	GSE48573_DEG_Expt1_Control_vs_Group1	9cis-RA	"blood, myeloid"	primary		retinoid receptor agonist	12054	8948	-0.101839429	-0.026539336
+GSE48573	GSE48573_DEG_Expt1_Control_vs_Group2	R-RA	"blood, myeloid"	primary		retinoid receptor ligand	3565	3816	0.1250274	0.11436663
+GSE48573	GSE48573_DEG_Expt1_Control_vs_Group3	S-RA	"blood, myeloid"	primary		retinoid receptor ligand	2627	3928	0.151745547	0.093875906
+GSE48573	GSE48573_DEG_Expt1_Control_vs_Group4	RSG	"blood, myeloid"	primary		PPAR receptor agonist	677	9876	0.295104558	-0.037843839
+GSE48573	GSE48573_DEG_Expt1_Control_vs_Group5	GW1516	"blood, myeloid"	primary		PPAR receptor agonist	2108	7566	0.129753539	0.001447867
+GSE48573	GSE48573_DEG_Expt1_Control_vs_Group6	GW13965	"blood, myeloid"	primary		LXR agonist	3784	6399	0.074667185	0.017687187
+GSE48573	GSE48573_DEG_Expt2_Control_vs_Group1	AM580	"blood, myeloid"	primary		retinoid receptor agonist	16700	4817	-0.743110548	0.092185676
+GSE49284	GSE49284_DEG_Expt1_Control_vs_Group1	EPZ6438	"blood, lymphoid"	cell line	WSU-DLCL2	histone lysine methyltransferase inhibitor	12764	16107	-0.109351151	-0.27283184
+GSE49284	GSE49284_DEG_Expt1_Control_vs_Group2	EPZ6438	"blood, lymphoid"	cell line	WSU-DLCL2	histone lysine methyltransferase inhibitor	15123	16783	-0.317972124	-0.836618823
+GSE49284	GSE49284_DEG_Expt10_Control_vs_Group1	EPZ6438	"blood, lymphoid"	cell line	Pfeiffer	histone lysine methyltransferase inhibitor	1044	14060	0.358763869	-0.250150418
+GSE49284	GSE49284_DEG_Expt10_Control_vs_Group2	EPZ6438	"blood, lymphoid"	cell line	Pfeiffer	histone lysine methyltransferase inhibitor	5497	16641	0.067614539	-0.328528784
+GSE49284	GSE49284_DEG_Expt11_Control_vs_Group1	EPZ6438	"blood, lymphoid"	cell line	SU-DHL6	histone lysine methyltransferase inhibitor	9872	16534	-0.086697836	-0.492039898
+GSE49284	GSE49284_DEG_Expt11_Control_vs_Group2	EPZ6438	"blood, lymphoid"	cell line	SU-DHL6	histone lysine methyltransferase inhibitor	13600	16699	-0.344411899	-1.304494269
+GSE49284	GSE49284_DEG_Expt12_Control_vs_Group1	EPZ6438	"blood, lymphoid"	cell line	Karpas422	histone lysine methyltransferase inhibitor	16137	15144	-0.600314029	-0.374121638
+GSE49284	GSE49284_DEG_Expt12_Control_vs_Group2	EPZ6438	"blood, lymphoid"	cell line	Karpas422	histone lysine methyltransferase inhibitor	16434	16764	-1.06372791	-1.55384169
+GSE49284	GSE49284_DEG_Expt2_Control_vs_Group1	EPZ6438	"blood, lymphoid"	cell line	Pfeiffer	histone lysine methyltransferase inhibitor	13997	519	-0.110134258	0.28459985
+GSE49284	GSE49284_DEG_Expt2_Control_vs_Group2	EPZ6438	"blood, lymphoid"	cell line	Pfeiffer	histone lysine methyltransferase inhibitor	13440	470	-0.103760484	0.312604929
+GSE49284	GSE49284_DEG_Expt3_Control_vs_Group1	EPZ6438	"blood, lymphoid"	cell line	SU-DHL6	histone lysine methyltransferase inhibitor	12037	4068	-0.050957577	0.16549409
+GSE49284	GSE49284_DEG_Expt3_Control_vs_Group2	EPZ6438	"blood, lymphoid"	cell line	SU-DHL6	histone lysine methyltransferase inhibitor	8181	10203	0.049450428	-0.005555445
+GSE49284	GSE49284_DEG_Expt4_Control_vs_Group1	EPZ6438	"blood, lymphoid"	cell line	Karpas422	histone lysine methyltransferase inhibitor	8801	8620	-0.024413964	-0.020771422
+GSE49284	GSE49284_DEG_Expt4_Control_vs_Group2	EPZ6438	"blood, lymphoid"	cell line	Karpas422	histone lysine methyltransferase inhibitor	16606	11772	-0.409369668	-0.095962254
+GSE49284	GSE49284_DEG_Expt5_Control_vs_Group1	EPZ6438	"blood, lymphoid"	cell line	WSU-DLCL2	histone lysine methyltransferase inhibitor	16207	16735	-0.584088033	-1.179029082
+GSE49284	GSE49284_DEG_Expt5_Control_vs_Group2	EPZ6438	"blood, lymphoid"	cell line	WSU-DLCL2	histone lysine methyltransferase inhibitor	15603	16764	-0.451942631	-1.642042138
+GSE49284	GSE49284_DEG_Expt6_Control_vs_Group1	EPZ6438	"blood, lymphoid"	cell line	Pfeiffer	histone lysine methyltransferase inhibitor	219	2282	0.343348229	0.154021454
+GSE49284	GSE49284_DEG_Expt6_Control_vs_Group2	EPZ6438	"blood, lymphoid"	cell line	Pfeiffer	histone lysine methyltransferase inhibitor	6095	1473	0.058448547	0.238588299
+GSE49284	GSE49284_DEG_Expt7_Control_vs_Group1	EPZ6438	"blood, lymphoid"	cell line	SU-DHL6	histone lysine methyltransferase inhibitor	11660	12777	-0.101657757	-0.130606941
+GSE49284	GSE49284_DEG_Expt7_Control_vs_Group2	EPZ6438	"blood, lymphoid"	cell line	SU-DHL6	histone lysine methyltransferase inhibitor	15909	16675	-0.389487498	-0.608170201
+GSE49284	GSE49284_DEG_Expt8_Control_vs_Group1	EPZ6438	"blood, lymphoid"	cell line	Karpas422	histone lysine methyltransferase inhibitor	16635	3195	-0.404859045	0.146552182
+GSE49284	GSE49284_DEG_Expt8_Control_vs_Group2	EPZ6438	"blood, lymphoid"	cell line	Karpas422	histone lysine methyltransferase inhibitor	16799	16317	-1.043356932	-0.658592683
+GSE49284	GSE49284_DEG_Expt9_Control_vs_Group1	EPZ6438	"blood, lymphoid"	cell line	WSU-DLCL2	histone lysine methyltransferase inhibitor	9479	16879	-0.014066898	-1.447888131
+GSE49284	GSE49284_DEG_Expt9_Control_vs_Group2	EPZ6438	"blood, lymphoid"	cell line	WSU-DLCL2	histone lysine methyltransferase inhibitor	9382	16873	-0.023128642	-1.998172379
+GSE50811	GSE50811_DEG_Expt1_Control_vs_Group1	eribulin	breast	cell line	BT-20	microtubule inhibitor	175	16831	0.501563737	-0.611007765
+GSE50811	GSE50811_DEG_Expt10_Control_vs_Group1	eribulin	breast	cell line	SKBR3	microtubule inhibitor	784	15598	0.239562731	-0.24285354
+GSE50811	GSE50811_DEG_Expt11_Control_vs_Group1	eribulin	breast	cell line	HCC-2218	microtubule inhibitor	419	16864	0.614914923	-0.848755355
+GSE50811	GSE50811_DEG_Expt12_Control_vs_Group1	eribulin	breast	cell line	BT-474	microtubule inhibitor	139	5030	0.539166425	0.033161529
+GSE50811	GSE50811_DEG_Expt13_Control_vs_Group1	eribulin	breast	cell line	DU4475	microtubule inhibitor	8700	16700	-0.008179027	-0.325649478
+GSE50811	GSE50811_DEG_Expt14_Control_vs_Group1	eribulin	breast	cell line	HCC-1937	microtubule inhibitor	544	16662	0.258334278	-0.353080252
+GSE50811	GSE50811_DEG_Expt15_Control_vs_Group1	eribulin	breast	cell line	MDA-MB-231	microtubule inhibitor	592	16718	0.318628328	-0.662295414
+GSE50811	GSE50811_DEG_Expt16_Control_vs_Group1	eribulin	breast	cell line	HCC-38	microtubule inhibitor	152	6545	0.584739782	0.034854771
+GSE50811	GSE50811_DEG_Expt17_Control_vs_Group1	eribulin	breast	cell line	AU565	microtubule inhibitor	106	15585	0.618618925	-0.237007522
+GSE50811	GSE50811_DEG_Expt18_Control_vs_Group1	eribulin	breast	cell line	UACC-893	microtubule inhibitor	114	16878	1.135232471	-1.703693188
+GSE50811	GSE50811_DEG_Expt19_Control_vs_Group1	eribulin	breast	cell line	MDA-MB-468	microtubule inhibitor	212	16888	0.631147339	-1.337275782
+GSE50811	GSE50811_DEG_Expt2_Control_vs_Group1	eribulin	breast	cell line	CAL-51	microtubule inhibitor	89	16878	0.865500105	-0.664716269
+GSE50811	GSE50811_DEG_Expt20_Control_vs_Group1	eribulin	breast	cell line	HCC-1428	microtubule inhibitor	79	8181	0.454676154	-0.024909545
+GSE50811	GSE50811_DEG_Expt21_Control_vs_Group1	eribulin	breast	cell line	MDA-MB-453	microtubule inhibitor	16599	16646	-0.615828432	-0.646895451
+GSE50811	GSE50811_DEG_Expt22_Control_vs_Group1	eribulin	breast	cell line	HCC-1419	microtubule inhibitor	132	16149	0.659728285	-0.305433584
+GSE50811	GSE50811_DEG_Expt23_Control_vs_Group1	eribulin	breast	cell line	HCC-1500	microtubule inhibitor	7592	16808	-0.000439691	-0.83202256
+GSE50811	GSE50811_DEG_Expt24_Control_vs_Group1	eribulin	breast	cell line	HCC-70	microtubule inhibitor	6	16720	2.429261632	-0.828315197
+GSE50811	GSE50811_DEG_Expt25_Control_vs_Group1	eribulin	breast	cell line	UACC-812	microtubule inhibitor	43	16849	2.219605146	-1.450996168
+GSE50811	GSE50811_DEG_Expt3_Control_vs_Group1	eribulin	breast	cell line	MDA-MB-436	microtubule inhibitor	465	16892	0.291406695	-1.215788895
+GSE50811	GSE50811_DEG_Expt4_Control_vs_Group1	eribulin	breast	cell line	BT-549	microtubule inhibitor	102	16735	0.718133646	-0.573934827
+GSE50811	GSE50811_DEG_Expt5_Control_vs_Group1	eribulin	breast	cell line	Hs578T	microtubule inhibitor	695	16606	0.271776513	-0.349814445
+GSE50811	GSE50811_DEG_Expt6_Control_vs_Group1	eribulin	breast	cell line	T47D	microtubule inhibitor	233	16774	0.351469674	-0.416697187
+GSE50811	GSE50811_DEG_Expt7_Control_vs_Group1	eribulin	breast	cell line	MCF7	microtubule inhibitor	195	11770	0.350308183	-0.062530491
+GSE50811	GSE50811_DEG_Expt8_Control_vs_Group1	eribulin	breast	cell line	HCC-1954	microtubule inhibitor	298	16603	0.404472335	-0.376660163
+GSE50811	GSE50811_DEG_Expt9_Control_vs_Group1	eribulin	breast	cell line	HCC-1806	microtubule inhibitor	1858	16894	0.17953088	-1.243451343
+GSE50811	GSE50811_DEG_Expt1_Control_vs_Group2	paclitaxel	breast	cell line	BT-20	microtubule stabilizer	182	16888	0.509668703	-0.837435578
+GSE50811	GSE50811_DEG_Expt10_Control_vs_Group2	paclitaxel	breast	cell line	SKBR3	microtubule stabilizer	244	11619	0.371888018	-0.071167059
+GSE50811	GSE50811_DEG_Expt11_Control_vs_Group2	paclitaxel	breast	cell line	HCC-2218	microtubule stabilizer	499	16749	0.405879214	-0.423117401
+GSE50811	GSE50811_DEG_Expt12_Control_vs_Group2	paclitaxel	breast	cell line	BT-474	microtubule stabilizer	7079	5228	0.020866025	0.065409126
+GSE50811	GSE50811_DEG_Expt13_Control_vs_Group2	paclitaxel	breast	cell line	DU4475	microtubule stabilizer	11130	16756	-0.047137294	-0.388964195
+GSE50811	GSE50811_DEG_Expt14_Control_vs_Group2	paclitaxel	breast	cell line	HCC-1937	microtubule stabilizer	681	16801	0.292261204	-0.469001011
+GSE50811	GSE50811_DEG_Expt15_Control_vs_Group2	paclitaxel	breast	cell line	MDA-MB-231	microtubule stabilizer	1392	16788	0.182347054	-0.643569813
+GSE50811	GSE50811_DEG_Expt16_Control_vs_Group2	paclitaxel	breast	cell line	HCC-38	microtubule stabilizer	997	12953	0.26226785	-0.136077459
+GSE50811	GSE50811_DEG_Expt17_Control_vs_Group2	paclitaxel	breast	cell line	AU565	microtubule stabilizer	111	16526	0.635502548	-0.33715539
+GSE50811	GSE50811_DEG_Expt18_Control_vs_Group2	paclitaxel	breast	cell line	UACC-893	microtubule stabilizer	1792	16867	0.171504936	-0.5089878
+GSE50811	GSE50811_DEG_Expt19_Control_vs_Group2	paclitaxel	breast	cell line	MDA-MB-468	microtubule stabilizer	71	16813	0.97736563	-0.97355384
+GSE50811	GSE50811_DEG_Expt2_Control_vs_Group2	paclitaxel	breast	cell line	CAL-51	microtubule stabilizer	145	16874	0.794799098	-0.890549925
+GSE50811	GSE50811_DEG_Expt20_Control_vs_Group2	paclitaxel	breast	cell line	HCC-1428	microtubule stabilizer	5706	9671	0.067787261	-0.071214232
+GSE50811	GSE50811_DEG_Expt21_Control_vs_Group2	paclitaxel	breast	cell line	MDA-MB-453	microtubule stabilizer	16855	16716	-0.85895473	-0.625290628
+GSE50811	GSE50811_DEG_Expt22_Control_vs_Group2	paclitaxel	breast	cell line	HCC-1419	microtubule stabilizer	1117	10335	0.183276519	-0.027760719
+GSE50811	GSE50811_DEG_Expt23_Control_vs_Group2	paclitaxel	breast	cell line	HCC-1500	microtubule stabilizer	13931	14411	-0.10626646	-0.120663552
+GSE50811	GSE50811_DEG_Expt24_Control_vs_Group2	paclitaxel	breast	cell line	HCC-70	microtubule stabilizer	7	16867	1.763386583	-0.890343728
+GSE50811	GSE50811_DEG_Expt25_Control_vs_Group2	paclitaxel	breast	cell line	UACC-812	microtubule stabilizer	79	16839	0.495443948	-0.502245563
+GSE50811	GSE50811_DEG_Expt3_Control_vs_Group2	paclitaxel	breast	cell line	MDA-MB-436	microtubule stabilizer	3700	16893	0.105334216	-1.162477696
+GSE50811	GSE50811_DEG_Expt4_Control_vs_Group2	paclitaxel	breast	cell line	BT-549	microtubule stabilizer	619	16826	0.428732068	-0.763379399
+GSE50811	GSE50811_DEG_Expt5_Control_vs_Group2	paclitaxel	breast	cell line	Hs578T	microtubule stabilizer	761	15395	0.292151813	-0.230361746
+GSE50811	GSE50811_DEG_Expt6_Control_vs_Group2	paclitaxel	breast	cell line	T47D	microtubule stabilizer	266	16784	0.347723472	-0.46249448
+GSE50811	GSE50811_DEG_Expt7_Control_vs_Group2	paclitaxel	breast	cell line	MCF7	microtubule stabilizer	84	12997	0.620862452	-0.141369696
+GSE50811	GSE50811_DEG_Expt8_Control_vs_Group2	paclitaxel	breast	cell line	HCC-1954	microtubule stabilizer	185	16843	0.550003469	-0.82076282
+GSE50811	GSE50811_DEG_Expt9_Control_vs_Group2	paclitaxel	breast	cell line	HCC-1806	microtubule stabilizer	997	16889	0.228569004	-1.032481496
+GSE50830	GSE50830_DEG_Expt1_Control_vs_Group1	eribulin	endometrial	cell line	HEC-88nu	microtubule inhibitor	51	16415	1.003860168	-0.493732026
+GSE50830	GSE50830_DEG_Expt10_Control_vs_Group1	eribulin	endometrial	cell line	AN3 CA	microtubule inhibitor	17	15611	1.141561293	-0.274373319
+GSE50830	GSE50830_DEG_Expt11_Control_vs_Group1	eribulin	endometrial	cell line	HEC-1	microtubule inhibitor	20	16867	1.046745749	-0.761126278
+GSE50830	GSE50830_DEG_Expt12_Control_vs_Group1	eribulin	endometrial	cell line	HEC-6	microtubule inhibitor	772	16849	0.296978005	-0.597294788
+GSE50830	GSE50830_DEG_Expt13_Control_vs_Group1	eribulin	endometrial	cell line	MFE-280	microtubule inhibitor	73	15928	1.147201939	-0.467977816
+GSE50830	GSE50830_DEG_Expt15_Control_vs_Group1	eribulin	endometrial	cell line	KLE	microtubule inhibitor	142	15896	0.691734361	-0.381120932
+GSE50830	GSE50830_DEG_Expt16_Control_vs_Group1	eribulin	endometrial	cell line	HEC-1-B	microtubule inhibitor	19	16720	1.346020415	-0.685693608
+GSE50830	GSE50830_DEG_Expt17_Control_vs_Group1	eribulin	endometrial	cell line	SNG-M	microtubule inhibitor	1006	16877	0.233246893	-0.706848336
+GSE50830	GSE50830_DEG_Expt2_Control_vs_Group1	eribulin	endometrial	cell line	HEC-108	microtubule inhibitor	84	16815	0.7129113	-0.566932501
+GSE50830	GSE50830_DEG_Expt3_Control_vs_Group1	eribulin	endometrial	cell line	HEC-1-A	microtubule inhibitor	174	16875	0.509308335	-0.861785817
+GSE50830	GSE50830_DEG_Expt4_Control_vs_Group1	eribulin	endometrial	cell line	ECC-1	microtubule inhibitor	3	16786	3.302838512	-1.195435231
+GSE50830	GSE50830_DEG_Expt5_Control_vs_Group1	eribulin	endometrial	cell line	HEC-151	microtubule inhibitor	6	16891	1.653658951	-1.363927795
+GSE50830	GSE50830_DEG_Expt6_Control_vs_Group1	eribulin	endometrial	cell line	HEC-59	microtubule inhibitor	35	16889	0.943019619	-1.022099243
+GSE50830	GSE50830_DEG_Expt7_Control_vs_Group1	eribulin	endometrial	cell line	MFE-296	microtubule inhibitor	23	1629	0.785206786	0.212316354
+GSE50830	GSE50830_DEG_Expt8_Control_vs_Group1	eribulin	endometrial	cell line	SNG-II	microtubule inhibitor	8688	16077	-0.003928017	-0.711502761
+GSE50830	GSE50830_DEG_Expt9_Control_vs_Group1	eribulin	endometrial	cell line	HEC-50B	microtubule inhibitor	278	16602	0.594640547	-0.724353382
+GSE50830	GSE50830_DEG_Expt1_Control_vs_Group2	paclitaxel	endometrial	cell line	HEC-88nu	microtubule stabilizer	84	16796	0.670427661	-0.589758405
+GSE50830	GSE50830_DEG_Expt10_Control_vs_Group2	paclitaxel	endometrial	cell line	AN3 CA	microtubule stabilizer	48	16685	0.852644407	-0.800309403
+GSE50830	GSE50830_DEG_Expt11_Control_vs_Group2	paclitaxel	endometrial	cell line	HEC-1	microtubule stabilizer	169	16786	0.484777687	-0.503455256
+GSE50830	GSE50830_DEG_Expt12_Control_vs_Group2	paclitaxel	endometrial	cell line	HEC-6	microtubule stabilizer	571	16680	0.349110833	-0.431776933
+GSE50830	GSE50830_DEG_Expt13_Control_vs_Group2	paclitaxel	endometrial	cell line	MFE-280	microtubule stabilizer	5311	16755	0.059522707	-0.724232157
+GSE50830	GSE50830_DEG_Expt14_Control_vs_Group2	paclitaxel	endometrial	cell line	RL95-2 	microtubule stabilizer	47	16872	0.934198073	-0.721569734
+GSE50830	GSE50830_DEG_Expt15_Control_vs_Group2	paclitaxel	endometrial	cell line	KLE	microtubule stabilizer	1613	7938	0.136826033	0.00263793
+GSE50830	GSE50830_DEG_Expt16_Control_vs_Group2	paclitaxel	endometrial	cell line	HEC-1-B	microtubule stabilizer	405	16889	0.315681868	-0.617678016
+GSE50830	GSE50830_DEG_Expt17_Control_vs_Group2	paclitaxel	endometrial	cell line	SNG-M	microtubule stabilizer	3557	16892	0.128094697	-1.501531205
+GSE50830	GSE50830_DEG_Expt2_Control_vs_Group2	paclitaxel	endometrial	cell line	HEC-108	microtubule stabilizer	189	16822	0.479977488	-0.484285535
+GSE50830	GSE50830_DEG_Expt3_Control_vs_Group2	paclitaxel	endometrial	cell line	HEC-1-A	microtubule stabilizer	122	16876	0.499814618	-0.723629673
+GSE50830	GSE50830_DEG_Expt4_Control_vs_Group2	paclitaxel	endometrial	cell line	ECC-1	microtubule stabilizer	34	16878	1.915942122	-1.499059136
+GSE50830	GSE50830_DEG_Expt5_Control_vs_Group2	paclitaxel	endometrial	cell line	HEC-151	microtubule stabilizer	7	16893	1.304033614	-1.766194545
+GSE50830	GSE50830_DEG_Expt6_Control_vs_Group2	paclitaxel	endometrial	cell line	HEC-59	microtubule stabilizer	3982	16459	0.089340049	-0.350986398
+GSE50830	GSE50830_DEG_Expt7_Control_vs_Group2	paclitaxel	endometrial	cell line	MFE-296	microtubule stabilizer	19	10847	1.245583876	-0.072101977
+GSE50830	GSE50830_DEG_Expt8_Control_vs_Group2	paclitaxel	endometrial	cell line	SNG-II	microtubule stabilizer	157	16875	0.776311788	-1.521187108
+GSE50830	GSE50830_DEG_Expt9_Control_vs_Group2	paclitaxel	endometrial	cell line	HEC-50B	microtubule stabilizer	216	16866	0.630189589	-1.233277514
+GSE50831	GSE50831_DEG_Expt1_Control_vs_Group1	eribulin	ovary	cell line	SK-OV-3	microtubule inhibitor	67	16887	1.00474249	-1.451275188
+GSE50831	GSE50831_DEG_Expt10_Control_vs_Group1	eribulin	ovary	cell line	A2780	microtubule inhibitor	81	16881	0.99770541	-1.069535855
+GSE50831	GSE50831_DEG_Expt11_Control_vs_Group1	eribulin	ovary	cell line	COV644	microtubule inhibitor	1349	16848	0.269448013	-0.74222718
+GSE50831	GSE50831_DEG_Expt12_Control_vs_Group1	eribulin	ovary	cell line	EFO-27	microtubule inhibitor	28	16768	1.221934102	-0.641204976
+GSE50831	GSE50831_DEG_Expt13_Control_vs_Group1	eribulin	ovary	cell line	OVCAR-3	microtubule inhibitor	1678	16736	0.219780281	-0.646425548
+GSE50831	GSE50831_DEG_Expt14_Control_vs_Group1	eribulin	ovary	cell line	OV-90	microtubule inhibitor	17	16879	0.880584037	-1.070168496
+GSE50831	GSE50831_DEG_Expt15_Control_vs_Group1	eribulin	ovary	cell line	KURAMOCHI	microtubule inhibitor	11	15859	1.912108938	-0.399076413
+GSE50831	GSE50831_DEG_Expt16_Control_vs_Group1	eribulin	ovary	cell line	OVTOKO	microtubule inhibitor	1022	16883	0.266211694	-1.048795423
+GSE50831	GSE50831_DEG_Expt17_Control_vs_Group1	eribulin	ovary	cell line	OVCAR-4	microtubule inhibitor	24	16704	1.105601651	-0.459469057
+GSE50831	GSE50831_DEG_Expt18_Control_vs_Group1	eribulin	ovary	cell line	OVSAHO	microtubule inhibitor	74	16313	1.06208384	-0.605332088
+GSE50831	GSE50831_DEG_Expt19_Control_vs_Group1	eribulin	ovary	cell line	EFO-21	microtubule inhibitor	179	16527	0.512042707	-0.564140806
+GSE50831	GSE50831_DEG_Expt2_Control_vs_Group1	eribulin	ovary	cell line	TOV-21G	microtubule inhibitor	65	16891	0.721747554	-0.983874871
+GSE50831	GSE50831_DEG_Expt20_Control_vs_Group1	eribulin	ovary	cell line	COV434	microtubule inhibitor	2	16106	1.656642631	-0.453442289
+GSE50831	GSE50831_DEG_Expt21_Control_vs_Group1	eribulin	ovary	cell line	CaOv3	microtubule inhibitor	1868	16663	0.230995305	-0.572596404
+GSE50831	GSE50831_DEG_Expt3_Control_vs_Group1	eribulin	ovary	cell line	OVISE	microtubule inhibitor	2305	16876	0.176730631	-1.515003291
+GSE50831	GSE50831_DEG_Expt4_Control_vs_Group1	eribulin	ovary	cell line	TOV-112D	microtubule inhibitor	15077	16894	-0.213346395	-1.0645423
+GSE50831	GSE50831_DEG_Expt5_Control_vs_Group1	eribulin	ovary	cell line	OV56	microtubule inhibitor	123	16775	0.925752088	-1.206106376
+GSE50831	GSE50831_DEG_Expt6_Control_vs_Group1	eribulin	ovary	cell line	COV362	microtubule inhibitor	1226	16874	0.207958576	-0.671098038
+GSE50831	GSE50831_DEG_Expt7_Control_vs_Group1	eribulin	ovary	cell line	COV504	microtubule inhibitor	40	16892	0.94863329	-1.372684259
+GSE50831	GSE50831_DEG_Expt8_Control_vs_Group1	eribulin	ovary	cell line	COLO-704	microtubule inhibitor	493	16860	0.370718886	-0.847817295
+GSE50831	GSE50831_DEG_Expt9_Control_vs_Group1	eribulin	ovary	cell line	COLO 720E	microtubule inhibitor	16285	16674	-0.334011228	-0.477376461
+GSE50831	GSE50831_DEG_Expt1_Control_vs_Group2	paclitaxel	ovary	cell line	SK-OV-3	microtubule stabilizer	88	16889	0.924483428	-1.689781568
+GSE50831	GSE50831_DEG_Expt10_Control_vs_Group2	paclitaxel	ovary	cell line	A2780	microtubule stabilizer	132	16883	0.942739864	-1.241790445
+GSE50831	GSE50831_DEG_Expt11_Control_vs_Group2	paclitaxel	ovary	cell line	COV644	microtubule stabilizer	1699	16820	0.236208776	-0.633023676
+GSE50831	GSE50831_DEG_Expt12_Control_vs_Group2	paclitaxel	ovary	cell line	EFO-27	microtubule stabilizer	29	16767	1.356980323	-0.529535357
+GSE50831	GSE50831_DEG_Expt13_Control_vs_Group2	paclitaxel	ovary	cell line	OVCAR-3	microtubule stabilizer	197	16661	0.514974529	-0.45606885
+GSE50831	GSE50831_DEG_Expt14_Control_vs_Group2	paclitaxel	ovary	cell line	OV-90	microtubule stabilizer	37	16851	0.667404287	-0.667101292
+GSE50831	GSE50831_DEG_Expt15_Control_vs_Group2	paclitaxel	ovary	cell line	KURAMOCHI	microtubule stabilizer	20	14330	0.96248787	-0.15970374
+GSE50831	GSE50831_DEG_Expt16_Control_vs_Group2	paclitaxel	ovary	cell line	OVTOKO	microtubule stabilizer	1651	16888	0.225572821	-1.38507375
+GSE50831	GSE50831_DEG_Expt17_Control_vs_Group2	paclitaxel	ovary	cell line	OVCAR-4	microtubule stabilizer	18	16022	1.25379529	-0.325653931
+GSE50831	GSE50831_DEG_Expt18_Control_vs_Group2	paclitaxel	ovary	cell line	OVSAHO	microtubule stabilizer	3885	16242	0.129257847	-0.349526904
+GSE50831	GSE50831_DEG_Expt19_Control_vs_Group2	paclitaxel	ovary	cell line	EFO-21	microtubule stabilizer	144	16342	0.503609617	-0.440892999
+GSE50831	GSE50831_DEG_Expt2_Control_vs_Group2	paclitaxel	ovary	cell line	TOV-21G	microtubule stabilizer	60	16890	0.670807095	-0.934684031
+GSE50831	GSE50831_DEG_Expt20_Control_vs_Group2	paclitaxel	ovary	cell line	COV434	microtubule stabilizer	2	15404	1.454922885	-0.28942238
+GSE50831	GSE50831_DEG_Expt21_Control_vs_Group2	paclitaxel	ovary	cell line	CaOv3	microtubule stabilizer	2096	15950	0.26666181	-0.491882037
+GSE50831	GSE50831_DEG_Expt3_Control_vs_Group2	paclitaxel	ovary	cell line	OVISE	microtubule stabilizer	4308	16845	0.083570076	-0.767277176
+GSE50831	GSE50831_DEG_Expt4_Control_vs_Group2	paclitaxel	ovary	cell line	TOV-112D	microtubule stabilizer	13191	16891	-0.152384047	-1.105706694
+GSE50831	GSE50831_DEG_Expt5_Control_vs_Group2	paclitaxel	ovary	cell line	OV56	microtubule stabilizer	112	16717	0.858931614	-0.581288984
+GSE50831	GSE50831_DEG_Expt6_Control_vs_Group2	paclitaxel	ovary	cell line	COV362	microtubule stabilizer	2123	16866	0.153466946	-0.646142911
+GSE50831	GSE50831_DEG_Expt7_Control_vs_Group2	paclitaxel	ovary	cell line	COV504	microtubule stabilizer	24	16894	1.014377526	-1.544309883
+GSE50831	GSE50831_DEG_Expt8_Control_vs_Group2	paclitaxel	ovary	cell line	COLO-704	microtubule stabilizer	3280	16850	0.12735787	-0.748232029
+GSE50831	GSE50831_DEG_Expt9_Control_vs_Group2	paclitaxel	ovary	cell line	COLO 720E	microtubule stabilizer	11565	16718	-0.073927312	-0.426919791
+GSE51212	GSE51212_DEG_Expt1_Control_vs_Group1	erlotinib	lung	cell line	HCC827	EGFR inhibitor	16760	16885	-0.895466869	-2.197365315
+GSE51212	GSE51212_DEG_Expt1_Control_vs_Group2	AZD6244	lung	cell line	HCC827	MEK inhibitor	16871	16804	-0.766827607	-0.436985436
+GSE51212	GSE51212_DEG_Expt1_Control_vs_Group3	BEZ235	lung	cell line	HCC827	PI3K inhibitor	112	16888	1.071026229	-1.566905119
+GSE5145	GSE5145_DEG_Expt1_Control_vs_Group1	vitamin D3	muscle	primary		"Vitamin,mineral,metabolite"	6429	13962	0.04802902	-0.118995782
+GSE51524	GSE51524_DEG_Expt1_Control_vs_Group1	DHT	prostate	cell line	LNCaP	androgen receptor agonist	11885	16859	-0.056080653	-0.35694512
+GSE52087	GSE52087_DEG_Expt1_Control_vs_Group1	mesoporphyrine	"blood, myeloid"	cell line	K562	heme oxygenase inhibitor	1051	13744	0.307237835	-0.179263181
+GSE52087	GSE52087_DEG_Expt1_Control_vs_Group2	mesoporphyrine	"blood, myeloid"	cell line	K562	heme oxygenase inhibitor	1106	15575	0.411653251	-0.45286484
+GSE53183	GSE53183_DEG_Expt1_Control_vs_Group1	doxycycline	kidney	cell line	HEK293	metalloproteinase inhibitor	13353	10488	-0.063362804	-0.025437252
+GSE5679	GSE5679_DEG_Expt1_Control_vs_Group1	RSG	"blood, myeloid"	primary		PPAR receptor agonist	217	5846	0.77403634	0.053114998
+GSE5679	GSE5679_DEG_Expt1_Control_vs_Group2	AM580	"blood, myeloid"	primary		retinoid receptor agonist	10973	4778	-0.070295032	0.06730826
+GSE57728	GSE57728_DEG_Expt1_Control_vs_Group1	ICG-001	pancreatic	cell line	AsPC1	beta-catenin inhibitor	46	16846	1.144017139	-0.905539013
+GSE57728	GSE57728_DEG_Expt2_Control_vs_Group1	ICG-001	pancreatic	cell line	AsPC1	beta-catenin inhibitor	102	16893	1.050762641	-2.399434104
+GSE59228	GSE59228_DEG_Expt1_Control_vs_Group1	2DG	breast	cell line	MCF10A	glycolysis inhibitor	1565	16892	0.731093056	-5.480189888
+GSE59228	GSE59228_DEG_Expt2_Control_vs_Group1	2DG	breast	cell line	MCF10A	glycolysis inhibitor	652	16816	0.933200965	-2.114271014
+GSE60722	GSE60722_DEG_Expt1_Control_vs_Group1	bicalutamide	prostate	cell line	LNCaP	androgen receptor antagonist	12937	12218	-0.074688955	-0.057445742
+GSE62203	GSE62203_DEG_Expt1_Control_vs_Group1	glucose|endothelin-1|cortisol	heart	iPS		Other|vasoconstrictor|steroid hormone	23	6627	1.728364096	0.029355277
+GSE62947	GSE62947_DEG_Expt1_Control_vs_Group1	SRPIN803	epithelial	cell line	ARPE-19	SRPK1/CK2 inhibitor	3430	13561	0.133366366	-0.098982435
+GSE63009	GSE63009_DEG_Expt1_Control_vs_Group1	aledronate	bone	cell line	H1666	bisphosphonates	4122	16681	0.061932037	-0.28789471
+GSE63009	GSE63009_DEG_Expt1_Control_vs_Group2	risedronate	bone	cell line	H1666	bisphosphonates	8790	9721	-0.003817541	-0.016538566
+GSE64337	GSE64337_DEG_Expt1_Control_vs_Group1	TVB-3166	pancreatic	cell line	PANC-1	FASN inhibitor	26	16879	1.611293805	-1.128966549
+GSE64337	GSE64337_DEG_Expt1_Control_vs_Group2	TVB-3166	pancreatic	cell line	PANC-1	FASN inhibitor	5	16829	2.653462708	-1.304496642
+GSE64480	GSE64480_DEG_Expt1_Control_vs_Group1	TLR7 agonist|TLR8 agonist	"blood, myeloid"	primary		immunomodulator	3609	2950	0.177922534	0.219653162
+GSE64480	GSE64480_DEG_Expt1_Control_vs_Group2	TLR7 agonist|TLR8 agonist	"blood, myeloid"	primary		immunomodulator	434	413	1.455386929	1.488161221
+GSE64536	GSE64536_DEG_Expt1_Control_vs_Group1	tamoxifen	breast	cell line	MCF10A	estrogen receptor antagonist	795	15926	0.224879268	-0.232626681
+GSE64536	GSE64536_DEG_Expt2_Control_vs_Group1	tamoxifen	breast	cell line	MCF10A	estrogen receptor antagonist	13793	16105	-0.188982428	-0.467726464
+GSE65012	GSE65012_DEG_Expt1_Control_vs_Group1	cortistatin A	"blood, myeloid"	cell line	K562	CDK inhibitor	106	16841	0.328486093	-0.355052993
+GSE65014	GSE65014_DEG_Expt1_Control_vs_Group1	cortistatin A	"blood, myeloid"	cell line	MOLM-14	CDK inhibitor	143	16255	0.618998694	-0.246819689
+GSE65015	GSE65015_DEG_Expt1_Control_vs_Group1	cortistatin A	"blood, myeloid"	cell line	MOLM-14	CDK inhibitor	14161	16892	-0.107601101	-0.514811684
+GSE65019	GSE65019_DEG_Expt1_Control_vs_Group1	cortistatin A	"blood, myeloid"	cell line	MV4-11	CDK inhibitor	16808	16625	-0.396483082	-0.305243897
+GSE65816	GSE65816_DEG_Expt1_Control_vs_Group1	ibrutinib|PLS-123	lymph	cell line	OCI-Ly7	BTK inhibitor	5612	5320	0.04535934	0.051441796
+GSE65816	GSE65816_DEG_Expt1_Control_vs_Group2	ibrutinib|PLS-123	lymph	cell line	OCI-Ly7	BTK inhibitor	9464	9320	-0.044598192	-0.040900563
+GSE65816	GSE65816_DEG_Expt1_Control_vs_Group3	ibrutinib|PLS-123	lymph	cell line	OCI-Ly7	BTK inhibitor	15413	6128	-0.361062245	0.046241976
+GSE67051	GSE67051_DEG_Expt1_Control_vs_Group1	erlotinib	lung	cell line	PC-9	EGFR inhibitor	14798	14680	-0.459934971	-0.443630289
+GSE67051	GSE67051_DEG_Expt2_Control_vs_Group1	erlotinib	lung	cell line	HCC827	EGFR inhibitor	16165	16109	-0.608104505	-0.586735675
+GSE67326	GSE67326_DEG_Expt1_Control_vs_Group1	myostatin	muscle	primary		myogenesis inhibitor	12639	7635	-0.128288779	-0.025294746
+GSE67326	GSE67326_DEG_Expt1_Control_vs_Group2	myostatin	muscle	primary		myogenesis inhibitor	11008	1718	-0.097572476	0.152707579
+GSE67326	GSE67326_DEG_Expt1_Control_vs_Group3	myostatin	muscle	primary		myogenesis inhibitor	9829	5397	-0.04685546	0.038732484
+GSE67326	GSE67326_DEG_Expt2_Control_vs_Group1	myostatin	muscle	primary		myogenesis inhibitor	5167	15767	0.070390527	-0.174942354
+GSE67326	GSE67326_DEG_Expt2_Control_vs_Group2	myostatin	muscle	primary		myogenesis inhibitor	8178	16640	0.042500556	-0.473176431
+GSE67326	GSE67326_DEG_Expt2_Control_vs_Group3	myostatin	muscle	primary		myogenesis inhibitor	1788	15592	0.273276646	-0.331627309
+GSE67338	GSE67338_DEG_Expt1_Control_vs_Group1	terfilunomide	brain	cell line	IMR32	immunomodulator	1595	13824	0.395617902	-0.235290916
+GSE67920	GSE67920_DEG_Expt1_Control_vs_Group1	PFI-3	"blood, myeloid"	cell line	MV4-11	bromodomain inhibitor	10984	13195	-0.041456368	-0.10643937
+GSE68527	GSE68527_DEG_Expt1_Control_vs_Group1	copaxone	"blood, myeloid"	cell line	THP1	immunomodulator	887	14423	0.227116425	-0.131553309
+GSE68527	GSE68527_DEG_Expt1_Control_vs_Group2	probioglat	"blood, myeloid"	cell line	THP1	immunomodulator	426	15101	0.434723079	-0.187454414
+GSE68527	GSE68527_DEG_Expt2_Control_vs_Group1	copaxone	"blood, myeloid"	cell line	THP1	immunomodulator	11418	12756	-0.040564815	-0.057877829
+GSE68527	GSE68527_DEG_Expt2_Control_vs_Group2	probioglat	"blood, myeloid"	cell line	THP1	immunomodulator	3646	15811	0.075601694	-0.164808395
+GSE68527	GSE68527_DEG_Expt3_Control_vs_Group1	copaxone	"blood, myeloid"	cell line	THP1	immunomodulator	9966	14918	-0.022413793	-0.093450514
+GSE68527	GSE68527_DEG_Expt3_Control_vs_Group2	probioglat	"blood, myeloid"	cell line	THP1	immunomodulator	4739	13803	0.041007227	-0.075213099
+GSE69330	GSE69330_DEG_Expt1_Control_vs_Group1	DHT	prostate	cell line	LNCaP	androgen receptor agonist	742	14451	0.470311746	-0.230140171
+GSE69346	GSE69346_DEG_Expt1_Control_vs_Group1	givinostat	"blood, lymphoid"	primary		HDAC inhibitor	734	15098	0.714875965	-0.363041692
+GSE69346	GSE69346_DEG_Expt2_Control_vs_Group1	givinostat	"blood, lymphoid"	primary		HDAC inhibitor	9163	6715	-0.062722376	0.031517446
+GSE69346	GSE69346_DEG_Expt3_Control_vs_Group1	givinostat	"blood, lymphoid"	primary		HDAC inhibitor	3423	16411	0.158019379	-0.463584141
+GSE6962	GSE6962_DEG_Expt1_Control_vs_Group1	PCI-5002	lung	cell line	A549	"Vitamin,mineral,metabolite"	10	1950	0.800279644	0.178265358
+GSE6962	GSE6962_DEG_Expt1_Control_vs_Group2	PCI-5002	lung	cell line	A549	"Vitamin,mineral,metabolite"	16821	1912	-0.641111562	0.191140446
+GSE69698	GSE69698_DEG_Expt1_Control_vs_Group1	vitamin D3	muscle	primary		"Vitamin,mineral,metabolite"	612	10168	0.35321672	-0.048087191
+GSE71127	GSE71127_DEG_Expt1_Control_vs_Group1	MeHg	stem cells	cell line	UKN1?	Carcinogen	1003	10569	0.29220786	-0.047041549
+GSE71127	GSE71127_DEG_Expt2_Control_vs_Group1	TSA	stem cells	cell line	UKN1?	HDAC inhibitor	211	16490	1.03316427	-0.751367179
+GSE71127	GSE71127_DEG_Expt3_Control_vs_Group1	SAHA	stem cells	cell line	UKN1?	HDAC inhibitor	295	10219	0.714728085	-0.064973756
+GSE71347	GSE71347_DEG_Expt1_Control_vs_Group1	estradiol	breast	cell line	BT-474	estrogen receptor agonist	16558	737	-0.465897281	0.355761203
+GSE71347	GSE71347_DEG_Expt2_Control_vs_Group1	estradiol	breast	cell line	BT-474	estrogen receptor agonist	11492	10311	-0.036998138	-0.018599789
+GSE71996	GSE71996_DEG_Expt1_Control_vs_Group1	diphenylcyclopropenone	skin	primary		immunostimulant	549	12803	0.246482694	-0.149569009
+GSE71996	GSE71996_DEG_Expt1_Control_vs_Group2	diphenylcyclopropenone	skin	primary		immunostimulant	515	4325	1.157370493	0.16588703
+GSE71996	GSE71996_DEG_Expt1_Control_vs_Group3	diphenylcyclopropenone	skin	primary		immunostimulant	369	9634	1.228845814	-0.071554542
+GSE71996	GSE71996_DEG_Expt1_Control_vs_Group4	diphenylcyclopropenone	skin	primary		immunostimulant	607	5407	1.17586952	0.108234229
+GSE71996	GSE71996_DEG_Expt1_Control_vs_Group5	diphenylcyclopropenone	skin	primary		immunostimulant	528	10095	1.268464319	-0.085719281
+GSE71996	GSE71996_DEG_Expt1_Control_vs_Group6	diphenylcyclopropenone	skin	primary		immunostimulant	360	11352	1.564235738	-0.197472137
+GSE72320	GSE72320_DEG_Expt1_Control_vs_Group1	ETX	breast	cell line	MDA231	carnitine palmitoyltransferase inhibitor	1327	16259	0.31315217	-0.334057755
+GSE74000	GSE74000_DEG_Expt1_Control_vs_Group1	acetaminophen	liver	cell line	hSKP-HPC	COX inhibitor	667	28	1.511287424	4.370007411
+GSE74000	GSE74000_DEG_Expt2_Control_vs_Group1	acetaminophen	liver	cell line	hSKP-HPC	COX inhibitor	283	16364	1.444668195	-1.443649856
+GSE74000	GSE74000_DEG_Expt3_Control_vs_Group1	acetaminophen	liver	cell line	hSKP-HPC	COX inhibitor	16890	3074	-1.238350081	0.172733471
+GSE76293	GSE76293_DEG_Expt1_Control_vs_Group1	PI3K inhibitor	"blood, myeloid"	primary		PI3K inhibitor	16833	3000	-0.882646752	0.120217081
+GSE76293	GSE76293_DEG_Expt1_Control_vs_Group2	GM-CSF	"blood, myeloid"	primary		Other	188	2965	1.128706501	0.095056034
+GSE76675	GSE76675_DEG_Expt1_Control_vs_Group1	AZD3965	breast	cell line	HS578T	monocarboxylate transporter inhibitor	7043	14706	0.020989136	-0.149226123
+GSE76675	GSE76675_DEG_Expt2_Control_vs_Group1	AZD3965	breast	cell line	SUM149	monocarboxylate transporter inhibitor	13237	16550	-0.118452732	-0.457487209
+GSE76675	GSE76675_DEG_Expt3_Control_vs_Group1	AZD3965	breast	cell line	SUM159	monocarboxylate transporter inhibitor	11222	16690	-0.028821563	-0.268636686
+GSE7807	GSE7807_DEG_Expt1_Control_vs_Group1	leukotriene D4	"blood, myeloid"	primary		leukocyte activator	131	12380	0.287839248	-0.06231676
+GSE78704	GSE78704_DEG_Expt1_Control_vs_Group1	JQ1	ovary	cell line	Ovcar8	bromodomain inhibitor	15239	7056	-0.514739899	0.043788541
+GSE79761	GSE79761_DEG_Expt1_Control_vs_Group1	estradiol	breast	cell line	MCF7	estrogen receptor agonist	126	2579	1.493208381	0.240209769
+GSE79761	GSE79761_DEG_Expt1_Control_vs_Group2	dexamethasone	breast	cell line	MCF7	glucocorticoid receptor agonist	232	1772	1.036239843	0.310426036
+GSE79761	GSE79761_DEG_Expt1_Control_vs_Group3	estradiol|dexamethasone	breast	cell line	MCF7	estrogen receptor agonist|glucocorticoid receptor agonist	41	2169	1.434681621	0.195855525
+GSE83120	GSE83120_DEG_Expt1_Control_vs_Group1	erlotinib	prostate	cell line	PC-9	EGFR inhibitor	16860	16431	-3.125727493	-1.338787571
+GSE83491	GSE83491_DEG_Expt1_Control_vs_Group1	AZD3965	stem cells	cell line	hESC	monocarboxylate transporter inhibitor	755	15703	0.317405223	-0.222538545
+GSE83491	GSE83491_DEG_Expt2_Control_vs_Group1	AZD3965	stem cells	cell line	hESC	monocarboxylate transporter inhibitor	3451	16740	0.182375297	-0.692284452
+GSE8588	GSE8588_DEG_Expt1_Control_vs_Group1	2-OH-BDE47|2-OH-BDE85	adrenal	cell line	H295R	Other	752	16842	0.740014383	-1.545476902
+GSE8588	GSE8588_DEG_Expt1_Control_vs_Group2	2-OH-BDE47|2-OH-BDE85	adrenal	cell line	H295R	Other	205	16672	1.325623837	-1.258366147
+GSE8597	GSE8597_DEG_Expt1_Control_vs_Group1	E2	breast	cell line	MCF7	estrogen receptor agonist	10438	22	-0.028613985	1.833130348
+GSE8658	GSE8658_DEG_Expt1_Control_vs_Group1	rosiglitazone	"blood, myeloid"	primary		PPAR receptor agonist	269	6249	0.470054789	0.029779725
+GSE9988	GSE9988_DEG_Expt1_Control_vs_Group1	LPS	"blood, myeloid"	primary		Other	66	631	2.477555326	0.750512782
