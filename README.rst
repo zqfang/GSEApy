@@ -24,6 +24,12 @@ The full ``GSEA`` is described in:
 `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ documentation. All files' formats for GSEApy are identical to ``GSEA`` desktop version.
 
 
+Data & Availability
+---------------------
+
+The data, results and analysis described in `our preprint <https://www.biorxiv.org/content/early/2018/02/04/259440>`_ are hosted in a Synapse project available `here <https://www.synapse.org/GSEA_InContext>`_ (doi:10.7303/syn11804693).
+
+
 Dependencies & Requirements
 --------------
 * Python 2.7 or 3.4+
