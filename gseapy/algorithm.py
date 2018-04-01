@@ -10,6 +10,7 @@ from multiprocessing import Pool
 from math import ceil
 from collections import defaultdict
 from numpy.random import choice, normal
+from beta_binomial import *
 
 def enrichment_score(gene_list, correl_vector, gene_set, weighted_score_type=1, 
 					 nperm=1000, rs=np.random.RandomState(), single=False, scale=False):
@@ -87,6 +88,17 @@ def enrichment_score(gene_list, correl_vector, gene_set, weighted_score_type=1,
 
 	return es, esnull, hit_ind, RES
 
+def scale_range_01(x):
+	min_x = min(x)
+	num = [xi - min_x for xi in x]
+	denom = max(x) - min_x
+	return [ni/denom for ni in num]
+
+def estimate_alpha_beta(mu, var):
+	a = (((1 - mu) / var) - (1 / mu)) * mu**2
+	b = a * ((1/mu)-1)
+	return (a, b)
+
 def make_background_dist(background_rnk_lists, nperm):
 	"""Given a list of ranked gene lists, expand to number of permutations
 	Avoid doing this multiple times
@@ -99,9 +111,22 @@ def make_background_dist(background_rnk_lists, nperm):
 			gene_dists[gene].append(i)
 	for gene in gene_dists.keys():
 		dist = gene_dists[gene]
-		h = np.median([abs(i[0]-i[1]) for i in it.product(dist, dist)])
-		rand_ints = normal(loc=np.mean(dist), scale=h, size=nperm)
-		rand_ints = [round(i, 0) for i in rand_ints]
+
+		# Estimate alpha and beta
+		scaled_dist = scale_range_01(dist)
+		mu = np.mean(scaled_dist)
+		neighbors = list(it.product(scaled_dist, scaled_dist))
+		diffs = [abs(i[0]-i[1]) for i in neighbors if i[0] != i[1]]
+		var = np.median(diffs)**2
+		a, b = estimate_alpha_beta(mu, var)
+
+		# If possible, draw ranks from beta-binomial distribution
+		if a > 0 and b > 0:
+			rand_ints = betabinom.rvs(n=nperm, a=a, b=b, size = 1000)
+		else:
+			# If alpha or beta are negative, use normal distribution
+			rand_ints = normal(loc=np.mean(dist), scale=h, size=nperm)
+			rand_ints = [round(i, 0) for i in rand_ints]
 		gene_dists[gene].extend([int(r) if r > 0 else 0 for r in rand_ints])
 
 	# Then make n permutations of that
