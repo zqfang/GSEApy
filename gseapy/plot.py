@@ -5,6 +5,7 @@ import logging, sys
 from matplotlib.colors import Normalize
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
+from matplotlib.ticker import MaxNLocator
 import matplotlib.pyplot as plt
 import matplotlib.transforms as transforms
 from gseapy.parser import unique
@@ -298,7 +299,8 @@ def dotplot(df, cutoff=0.05, figsize=(3.5,6), top_term=10, scale=1):
     # canvas.print_figure('test', bbox_inches='tight')
     return fig
 
-def barplot(df, cutoff=0.05, figsize=(6.5,6), top_term=10):
+def barplot(df, cutoff=0.05, figsize=(6.5,6), top_term=10,
+            color='salmon', title=""):
     """ barplot for enrichr results"""
 
     # pvalue cut off
@@ -312,11 +314,13 @@ def barplot(df, cutoff=0.05, figsize=(6.5,6), top_term=10):
     fig = Figure(figsize=figsize)
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(111)
-    bar = dd.plot.barh(x='Term', y='logAP', color="salmon", alpha=0.75, fontsize=24, ax=ax)
-    bar.set_xlabel("-log$_{10}$ Adjust P-value", fontsize=24)
+    bar = dd.plot.barh(x='Term', y='logAP', color=color, alpha=0.75, fontsize=24, ax=ax)
+    bar.set_xlabel("-log$_{10}$ Adjust P-value", fontsize=24, fontweight='bold')
     bar.set_ylabel("")
-    # bar.set_title("Enrichr",fontsize=32)
-    bar.legend(loc=4)
+    bar.set_titile(title, fontsize=32, fontweight='bold')
+    bar.xaxis.set_major_locator(MaxNLocator(integer=True))
+    bar.legend_.remove()
+    adjust_spine(ax, spines=['left','bottom'])
     # fig.savefig(png, bbox_inches='tight')
     # fig.savefig(pdf, bbox_inches='tight')
     return fig

@@ -13,8 +13,9 @@ from gseapy.utils import *
 
 class Enrichr(object):
     """Enrichr API"""
-    def __init__(self, gene_list, gene_sets, descriptions='foo', outdir='Enrichr',
-            cutoff=0.05, format='pdf', figsize=(8,6), top_term=10, no_plot=False, verbose=False):
+    def __init__(self, gene_list, gene_sets, descriptions='foo', 
+                 outdir='Enrichr', cutoff=0.05, format='pdf', 
+                 figsize=(6.5,6), top_term=10, no_plot=False, verbose=False):
 
         self.gene_list=gene_list
         self.gene_sets=gene_sets
@@ -65,7 +66,7 @@ class Enrichr(object):
 
         # read input file
         genes_str=self.parse_input()
-
+        
         # name of analysis or list
         description = str(self.descriptions)
         gene_set = str(self.gene_sets)
@@ -143,7 +144,10 @@ class Enrichr(object):
         # plotting
         if not self.__no_plot:
             fig = barplot(df=df, cutoff=self.cutoff,
-                        figsize=self.figsize, top_term=self.__top_term,)
+                          figsize=self.figsize, 
+                          top_term=self.__top_term,
+                          color='salmon',
+                          title='')
             if fig is None:
                 self._logger.warning("Warning: No enrich terms using library %s when cuttoff = %s"%(gene_set, self.cutoff))
             else:
