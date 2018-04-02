@@ -317,10 +317,10 @@ def barplot(df, cutoff=0.05, figsize=(6.5,6), top_term=10,
     bar = dd.plot.barh(x='Term', y='logAP', color=color, alpha=0.75, fontsize=24, ax=ax)
     bar.set_xlabel("-log$_{10}$ Adjust P-value", fontsize=24, fontweight='bold')
     bar.set_ylabel("")
-    bar.set_titile(title, fontsize=32, fontweight='bold')
+    bar.set_title(title, fontsize=32, fontweight='bold')
     bar.xaxis.set_major_locator(MaxNLocator(integer=True))
     bar.legend_.remove()
-    adjust_spine(ax, spines=['left','bottom'])
+    adjust_spines(ax, spines=['left','bottom'])
     # fig.savefig(png, bbox_inches='tight')
     # fig.savefig(pdf, bbox_inches='tight')
     return fig
