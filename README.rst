@@ -11,8 +11,8 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
 .. image:: https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat-square
     :target: http://bioconda.github.io
 
-.. image:: https://travis-ci.org/BioNinja/GSEApy.svg?branch=master
-    :target: https://travis-ci.org/BioNinja/GSEApy
+.. image:: https://travis-ci.org/zqfang/GSEApy.svg?branch=master
+    :target: https://travis-ci.org/zqfang/GSEApy
 
 .. image:: http://readthedocs.org/projects/gseapy/badge/?version=master
     :target: http://gseapy.readthedocs.io/en/master/?badge=master
@@ -34,7 +34,7 @@ The main documentation for GSEApy can be found at http://gseapy.rtfd.io/
 
 An example to use gseapy, please click here: `Example <http://gseapy.readthedocs.io/en/master/gseapy_example.html>`_
 
-**Release notes** : https://github.com/BioNinja/gseapy/releases
+**Release notes** : https://github.com/zqfang/gseapy/releases
 
 GSEAPY is a python wrapper for **GSEA** and **Enrichr**.
 --------------------------------------------------------------------------------------------
@@ -146,7 +146,7 @@ Installation
 
 .. code:: shell
 
-   $ pip install git+git://github.com/BioNinja/gseapy.git#egg=gseapy
+   $ pip install git+git://github.com/zqfang/gseapy.git#egg=gseapy
 
 Dependency
 --------------
