@@ -226,8 +226,8 @@ def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
     neg = classes == neg
     pos_cor_mean = perm_cor_tensor[:,pos,:].mean(axis=1)
     neg_cor_mean = perm_cor_tensor[:,neg,:].mean(axis=1)
-    pos_cor_std = perm_cor_tensor[:,pos,:].std(axis=1)
-    neg_cor_std = perm_cor_tensor[:,neg,:].std(axis=1)
+    pos_cor_std = perm_cor_tensor[:,pos,:].std(axis=1, ddof=1)
+    neg_cor_std = perm_cor_tensor[:,neg,:].std(axis=1, ddof=1)
 
     if method == 'signal_to_noise':
         cor_mat = (pos_cor_mean - neg_cor_mean)/(pos_cor_std + neg_cor_std)
