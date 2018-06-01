@@ -30,7 +30,6 @@ class GSEAbase(object):
         self._processes=1
         self._logger=None
 
-
     def _set_cores(self):
         """set cpu numbers to be used"""
 

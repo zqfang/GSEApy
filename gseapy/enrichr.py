@@ -61,15 +61,24 @@ class Enrichr(object):
         genes_str = '\n'.join(genes)
         return genes_str
 
+
     def run(self):
-        """run enrichr"""
+        """run enrichr for multi library input"""
+        gs = self.gene_sets.split(",")
+        for g in gs:
+            self._gs = g
+            self._logger.debug("Start Enrichr using library: %s"%(str(gs)))
+            self.run_single()
+
+    def run_single(self):
+        """run enrichr for one sample"""
 
         # read input file
         genes_str=self.parse_input()
         
         # name of analysis or list
         description = str(self.descriptions)
-        gene_set = str(self.gene_sets)
+        gene_set = str(self._gs)
 
         self._logger.info("Connecting to Enrichr Server to get latest library names")
         if gene_set in DEFAULT_LIBRARY:
@@ -77,8 +86,8 @@ class Enrichr(object):
         else:
             enrichr_library = get_library_name()
             if gene_set not in enrichr_library:
-                sys.stderr.write("%s is not a enrichr library name\n"%gene_set)
-                sys.stdout.write("Hint: use get_library_name() to veiw full list of supported names")
+                sys.stderr.write("%s is not a Enrichr library name\n"%gene_set)
+                sys.stdout.write("Hint: use get_library_name() to view full list of supported names")
                 sys.exit(1)
 
         self._logger.info('Analysis name: %s, Enrichr Library: %s'%(description, gene_set))

@@ -40,7 +40,7 @@ def z_score(data2d, axis=0):
     else:
         z_scored = data2d.T
 
-    z_scored = (z_scored - z_scored.mean()) / z_scored.std()
+    z_scored = (z_scored - z_scored.mean()) / z_scored.std(ddof=1)
 
     if axis == 1:
         return z_scored

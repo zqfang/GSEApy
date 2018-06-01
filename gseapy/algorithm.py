@@ -457,7 +457,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
 
     if permutation_type == "phenotype":
         logging.debug("Start to permutate classes..............................")
-        # shuffling classes and generate raondom correlation rankings
+        # shuffling classes and generate random correlation rankings
         rs = np.random.RandomState(seed)
         genes_mat, cor_mat = ranking_metric_tensor(exprs=data, method=method,
                                                    permutation_num=n,
