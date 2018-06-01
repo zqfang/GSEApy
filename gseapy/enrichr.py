@@ -171,7 +171,7 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr',
     """Enrichr API.
 
     :param gene_list: Flat file with list of genes, one gene id per row, or a python list object
-    :param gene_sets: Enrichr Library to query. Required enrichr library name
+    :param gene_sets: Enrichr Library to query. Required enrichr library name(s). Separate each name by comma.
     :param description: name of analysis. optional.
     :param outdir: Output file directory
     :param float cutoff: Adjust P-value cutoff, for plotting. Default: 0.05

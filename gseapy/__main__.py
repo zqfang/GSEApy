@@ -273,7 +273,7 @@ def add_enrichr_parser(subparsers):
     enrichr_opt.add_argument("-i", "--input-list", action="store", dest="gene_list", type=str, required=True, metavar='geneSymbols',
                               help="Enrichr uses a list of Entrez gene symbols as input.")
     enrichr_opt.add_argument("-g", "--gene-sets", action="store", dest="library", type=str, required=True, metavar='gmt',
-                              help="Enrichr library name required. see online tool for library names.")
+                              help="Enrichr library name(s) required. Separate each name by comma.See online tool for library names.")
     enrichr_opt.add_argument("--ds", "--description", action="store", dest="descrip", type=str, default='enrichr', metavar='strings',
                               help="It is recommended to enter a short description for your list so that multiple lists \
                               can be differentiated from each other if you choose to save or share your list.")
