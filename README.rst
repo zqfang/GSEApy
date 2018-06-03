@@ -304,7 +304,7 @@ Or use ``get_library_name`` function inside python console.
 Bug Report
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you would like to report any bugs when you running gseapy, don't hesitate to create an issue on github here, or email me: fangzhuoqing@sibs.ac.cn
+If you would like to report any bugs when you running gseapy, don't hesitate to create an issue on github here, or email me: fzq518@gmail.com
 
 
 To get help of GSEAPY

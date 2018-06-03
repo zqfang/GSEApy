@@ -5,7 +5,7 @@ from setuptools.command.test import test as TestCommand
 
 
 
-__version__='0.9.3'
+__version__='0.9.4'
 
 if sys.argv[-1] == 'publish':
     os.system("python setup.py sdist bdist_wheel register upload")
@@ -50,9 +50,9 @@ setup(name='gseapy',
           'Topic :: Software Development :: Libraries'],
       keywords= ['Gene Ontology', 'GO','Biology', 'Enrichment',
           'Bioinformatics', 'Computational Biology',],
-      url='https://github.com/BioNinja/gseapy',
+      url='https://github.com/zqfang/gseapy',
       author='Zhuoqing Fang',
-      author_email='fangzhuoqing@sibs.ac.cn',
+      author_email='fzq518@gmail.com',
       license='MIT',
       packages=['gseapy'],
       install_requires=[
@@ -60,13 +60,11 @@ setup(name='gseapy',
           'pandas>=0.16',
           'matplotlib>=1.4.3',
           'beautifulsoup4>=4.4.1',
-          'requests',
-          'lxml',
-          'html5lib',],
+          'requests'],
       entry_points={'console_scripts': ['gseapy = gseapy.__main__:main'],},
       tests_require=['pytest'],
       cmdclass = {'test': PyTest},
       zip_safe=False,
-      download_url='https://github.com/BioNinja/gseapy',)
+      download_url='https://github.com/zqfang/gseapy',)
 
 __author__ = 'Zhuoqing Fang'
