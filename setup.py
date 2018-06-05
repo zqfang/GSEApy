@@ -62,7 +62,7 @@ setup(name='gseapy',
           'beautifulsoup4>=4.4.1',
           'requests',
           'html5lib',
-          'lxml']
+          'lxml'],
       entry_points={'console_scripts': ['gseapy = gseapy.__main__:main'],},
       tests_require=['pytest'],
       cmdclass = {'test': PyTest},
