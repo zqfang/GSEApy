@@ -68,7 +68,7 @@ def log_init(outlog, log_level=logging.INFO):
     """logging start"""
 
     # clear old root logger handlers
-    logging.getLogger("").handlers = []
+    logging.getLogger("gseapy").handlers = []
     # init a root logger
     logging.basicConfig(level    = logging.DEBUG,
                         format   = 'LINE %(lineno)-4d: %(asctime)s [%(levelname)-8s] %(message)s',
@@ -83,8 +83,8 @@ def log_init(outlog, log_level=logging.INFO):
     # tell the handler to use this format
     console.setFormatter(formatter)
     # add handlers
-    logging.getLogger("").addHandler(console)
-    logger = logging.getLogger("")
+    logging.getLogger("gseapy").addHandler(console)
+    logger = logging.getLogger("gseapy")
     # logger.setLevel(log_level)
     return logger
 
