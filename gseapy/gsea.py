@@ -799,7 +799,7 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
     """ Run Gene Set Enrichment Analysis.
 
     :param data: Gene expression data table, pandas DataFrame, gct file.
-    :param gene_sets: Enrichr Library name or .gmt gene sets file. Same input with GSEA.
+    :param gene_sets: Enrichr Library name or .gmt gene sets file or dict of gene sets. Same input with GSEA.
     :param cls: a list or a .cls file format required for GSEA.
     :param str outdir: Results output directory.
     :param int permutation_num: Number of permutations for significance computation. Default: 1000.
@@ -874,7 +874,7 @@ def ssgsea(data, gene_sets, outdir="ssGSEA_", sample_norm_method='rank', min_siz
     """Run Gene Set Enrichment Analysis with single sample GSEA tool
 
     :param data: expression table, pd.Series, pd.DataFrame, GCT file, or .rnk file format.
-    :param gene_sets: Enrichr Library name or .gmt gene sets file. Same input with GSEA.
+    :param gene_sets: Enrichr Library name or .gmt gene sets file or dict of gene sets. Same input with GSEA.
     :param outdir: results output directory.
     :param str sample_norm_method: "Sample normalization method. Choose from {'rank', 'log', 'log_rank'}. Default: rank.
 
@@ -927,7 +927,7 @@ def prerank(rnk, gene_sets, outdir='GSEA_Prerank', pheno_pos='Pos', pheno_neg='N
     """ Run Gene Set Enrichment Analysis with pre-ranked correlation defined by user.
 
     :param rnk: pre-ranked correlation table or pandas DataFrame. Same input with ``GSEA`` .rnk file.
-    :param gene_sets: Enrichr Library name or .gmt gene sets file. Same input with GSEA.
+    :param gene_sets: Enrichr Library name or .gmt gene sets file or dict of gene sets. Same input with GSEA.
     :param outdir: results output directory.
     :param int permutation_num: Number of permutations for significance computation. Default: 1000.
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Defaut: 15.
