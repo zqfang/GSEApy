@@ -555,6 +555,7 @@ class SingleSampleGSEA(GSEAbase):
             data = log(dat + exp(1))
         elif self.sample_norm_method == 'custom':
             self._logger.info("Use custom rank metric for ssGSEA")
+            data = dat
         else:
             sys.stderr.write("No supported method: %s"%self.sample_norm_method)
             sys.exit(0)
