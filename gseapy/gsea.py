@@ -89,7 +89,13 @@ class GSEAbase(object):
     def load_gmt(self, gene_list, gmt):
         """load gene set dict"""
 
-        genesets_dict = self.parse_gmt(gmt)
+        if isinstance(gmt, dict):
+            genesets_dict = gmt
+        elif isinstance(gmt, str):
+            genesets_dict = self.parse_gmt(gmt)
+        else:
+            raise Exception("Error parsing gmt parameter for gene sets")
+        
         subsets = list(genesets_dict.keys())
         for subset in subsets:
             tag_indicator = np.in1d(gene_list, genesets_dict.get(subset), assume_unique=True)
@@ -482,8 +488,9 @@ class SingleSampleGSEA(GSEAbase):
         self._processes=processes
         self._noplot=no_plot
         # init logger
+
         mkdirs(self.outdir)
-        _gset =os.path.split(self.gene_sets)[-1].lower().rstrip(".gmt")
+        _gset = os.path.split(self.gene_sets)[-1].lower().rstrip(".gmt") if isinstance(self.gene_sets, str) else "blank_name"
         outlog = os.path.join(self.outdir,"gseapy.%s.%s.log"%(self.module, _gset))
         self._logger = log_init(outlog=outlog,
                                 log_level=logging.INFO if self.verbose else logging.WARNING)
