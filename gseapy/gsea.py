@@ -5,7 +5,7 @@ from __future__ import division
 import os, sys, logging, json
 from collections import OrderedDict
 from multiprocessing import Pool, cpu_count
-
+from tempfile import TemporaryDirectory
 import numpy as np
 import pandas as pd
 from numpy import log, exp
@@ -29,6 +29,21 @@ class GSEAbase(object):
         self.verbose=False
         self._processes=1
         self._logger=None
+
+    def prepare_outputs(self):
+        """create temp directory."""
+        self._outdir = self.outdir
+        if self.outdir is None:
+            self._tmpdir = TemporaryDirectory()
+            self.outdir = self._tmpdir.name
+        elif isinstance(self.outdir, str):
+            mkdirs(self.outdir)
+        else:
+            raise Exception("Error parsing outdir: %s"%type(self.outdir))
+        _gset_temp = os.path.split(self.gene_sets)[-1].lower().rstrip(".gmt")
+        _gset = _gset_temp if isinstance(self.gene_sets, str) else "blank_name"
+        logfile = os.path.join(self.outdir, "gseapy.%s.%s.log" % (self.module, _gset))
+        return logfile
 
     def _set_cores(self):
         """set cpu numbers to be used"""
@@ -107,7 +122,7 @@ class GSEAbase(object):
         self._logger.info("%04d gene_sets have been filtered out when max_size=%s and min_size=%s"%(filsets_num, self.max_size, self.min_size))
 
         if filsets_num == len(subsets):
-            self._logger.error("No gene sets passed throught filtering condition!!!, try new paramters again!\n" +\
+            self._logger.error("No gene sets passed through filtering condition!!!, try new parameters again!\n" +\
                                "Note: check gene name, gmt file format, or filtering size." )
             sys.exit(0)
 
@@ -291,10 +306,8 @@ class GSEA(GSEAbase):
         self.ranking=None
         self._noplot=no_plot
         # init logger
-        mkdirs(self.outdir)
-        _gset =os.path.split(self.gene_sets)[-1].lower().rstrip(".gmt")
-        outlog = os.path.join(self.outdir,"gseapy.%s.%s.log"%(self.module, _gset))
-        self._logger = log_init(outlog=outlog,
+        logfile = self.prepare_outputs()
+        self._logger = log_init(outlog=logfile,
                                 log_level=logging.INFO if self.verbose else logging.WARNING)
 
     def load_data(self, cls_vec):
@@ -381,6 +394,10 @@ class GSEA(GSEAbase):
                            figsize=self.figsize, format=self.format, module=self.module,
                            data=heat_dat, classes=cls_vector, phenoPos=phenoPos, phenoNeg=phenoNeg)
 
+
+        if self._outdir is None:
+            self._tmpdir.cleanup()
+
         self._logger.info("Congratulations. GSEApy run successfully................\n")
 
         return
@@ -414,11 +431,10 @@ class Prerank(GSEAbase):
         self._processes=processes
         self._noplot=no_plot
         # init logger
-        mkdirs(self.outdir)
-        _gset =os.path.split(self.gene_sets)[-1].lower().rstrip(".gmt")
-        outlog = os.path.join(self.outdir,"gseapy.%s.%s.log"%(self.module, _gset))
-        self._logger = log_init(outlog=outlog,
+        logfile = self.prepare_outputs()
+        self._logger = log_init(outlog=logfile,
                                 log_level=logging.INFO if self.verbose else logging.WARNING)
+
 
     def run(self):
         """GSEA prerank workflow"""
@@ -457,6 +473,9 @@ class Prerank(GSEAbase):
                            figsize=self.figsize, format=self.format,
                            module=self.module, phenoPos=self.pheno_pos, phenoNeg=self.pheno_neg)
 
+        if self._outdir is None:
+            self._tmpdir.cleanup()
+
         self._logger.info("Congratulations. GSEApy run successfully................\n")
 
         return
@@ -489,10 +508,8 @@ class SingleSampleGSEA(GSEAbase):
         self._noplot=no_plot
         # init logger
 
-        mkdirs(self.outdir)
-        _gset = os.path.split(self.gene_sets)[-1].lower().rstrip(".gmt") if isinstance(self.gene_sets, str) else "blank_name"
-        outlog = os.path.join(self.outdir,"gseapy.%s.%s.log"%(self.module, _gset))
-        self._logger = log_init(outlog=outlog,
+        logfile = self.prepare_outputs()
+        self._logger = log_init(outlog=logfile,
                                 log_level=logging.INFO if self.verbose else logging.WARNING)
 
     def corplot(self):
@@ -590,6 +607,9 @@ class SingleSampleGSEA(GSEAbase):
             # run permutation procedure and calculate pvals, fdrs
             self._logger.info("run ssGSEA with permutation procedure, might take a while")
             self.runSamplesPermu(df=normdat, gmt=gmt)
+
+        if self._outdir is None:
+            self._tmpdir.cleanup()
 
     def runSamplesPermu(self, df, gmt=None):
         """Single Sample GSEA workflow with permutation procedure"""

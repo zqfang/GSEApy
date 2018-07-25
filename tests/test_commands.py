@@ -52,6 +52,11 @@ def test_prerank(prernk, geneGMT):
     prerank(prernk, geneGMT, tmpdir.name, permutation_num=10)
     tmpdir.cleanup()
 
+def test_prerank(prernk, geneGMT):
+    # Only tests of the command runs successfully,
+    # doesnt't check the image
+    prerank(prernk, geneGMT, None, permutation_num=10)
+
 def test_ssgsea1(ssGCT, geneGMT):
     # Only tests of the command runs successfully,
     # doesnt't check the image
