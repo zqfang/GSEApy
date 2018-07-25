@@ -5,6 +5,7 @@
 import sys, json, os, logging
 import requests
 from time import sleep
+from tempfile import TemporaryDirectory
 from pandas import read_table, DataFrame, Series
 from gseapy.plot import barplot
 from gseapy.parser import get_library_name
@@ -30,12 +31,31 @@ class Enrichr(object):
         self.module="enrichr"
         self.res2d=None
         self._processes=1
+
         # init logger
-        mkdirs(self.outdir)
-        _gset =os.path.split(self.gene_sets)[-1].lower().rstrip(".gmt")
-        outlog = os.path.join(self.outdir,"gseapy.%s.%s.log"%(self.module, _gset))
-        self._logger = log_init(outlog=outlog,
+        logfile = self.prepare_outdir()
+        self._logger = log_init(outlog=logfile,
                                 log_level=logging.INFO if self.verbose else logging.WARNING)
+
+    def prepare_outdir(self):
+        """create temp directory."""
+        self._outdir = self.outdir
+        if self.outdir is None:
+            self._tmpdir = TemporaryDirectory()
+            self.outdir = self._tmpdir.name
+        elif isinstance(self.outdir, str):
+            mkdirs(self.outdir)
+        else:
+            raise Exception("Error parsing outdir: %s"%type(self.outdir))
+
+        # handle gene_sets
+        if isinstance(self.gene_sets, str):
+            _gset = os.path.split(self.gene_sets)[-1].lower().rstrip(".gmt")
+        else:
+            raise Exception("Error parsing gene_sets parameter for gene sets")
+
+        logfile = os.path.join(self.outdir, "gseapy.%s.%s.log" % (self.module, _gset))
+        return logfile
 
     def parse_input(self):
         if isinstance(self.gene_list, list):
@@ -69,6 +89,8 @@ class Enrichr(object):
             self._gs = g
             self._logger.debug("Start Enrichr using library: %s"%(str(gs)))
             self.run_single()
+        # clean up tmpdir
+        if self._outdir is None: self._tmpdir.cleanup()
 
     def run_single(self):
         """run enrichr for one sample"""
@@ -146,10 +168,12 @@ class Enrichr(object):
                     f.write(chunk)
 
         self._logger.debug('Results written to: ' + outfile)
+
         # save results
         df =  read_table(outfile)
         self.res2d = df
 
+        if self._outdir is None: return
         # plotting
         if not self.__no_plot:
             fig = barplot(df=df, cutoff=self.cutoff,

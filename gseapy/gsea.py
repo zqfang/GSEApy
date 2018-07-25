@@ -20,6 +20,7 @@ from gseapy.utils import mkdirs, log_init, retry, DEFAULT_LIBRARY
 class GSEAbase(object):
     """base class of GSEA."""
     def __init__(self):
+        self.outdir='temp_gseapy'
         self.gene_sets='KEGG_2016'
         self.module='base'
         self.results=None
@@ -30,7 +31,7 @@ class GSEAbase(object):
         self._processes=1
         self._logger=None
 
-    def prepare_outputs(self):
+    def prepare_outdir(self):
         """create temp directory."""
         self._outdir = self.outdir
         if self.outdir is None:
@@ -40,8 +41,15 @@ class GSEAbase(object):
             mkdirs(self.outdir)
         else:
             raise Exception("Error parsing outdir: %s"%type(self.outdir))
-        _gset_temp = os.path.split(self.gene_sets)[-1].lower().rstrip(".gmt")
-        _gset = _gset_temp if isinstance(self.gene_sets, str) else "blank_name"
+
+        # handle gmt type
+        if isinstance(self.gene_sets, str):
+            _gset = os.path.split(self.gene_sets)[-1].lower().rstrip(".gmt")
+        elif isinstance(self.gene_sets, dict):
+            _gset = "blank_name"
+        else:
+            raise Exception("Error parsing gene_sets parameter for gene sets")
+
         logfile = os.path.join(self.outdir, "gseapy.%s.%s.log" % (self.module, _gset))
         return logfile
 
@@ -198,6 +206,7 @@ class GSEAbase(object):
             :param data: preprocessed expression table
 
         """
+        if self._outdir is None: return
         #Plotting
         top_term = res2d.head(graph_num).index
 
@@ -261,7 +270,9 @@ class GSEAbase(object):
         res_df.index.name = 'Term'
         res_df.sort_values(by='fdr', inplace=True)
         res_df.drop(['RES','hits_indices'], axis=1, inplace=True)
-
+        self.res2d = res_df
+        self.results  = res
+        if self._outdir is None: return
         out = os.path.join(outdir,'gseapy.{b}.{c}.report.csv'.format(b=module, c=permutation_type))
         if self.module == 'ssgsea':
             out = out.replace(".csv",".txt")
@@ -272,8 +283,6 @@ class GSEAbase(object):
         else:
             res_df.to_csv(out)
 
-        self.res2d = res_df
-        self.results  = res
         return
 
 class GSEA(GSEAbase):
@@ -306,7 +315,7 @@ class GSEA(GSEAbase):
         self.ranking=None
         self._noplot=no_plot
         # init logger
-        logfile = self.prepare_outputs()
+        logfile = self.prepare_outdir()
         self._logger = log_init(outlog=logfile,
                                 log_level=logging.INFO if self.verbose else logging.WARNING)
 
@@ -394,11 +403,9 @@ class GSEA(GSEAbase):
                            figsize=self.figsize, format=self.format, module=self.module,
                            data=heat_dat, classes=cls_vector, phenoPos=phenoPos, phenoNeg=phenoNeg)
 
-
+        self._logger.info("Congratulations. GSEApy run successfully................\n")
         if self._outdir is None:
             self._tmpdir.cleanup()
-
-        self._logger.info("Congratulations. GSEApy run successfully................\n")
 
         return
 
@@ -431,7 +438,7 @@ class Prerank(GSEAbase):
         self._processes=processes
         self._noplot=no_plot
         # init logger
-        logfile = self.prepare_outputs()
+        logfile = self.prepare_outdir()
         self._logger = log_init(outlog=logfile,
                                 log_level=logging.INFO if self.verbose else logging.WARNING)
 
@@ -473,10 +480,9 @@ class Prerank(GSEAbase):
                            figsize=self.figsize, format=self.format,
                            module=self.module, phenoPos=self.pheno_pos, phenoNeg=self.pheno_neg)
 
+        self._logger.info("Congratulations. GSEApy run successfully................\n")
         if self._outdir is None:
             self._tmpdir.cleanup()
-
-        self._logger.info("Congratulations. GSEApy run successfully................\n")
 
         return
 
@@ -607,7 +613,7 @@ class SingleSampleGSEA(GSEAbase):
             # run permutation procedure and calculate pvals, fdrs
             self._logger.info("run ssGSEA with permutation procedure, might take a while")
             self.runSamplesPermu(df=normdat, gmt=gmt)
-
+        # clean up all outputs if _outdir is None
         if self._outdir is None:
             self._tmpdir.cleanup()
 
@@ -712,6 +718,14 @@ class SingleSampleGSEA(GSEAbase):
         # save raw ES to one csv file
         samplesRawES = pd.DataFrame(self.resultsOnSamples)
         samplesRawES.index.name = 'Term|ES'
+        # normalize enrichment scores by using the entire data set, as indicated
+        # by Barbie et al., 2009, online methods, pg. 2
+        samplesNES = samplesRawES / (samplesRawES.values.max() - samplesRawES.values.min())
+        samplesNES = samplesNES.copy()
+        samplesNES.index.rename('Term|NES', inplace=True)
+        self.res2d = samplesNES
+        self._logger.info("Congratulations. GSEApy run successfully................\n")
+        if self._outdir is None: return
         # write es
         outESfile = os.path.join(outdir, "gseapy.samples.raw.es.txt")
         with open(outESfile, 'a') as f:
@@ -723,19 +737,12 @@ class SingleSampleGSEA(GSEAbase):
                 f.write('# raw enrichment scores of all data\n')
                 f.write('# no scale es by numbers of genes in the gene sets\n')
             samplesRawES.to_csv(f, sep='\t')
-        # normalize enrichment scores by using the entire data set, as indicated
-        # by Barbie et al., 2009, online methods, pg. 2
-        samplesNES = samplesRawES / (samplesRawES.values.max() - samplesRawES.values.min())
-        samplesNES = samplesNES.copy()
-        samplesNES.index.rename('Term|NES', inplace=True)
+
         outNESfile = os.path.join(outdir, "gseapy.samples.normalized.es.txt")
         with open(outNESfile, 'a') as f:
             f.write('# normalize enrichment scores by using the entire data set\n')
             f.write('# as indicated by Barbie et al., 2009, online methods, pg. 2\n')
             samplesNES.to_csv(f, sep='\t')
-        self.res2d = samplesNES
-        self._logger.info("Congratulations. GSEApy run successfully................\n")
-
         return
 
 class Replot(GSEAbase):
