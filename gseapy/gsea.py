@@ -34,7 +34,7 @@ class GSEAbase(object):
     def prepare_outdir(self):
         """create temp directory."""
         self._outdir = self.outdir
-        if self.outdir is None:
+        if self._outdir is None:
             self._tmpdir = TemporaryDirectory()
             self.outdir = self._tmpdir.name
         elif isinstance(self.outdir, str):

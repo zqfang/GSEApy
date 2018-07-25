@@ -28,13 +28,16 @@ def z_score(data2d, axis=0):
 
     :param data2d: DataFrame to normalize.
     :param axis: int, Which axis to normalize across. If 0, normalize across rows,
-                  if 1, normalize across columns.
-
-
+                  if 1, normalize across columns. If None, normalized by entire dataset
+                  
     :Returns: Normalized DataFrame. Normalized data with a mean of 0 and variance of 1
               across the specified axis.
 
     """
+    if axis is None:
+        z_scored = (data2d - data2d.values.mean()) / data2d.values.std(ddof=1)
+        return z_scored
+
     if axis == 1:
         z_scored = data2d
     else:
@@ -54,12 +57,12 @@ def heatmap(df, term, outdir, axis=0, figsize=(5,5), format='png'):
     :param df: DataFrame from expression table.
     :param term: gene set name.
     :param outdir: path to save heatmap.
-    :param axis: z_score axis. If None, do not standardize row or column.
+    :param axis: z_score axis. If None, normalized using all data value.
     :param figsize: heatmap figsize.
     :param format: Matplotlib supported figure formats.
 
     """
-    if axis is not None: df = z_score(df, axis=axis)
+    df = z_score(df, axis=axis)
     df = df.iloc[::-1]
     # Get the positions and used label for the ticks
     nx, ny = df.T.shape
