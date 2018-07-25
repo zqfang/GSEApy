@@ -31,7 +31,7 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
 GSEAPY is a python wrapper for **GESA** and **Enrichr**. 
 --------------------------------------------------------------------------------------------
 
-It's used for convenient GO enrichments and produce **publishable quality figures** from python. 
+It's used for convenient GO enrichments and produce **publication quality figures** from python. 
 
 GSEAPY could be used for **RNA-seq, ChIP-seq, Microarry** data.
 
@@ -51,13 +51,13 @@ Enrichr is open source and freely available online at: http://amp.pharm.mssm.edu
 Why GSEAPY
 -----------------------------------------------------
 
-I would like to use Pandas to explore my data, but I did not find a  convenient tool to
-do gene set enrichment analysis in python. So, here is my reason: 
+I would like to use Pandas to explore my data, but I did not find a convenient tool to
+do gene set enrichment analysis in python. So, here are my reasons: 
 
-* **Running inside python interactive console without switch to R!!!**
-* User friendly for both wet and dry lab usrers.
+* **Ability to run inside python interactive console without switch to R!!!**
+* User friendly for both wet and dry lab users.
 * Produce publishable figures.
-* Perform batch jobs easy(using for loops).
+* Perform batch jobs easy (e.g. using for loops).
 * Easy to use in bash shell or your  data analysis workflow, e.g. snakemake.  
 
 
