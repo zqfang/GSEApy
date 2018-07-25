@@ -128,8 +128,8 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
 
     # output truetype
     plt.rcParams.update({'pdf.fonttype':42,'ps.fonttype':42})
-    # in most case, we will have mangy plots, so do not display plots
-    # It's also convinient to run this script on command line.
+    # in most case, we will have many plots, so do not display plots
+    # It's also usefull to run this script on command line.
 
     # GSEA Plots
     gs = plt.GridSpec(16,1)
@@ -147,11 +147,12 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     else:
         ax1.fill_between(x, y1=rankings, y2=0, color='#C9D3DB')
         ax1.set_ylabel("Ranked list metric", fontsize=14)
-    ax1.text(.05, .9, phenoP_label, color='red', horizontalalignment='left', verticalalignment='top',
-         transform=ax1.transAxes)
-    ax1.text(.95, .05, phenoN_label, color='Blue', horizontalalignment='right', verticalalignment='bottom',
-         transform=ax1.transAxes)
-
+    ax1.text(.05, .9, phenoP_label, color='red',
+             horizontalalignment='left', verticalalignment='top',
+             transform=ax1.transAxes)
+    ax1.text(.95, .05, phenoN_label, color='Blue',
+             horizontalalignment='right', verticalalignment='bottom',
+             transform=ax1.transAxes)
     # the x coords of this transformation are data, and the y coord are axes
     trans1 = transforms.blended_transform_factory(ax1.transData, ax1.transAxes)
     ax1.vlines(zero_score_ind, 0, 1, linewidth=.5, transform=trans1, linestyles='--', color='grey')
@@ -198,7 +199,7 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     ax4.set_xlim(min(x), max(x))
     ax4.tick_params(axis='both', which='both', bottom='off', top='off', labelbottom='off', right='off')
     ax4.locator_params(axis='y', nbins=5)
-    # FuncFormatter need two argment, I don't know why. this lambda function used to format yaxis tick labels.
+    # FuncFormatter need two argument, I don't know why. this lambda function used to format yaxis tick labels.
     ax4.yaxis.set_major_formatter(plt.FuncFormatter(lambda tick_loc,tick_num :  '{:.1f}'.format(tick_loc)) )
 
     # fig adjustment
