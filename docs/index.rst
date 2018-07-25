@@ -38,19 +38,19 @@ GSEAPY is a python wrapper for **GSEA** and **Enrichr**.
 
 GSEAPY has five subcommands: ``gsea``, ``prerank``, ``ssgsea``, ``replot`` ``enrichr``.
 
-1. The ``gsea`` module produce **GSEA** results.    
+1. The ``gsea`` module produces **GSEA** results.    
 The input requries a txt file(FPKM, Expected Counts, TPM, et.al), a cls file, and gene_sets file in gmt format. 
 
-2. The ``prerank`` module produce **Prerank tool** results.  
+2. The ``prerank`` module produces **Prerank tool** results.  
 The input expects a pre-ranked gene list dataset with correlation values, which in .rnk format, and gene_sets file in gmt format.  ``prerank`` module is an API to `GSEA` pre-rank tools.
 
-3. The ``ssgsea`` module perform **single sample GSEA(ssGSEA)** analysis.  
+3. The ``ssgsea`` module performs **single sample GSEA(ssGSEA)** analysis.  
 The input expects a gene list with expression values(same with ``.rnk`` file, and gene_sets file in gmt format. ssGSEA enrichment score for the gene set as described by `D. Barbie et al 2009 <http://www.nature.com/nature/journal/v462/n7269/abs/nature08460.html>`_.
 
-4. The ``replot`` module reproduce GSEA desktop version results.  
+4. The ``replot`` module reproduces GSEA desktop version results.  
 The only input for GSEAPY is the location to GSEA Desktop output results.
 
-5. The ``enrichr`` module enable you perform gene set enrichment analysis using ``Enrichr`` API.
+5. The ``enrichr`` module enables you to perform gene set enrichment analysis using ``Enrichr`` API.
 Enrichr is open source and freely available online at: http://amp.pharm.mssm.edu/Enrichr . It runs very fast and generates results in txt format.
 
 GSEAPY could be used for **RNA-seq, ChIP-seq, Microarry** data. It's used for convenient GO enrichments and produce **publishable quality figures** in python. 
@@ -65,14 +65,14 @@ The full ``GSEA`` is far too extensive to describe here; see
 Why GSEAPY
 -----------------------------------------------------
 
-I would like to use Pandas to explore my data, but I did not find a  convenient tool to
-do gene set enrichment analysis in python. So, here is my reason: 
+I would like to use Pandas to explore my data, but I did not find a convenient tool to
+do gene set enrichment analysis in python. So, here are my reasons:
 
-* **Running inside python interactive console without switch to R!!!**
+* **Ability to run inside python interactive console without having to switch to R!!!**
 * User friendly for both wet and dry lab users.
 * Produce and reproduce publishable figures.
-* Perform batch jobs easy(using for loops).
-* Easy to use in bash shell or your  data analysis workflow, e.g. snakemake.  
+* Perform batch jobs easily (e.g. using for loops).
+* Easy to use in bash shell or your data analysis workflow, e.g. snakemake.  
 
 
 
