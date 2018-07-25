@@ -514,7 +514,7 @@ class SingleSampleGSEA(GSEAbase):
         self._noplot=no_plot
         # init logger
 
-        logfile = self.prepare_outputs()
+        logfile = self.prepare_outdir()
         self._logger = log_init(outlog=logfile,
                                 log_level=logging.INFO if self.verbose else logging.WARNING)
 
