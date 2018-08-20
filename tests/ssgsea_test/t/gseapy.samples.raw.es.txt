@@ -1,5 +1,0 @@
-# scale the enrichment scores by number of genes in the gene sets
-# this normalization has not effects on the final NES, as indicated by Barbie et al., 2009, online methods, pg. 2
-Term|ES	0	0.1
-example_dn	-0.02231731402238301	-0.02231731402238301
-example_up	-0.017072635505815188	-0.017072635505815188
