@@ -1,0 +1,5 @@
+# normalize enrichment scores by using the entire data set
+# as indicated by Barbie et al., 2009, online methods, pg. 2
+Term|NES	0	0.1
+example_dn	-4.255230125523064	-4.255230125523064
+example_up	-3.2552301255230636	-3.2552301255230636

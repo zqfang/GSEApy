@@ -158,11 +158,12 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
              transform=ax1.transAxes)
     # the x coords of this transformation are data, and the y coord are axes
     trans1 = transforms.blended_transform_factory(ax1.transData, ax1.transAxes)
-    ax1.vlines(zero_score_ind, 0, 1, linewidth=.5, transform=trans1, linestyles='--', color='grey')
-    ax1.text(zero_score_ind, 0.5, z_score_label,
-             horizontalalignment='right' if module == 'ssgsea' else 'center',
-             verticalalignment='center',
-             transform=trans1)
+    if module != 'ssgsea':
+        ax1.vlines(zero_score_ind, 0, 1, linewidth=.5, transform=trans1, linestyles='--', color='grey')
+        ax1.text(zero_score_ind, 0.5, z_score_label,
+                 horizontalalignment='center',
+                 verticalalignment='center',
+                 transform=trans1)
     ax1.set_xlabel("Rank in Ordered Dataset", fontsize=14)
     ax1.spines['top'].set_visible(False)
     ax1.tick_params(axis='both', which='both', top='off', right='off', left='off')
