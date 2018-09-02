@@ -4,10 +4,10 @@
 
 import sys, json, os, logging
 import requests
+import pandas as pd
 from io import StringIO
 from time import sleep
 from tempfile import TemporaryDirectory
-from pandas import read_table, DataFrame, Series
 from gseapy.plot import barplot
 from gseapy.parser import get_library_name
 from gseapy.utils import *
@@ -50,12 +50,7 @@ class Enrichr(object):
             raise Exception("Error parsing outdir: %s"%type(self.outdir))
 
         # handle gene_sets
-        if isinstance(self.gene_sets, str):
-            _gset = os.path.split(self.gene_sets)[-1].lower().rstrip(".gmt")
-        else:
-            _gset = 'allsets'
-
-        logfile = os.path.join(self.outdir, "gseapy.%s.%s.log" % (self.module, _gset))
+        logfile = os.path.join(self.outdir, "gseapy.%s.%s.log" % (self.module, self.descriptions))
         return logfile
     def parse_genesets(self):
 
@@ -66,7 +61,7 @@ class Enrichr(object):
         else:
             raise Exception("Error parsing enrichr libraries, please provided corrected one")
 
-    def parse_genes(self):
+    def parse_genelists(self):
         """parse gene list"""
         if isinstance(self.gene_list, list):
             genes = [str(gene) for gene in self.gene_list]
@@ -79,7 +74,7 @@ class Enrichr(object):
                genes= self.gene_list.apply(lambda x: ",".join([str(i) for i in x]), axis=1).tolist()
             else:
                genes = self.gene_list.squeeze().tolist()
-        elif isinstance(self.gene_list, Series):
+        elif isinstance(self.gene_list, pd.Series):
             genes = self.gene_list.squeeze().tolist()
         else:
             # get gene lists or bed file, or gene list with weighted values.
@@ -134,10 +129,10 @@ class Enrichr(object):
         response = s.get(url, stream=True, timeout=None)
         # response = requests.get(RESULTS_URL + query_string % (user_list_id, gene_set))
         sleep(1)
-        res = read_table(StringIO(response.content.decode('utf-8')))
+        res = pd.read_table(StringIO(response.content.decode('utf-8')))
         return [job_id['shortId'], res]
 
-    def run(self):
+    def run_v2(self):
         """run enrichr for multi library input"""
         gs = self.gene_sets.split(",")
         self.results = pd.DataFrame()
@@ -149,17 +144,17 @@ class Enrichr(object):
         if self._outdir is None: self._tmpdir.cleanup()
         return
 
-    def run_v2(self):
+    def run(self):
         """run enrichr for one sample"""
 
         # read input file
-        genes_list = self.parse_input()
-
+        genes_list = self.parse_genelists()
+        gss = unique(self.parse_genesets())
         self._logger.info("Connecting to Enrichr Server to get latest library names")
-        gss = self.parse_genesets()
         # gss = self.gene_sets.split(",")
         enrichr_library = get_library_name()
         gss = [ g for g in gss if g in enrichr_library]
+        self._logger.info("Libraries are used: %s"%("',".join(gss)))
         if len(gss) < 1:
             sys.stderr.write("Not validated Enrichr library name provided\n")
             sys.stdout.write("Hint: use get_library_name() to view full list of supported names")
@@ -204,7 +199,7 @@ class Enrichr(object):
         """run enrichr for one sample"""
 
         # read input file
-        genes_str=self.parse_input()
+        genes_str=self.parse_genelists()
 
         self._logger.info("Connecting to Enrichr Server to get latest library names")
         if self._gs in DEFAULT_LIBRARY:
@@ -264,7 +259,7 @@ class Enrichr(object):
         self._logger.debug('Results written to: ' + outfile)
 
         # save results
-        df =  read_table(StringIO(response.content.decode('utf-8')))
+        df =  pd.read_table(StringIO(response.content.decode('utf-8')))
         self.res2d = df
 
         if self._outdir is None: return
@@ -304,6 +299,6 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr',
     """
     enr = Enrichr(gene_list, gene_sets, description, outdir,
                   cutoff, format, figsize, top_term, no_plot, verbose)
-    enr.run_v2()
+    enr.run()
 
     return enr
