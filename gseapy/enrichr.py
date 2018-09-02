@@ -52,6 +52,7 @@ class Enrichr(object):
         # handle gene_sets
         logfile = os.path.join(self.outdir, "gseapy.%s.%s.log" % (self.module, self.descriptions))
         return logfile
+
     def parse_genesets(self):
 
         if isinstance(self.gene_sets, list):
@@ -145,7 +146,7 @@ class Enrichr(object):
         return
 
     def run(self):
-        """run enrichr for one sample"""
+        """run enrichr for one sample gene list but multi-libraries"""
 
         # read input file
         genes_list = self.parse_genelists()
