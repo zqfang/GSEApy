@@ -56,7 +56,7 @@ class Enrichr(object):
     def parse_genesets(self):
 
         if isinstance(self.gene_sets, list):
-            return
+            return  self.gene_sets
         elif isinstance(self.gene_sets, str):
             return self.gene_sets.split(",")
         else:
@@ -168,7 +168,7 @@ class Enrichr(object):
 
             shortID, res = self.get_results(genes_list)
             # Remember gene set library used
-            res["dataset"] = self._gs
+            res["Gene_set"] = self._gs
             # Append to master dataframe
             self.results = self.results.append(res, ignore_index=True)
             self.res2d = res
