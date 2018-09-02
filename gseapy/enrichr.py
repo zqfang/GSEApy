@@ -53,15 +53,24 @@ class Enrichr(object):
         if isinstance(self.gene_sets, str):
             _gset = os.path.split(self.gene_sets)[-1].lower().rstrip(".gmt")
         else:
-            raise Exception("Error parsing gene_sets parameter for gene sets")
+            _gset = 'allsets'
 
         logfile = os.path.join(self.outdir, "gseapy.%s.%s.log" % (self.module, _gset))
         return logfile
+    def parse_genesets(self):
 
-    def parse_input(self):
+        if isinstance(self.gene_sets, list):
+            return
+        elif isinstance(self.gene_sets, str):
+            return self.gene_sets.split(",")
+        else:
+            raise Exception("Error parsing enrichr libraries, please provided corrected one")
+
+    def parse_genes(self):
+        """parse gene list"""
         if isinstance(self.gene_list, list):
             genes = [str(gene) for gene in self.gene_list]
-        elif isinstance(self.gene_list, DataFrame):
+        elif isinstance(self.gene_list, pd.DataFrame):
             # input type is bed file
             if self.gene_list.shape[1] >=3:
                 genes= self.gene_list.iloc[:,:3].apply(lambda x: "\t".join([str(i) for i in x]), axis=1).tolist()
@@ -96,7 +105,6 @@ class Enrichr(object):
         job_id = json.loads(response.text)
 
         return job_id
-
 
     def check_genes(self, gene_list, usr_list_id):
         '''
@@ -148,8 +156,8 @@ class Enrichr(object):
         genes_list = self.parse_input()
 
         self._logger.info("Connecting to Enrichr Server to get latest library names")
-
-        gss = self.gene_sets.split(",")
+        gss = self.parse_genesets()
+        # gss = self.gene_sets.split(",")
         enrichr_library = get_library_name()
         gss = [ g for g in gss if g in enrichr_library]
         if len(gss) < 1:
