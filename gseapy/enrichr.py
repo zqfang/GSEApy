@@ -4,6 +4,7 @@
 
 import sys, json, os, logging
 import requests
+from io import StringIO
 from time import sleep
 from tempfile import TemporaryDirectory
 from pandas import read_table, DataFrame, Series
@@ -20,7 +21,7 @@ class Enrichr(object):
 
         self.gene_list=gene_list
         self.gene_sets=gene_sets
-        self.descriptions=descriptions
+        self.descriptions=str(descriptions)
         self.outdir=outdir
         self.cutoff=cutoff
         self.format=format
@@ -81,54 +82,141 @@ class Enrichr(object):
         genes_str = '\n'.join(genes)
         return genes_str
 
+    def send_genes(self, gene_list, url):
+        """ send gene list to enrichr server"""
+        payload = {
+          'list': (None, gene_list),
+          'description': (None, self.descriptions)
+           }
+        # response
+        response = requests.post(url, files=payload)
+        if not response.ok:
+            raise Exception('Error analyzing gene list')
+        sleep(1)
+        job_id = json.loads(response.text)
+
+        return job_id
+
+
+    def check_genes(self, gene_list, usr_list_id):
+        '''
+        Compare the genes send and received to get succesfully recognized genes
+        '''
+        response = requests.get('http://amp.pharm.mssm.edu/Enrichr/view?userListId=%s' % usr_list_id)
+        if not response.ok:
+            raise Exception('Error getting gene list back')
+        returnedL = json.loads(response.text)["genes"]
+        returnedN = sum([1 for gene in gene_list if gene in returnedL])
+        self._logger.info('{} genes successfully recognized by Enrichr'.format(returnedN))
+
+    def get_results(self, gene_list):
+        """Enrichr API"""
+        ADDLIST_URL = 'http://amp.pharm.mssm.edu/Enrichr/addList'
+        # RESULTS_URL = 'http://amp.pharm.mssm.edu/Enrichr/enrich'
+        # query_string = '?userListId=%s&backgroundType=%s'
+        job_id = self.send_genes(gene_list, ADDLIST_URL)
+        user_list_id = job_id['userListId']
+
+        RESULTS_URL = 'http://amp.pharm.mssm.edu/Enrichr/export'
+        query_string = '?userListId=%s&filename=%s&backgroundType=%s'
+        # set max retries num =5
+        s = retry(num=5)
+        filename = "%s.%s.reports" % (self._gs, self.descriptions)
+        url = RESULTS_URL + query_string % (user_list_id, filename, self._gs)
+        response = s.get(url, stream=True, timeout=None)
+        # response = requests.get(RESULTS_URL + query_string % (user_list_id, gene_set))
+        sleep(1)
+        res = read_table(StringIO(response.content.decode('utf-8')))
+        return [job_id['shortId'], res]
 
     def run(self):
         """run enrichr for multi library input"""
         gs = self.gene_sets.split(",")
+        self.results = pd.DataFrame()
         for g in gs:
-            self._gs = g
-            self._logger.debug("Start Enrichr using library: %s"%(str(gs)))
+            self._gs = str(g)
+            self._logger.debug("Start Enrichr using library: %s"%(self._gs))
             self.run_single()
         # clean up tmpdir
         if self._outdir is None: self._tmpdir.cleanup()
+        return
+
+    def run_v2(self):
+        """run enrichr for one sample"""
+
+        # read input file
+        genes_list = self.parse_input()
+
+        self._logger.info("Connecting to Enrichr Server to get latest library names")
+
+        gss = self.gene_sets.split(",")
+        enrichr_library = get_library_name()
+        gss = [ g for g in gss if g in enrichr_library]
+        if len(gss) < 1:
+            sys.stderr.write("Not validated Enrichr library name provided\n")
+            sys.stdout.write("Hint: use get_library_name() to view full list of supported names")
+            sys.exit(1)
+        self.results = pd.DataFrame()
+        for g in gss:
+            self._gs = str(g)
+            self._logger.debug("Start Enrichr using library: %s" % (self._gs))
+            self._logger.info('Analysis name: %s, Enrichr Library: %s' % (self.descriptions, self._gs))
+
+            shortID, res = self.get_results(genes_list)
+            # Remember gene set library used
+            res["dataset"] = self._gs
+            # Append to master dataframe
+            self.results = self.results.append(res, ignore_index=True)
+            self.res2d = res
+            sleep(2)
+            if self._outdir is None: continue
+
+            self._logger.info('Save file of enrichment results: Job Id:' + str(shortID))
+            outfile = "%s/%s.%s.%s.reports.txt" % (self.outdir, self._gs, self.descriptions, self.module)
+            self.res2d.to_csv(outfile, index=False, encoding='utf-8')
+            # plotting
+            if not self.__no_plot:
+                fig = barplot(df=res, cutoff=self.cutoff,
+                              figsize=self.figsize,
+                              top_term=self.__top_term,
+                              color='salmon',
+                              title='')
+                if fig is None:
+                    self._logger.warning("Warning: No enrich terms using library %s when cutoff = %s"%(self._gs, self.cutoff))
+                else:
+                    fig.savefig(outfile.replace("txt", self.format),
+                                bbox_inches='tight', dpi=300)
+            self._logger.info('Done.\n')
+        # clean up tmpdir
+        if self._outdir is None: self._tmpdir.cleanup()
+
+        return
 
     def run_single(self):
         """run enrichr for one sample"""
 
         # read input file
         genes_str=self.parse_input()
-        
-        # name of analysis or list
-        description = str(self.descriptions)
-        gene_set = str(self._gs)
 
         self._logger.info("Connecting to Enrichr Server to get latest library names")
-        if gene_set in DEFAULT_LIBRARY:
+        if self._gs in DEFAULT_LIBRARY:
             enrichr_library = DEFAULT_LIBRARY
         else:
             enrichr_library = get_library_name()
-            if gene_set not in enrichr_library:
-                sys.stderr.write("%s is not a Enrichr library name\n"%gene_set)
+            if self._gs not in enrichr_library:
+                sys.stderr.write("%s is not a Enrichr library name\n"%self._gs)
                 sys.stdout.write("Hint: use get_library_name() to view full list of supported names")
                 sys.exit(1)
 
-        self._logger.info('Analysis name: %s, Enrichr Library: %s'%(description, gene_set))
+        self._logger.info('Analysis name: %s, Enrichr Library: %s'%(self.descriptions, self._gs))
 
         # enrichr url
         ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/addList'
-        # payload
-        payload = {
-          'list': (None, genes_str),
-          'description': (None, description)
-           }
-        # response
-        response = requests.post(ENRICHR_URL, files=payload)
-        if not response.ok:
-            raise Exception('Error analyzing gene list')
-
-        job_id = json.loads(response.text)
-
+        # Send gene list
+        job_id = self.send_genes(genes_str, ENRICHR_URL)
         self._logger.debug('Job ID:'+ str(job_id))
+
+        # check overlap genes
         ENRICHR_URL_A = 'http://amp.pharm.mssm.edu/Enrichr/view?userListId=%s'
         user_list_id = job_id['userListId']
         response_gene_list = requests.get(ENRICHR_URL_A % str(user_list_id), timeout=None)
@@ -143,7 +231,7 @@ class Enrichr(object):
         query_string = '?userListId=%s&backgroundType=%s'
         # get id data
         user_list_id = job_id['userListId']
-        response = requests.get(ENRICHR_URL + query_string % (str(user_list_id), gene_set))
+        response = requests.get(ENRICHR_URL + query_string % (str(user_list_id), self._gs))
         if not response.ok:
             raise Exception('Error fetching enrichment results')
 
@@ -152,28 +240,28 @@ class Enrichr(object):
         ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/export'
         query_string = '?userListId=%s&filename=%s&backgroundType=%s'
         user_list_id = str(job_id['userListId'])
-        filename = "%s.%s.%s.reports"%(gene_set, description, self.module)
-        url = ENRICHR_URL + query_string % (user_list_id, filename, gene_set)
+        filename = "%s.%s.%s.reports"%(self._gs, self.descriptions, self.module)
+        url = ENRICHR_URL + query_string % (user_list_id, filename, self._gs)
 
         # set max retries num =5
         s = retry(num=5)
         response = s.get(url, stream=True, timeout=None)
 
         self._logger.info('Downloading file of enrichment results: Job Id:'+ str(job_id))
-        outfile="%s/%s.%s.%s.reports.txt"%(self.outdir, gene_set, description, self.module)
-
-        with open(outfile, 'wb') as f:
-            for chunk in response.iter_content(chunk_size=1024):
-                if chunk:
-                    f.write(chunk)
+        # with open(outfile, 'wb') as f:
+        #     for chunk in response.iter_content(chunk_size=1024):
+        #         if chunk:
+        #             f.write(chunk)
 
         self._logger.debug('Results written to: ' + outfile)
 
         # save results
-        df =  read_table(outfile)
+        df =  read_table(StringIO(response.content.decode('utf-8')))
         self.res2d = df
 
         if self._outdir is None: return
+        outfile="%s/%s.%s.%s.reports.txt"%(self.outdir, self._gs, self.descriptions, self.module)
+        df.to_csv(outfile, index=False, sep='\t')
         # plotting
         if not self.__no_plot:
             fig = barplot(df=df, cutoff=self.cutoff,
@@ -182,7 +270,7 @@ class Enrichr(object):
                           color='salmon',
                           title='')
             if fig is None:
-                self._logger.warning("Warning: No enrich terms using library %s when cuttoff = %s"%(gene_set, self.cutoff))
+                self._logger.warning("Warning: No enrich terms using library %s when cutoff = %s"%(self._gs, self.cutoff))
             else:
                 fig.savefig(outfile.replace("txt", self.format),
                             bbox_inches='tight', dpi=300)
@@ -208,6 +296,6 @@ def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr',
     """
     enr = Enrichr(gene_list, gene_sets, description, outdir,
                   cutoff, format, figsize, top_term, no_plot, verbose)
-    enr.run()
+    enr.run_v2()
 
     return enr

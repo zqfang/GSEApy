@@ -69,13 +69,13 @@ def test_ssgsea2(ssGCT, geneGMT):
     tmpdir.cleanup()
     ssgsea(ssGCT, geneGMT, None, permutation_num=0)
 
-# def test_enrichr(genelist):
-#     # Only tests of the command runs successfully,
-#     # doesnt't check the image
-#     tmpdir= TemporaryDirectory(dir="tests")
-#     enrichr(genelist, gene_sets='KEGG_2016', outdir=tmpdir.name)
-#     tmpdir.cleanup()
-#     enrichr(genelist, gene_sets='KEGG_2013', outdir=None)
+def test_enrichr(genelist):
+    # Only tests of the command runs successfully,
+    # doesnt't check the image
+    tmpdir= TemporaryDirectory(dir="tests")
+    enrichr(genelist, gene_sets='KEGG_2016', outdir=tmpdir.name)
+    tmpdir.cleanup()
+    enrichr(genelist, gene_sets='KEGG_2013,KEGG_2016', outdir=None)
 
 def test_replot(edbDIR):
     # Only tests of the command runs successfully,
