@@ -120,6 +120,7 @@ class GSEAbase(object):
             raise Exception("Error parsing gmt parameter for gene sets")
         
         subsets = list(genesets_dict.keys())
+        self.n_genesets = len(subsets)
         for subset in subsets:
             tag_indicator = np.in1d(gene_list, genesets_dict.get(subset), assume_unique=True)
             tag_len = tag_indicator.sum()
