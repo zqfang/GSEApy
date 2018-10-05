@@ -261,17 +261,20 @@ class GSEAbase(object):
             #reformat gene list.
             _genes = rank_metric.index.values[ind]
             rdict['genes'] = ";".join([ g.strip() for g in _genes ])
-            # extract leading edge genes
-            if rdict['es'] > 0:
-                # RES -> ndarray, ind -> list
-                idx = RES.argmax()
-                ldg_pos = list(filter(lambda x: x<= idx, ind))
-            elif rdict['es'] < 0:
-                idx = RES.argmin()
-                ldg_pos = list(filter(lambda x: x >= idx, ind))
-            else:
-                ldg_pos = ind # es == 0 ?
-            rdict['ledge_genes'] = ';'.join(rank_metric.iloc[ldg_pos].index)
+            
+            if self.module != 'ssgsea':
+                # extract leading edge genes
+                if rdict['es'] > 0:
+                    # RES -> ndarray, ind -> list
+                    idx = RES.argmax()
+                    ldg_pos = list(filter(lambda x: x<= idx, ind))
+                elif rdict['es'] < 0:
+                    idx = RES.argmin()
+                    ldg_pos = list(filter(lambda x: x >= idx, ind))
+                else:
+                    ldg_pos = ind # es == 0 ?
+                rdict['ledge_genes'] = ';'.join(rank_metric.iloc[ldg_pos].index)
+                
             rdict['RES'] = RES
             rdict['hits_indices'] = ind
             # save to one odict

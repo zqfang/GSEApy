@@ -81,13 +81,13 @@ def heatmap(df, term, outdir, axis=0, figsize=(5,5), format='png'):
     ax.set_xticklabels(df.columns.values, fontsize=18, rotation=90)
     ax.set_yticklabels(df.index.values,  fontsize=18)
     ax.set_title("%s\nHeatmap of the Analyzed GeneSet"%term, fontsize=24)
-    ax.tick_params(axis='both', which='both', bottom='off', top='off',
-                   right='off', left='off')
+    ax.tick_params(axis='both', which='both', bottom=False, top=False,
+                   right=False, left=False)
     # fig.colorbar(matrix, ax=ax)
     cax=fig.add_axes([0.93,0.25,0.05,0.20])
     cbar = fig.colorbar(matrix, cax=cax)
-    cbar.ax.tick_params(axis='both', which='both', bottom='off', top='off',
-                        right='off', left='off')
+    cbar.ax.tick_params(axis='both', which='both', bottom=False, top=False,
+                        right=False, left=False)
     for side in ["top", "right", "left", "bottom"]:
         ax.spines[side].set_visible(False)
         cbar.ax.spines[side].set_visible(False)
@@ -166,7 +166,7 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
                  transform=trans1)
     ax1.set_xlabel("Rank in Ordered Dataset", fontsize=14)
     ax1.spines['top'].set_visible(False)
-    ax1.tick_params(axis='both', which='both', top='off', right='off', left='off')
+    ax1.tick_params(axis='both', which='both', top=False, right=False, left=False)
     ax1.locator_params(axis='y', nbins=5)
     ax1.yaxis.set_major_formatter(plt.FuncFormatter(lambda tick_loc,tick_num :  '{:.1f}'.format(tick_loc) ))
 
@@ -180,14 +180,14 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     trans2 = transforms.blended_transform_factory(ax2.transData, ax2.transAxes)
     ax2.vlines(hit_ind, 0, 1,linewidth=.5,transform=trans2)
     ax2.spines['bottom'].set_visible(False)
-    ax2.tick_params(axis='both', which='both', bottom='off', top='off',
-                    labelbottom='off', right='off', left='off', labelleft='off')
+    ax2.tick_params(axis='both', which='both', bottom=False, top=False,
+                    labelbottom=False, right=False, left=False, labelleft=False)
     # colormap
     ax3 =  fig.add_subplot(gs[10], sharex=ax1)
     ax3.imshow(im_matrix, aspect='auto', norm=norm, cmap=plt.cm.seismic, interpolation='none') # cm.coolwarm
     ax3.spines['bottom'].set_visible(False)
-    ax3.tick_params(axis='both', which='both', bottom='off', top='off',
-                    labelbottom='off', right='off', left='off',labelleft='off')
+    ax3.tick_params(axis='both', which='both', bottom=False, top=False,
+                    labelbottom=False, right=False, left=False,labelleft=False)
 
     # Enrichment score plot
     ax4 = fig.add_subplot(gs[:8], sharex=ax1)
@@ -201,7 +201,7 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     ax4.hlines(0, 0, 1, linewidth=.5, transform=trans4, color='grey')
     ax4.set_ylabel("Enrichment score (ES)", fontsize=14)
     ax4.set_xlim(min(x), max(x))
-    ax4.tick_params(axis='both', which='both', bottom='off', top='off', labelbottom='off', right='off')
+    ax4.tick_params(axis='both', which='both', bottom=False, top=False, labelbottom=False, right=False)
     ax4.locator_params(axis='y', nbins=5)
     # FuncFormatter need two argument, I don't know why. this lambda function used to format yaxis tick labels.
     ax4.yaxis.set_major_formatter(plt.FuncFormatter(lambda tick_loc,tick_num :  '{:.1f}'.format(tick_loc)) )
@@ -278,7 +278,7 @@ def dotplot(df, cutoff=0.05, figsize=(3.5,6), top_term=10, scale=1):
     # colorbar
     cax=fig.add_axes([0.93,0.20,0.07,0.22])
     cbar = fig.colorbar(sc, cax=cax,)
-    cbar.ax.tick_params(right='off')
+    cbar.ax.tick_params(right=False)
     cbar.ax.set_title('Com-\nscore',loc='left', fontsize=12)
     # for terms less than 3
     if len(df) >= 3:
