@@ -24,7 +24,7 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
     :target:   https://img.shields.io/badge/python-3.5%2B-blue.svg
 
 
-**Please note** : from version 0.9.5 on, GSEApy only works on Python 3.4+ and Python 2.x will no longer be supported.
+**Please note** : from version 0.9.5 on, GSEApy only works on Python 3.5+ and Python 2.x will no longer be supported.
 For a Python 2 version you can install v0.9.4.
 
 
@@ -150,7 +150,7 @@ Installation
 
 Dependency
 --------------
-* Python 2.7 or 3.4+
+* Python 2.7 or 3.5+
 
 Mandatory
 ~~~~~~~~~

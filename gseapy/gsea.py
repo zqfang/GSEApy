@@ -6,9 +6,9 @@ import os, sys, logging, json
 from collections import OrderedDict
 from multiprocessing import Pool, cpu_count
 from tempfile import TemporaryDirectory
+from numpy import log, exp
 import numpy as np
 import pandas as pd
-from numpy import log, exp
 
 from gseapy.algorithm import enrichment_score, gsea_compute, ranking_metric
 from gseapy.algorithm import enrichment_score_tensor, gsea_compute_tensor
@@ -22,6 +22,7 @@ class GSEAbase(object):
     def __init__(self):
         self.outdir='temp_gseapy'
         self.gene_sets='KEGG_2016'
+        self.fdr=0.05
         self.module='base'
         self.results=None
         self.res2d=None
@@ -211,22 +212,22 @@ class GSEAbase(object):
         top_term = res2d.head(graph_num).index
 
         # multi-threading
-        pool = Pool(processes=self._processes)
+        # pool = Pool(processes=self._processes)
 
         for gs in top_term:
             hit = results.get(gs)['hits_indices']
             NES = 'nes' if module != 'ssgsea' else 'es'
-            # gsea_plot(rank_metric=rank_metric, enrich_term=gs, hit_ind=hit,
-            #           nes=results.get(gs)[NES], pval=results.get(gs)['pval'], fdr=results.get(gs)['fdr'],
-            #           RES=results.get(gs)['RES'], phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize,
-            #           format=self.format, outdir=self.outdir, module=self.module)
-            pool.apply_async(gsea_plot, args=(rank_metric, gs, hit, results.get(gs)[NES],
-                                              results.get(gs)['pval'],results.get(gs)['fdr'],
-                                              results.get(gs)['RES'],
-                                              phenoPos, phenoNeg, figsize, self.format,
-                                              self.outdir,self.module))
-        pool.close()
-        pool.join()
+            gsea_plot(rank_metric=rank_metric, enrich_term=gs, hit_ind=hit,
+                      nes=results.get(gs)[NES], pval=results.get(gs)['pval'], fdr=results.get(gs)['fdr'],
+                      RES=results.get(gs)['RES'], phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize,
+                      format=self.format, outdir=self.outdir, module=self.module)
+            # pool.apply_async(gsea_plot, args=(rank_metric, gs, hit, results.get(gs)[NES],
+            #                                   results.get(gs)['pval'],results.get(gs)['fdr'],
+            #                                   results.get(gs)['RES'],
+            #                                   phenoPos, phenoNeg, figsize, self.format,
+            #                                   self.outdir,self.module))
+        # pool.close()
+        # pool.join()
 
         if module == 'gsea':
             width = len(classes) if len(classes) >= 6 else  5
@@ -235,22 +236,21 @@ class GSEAbase(object):
             datA = data.loc[:, cls_booA]
             datB = data.loc[:, cls_booB]
             datAB=pd.concat([datA,datB], axis=1)
-            pool_heat = Pool(self._processes)
-
+            # pool_heat = Pool(self._processes)
             # no values need to be returned
             for gs in top_term:
                 hit = results.get(gs)['hits_indices']
-                pool_heat.apply_async(heatmap, args=(datAB.iloc[hit], gs, outdir, 0,
-                                                    (width, len(hit)/2), format))
-                # heatmap(datAB.iloc[hit], gs, outdir, 0, (width, len(hit)/2), format)
-            pool_heat.close()
-            pool_heat.join()
-
+                # pool_heat.apply_async(heatmap, args=(datAB.iloc[hit], gs, outdir, 0,
+                #                                     (width, len(hit)/2), format))
+                heatmap(datAB.iloc[hit], gs, outdir, 0, (width, len(hit)/2), format)
+            # pool_heat.close()
+            # pool_heat.join()
+       
     def _save_results(self, zipdata, outdir, module, gmt, rank_metric, permutation_type):
         """reformat gsea results, and save to txt"""
 
         res = OrderedDict()
-        for gs,gseale,ind,RES in zipdata:
+        for gs, gseale, ind, RES in zipdata:
             rdict = OrderedDict()
             rdict['es'] = gseale[0]
             rdict['nes'] = gseale[1]
@@ -260,18 +260,31 @@ class GSEAbase(object):
             rdict['matched_size'] = len(ind)
             #reformat gene list.
             _genes = rank_metric.index.values[ind]
-            rdict['genes'] = ",".join([ g.strip() for g in _genes ])
-
+            rdict['genes'] = ";".join([ g.strip() for g in _genes ])
+            # extract leading edge genes
+            if rdict['es'] > 0:
+                # RES -> ndarray, ind -> list
+                idx = RES.argmax()
+                ldg_pos = list(filter(lambda x: x<= idx, ind))
+            elif rdict['es'] < 0:
+                idx = RES.argmin()
+                ldg_pos = list(filter(lambda x: x >= idx, ind))
+            else:
+                ldg_pos = ind # es == 0 ?
+            rdict['ledge_genes'] = ';'.join(rank_metric.iloc[ldg_pos].index)
             rdict['RES'] = RES
             rdict['hits_indices'] = ind
+            # save to one odict
             res[gs] = rdict
-
+        # save
+        self.results  = res
+        # save to dataframe
         res_df = pd.DataFrame.from_dict(res, orient='index')
         res_df.index.name = 'Term'
-        res_df.sort_values(by='fdr', inplace=True)
         res_df.drop(['RES','hits_indices'], axis=1, inplace=True)
+        res_df.sort_values(by=['fdr','pval'], inplace=True)
         self.res2d = res_df
-        self.results  = res
+
         if self._outdir is None: return
         out = os.path.join(outdir,'gseapy.{b}.{c}.report.csv'.format(b=module, c=permutation_type))
         if self.module == 'ssgsea':
@@ -884,7 +897,9 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
                  |  fdr: FDR,
                  |  size: gene set size,
                  |  matched_size: genes matched to the data,
-                 |  genes: gene names from the data set}
+                 |  genes: gene names from the data set
+                 |  ledge_genes: leading edge genes}
+
 
     """
     gs = GSEA(data, gene_sets, cls, outdir, min_size, max_size, permutation_num,
@@ -936,7 +951,9 @@ def ssgsea(data, gene_sets, outdir="ssGSEA_", sample_norm_method='rank', min_siz
                  |  fdr: FDR,
                  |  size: gene set size,
                  |  matched_size: genes matched to the data,
-                 |  genes: gene names from the data set}
+                 |  genes: gene names from the data set
+                 |  ledge_genes: leading edge genes, if permutation_num >0}
+
 
     """
 
@@ -978,7 +995,9 @@ def prerank(rnk, gene_sets, outdir='GSEA_Prerank', pheno_pos='Pos', pheno_neg='N
                  |  fdr: FDR,
                  |  size: gene set size,
                  |  matched_size: genes matched to the data,
-                 |  genes: gene names from the data set}
+                 |  genes: gene names from the data set
+                 |  ledge_genes: leading edge genes}
+
 
     """
     pre = Prerank(rnk, gene_sets, outdir, pheno_pos, pheno_neg,
