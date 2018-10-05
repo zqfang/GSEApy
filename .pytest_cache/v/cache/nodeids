@@ -1,8 +1,0 @@
-[
-  "tests/test_commands.py::test_gsea",
-  "tests/test_commands.py::test_prerank",
-  "tests/test_commands.py::test_ssgsea1",
-  "tests/test_commands.py::test_ssgsea2",
-  "tests/test_commands.py::test_enrichr",
-  "tests/test_commands.py::test_replot"
-]
