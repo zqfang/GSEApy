@@ -342,19 +342,18 @@ def barplot(df, column=None, cutoff=0.05, figsize=(6.5,6),
     """
 
     # pvalue cut off
-    cols = 'Adjusted P-value' if column is None else column
-    d = df[df[cols] <= cutoff]
+    colname = 'Adjusted P-value' if column is None else column
+    d = df[df[colname] <= cutoff]
     if len(d) < 1: 
         msg = "Warning: No enrich terms using library %s when cutoff = %s"%(title, cutoff)
         return msg
 
     if column is None: 
-        d = d.assign(logAP = - np.log10(d.loc[:,cols]).values )
-        d = d.sort_values('logAP', ascending=False)
-    else:
-        d = d.sort_values(cols, ascending=False)
+        d = d.assign(logAP = - np.log10(d.loc[:,colname]).values )
+        colname = 'logAP' 
+    dd = d.head(top_term).sort_values(colname)
         
-    dd = d.head(top_term).sort_values('logAP')
+    # dd = d.head(top_term).sort_values('logAP')
     # create bar plot
     if hasattr(sys, 'ps1') and (ofname is None):
         # working inside python console, show (True) figure
@@ -364,8 +363,9 @@ def barplot(df, column=None, cutoff=0.05, figsize=(6.5,6),
         fig = Figure(figsize=figsize)
         canvas = FigureCanvas(fig)
     ax = fig.add_subplot(111)
-    bar = dd.plot.barh(x='Term', y='logAP', color=color, alpha=0.75, fontsize=24, ax=ax)
-    bar.set_xlabel("-log$_{10}$ Adjust P-value", fontsize=24, fontweight='bold')
+    bar = dd.plot.barh(x='Term', y=colname, color=color, alpha=0.75, fontsize=24, ax=ax)
+    xlabel = "-log$_{10}$ Adjust P-value" if column is None else colname
+    bar.set_xlabel(xlabel, fontsize=24, fontweight='bold')
     bar.set_ylabel("")
     bar.set_title(title, fontsize=32, fontweight='bold')
     bar.xaxis.set_major_locator(MaxNLocator(integer=True))
