@@ -235,10 +235,11 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
         fig.savefig(ofname, bbox_inches='tight', dpi=300)
     return
 
-def dotplot(df, cutoff=0.05, figsize=(3.5,6), top_term=10, scale=1, ofname=None):
+def dotplot(df, column=None, cutoff=0.05, figsize=(3.5,6), top_term=10, scale=1, ofname=None):
     """Visualize enrichr results.
 
     :param df: GSEApy DataFrame results.
+    :param column: which column of DataFrame to show. If None, set to Adjusted P-value
     :param cutoff: p-adjust cut-off.
     :param top_term: number of enriched terms to show.
     :param scale: dotplot point size scale.
@@ -326,11 +327,12 @@ def dotplot(df, cutoff=0.05, figsize=(3.5,6), top_term=10, scale=1, ofname=None)
         fig.savefig(ofname, bbox_inches='tight', dpi=300)
     return
 
-def barplot(df, cutoff=0.05, figsize=(6.5,6), 
+def barplot(df, column=None, cutoff=0.05, figsize=(6.5,6), 
             top_term=10, color='salmon', title="", ofname=None):
     """Visualize enrichr results.
 
     :param df: GSEApy DataFrame results.
+    :param column: which column of DataFrame to show. If None, set to Adjusted P-value
     :param cutoff: p-adjust cut-off.
     :param top_term: number of enriched terms to show.
     :param color: color of bars.
@@ -340,13 +342,18 @@ def barplot(df, cutoff=0.05, figsize=(6.5,6),
     """
 
     # pvalue cut off
-    d = df[df['Adjusted P-value'] <= cutoff]
-
+    cols = 'Adjusted P-value' if column is None else column
+    d = df[df[cols] <= cutoff]
     if len(d) < 1: 
         msg = "Warning: No enrich terms using library %s when cutoff = %s"%(title, cutoff)
         return msg
-    d = d.assign(logAP = - np.log10(d.loc[:,'Adjusted P-value']).values )
-    d = d.sort_values('logAP', ascending=False)
+
+    if column is None: 
+        d = d.assign(logAP = - np.log10(d.loc[:,cols]).values )
+        d = d.sort_values('logAP', ascending=False)
+    else:
+        d = d.sort_values(cols, ascending=False)
+        
     dd = d.head(top_term).sort_values('logAP')
     # create bar plot
     if hasattr(sys, 'ps1') and (ofname is None):
