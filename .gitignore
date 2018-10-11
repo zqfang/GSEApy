@@ -17,6 +17,7 @@ dist
 *.tmp*
 .cache
 .DS_Store
+
 tmp/
 # vim
 .*swp
@@ -25,3 +26,4 @@ docs/_build/doctest
 
 # tests
 tests/.ipynb_checkpoints
+.pytest_cache
