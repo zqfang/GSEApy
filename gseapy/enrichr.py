@@ -133,18 +133,6 @@ class Enrichr(object):
         res = pd.read_table(StringIO(response.content.decode('utf-8')))
         return [job_id['shortId'], res]
 
-    def run_v2(self):
-        """run enrichr for multi library input"""
-        gs = self.gene_sets.split(",")
-        self.results = pd.DataFrame()
-        for g in gs:
-            self._gs = str(g)
-            self._logger.debug("Start Enrichr using library: %s"%(self._gs))
-            self.run_single()
-        # clean up tmpdir
-        if self._outdir is None: self._tmpdir.cleanup()
-        return
-
     def run(self):
         """run enrichr for one sample gene list but multi-libraries"""
 
@@ -172,117 +160,25 @@ class Enrichr(object):
             # Append to master dataframe
             self.results = self.results.append(res, ignore_index=True)
             self.res2d = res
-            sleep(2)
             if self._outdir is None: continue
-
             self._logger.info('Save file of enrichment results: Job Id:' + str(shortID))
             outfile = "%s/%s.%s.%s.reports.txt" % (self.outdir, self._gs, self.descriptions, self.module)
             self.res2d.to_csv(outfile, index=False, encoding='utf-8')
             # plotting
             if not self.__no_plot:
-                fig = barplot(df=res, cutoff=self.cutoff,
-                              figsize=self.figsize,
-                              top_term=self.__top_term,
-                              color='salmon',
-                              title='')
-                if fig is None:
-                    self._logger.warning("Warning: No enrich terms using library %s when cutoff = %s"%(self._gs, self.cutoff))
-                else:
-                    fig.savefig(outfile.replace("txt", self.format),
-                                bbox_inches='tight', dpi=300)
+                msg = barplot(df=res, cutoff=self.cutoff, figsize=self.figsize,
+                              top_term=self.__top_term, color='salmon',
+                              title=self._gs,
+                              ofname=outfile.replace("txt", self.format))
+                if msg is not None : self._logger.warning(msg)
             self._logger.info('Done.\n')
         # clean up tmpdir
         if self._outdir is None: self._tmpdir.cleanup()
 
         return
 
-    def run_single(self):
-        """run enrichr for one sample"""
 
-        # read input file
-        genes_str=self.parse_genelists()
-
-        self._logger.info("Connecting to Enrichr Server to get latest library names")
-        if self._gs in DEFAULT_LIBRARY:
-            enrichr_library = DEFAULT_LIBRARY
-        else:
-            enrichr_library = get_library_name()
-            if self._gs not in enrichr_library:
-                sys.stderr.write("%s is not a Enrichr library name\n"%self._gs)
-                sys.stdout.write("Hint: use get_library_name() to view full list of supported names")
-                sys.exit(1)
-
-        self._logger.info('Analysis name: %s, Enrichr Library: %s'%(self.descriptions, self._gs))
-
-        # enrichr url
-        ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/addList'
-        # Send gene list
-        job_id = self.send_genes(genes_str, ENRICHR_URL)
-        self._logger.debug('Job ID:'+ str(job_id))
-
-        # check overlap genes
-        ENRICHR_URL_A = 'http://amp.pharm.mssm.edu/Enrichr/view?userListId=%s'
-        user_list_id = job_id['userListId']
-        response_gene_list = requests.get(ENRICHR_URL_A % str(user_list_id), timeout=None)
-        # wait for 1s
-        sleep(1)
-        if not response_gene_list.ok:
-            raise Exception('Error getting gene list')
-
-        self._logger.info('Submitted gene list:' + str(job_id))
-        # Get enrichment results
-        ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/enrich'
-        query_string = '?userListId=%s&backgroundType=%s'
-        # get id data
-        user_list_id = job_id['userListId']
-        response = requests.get(ENRICHR_URL + query_string % (str(user_list_id), self._gs))
-        if not response.ok:
-            raise Exception('Error fetching enrichment results')
-
-        self._logger.debug('Get enrichment results: Job Id:'+ str(job_id))
-        # Download file of enrichment results
-        ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/export'
-        query_string = '?userListId=%s&filename=%s&backgroundType=%s'
-        user_list_id = str(job_id['userListId'])
-        filename = "%s.%s.%s.reports"%(self._gs, self.descriptions, self.module)
-        url = ENRICHR_URL + query_string % (user_list_id, filename, self._gs)
-
-        # set max retries num =5
-        s = retry(num=5)
-        response = s.get(url, stream=True, timeout=None)
-
-        self._logger.info('Downloading file of enrichment results: Job Id:'+ str(job_id))
-        # with open(outfile, 'wb') as f:
-        #     for chunk in response.iter_content(chunk_size=1024):
-        #         if chunk:
-        #             f.write(chunk)
-
-        self._logger.debug('Results written to: ' + outfile)
-
-        # save results
-        df =  pd.read_table(StringIO(response.content.decode('utf-8')))
-        self.res2d = df
-
-        if self._outdir is None: return
-        outfile="%s/%s.%s.%s.reports.txt"%(self.outdir, self._gs, self.descriptions, self.module)
-        df.to_csv(outfile, index=False, sep='\t')
-        # plotting
-        if not self.__no_plot:
-            fig = barplot(df=df, cutoff=self.cutoff,
-                          figsize=self.figsize, 
-                          top_term=self.__top_term,
-                          color='salmon',
-                          title='')
-            if fig is None:
-                self._logger.warning("Warning: No enrich terms using library %s when cutoff = %s"%(self._gs, self.cutoff))
-            else:
-                fig.savefig(outfile.replace("txt", self.format),
-                            bbox_inches='tight', dpi=300)
-        self._logger.info('Done.\n')
-        return
-
-
-def enrichr(gene_list, gene_sets, description='foo', outdir='Enrichr',
+def enrichr(gene_list, gene_sets, description='', outdir='Enrichr',
             cutoff=0.05, format='pdf', figsize=(8,6), top_term=10, no_plot=False, verbose=False):
     """Enrichr API.
 

@@ -200,7 +200,7 @@ class GSEAbase(object):
 
     def _plotting(self, rank_metric, results, res2d,
                  graph_num, outdir, format, figsize, module=None, data=None,
-                 classes=None, phenoPos='', phenoNeg=''):
+                 classes=None, pheno_pos='', pheno_neg=''):
         """ Plotting API.
             :param rank_metric: sorted pd.Series with rankings values.
             :param results: self.results
@@ -217,22 +217,24 @@ class GSEAbase(object):
         for gs in top_term:
             hit = results.get(gs)['hits_indices']
             NES = 'nes' if module != 'ssgsea' else 'es'
-            gsea_plot(rank_metric=rank_metric, enrich_term=gs, hit_ind=hit,
+            term = gs.replace('/','_').replace(":","_")
+            outfile = '{0}/{1}.{2}.{3}'.format(self.outdir, term, self.module, self.format)
+            gsea_plot(rank_metric=rank_metric, enrich_term=term, hit_ind=hit,
                       nes=results.get(gs)[NES], pval=results.get(gs)['pval'], fdr=results.get(gs)['fdr'],
-                      RES=results.get(gs)['RES'], phenoPos=phenoPos, phenoNeg=phenoNeg, figsize=figsize,
-                      format=self.format, outdir=self.outdir, module=self.module)
-            # pool.apply_async(gsea_plot, args=(rank_metric, gs, hit, results.get(gs)[NES],
+                      RES=results.get(gs)['RES'], pheno_pos=pheno_pos, pheno_neg=pheno_neg, figsize=figsize,
+                      ofname=outfile)
+            # pool.apply_async(gsea_plot, args=(rank_metric, term, hit, results.get(gs)[NES],
             #                                   results.get(gs)['pval'],results.get(gs)['fdr'],
             #                                   results.get(gs)['RES'],
-            #                                   phenoPos, phenoNeg, figsize, self.format,
-            #                                   self.outdir,self.module))
+            #                                   pheno_pos, pheno_neg, figsize, outfile))
+            #                                   
         # pool.close()
         # pool.join()
 
         if module == 'gsea':
             width = len(classes) if len(classes) >= 6 else  5
-            cls_booA =list(map(lambda x: True if x == phenoPos else False, classes))
-            cls_booB =list(map(lambda x: True if x == phenoNeg else False, classes))
+            cls_booA =list(map(lambda x: True if x == pheno_pos else False, classes))
+            cls_booB =list(map(lambda x: True if x == pheno_neg else False, classes))
             datA = data.loc[:, cls_booA]
             datB = data.loc[:, cls_booB]
             datAB=pd.concat([datA,datB], axis=1)
@@ -240,9 +242,12 @@ class GSEAbase(object):
             # no values need to be returned
             for gs in top_term:
                 hit = results.get(gs)['hits_indices']
-                # pool_heat.apply_async(heatmap, args=(datAB.iloc[hit], gs, outdir, 0,
-                #                                     (width, len(hit)/2), format))
-                heatmap(datAB.iloc[hit], gs, outdir, 0, (width, len(hit)/2), format)
+                term = gs.replace('/','_').replace(":","_")
+                outfile = "{0}/{1}.heatmap.{2}".format(self.outdir, term, self.format)
+                # pool_heat.apply_async(heatmap, args=(datAB.iloc[hit], term, outfile 0,
+                #                                     (width, len(hit)/2), ))
+                heatmap(df=datAB.iloc[hit], title=term, ofname=outfile, 
+                        axis=0, figsize=(width, len(hit)/2))
             # pool_heat.close()
             # pool_heat.join()
        
@@ -417,7 +422,7 @@ class GSEA(GSEAbase):
             self._plotting(rank_metric=dat2, results=self.results, res2d=self.res2d,
                            graph_num=self.graph_num, outdir=self.outdir,
                            figsize=self.figsize, format=self.format, module=self.module,
-                           data=heat_dat, classes=cls_vector, phenoPos=phenoPos, phenoNeg=phenoNeg)
+                           data=heat_dat, classes=cls_vector, pheno_pos=phenoPos, pheno_neg=phenoNeg)
 
         self._logger.info("Congratulations. GSEApy run successfully................\n")
         if self._outdir is None:
@@ -494,7 +499,7 @@ class Prerank(GSEAbase):
             self._plotting(rank_metric=dat2, results=self.results, res2d=self.res2d,
                            graph_num=self.graph_num, outdir=self.outdir,
                            figsize=self.figsize, format=self.format,
-                           module=self.module, phenoPos=self.pheno_pos, phenoNeg=self.pheno_neg)
+                           module=self.module, pheno_pos=self.pheno_pos, pheno_neg=self.pheno_neg)
 
         self._logger.info("Congratulations. GSEApy run successfully................\n")
         if self._outdir is None:
@@ -721,9 +726,10 @@ class SingleSampleGSEA(GSEAbase):
             if self._noplot: continue
             self._logger.info("Plotting Sample: %s \n" % name)
             for i, term in enumerate(subsets):
+                term = term.replace('/','_').replace(":","_")
+                outfile = '{0}/{1}.{2}.{3}'.format(self.outdir, term, self.module, self.format)
                 gsea_plot(rnk,term, hit_ind[i], es[i], 1, 1, RES[i],
-                          '', '', self.figsize, self.format,
-                          self.outdir, module=self.module)
+                          '', '', self.figsize, outfile)
         # save es, nes to file
         self._save(outdir)
 
@@ -827,9 +833,10 @@ class Replot(GSEAbase):
                                    weighted_score_type=self.weighted_score_type,
                                    nperm=0)[-1]
             # plotting
+            term = enrich_term.replace('/','_').replace(":","_")
+            outfile = '{0}/{1}.{2}.{3}'.format(self.outdir, term, self.module, self.format)
             gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval,
-                            fdr, RES, phenoPos, phenoNeg, self.figsize,
-                            self.format, self.outdir, self.module)
+                      fdr, RES, phenoPos, phenoNeg, self.figsize, outfile)
 
         self._logger.info("Congratulations! Your plots have been reproduced successfully!\n")
 

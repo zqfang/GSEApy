@@ -6,6 +6,7 @@ from matplotlib.colors import Normalize
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.ticker import MaxNLocator
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.pyplot as plt
 import matplotlib.transforms as transforms
 from gseapy.parser import unique
@@ -50,16 +51,24 @@ def z_score(data2d, axis=0):
     else:
         return z_scored.T
 
+def colorbar(mappable):
+    ax = mappable.axes
+    fig = ax.figure
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.05)
+    return fig.colorbar(mappable, cax=cax)
 
-def heatmap(df, term, outdir, axis=0, figsize=(5,5), format='png'):
+
+def heatmap(df, axis=0, title='', figsize=(5,5), cmap='RdBu_r', ofname=None):
     """Visualize the dataframe.
 
     :param df: DataFrame from expression table.
-    :param term: gene set name.
-    :param outdir: path to save heatmap.
     :param axis: z_score axis. If None, normalized using all data value.
+    :param title: gene set name.
+    :param outdir: path to save heatmap.
     :param figsize: heatmap figsize.
-    :param format: Matplotlib supported figure formats.
+    :param cmap: matplotlib colormap.
+    :param ofname: output file name. If None, don't save figure 
 
     """
     df = z_score(df, axis=axis)
@@ -70,34 +79,39 @@ def heatmap(df, term, outdir, axis=0, figsize=(5,5), format='png'):
     yticks = np.arange(0, ny, 1) + .5
 
     # If working on commandline, don't show figure
-    fig = Figure(figsize=figsize)
-    canvas = FigureCanvas(fig)
+    if hasattr(sys, 'ps1') and (ofname is None): 
+        fig = plt.figure(figsize=figsize)
+    else:
+        fig = Figure(figsize=figsize)
+        canvas = FigureCanvas(fig)
     ax = fig.add_subplot(111)
     vmin = np.percentile(df.min(), 2)
     vmax =  np.percentile(df.max(), 98)
-    matrix = ax.pcolormesh(df.values, cmap=plt.cm.RdBu_r, vmin=vmin, vmax=vmax)
+    matrix = ax.pcolormesh(df.values, cmap=cmap, vmin=vmin, vmax=vmax)
     ax.set_ylim([0,len(df)])
     ax.set(xticks=xticks, yticks=yticks)
     ax.set_xticklabels(df.columns.values, fontsize=18, rotation=90)
     ax.set_yticklabels(df.index.values,  fontsize=18)
-    ax.set_title("%s\nHeatmap of the Analyzed GeneSet"%term, fontsize=24)
+    ax.set_title("%s\nHeatmap of the Analyzed GeneSet"%title, fontsize=24)
     ax.tick_params(axis='both', which='both', bottom=False, top=False,
                    right=False, left=False)
-    # fig.colorbar(matrix, ax=ax)
-    cax=fig.add_axes([0.93,0.25,0.05,0.20])
-    cbar = fig.colorbar(matrix, cax=cax)
+    # cax=fig.add_axes([0.93,0.25,0.05,0.20])
+    # cbar = fig.colorbar(matrix, cax=cax)
+    cbar = colorbar(matrix)
     cbar.ax.tick_params(axis='both', which='both', bottom=False, top=False,
                         right=False, left=False)
     for side in ["top", "right", "left", "bottom"]:
         ax.spines[side].set_visible(False)
         cbar.ax.spines[side].set_visible(False)
     # cbar.ax.set_title('',loc='left')
-    term = term.replace('/','_').replace(":","_")
-    canvas.print_figure("{a}/{b}.heatmap.{c}".format(a=outdir, b=term, c=format),
-                        bbox_inches='tight')
+
+    if ofname is not None: 
+        # canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
+        fig.savefig(ofname, bbox_inches='tight', dpi=300)
+    return
 
 def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
-              phenoPos, phenoNeg, figsize, format, outdir, module):
+              pheno_pos, pheno_neg, figsize, ofname=None):
     """This is the main function for reproducing the gsea plot.
 
     :param rank_metric: pd.Series for rankings, rank_metric.values.
@@ -107,10 +121,11 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     :param pval: nominal p-value.
     :param fdr: false discovery rate.
     :param RES: running enrichment scores.
-    :param phenoPos: phenotype label, positive correlated.
-    :param phenoNeg: phenotype label, negative correlated.
+    :param pheno_pos: phenotype label, positive correlated.
+    :param pheno_neg: phenotype label, negative correlated.
     :param figsize: matplotlib figsize.
-    :return:
+    :param ofname: output file name. If None, don't save figure 
+
     """
     # plt.style.use('classic')
     # center color map at midpoint = 0
@@ -120,8 +135,8 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     x = np.arange(len(rank_metric))
     rankings = rank_metric.values
     # figsize = (6,6)
-    phenoP_label = phenoPos + ' (Positively Correlated)'
-    phenoN_label = phenoNeg + ' (Negatively Correlated)'
+    phenoP_label = pheno_pos + ' (Positively Correlated)'
+    phenoN_label = pheno_neg + ' (Negatively Correlated)'
     zero_score_ind = np.abs(rankings).argmin()
     z_score_label = 'Zero score at ' + str(zero_score_ind)
     nes_label = 'NES: '+ "{:.3f}".format(float(nes))
@@ -136,11 +151,16 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
 
     # GSEA Plots
     gs = plt.GridSpec(16,1)
-    # fig = plt.figure(figsize=figsize)
-    fig = Figure(figsize=figsize)
-    canvas = FigureCanvas(fig)
+    if hasattr(sys, 'ps1') and (ofname is None):
+        # working inside python console, show figure
+        fig = plt.figure(figsize=figsize)
+    else:
+        # If working on commandline, don't show figure
+        fig = Figure(figsize=figsize)
+        canvas = FigureCanvas(fig)
     # Ranked Metric Scores Plot
     ax1 =  fig.add_subplot(gs[11:])
+    module = ofname.split(".")[-2]
     if module == 'ssgsea':
         nes_label = 'ES: '+ "{:.3f}".format(float(nes))
         pval_label='Pval: '
@@ -210,20 +230,19 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     fig.suptitle(enrich_term, fontsize=16)
     fig.subplots_adjust(hspace=0)
     # fig.tight_layout()
-    # plt.close(fig)
-    enrich_term = enrich_term.replace('/','_').replace(":","_")
-    canvas.print_figure('{0}/{1}.{2}.{3}'.format(outdir, enrich_term, module, format),
-                         bbox_inches='tight', dpi=300,)
+    if ofname is not None: 
+        # canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
+        fig.savefig(ofname, bbox_inches='tight', dpi=300)
     return
 
-def dotplot(df, cutoff=0.05, figsize=(3.5,6), top_term=10, scale=1):
+def dotplot(df, cutoff=0.05, figsize=(3.5,6), top_term=10, scale=1, ofname=None):
     """Visualize enrichr results.
 
     :param df: GSEApy DataFrame results.
     :param cutoff: p-adjust cut-off.
     :param top_term: number of enriched terms to show.
     :param scale: dotplot point size scale.
-    :return:  a dotplot for enrichr terms.
+    :param ofname: output file name. If None, don't save figure 
 
     """
 
@@ -301,23 +320,42 @@ def dotplot(df, cutoff=0.05, figsize=(3.5,6), top_term=10, scale=1):
                      handlelength=2, loc = 8, borderpad = 1.8,
                      handletextpad=1, title='Gene\nRatio', scatterpoints = 1)
 
-    # canvas.print_figure('test', bbox_inches='tight')
-    return fig
 
-def barplot(df, cutoff=0.05, figsize=(6.5,6), top_term=10,
-            color='salmon', title=""):
-    """ barplot for enrichr results"""
+    if ofname is not None: 
+        # canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
+        fig.savefig(ofname, bbox_inches='tight', dpi=300)
+    return
+
+def barplot(df, cutoff=0.05, figsize=(6.5,6), 
+            top_term=10, color='salmon', title="", ofname=None):
+    """Visualize enrichr results.
+
+    :param df: GSEApy DataFrame results.
+    :param cutoff: p-adjust cut-off.
+    :param top_term: number of enriched terms to show.
+    :param color: color of bars.
+    :param title: figure title.
+    :param ofname: output file name. If None, don't save figure    
+    
+    """
 
     # pvalue cut off
     d = df[df['Adjusted P-value'] <= cutoff]
 
-    if len(d) < 1:
-        return None
+    if len(d) < 1: 
+        msg = "Warning: No enrich terms using library %s when cutoff = %s"%(title, cutoff)
+        return msg
     d = d.assign(logAP = - np.log10(d.loc[:,'Adjusted P-value']).values )
     d = d.sort_values('logAP', ascending=False)
     dd = d.head(top_term).sort_values('logAP')
-    fig = Figure(figsize=figsize)
-    canvas = FigureCanvas(fig)
+    # create bar plot
+    if hasattr(sys, 'ps1') and (ofname is None):
+        # working inside python console, show (True) figure
+        fig = plt.figure(figsize=figsize)
+    else:
+        # If working on commandline, don't show figure
+        fig = Figure(figsize=figsize)
+        canvas = FigureCanvas(fig)
     ax = fig.add_subplot(111)
     bar = dd.plot.barh(x='Term', y='logAP', color=color, alpha=0.75, fontsize=24, ax=ax)
     bar.set_xlabel("-log$_{10}$ Adjust P-value", fontsize=24, fontweight='bold')
@@ -326,9 +364,11 @@ def barplot(df, cutoff=0.05, figsize=(6.5,6), top_term=10,
     bar.xaxis.set_major_locator(MaxNLocator(integer=True))
     bar.legend_.remove()
     adjust_spines(ax, spines=['left','bottom'])
-    # fig.savefig(png, bbox_inches='tight')
-    # fig.savefig(pdf, bbox_inches='tight')
-    return fig
+
+    if ofname is not None: 
+        # canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
+        fig.savefig(ofname, bbox_inches='tight', dpi=300)
+    return
 
 def adjust_spines(ax, spines):
     """function for removing spines and ticks.
