@@ -13,7 +13,7 @@ import pandas as pd
 from gseapy.algorithm import enrichment_score, gsea_compute, ranking_metric
 from gseapy.algorithm import enrichment_score_tensor, gsea_compute_tensor
 from gseapy.parser import *
-from gseapy.plot import gsea_plot, heatmap
+from gseapy.plot import gseaplot, heatmap
 from gseapy.utils import mkdirs, log_init, retry, DEFAULT_LIBRARY
 
 
@@ -219,11 +219,12 @@ class GSEAbase(object):
             NES = 'nes' if module != 'ssgsea' else 'es'
             term = gs.replace('/','_').replace(":","_")
             outfile = '{0}/{1}.{2}.{3}'.format(self.outdir, term, self.module, self.format)
-            gsea_plot(rank_metric=rank_metric, enrich_term=term, hit_ind=hit,
-                      nes=results.get(gs)[NES], pval=results.get(gs)['pval'], fdr=results.get(gs)['fdr'],
-                      RES=results.get(gs)['RES'], pheno_pos=pheno_pos, pheno_neg=pheno_neg, figsize=figsize,
+            gseaplot(rank_metric=rank_metric, enrich_term=term, hit_ind=hit,
+                      nes=results.get(gs)[NES], pval=results.get(gs)['pval'], 
+                      fdr=results.get(gs)['fdr'], RES=results.get(gs)['RES'],
+                      pheno_pos=pheno_pos, pheno_neg=pheno_neg, figsize=figsize,
                       ofname=outfile)
-            # pool.apply_async(gsea_plot, args=(rank_metric, term, hit, results.get(gs)[NES],
+            # pool.apply_async(gseaplot, args=(rank_metric, term, hit, results.get(gs)[NES],
             #                                   results.get(gs)['pval'],results.get(gs)['fdr'],
             #                                   results.get(gs)['RES'],
             #                                   pheno_pos, pheno_neg, figsize, outfile))
@@ -728,8 +729,10 @@ class SingleSampleGSEA(GSEAbase):
             for i, term in enumerate(subsets):
                 term = term.replace('/','_').replace(":","_")
                 outfile = '{0}/{1}.{2}.{3}'.format(self.outdir, term, self.module, self.format)
-                gsea_plot(rnk,term, hit_ind[i], es[i], 1, 1, RES[i],
-                          '', '', self.figsize, outfile)
+                gseaplot(rank_metric=rnk, enrich_term=term, 
+                         hit_ind=hit_ind[i], nes=es[i], pval=1, fdr=1, 
+                         RES=RES[i], pheno_pos='', pheno_neg='', 
+                         figsize=self.figsize, ofname=outfile)
         # save es, nes to file
         self._save(outdir)
 
@@ -806,10 +809,10 @@ class Replot(GSEAbase):
         # extract sample names from .cls file
         cls_path = glob.glob(self.indir+'*/edb/*.cls')
         if cls_path:
-            phenoPos, phenoNeg, classes = gsea_cls_parser(cls_path[0])
+            pos, neg, classes = gsea_cls_parser(cls_path[0])
         else:
             # logic for prerank results
-            phenoPos, phenoNeg = '',''
+            pos, neg = '',''
         # start reploting
         self.gene_sets=gene_set_path
         # obtain gene sets
@@ -835,8 +838,10 @@ class Replot(GSEAbase):
             # plotting
             term = enrich_term.replace('/','_').replace(":","_")
             outfile = '{0}/{1}.{2}.{3}'.format(self.outdir, term, self.module, self.format)
-            gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval,
-                      fdr, RES, phenoPos, phenoNeg, self.figsize, outfile)
+            gseaplot(rank_metric=rank_metric, enrich_term=enrich_term, 
+                         hit_ind=hit_ind, nes=nes, pval=pval, fdr=fdr, 
+                         RES=RES, pheno_pos=pos, pheno_neg=neg, 
+                         figsize=self.figsize, ofname=outfile)
 
         self._logger.info("Congratulations! Your plots have been reproduced successfully!\n")
 

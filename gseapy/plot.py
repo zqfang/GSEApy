@@ -110,8 +110,8 @@ def heatmap(df, axis=0, title='', figsize=(5,5), cmap='RdBu_r', ofname=None):
         fig.savefig(ofname, bbox_inches='tight', dpi=300)
     return
 
-def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
-              pheno_pos, pheno_neg, figsize, ofname=None):
+def gseaplot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
+              pheno_pos, pheno_neg, figsize, cmap='seismic', ofname=None):
     """This is the main function for reproducing the gsea plot.
 
     :param rank_metric: pd.Series for rankings, rank_metric.values.
@@ -204,7 +204,7 @@ def gsea_plot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
                     labelbottom=False, right=False, left=False, labelleft=False)
     # colormap
     ax3 =  fig.add_subplot(gs[10], sharex=ax1)
-    ax3.imshow(im_matrix, aspect='auto', norm=norm, cmap=plt.cm.seismic, interpolation='none') # cm.coolwarm
+    ax3.imshow(im_matrix, aspect='auto', norm=norm, cmap=cmap, interpolation='none') # cm.coolwarm
     ax3.spines['bottom'].set_visible(False)
     ax3.tick_params(axis='both', which='both', bottom=False, top=False,
                     labelbottom=False, right=False, left=False,labelleft=False)
