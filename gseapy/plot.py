@@ -110,13 +110,14 @@ def heatmap(df, axis=0, title='', figsize=(5,5), cmap='RdBu_r', ofname=None):
         fig.savefig(ofname, bbox_inches='tight', dpi=300)
     return
 
-def gseaplot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
-              pheno_pos, pheno_neg, figsize, cmap='seismic', ofname=None):
+def gseaplot(rank_metric, term, hits_indices, nes, pval, fdr, RES,
+              pheno_pos='', pheno_neg='', figsize=(6,5.5), 
+              cmap='seismic', ofname=None, **kwargs):
     """This is the main function for reproducing the gsea plot.
 
     :param rank_metric: pd.Series for rankings, rank_metric.values.
-    :param enrich_term: gene_set name
-    :param hit_ind: hits indices of rank_metric.index presented in gene set S.
+    :param term: gene_set name
+    :param hits_indices: hits indices of rank_metric.index presented in gene set S.
     :param nes: Normalized enrichment scores.
     :param pval: nominal p-value.
     :param fdr: false discovery rate.
@@ -160,7 +161,7 @@ def gseaplot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
         canvas = FigureCanvas(fig)
     # Ranked Metric Scores Plot
     ax1 =  fig.add_subplot(gs[11:])
-    module = ofname.split(".")[-2]
+    module = 'tmp' if ofname is  None else ofname.split(".")[-2]
     if module == 'ssgsea':
         nes_label = 'ES: '+ "{:.3f}".format(float(nes))
         pval_label='Pval: '
@@ -198,7 +199,7 @@ def gseaplot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
 
     # the x coords of this transformation are data, and the y coord are axes
     trans2 = transforms.blended_transform_factory(ax2.transData, ax2.transAxes)
-    ax2.vlines(hit_ind, 0, 1,linewidth=.5,transform=trans2)
+    ax2.vlines(hits_indices, 0, 1,linewidth=.5,transform=trans2)
     ax2.spines['bottom'].set_visible(False)
     ax2.tick_params(axis='both', which='both', bottom=False, top=False,
                     labelbottom=False, right=False, left=False, labelleft=False)
@@ -227,7 +228,7 @@ def gseaplot(rank_metric, enrich_term, hit_ind, nes, pval, fdr, RES,
     ax4.yaxis.set_major_formatter(plt.FuncFormatter(lambda tick_loc,tick_num :  '{:.1f}'.format(tick_loc)) )
 
     # fig adjustment
-    fig.suptitle(enrich_term, fontsize=16)
+    fig.suptitle(term, fontsize=16)
     fig.subplots_adjust(hspace=0)
     # fig.tight_layout()
     if ofname is not None: 

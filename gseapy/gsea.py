@@ -219,7 +219,7 @@ class GSEAbase(object):
             NES = 'nes' if module != 'ssgsea' else 'es'
             term = gs.replace('/','_').replace(":","_")
             outfile = '{0}/{1}.{2}.{3}'.format(self.outdir, term, self.module, self.format)
-            gseaplot(rank_metric=rank_metric, enrich_term=term, hit_ind=hit,
+            gseaplot(rank_metric=rank_metric, term=term, hits_indices=hit,
                       nes=results.get(gs)[NES], pval=results.get(gs)['pval'], 
                       fdr=results.get(gs)['fdr'], RES=results.get(gs)['RES'],
                       pheno_pos=pheno_pos, pheno_neg=pheno_neg, figsize=figsize,
@@ -838,8 +838,8 @@ class Replot(GSEAbase):
             # plotting
             term = enrich_term.replace('/','_').replace(":","_")
             outfile = '{0}/{1}.{2}.{3}'.format(self.outdir, term, self.module, self.format)
-            gseaplot(rank_metric=rank_metric, enrich_term=enrich_term, 
-                         hit_ind=hit_ind, nes=nes, pval=pval, fdr=fdr, 
+            gseaplot(rank_metric=rank_metric, term=enrich_term, 
+                         hits_indices=hit_ind, nes=nes, pval=pval, fdr=fdr, 
                          RES=RES, pheno_pos=pos, pheno_neg=neg, 
                          figsize=self.figsize, ofname=outfile)
 
