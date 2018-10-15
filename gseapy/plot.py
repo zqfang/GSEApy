@@ -59,7 +59,8 @@ def colorbar(mappable):
     return fig.colorbar(mappable, cax=cax)
 
 
-def heatmap(df, axis=0, title='', figsize=(5,5), cmap='RdBu_r', ofname=None):
+def heatmap(df, axis=0, title='', figsize=(5,5), cmap='RdBu_r', 
+            xticklabels=True, yticklabels=True, ofname=None, **kwargs):
     """Visualize the dataframe.
 
     :param df: DataFrame from expression table.
@@ -90,9 +91,9 @@ def heatmap(df, axis=0, title='', figsize=(5,5), cmap='RdBu_r', ofname=None):
     matrix = ax.pcolormesh(df.values, cmap=cmap, vmin=vmin, vmax=vmax)
     ax.set_ylim([0,len(df)])
     ax.set(xticks=xticks, yticks=yticks)
-    ax.set_xticklabels(df.columns.values, fontsize=18, rotation=90)
-    ax.set_yticklabels(df.index.values,  fontsize=18)
-    ax.set_title("%s\nHeatmap of the Analyzed GeneSet"%title, fontsize=24)
+    ax.set_xticklabels(df.columns.values if xticklabels else '', fontsize=14, rotation=90)
+    ax.set_yticklabels(df.index.values if yticklabels else '',  fontsize=14)
+    ax.set_title("%s\nHeatmap of the Analyzed GeneSet"%title, fontsize=20)
     ax.tick_params(axis='both', which='both', bottom=False, top=False,
                    right=False, left=False)
     # cax=fig.add_axes([0.93,0.25,0.05,0.20])
