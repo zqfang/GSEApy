@@ -55,7 +55,7 @@ def colorbar(mappable):
     ax = mappable.axes
     fig = ax.figure
     divider = make_axes_locatable(ax)
-    cax = divider.append_axes("right", size="5%", pad=0.05)
+    cax = divider.append_axes("right", size="2%", pad=0.05)
     return fig.colorbar(mappable, cax=cax)
 
 
@@ -236,7 +236,8 @@ def gseaplot(rank_metric, term, hits_indices, nes, pval, fdr, RES,
         fig.savefig(ofname, bbox_inches='tight', dpi=300)
     return
 
-def dotplot(df, column=None, cutoff=0.05, figsize=(3.5,6), top_term=10, scale=1, ofname=None):
+def dotplot(df, column=None, cutoff=0.05, figsize=(3.5,6), 
+            top_term=10, scale=1, ofname=None):
     """Visualize enrichr results.
 
     :param df: GSEApy DataFrame results.
@@ -334,9 +335,9 @@ def barplot(df, column=None, cutoff=0.05, figsize=(6.5,6),
 
     :param df: GSEApy DataFrame results.
     :param column: which column of DataFrame to show. If None, set to Adjusted P-value
-    :param cutoff: p-adjust cut-off.
-    :param top_term: number of enriched terms to show.
-    :param color: color of bars.
+    :param cutoff: cut-off of the cloumn you've chose.
+    :param top_term: number of top enriched terms to show.
+    :param color: color for bars.
     :param title: figure title.
     :param ofname: output file name. If None, don't save figure    
     

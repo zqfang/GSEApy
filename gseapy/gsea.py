@@ -197,26 +197,38 @@ class GSEAbase(object):
         gmtout.close()
 
         return genesets_dict
+    def _heatmat(self, df, classes, pheno_pos, pheno_neg):
+        """only use for gsea heatmap"""
+        width = len(classes) if len(classes) >= 6 else  5
+        cls_booA =list(map(lambda x: True if x == pheno_pos else False, classes))
+        cls_booB =list(map(lambda x: True if x == pheno_neg else False, classes))
+        datA = df.loc[:, cls_booA]
+        datB = df.loc[:, cls_booB]
+        datAB=pd.concat([datA,datB], axis=1)
+        self._width = width
+        self.heatmat = datAB
+        return
 
-    def _plotting(self, rank_metric, results, res2d,
-                 graph_num, outdir, format, figsize, module=None, data=None,
-                 classes=None, pheno_pos='', pheno_neg=''):
+    def _plotting(self, rank_metric, results, graph_num, outdir, 
+                  format, figsize, pheno_pos='', pheno_neg=''):
         """ Plotting API.
             :param rank_metric: sorted pd.Series with rankings values.
             :param results: self.results
             :param data: preprocessed expression table
 
         """
+        # pool_heat = Pool(self._processes)
+        # no values need to be returned
         if self._outdir is None: return
         #Plotting
-        top_term = res2d.head(graph_num).index
+        top_term = self.res2d.index[:graph_num]
 
         # multi-threading
         # pool = Pool(processes=self._processes)
 
         for gs in top_term:
             hit = results.get(gs)['hits_indices']
-            NES = 'nes' if module != 'ssgsea' else 'es'
+            NES = 'nes' if self.module != 'ssgsea' else 'es'
             term = gs.replace('/','_').replace(":","_")
             outfile = '{0}/{1}.{2}.{3}'.format(self.outdir, term, self.module, self.format)
             gseaplot(rank_metric=rank_metric, term=term, hits_indices=hit,
@@ -231,24 +243,13 @@ class GSEAbase(object):
             #                                   
         # pool.close()
         # pool.join()
-
-        if module == 'gsea':
-            width = len(classes) if len(classes) >= 6 else  5
-            cls_booA =list(map(lambda x: True if x == pheno_pos else False, classes))
-            cls_booB =list(map(lambda x: True if x == pheno_neg else False, classes))
-            datA = data.loc[:, cls_booA]
-            datB = data.loc[:, cls_booB]
-            datAB=pd.concat([datA,datB], axis=1)
-            # pool_heat = Pool(self._processes)
-            # no values need to be returned
-            for gs in top_term:
-                hit = results.get(gs)['hits_indices']
-                term = gs.replace('/','_').replace(":","_")
-                outfile = "{0}/{1}.heatmap.{2}".format(self.outdir, term, self.format)
+            
+            if self.module == 'gsea':
+                outfile2 = "{0}/{1}.heatmap.{2}".format(self.outdir, term, self.format)
                 # pool_heat.apply_async(heatmap, args=(datAB.iloc[hit], term, outfile 0,
                 #                                     (width, len(hit)/2), ))
-                heatmap(df=datAB.iloc[hit], title=term, ofname=outfile, 
-                        axis=0, figsize=(width, len(hit)/2))
+                heatmap(df=self.heatmat, title=term, ofname=outfile2, 
+                        axis=0, figsize=(self._width, len(hit)/2))
             # pool_heat.close()
             # pool_heat.join()
        
@@ -395,6 +396,7 @@ class GSEA(GSEAbase):
         # ranking metrics calculation.
         dat2 = ranking_metric(df=dat, method=self.method, pos=phenoPos, neg=phenoNeg,
                               classes=cls_vector, ascending=self.ascending)
+        self.ranking = dat2
         # filtering out gene sets and build gene sets dictionary
         gmt = self.load_gmt(gene_list=dat2.index.values, gmt=self.gene_sets)
 
@@ -417,13 +419,15 @@ class GSEA(GSEAbase):
         self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
                                    gmt=gmt, rank_metric=dat2, permutation_type=self.permutation_type)
 
+        # reorder datarame for heatmap
+        self._heatmat(df=dat.loc[dat2.index], classes=cls_vector, 
+                      pheno_pos=phenoPos, pheno_neg=phenoNeg)
         # Plotting
         if not self._noplot:
-            heat_dat = dat.loc[dat2.index]
-            self._plotting(rank_metric=dat2, results=self.results, res2d=self.res2d,
+            self._plotting(rank_metric=dat2, results=self.results,
                            graph_num=self.graph_num, outdir=self.outdir,
-                           figsize=self.figsize, format=self.format, module=self.module,
-                           data=heat_dat, classes=cls_vector, pheno_pos=phenoPos, pheno_neg=phenoNeg)
+                           figsize=self.figsize, format=self.format,
+                           pheno_pos=phenoPos, pheno_neg=phenoNeg)
 
         self._logger.info("Congratulations. GSEApy run successfully................\n")
         if self._outdir is None:
@@ -497,10 +501,10 @@ class Prerank(GSEAbase):
 
         # Plotting
         if not self._noplot:
-            self._plotting(rank_metric=dat2, results=self.results, res2d=self.res2d,
+            self._plotting(rank_metric=dat2, results=self.results,
                            graph_num=self.graph_num, outdir=self.outdir,
                            figsize=self.figsize, format=self.format,
-                           module=self.module, pheno_pos=self.pheno_pos, pheno_neg=self.pheno_neg)
+                           pheno_pos=self.pheno_pos, pheno_neg=self.pheno_neg)
 
         self._logger.info("Congratulations. GSEApy run successfully................\n")
         if self._outdir is None:
@@ -673,9 +677,9 @@ class SingleSampleGSEA(GSEAbase):
             # plotting
             if self._noplot: continue
             self._logger.info("Plotting Sample: %s \n" % name)
-            self._plotting(rank_metric=dat2, results=self.results, res2d=self.res2d,
+            self._plotting(rank_metric=dat2, results=self.results,
                            graph_num=self.graph_num, outdir=self.outdir,
-                           figsize=self.figsize, format=self.format, module=self.module)
+                           figsize=self.figsize, format=self.format)
 
         # save es, nes to file
         self._save(outdir)
@@ -729,8 +733,8 @@ class SingleSampleGSEA(GSEAbase):
             for i, term in enumerate(subsets):
                 term = term.replace('/','_').replace(":","_")
                 outfile = '{0}/{1}.{2}.{3}'.format(self.outdir, term, self.module, self.format)
-                gseaplot(rank_metric=rnk, enrich_term=term, 
-                         hit_ind=hit_ind[i], nes=es[i], pval=1, fdr=1, 
+                gseaplot(rank_metric=rnk, term=term, 
+                         hits_indices=hit_ind[i], nes=es[i], pval=1, fdr=1, 
                          RES=RES[i], pheno_pos='', pheno_neg='', 
                          figsize=self.figsize, ofname=outfile)
         # save es, nes to file
