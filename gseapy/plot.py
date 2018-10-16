@@ -24,12 +24,12 @@ class _MidpointNormalize(Normalize):
         return np.ma.masked_array(np.interp(value, x, y))
 
 
-def z_score(data2d, axis=0):
+def zscore(data2d, axis=0):
     """Standardize the mean and variance of the data axis Parameters.
 
     :param data2d: DataFrame to normalize.
     :param axis: int, Which axis to normalize across. If 0, normalize across rows,
-                  if 1, normalize across columns. If None, normalized by entire dataset
+                  if 1, normalize across columns. If None, don't change data
                   
     :Returns: Normalized DataFrame. Normalized data with a mean of 0 and variance of 1
               across the specified axis.
@@ -40,17 +40,18 @@ def z_score(data2d, axis=0):
         # z_scored = (data2d - data2d.values.mean()) / data2d.values.std(ddof=1)
         return data2d
 
-    if axis == 1:
-        z_scored = data2d
-    else:
-        z_scored = data2d.T
+    # if axis == 1:
+    #     z_scored = data2d
+    # else:
+    #     z_scored = data2d.T
 
-    z_scored = (z_scored - z_scored.mean()) / z_scored.std(ddof=1)
+    # z_scored = (z_scored - z_scored.mean()) / z_scored.std(ddof=1)
     
-    if axis == 1:
-        return z_scored
-    else:
-        return z_scored.T
+    # if axis == 1:
+    #     return z_scored
+    # else:
+    #     return z_scored.T
+    return data2d.apply(lambda x: (x-x.mean())/x.std(ddof=1), axis=axis)
 
 def colorbar(mappable):
     ax = mappable.axes
@@ -60,12 +61,12 @@ def colorbar(mappable):
     return fig.colorbar(mappable, cax=cax)
 
 
-def heatmap(df, axis=None, title='', figsize=(5,5), cmap='RdBu_r', 
+def heatmap(df, z_score=None, title='', figsize=(5,5), cmap='RdBu_r', 
             xticklabels=True, yticklabels=True, ofname=None, **kwargs):
     """Visualize the dataframe.
 
     :param df: DataFrame from expression table.
-    :param axis: z_score axis. If None, normalized using all data value.
+    :param z_score: z_score axis{0, 1}. If None, don't normalize data.
     :param title: gene set name.
     :param outdir: path to save heatmap.
     :param figsize: heatmap figsize.
@@ -73,7 +74,7 @@ def heatmap(df, axis=None, title='', figsize=(5,5), cmap='RdBu_r',
     :param ofname: output file name. If None, don't save figure 
 
     """
-    df = z_score(df, axis=axis)
+    df = zscore(df, axis=z_score)
     df = df.iloc[::-1]
     # Get the positions and used label for the ticks
     nx, ny = df.T.shape

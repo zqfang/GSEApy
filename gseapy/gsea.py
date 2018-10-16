@@ -249,7 +249,7 @@ class GSEAbase(object):
                 # pool_heat.apply_async(heatmap, args=(datAB.iloc[hit], term, outfile 0,
                 #                                     (width, len(hit)/2), ))
                 heatmap(df=self.heatmat, title=term, ofname=outfile2, 
-                        axis=1, figsize=(self._width, len(hit)/2))
+                        z_score=0, figsize=(self._width, len(hit)/2))
             # pool_heat.close()
             # pool_heat.join()
        
