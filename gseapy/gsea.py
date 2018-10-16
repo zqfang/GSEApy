@@ -249,7 +249,7 @@ class GSEAbase(object):
                 # pool_heat.apply_async(heatmap, args=(datAB.iloc[hit], term, outfile 0,
                 #                                     (width, len(hit)/2), ))
                 heatmap(df=self.heatmat, title=term, ofname=outfile2, 
-                        axis=0, figsize=(self._width, len(hit)/2))
+                        axis=1, figsize=(self._width, len(hit)/2))
             # pool_heat.close()
             # pool_heat.join()
        
@@ -637,7 +637,7 @@ class SingleSampleGSEA(GSEAbase):
             self.runSamples(df=normdat, gmt=gmt)
         else:
             # run permutation procedure and calculate pvals, fdrs
-            self._logger.info("run ssGSEA with permutation procedure, might take a while")
+            self._logger.warning("run ssGSEA with permutation procedure, don't use these part of results for publication.")
             self.runSamplesPermu(df=normdat, gmt=gmt)
         # clean up all outputs if _outdir is None
         if self._outdir is None:

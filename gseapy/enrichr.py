@@ -156,7 +156,7 @@ class Enrichr(object):
 
             shortID, res = self.get_results(genes_list)
             # Remember gene set library used
-            res["Gene_set"] = self._gs
+            res.insert(0,"Gene_set", self._gs)
             # Append to master dataframe
             self.results = self.results.append(res, ignore_index=True)
             self.res2d = res

@@ -36,8 +36,9 @@ def z_score(data2d, axis=0):
 
     """
     if axis is None:
-        z_scored = (data2d - data2d.values.mean()) / data2d.values.std(ddof=1)
-        return z_scored
+        # nnormalized to mean and std using entire matrix
+        # z_scored = (data2d - data2d.values.mean()) / data2d.values.std(ddof=1)
+        return data2d
 
     if axis == 1:
         z_scored = data2d
@@ -45,7 +46,7 @@ def z_score(data2d, axis=0):
         z_scored = data2d.T
 
     z_scored = (z_scored - z_scored.mean()) / z_scored.std(ddof=1)
-
+    
     if axis == 1:
         return z_scored
     else:
@@ -59,7 +60,7 @@ def colorbar(mappable):
     return fig.colorbar(mappable, cax=cax)
 
 
-def heatmap(df, axis=0, title='', figsize=(5,5), cmap='RdBu_r', 
+def heatmap(df, axis=None, title='', figsize=(5,5), cmap='RdBu_r', 
             xticklabels=True, yticklabels=True, ofname=None, **kwargs):
     """Visualize the dataframe.
 
@@ -93,7 +94,7 @@ def heatmap(df, axis=0, title='', figsize=(5,5), cmap='RdBu_r',
     ax.set(xticks=xticks, yticks=yticks)
     ax.set_xticklabels(df.columns.values if xticklabels else '', fontsize=14, rotation=90)
     ax.set_yticklabels(df.index.values if yticklabels else '',  fontsize=14)
-    ax.set_title("%s\nHeatmap of the Analyzed GeneSet"%title, fontsize=20)
+    ax.set_title("%s\nHeatmap of the Analyzed Geneset"%title, fontsize=20)
     ax.tick_params(axis='both', which='both', bottom=False, top=False,
                    right=False, left=False)
     # cax=fig.add_axes([0.93,0.25,0.05,0.20])
@@ -229,7 +230,7 @@ def gseaplot(rank_metric, term, hits_indices, nes, pval, fdr, RES,
     ax4.yaxis.set_major_formatter(plt.FuncFormatter(lambda tick_loc,tick_num :  '{:.1f}'.format(tick_loc)) )
 
     # fig adjustment
-    fig.suptitle(term, fontsize=16)
+    fig.suptitle(term, fontsize=16, fontweight='bold')
     fig.subplots_adjust(hspace=0)
     # fig.tight_layout()
     if ofname is not None: 
@@ -237,47 +238,42 @@ def gseaplot(rank_metric, term, hits_indices, nes, pval, fdr, RES,
         fig.savefig(ofname, bbox_inches='tight', dpi=300)
     return
 
-def dotplot(df, column=None, cutoff=0.05, figsize=(3.5,6), 
-            top_term=10, scale=1, ofname=None):
+def dotplot(df, column=None, cutoff=0.05, top_term=10, 
+            figsize=(6, 5.5), cmap='RdBu_r', ofname=None, **kwargs):
     """Visualize enrichr results.
 
     :param df: GSEApy DataFrame results.
     :param column: which column of DataFrame to show. If None, set to Adjusted P-value
     :param cutoff: p-adjust cut-off.
     :param top_term: number of enriched terms to show.
-    :param scale: dotplot point size scale.
+    :param cmap: matplotlib colormap
     :param ofname: output file name. If None, don't save figure 
 
     """
 
-    if 'fdr' in df.columns:
-        # gsea results
-        df.rename(columns={'fdr':'Adjusted P-value',}, inplace=True)
-        df['hits_ratio'] =  df['matched_size'] / df['gene_set_size']
-    else:
-        # enrichr results
-        df['Count'] = df['Overlap'].str.split("/").str[0].astype(int)
-        df['Background'] = df['Overlap'].str.split("/").str[1].astype(int)
-        df['hits_ratio'] =  df['Count'] / df['Background']
+    # enrichr results
+    df['Count'] = df['Overlap'].str.split("/").str[0].astype(int)
+    df['Background'] = df['Overlap'].str.split("/").str[1].astype(int)
+    df['hits_ratio'] =  df['Count'] / df['Background']
 
     # pvalue cut off
     df = df[df['Adjusted P-value'] <= cutoff]
 
     if len(df) < 1:
-        logging.warning("Warning: No enrich terms when cuttoff = %s"%cutoff )
-        return None
+        msg = "Warning: No enrich terms when cuttoff = %s"%cutoff 
+        return  msg
     # sorting the dataframe for better visualization
-    df = df.sort_values(by='Adjusted P-value', ascending=False)
-    df = df.head(top_term)
+    df = df.head(top_term).sort_values(by='Adjusted P-value', ascending=False)
     # x axis values
     padj = df['Adjusted P-value']
     combined_score = df['Combined Score'].round().astype('int')
     x = - padj.apply(np.log10)
     # y axis index and values
     y=  [i for i in range(0,len(df))]
-    labels = df.Term.values
-
-    area = np.pi * (df['Count'] *scale) **2
+    labels = df.index.values
+    # Normalised [0,1]
+    b = (df['Count']  - df['Count'].min())/ np.ptp(df['Count'])
+    area = 100 * b
 
     # creat scatter plot
     if hasattr(sys, 'ps1'):
@@ -291,8 +287,8 @@ def dotplot(df, column=None, cutoff=0.05, figsize=(3.5,6),
     vmin = np.percentile(combined_score.min(), 2)
     vmax =  np.percentile(combined_score.max(), 98)
     sc = ax.scatter(x=x, y=y, s=area, edgecolors='face', c=combined_score,
-                    cmap = plt.cm.RdBu, vmin=vmin, vmax=vmax)
-    ax.set_xlabel("-log$_{10}$(Adjust P-value)", fontsize=16)
+                    cmap=cmap, vmin=vmin, vmax=vmax)
+    ax.set_xlabel("-log$_{10}$(Adjust P-value)" if column is None else column, fontsize=16)
     ax.yaxis.set_major_locator(plt.FixedLocator(y))
     ax.yaxis.set_major_formatter(plt.FixedFormatter(labels))
     ax.set_yticklabels(labels, fontsize=16)
@@ -302,7 +298,7 @@ def dotplot(df, column=None, cutoff=0.05, figsize=(3.5,6),
     cax=fig.add_axes([0.93,0.20,0.07,0.22])
     cbar = fig.colorbar(sc, cax=cax,)
     cbar.ax.tick_params(right=False)
-    cbar.ax.set_title('Com-\nscore',loc='left', fontsize=12)
+    cbar.ax.set_title('CScore',loc='left', fontsize=12)
     # for terms less than 3
     if len(df) >= 3:
 
@@ -331,7 +327,7 @@ def dotplot(df, column=None, cutoff=0.05, figsize=(3.5,6),
     return
 
 def barplot(df, column=None, cutoff=0.05, figsize=(6.5,6), 
-            top_term=10, color='salmon', title="", ofname=None):
+            top_term=10, color='salmon', title="", ofname=None, **kwargs):
     """Visualize enrichr results.
 
     :param df: GSEApy DataFrame results.
@@ -366,11 +362,11 @@ def barplot(df, column=None, cutoff=0.05, figsize=(6.5,6),
         fig = Figure(figsize=figsize)
         canvas = FigureCanvas(fig)
     ax = fig.add_subplot(111)
-    bar = dd.plot.barh(x='Term', y=colname, color=color, alpha=0.75, fontsize=24, ax=ax)
+    bar = dd.plot.barh(x='Term', y=colname, color=color, alpha=0.75, fontsize=20, ax=ax)
     xlabel = "-log$_{10}$ Adjust P-value" if column is None else colname
-    bar.set_xlabel(xlabel, fontsize=24, fontweight='bold')
+    bar.set_xlabel(xlabel, fontsize=20, fontweight='bold')
     bar.set_ylabel("")
-    bar.set_title(title, fontsize=32, fontweight='bold')
+    bar.set_title(title, fontsize=28, fontweight='bold')
     bar.xaxis.set_major_locator(MaxNLocator(integer=True))
     bar.legend_.remove()
     adjust_spines(ax, spines=['left','bottom'])
