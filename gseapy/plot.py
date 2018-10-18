@@ -283,7 +283,7 @@ def dotplot(df, column=None, title='', cutoff=0.05, top_term=10,
     # b = (df['Count']  - df['Count'].min())/ np.ptp(df['Count'])
     # area = 100 * b
 
-    numbers = np.sort(df.Count.unique())
+    numbers = np.sort(df.Hits.unique())
     if norm is None:
         norm = Normalize()
     elif isinstance(norm, tuple):
@@ -302,7 +302,7 @@ def dotplot(df, column=None, title='', cutoff=0.05, top_term=10,
     if scl.mask.any():
         widths[scl.mask] = 0
     sizes = dict(zip(levels, widths))
-    df['sizes'] = df.Count.map(sizes)
+    df['sizes'] = df.Hits.map(sizes)
     area = df['sizes'].values
 
     # creat scatter plot
