@@ -2,6 +2,7 @@
 
 import numpy as np
 import logging, sys
+
 from matplotlib.colors import Normalize
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -239,14 +240,20 @@ def gseaplot(rank_metric, term, hits_indices, nes, pval, fdr, RES,
         fig.savefig(ofname, bbox_inches='tight', dpi=300)
     return
 
-def dotplot(df, column=None, cutoff=0.05, top_term=10, 
-            figsize=(6, 5.5), cmap='RdBu_r', ofname=None, **kwargs):
+
+def dotplot(df, column=None, title='', cutoff=0.05, top_term=10, sizes=None, norm=None, 
+            legend=True, figsize=(6, 5.5), cmap='RdBu_r', ofname=None, **kwargs):
     """Visualize enrichr results.
 
     :param df: GSEApy DataFrame results.
     :param column: which column of DataFrame to show. If None, set to Adjusted P-value
+    :param title: figure title
     :param cutoff: p-adjust cut-off.
     :param top_term: number of enriched terms to show.
+    :param sizes: tuple, (min, max) scatter size.
+    :param norm: maplotlib.colors.Normalize object.
+    :param legend: bool, whether to show legend.
+    :param figsize: tuple, figure size. 
     :param cmap: matplotlib colormap
     :param ofname: output file name. If None, don't save figure 
 
@@ -272,9 +279,31 @@ def dotplot(df, column=None, cutoff=0.05, top_term=10,
     # y axis index and values
     y=  [i for i in range(0,len(df))]
     labels = df.index.values
-    # Normalised [0,1]
-    b = (df['Count']  - df['Count'].min())/ np.ptp(df['Count'])
-    area = 100 * b
+    # Normalise to [0,1]
+    # b = (df['Count']  - df['Count'].min())/ np.ptp(df['Count'])
+    # area = 100 * b
+
+    levels = numbers = np.sort(df.Count.unique())
+    if norm is None:
+        norm = Normalize()
+    elif isinstance(norm, tuple):
+        norm = Normalize(*norm)
+    elif not isinstance(norm, Normalize):
+        err = ("``size_norm`` must be None, tuple, "
+                "or Normalize object.")
+        raise ValueError(err)
+    min_width, max_width = np.r_[20, 100] * plt.rcParams["lines.linewidth"]
+    norm.clip = True
+    if not norm.scaled():
+        norm(np.asarray(numbers))
+    size_limits = norm.vmin, norm.vmax
+    scl = norm(numbers)
+    widths = np.asarray(min_width + scl * (max_width - min_width))
+    if scl.mask.any():
+        widths[scl.mask] = 0
+    sizes = dict(zip(levels, widths))
+    df['sizes'] = df.Count.map(sizes)
+    area = df['sizes'].values
 
     # creat scatter plot
     if hasattr(sys, 'ps1'):
@@ -293,16 +322,17 @@ def dotplot(df, column=None, cutoff=0.05, top_term=10,
     ax.yaxis.set_major_locator(plt.FixedLocator(y))
     ax.yaxis.set_major_formatter(plt.FixedFormatter(labels))
     ax.set_yticklabels(labels, fontsize=16)
+    
     # ax.set_ylim([-1, len(df)])
     ax.grid()
     # colorbar
-    cax=fig.add_axes([0.93,0.20,0.07,0.22])
+    cax=fig.add_axes([0.95,0.20,0.03,0.22])
     cbar = fig.colorbar(sc, cax=cax,)
     cbar.ax.tick_params(right=False)
     cbar.ax.set_title('CScore',loc='left', fontsize=12)
+
     # for terms less than 3
     if len(df) >= 3:
-
         # find the index of the closest value to the median
         idx = [area.argmax(), np.abs(area - area.mean()).argmin(), area.argmin()]
         idx = unique(idx)
@@ -310,18 +340,16 @@ def dotplot(df, column=None, cutoff=0.05, top_term=10,
     else:
         x2 =  [0]*len(df)
         idx = df.index
-    # scale of dots
-    ax2 =fig.add_axes([0.93,0.55,0.09,0.06*len(idx)])
-    # s=area[idx]
-    l1 = ax2.scatter([],[], s=10, edgecolors='none')
-    l2 = ax2.scatter([],[], s=50, edgecolors='none')
-    l3 = ax2.scatter([],[], s=100, edgecolors='none')
-    labels = df['Count'][idx]
-    leg = ax.legend([l1, l2, l3], labels, nrow=3, frameon=True, fontsize=12,
-                     handlelength=2, loc = 8, borderpad = 1.8,
-                     handletextpad=1, title='Gene\nRatio', scatterpoints = 1)
-
-
+    label = df['Count'][idx]
+    if legend:
+        handles, _ = ax.get_legend_handles_labels()
+        legend_markers = []
+        for ix in idx: 
+            legend_markers.append(ax.scatter([],[], s=area[ix], c='b'))
+        # artist = ax.scatter([], [], s=size_levels,) 
+        ax.legend(legend_markers, label, title='Counts')
+    ax.set_title(title, fontsize=20, fontweight='bold')
+    
     if ofname is not None: 
         # canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
         fig.savefig(ofname, bbox_inches='tight', dpi=300)
