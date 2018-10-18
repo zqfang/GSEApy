@@ -283,7 +283,7 @@ def dotplot(df, column=None, title='', cutoff=0.05, top_term=10,
     # b = (df['Count']  - df['Count'].min())/ np.ptp(df['Count'])
     # area = 100 * b
 
-    numbers = np.sort(df.Hits.unique())
+    levels = numbers = np.sort(df.Hits.unique())
     if norm is None:
         norm = Normalize()
     elif isinstance(norm, tuple):
