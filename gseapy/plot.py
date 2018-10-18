@@ -242,8 +242,8 @@ def gseaplot(rank_metric, term, hits_indices, nes, pval, fdr, RES,
 
 
 def dotplot(df, column=None, title='', cutoff=0.05, top_term=10, 
-            ascending=False, sizes=None, norm=None, 
-            legend=True, figsize=(6, 5.5), cmap='RdBu_r', ofname=None, **kwargs):
+            sizes=None, norm=None, legend=True, figsize=(6, 5.5), 
+            cmap='RdBu_r', ofname=None, **kwargs):
     """Visualize enrichr results.
 
     :param df: GSEApy DataFrame results.
@@ -252,7 +252,7 @@ def dotplot(df, column=None, title='', cutoff=0.05, top_term=10,
     :param cutoff: p-adjust cut-off.
     :param top_term: number of enriched terms to show.
     :param ascending: bool, the order of y axis.
-    :param sizes: tuple, (min, max) scatter size.
+    :param sizes: tuple, (min, max) scatter size. Not functional for now
     :param norm: maplotlib.colors.Normalize object.
     :param legend: bool, whether to show legend.
     :param figsize: tuple, figure size. 
@@ -264,20 +264,24 @@ def dotplot(df, column=None, title='', cutoff=0.05, top_term=10,
         colname, xname = 'Adjusted P-value', 'logAP'  
     else:
         colname, xname = column, column
-    # enrichr results cut off
-    df = df[df[colname] <= cutoff]
-    if len(df) < 1:
-        msg = "Warning: No enrich terms when cuttoff = %s"%cutoff 
-        return  msg
+
     # sorting the dataframe for better visualization
-    df = df.head(top_term).sort_values(by=colname, ascending=ascending)
+    asc =  True
+    if colname in ['Adjusted P-value', 'P-value']: 
+        asc = False
+        df = df[df[colname] <= cutoff]
+        if len(df) < 1: 
+            msg = "Warning: No enrich terms when cutoff = %s"%cutoff
+            return msg
+
+    df = df.head(top_term).sort_values(by=colname, ascending=asc)
     # 
     temp = df['Overlap'].str.split("/", expand=True).astype(int)
     df = df.assign(Hits=temp.iloc[:,0], Background=temp.iloc[:,1])
     df = df.assign(Hits_ratio=lambda x:x.Hits / x.Background,
                    logAP=lambda x: - x['Adjusted P-value'].apply(np.log10))
     # x axis values
-    x = df[xname].values
+    x = df.loc[:,xname].values
     combined_score = df['Combined Score'].round().astype('int')
     # y axis index and values
     y = [i for i in range(0,len(df))]
@@ -285,7 +289,8 @@ def dotplot(df, column=None, title='', cutoff=0.05, top_term=10,
     # Normalise to [0,1]
     # b = (df['Count']  - df['Count'].min())/ np.ptp(df['Count'])
     # area = 100 * b
-
+    
+    # control the size of scatter and legend marker
     levels = numbers = np.sort(df.Hits.unique())
     if norm is None:
         norm = Normalize()
@@ -332,7 +337,7 @@ def dotplot(df, column=None, title='', cutoff=0.05, top_term=10,
     # colorbar
     cax=fig.add_axes([0.95,0.20,0.03,0.22])
     cbar = fig.colorbar(sc, cax=cax,)
-    cbar.ax.tick_params(right=False)
+    cbar.ax.tick_params(right=True)
     cbar.ax.set_title('Combined\nScore',loc='left', fontsize=12)
 
     # for terms less than 3
@@ -358,32 +363,31 @@ def dotplot(df, column=None, title='', cutoff=0.05, top_term=10,
         fig.savefig(ofname, bbox_inches='tight', dpi=300)
     return
 
-def barplot(df, column=None, cutoff=0.05, figsize=(6.5,6), 
-            top_term=10, color='salmon', title="", ofname=None, **kwargs):
+def barplot(df, column=None, title="", cutoff=0.05, top_term=10,
+            figsize=(6.5,6), color='salmon', ofname=None, **kwargs):
     """Visualize enrichr results.
 
     :param df: GSEApy DataFrame results.
     :param column: which column of DataFrame to show. If None, set to Adjusted P-value
+    :param title: figure title.
     :param cutoff: cut-off of the cloumn you've chose.
     :param top_term: number of top enriched terms to show.
+    :param figsize: tuple, matplotlib figsize.
     :param color: color for bars.
-    :param title: figure title.
     :param ofname: output file name. If None, don't save figure    
     
     """
 
-    # pvalue cut off
     colname = 'Adjusted P-value' if column is None else column
-    d = df[df[colname] <= cutoff]
-    if len(d) < 1: 
-        msg = "Warning: No enrich terms using library %s when cutoff = %s"%(title, cutoff)
-        return msg
-
-    if column is None: 
-        d = d.assign(logAP = - np.log10(d.loc[:,colname]).values )
+    if colname in ['Adjusted P-value', 'P-value']: 
+        df = df[df[colname] <= cutoff]
+        if len(df) < 1: 
+            msg = "Warning: No enrich terms using library %s when cutoff = %s"%(title, cutoff)
+            return msg
+        df = df.assign(logAP = lambda x: - x[colname].apply(np.log10))
         colname = 'logAP' 
-    dd = d.head(top_term).sort_values(colname)
-        
+
+    dd = df.head(top_term).sort_values(by=colname)          
     # dd = d.head(top_term).sort_values('logAP')
     # create bar plot
     if hasattr(sys, 'ps1') and (ofname is None):
