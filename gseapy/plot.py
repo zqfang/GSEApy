@@ -241,7 +241,8 @@ def gseaplot(rank_metric, term, hits_indices, nes, pval, fdr, RES,
     return
 
 
-def dotplot(df, column=None, title='', cutoff=0.05, top_term=10, sizes=None, norm=None, 
+def dotplot(df, column=None, title='', cutoff=0.05, top_term=10, 
+            ascending=False, sizes=None, norm=None, 
             legend=True, figsize=(6, 5.5), cmap='RdBu_r', ofname=None, **kwargs):
     """Visualize enrichr results.
 
@@ -250,6 +251,7 @@ def dotplot(df, column=None, title='', cutoff=0.05, top_term=10, sizes=None, nor
     :param title: figure title
     :param cutoff: p-adjust cut-off.
     :param top_term: number of enriched terms to show.
+    :param ascending: bool, the order of y axis.
     :param sizes: tuple, (min, max) scatter size.
     :param norm: maplotlib.colors.Normalize object.
     :param legend: bool, whether to show legend.
@@ -258,24 +260,22 @@ def dotplot(df, column=None, title='', cutoff=0.05, top_term=10, sizes=None, nor
     :param ofname: output file name. If None, don't save figure 
 
     """
-
-    # enrichr results
-    df['Count'] = df['Overlap'].str.split("/").str[0].astype(int)
-    df['Background'] = df['Overlap'].str.split("/").str[1].astype(int)
-    df['hits_ratio'] =  df['Count'] / df['Background']
-
-    # pvalue cut off
-    df = df[df['Adjusted P-value'] <= cutoff]
-
+    colname = 'Adjusted P-value' if column is None else column
+    # enrichr results cut off
+    df = df[df[colname] <= cutoff]
     if len(df) < 1:
         msg = "Warning: No enrich terms when cuttoff = %s"%cutoff 
         return  msg
+    temp = df['Overlap'].str.split("/", expand=True).astype(int)
+    df['Hits'] = temp.iloc[:,0]
+    df['Background'] = temp.iloc[:,1]
+    df['Hits_ratio'] =  df['Hits'] / df['Background']
+
     # sorting the dataframe for better visualization
-    df = df.head(top_term).sort_values(by='Adjusted P-value', ascending=False)
+    df = df.head(top_term).sort_values(by=colname, ascending=ascending)
     # x axis values
-    padj = df['Adjusted P-value']
+    x = - df['Adjusted P-value'].apply(np.log10)
     combined_score = df['Combined Score'].round().astype('int')
-    x = - padj.apply(np.log10)
     # y axis index and values
     y=  [i for i in range(0,len(df))]
     labels = df.index.values
@@ -283,7 +283,7 @@ def dotplot(df, column=None, title='', cutoff=0.05, top_term=10, sizes=None, nor
     # b = (df['Count']  - df['Count'].min())/ np.ptp(df['Count'])
     # area = 100 * b
 
-    levels = numbers = np.sort(df.Count.unique())
+    numbers = np.sort(df.Count.unique())
     if norm is None:
         norm = Normalize()
     elif isinstance(norm, tuple):
@@ -306,7 +306,7 @@ def dotplot(df, column=None, title='', cutoff=0.05, top_term=10, sizes=None, nor
     area = df['sizes'].values
 
     # creat scatter plot
-    if hasattr(sys, 'ps1'):
+    if hasattr(sys, 'ps1') and (ofname is None):
         # working inside python console, show figure
         fig, ax = plt.subplots(figsize=figsize)
     else:
@@ -329,25 +329,24 @@ def dotplot(df, column=None, title='', cutoff=0.05, top_term=10, sizes=None, nor
     cax=fig.add_axes([0.95,0.20,0.03,0.22])
     cbar = fig.colorbar(sc, cax=cax,)
     cbar.ax.tick_params(right=False)
-    cbar.ax.set_title('CScore',loc='left', fontsize=12)
+    cbar.ax.set_title('Combined\nScore',loc='left', fontsize=12)
 
     # for terms less than 3
     if len(df) >= 3:
         # find the index of the closest value to the median
         idx = [area.argmax(), np.abs(area - area.mean()).argmin(), area.argmin()]
         idx = unique(idx)
-        x2 = [0]*len(idx)
     else:
-        x2 =  [0]*len(df)
         idx = df.index
-    label = df['Count'][idx]
+    label = df['Hits'][idx]
+    
     if legend:
         handles, _ = ax.get_legend_handles_labels()
         legend_markers = []
         for ix in idx: 
             legend_markers.append(ax.scatter([],[], s=area[ix], c='b'))
         # artist = ax.scatter([], [], s=size_levels,) 
-        ax.legend(legend_markers, label, title='Counts')
+        ax.legend(legend_markers, label, title='Hits')
     ax.set_title(title, fontsize=20, fontweight='bold')
     
     if ofname is not None: 
