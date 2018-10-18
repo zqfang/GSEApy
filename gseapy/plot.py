@@ -265,16 +265,16 @@ def dotplot(df, column=None, title='', cutoff=0.05, top_term=10,
     else:
         colname, xname = column, column
 
+    
     # sorting the dataframe for better visualization
-    asc =  True
     if colname in ['Adjusted P-value', 'P-value']: 
-        asc = False
         df = df[df[colname] <= cutoff]
         if len(df) < 1: 
             msg = "Warning: No enrich terms when cutoff = %s"%cutoff
             return msg
-
-    df = df.head(top_term).sort_values(by=colname, ascending=asc)
+        df = df.assign(logAP=lambda x: - x['Adjusted P-value'].apply(np.log10))
+        colname='logAP'
+    df = df.sort_values(by=colname).iloc[-top_term:,:]
     # 
     temp = df['Overlap'].str.split("/", expand=True).astype(int)
     df = df.assign(Hits=temp.iloc[:,0], Background=temp.iloc[:,1])
@@ -379,6 +379,7 @@ def barplot(df, column=None, title="", cutoff=0.05, top_term=10,
     """
 
     colname = 'Adjusted P-value' if column is None else column
+    
     if colname in ['Adjusted P-value', 'P-value']: 
         df = df[df[colname] <= cutoff]
         if len(df) < 1: 
@@ -386,8 +387,7 @@ def barplot(df, column=None, title="", cutoff=0.05, top_term=10,
             return msg
         df = df.assign(logAP = lambda x: - x[colname].apply(np.log10))
         colname = 'logAP' 
-
-    dd = df.head(top_term).sort_values(by=colname)          
+    dd = df.sort_values(by=colname).iloc[-top_term:,:]
     # dd = d.head(top_term).sort_values('logAP')
     # create bar plot
     if hasattr(sys, 'ps1') and (ofname is None):
