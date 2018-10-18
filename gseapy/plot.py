@@ -260,25 +260,28 @@ def dotplot(df, column=None, title='', cutoff=0.05, top_term=10,
     :param ofname: output file name. If None, don't save figure 
 
     """
-    colname = 'Adjusted P-value' if column is None else column
+    if column is None:
+        colname, xname = 'Adjusted P-value', 'logAP'  
+    else:
+        colname, xname = column, column
     # enrichr results cut off
     df = df[df[colname] <= cutoff]
     if len(df) < 1:
         msg = "Warning: No enrich terms when cuttoff = %s"%cutoff 
         return  msg
-    temp = df['Overlap'].str.split("/", expand=True).astype(int)
-    df['Hits'] = temp.iloc[:,0]
-    df['Background'] = temp.iloc[:,1]
-    df['Hits_ratio'] =  df['Hits'] / df['Background']
-
     # sorting the dataframe for better visualization
     df = df.head(top_term).sort_values(by=colname, ascending=ascending)
+    # 
+    temp = df['Overlap'].str.split("/", expand=True).astype(int)
+    df = df.assign(Hits=temp.iloc[:,0], Background=temp.iloc[:,1])
+    df = df.assign(Hits_ratio=lambda x:x.Hits / x.Background,
+                   logAP=lambda x: - x['Adjusted P-value'].apply(np.log10))
     # x axis values
-    x = - df['Adjusted P-value'].apply(np.log10)
+    x = df[xname].values
     combined_score = df['Combined Score'].round().astype('int')
     # y axis index and values
-    y=  [i for i in range(0,len(df))]
-    labels = df.index.values
+    y = [i for i in range(0,len(df))]
+    ylabels = df['Term'].values
     # Normalise to [0,1]
     # b = (df['Count']  - df['Count'].min())/ np.ptp(df['Count'])
     # area = 100 * b
@@ -318,10 +321,11 @@ def dotplot(df, column=None, title='', cutoff=0.05, top_term=10,
     vmax =  np.percentile(combined_score.max(), 98)
     sc = ax.scatter(x=x, y=y, s=area, edgecolors='face', c=combined_score,
                     cmap=cmap, vmin=vmin, vmax=vmax)
-    ax.set_xlabel("-log$_{10}$(Adjust P-value)" if column is None else column, fontsize=16)
+    ax.set_xlabel("-log$_{10}$(Adjust P-value)" if column is None else column, 
+                  fontsize=14, fontweight='bold')
     ax.yaxis.set_major_locator(plt.FixedLocator(y))
-    ax.yaxis.set_major_formatter(plt.FixedFormatter(labels))
-    ax.set_yticklabels(labels, fontsize=16)
+    ax.yaxis.set_major_formatter(plt.FixedFormatter(ylabels))
+    ax.set_yticklabels(ylabels, fontsize=16)
     
     # ax.set_ylim([-1, len(df)])
     ax.grid()
@@ -337,8 +341,8 @@ def dotplot(df, column=None, title='', cutoff=0.05, top_term=10,
         idx = [area.argmax(), np.abs(area - area.mean()).argmin(), area.argmin()]
         idx = unique(idx)
     else:
-        idx = df.index
-    label = df['Hits'][idx]
+        idx = df.index.values
+    label = df.iloc[idx, df.columns.get_loc('Hits')]
     
     if legend:
         handles, _ = ax.get_legend_handles_labels()
