@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-import logging, sys
+import logging, sys, operator
 
 from matplotlib.colors import Normalize
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
@@ -40,7 +40,7 @@ def zscore(data2d, axis=0):
         # nnormalized to mean and std using entire matrix
         # z_scored = (data2d - data2d.values.mean()) / data2d.values.std(ddof=1)
         return data2d
-
+    assert axis in [0,1]
     # if axis == 1:
     #     z_scored = data2d
     # else:
@@ -52,7 +52,9 @@ def zscore(data2d, axis=0):
     #     return z_scored
     # else:
     #     return z_scored.T
-    return data2d.apply(lambda x: (x-x.mean())/x.std(ddof=1), axis=axis)
+    z_scored = data2d.apply(lambda x: (x-x.mean())/x.std(ddof=1), 
+                            axis=operator.xor(1, axis))
+    return z_scored
 
 def colorbar(mappable):
     ax = mappable.axes
@@ -78,7 +80,7 @@ def heatmap(df, z_score=None, title='', figsize=(5,5), cmap='RdBu_r',
     df = zscore(df, axis=z_score)
     df = df.iloc[::-1]
     # Get the positions and used label for the ticks
-    nx, ny = df.T.shape
+    ny, nx = df.shape
     xticks = np.arange(0, nx, 1) + .5
     yticks = np.arange(0, ny, 1) + .5
 
@@ -399,15 +401,15 @@ def barplot(df, column='Adjusted P-value', title="", cutoff=0.05, top_term=10,
         canvas = FigureCanvas(fig)
     ax = fig.add_subplot(111)
     bar = dd.plot.barh(x='Term', y=colname, color=color, 
-                       alpha=0.75, fontsize=20, ax=ax)
+                       alpha=0.75, fontsize=16, ax=ax)
     
     if column in ['Adjusted P-value', 'P-value']:
         xlabel = "-log$_{10}$(%s)"%column
     else:
         xlabel = column 
-    bar.set_xlabel(xlabel, fontsize=20, fontweight='bold')
+    bar.set_xlabel(xlabel, fontsize=16, fontweight='bold')
     bar.set_ylabel("")
-    bar.set_title(title, fontsize=28, fontweight='bold')
+    bar.set_title(title, fontsize=24, fontweight='bold')
     bar.xaxis.set_major_locator(MaxNLocator(integer=True))
     bar.legend_.remove()
     adjust_spines(ax, spines=['left','bottom'])
