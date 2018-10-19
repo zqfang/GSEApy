@@ -1,694 +1,856 @@
-CTLA2B
-SCARA3
-LOC100044683
-CMBL
-CLIC6
-IL13RA1
-TACSTD2
-DKKL1
-CSF1
-CITED1
-SYNPO2L
-TINAGL1
-PTX3
-BGN
-HERC1
-EFNA1
-CIB2
-PMP22
-TMEM173
-MANSC1
-PRSS23
-QPCT
-DMKN
-MS4A4D
-CCL2
-CDC42EP1
-RCAN2
-CRTC3
-TMEM56
-SLC25A24
-BNC1
-CACNA1H
-CDA
-KRT19
-TAGLN
-DHX58
-GJA3
-CD44
-MAGEE1
-CLMN
-TRMT2B
-COL8A2
-RASL10A
-NEDD9
-SEP4
-LIMCH1
-ST3GAL1
-FNDC5
-TGFBR2
-PLD2
-KRT7
-FOSL2
-EFEMP2
-GM715
-CD40
-HOXD8
-OLIG1
-COL6A1
-CHRDL2
-PFTK1
-PLAT
-IL10RB
-S100A1
-CYP26A1
-PARVA
-MPRIP
-TMEM130
-REM2
-ABHD14B
-RRAD
-DSC2
-CHST8
-RUNX3
-LOC677224
-BC006779
-ATRNL1
-SGPP1
-TBX21
-CYR61
-MCOLN3
-AFAP1L1
-ENO2
-VNN1
-FLNC
-PTPDC1
-IRGM2
-TBX20
-CTSH
-1200009I06RIK
-FAM115A
-GALNT4
-ACTA1
-H2-Q7
-AW060742
-CXCL10
-4-SEP
-NELF
-2810468N07RIK
-BC046404
-SLC24A3
-LATS2
-AIFM3
-6330403K07RIK
-GRAMD1C
-8430427H17RIK
-5430407P10RIK
-MED12L
-PYGL
-THBS4
-STBD1
-A330049M08RIK
-ENHO
-MOGAT2
-CTSO
-GM967
-PRKAR1B
-HIST2H3C2
-ZBTB4
-ANXA3
-SLC45A3
-EPM2AIP1
-CERK
-C030034E14RIK
-GPRC5C
-MARVELD2
-LAMB3
-FAM101B
-TMPRSS2
-MTHFD2L
-DBNDD2
-CXCL14
-TM6SF2
-PRRX2
-BC018465
-KRT18
-SCARF2
-ZFP672
-GLRB
-LHFP
-PTPN20
-PRICKLE2
-APOB48R
-DUSP14
-CHKB-CPT1B
-BE136769
-SELENBP1
-HIST3H2A
-H2-AA
-AI426330
-BMP8B
-RET
-SRI
-4930523C07RIK
-SEPN1
-GPX8
-PCP4L1
-LMO1
-EIF4E3
-RHOC
-MAP3K5
-GSDMD
-SH3BP5
-RAB6B
-RAB3B
-BIK
-ENSMUSG00000073738
-STK39
-SERPINE1
-ARAP3
-PDGFRB
-SERTAD4
-PITPNM1
-CCDC68
-PTGDS
-UBASH3B
-VASN
-GDPD1
-ADCY6
-ABHD3
-NPTX1
-CHRNB1
-OPRL1
-GSN
-TNFAIP2
-H1F0
-PLEKHA2
-CCDC45
-KRT8
-TDRD7
-TMEM37
-PPP3CC
-ANKRD44
-MYRIP
-LGALS7
-KCTD11
-2610034B18RIK
-ETS1
-SUOX
-CLDN3
-SNX9
-ENTPD2
-NINJ1
-PTPLAD2
-HRASLS
-CD47
-GPR177
-GALNT12
-AQP5
-TGFBR3
-ENPP1
-PTRF
-PRKD1
-TSPYL4
-LOC100046207
-D6MM5E
-ECSCR
-1700008I05RIK
-FAM46B
-TGFA
-TM6SF1
-ARSB
-WNT9A
-PDLIM4
-POGK
-TIMP2
-TNNC1
-LETM1
-BHLHE40
-EGR1
-CLIP1
-TNFRSF12A
-GPSM1
-4930583H14RIK
-TMCC2
-ABCA3
-ESX1
-GCHFR
-TMEM62
-RHOB
-P2RX4
-ANXA2
-SENP7
-UBE2H
-FADS6
-SPINK2
-DES
-IGDCC3
-SCD2
-COL7A1
-CLDN6
-1700017B05RIK
-GNG13
-3110040M04RIK
-PHLDB2
-ZFP3
-TACC3
-AEBP1
-GM70
-BCL2L2
-LTBR
-MOXD1
-BACE1
-CDCP1
-DIP2A
-HIP1
-KLHL23
-LXN
-NFATC1
-SPEG
-2310030G06RIK
-CRYAB
-RHOX6
-PARP4
-SIRT2
-S100A13
-EMP2
-RAI1
-IER3
-8430419L09RIK
-SERP2
-A130022J15RIK
-STAT5B
-CYBA
-ANKRD34B
-HIST1H1C
-2210011C24RIK
-TGM2
-SH3BP1
-RBP4
-MAPK13
-PLAUR
-SYNGR3
-ABTB2
-ULK2
-SYAP1
-PRPH
-RIPK3
-ARG2
-UNC5B
-MSL1
-CHST14
-CYBRD1
-FLT4
-GPHN
-4930506M07RIK
-SERF1
-PDLIM2
-TNFAIP8
-FAM102B
-CRYM
-MARK1
-B230380D07RIK
-0610010K14RIK
-WDR22
-B2M
-CTSB
-PRSS16
-TNFRSF1A
-PROCR
-TRPC1
-BAIAP2L1
-LY6K
-JAK2
-ACPL2
-FZD2
-CTDSPL
-STXBP1
-NPNT
-HSPB2
-DNAJA4
-1110003E01RIK
-ELK3
-ZFP362
-ENTPD5
-WIPF1
-FARP1
-TMEM9B
-TTC28
-ILK
-ZDHHC2
-RHOX9
-ADCY7
-DNM1
-AI851716
-COBLL1
-AIFM2
-LOC100047565
-SIPA1L1
-ZFP352
-DUSP3
-RHOD
-PHLDA1
-RNF103
-FAM171B
-HPN
-ACADVL
-CCDC28B
-MAN2A2
-FAM65A
-SH3GLB1
-FAM55C
-2010012O05RIK
-REEP5
-ARHGDIB
-SELM
-CD302
-5031439G07RIK
-LPGAT1
-2200002D01RIK
-RIN1
-B3GALNT1
-PTPN9
-PLEKHG2
-SERPINF1
-ACSS2
-NUAK1
-TAGLN2
-TSPAN33
-OCLN
-CD99L2
-GRINA
-6430598A04RIK
-ADRBK2
-SGCB
-HEBP2
-RRAS
-RHOG
-RHOU
-EFHD2
-EID1
-DBN1
-ERBB2
-PBX2
-CLU
-BIN1
-SPTLC2
-CPE
-TRP53INP2
-HSPA4L
-1110007C09RIK
-1110012D08RIK
-APCDD1
-APH1A
-GSTM5
-CORO1A
-NAB1
-LITAF
-CYTSB
-PCBD1
-GATA2
-FAM57A
-LPP
-TAX1BP3
-TMC7
-ABCA5
-TMEM98
-TSPYL3
-TEX261
-LGALS1
-SI
-CBX4
-LOC100044896
-GADD45B
-2310021P13RIK
-2310043N10RIK
-GYG
-NMB
-SOS2
-MMD
-STARD10
-ARMCX3
-SGK3
-SCD1
-HMGN3
-KLHL5
-2900026A02RIK
-MBD2
-PAN3
-CASP6
-RECK
-SCT
-PDLIM7
-SERPINH1
-NENF
-MAR2
-CLDN7
-CSRP1
-SMPD1
-ELOVL1
-SETD7
-PRTG
-GNG10
-VAMP8
-CARD10
-ADAM9
-1110036O03RIK
-PITPNA
-SORT1
-DUSP22
-ANXA5
-JUN
-GNB4
-LMNA
-PARD6B
-GCH1
-H2-K1
-XPR1
-LRRC41
-PRMT2
-AFAP1
-TMEM88
-SGCE
-SERTAD1
-PFN2
-CLIC1
-RBMS1
-TPM2
-LAMP2
-HCFC1R1
-SHISA5
-ZFAND3
-HIST1H2BC
-TCN2
-TPM1
-S100A6
-AHNAK
-EHD1
-NDN
-RPL13
-TUBB6
-ITGAV
-MYO1C
-CSTB
-S100A11
-MYCN
-PRDM5
-SLC27A2
-PTCH1
-MANBA
-TCTE3
-NODAL
-SGK1
-GLI2
-HES6
-ZBTB8A
-SPP1
-INTS6
-SEPP1
-2500002B13RIK
-ENSMUSG00000074303
-TUBB3
-DNMT3A
-ARID5B
-1700019D03RIK
-PLA2G10
-NR0B1
-NEFL
-TDH
-CALML4
-BC063263
-5430416N02RIK
-ZBED3
-SLC7A3
-PIM2
-GTSF1L
-OTTMUSG00000002879
-HSD17B14
-D630045M09RIK
-2810474O19RIK
-C730049O14RIK
-IFITM1
-MRAS
-PLEKHA4
-FOXP1
-TDRD12
-RNF125
-FGF4
-IPMK
-AK7
-COBL
-TNFSF12
-ESRRB
-CNTF
-2310043M15RIK
-LOC100045707
-RIF1
-CYP11A1
-2210409E12RIK
-EG627821
-PCMTD1
-DPPA3
-RNF165
-4930503L19RIK
-G2E3
-HELLS
-SLC20A1
-CHGA
-GNA14
-PLEKHG1
-TTLL6
-LRRC34
-LIPH
-LOC547150
-HCK
-BC032203
-TRIB2
-ZP3
-NTN1
-CALCA
-ZFP493
-ARL4A
-AI452195
-OTTMUSG00000010671
-STMN3
-JAM2
-ENOX1
-ZFP28
-4930566F21RIK
-PECAM1
-SLC5A4B
-TRH
-6430514M23RIK
-MORC1
-MAPT
-TAF1D
-ZFP78
-STC2
-SEP1
-2410004A20RIK
-FGF17
-SLC5A10
-P2RX7
-DPP4
-CAMK1D
-UBTFL1
-LOC100045988
-SUFU
-TMEM191C
-ZFP644
-CAR3
-TTPA
-A230083H22RIK
-PCDH21
-BNC2
-ZIC2
-KANK3
-EG631624
-SLC6A15
-TMEM209
-PRDX6
-PDZD4
-TCL1
-ZIC5
-TMEM40
-2410007B07RIK
-2410137M14RIK
-PCYT1B
-4930434E21RIK
-SULT6B1
-SFRP1
-INSM1
-A930038C07RIK
-SLC23A1
-AASS
-FBP1
-1700042O10RIK
-ACSS1
-INHBB
-SEMA3E
-ALDH3A1
-D16ERTD778E
-ACCSL
-AI480624
-NAPB
-NCAM1
-SLCO4C1
-CBR3
-LGALS9
-STYXL1
-RPRD1A
-CD80
-EG329217
-EFHD1
-MTAP1B
-CD151
-DLL1
-VEGFC
-LAPTM5
-LPAR4
-PTN
-ZFP819
-TGFBI
-GPX2
-MYB
-DPYS
-DPYSL3
-CRISP1
-BHMT
-GSTA3
-TTN
-LEF1
-1700108F19RIK
-GAP43
-TRPS1
-TRIM2
-EPHA4
-SYT4
-8430420F16RIK
-NEUROG3
-NEUROD1
-9430069I07RIK
-1700097N02RIK
-PDGFC
-LRRC2
-SOX4
-CLPS
-CYP2J9
-3100002J23RIK
-SPNA1
-GFRA1
-KLK1
-MYO1F
-ENPP2
-DACH1
-LPXN
-MCF2
-BCL11A
-FCGR2B
-B430203I24RIK
-POF1B
-MT4
-4930526L06RIK
-TCERG1L
-RUNX1T1
+IGKV4-1
+           CD55
+           IGKC
+        PPFIBP1
+          ABHD4
+          PCSK6
+            PGD
+        ARHGDIB
+          ITGB2
+          CARD6
+           MNDA
+           ATE1
+         LGALS8
+         HOMER3
+   RP11-356N1.2
+          MT-TN
+      C14orf159
+         HS2ST1
+          VDAC3
+         MAP4K4
+            HK3
+           SSH1
+            HGD
+          MBNL3
+         GOLGA2
+      TNFRSF10C
+      LINC01410
+          MGRN1
+          NUP98
+           RAC1
+         MAPRE2
+        ADIPOR1
+          MOB1A
+           LTBR
+         FBXO30
+           FAR1
+           HPS1
+           GBP2
+         ANP32B
+         LUCAT1
+        HNRNPA3
+             F5
+           SNX6
+         LILRA5
+           FADD
+          PTGS1
+          KIF1C
+          MED25
+        ATG16L2
+     AC013461.1
+            LYN
+          GMCL1
+          ARPC2
+          MMGT1
+       GLTSCR1L
+          MSRB1
+         BCAP29
+          RGS10
+          FRAT2
+          IL2RG
+          HSH2D
+        FAM199X
+            HCK
+          HSDL2
+         TMEM64
+        BLOC1S6
+           GMPR
+          LITAF
+       TNFSF13B
+          KCNE1
+         HSPA1A
+            STS
+        TBC1D20
+           JAG1
+       C9orf139
+       FGFR1OP2
+      KIDINS220
+          MFSD6
+           MBD5
+     AC011380.8
+          FRAT1
+          F13A1
+           CD46
+         GALNT4
+          HIPK1
+          KCTD2
+           KRAS
+         TALDO1
+         LPGAT1
+         LPCAT2
+          BASP1
+           BIN2
+           AOC3
+           GPS2
+           M6PR
+         GPR107
+         HNRNPC
+            MME
+           IRS2
+      ARHGAP11B
+            TKT
+          GABPA
+           GAB3
+         IFNAR1
+          FOXJ2
+         GLIPR2
+        PRKAR2B
+         MBOAT2
+           MLKL
+          SUSD1
+          FLOT1
+         BCAP31
+        KBTBD11
+          HECW2
+          HADHA
+           RIN2
+        FAM198B
+         LILRB1
+           BTG2
+         FAM8A1
+      LINC01272
+         GOLGA5
+         LMBRD1
+          LATS2
+            HGF
+         MAP3K2
+         BCL2A1
+          ITM2C
+            FYB
+          ISG20
+         MARCKS
+         ANAPC5
+       ARHGEF12
+          BSDC1
+          BLCAP
+  RP11-497H16.7
+            LYN
+        C8orf44
+          FCGRT
+          FFAR2
+        TBC1D14
+        ATP6V1D
+         LRRC25
+           EVI5
+        MIR22HG
+            LYN
+        MT-ATP8
+            TKT
+        PSTPIP2
+          GPAT3
+  RP11-793H13.8
+           MCL1
+            SYK
+           IER5
+         LUC7L2
+          TSHZ3
+         HNRNPU
+           NEK4
+          PANK2
+           FGL2
+          FOSL2
+          GRINA
+          GTF2I
+      LINC01002
+          RAP1A
+           NEK4
+          CMAHP
+         KCTD18
+          MAPK3
+        MAP3K11
+       ARHGEF11
+         UBE2E3
+          SIRPA
+        TMEM50A
+       KIAA2013
+          TIGD3
+          APAF1
+         GLT1D1
+           SUOX
+         FCGR2C
+           TGFA
+          MATR3
+           CCNY
+         BTN3A1
+         FAM46A
+           ABAT
+         FAM49B
+          HMGB2
+       C11orf58
+           ETFA
+        ZNF385A
+          BAZ2B
+           JRKL
+        ZCCHC17
+          SFXN5
+          SNX19
+          CLCN4
+          BMP2K
+          PLIN5
+         LARP1B
+          RAB10
+           RALB
+           HPS1
+           ANO6
+          MOB1A
+            GCA
+        IKBKGP1
+           YBX3
+           IGIP
+          ARPC5
+        FAM222B
+          PTPRC
+         GTF2A1
+           MAFB
+       HSP90AA1
+          FBXL3
+           GNB1
+           GBP4
+        HLA-DMB
+           JAK3
+        ITGB1P1
+         MAP3K5
+   RP5-858L17.1
+         TMEM65
+          IL1R2
+          IL1R1
+       ATP6V1B2
+       CNTNAP3B
+           CDS2
+        SLC35D2
+         LILRB3
+         ATP2C1
+          IGSF6
+         DNAJC9
+  RP11-632K20.7
+         LILRA2
+        GRAMD1B
+         MAN2B2
+         DCAF12
+          CNPY3
+          LETM2
+         RASSF8
+          LAMP2
+           CCR2
+          RAB5B
+          PROK2
+         KIF1BP
+          FBXW7
+        SLC30A5
+         FCER1G
+          BTNL8
+         PPBPP2
+           LRG1
+         S100A8
+          ARPC2
+            GP5
+         KCNJ15
+       ARHGAP29
+           GIT2
+         NLRP12
+           ING1
+         FNDC3B
+          MAPK6
+         JMJD1C
+         KIF13A
+           LRBA
+          MCUR1
+            MBP
+       GTF2IP12
+            PGD
+           NCK2
+           KAZN
+         PTPN12
+       IGHV1-18
+        SH3GLB1
+         MBOAT7
+         PTPN12
+         MCEMP1
+            MFF
+          MAML3
+       ZMPSTE24
+         SLAIN2
+          LIMK2
+     AC079630.4
+           GMPR
+           IGHM
+           SNX3
+           GANC
+           RSU1
+          RAB31
+            HBB
+           DSC2
+        LRRFIP1
+           GLCE
+           E2F3
+          STRN4
+           LAT2
+           PCNP
+        FAM157A
+    AC018755.18
+          GALK2
+            HK2
+          KDM3B
+         TUBB4B
+       KIAA1033
+          EXTL3
+           GLUL
+          LRFN1
+         GIMAP4
+          GRAP2
+  RP11-213H15.4
+         USP27X
+        FAM102B
+        CCDC149
+        ARHGDIB
+        ATP6V0C
+         IQGAP1
+          WIPF1
+          ABCC6
+       C15orf39
+   RP11-91P17.1
+          LPAR2
+          CCPG1
+         BCORL1
+      NUP50-AS1
+          IL6ST
+          MGAT3
+          ARL5A
+        MFSD14B
+          PRRG4
+          EGLN1
+         MT-TL1
+           GNAS
+         LILRA6
+           GNB1
+ RP11-59D5__B.2
+          PELI2
+           PLEK
+            HTT
+         METTL9
+         IQGAP2
+        FAM193A
+           BCOR
+          ATP5J
+           BST1
+        ATP6V1A
+         FAM45A
+          MT-TH
+           GNB1
+            HLX
+           CLTA
+          CFLAR
+         TSPAN2
+         PTP4A2
+         IL1RAP
+          MAML1
+          CD226
+          PLIN2
+           ICA1
+         PNPLA1
+         CD99P1
+         DHTKD1
+           GNAS
+          KMT2A
+  RP11-164H13.1
+         HSPA1L
+           BCL9
+         DIAPH1
+          FOXN2
+          WIPI1
+          ARRB1
+           FCN1
+           CD82
+          PTGS1
+           GNB1
+         PABPC1
+          PRKCB
+       KIAA0556
+      LINC01127
+        GTF2IP4
+           NEK7
+           IRF2
+            BMX
+           TLR5
+         PLXDC2
+        LRRFIP2
+        FAM120A
+ RP11-544M22.13
+       HLA-DPA1
+  RP11-848G14.5
+           QPCT
+         GPCPD1
+           RAC1
+           RBX1
+        ST3GAL6
+        FASTKD5
+           PYGL
+          FXYD6
+           RYBP
+        HLA-DMA
+          PRKCD
+          GSDMD
+          ITGAX
+         IQSEC1
+         FAM20B
+        HNRNPH2
+       IGLV7-43
+           SRGN
+           ANO6
+           FMO5
+         RAB39A
+          CEP19
+          LIN54
+            ASL
+          MT-TW
+        PIP4K2A
+         BTN3A2
+  RP5-1126H10.2
+         USP6NL
+        ZCCHC17
+          FOXO3
+            APP
+          PTGS1
+          H3F3A
+            FYB
+          MT-TE
+       TMSB4XP4
+          GPR27
+      TNFRSF10D
+           AOC2
+           DPYD
+         IMPDH1
+           CAP1
+        FAM117A
+         MAPK14
+          MGAM2
+          LASP1
+          LIMS1
+          KLF10
+         NMNAT1
+         FAM78A
+         FCER1A
+           PLEK
+           GNB1
+         PRKAB2
+          ICAM3
+          VTI1B
+         WRNIP1
+          BICD2
+         ATP8A1
+           HBP1
+        FAM126B
+        IGHV3-7
+        ST6GAL1
+         PTPN12
+          LRRC6
+            GNS
+           MLEC
+          KDM7A
+          MTHFS
+         GGTA1P
+   RP11-256L6.3
+       TMEM176A
+  CTD-2184C24.2
+        SLC22A4
+          DUSP3
+          WDTC1
+        FAM101B
+          GNL3L
+          FMNL1
+          STK40
+          MSRB2
+          FLOT2
+           NAPA
+         IFNGR2
+         RNF141
+ LL22NC03-2H8.5
+            LYZ
+          GLYR1
+           GMPR
+          IFIH1
+       ATP6V0D1
+          BMPR2
+           IST1
+           ATF6
+            MCU
+         CLEC5A
+        FAM105A
+          LRRK2
+           DYSF
+          ATMIN
+           MADD
+          MAST3
+       FLJ37453
+            PXK
+           HECA
+           HHEX
+         TRIOBP
+         TRIM24
+           MPP1
+           GRK3
+          CMTM6
+          SORT1
+          KLHL6
+        FAM129A
+           VNN1
+        TSPAN13
+         MANSC1
+       MAPKAPK2
+           ING4
+        PTTG1IP
+            FYB
+       ARHGAP18
+        PRKAR2B
+          ASAP1
+         ANXA11
+         JARID2
+        ATXN7L3
+          FBXO7
+        ATP6V0B
+       KIAA0232
+          WBP1L
+         TALDO1
+          IGHG1
+          CASP3
+         LMAN2L
+   CTD-2370N5.3
+          SPARC
+           FPR1
+          BEST1
+          PANX1
+            HAL
+       MIS18BP1
+        FAM157C
+          GRAP2
+          MGAT5
+         MAP3K1
+          BCL7B
+         IFNGR1
+          PHTF1
+          GPBP1
+           HBA2
+           HIP1
+           IDH1
+        SULT1B1
+           STX6
+       HLA-DRB1
+          FBXO7
+           WDR1
+          PADI2
+           XPO7
+          MT-TR
+       RABGAP1L
+         MICAL2
+           RGS6
+        FAM229A
+          FBXO8
+           NBR1
+          SCN1B
+           IRF9
+            VCL
+       ATP6V1G1
+         FCGR2A
+           SELT
+          MKRN1
+        MICALCL
+          FABP5
+         PTPN11
+         FUNDC2
+            LYN
+          LPAR1
+         PECAM1
+        SLC24A4
+         STEAP4
+          PTGS1
+        IL13RA1
+          KIF5B
+      C10orf105
+          HSPA6
+        B4GALT5
+         FYTTD1
+        FAM122A
+       SERPINB6
+         MAN1A1
+        PRKAR1A
+            FOS
+        PGLYRP1
+         BRI3BP
+         TXNDC5
+          RNF24
+          BAZ1A
+           IRF1
+      LINC00888
+          ATHL1
+           MBD6
+       KIAA1257
+          KRT23
+           BIN2
+           HBA1
+          BTBD7
+          PTGS1
+      LINC01001
+          MARC1
+          H3F3B
+         CLEC4D
+           F11R
+          BCKDK
+          MBNL1
+           IL4R
+          SMC1A
+           FAR2
+         MAP3K3
+          IRAK3
+           GNAQ
+           FBN2
+        ADIPOR1
+          ITGB5
+          LRRC4
+        HEATR5A
+     AC116366.5
+         FCGR1B
+        CYP27A1
+          MEF2C
+           CSTA
+         UBE2J1
+     TOLLIP-AS1
+          MT-TT
+          BANK1
+         MIR142
+           JUNB
+          IGHG2
+         FAXDC2
+         GLIPR1
+          MKNK2
+       FAM160B1
+          CCNJL
+         FBXO11
+          KDM1B
+    GS1-358P8.4
+          ASXL2
+          HIPK3
+           ELF1
+       CDC42EP1
+           FPR2
+          LIN7A
+          TLR10
+         ZNF701
+          KIF1B
+        HNRNPH1
+            FRY
+            NPL
+            ANG
+           GNAS
+  RP11-879F14.1
+          PRKCB
+     BAIAP2-AS1
+           COQ2
+           MGAM
+          FBXL5
+         ATP11B
+         KCTD12
+            HN1
+            CA2
+   RP11-44F14.1
+           RHOU
+            GRN
+           GPX8
+           MED4
+           IER2
+          ITGAL
+         SNAP23
+        HLA-DRA
+          SENP6
+          KPNA1
+       KIAA0040
+          ITM2B
+         MARCH7
+           WDR1
+       ANKRD33B
+          ADAM9
+         LSM14A
+         CHMP4B
+           GNB2
+      KIAA0226L
+          EPAS1
+           IPMK
+        FAM131A
+         MESDC1
+           GRB2
+          CMTM2
+         IFITM2
+         GTPBP2
+           LYST
+       ITPRIPL2
+    RP11-88H9.2
+          LRCH4
+            FYN
+          HINT3
+           HRH2
+          LIMD2
+          TMED8
+           AKNA
+        EFCAB12
+        SLC35D2
+           BCL3
+           SOD2
+        PHF20L1
+          MEF2A
+       IGLV2-23
+          MILR1
+          BRWD3
+            NPL
+        ANKRD50
+           CPT2
+          MKNK1
+    CTA-363E6.6
+          IGHA2
+        ZCCHC17
+          F2RL1
+         GPR146
+         PPP3R1
+         BCKDHA
+           GRB2
+           GDE1
+         IL17RA
+        KREMEN1
+          LTBP1
+        ATP6AP2
+         IL10RB
+          IFIT5
+          PRKCB
+           STX7
+           CAP1
+        PACSIN2
+           MPP1
+          PCGF5
+         BNIP3L
+         S100A9
+           NFE4
+        PRIMPOL
+          HMGB3
+         PDLIM1
+         FAM65B
+         SIRPB2
+         TMEM9B
+           PGK1
+        OSBPL11
+         MAP2K4
+           RAC1
+           BCL6
+       ATP6V0A1
+         CORO1C
+          GNA15
+          SPARC
+           CD36
+           TLR4
+         RNF130
+         IFITM1
+     AC007743.1
+           STX7
+          KCNK6
+         KBTBD7
+         PRKACA
+         LILRB2
+          ITGB3
+         ZFAND3
+        ADIPOR2
+            BID
+          CXCR2
+        FAM214B
+          FBXO7
+          FXYD5
+             GK
+          UBAP1
+          IKBIP
+  RP11-437B10.1
+        CCDC153
+         LYPLA1
+           GM2A
+         TALDO1
+          LMNB1
+         ADGRE3
+           HEY1
+        S100A12
+         SLC6A6
+          KDM6B
+         FAM53C
+          CDK19
+         KCTD21
+         ARPC1A
+          KMT2D
+           JAML
+            MAK
+           BAG5
+           RSU1
+          GNG10
+          PADI4
+         CHMP4B
+        NUDT4P1
+          KPNA3
+          PROK2
+         OGFRL1
+           LIPE
+            QKI
+          HIF1A
+          ITGA5
+      HNRNPA2B1
+          CAB39
+           LRP1
+         JCHAIN
+           GNB4
+          RNF10
+           LIPA
+          GSK3B
+       UHRF1BP1
+           MPST
+LL21NC02-1C16.2
+       SLC9A3R2
+          HEBP1
+         ZDHHC2
+           MIDN
+         MAGOHB
+  RP11-631N16.2
+          GSKIP
+           GAB2
+          DRAM1
+           ACPP
+         FCGR3B
+           IL6R
+          LPIN2
+           ICMT
+          MCTP1
+         BOD1L1
+          MT-TI
+           FUT7
+           FTH1
+          HCG11
+           NRDC
+       KIAA1551
+           MYH9
+          CMPK1
+         FBXO28
+           GNB1
+         PTPN12
+          IGF2R
+           CDYL
+         MARCH2
+           SSH2
+           MEFV
+          TGFB1
+  RP11-705C15.4
+        FAM107A
+           ATRX
+          MEGF9
+           RSU1
+         RALBP1
