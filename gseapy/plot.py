@@ -241,13 +241,13 @@ def gseaplot(rank_metric, term, hits_indices, nes, pval, fdr, RES,
     return
 
 
-def dotplot(df, column=None, title='', cutoff=0.05, top_term=10, 
+def dotplot(df, column='Adjusted P-value', title='', cutoff=0.05, top_term=10, 
             sizes=None, norm=None, legend=True, figsize=(6, 5.5), 
             cmap='RdBu_r', ofname=None, **kwargs):
     """Visualize enrichr results.
 
     :param df: GSEApy DataFrame results.
-    :param column: which column of DataFrame to show. If None, set to Adjusted P-value
+    :param column: which column of DataFrame to show. Default: Adjusted P-value
     :param title: figure title
     :param cutoff: p-adjust cut-off.
     :param top_term: number of enriched terms to show.
@@ -260,28 +260,24 @@ def dotplot(df, column=None, title='', cutoff=0.05, top_term=10,
     :param ofname: output file name. If None, don't save figure 
 
     """
-    if column is None:
-        colname, xname = 'Adjusted P-value', 'logAP'  
-    else:
-        colname, xname = column, column
 
-    
+
+    colname = column    
     # sorting the dataframe for better visualization
     if colname in ['Adjusted P-value', 'P-value']: 
         df = df[df[colname] <= cutoff]
         if len(df) < 1: 
             msg = "Warning: No enrich terms when cutoff = %s"%cutoff
             return msg
-        df = df.assign(logAP=lambda x: - x['Adjusted P-value'].apply(np.log10))
+        df = df.assign(logAP=lambda x: - x[colname].apply(np.log10))
         colname='logAP'
     df = df.sort_values(by=colname).iloc[-top_term:,:]
     # 
     temp = df['Overlap'].str.split("/", expand=True).astype(int)
     df = df.assign(Hits=temp.iloc[:,0], Background=temp.iloc[:,1])
-    df = df.assign(Hits_ratio=lambda x:x.Hits / x.Background,
-                   logAP=lambda x: - x['Adjusted P-value'].apply(np.log10))
+    df = df.assign(Hits_ratio=lambda x:x.Hits / x.Background)
     # x axis values
-    x = df.loc[:,xname].values
+    x = df.loc[:, colname].values
     combined_score = df['Combined Score'].round().astype('int')
     # y axis index and values
     y = [i for i in range(0,len(df))]
@@ -326,8 +322,12 @@ def dotplot(df, column=None, title='', cutoff=0.05, top_term=10,
     vmax =  np.percentile(combined_score.max(), 98)
     sc = ax.scatter(x=x, y=y, s=area, edgecolors='face', c=combined_score,
                     cmap=cmap, vmin=vmin, vmax=vmax)
-    ax.set_xlabel("-log$_{10}$(Adjust P-value)" if column is None else column, 
-                  fontsize=14, fontweight='bold')
+
+    if column in ['Adjusted P-value', 'P-value']:
+        xlabel = "-log$_{10}$(%s)"%column
+    else:
+        xlabel = column 
+    ax.set_xlabel(xlabel, fontsize=14, fontweight='bold')
     ax.yaxis.set_major_locator(plt.FixedLocator(y))
     ax.yaxis.set_major_formatter(plt.FixedFormatter(ylabels))
     ax.set_yticklabels(ylabels, fontsize=16)
@@ -361,14 +361,14 @@ def dotplot(df, column=None, title='', cutoff=0.05, top_term=10,
     if ofname is not None: 
         # canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
         fig.savefig(ofname, bbox_inches='tight', dpi=300)
-    return
+    return ax
 
-def barplot(df, column=None, title="", cutoff=0.05, top_term=10,
+def barplot(df, column='Adjusted P-value', title="", cutoff=0.05, top_term=10,
             figsize=(6.5,6), color='salmon', ofname=None, **kwargs):
     """Visualize enrichr results.
 
     :param df: GSEApy DataFrame results.
-    :param column: which column of DataFrame to show. If None, set to Adjusted P-value
+    :param column: which column of DataFrame to show. Default: Adjusted P-value
     :param title: figure title.
     :param cutoff: cut-off of the cloumn you've chose.
     :param top_term: number of top enriched terms to show.
@@ -378,8 +378,7 @@ def barplot(df, column=None, title="", cutoff=0.05, top_term=10,
     
     """
 
-    colname = 'Adjusted P-value' if column is None else column
-    
+    colname = column   
     if colname in ['Adjusted P-value', 'P-value']: 
         df = df[df[colname] <= cutoff]
         if len(df) < 1: 
@@ -398,8 +397,13 @@ def barplot(df, column=None, title="", cutoff=0.05, top_term=10,
         fig = Figure(figsize=figsize)
         canvas = FigureCanvas(fig)
     ax = fig.add_subplot(111)
-    bar = dd.plot.barh(x='Term', y=colname, color=color, alpha=0.75, fontsize=20, ax=ax)
-    xlabel = "-log$_{10}$ Adjust P-value" if column is None else colname
+    bar = dd.plot.barh(x='Term', y=colname, color=color, 
+                       alpha=0.75, fontsize=20, ax=ax)
+    
+    if column in ['Adjusted P-value', 'P-value']:
+        xlabel = "-log$_{10}$(%s)"%column
+    else:
+        xlabel = column 
     bar.set_xlabel(xlabel, fontsize=20, fontweight='bold')
     bar.set_ylabel("")
     bar.set_title(title, fontsize=28, fontweight='bold')
@@ -410,7 +414,7 @@ def barplot(df, column=None, title="", cutoff=0.05, top_term=10,
     if ofname is not None: 
         # canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
         fig.savefig(ofname, bbox_inches='tight', dpi=300)
-    return
+    return ax
 
 def adjust_spines(ax, spines):
     """function for removing spines and ticks.
