@@ -361,6 +361,7 @@ def dotplot(df, column='Adjusted P-value', title='', cutoff=0.05, top_term=10,
     if ofname is not None: 
         # canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
         fig.savefig(ofname, bbox_inches='tight', dpi=300)
+        return
     return ax
 
 def barplot(df, column='Adjusted P-value', title="", cutoff=0.05, top_term=10,
@@ -414,6 +415,7 @@ def barplot(df, column='Adjusted P-value', title="", cutoff=0.05, top_term=10,
     if ofname is not None: 
         # canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
         fig.savefig(ofname, bbox_inches='tight', dpi=300)
+        return
     return ax
 
 def adjust_spines(ax, spines):
