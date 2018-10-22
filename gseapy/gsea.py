@@ -125,6 +125,7 @@ class GSEAbase(object):
             subset_list = genesets_dict.get(subset)
             if isinstance(subset_list, set):
                 subset_list = list(subset_list)
+                genesets_dict[subset] = subset_list
             tag_indicator = np.in1d(gene_list, subset_list, assume_unique=True)
             tag_len = tag_indicator.sum()
             if  self.min_size <= tag_len <= self.max_size: continue
