@@ -272,7 +272,7 @@ class GSEAbase(object):
             rdict['matched_size'] = len(ind)
             #reformat gene list.
             _genes = rank_metric.index.values[ind]
-            rdict['genes'] = ";".join([ g.strip() for g in _genes ])
+            rdict['genes'] = ";".join([ str(g).strip() for g in _genes ])
             
             if self.module != 'ssgsea':
                 # extract leading edge genes
