@@ -56,6 +56,7 @@ setup(name='gseapy',
       packages=['gseapy'],
       install_requires=[
           'numpy>=1.13.0',
+          'scipy',
           'pandas>=0.16',
           'matplotlib>=1.4.3',
           'beautifulsoup4>=4.4.1',
