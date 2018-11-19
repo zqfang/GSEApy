@@ -6,17 +6,19 @@ import sys, json, os, logging
 import requests
 import pandas as pd
 from io import StringIO
+from collections import OrderedDict
 from time import sleep
 from tempfile import TemporaryDirectory
 from gseapy.plot import barplot
 from gseapy.parser import get_library_name
 from gseapy.utils import *
+from gseapy.stats import calc_pvalues, multiple_testing_correction
 
 
 class Enrichr(object):
     """Enrichr API"""
-    def __init__(self, gene_list, gene_sets, descriptions='foo', 
-                 outdir='Enrichr', cutoff=0.05, format='pdf', 
+    def __init__(self, gene_list, gene_sets, descriptions='', 
+                 outdir='Enrichr', cutoff=0.05, background=None, format='pdf', 
                  figsize=(6.5,6), top_term=10, no_plot=False, verbose=False):
 
         self.gene_list=gene_list
@@ -32,7 +34,8 @@ class Enrichr(object):
         self.module="enrichr"
         self.res2d=None
         self._processes=1
-
+        self.background=background
+        self.alpha=0.05
         # init logger
         logfile = self.prepare_outdir()
         self._logger = log_init(outlog=logfile,
@@ -54,13 +57,37 @@ class Enrichr(object):
         return logfile
 
     def parse_genesets(self):
+        """parse gene_sets input file type"""
 
+        enrichr_library = get_library_name()
         if isinstance(self.gene_sets, list):
-            return  self.gene_sets
+            gss = self.gene_sets
         elif isinstance(self.gene_sets, str):
-            return self.gene_sets.split(",")
+            gss = self.gene_sets.split(",")
+        elif isinstance(self.gene_sets, dict):
+            gss = [self.gene_sets,]
         else:
             raise Exception("Error parsing enrichr libraries, please provided corrected one")
+        
+        # gss: a list contain .gmt, dict, enrichr_liraries.
+        # now, convert .gmt to dict
+        gss_exist = [] 
+        for g in gss:
+            if isinstance(g, dict): 
+                gss_exist.append(g)
+                continue
+
+            if isinstance(g, str): 
+                if g in enrichr_library: 
+                    gss_exist.append(g)
+                    continue
+                if g.lower().endswith(".gmt") and os.path.exists(g):
+                    self._logger.info("User Defined gene sets is given: %s"%g)
+                    with open(g) as genesets:
+                        g_dict = { line.strip().split("\t")[0]: line.strip().split("\t")[2:]
+                                        for line in genesets.readlines() }
+                    gss_exist.append(g_dict)
+        return gss_exist
 
     def parse_genelists(self):
         """parse gene list"""
@@ -84,8 +111,8 @@ class Enrichr(object):
                 for gene in f:
                     genes.append(gene.strip())
 
-        genes_str = '\n'.join(genes)
-        return genes_str
+        self.__gls = genes
+        return '\n'.join(genes)
 
     def send_genes(self, gene_list, url):
         """ send gene list to enrichr server"""
@@ -133,30 +160,61 @@ class Enrichr(object):
         res = pd.read_table(StringIO(response.content.decode('utf-8')))
         return [job_id['shortId'], res]
 
+    def enrich(self, gmt):
+        """use local mode
+         
+        p = p-value computed using the Fisher exact test (Hypergeomic test)    
+        combine score = log(p)·z
+        see here: http://amp.pharm.mssm.edu/Enrichr/help#background&q=4
+
+        columns should contain
+        Term Overlap P-value Adjusted P-value Z-score Combined Score Genes
+        """
+        bg = self.background
+        pvals, olsz, gsetsz, genes = list(calc_pvalues(query=self.__gls, 
+                                                       gene_sets=gmt, 
+                                                       background=bg))
+        fdrs, rej = multiple_testing_correction(ps = pvals, 
+                                                alpha=self.cutoff,
+                                                method='benjamini-hochberg')
+        # save to a dataframe
+        odict = OrderedDict()
+        odict['Term'] = sorted(gmt.keys())
+        odict['Overlap'] = list(map(lambda h,g: "%s/%s"%(h, g), olsz, gsetsz))
+        odict['P-value'] = pvals
+        odict['Adjusted P-value'] = fdrs
+        odict['Reject (FDR< %s)'%self.alpha ] = rej
+        odict['Genes'] = [";".join(g) for g in genes]
+        res = pd.DataFrame(odict)
+        return  res
+
     def run(self):
         """run enrichr for one sample gene list but multi-libraries"""
 
         # read input file
         genes_list = self.parse_genelists()
-        gss = unique(self.parse_genesets())
+        gss = self.parse_genesets()
+        # if gmt
         self._logger.info("Connecting to Enrichr Server to get latest library names")
-        # gss = self.gene_sets.split(",")
-        enrichr_library = get_library_name()
-        gss = [ g for g in gss if g in enrichr_library]
-        self._logger.info("Libraries are used: %s"%("',".join(gss)))
         if len(gss) < 1:
             sys.stderr.write("Not validated Enrichr library name provided\n")
             sys.stdout.write("Hint: use get_library_name() to view full list of supported names")
             sys.exit(1)
         self.results = pd.DataFrame()
-        for g in gss:
-            self._gs = str(g)
-            self._logger.debug("Start Enrichr using library: %s" % (self._gs))
-            self._logger.info('Analysis name: %s, Enrichr Library: %s' % (self.descriptions, self._gs))
 
-            shortID, res = self.get_results(genes_list)
-            # Remember gene set library used
-            res.insert(0,"Gene_set", self._gs)
+        for g in gss: 
+            if isinstance(g, dict): 
+                ## local mode
+                res = self.enrich(g)
+                shortID, self._gs = str(id(g)), "custom"
+            else:
+                ## online mode
+                self._gs = str(g)
+                self._logger.debug("Start Enrichr using library: %s" % (self._gs))
+                self._logger.info('Analysis name: %s, Enrichr Library: %s' % (self.descriptions, self._gs))
+                shortID, res = self.get_results(genes_list)
+                # Remember gene set library used
+            res.insert(0, "Gene_set", self._gs)
             # Append to master dataframe
             self.results = self.results.append(res, ignore_index=True)
             self.res2d = res
@@ -179,7 +237,8 @@ class Enrichr(object):
 
 
 def enrichr(gene_list, gene_sets, description='', outdir='Enrichr',
-            cutoff=0.05, format='pdf', figsize=(8,6), top_term=10, no_plot=False, verbose=False):
+            cutoff=0.05, backgroud=None, format='pdf', 
+            figsize=(8,6), top_term=10, no_plot=False, verbose=False):
     """Enrichr API.
 
     :param gene_list: Flat file with list of genes, one gene id per row, or a python list object
@@ -195,7 +254,7 @@ def enrichr(gene_list, gene_sets, description='', outdir='Enrichr',
     :return: An Enrichr object, which obj.res2d contains your enrichr query.
     """
     enr = Enrichr(gene_list, gene_sets, description, outdir,
-                  cutoff, format, figsize, top_term, no_plot, verbose)
+                  cutoff, background, format, figsize, top_term, no_plot, verbose)
     enr.run()
 
     return enr
