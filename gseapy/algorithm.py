@@ -7,6 +7,7 @@ import numpy as np
 from functools import reduce
 from multiprocessing import Pool
 from math import ceil
+from scipy.stats import hypergeom
 
 def enrichment_score(gene_list, correl_vector, gene_set, weighted_score_type=1, 
                      nperm=1000, rs=np.random.RandomState(), single=False, scale=False):
@@ -636,3 +637,4 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
     logging.debug("Statistical testing finished.............................")
 
     return zip(enrichment_scores, nEnrichmentScores, enrichmentPVals, fdrs)
+

@@ -11,7 +11,7 @@ import argparse as ap
 # or args = argparser.parse_args() will throw bugs!!!
 
 
-__version__ = '0.9.8'
+__version__ = '0.9.9'
 
 def main():
     """The Main function/pipeline for GSEApy."""
@@ -62,7 +62,8 @@ def main():
         # calling enrichr API
         from .enrichr import Enrichr
         enr = Enrichr(gene_list= args.gene_list, descriptions=args.descrip, gene_sets=args.library,
-                      outdir=args.outdir, format=args.format, cutoff=args.thresh, figsize=args.figsize,
+                      outdir=args.outdir, format=args.format, cutoff=args.thresh, 
+                      background=args.bg, figsize=args.figsize,
                       top_term=args.term, no_plot=args.noplot, verbose=args.verbose)
         enr.run()
     else:
@@ -279,6 +280,8 @@ def add_enrichr_parser(subparsers):
                               can be differentiated from each other if you choose to save or share your list.")
     enrichr_opt.add_argument("--cut", "--cut-off", action="store", dest="thresh", metavar='float', type=float, default=0.05,
                               help="Adjust-Pval cutoff, used for generating plots. Default: 0.05.")
+    enrichr_opt.add_argument("--bg", "--backgroud", action="store", dest="bg", type=int, default=20000, metavar='GENES',
+                              help="Background genes numbers. Default: 20000")
     enrichr_opt.add_argument("-t", "--top-term", dest="term", action="store", type=int, default=10, metavar='int',
                               help="Numbers of top terms showed in the plot. Default: 10")
     #enrichr_opt.add_argument("--scale", dest = "scale", action="store", type=float, default=0.5, metavar='float',
