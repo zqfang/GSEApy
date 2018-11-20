@@ -18,7 +18,7 @@ from gseapy.stats import calc_pvalues, multiple_testing_correction
 class Enrichr(object):
     """Enrichr API"""
     def __init__(self, gene_list, gene_sets, descriptions='', 
-                 outdir='Enrichr', cutoff=0.05, background=None, format='pdf', 
+                 outdir='Enrichr', cutoff=0.05, background=20000, format='pdf', 
                  figsize=(6.5,6), top_term=10, no_plot=False, verbose=False):
 
         self.gene_list=gene_list
@@ -237,7 +237,7 @@ class Enrichr(object):
 
 
 def enrichr(gene_list, gene_sets, description='', outdir='Enrichr',
-            cutoff=0.05, backgroud=None, format='pdf', 
+            cutoff=0.05, background=20000, format='pdf', 
             figsize=(8,6), top_term=10, no_plot=False, verbose=False):
     """Enrichr API.
 
@@ -245,7 +245,8 @@ def enrichr(gene_list, gene_sets, description='', outdir='Enrichr',
     :param gene_sets: Enrichr Library to query. Required enrichr library name(s). Separate each name by comma.
     :param description: name of analysis. optional.
     :param outdir: Output file directory
-    :param float cutoff: Adjust P-value cutoff, for plotting. Default: 0.05
+    :param float cutoff: Adjust P-value (benjamini-hochberg correction)cutoff. Default: 0.05
+    :param int background: Total number of Background genes. Default: 20000
     :param str format: Output figure format supported by matplotlib,('pdf','png','eps'...). Default: 'pdf'.
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. (width,height). Default: (6.5,6).
     :param bool no_plot: if equal to True, no figure will be draw. Default: False.

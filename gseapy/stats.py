@@ -7,15 +7,19 @@ import numpy as np
 from scipy.stats import hypergeom
 
 
-def calc_pvalues(query, gene_sets, background=None, **kwargs):
+def calc_pvalues(query, gene_sets, background=20000, **kwargs):
     """ calculate pvalues for all categories in the graph
 
     :param set query: set of identifiers for which the p value is calculated
     :param dict gene_sets: gmt file dict after background was set
-    :param set background: background genes. if None, background size eq to 20000.
-    :returns: pvalues, x (number of overlaps), n (legth of gene_set belongs to each terms)
+    :param set background: total number of genes in your background gene set.
+    :returns: pvalues
+              x: overlaped gene number
+              n:legth of gene_set belongs to each terms
+              hits: overlaped gene names.
 
-    For 2*2 contingency table, 
+
+    For 2*2 contingency table: 
     =============================================================================
                          |   in  query  |  not in query |    row total
     =>      in gene_set  |        a     |       b       |       a+b  
@@ -25,20 +29,20 @@ def calc_pvalues(query, gene_sets, background=None, **kwargs):
     backgroud genes number = a + b + c + d.
 
     Then, in R
-        x=a     the number of white balls drawn without replacement from an urn which contains both black and white balls.
+        x=a     the number of white balls drawn without replacement 
+                from an urn which contains both black and white balls.
         m=a+b   the number of white balls in the urn    
         n=c+d   the number of black balls in the urn    
         k=a+c   the number of balls drawn from the urn  
    
     In Scipy:
-    for args in scipy.hypergeom.sf:
-        hypergeom.sf(k, M, n, N, loc=0)
-        M: is the total number of objects, 
-        n: is total number of Type I objects. 
+    for args in scipy.hypergeom.sf(k, M, n, N, loc=0):
+        M: the total number of objects, 
+        n: the total number of Type I objects. 
         k: the random variate represents the number of Type I objects in N drawn 
-        without replacement from the total population.
+           without replacement from the total population.
     
-    These two are same:
+    Therefore, these two fuction are same when using parameters from 2*2 table:
     R:     >   phyper(x-1, m, n, k, lower.tail=FALSE)
     Scipy: >>> hypergeom.sf(x-1, m+n, m, k)
      
@@ -46,8 +50,6 @@ def calc_pvalues(query, gene_sets, background=None, **kwargs):
 
     # number of genes in your query data
     k = len(query) 
-    # background size, total number of genes in your background gene data, usally 20,000 for humman
-    bg_num = 20000 if background is None else background
     query = set(query)
     vals = []
     subsets = sorted(gene_sets.keys())
@@ -57,7 +59,7 @@ def calc_pvalues(query, gene_sets, background=None, **kwargs):
         m = len(category)
         hits = query.intersection(set(category))
         x = len(hits)
-        vals.append((hypergeom.sf(x-1, bg_num, m, k), x, m, hits))
+        vals.append((hypergeom.sf(x-1, background, m, k), x, m, hits))
     return zip(*vals)
 
 def _ecdf(x):
@@ -65,7 +67,9 @@ def _ecdf(x):
     return np.arange(1,nobs+1)/float(nobs)
 
 def fdrcorrection(pvals, alpha=0.05):
-    """ benjamini hocheberg fdr correction. inspired by statsmodels """
+    """ benjamini hocheberg fdr correction. inspired by statsmodels 
+    """
+    # Implement copy from GOATools.
     pvals = np.asarray(pvals)
     pvals_sortind = np.argsort(pvals)
     pvals_sorted = np.take(pvals, pvals_sortind)
@@ -94,6 +98,7 @@ def multiple_testing_correction(ps, alpha=0.05, method='benjamini-hochberg', **k
     :param method: multiple testing correction method [bonferroni|benjamini-hochberg]
     :returns (q, rej): two lists of q-values and rejected nodes
     """
+    # Implement copy from GOATools.
     _p = np.array(ps)
     q = _p.copy()
     rej = _p.copy()
