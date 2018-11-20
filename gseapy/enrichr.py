@@ -7,6 +7,7 @@ import requests
 import pandas as pd
 from io import StringIO
 from collections import OrderedDict
+from functools import reduce
 from time import sleep
 from tempfile import TemporaryDirectory
 from gseapy.plot import barplot
@@ -18,7 +19,7 @@ from gseapy.stats import calc_pvalues, multiple_testing_correction
 class Enrichr(object):
     """Enrichr API"""
     def __init__(self, gene_list, gene_sets, descriptions='', 
-                 outdir='Enrichr', cutoff=0.05, background=20000, format='pdf', 
+                 outdir='Enrichr', cutoff=0.05, background=None, format='pdf', 
                  figsize=(6.5,6), top_term=10, no_plot=False, verbose=False):
 
         self.gene_list=gene_list
@@ -35,7 +36,6 @@ class Enrichr(object):
         self.res2d=None
         self._processes=1
         self.background=background
-        self.alpha=0.05
         # init logger
         logfile = self.prepare_outdir()
         self._logger = log_init(outlog=logfile,
@@ -170,16 +170,18 @@ class Enrichr(object):
         columns should contain
         Term Overlap P-value Adjusted P-value Z-score Combined Score Genes
         """
-        bg = self.background
-        pvals, olsz, gsetsz, genes = list(calc_pvalues(query=self.__gls, 
-                                                       gene_sets=gmt, 
-                                                       background=bg))
+        
+        if self.background is None: 
+            self.background = set(reduce(lambda x,y: x+y, gmt.values(),[]))  
+        terms, pvals, olsz, gsetsz, genes = list(calc_pvalues(query=self.__gls, 
+                                                              gene_sets=gmt, 
+                                                              background=self.background))
         fdrs, rej = multiple_testing_correction(ps = pvals, 
                                                 alpha=self.cutoff,
                                                 method='benjamini-hochberg')
         # save to a dataframe
         odict = OrderedDict()
-        odict['Term'] = sorted(gmt.keys())
+        odict['Term'] = terms
         odict['Overlap'] = list(map(lambda h,g: "%s/%s"%(h, g), olsz, gsetsz))
         odict['P-value'] = pvals
         odict['Adjusted P-value'] = fdrs
@@ -237,7 +239,7 @@ class Enrichr(object):
 
 
 def enrichr(gene_list, gene_sets, description='', outdir='Enrichr',
-            cutoff=0.05, background=20000, format='pdf', 
+            cutoff=0.05, background=None, format='pdf', 
             figsize=(8,6), top_term=10, no_plot=False, verbose=False):
     """Enrichr API.
 
@@ -246,13 +248,14 @@ def enrichr(gene_list, gene_sets, description='', outdir='Enrichr',
     :param description: name of analysis. optional.
     :param outdir: Output file directory
     :param float cutoff: Adjust P-value (benjamini-hochberg correction)cutoff. Default: 0.05
-    :param int background: Total number of Background genes. Default: 20000
+    :param int background: Total number of unique genes which are found in gene_sets.
+                           You could also specify a number by yourself, e.g. total expressed genes number.
     :param str format: Output figure format supported by matplotlib,('pdf','png','eps'...). Default: 'pdf'.
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. (width,height). Default: (6.5,6).
     :param bool no_plot: if equal to True, no figure will be draw. Default: False.
     :param bool verbose: Increase output verbosity, print out progress of your job, Default: False.
 
-    :return: An Enrichr object, which obj.res2d contains your enrichr query.
+    :return: An Enrichr object, which obj.res2d stores your last query, obj.results stores your all queries.
     """
     enr = Enrichr(gene_list, gene_sets, description, outdir,
                   cutoff, background, format, figsize, top_term, no_plot, verbose)

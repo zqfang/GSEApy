@@ -12,7 +12,7 @@ def calc_pvalues(query, gene_sets, background=20000, **kwargs):
 
     :param set query: set of identifiers for which the p value is calculated
     :param dict gene_sets: gmt file dict after background was set
-    :param set background: total number of genes in your background gene set.
+    :param set background: total number of genes in your annoated database.
     :returns: pvalues
               x: overlaped gene number
               n:legth of gene_set belongs to each terms
@@ -24,7 +24,7 @@ def calc_pvalues(query, gene_sets, background=20000, **kwargs):
                          |   in  query  |  not in query |    row total
     =>      in gene_set  |        a     |       b       |       a+b  
     =>  not in gene_set  |        c     |       d       |       c+d  
-           column total                                 | a+b+c+d = genome
+           column total                                 | a+b+c+d = anno database
     =============================================================================
     backgroud genes number = a + b + c + d.
 
@@ -52,14 +52,26 @@ def calc_pvalues(query, gene_sets, background=20000, **kwargs):
     k = len(query) 
     query = set(query)
     vals = []
+    # background should be all genes in annotated database
+    # such as go, kegg et.al.
+    if isinstance(background, set): 
+        bg = len(background) # total number in your annotated database 
+        # filter genes that not found in annotated database
+        query = query.intersection(background)
+    elif isinstance(background, int):
+        bg = background
+    else:
+        raise ValueError("backgroud should be set or int object")
+    # pval
     subsets = sorted(gene_sets.keys())
-
     for s in subsets:
         category = gene_sets.get(s)
         m = len(category)
         hits = query.intersection(set(category))
         x = len(hits)
-        vals.append((hypergeom.sf(x-1, background, m, k), x, m, hits))
+        # pVal = hypergeom.sf(hitCount-1,popTotal,bgHits,queryTotal) 
+        # p(X >= hitCounts)
+        vals.append(s, hypergeom.sf(x-1, bg, m, k), x, m, hits)
     return zip(*vals)
 
 def _ecdf(x):
