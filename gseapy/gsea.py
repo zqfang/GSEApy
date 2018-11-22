@@ -222,40 +222,38 @@ class GSEAbase(object):
             :param data: preprocessed expression table
 
         """
-        # pool_heat = Pool(self._processes)
+        
         # no values need to be returned
         if self._outdir is None: return
         #Plotting
         top_term = self.res2d.index[:graph_num]
-
         # multi-threading
-        # pool = Pool(processes=self._processes)
+        pool = Pool(self._processes)
         for gs in top_term:
             hit = results.get(gs)['hits_indices']
             NES = 'nes' if self.module != 'ssgsea' else 'es'
             term = gs.replace('/','_').replace(":","_")
             outfile = '{0}/{1}.{2}.{3}'.format(self.outdir, term, self.module, self.format)
-            gseaplot(rank_metric=rank_metric, term=term, hits_indices=hit,
-                      nes=results.get(gs)[NES], pval=results.get(gs)['pval'], 
-                      fdr=results.get(gs)['fdr'], RES=results.get(gs)['RES'],
-                      pheno_pos=pheno_pos, pheno_neg=pheno_neg, figsize=figsize,
-                      ofname=outfile)
-            # pool.apply_async(gseaplot, args=(rank_metric, term, hit, results.get(gs)[NES],
-            #                                   results.get(gs)['pval'],results.get(gs)['fdr'],
-            #                                   results.get(gs)['RES'],
-            #                                   pheno_pos, pheno_neg, figsize, outfile))
-            #                                   
-        # pool.close()
-        # pool.join()
-            
+            # gseaplot(rank_metric=rank_metric, term=term, hits_indices=hit,
+            #           nes=results.get(gs)[NES], pval=results.get(gs)['pval'], 
+            #           fdr=results.get(gs)['fdr'], RES=results.get(gs)['RES'],
+            #           pheno_pos=pheno_pos, pheno_neg=pheno_neg, figsize=figsize,
+            #           ofname=outfile)
+            pool.apply_async(gseaplot, args=(rank_metric, term, hit, results.get(gs)[NES],
+                                              results.get(gs)['pval'],results.get(gs)['fdr'],
+                                              results.get(gs)['RES'],
+                                              pheno_pos, pheno_neg, 
+                                              figsize, 'seismic', outfile))
             if self.module == 'gsea':
                 outfile2 = "{0}/{1}.heatmap.{2}".format(self.outdir, term, self.format)
-                # pool_heat.apply_async(heatmap, args=(datAB.iloc[hit], term, outfile 0,
-                #                                     (width, len(hit)/2), ))
-                heatmap(df=self.heatmat.iloc[hit, :], title=term, ofname=outfile2, 
-                        z_score=0, figsize=(self._width, len(hit)/2))
-            # pool_heat.close()
-            # pool_heat.join()
+                # heatmap(df=self.heatmat.iloc[hit, :], title=term, ofname=outfile2, 
+                #         z_score=0, figsize=(self._width, len(hit)/2))
+                pool.apply_async(heatmap, args=(self.heatmat.iloc[hit, :], 0, term, 
+                                               (self._width, len(hit)/2), 'RdBu_r',
+                                                True, True, outfile2))
+        pool.close()
+        pool.join()
+
        
     def _save_results(self, zipdata, outdir, module, gmt, rank_metric, permutation_type):
         """reformat gsea results, and save to txt"""
