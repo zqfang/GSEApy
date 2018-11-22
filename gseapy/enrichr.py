@@ -163,7 +163,7 @@ class Enrichr(object):
     def enrich(self, gmt):
         """use local mode
          
-        p = p-value computed using the Fisher exact test (Hypergeomic test)    
+        p = p-value computed using the Fisher exact test (Hypergeometric test)    
         combine score = log(p)·z
         see here: http://amp.pharm.mssm.edu/Enrichr/help#background&q=4
 
@@ -172,7 +172,9 @@ class Enrichr(object):
         """
         
         if self.background is None: 
-            self.background = set(reduce(lambda x,y: x+y, gmt.values(),[]))  
+            self.background = set(reduce(lambda x,y: x+y, gmt.values(),[]))
+            self._logger.warning("Backgroud genes used: All genes in your gmt file."+\
+                                 "If this is not you wanted, please input a number for backgroud argument") 
         terms, pvals, olsz, gsetsz, genes = list(calc_pvalues(query=self.__gls, 
                                                               gene_sets=gmt, 
                                                               background=self.background))
