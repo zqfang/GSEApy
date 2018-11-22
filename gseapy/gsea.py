@@ -230,7 +230,6 @@ class GSEAbase(object):
 
         # multi-threading
         # pool = Pool(processes=self._processes)
-
         for gs in top_term:
             hit = results.get(gs)['hits_indices']
             NES = 'nes' if self.module != 'ssgsea' else 'es'
@@ -253,7 +252,7 @@ class GSEAbase(object):
                 outfile2 = "{0}/{1}.heatmap.{2}".format(self.outdir, term, self.format)
                 # pool_heat.apply_async(heatmap, args=(datAB.iloc[hit], term, outfile 0,
                 #                                     (width, len(hit)/2), ))
-                heatmap(df=self.heatmat, title=term, ofname=outfile2, 
+                heatmap(df=self.heatmat.iloc[hit, :], title=term, ofname=outfile2, 
                         z_score=0, figsize=(self._width, len(hit)/2))
             # pool_heat.close()
             # pool_heat.join()
