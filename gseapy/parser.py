@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import sys, logging, json
+import sys, logging, json, os
 import requests
 from io import StringIO
+
 from numpy import in1d
 from pandas import read_table, DataFrame
 from requests.packages.urllib3.util.retry import Retry
@@ -196,14 +197,15 @@ def get_mart(dataset='hsapiens_gene_ensembl', attributes=[],
     
     # init
     bm = BioMart(verbose=False, host=host)
-    i=0
-    while bm.host: 
-        bm.host = hosts[i]
-        i+=1
+    # i=0
+    # while bm.host: 
+    #     if i >= 3: break
+    #     bm.host = hosts[i]
+    #     i+=1
     # start query online
     bm.new_query()
     bm.add_dataset_to_xml(dataset)
-    for at in attribute:
+    for at in attributes:
         bm.add_attribute_to_xml(at)
     #bm.add_filter_to_xml('with_entrezgene',[])
     #bm.add_filter_to_xml('with_go',[]) # or 'go'
@@ -213,7 +215,7 @@ def get_mart(dataset='hsapiens_gene_ensembl', attributes=[],
     df = read_table(StringIO(results), header=None, names=['gene_name', 'entrez','go_id'])
     # save file to cache path.
     if filename is None: 
-        mkdirs(default_cache_path)
-        filename = path_join(default_cache_path, "{}.backgroud.genes.txt".format(dataset))
+        mkdirs(DEFAULT_CACHE_PATH)
+        filename = os.path.join(DEFAULT_CACHE_PATH, "{}.backgroud.genes.txt".format(dataset))
     df.to_csv(filename, sep="\t")
     return df
