@@ -3,8 +3,9 @@ import os, errno, logging
 import requests
 from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
+from os.path import expanduser, join as path_join
 
-
+DEFAULT_CACHE_PATH = path_join(expanduser("~"), ".gseapy")
 # CONSTANT
 DEFAULT_LIBRARY=['GO_Biological_Process_2013',
 				 'GO_Biological_Process_2015',
@@ -112,3 +113,11 @@ def retry(num=5):
     s.mount('http://', HTTPAdapter(max_retries=retries))
 
     return s
+
+
+
+
+
+
+
+

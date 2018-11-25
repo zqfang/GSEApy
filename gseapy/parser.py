@@ -2,13 +2,13 @@
 
 import sys, logging, json
 import requests
-
+from io import StringIO
 from numpy import in1d
 from pandas import read_table, DataFrame
-from gseapy.utils import unique, DEFAULT_LIBRARY
 from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
-
+from bioservices import BioMart, BioServicesError
+from gseapy.utils import unique, DEFAULT_LIBRARY, DEFAULT_CACHE_PATH, mkdirs
 
 def gsea_cls_parser(cls):
     """Extract class(phenotype) name from .cls file.
@@ -165,3 +165,55 @@ def get_library_name():
     libs = [lib['libraryName'] for lib in libs_json['statistics']]
 
     return sorted(libs)
+
+def get_mart(dataset='hsapiens_gene_ensembl', attributes=[], 
+             filters=[], filename=None, host="www.ensemble.org"):
+    """mapping ids using BioMart. A wrapper of BioMart() from bioseverices 
+
+    :param dataset: str, default: 'hsapiens_gene_ensembl' 
+    :param attributes: str, list, tuple
+    :param filters: str, list, tuple
+    :param host: www.ensemble.org, asia.ensembl.org, useast.ensembl.org
+    :return: a dataframe contains all attributes you selected.
+
+    **Note**: it wil take a couple of minutes to get the results.
+
+    How to see validated dataset, attributes, filters:
+    example:
+
+        >>> from bioservices import BioMart 
+        >>> bm = BioMart(verbose=False, host="asia.ensembl.org")
+        >>> b.valid_attributes ## view validated datasets, select one from dict values
+        >>> bm.dataset('hsapiens_gene_ensembl') # set dataset
+        >>> bm.attributes('hsapiens_gene_ensembl') # view validated attrs after dataset was set
+        >>> bm.filters('hsapiens_gene_ensembl') # view validated filters after dataset was set
+    
+    
+    """
+    hosts=["www.ensemble.org", "asia.ensembl.org", "useast.ensembl.org"]
+    if attributes: 
+        attributes = ['ensembl_gene_id', 'hgnc_symbol', 'entrezgene', 'go_id']
+    
+    # init
+    bm = BioMart(verbose=False, host=host)
+    i=0
+    while bm.host: 
+        bm.host = hosts[i]
+        i+=1
+    # start query online
+    bm.new_query()
+    bm.add_dataset_to_xml(dataset)
+    for at in attribute:
+        bm.add_attribute_to_xml(at)
+    #bm.add_filter_to_xml('with_entrezgene',[])
+    #bm.add_filter_to_xml('with_go',[]) # or 'go'
+    #bm.add_filter_to_xml('with_hgnc',[]) # or 'hgnc_symbol'
+    xml_query = bm.get_xml()
+    results = bm.query(xml_query)
+    df = read_table(StringIO(results), header=None, names=['gene_name', 'entrez','go_id'])
+    # save file to cache path.
+    if filename is None: 
+        mkdirs(default_cache_path)
+        filename = path_join(default_cache_path, "{}.backgroud.genes.txt".format(dataset))
+    df.to_csv(filename, sep="\t")
+    return df
