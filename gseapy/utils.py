@@ -6,35 +6,6 @@ from requests.adapters import HTTPAdapter
 from os.path import expanduser
 
 DEFAULT_CACHE_PATH = os.path.join(expanduser("~"), ".gseapy")
-# CONSTANT
-DEFAULT_LIBRARY=['GO_Biological_Process_2013',
-				 'GO_Biological_Process_2015',
-				 'GO_Cellular_Component_2013',
-				 'GO_Cellular_Component_2015',
-				 'GO_Molecular_Function_2013',
-				 'GO_Molecular_Function_2015',
-				 'GeneSigDB',
-				 'HumanCyc_2015',
-				 'Human_Gene_Atlas',
-				 'Human_Phenotype_Ontology',
-				 'Humancyc_2016',
-				 'KEGG_2013',
-				 'KEGG_2015',
-				 'KEGG_2016',
-				 'MGI_Mammalian_Phenotype_2013',
-				 'MGI_Mammalian_Phenotype_Level_3',
-				 'MGI_Mammalian_Phenotype_Level_4',
-				 'MSigDB_Computational',
-				 'MSigDB_Oncogenic_Signatures',
-				 'Mouse_Gene_Atlas',
-				 'Panther_2015',
-				 'Panther_2016',
-				 'Reactome_2013',
-				 'Reactome_2015',
-				 'Reactome_2016',
-				 'WikiPathways_2013',
-				 'WikiPathways_2015',
-				 'WikiPathways_2016']
 
 def unique(seq):
     """Remove duplicates from a list in Python while preserving order.
@@ -114,7 +85,35 @@ def retry(num=5):
 
     return s
 
-
+# CONSTANT
+DEFAULT_LIBRARY=['GO_Biological_Process_2013',
+				 'GO_Biological_Process_2015',
+				 'GO_Cellular_Component_2013',
+				 'GO_Cellular_Component_2015',
+				 'GO_Molecular_Function_2013',
+				 'GO_Molecular_Function_2015',
+				 'GeneSigDB',
+				 'HumanCyc_2015',
+				 'Human_Gene_Atlas',
+				 'Human_Phenotype_Ontology',
+				 'Humancyc_2016',
+				 'KEGG_2013',
+				 'KEGG_2015',
+				 'KEGG_2016',
+				 'MGI_Mammalian_Phenotype_2013',
+				 'MGI_Mammalian_Phenotype_Level_3',
+				 'MGI_Mammalian_Phenotype_Level_4',
+				 'MSigDB_Computational',
+				 'MSigDB_Oncogenic_Signatures',
+				 'Mouse_Gene_Atlas',
+				 'Panther_2015',
+				 'Panther_2016',
+				 'Reactome_2013',
+				 'Reactome_2015',
+				 'Reactome_2016',
+				 'WikiPathways_2013',
+				 'WikiPathways_2015',
+				 'WikiPathways_2016']
 
 
 

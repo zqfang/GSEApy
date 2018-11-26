@@ -280,8 +280,8 @@ def add_enrichr_parser(subparsers):
                               can be differentiated from each other if you choose to save or share your list.")
     enrichr_opt.add_argument("--cut", "--cut-off", action="store", dest="thresh", metavar='float', type=float, default=0.05,
                               help="Adjust-Pval cutoff, used for generating plots. Default: 0.05.")
-    enrichr_opt.add_argument("--bg", "--backgroud", action="store", dest="bg", type=int, default=None, metavar='GENES',
-                              help="Background genes numbers. Default: None")
+    enrichr_opt.add_argument("--bg", "--backgroud", action="store", dest="bg",default='hsapiens_gene_ensembl', metavar='GENES',
+                              help="BioMart Dataset name or Background total genes number. Default: None")
     enrichr_opt.add_argument("-t", "--top-term", dest="term", action="store", type=int, default=10, metavar='int',
                               help="Numbers of top terms showed in the plot. Default: 10")
     #enrichr_opt.add_argument("--scale", dest = "scale", action="store", type=float, default=0.5, metavar='float',

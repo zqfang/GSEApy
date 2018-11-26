@@ -171,13 +171,13 @@ def get_mart(dataset='hsapiens_gene_ensembl', attributes=[],
              filters=[], filename=None, host="www.ensemble.org"):
     """mapping ids using BioMart. A wrapper of BioMart() from bioseverices 
 
-    :param dataset: str, default: 'hsapiens_gene_ensembl' 
+    :param dataset: str, default: 'hsapiens_gene_ensembl'
     :param attributes: str, list, tuple
     :param filters: str, list, tuple
     :param host: www.ensemble.org, asia.ensembl.org, useast.ensembl.org
     :return: a dataframe contains all attributes you selected.
 
-    **Note**: it wil take a couple of minutes to get the results.
+    **Note**: it will take a couple of minutes to get the results.
 
     How to see validated dataset, attributes, filters:
     example:
@@ -185,25 +185,20 @@ def get_mart(dataset='hsapiens_gene_ensembl', attributes=[],
         >>> from bioservices import BioMart 
         >>> bm = BioMart(verbose=False, host="asia.ensembl.org")
         >>> b.valid_attributes ## view validated datasets, select one from dict values
-        >>> bm.dataset('hsapiens_gene_ensembl') # set dataset
+        >>> bm.add_dataset_to_xml('hsapiens_gene_ensembl') # set dataset
         >>> bm.attributes('hsapiens_gene_ensembl') # view validated attrs after dataset was set
         >>> bm.filters('hsapiens_gene_ensembl') # view validated filters after dataset was set
     
     
     """
-    hosts=["www.ensemble.org", "asia.ensembl.org", "useast.ensembl.org"]
-    if attributes: 
-        attributes = ['ensembl_gene_id', 'hgnc_symbol', 'entrezgene', 'go_id']
+    # hosts=["www.ensemble.org", "asia.ensembl.org", "useast.ensembl.org"]
+    if not attributes: 
+        attributes = ['ensembl_gene_id', 'external_gene_name', 'entrezgene', 'go_id']
     
     # init
     bm = BioMart(verbose=False, host=host)
-    # i=0
-    # while bm.host: 
-    #     if i >= 3: break
-    #     bm.host = hosts[i]
-    #     i+=1
-    # start query online
     bm.new_query()
+    # 'mmusculus_gene_ensembl'
     bm.add_dataset_to_xml(dataset)
     for at in attributes:
         bm.add_attribute_to_xml(at)
@@ -212,10 +207,16 @@ def get_mart(dataset='hsapiens_gene_ensembl', attributes=[],
     #bm.add_filter_to_xml('with_hgnc',[]) # or 'hgnc_symbol'
     xml_query = bm.get_xml()
     results = bm.query(xml_query)
-    df = read_table(StringIO(results), header=None, names=['gene_name', 'entrez','go_id'])
+    df = read_table(StringIO(results), header=None, names=['gene_name', 'entrez_id','go_id'])
+    # save genes with entrez and go id
+    # df.dropna(inplace=True)
     # save file to cache path.
+    df.dropna(subset=['entrez_id'], inplace=True)
+    df['entrez'] = df.entrez.astype(int)
+    df.index.name = 'gene_id'
     if filename is None: 
         mkdirs(DEFAULT_CACHE_PATH)
-        filename = os.path.join(DEFAULT_CACHE_PATH, "{}.backgroud.genes.txt".format(dataset))
+        filename = os.path.join(DEFAULT_CACHE_PATH, "{}.background.genes.txt".format(dataset))
     df.to_csv(filename, sep="\t")
     return df
+

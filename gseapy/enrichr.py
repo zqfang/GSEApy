@@ -11,16 +11,17 @@ from functools import reduce
 from time import sleep
 from tempfile import TemporaryDirectory
 from gseapy.plot import barplot
-from gseapy.parser import get_library_name
+from gseapy.parser import get_library_name, get_mart
 from gseapy.utils import *
 from gseapy.stats import calc_pvalues, multiple_testing_correction
 
 
 class Enrichr(object):
     """Enrichr API"""
-    def __init__(self, gene_list, gene_sets, descriptions='', 
-                 outdir='Enrichr', cutoff=0.05, background=None, format='pdf', 
-                 figsize=(6.5,6), top_term=10, no_plot=False, verbose=False):
+    def __init__(self, gene_list, gene_sets, descriptions='', outdir='Enrichr', 
+                 cutoff=0.05, background='hsapiens_gene_ensembl', 
+                 format='pdf', figsize=(6.5,6), top_term=10, no_plot=False, 
+                 verbose=False):
 
         self.gene_list=gene_list
         self.gene_sets=gene_sets
@@ -63,9 +64,9 @@ class Enrichr(object):
         if isinstance(self.gene_sets, list):
             gss = self.gene_sets
         elif isinstance(self.gene_sets, str):
-            gss = self.gene_sets.split(",")
+            gss = [ g.strip() for g in self.gene_sets.strip().split(",") ]
         elif isinstance(self.gene_sets, dict):
-            gss = [self.gene_sets,]
+            gss = [self.gene_sets]
         else:
             raise Exception("Error parsing enrichr libraries, please provided corrected one")
         
@@ -92,7 +93,7 @@ class Enrichr(object):
     def parse_genelists(self):
         """parse gene list"""
         if isinstance(self.gene_list, list):
-            genes = [str(gene) for gene in self.gene_list]
+            genes = self.gene_list
         elif isinstance(self.gene_list, pd.DataFrame):
             # input type is bed file
             if self.gene_list.shape[1] >=3:
@@ -111,7 +112,10 @@ class Enrichr(object):
                 for gene in f:
                     genes.append(gene.strip())
 
-        self.__gls = genes
+        self._isezid = all(map(self._is_entrez_id, genes))
+        if self._isezid: 
+            self._gls = set(map(int, self._gls))
+
         return '\n'.join(genes)
 
     def send_genes(self, gene_list, url):
@@ -160,22 +164,55 @@ class Enrichr(object):
         res = pd.read_table(StringIO(response.content.decode('utf-8')))
         return [job_id['shortId'], res]
 
+    def _is_entrez_id(self, idx):
+        try:
+            int(idx)
+            return True
+        except:
+            return False   
+
+    def get_background(self):
+        """get background gene"""
+        filename = os.path.join(DEFAULT_CACHE_PATH, "{}.background.genes.txt".format(self.background))
+        if os.path.exists(filename):
+            df = pd.read_table(filename)
+        else:
+            self._logger.warning("Downloading %s for the first time. It might take a couple of miniutes."%self.background)
+            df = get_mart(dataset=self.background)
+        self._logger.info("using all annotated genes with GO_ID as background genes")
+        df.dropna(subset='go_id', inplace=True)     
+        self._background = df
+        return
+
     def enrich(self, gmt):
         """use local mode
          
-        p = p-value computed using the Fisher exact test (Hypergeometric test)    
-        combine score = log(p)·z
-        see here: http://amp.pharm.mssm.edu/Enrichr/help#background&q=4
+        p = p-value computed using the Fisher exact test (Hypergeometric test)  
 
-        columns should contain
-        Term Overlap P-value Adjusted P-value Z-score Combined Score Genes
-        """
+        Not implemented here:
+
+            combine score = log(p)·z
+
+        see here: http://amp.pharm.mssm.edu/Enrichr/help#background&q=4
         
-        if self.background is None: 
-            self.background = set(reduce(lambda x,y: x+y, gmt.values(),[]))
-            self._logger.warning("Backgroud genes used: All genes in your gmt file."+\
-                                 "If this is not you wanted, please input a number for backgroud argument") 
-        terms, pvals, olsz, gsetsz, genes = list(calc_pvalues(query=self.__gls, 
+        columns contain:
+            
+            Term Overlap P-value Adjusted_P-value Genes
+
+        """
+        if isinstance(self.background, str): 
+            # self.background = set(reduce(lambda x,y: x+y, gmt.values(),[]))
+            self.get_background()
+            # input id type: entrez or gene_name
+            if self._isezid:
+                bg = self._background['entrez_id'].astype(int) 
+            else:
+                bg = self._background['gene_name']
+
+            self.background = set(bg)
+            self._logger.warning("Backgroud genes used: all entrz genes with GO_IDs."+\
+                                 "If this is not you wanted, please give a number to background argument") 
+        terms, pvals, olsz, gsetsz, genes = list(calc_pvalues(query=self._gls, 
                                                               gene_sets=gmt, 
                                                               background=self.background))
         fdrs, rej = multiple_testing_correction(ps = pvals, 
@@ -240,8 +277,8 @@ class Enrichr(object):
         return
 
 
-def enrichr(gene_list, gene_sets, description='', outdir='Enrichr',
-            cutoff=0.05, background=None, format='pdf', 
+def enrichr(gene_list, gene_sets, description='', outdir='Enrichr', cutoff=0.05, 
+            background='hsapiens_gene_ensembl', format='pdf', 
             figsize=(8,6), top_term=10, no_plot=False, verbose=False):
     """Enrichr API.
 
@@ -250,14 +287,22 @@ def enrichr(gene_list, gene_sets, description='', outdir='Enrichr',
     :param description: name of analysis. optional.
     :param outdir: Output file directory
     :param float cutoff: Adjust P-value (benjamini-hochberg correction)cutoff. Default: 0.05
-    :param int background: Total number of unique genes which are found in gene_sets.
+    :param int background: BioMart dataset name which contains all genes with go_ids. 
                            You could also specify a number by yourself, e.g. total expressed genes number.
+    
+    use the code below to see validated background dataset name for BioMart.
+
+        >>> from bioservices import BioMart 
+        >>> bm = BioMart(verbose=False, host="www.ensembl.org")
+        >>> b.valid_attributes ## view validated datasets, select one from dict values
+
     :param str format: Output figure format supported by matplotlib,('pdf','png','eps'...). Default: 'pdf'.
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. (width,height). Default: (6.5,6).
     :param bool no_plot: if equal to True, no figure will be draw. Default: False.
     :param bool verbose: Increase output verbosity, print out progress of your job, Default: False.
 
     :return: An Enrichr object, which obj.res2d stores your last query, obj.results stores your all queries.
+    
     """
     enr = Enrichr(gene_list, gene_sets, description, outdir,
                   cutoff, background, format, figsize, top_term, no_plot, verbose)
