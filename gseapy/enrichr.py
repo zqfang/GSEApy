@@ -8,6 +8,7 @@ import pandas as pd
 from io import StringIO
 from collections import OrderedDict
 from functools import reduce
+from pkg_resources import resource_filename
 from time import sleep
 from tempfile import TemporaryDirectory
 from gseapy.plot import barplot
@@ -173,9 +174,12 @@ class Enrichr(object):
 
     def get_background(self):
         """get background gene"""
+        DB_FILE = resource_filename("gseapy","data/{}.background.genes.txt".format(self.background))
         filename = os.path.join(DEFAULT_CACHE_PATH, "{}.background.genes.txt".format(self.background))
         if os.path.exists(filename):
             df = pd.read_table(filename)
+        elif os.path.exists(DB_FILE):
+            df = pd.read_table(DB_FILE)
         else:
             self._logger.warning("Downloading %s for the first time. It might take a couple of miniutes."%self.background)
             df = get_mart(dataset=self.background)

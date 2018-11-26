@@ -54,8 +54,8 @@ setup(name='gseapy',
       author_email='fzq518@gmail.com',
       license='MIT',
       packages=['gseapy'],
-      # package_data={'gseapy': ["data/*.txt"],}
-      # include_package_data=True,
+      package_data={'gseapy': ["data/*.txt"],},
+      include_package_data=True,
       install_requires=[
                         'numpy>=1.13.0',
                         'scipy',

@@ -184,7 +184,7 @@ def get_mart(dataset='hsapiens_gene_ensembl', attributes=[],
 
         >>> from bioservices import BioMart 
         >>> bm = BioMart(verbose=False, host="asia.ensembl.org")
-        >>> b.valid_attributes ## view validated datasets, select one from dict values
+        >>> bm.valid_attributes ## view validated datasets, select one from dict values
         >>> bm.add_dataset_to_xml('hsapiens_gene_ensembl') # set dataset
         >>> bm.attributes('hsapiens_gene_ensembl') # view validated attrs after dataset was set
         >>> bm.filters('hsapiens_gene_ensembl') # view validated filters after dataset was set
@@ -212,7 +212,7 @@ def get_mart(dataset='hsapiens_gene_ensembl', attributes=[],
     # df.dropna(inplace=True)
     # save file to cache path.
     df.dropna(subset=['entrez_id'], inplace=True)
-    df['entrez'] = df.entrez.astype(int)
+    df['entrez_id'] = df.entrez_id.astype(int)
     df.index.name = 'gene_id'
     if filename is None: 
         mkdirs(DEFAULT_CACHE_PATH)
