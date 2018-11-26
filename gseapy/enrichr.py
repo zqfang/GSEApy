@@ -298,7 +298,7 @@ def enrichr(gene_list, gene_sets, description='', outdir='Enrichr', cutoff=0.05,
 
         >>> from bioservices import BioMart 
         >>> bm = BioMart(verbose=False, host="www.ensembl.org")
-        >>> b.valid_attributes ## view validated datasets, select one from dict values
+        >>> bm.valid_attributes ## view validated datasets, select one from dict values
 
     :param str format: Output figure format supported by matplotlib,('pdf','png','eps'...). Default: 'pdf'.
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. (width,height). Default: (6.5,6).
