@@ -71,7 +71,7 @@ def calc_pvalues(query, gene_sets, background=20000, **kwargs):
         x = len(hits)
         # pVal = hypergeom.sf(hitCount-1,popTotal,bgHits,queryTotal) 
         # p(X >= hitCounts)
-        vals.append(s, hypergeom.sf(x-1, bg, m, k), x, m, hits)
+        vals.append((s, hypergeom.sf(x-1, bg, m, k), x, m, hits))
     return zip(*vals)
 
 def _ecdf(x):

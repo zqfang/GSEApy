@@ -116,6 +116,8 @@ class Enrichr(object):
         self._isezid = all(map(self._is_entrez_id, genes))
         if self._isezid: 
             self._gls = set(map(int, self._gls))
+        else:
+            self._gls = genes
 
         return '\n'.join(genes)
 
@@ -184,7 +186,7 @@ class Enrichr(object):
             self._logger.warning("Downloading %s for the first time. It might take a couple of miniutes."%self.background)
             df = get_mart(dataset=self.background)
         self._logger.info("using all annotated genes with GO_ID as background genes")
-        df.dropna(subset='go_id', inplace=True)     
+        df.dropna(subset=['go_id'], inplace=True)     
         self._background = df
         return
 
@@ -228,7 +230,7 @@ class Enrichr(object):
         odict['Overlap'] = list(map(lambda h,g: "%s/%s"%(h, g), olsz, gsetsz))
         odict['P-value'] = pvals
         odict['Adjusted P-value'] = fdrs
-        odict['Reject (FDR< %s)'%self.alpha ] = rej
+        # odict['Reject (FDR< %s)'%self.cutoff ] = rej
         odict['Genes'] = [";".join(g) for g in genes]
         res = pd.DataFrame(odict)
         return  res
