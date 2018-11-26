@@ -297,7 +297,7 @@ def enrichr(gene_list, gene_sets, description='', outdir='Enrichr', cutoff=0.05,
     use the code below to see validated background dataset name for BioMart.
 
         >>> from bioservices import BioMart 
-        >>> bm = BioMart(verbose=False, host="www.ensembl.org")
+        >>> bm = BioMart(verbose=False, host="asia.ensembl.org") # or 'www.ensembl.org'
         >>> bm.valid_attributes ## view validated datasets, select one from dict values
 
     :param str format: Output figure format supported by matplotlib,('pdf','png','eps'...). Default: 'pdf'.
