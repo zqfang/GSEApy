@@ -216,25 +216,26 @@ class Enrichr(object):
                 bg = self._background['gene_name']
 
             self.background = set(bg)
-            self._logger.warning("Backgroud genes used: all entrz genes with GO_IDs."+\
+            self._logger.warning("Backgroud genes used: all entrz genes with GO_IDs. "+\
                                  "If this is not you wanted, please give a number to background argument") 
-        terms, pvals, olsz, gsetsz, genes = list(calc_pvalues(query=self._gls, 
-                                                              gene_sets=gmt, 
-                                                              background=self.background))
-        fdrs, rej = multiple_testing_correction(ps = pvals, 
-                                                alpha=self.cutoff,
-                                                method='benjamini-hochberg')
-        # save to a dataframe
-        odict = OrderedDict()
-        odict['Term'] = terms
-        odict['Overlap'] = list(map(lambda h,g: "%s/%s"%(h, g), olsz, gsetsz))
-        odict['P-value'] = pvals
-        odict['Adjusted P-value'] = fdrs
-        # odict['Reject (FDR< %s)'%self.cutoff ] = rej
-        odict['Genes'] = [";".join(g) for g in genes]
-        res = pd.DataFrame(odict)
-        return  res
-
+        hgtest = list(calc_pvalues(query=self._gls, gene_sets=gmt, 
+                                   background=self.background))
+        if not hgtest:
+            terms, pvals, olsz, gsetsz, genes = hgtest
+            fdrs, rej = multiple_testing_correction(ps = pvals, 
+                                                    alpha=self.cutoff,
+                                                    method='benjamini-hochberg')
+            # save to a dataframe
+            odict = OrderedDict()
+            odict['Term'] = terms
+            odict['Overlap'] = list(map(lambda h,g: "%s/%s"%(h, g), olsz, gsetsz))
+            odict['P-value'] = pvals
+            odict['Adjusted P-value'] = fdrs
+            # odict['Reject (FDR< %s)'%self.cutoff ] = rej
+            odict['Genes'] = [";".join(g) for g in genes]
+            res = pd.DataFrame(odict)
+            return  res
+        return
     def run(self):
         """run enrichr for one sample gene list but multi-libraries"""
 
@@ -254,6 +255,9 @@ class Enrichr(object):
                 ## local mode
                 res = self.enrich(g)
                 shortID, self._gs = str(id(g)), "custom"
+                if res is None: 
+                    self._logger.info("No hits return, for custom gene set: %s"%shortID)
+                    continue
             else:
                 ## online mode
                 self._gs = str(g)
