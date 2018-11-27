@@ -54,13 +54,13 @@ Why GSEAPY
 -----------------------------------------------------
 
 I would like to use Pandas to explore my data, but I did not find a convenient tool to
-do gene set enrichment analysis in python. So, here are my reasons: 
+do gene set enrichment analysis in python. So, here are my reasons:
 
-* **Ability to run inside python interactive console without switch to R!!!**
+* **Ability to run inside python interactive console without having to switch to R!!!**
 * User friendly for both wet and dry lab users.
-* Produce publishable figures.
-* Perform batch jobs easy (e.g. using for loops).
-* Easy to use in bash shell or your  data analysis workflow, e.g. snakemake.  
+* Produce or reproduce publishable figures.
+* Perform batch jobs easy.
+* Easy to use in bash shell or your data analysis workflow, e.g. snakemake.
 
 
 GSEA Java version output: 

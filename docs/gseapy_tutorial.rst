@@ -180,66 +180,6 @@ An example of gmt file looks like below:
     TS-SPECIFIC	Arid3a_used	5430407P10RIK	AFAP1L1	AHNAK	ANXA2	ANXA3	ANXA5	B2M	BIK	BMP8B	CAMK1D	CBX4	CLDN3	CSRP1	DKKL1	DSC2
 
 
-
-4. Run gseapy inside python
--------------------------------------------------------
-
-At least 3 files are required to run gseapy.
-
-interactive python console
-.. code:: python
-
-    import gseapy
-    gseapy.gsea(data='gsea_data.txt', cls='gsea.cls', gmt='gene_sets.gmt', outdir='gseapy_out')
-
-
-bash shell
-.. code:: bash
-
-    gseapy gsea -d gsea_data.txt -c test.cls -g gene_sets.gmt -o gseapy_out
-
-
-Use ``prerank`` Command, or :func:`prerank`
-===============================================================
-
-If you would like to use a pre-ranked gene list to run GSEAPY, ``prerank`` module expects
-a pre-ranked gene list dataset with correlation values, which in .rnk format,
-and gene_sets file in gmt format.  ``prerank`` module has the same API to `GSEA` pre-rank tools.
-
-After this, you can start to run gseapy.
-
-.. code:: bash
-
-    gseapy prerank -r gsea_data.rnk -g gene_sets.gmt -o test
-
-
-Or run inside python.
-
-
-
-.. code:: python
-
-    import gseapy
-    gseapy.prerank(rnk='gsea_data.rnk', gene_sets='gene_sets.gmt', outdir='test')
-
-
-
-Use ``ssgsea`` command, or :func:`ssgsea`
-===============================================================
-
-
-.. code:: bash
-
-    gseapy ssgsea -d expression.txt -g gene_sets.gmt -o test
-
-
-.. code:: python
-
-    #ssGSEA
-    gseapy.ssgsea(data="expression.txt", gene_sets= "gene_sets.gmt", outdir='test')
-
-
-
 Use ``enrichr`` command, or :func:`enrichr`
 ===============================================================
 
@@ -405,9 +345,6 @@ Select the library you want to do enrichment analysis. For a view all avilable l
   'Humancyc_2016',
   'NCI-Nature_2016',
   'Panther_2016']
-
-
-
 
 
 for for details, please track the offical links: http://amp.pharm.mssm.edu/Enrichr/

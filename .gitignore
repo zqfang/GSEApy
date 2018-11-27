@@ -17,7 +17,7 @@ dist
 *.tmp*
 .cache
 .DS_Store
-
+.vscode
 tmp/
 # vim
 .*swp

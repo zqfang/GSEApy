@@ -28,7 +28,7 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
     :target:   https://img.shields.io/badge/python-3.5%2B-blue.svg
 
 
-**Please note** : from version 0.9.5 on, GSEApy only works on Python 3.4+ and Python 2.x will no longer be supported.
+**Please note** : from version 0.9.5 on, GSEApy only works on Python 3.5+ and Python 2.x will no longer be supported.
 For a Python 2 version you can install v0.9.4.
 
 **Release notes** : https://github.com/BioNinja/gseapy/releases 
@@ -70,9 +70,9 @@ do gene set enrichment analysis in python. So, here are my reasons:
 
 * **Ability to run inside python interactive console without having to switch to R!!!**
 * User friendly for both wet and dry lab users.
-* Produce and reproduce publishable figures.
-* Perform batch jobs easily (e.g. using for loops).
-* Easy to use in bash shell or your data analysis workflow, e.g. snakemake.  
+* Produce or reproduce publishable figures.
+* Perform batch jobs easy.
+* Easy to use in bash shell or your data analysis workflow, e.g. snakemake.
 
 
 
