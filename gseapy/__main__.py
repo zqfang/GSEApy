@@ -1,5 +1,5 @@
 
-import sys, logging
+import os, sys, logging
 import argparse as ap
 
 
@@ -66,6 +66,11 @@ def main():
                       background=args.bg, figsize=args.figsize,
                       top_term=args.term, no_plot=args.noplot, verbose=args.verbose)
         enr.run()
+    elif subcommand == "biomart":
+        from .parser import Biomart
+        # filters = {k:v for k,v in zip(args.filters.spilt(","), args.values.spilt(",")) }
+        bm = Biomart(host=args.host, verbose=args.verbose)
+        df = bm.query(dataset=args.bg, attributes=args.attrs.split(","), filename=args.ofile)
     else:
         argparser.print_help()
         sys.exit(0)
@@ -91,6 +96,8 @@ def prepare_argparser():
     add_plot_parser(subparsers)
     # command for 'enrichr'
     add_enrichr_parser(subparsers)
+    # command for 'biomart'
+    add_biomart_parser(subparsers)
 
     return argparser
 
@@ -113,6 +120,7 @@ def add_output_option(parser):
                                    "This is useful only if data are interested. Default: False.")
     parser.add_argument("-v", "--verbose", action="store_true", default=False, dest='verbose',
                         help="increase output verbosity, print out progress of your job", )
+
 def add_output_group(parser, required=True):
     """output group"""
 
@@ -291,9 +299,31 @@ def add_enrichr_parser(subparsers):
 
     enrichr_output = argparser_enrichr.add_argument_group("Output figure arguments")
     add_output_option(enrichr_output)
-
-
     return
+
+def add_biomart_parser(subparsers):
+    """Add function 'biomart' argument parsers."""
+
+    argparser_biomart = subparsers.add_parser("biomart", help="Using BioMart API to convert gene ids.")
+
+    # group for required options.
+    biomart_opt = argparser_biomart.add_argument_group("Input arguments")
+    biomart_opt.add_argument("-o", "--ofile", dest="ofile", type=str, default='hsapiens_gene_ensembl.txt',
+                              help="Output file name")
+    biomart_opt.add_argument("-a", "--attributes", action="store", dest="attrs", type=str, required=True, metavar='ATTR',
+                              help="Which attribute to retrieve. Separate each attr by comma.")
+    biomart_opt.add_argument("-d", "--dataset", action="store", dest="bg", type=str, default='hsapiens_gene_ensembl', metavar='DATA',
+                              help="Which dataset to use. [default: hsapiens_gene_ensembl]")                              
+    biomart_opt.add_argument("--host", action="store", dest="host", type=str, default='www.ensemble.org', metavar='HOST',
+                              help="Which host to use. Select from {'www.ensemble.org', 'asia.ensembl.org', 'useast.ensembl.org'}.")                            
+    # biomart_opt.add_argument("--filters", action="store", dest="filters", type=str, default='', metavar='filter',
+    #                           help="Which filter to use. Separate each filter by comma.")
+    # biomart_opt.add_argument("--values", action="store", dest="values", metavar='values', type=float, default='',
+    #                           help="Which value for filter to use. Separate each filter by comma.")
+    biomart_opt.add_argument("-m", "--mart", action="store", dest="mart", type=str, metavar='MART',
+                              default="ENSEMBL_MART_ENSEMBL", help="Which mart to use. [default: ENSEMBL_MART_ENSEMBL].")
+    biomart_opt.add_argument("-v", "--verbose", action="store_true", default=False, dest='verbose',
+                             help="increase output verbosity, print out progress of your job", )
 
 if __name__ == '__main__':
     try:

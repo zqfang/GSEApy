@@ -2,10 +2,9 @@
 
 import sys, logging, json, os
 import requests
+import pandas as pd
 from io import StringIO
-
 from numpy import in1d
-from pandas import read_table, DataFrame
 from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 from bioservices import BioMart, BioServicesError
@@ -167,56 +166,96 @@ def get_library_name():
 
     return sorted(libs)
 
-def get_mart(dataset='hsapiens_gene_ensembl', attributes=[], 
-             filters=[], filename=None, host="www.ensemble.org"):
-    """mapping ids using BioMart. A wrapper of BioMart() from bioseverices 
 
-    :param dataset: str, default: 'hsapiens_gene_ensembl'
-    :param attributes: str, list, tuple
-    :param filters: str, list, tuple
-    :param host: www.ensemble.org, asia.ensembl.org, useast.ensembl.org
-    :return: a dataframe contains all attributes you selected.
+class Biomart(BioMart):
+    """query from BioMart"""
+    def __init__(self, host="www.ensembl.org", verbose=False):
+        """A wrapper of BioMart() from bioseverices.
 
-    **Note**: it will take a couple of minutes to get the results.
+        How to see validated dataset, attributes, filters:
+        example:
 
-    How to see validated dataset, attributes, filters:
-    example:
+            >>> from bioservices import BioMart 
+            >>> bm = BioMart(verbose=False, host="asia.ensembl.org")
+            >>> bm.valid_attributes ## view validated datasets, select one from dict values
+            >>> bm.add_dataset_to_xml('hsapiens_gene_ensembl') # set dataset
+            >>> bm.attributes('hsapiens_gene_ensembl') # view validated attrs after dataset was set
+            >>> bm.filters('hsapiens_gene_ensembl') # view validated filters after dataset was set
+            
+        """
+        super(Biomart, self).__init__(host=host, verbose=verbose)
+        hosts=["www.ensemble.org", "asia.ensembl.org", "useast.ensembl.org"]
+        # if host not work, select next
+        i=0
+        while (self.host is None) and (i < 3):
+            self.host = hosts[i]
+            i +=1 
+     
+    def get_marts(self):
+        """Get available marts and their names."""
 
-        >>> from bioservices import BioMart 
-        >>> bm = BioMart(verbose=False, host="asia.ensembl.org")
-        >>> bm.valid_attributes ## view validated datasets, select one from dict values
-        >>> bm.add_dataset_to_xml('hsapiens_gene_ensembl') # set dataset
-        >>> bm.attributes('hsapiens_gene_ensembl') # view validated attrs after dataset was set
-        >>> bm.filters('hsapiens_gene_ensembl') # view validated filters after dataset was set
+        mart_names = pd.Series(self.names, name="Name")
+        mart_descriptions = pd.Series(self.displayNames, name="Description")
+
+        return pd.concat([mart_names, mart_descriptions], axis=1)
+
+    def get_datasets(self, mart):
+        """Get available datasets from mart you've selected"""
+        datasets = self.datasets(mart, raw=True)
+        return pd.read_table(StringIO(datasets), header=None, usecols=[1, 2],
+                            names = ["Name", "Description"])
+
+    def get_attributes(self, dataset):
+        """Get available attritbutes from dataset you've selected"""
+        attributes = self.attributes(dataset)
+        attr_ = [ (k, v[0]) for k, v in attributes.items()]
+        return pd.DataFrame(attr_, names=["Attribute","Description"])
+
+    def get_filters(self, dataset):
+        """Get available filters from dataset you've selected"""
+        filters = self.filters(dataset)
+        filt_ = [ (k, v[0]) for k, v in filters.items()]
+        return pd.DataFrame(filt_, names=["Filter", "Description"])
     
-    
-    """
-    # hosts=["www.ensemble.org", "asia.ensembl.org", "useast.ensembl.org"]
-    if not attributes: 
-        attributes = ['ensembl_gene_id', 'external_gene_name', 'entrezgene', 'go_id']
-    
-    # init
-    bm = BioMart(verbose=False, host=host)
-    bm.new_query()
-    # 'mmusculus_gene_ensembl'
-    bm.add_dataset_to_xml(dataset)
-    for at in attributes:
-        bm.add_attribute_to_xml(at)
-    #bm.add_filter_to_xml('with_entrezgene',[])
-    #bm.add_filter_to_xml('with_go',[]) # or 'go'
-    #bm.add_filter_to_xml('with_hgnc',[]) # or 'hgnc_symbol'
-    xml_query = bm.get_xml()
-    results = bm.query(xml_query)
-    df = read_table(StringIO(results), header=None, names=['gene_name', 'entrez_id','go_id'])
-    # save genes with entrez and go id
-    # df.dropna(inplace=True)
-    # save file to cache path.
-    df.dropna(subset=['entrez_id'], inplace=True)
-    df['entrez_id'] = df.entrez_id.astype(int)
-    df.index.name = 'gene_id'
-    if filename is None: 
-        mkdirs(DEFAULT_CACHE_PATH)
-        filename = os.path.join(DEFAULT_CACHE_PATH, "{}.background.genes.txt".format(dataset))
-    df.to_csv(filename, sep="\t")
-    return df
+    def query(self, dataset='hsapiens_gene_ensembl', attributes=[], 
+              filters={}, filename=None):
+        """mapping ids using BioMart.  
 
+        :param dataset: str, default: 'hsapiens_gene_ensembl'
+        :param attributes: str, list, tuple
+        :param filters: dict, {'filter name': list(filter value)}
+        :param host: www.ensemble.org, asia.ensembl.org, useast.ensembl.org
+        :return: a dataframe contains all attributes you selected.
+
+        **Note**: it will take a couple of minutes to get the results.
+            
+        """
+        if not attributes: 
+            attributes = ['ensembl_gene_id', 'external_gene_name', 'entrezgene', 'go_id'] 
+        # i=0
+        # while (self.host is None) and (i < 3):
+        #     self.host = self.ghosts[i]
+        #     i +=1 
+        self.new_query()
+        # 'mmusculus_gene_ensembl'
+        self.add_dataset_to_xml(dataset)
+        for at in attributes:
+            self.add_attribute_to_xml(at)
+        # add filters
+        if not filters:
+            for k, v in filters: self.add_filter_to_xml(k, v)
+
+        xml_query = self.get_xml()
+        results = super(Biomart, self).query(xml_query)
+        df = pd.read_table(StringIO(results), header=None, names=attributes, index_col=None)
+        # save genes with entrez and go id
+        # df.dropna(inplace=True)
+        # save file to cache path.
+        # df.dropna(subset=['entrezgene'], inplace=True)
+        # df['entrezgene'] = df.entrezgene.astype(int)
+        if filename is None: 
+            mkdirs(DEFAULT_CACHE_PATH)
+            filename = os.path.join(DEFAULT_CACHE_PATH, "{}.background.genes.txt".format(dataset))
+        df.to_csv(filename, sep="\t")
+        
+        return df

@@ -12,7 +12,7 @@ from pkg_resources import resource_filename
 from time import sleep
 from tempfile import TemporaryDirectory
 from gseapy.plot import barplot
-from gseapy.parser import get_library_name, get_mart
+from gseapy.parser import get_library_name, Biomart
 from gseapy.utils import *
 from gseapy.stats import calc_pvalues, multiple_testing_correction
 
@@ -184,9 +184,10 @@ class Enrichr(object):
             df = pd.read_table(DB_FILE)
         else:
             self._logger.warning("Downloading %s for the first time. It might take a couple of miniutes."%self.background)
-            df = get_mart(dataset=self.background)
+            bm = Biomart()
+            df = bm.query(dataset=self.background)
         self._logger.info("using all annotated genes with GO_ID as background genes")
-        df.dropna(subset=['go_id'], inplace=True)     
+        df.dropna(subset=['entrezgene', 'go_id'], inplace=True)     
         self._background = df
         return
 
@@ -211,9 +212,9 @@ class Enrichr(object):
             self.get_background()
             # input id type: entrez or gene_name
             if self._isezid:
-                bg = self._background['entrez_id'].astype(int) 
+                bg = self._background['entrezgene'].astype(int) 
             else:
-                bg = self._background['gene_name']
+                bg = self._background['external_gene_name']
 
             self.background = set(bg)
             self._logger.warning("Backgroud genes used: all entrz genes with GO_IDs. "+\

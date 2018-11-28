@@ -114,9 +114,3 @@ DEFAULT_LIBRARY=['GO_Biological_Process_2013',
 				 'WikiPathways_2013',
 				 'WikiPathways_2015',
 				 'WikiPathways_2016']
-
-
-
-
-
-
