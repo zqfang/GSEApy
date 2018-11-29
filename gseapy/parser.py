@@ -172,16 +172,25 @@ class Biomart(BioMart):
     def __init__(self, host="www.ensembl.org", verbose=False):
         """A wrapper of BioMart() from bioseverices.
 
-        How to see validated dataset, attributes, filters:
+        How to query validated dataset, attributes, filters:
         example:
 
-            >>> from bioservices import BioMart 
-            >>> bm = BioMart(verbose=False, host="asia.ensembl.org")
-            >>> bm.valid_attributes ## view validated datasets, select one from dict values
-            >>> bm.add_dataset_to_xml('hsapiens_gene_ensembl') # set dataset
-            >>> bm.attributes('hsapiens_gene_ensembl') # view validated attrs after dataset was set
-            >>> bm.filters('hsapiens_gene_ensembl') # view validated filters after dataset was set
-            
+            >>> from gseapy.parser import Biomart 
+            >>> bm = Biomart(verbose=False, host="asia.ensembl.org")
+            >>> ## view validated marts
+            >>> marts = bm.get_marts()
+            >>> ## view validated dataset
+            >>> datasets = bm.get_datasets(mart='ENSEMBL_MART_ENSEMBL')
+            >>> ## view validated attributes
+            >>> attrs = bm.get_attributes(dataset='hsapiens_gene_ensembl') 
+            >>> ## view validated filters
+            >>> filters = bm.get_filters(dataset='hsapiens_gene_ensembl')
+            >>> ## query results
+            >>> results = bm.query(dataset=dataset='hsapiens_gene_ensembl', 
+                                   attritbutes=['entrezgene', go_id'],
+                                   filters={'ensemble_gene_id': [your input list]}
+                                   )
+           
         """
         super(Biomart, self).__init__(host=host, verbose=verbose)
         hosts=["www.ensemble.org", "asia.ensembl.org", "useast.ensembl.org"]
@@ -199,7 +208,7 @@ class Biomart(BioMart):
 
         return pd.concat([mart_names, mart_descriptions], axis=1)
 
-    def get_datasets(self, mart):
+    def get_datasets(self, mart='ENSEMBL_MART_ENSEMBL'):
         """Get available datasets from mart you've selected"""
         datasets = self.datasets(mart, raw=True)
         return pd.read_table(StringIO(datasets), header=None, usecols=[1, 2],
@@ -248,14 +257,10 @@ class Biomart(BioMart):
         xml_query = self.get_xml()
         results = super(Biomart, self).query(xml_query)
         df = pd.read_table(StringIO(results), header=None, names=attributes, index_col=None)
-        # save genes with entrez and go id
-        # df.dropna(inplace=True)
         # save file to cache path.
-        # df.dropna(subset=['entrezgene'], inplace=True)
-        # df['entrezgene'] = df.entrezgene.astype(int)
         if filename is None: 
             mkdirs(DEFAULT_CACHE_PATH)
             filename = os.path.join(DEFAULT_CACHE_PATH, "{}.background.genes.txt".format(dataset))
-        df.to_csv(filename, sep="\t")
-        
+        df.to_csv(filename, sep="\t", index=False)
+      
         return df

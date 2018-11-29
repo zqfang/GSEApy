@@ -300,12 +300,16 @@ def enrichr(gene_list, gene_sets, description='', outdir='Enrichr', cutoff=0.05,
     :param float cutoff: Adjust P-value (benjamini-hochberg correction)cutoff. Default: 0.05
     :param int background: BioMart dataset name which contains all genes with go_ids. 
                            You could also specify a number by yourself, e.g. total expressed genes number.
+                           In this case, you will skip retrieving background infos from biomart.
     
-    use the code below to see validated background dataset name for BioMart.
+    use the code below to see validated background dataset name from BioMart.
 
-        >>> from bioservices import BioMart 
-        >>> bm = BioMart(verbose=False, host="asia.ensembl.org") # or 'www.ensembl.org'
-        >>> bm.valid_attributes ## view validated datasets, select one from dict values
+        >>> from gseapy.parser import Biomart 
+        >>> bm = Biomart(verbose=False, host="asia.ensembl.org")
+        >>> ## view validated marts
+        >>> marts = bm.get_marts()
+        >>> ## view validated dataset
+        >>> datasets = bm.get_datasets(mart='ENSEMBL_MART_ENSEMBL')
 
     :param str format: Output figure format supported by matplotlib,('pdf','png','eps'...). Default: 'pdf'.
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. (width,height). Default: (6.5,6).
