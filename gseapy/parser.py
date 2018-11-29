@@ -175,21 +175,21 @@ class Biomart(BioMart):
         How to query validated dataset, attributes, filters:
         example:
 
-            >>> from gseapy.parser import Biomart 
-            >>> bm = Biomart(verbose=False, host="asia.ensembl.org")
-            >>> ## view validated marts
-            >>> marts = bm.get_marts()
-            >>> ## view validated dataset
-            >>> datasets = bm.get_datasets(mart='ENSEMBL_MART_ENSEMBL')
-            >>> ## view validated attributes
-            >>> attrs = bm.get_attributes(dataset='hsapiens_gene_ensembl') 
-            >>> ## view validated filters
-            >>> filters = bm.get_filters(dataset='hsapiens_gene_ensembl')
-            >>> ## query results
-            >>> results = bm.query(dataset=dataset='hsapiens_gene_ensembl', 
-                                   attritbutes=['entrezgene', go_id'],
-                                   filters={'ensemble_gene_id': [your input list]}
-                                   )
+        >>> from gseapy.parser import Biomart 
+        >>> bm = Biomart(verbose=False, host="asia.ensembl.org")
+        >>> ## view validated marts
+        >>> marts = bm.get_marts()
+        >>> ## view validated dataset
+        >>> datasets = bm.get_datasets(mart='ENSEMBL_MART_ENSEMBL')
+        >>> ## view validated attributes
+        >>> attrs = bm.get_attributes(dataset='hsapiens_gene_ensembl') 
+        >>> ## view validated filters
+        >>> filters = bm.get_filters(dataset='hsapiens_gene_ensembl')
+        >>> ## query results
+        >>> results = bm.query(dataset=dataset='hsapiens_gene_ensembl', 
+                                attritbutes=['entrezgene', go_id'],
+                                filters={'ensemble_gene_id': [your input list]}
+                                )
            
         """
         super(Biomart, self).__init__(host=host, verbose=verbose)

@@ -69,16 +69,15 @@ def main():
     elif subcommand == "biomart":
         from .parser import Biomart
         # read input file or a argument
-        if os.path.isfile(args.inp):
-            with open(args.inp, 'r') as inp:
-                lines = inp.readlines()
-            idx = [ l.strip() for l in lines]
-        else:
-            idx = args.inp
+        name, value = args.filter
+        if os.path.isfile(value):
+            with open(value, 'r') as val:
+                lines = val.readlines()
+            value = [ l.strip() for l in lines]
         # run query
         bm = Biomart(host=args.host, verbose=args.verbose)
         bm.query(dataset=args.bg, attributes=args.attrs.split(","), 
-                 filters={args.filter: idx}, filename=args.ofile)
+                 filters={name : value}, filename=args.ofile)
     else:
         argparser.print_help()
         sys.exit(0)
@@ -316,10 +315,10 @@ def add_biomart_parser(subparsers):
 
     # group for required options.
     biomart_opt = argparser_biomart.add_argument_group("Input arguments")
-    biomart_opt.add_argument("-f", "--filter", action="store", dest="filter", type=str, required=True,
-                              help="Which filter to use. Input a filter name, e.g. external_gene_name") 
-    biomart_opt.add_argument("-i", "--input-value", dest="inp", required=True, metavar='VALUE', 
-                             help="Value for the filter given. If input a txt file, one ID per row, exclude header.")
+    biomart_opt.add_argument("-f", "--filter", action='store', nargs=2, dest='filter',
+                             required=True, metavar=('NAME', 'VALUE'),
+                             help="""Which filter to use. Input filter name, and value.
+                                     If value is a txt file, then one ID per row, exclude header.""")                             
     biomart_opt.add_argument("-a", "--attributes", action="store", dest="attrs", type=str, required=True, metavar='ATTR',
                               help="Which attribute(s) to retrieve. Separate each attr by comma.")                               
     biomart_opt.add_argument("-o", "--ofile", dest="ofile", type=str, required=True, help="Output file name")                               
