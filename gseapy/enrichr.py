@@ -186,8 +186,9 @@ class Enrichr(object):
             self._logger.warning("Downloading %s for the first time. It might take a couple of miniutes."%self.background)
             bm = Biomart()
             df = bm.query(dataset=self.background)
+            df.dropna(subset=['go_id'], inplace=True)
         self._logger.info("using all annotated genes with GO_ID as background genes")
-        df.dropna(subset=['entrezgene', 'go_id'], inplace=True)     
+        df.dropna(subset=['entrezgene'], inplace=True)     
         self._background = df
         return
 
@@ -217,11 +218,11 @@ class Enrichr(object):
                 bg = self._background['external_gene_name']
 
             self.background = set(bg)
-            self._logger.warning("Backgroud genes used: all entrz genes with GO_IDs. "+\
+            self._logger.warning("Backgroud genes used: all entrez genes with GO_IDs. "+\
                                  "If this is not you wanted, please give a number to background argument") 
         hgtest = list(calc_pvalues(query=self._gls, gene_sets=gmt, 
                                    background=self.background))
-        if not hgtest:
+        if len(hgtest) > 0:
             terms, pvals, olsz, gsetsz, genes = hgtest
             fdrs, rej = multiple_testing_correction(ps = pvals, 
                                                     alpha=self.cutoff,
@@ -236,7 +237,8 @@ class Enrichr(object):
             odict['Genes'] = [";".join(g) for g in genes]
             res = pd.DataFrame(odict)
             return  res
-        return
+        return 
+
     def run(self):
         """run enrichr for one sample gene list but multi-libraries"""
 
@@ -255,9 +257,9 @@ class Enrichr(object):
             if isinstance(g, dict): 
                 ## local mode
                 res = self.enrich(g)
-                shortID, self._gs = str(id(g)), "custom"
+                shortID, self._gs = str(id(g)), "CUSTOM%s"%id(g)
                 if res is None: 
-                    self._logger.info("No hits return, for custom gene set: %s"%shortID)
+                    self._logger.info("No hits return, for gene set: Custom%s"%shortID)
                     continue
             else:
                 ## online mode

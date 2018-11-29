@@ -314,11 +314,11 @@ def add_biomart_parser(subparsers):
     # group for required options.
     biomart_opt = argparser_biomart.add_argument_group("Input arguments")
     biomart_opt.add_argument("-i", "--input-list", dest="inp", type=str, required=True, metavar='IDs', 
-                             help="Input file, one ID per row.")
-    biomart_opt.add_argument("-f", "--filter", action="store", dest="filter", type=str, required=True,
-                              help="Which filter to use. Input file (ID) type. e.g. external_gene_name") 
+                             help="Input file, one ID per row. Remove header please.")
     biomart_opt.add_argument("-a", "--attributes", action="store", dest="attrs", type=str, required=True, metavar='ATTR',
-                              help="Which attribute(s) to retrieve. Separate each attr by comma.")                               
+                              help="Which attribute(s) to retrieve. Separate each attr by comma.")
+    biomart_opt.add_argument("-f", "--filter", action="store", dest="filter", type=str, required=True,
+                              help="Which filter to use. Input file (ID) type. e.g. external_gene_name")                                
     biomart_opt.add_argument("-o", "--ofile", dest="ofile", type=str, required=True, help="Output file name")                               
     biomart_opt.add_argument("-d", "--dataset", action="store", dest="bg", type=str, default='hsapiens_gene_ensembl', metavar='DATA',
                               help="Which dataset to use. Default: hsapiens_gene_ensembl")                              

@@ -251,8 +251,8 @@ class Biomart(BioMart):
         for at in attributes:
             self.add_attribute_to_xml(at)
         # add filters
-        if not filters:
-            for k, v in filters: self.add_filter_to_xml(k, v)
+        if filters:
+            for k, v in filters.items(): self.add_filter_to_xml(k, v)
 
         xml_query = self.get_xml()
         results = super(Biomart, self).query(xml_query)
