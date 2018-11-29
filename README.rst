@@ -48,10 +48,9 @@ GSEAPY has five sub-commands available: ``gsea``, ``prerank``, ``ssgsea``, ``rep
 :gsea:    The ``gsea`` module produces `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ results.  The input requries a txt file(FPKM, Expected Counts, TPM, et.al), a cls file, and gene_sets file in gmt format.
 :prerank: The ``prerank`` module produces **Prerank tool** results.  The input expects a pre-ranked gene list dataset with correlation values, provided in .rnk format, and gene_sets file in gmt format.  ``prerank`` module is an API to `GSEA` pre-rank tools.
 :ssgsea: The ``ssgsea`` module performs **single sample GSEA(ssGSEA)** analysis.  The input expects a pd.Series (indexed by gene name), or a pd.DataFrame (include ``GCT`` file) with expression values and a ``GMT`` file. For multiple sample input, ssGSEA reconigzes gct format, too. ssGSEA enrichment score for the gene set is described by `D. Barbie et al 2009 <http://www.nature.com/nature/journal/v462/n7269/abs/nature08460.html>`_.
-
 :replot: The ``replot`` module reproduce GSEA desktop version results.  The only input for GSEApy is the location to ``GSEA`` Desktop output results.
-
 :enrichr: The ``enrichr`` module enable you perform gene set enrichment analysis using ``Enrichr`` API. Enrichr is open source and freely available online at: http://amp.pharm.mssm.edu/Enrichr . It runs very fast.
+:biomart: The ``biomart`` module helps you convert gene ids using BioMart API.
 
 
 Please use 'gseapy COMMAND -h' to see the detail description for each option of each module.
@@ -76,17 +75,6 @@ do gene set enrichment analysis in python. So, here are my reasons:
 * Easy to use in bash shell or your data analysis workflow, e.g. snakemake.
 
 
-GSEA Java version output:
--------------------------------------------------
-This is an example of GSEA desktop application output
-
-.. figure:: docs/GSEA_OCT4_KD.png
-
-
-
-
-
-
 GSEAPY ``Prerank`` module output
 -----------------------------------------------
 Using the same data from ``GSEA``, GSEAPY reproduce the example above.
@@ -104,25 +92,6 @@ Using ``Prerank`` or ``replot`` module will reproduce the same figure for GSEA J
    **GSEAPY figures are supported by all matplotlib figure formats.**
 
    You can modify ``GSEA`` plots easily in .pdf files. Please Enjoy.
-
-
-
-GSEAPY ``enrichr`` module
------------------------------------------------
-**note:** For now, enrichr module download enriched results only.
-
-**TODO:** Save enriched table, grids, networks, bar graphs from website server using ``phantomJS`` and ``selenium``.
-
-A graphical introduction of Enrichr
-
-.. figure:: docs/enrichr.PNG
-    :height: 300px
-    :width: 600px
-    :align: center
-
-
-**Note**: Enrichr uses a list of Entrez gene symbols as input. You should convert all gene names to uppercase.
-
 
 
 Installation
@@ -156,10 +125,12 @@ Mandatory
 ~~~~~~~~~
 
 * Numpy >= 1.13.0
+* Scipy
 * Pandas
 * Matplotlib
 * Beautifulsoup4
-* Requests(for enrichr API)
+* Requests (for Enrichr API)
+* Bioservices (for BioMart API)
 
 You may also need to install **lxml, html5lib**, if you could not parse xml files.
 

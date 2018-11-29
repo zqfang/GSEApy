@@ -53,6 +53,9 @@ The only input for GSEAPY is the location to GSEA Desktop output results.
 5. The ``enrichr`` module enables you to perform gene set enrichment analysis using ``Enrichr`` API.
 Enrichr is open source and freely available online at: http://amp.pharm.mssm.edu/Enrichr . It runs very fast and generates results in txt format.
 
+6. The ``biomart`` module helps you convert gene ids using BioMart API.
+
+
 GSEAPY could be used for **RNA-seq, ChIP-seq, Microarry** data. It's used for convenient GO enrichments and produce **publishable quality figures** in python. 
 
 
