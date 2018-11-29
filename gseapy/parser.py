@@ -218,13 +218,13 @@ class Biomart(BioMart):
         """Get available attritbutes from dataset you've selected"""
         attributes = self.attributes(dataset)
         attr_ = [ (k, v[0]) for k, v in attributes.items()]
-        return pd.DataFrame(attr_, names=["Attribute","Description"])
+        return pd.DataFrame(attr_, columns=["Attribute","Description"])
 
     def get_filters(self, dataset):
         """Get available filters from dataset you've selected"""
         filters = self.filters(dataset)
         filt_ = [ (k, v[0]) for k, v in filters.items()]
-        return pd.DataFrame(filt_, names=["Filter", "Description"])
+        return pd.DataFrame(filt_, columns=["Filter", "Description"])
     
     def query(self, dataset='hsapiens_gene_ensembl', attributes=[], 
               filters={}, filename=None):
@@ -237,7 +237,25 @@ class Biomart(BioMart):
         :return: a dataframe contains all attributes you selected.
 
         **Note**: it will take a couple of minutes to get the results.
-            
+        A xml template for querying biomart. (see https://gist.github.com/keithshep/7776579)
+        
+        exampleTaxonomy = "mmusculus_gene_ensembl"
+        exampleGene = "ENSMUSG00000086981,ENSMUSG00000086982,ENSMUSG00000086983"
+        urlTemplate = \
+        '''http://ensembl.org/biomart/martservice?query=''' \
+        '''<?xml version="1.0" encoding="UTF-8"?>''' \
+        '''<!DOCTYPE Query>''' \
+        '''<Query virtualSchemaName="default" formatter="CSV" header="0" uniqueRows="0" count="" datasetConfigVersion="0.6">''' \
+        '''<Dataset name="%s" interface="default"><Filter name="ensembl_gene_id" value="%s"/>''' \
+        '''<Attribute name="ensembl_gene_id"/><Attribute name="ensembl_transcript_id"/>''' \
+        '''<Attribute name="transcript_start"/><Attribute name="transcript_end"/>''' \
+        '''<Attribute name="exon_chrom_start"/><Attribute name="exon_chrom_end"/>''' \
+        '''</Dataset>''' \
+        '''</Query>''' 
+        
+        exampleURL = urlTemplate % (exampleTaxonomy, exampleGene)
+        req = requests.get(exampleURL, stream=True)
+                   
         """
         if not attributes: 
             attributes = ['ensembl_gene_id', 'external_gene_name', 'entrezgene', 'go_id'] 
@@ -252,7 +270,9 @@ class Biomart(BioMart):
             self.add_attribute_to_xml(at)
         # add filters
         if filters:
-            for k, v in filters.items(): self.add_filter_to_xml(k, v)
+            for k, v in filters.items(): 
+                if isinstance(v, list): v = ",".join(v)
+                self.add_filter_to_xml(k, v)
 
         xml_query = self.get_xml()
         results = super(Biomart, self).query(xml_query)
