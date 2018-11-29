@@ -318,6 +318,7 @@ def add_biomart_parser(subparsers):
     biomart_opt.add_argument("-f", "--filter", action='store', nargs=2, dest='filter',
                              required=True, metavar=('NAME', 'VALUE'),
                              help="""Which filter to use. Input filter name, and value.
+                                     If multi-value required, seqarate each value by comma.
                                      If value is a txt file, then one ID per row, exclude header.""")                             
     biomart_opt.add_argument("-a", "--attributes", action="store", dest="attrs", type=str, required=True, metavar='ATTR',
                               help="Which attribute(s) to retrieve. Separate each attr by comma.")                               

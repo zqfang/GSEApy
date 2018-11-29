@@ -305,7 +305,7 @@ def enrichr(gene_list, gene_sets, description='', outdir='Enrichr', cutoff=0.05,
                            In this case, you will skip retrieving background infos from biomart.
     
     use the code below to see validated background dataset name from BioMart.
-
+    Here are examle code:
     >>> from gseapy.parser import Biomart 
     >>> bm = Biomart(verbose=False, host="asia.ensembl.org")
     >>> ## view validated marts
