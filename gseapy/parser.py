@@ -174,7 +174,6 @@ class Biomart(BioMart):
 
         How to query validated dataset, attributes, filters:
         example:
-
         >>> from gseapy.parser import Biomart 
         >>> bm = Biomart(verbose=False, host="asia.ensembl.org")
         >>> ## view validated marts
@@ -189,8 +188,7 @@ class Biomart(BioMart):
         >>> results = bm.query(dataset=dataset='hsapiens_gene_ensembl', 
                                 attritbutes=['entrezgene', go_id'],
                                 filters={'ensemble_gene_id': [your input list]}
-                                )
-           
+                                )         
         """
         super(Biomart, self).__init__(host=host, verbose=verbose)
         hosts=["www.ensemble.org", "asia.ensembl.org", "useast.ensembl.org"]
