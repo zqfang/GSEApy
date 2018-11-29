@@ -68,10 +68,13 @@ def main():
         enr.run()
     elif subcommand == "biomart":
         from .parser import Biomart
-        # read input list
-        with open(args.inp, 'r') as inp:
-            lines = inp.readlines()
-        idx = [ l.strip() for l in lines]
+        # read input file or a argument
+        if os.path.isfile(args.inp):
+            with open(args.inp, 'r') as inp:
+                lines = inp.readlines()
+            idx = [ l.strip() for l in lines]
+        else:
+            idx = args.inp
         # run query
         bm = Biomart(host=args.host, verbose=args.verbose)
         bm.query(dataset=args.bg, attributes=args.attrs.split(","), 
@@ -313,12 +316,12 @@ def add_biomart_parser(subparsers):
 
     # group for required options.
     biomart_opt = argparser_biomart.add_argument_group("Input arguments")
-    biomart_opt.add_argument("-i", "--input-list", dest="inp", type=str, required=True, metavar='IDs', 
-                             help="Input file, one ID per row. Remove header please.")
-    biomart_opt.add_argument("-a", "--attributes", action="store", dest="attrs", type=str, required=True, metavar='ATTR',
-                              help="Which attribute(s) to retrieve. Separate each attr by comma.")
     biomart_opt.add_argument("-f", "--filter", action="store", dest="filter", type=str, required=True,
-                              help="Which filter to use. Input file (ID) type. e.g. external_gene_name")                                
+                              help="Which filter to use. Input a filter name, e.g. external_gene_name") 
+    biomart_opt.add_argument("-i", "--input-value", dest="inp", required=True, metavar='VALUE', 
+                             help="Value for the filter given. If input a txt file, one ID per row, exclude header.")
+    biomart_opt.add_argument("-a", "--attributes", action="store", dest="attrs", type=str, required=True, metavar='ATTR',
+                              help="Which attribute(s) to retrieve. Separate each attr by comma.")                               
     biomart_opt.add_argument("-o", "--ofile", dest="ofile", type=str, required=True, help="Output file name")                               
     biomart_opt.add_argument("-d", "--dataset", action="store", dest="bg", type=str, default='hsapiens_gene_ensembl', metavar='DATA',
                               help="Which dataset to use. Default: hsapiens_gene_ensembl")                              
