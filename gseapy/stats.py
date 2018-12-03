@@ -69,16 +69,18 @@ def calc_pvalues(query, gene_sets, background=20000, **kwargs):
         m = len(category)
         hits = query.intersection(set(category))
         x = len(hits)
-        if x < 1: continue
+        if x < 1 : continue
         # pVal = hypergeom.sf(hitCount-1,popTotal,bgHits,queryTotal) 
         # p(X >= hitCounts)
         vals.append((s, hypergeom.sf(x-1, bg, m, k), x, m, hits))
 
     return zip(*vals)
 
+
 def _ecdf(x):
     nobs = len(x)
     return np.arange(1,nobs+1)/float(nobs)
+
 
 def fdrcorrection(pvals, alpha=0.05):
     """ benjamini hocheberg fdr correction. inspired by statsmodels 
@@ -103,6 +105,7 @@ def fdrcorrection(pvals, alpha=0.05):
     reject_ = np.empty_like(reject)
     reject_[pvals_sortind] = reject
     return reject_, pvals_corrected_
+
 
 def multiple_testing_correction(ps, alpha=0.05, method='benjamini-hochberg', **kwargs):
     """ correct pvalues for multiple testing and add corrected `q` value

@@ -185,10 +185,10 @@ class Biomart(BioMart):
         >>> ## view validated filters
         >>> filters = bm.get_filters(dataset='hsapiens_gene_ensembl')
         >>> ## query results
-        >>> results = bm.query(dataset=dataset='hsapiens_gene_ensembl', 
-                                attritbutes=['entrezgene', go_id'],
-                                filters={'ensemble_gene_id': [your input list]}
-                                )         
+        >>> results = bm.query(dataset='hsapiens_gene_ensembl', 
+                               attributes=['entrezgene', ‘go_id'],
+                               filters={'ensemble_gene_id': [your input list]}
+                              )         
         """
         super(Biomart, self).__init__(host=host, verbose=verbose)
         hosts=["www.ensemble.org", "asia.ensembl.org", "useast.ensembl.org"]

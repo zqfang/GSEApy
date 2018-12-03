@@ -38,6 +38,7 @@ class Enrichr(object):
         self.res2d=None
         self._processes=1
         self.background=background
+        self._bg=None
         # init logger
         logfile = self.prepare_outdir()
         self._logger = log_init(outlog=logfile,
@@ -176,7 +177,7 @@ class Enrichr(object):
 
     def get_background(self):
         """get background gene"""
-        DB_FILE = resource_filename("gseapy","data/{}.background.genes.txt".format(self.background))
+        DB_FILE = resource_filename("gseapy", "data/{}.background.genes.txt".format(self.background))
         filename = os.path.join(DEFAULT_CACHE_PATH, "{}.background.genes.txt".format(self.background))
         if os.path.exists(filename):
             df = pd.read_table(filename)
@@ -189,8 +190,8 @@ class Enrichr(object):
             df.dropna(subset=['go_id'], inplace=True)
         self._logger.info("using all annotated genes with GO_ID as background genes")
         df.dropna(subset=['entrezgene'], inplace=True)     
-        self._background = df
-        return
+
+        return df
 
     def enrich(self, gmt):
         """use local mode
@@ -210,18 +211,18 @@ class Enrichr(object):
         """
         if isinstance(self.background, str): 
             # self.background = set(reduce(lambda x,y: x+y, gmt.values(),[]))
-            self.get_background()
+            df = self.get_background()
             # input id type: entrez or gene_name
             if self._isezid:
-                bg = self._background['entrezgene'].astype(int) 
+                bg = df['entrezgene'].astype(int)
             else:
-                bg = self._background['external_gene_name']
+                bg = df['external_gene_name']
 
-            self.background = set(bg)
-            self._logger.warning("Backgroud genes used: all entrez genes with GO_IDs. "+\
-                                 "If this is not you wanted, please give a number to background argument") 
+            self._bg = set(bg.unique())
+            self._logger.warning("Background: %s %s genes with GO_IDs. "%(self._bg, self.background))
+            self._logger.warning("If this is not you wanted, please give a number to background argument")
         hgtest = list(calc_pvalues(query=self._gls, gene_sets=gmt, 
-                                   background=self.background))
+                                   background=self._bg))
         if len(hgtest) > 0:
             terms, pvals, olsz, gsetsz, genes = hgtest
             fdrs, rej = multiple_testing_correction(ps = pvals, 
@@ -236,7 +237,7 @@ class Enrichr(object):
             # odict['Reject (FDR< %s)'%self.cutoff ] = rej
             odict['Genes'] = [";".join(g) for g in genes]
             res = pd.DataFrame(odict)
-            return  res
+            return res
         return 
 
     def run(self):
@@ -300,7 +301,8 @@ def enrichr(gene_list, gene_sets, description='', outdir='Enrichr', cutoff=0.05,
     :param description: name of analysis. optional.
     :param outdir: Output file directory
     :param float cutoff: Adjust P-value (benjamini-hochberg correction)cutoff. Default: 0.05
-    :param int background: BioMart dataset name which contains all genes with go_ids. 
+    :param int background: BioMart dataset name for retrieving background gene information.
+                           This argument only works when gene_sets input is a gmt file or python dict.
                            You could also specify a number by yourself, e.g. total expressed genes number.
                            In this case, you will skip retrieving background infos from biomart.
     
@@ -326,3 +328,4 @@ def enrichr(gene_list, gene_sets, description='', outdir='Enrichr', cutoff=0.05,
     enr.run()
 
     return enr
+
