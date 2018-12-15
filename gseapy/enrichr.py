@@ -219,8 +219,8 @@ class Enrichr(object):
                 bg = df['external_gene_name']
 
             self._bg = set(bg.unique())
-            self._logger.warning("Background: %s %s genes with GO_IDs. "%(self._bg, self.background))
-            self._logger.warning("If this is not you wanted, please give a number to background argument")
+            self._logger.info("Background: %s %s genes with GO_IDs. "%(len(self._bg), self.background))
+            self._logger.info("If this is not you wanted, please give a number to background argument")
         hgtest = list(calc_pvalues(query=self._gls, gene_sets=gmt, 
                                    background=self._bg))
         if len(hgtest) > 0:

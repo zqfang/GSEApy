@@ -69,7 +69,7 @@ def test_ssgsea2(ssGCT, geneGMT):
     tmpdir.cleanup()
     ssgsea(ssGCT, geneGMT, None, permutation_num=0)
 
-def test_enrichr(genelist):
+def test_enrichr(genelist, geneGMT):
     # Only tests of the command runs successfully,
     # doesnt't check the image
     tmpdir= TemporaryDirectory(dir="tests")
