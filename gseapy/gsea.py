@@ -1,6 +1,5 @@
 #! python
 # -*- coding: utf-8 -*-
-from __future__ import division
 
 import os, sys, logging, json
 from collections import OrderedDict
@@ -12,9 +11,9 @@ import pandas as pd
 
 from gseapy.algorithm import enrichment_score, gsea_compute, ranking_metric
 from gseapy.algorithm import enrichment_score_tensor, gsea_compute_tensor
-from gseapy.parser import *
+from gseapy.parser import gsea_edb_parser, gsea_cls_parser
 from gseapy.plot import gseaplot, heatmap
-from gseapy.utils import mkdirs, log_init, retry, DEFAULT_LIBRARY
+from gseapy.utils import mkdirs, log_init, retry, DEFAULT_LIBRARY, DEFAULT_CACHE_PATH
 
 
 class GSEAbase(object):
@@ -163,17 +162,18 @@ class GSEAbase(object):
 
         self._logger.info("Downloading and generating Enrichr library gene sets......")
         tmpname = "enrichr." + gmt + ".gmt"
-        tempath = os.path.join(self.outdir, tmpname)
+        tempath = os.path.join(DEFAULT_CACHE_PATH, tmpname)
         # if file already download
         if os.path.isfile(tempath):
-            self._logger.info("Enrichr library gene sets already downloaded, use local file")
+            self._logger.info("Enrichr library gene sets already downloaded in: %s, use local file"%DEFAULT_CACHE_PATH)
             return self.parse_gmt(tempath)
         else:
             return self._download_libraries(gmt)
 
-    def get_libraries(self):
-        """return enrichr active enrichr library name.Offical API """
-        lib_url='http://amp.pharm.mssm.edu/Enrichr/datasetStatistics'
+    def get_libraries(self, database=''):
+        """return active enrichr library name.Offical API """
+
+        lib_url='http://amp.pharm.mssm.edu/%sEnrichr/datasetStatistics'%database
         libs_json = json.loads(requests.get(lib_url).text)
         libs = [lib['libraryName'] for lib in libs_json['statistics']]
         return sorted(libs)
@@ -191,7 +191,7 @@ class GSEAbase(object):
         # reformat to dict and wirte to disk
         genesets_dict = {}
         outname = "enrichr.%s.gmt"%libname
-        gmtout = open(os.path.join(self.outdir, outname),"w")
+        gmtout = open(os.path.join(DEFAULT_CACHE_PATH, outname), "w")
         for line in response.iter_lines(chunk_size=1024, decode_unicode='utf-8'):
             line=line.strip()
             k = line.split("\t")[0]
@@ -1027,7 +1027,6 @@ def prerank(rnk, gene_sets, outdir='GSEA_Prerank', pheno_pos='Pos', pheno_neg='N
                   ascending, processes, figsize, format, graph_num, no_plot, seed, verbose)
     pre.run()
     return pre
-
 
 
 def replot(indir, outdir='GSEA_Replot', weighted_score_type=1,

@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import  division
-
 import sys, logging
 import numpy as np
 from functools import reduce
 from multiprocessing import Pool
 from math import ceil
-from scipy.stats import hypergeom
+
 
 def enrichment_score(gene_list, correl_vector, gene_set, weighted_score_type=1, 
                      nperm=1000, rs=np.random.RandomState(), single=False, scale=False):
