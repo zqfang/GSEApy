@@ -7,42 +7,44 @@ import requests
 import pandas as pd
 from io import StringIO
 from collections import OrderedDict
-from functools import reduce
 from pkg_resources import resource_filename
 from time import sleep
 from tempfile import TemporaryDirectory
 from gseapy.plot import barplot
-from gseapy.parser import get_library_name, Biomart
+from gseapy.parser import Biomart
 from gseapy.utils import *
 from gseapy.stats import calc_pvalues, multiple_testing_correction
 
 
 class Enrichr(object):
     """Enrichr API"""
-    def __init__(self, gene_list, gene_sets, descriptions='', outdir='Enrichr', 
-                 cutoff=0.05, background='hsapiens_gene_ensembl', 
+    def __init__(self, gene_list, gene_sets, organism='human', descriptions='',
+                 outdir='Enrichr', cutoff=0.05, background='hsapiens_gene_ensembl',
                  format='pdf', figsize=(6.5,6), top_term=10, no_plot=False, 
                  verbose=False):
 
-        self.gene_list=gene_list
-        self.gene_sets=gene_sets
-        self.descriptions=str(descriptions)
-        self.outdir=outdir
-        self.cutoff=cutoff
-        self.format=format
-        self.figsize=figsize
-        self.__top_term=int(top_term)
-        self.__no_plot=no_plot
-        self.verbose=bool(verbose)
-        self.module="enrichr"
-        self.res2d=None
-        self._processes=1
-        self.background=background
-        self._bg=None
+        self.gene_list = gene_list
+        self.gene_sets = gene_sets
+        self.descriptions = str(descriptions)
+        self.outdir = outdir
+        self.cutoff = cutoff
+        self.format = format
+        self.figsize = figsize
+        self.__top_term = int(top_term)
+        self.__no_plot = no_plot
+        self.verbose = bool(verbose)
+        self.module = "enrichr"
+        self.res2d = None
+        self._processes = 1
+        self.background = background
+        self._bg = None
+        self.organism = organism
+        self._organism = None
         # init logger
         logfile = self.prepare_outdir()
         self._logger = log_init(outlog=logfile,
                                 log_level=logging.INFO if self.verbose else logging.WARNING)
+
 
     def prepare_outdir(self):
         """create temp directory."""
@@ -62,7 +64,7 @@ class Enrichr(object):
     def parse_genesets(self):
         """parse gene_sets input file type"""
 
-        enrichr_library = get_library_name()
+        enrichr_library = self.get_libraries()
         if isinstance(self.gene_sets, list):
             gss = self.gene_sets
         elif isinstance(self.gene_sets, str):
@@ -150,13 +152,11 @@ class Enrichr(object):
 
     def get_results(self, gene_list):
         """Enrichr API"""
-        ADDLIST_URL = 'http://amp.pharm.mssm.edu/Enrichr/addList'
-        # RESULTS_URL = 'http://amp.pharm.mssm.edu/Enrichr/enrich'
-        # query_string = '?userListId=%s&backgroundType=%s'
+        ADDLIST_URL = 'http://amp.pharm.mssm.edu/%sEnrichr/addList'%self._organism
         job_id = self.send_genes(gene_list, ADDLIST_URL)
         user_list_id = job_id['userListId']
 
-        RESULTS_URL = 'http://amp.pharm.mssm.edu/Enrichr/export'
+        RESULTS_URL = 'http://amp.pharm.mssm.edu/%sEnrichr/export'%self._organism
         query_string = '?userListId=%s&filename=%s&backgroundType=%s'
         # set max retries num =5
         s = retry(num=5)
@@ -173,7 +173,14 @@ class Enrichr(object):
             int(idx)
             return True
         except:
-            return False   
+            return False
+
+    def get_libraries(self,):
+        """return active enrichr library name. Offical API """
+        lib_url='http://amp.pharm.mssm.edu/%sEnrichr/datasetStatistics'%self._organism
+        libs_json = json.loads(requests.get(lib_url).text)
+        libs = [lib['libraryName'] for lib in libs_json['statistics']]
+        return sorted(libs)
 
     def get_background(self):
         """get background gene"""
@@ -192,6 +199,37 @@ class Enrichr(object):
         df.dropna(subset=['entrezgene'], inplace=True)     
 
         return df
+
+    def get_organism(self):
+        """Select Enrichr organism from below:
+
+           Human & Mouse: H. sapiens & M. musculus
+           Fly: D. melanogaster
+           Yeast: S. cerevisiae
+           Worm: C. elegans
+           Fish: D. rerio
+
+        """
+
+        organism = {'default': ['', 'hs', 'mm', 'human','mouse',
+                                'homo sapiens', 'mus musculus',
+                                'h. sapiens', 'm. musculus'],
+                    'Fly': ['fly', 'd. melanogaster', 'drosophila melanogaster'],
+                    'Yeast': ['yeast', 's. cerevisiae', 'saccharomyces cerevisiae'],
+                    'Worm': ['worm', 'c. elegans', 'caenorhabditis elegans', 'nematode'],
+                    'Fish': ['fish', 'd. rerio', 'danio rerio', 'zebrafish']
+                 }
+
+        for k, v in organism.items():
+            if self.organism.lower() in v :
+                self._organism = k
+
+        if self._organism is None:
+            raise Exception("No supported organism found !!!")
+
+        if self._organism == 'default':
+            self._organism = ''
+        return
 
     def enrich(self, gmt):
         """use local mode
@@ -245,6 +283,8 @@ class Enrichr(object):
     def run(self):
         """run enrichr for one sample gene list but multi-libraries"""
 
+        # set organism
+        self.get_organism()
         # read input file
         genes_list = self.parse_genelists()
         gss = self.parse_genesets()
@@ -293,13 +333,15 @@ class Enrichr(object):
         return
 
 
-def enrichr(gene_list, gene_sets, description='', outdir='Enrichr', cutoff=0.05, 
-            background='hsapiens_gene_ensembl', format='pdf', 
-            figsize=(8,6), top_term=10, no_plot=False, verbose=False):
+def enrichr(gene_list, gene_sets, organism='human', description='',
+            outdir='Enrichr', background='hsapiens_gene_ensembl', cutoff=0.05,
+            format='pdf', figsize=(8,6), top_term=10, no_plot=False, verbose=False):
     """Enrichr API.
 
     :param gene_list: Flat file with list of genes, one gene id per row, or a python list object
     :param gene_sets: Enrichr Library to query. Required enrichr library name(s). Separate each name by comma.
+    :param organism: Enrichr supported organism. Select from (human, mouse, yeast, fly, fish, worm).
+                     see here for details: https://amp.pharm.mssm.edu/modEnrichr
     :param description: name of analysis. optional.
     :param outdir: Output file directory
     :param float cutoff: Adjust P-value (benjamini-hochberg correction)cutoff. Default: 0.05
@@ -325,7 +367,7 @@ def enrichr(gene_list, gene_sets, description='', outdir='Enrichr', cutoff=0.05,
     :return: An Enrichr object, which obj.res2d stores your last query, obj.results stores your all queries.
     
     """
-    enr = Enrichr(gene_list, gene_sets, description, outdir,
+    enr = Enrichr(gene_list, gene_sets, organism, description, outdir,
                   cutoff, background, format, figsize, top_term, no_plot, verbose)
     enr.run()
 
