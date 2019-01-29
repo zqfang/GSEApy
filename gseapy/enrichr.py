@@ -209,7 +209,9 @@ class Enrichr(object):
             Term Overlap P-value Adjusted_P-value Genes
 
         """
-        if isinstance(self.background, str): 
+        if isinstance(self.background, int) or self.background.isdigit():
+            self._bg = int(self.background)
+        elif isinstance(self.background, str):
             # self.background = set(reduce(lambda x,y: x+y, gmt.values(),[]))
             df = self.get_background()
             # input id type: entrez or gene_name
