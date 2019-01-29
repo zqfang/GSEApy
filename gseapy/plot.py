@@ -373,7 +373,7 @@ def barplot(df, column='Adjusted P-value', title="", cutoff=0.05, top_term=10,
     :param df: GSEApy DataFrame results.
     :param column: which column of DataFrame to show. Default: Adjusted P-value
     :param title: figure title.
-    :param cutoff: cut-off of the cloumn you've chose.
+    :param cutoff: cut-off of the cloumn you've chosen.
     :param top_term: number of top enriched terms to show.
     :param figsize: tuple, matplotlib figsize.
     :param color: color for bars.

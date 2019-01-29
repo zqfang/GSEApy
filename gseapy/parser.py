@@ -33,7 +33,7 @@ def gsea_cls_parser(cls):
 def gsea_edb_parser(results_path, index=0):
     """Parse results.edb file stored under **edb** file folder.
 
-    :param results_path: the .results file where lcoated inside edb folder.
+    :param results_path: the .results file located inside edb folder.
     :param index: gene_set index of gmt database, used for iterating items.
     :return: enrichment_term, hit_index,nes, pval, fdr.
     """
@@ -74,7 +74,7 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
     :return: Return a new filtered gene set database dictionary.
 
     **DO NOT** filter gene sets, when use :func:`replot`. Because ``GSEA`` Desktop have already
-    do this for you.
+    done this for you.
 
     """
 
@@ -189,11 +189,11 @@ class Biomart(BioMart):
         >>> ## query results
         >>> results = bm.query(dataset='hsapiens_gene_ensembl', 
                                attributes=['entrezgene', ‘go_id'],
-                               filters={'ensemble_gene_id': [your input list]}
+                               filters={'ensembl_gene_id': [your input list]}
                               )         
         """
         super(Biomart, self).__init__(host=host, verbose=verbose)
-        hosts=["www.ensemble.org", "asia.ensembl.org", "useast.ensembl.org"]
+        hosts=["www.ensembl.org", "asia.ensembl.org", "useast.ensembl.org"]
         # if host not work, select next
         i=0
         while (self.host is None) and (i < 3):
@@ -233,7 +233,7 @@ class Biomart(BioMart):
         :param dataset: str, default: 'hsapiens_gene_ensembl'
         :param attributes: str, list, tuple
         :param filters: dict, {'filter name': list(filter value)}
-        :param host: www.ensemble.org, asia.ensembl.org, useast.ensembl.org
+        :param host: www.ensembl.org, asia.ensembl.org, useast.ensembl.org
         :return: a dataframe contains all attributes you selected.
 
         **Note**: it will take a couple of minutes to get the results.

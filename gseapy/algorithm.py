@@ -12,8 +12,8 @@ def enrichment_score(gene_list, correl_vector, gene_set, weighted_score_type=1,
     """This is the most important function of GSEApy. It has the same algorithm with GSEA and ssGSEA.
 
     :param gene_list:       The ordered gene list gene_name_list, rank_metric.index.values
-    :param gene_set:        gene_sets in gmt file, please used gsea_gmt_parser to get gene_set.
-    :param weighted_score_type:  It's same with gsea's weighted_score method. weighting by the correlation
+    :param gene_set:        gene_sets in gmt file, please use gsea_gmt_parser to get gene_set.
+    :param weighted_score_type:  It's the same with gsea's weighted_score method. Weighting by the correlation
                             is a very reasonable choice that allows significant gene sets with less than perfect coherence.
                             options: 0(classic),1,1.5,2. default:1. if one is interested in penalizing sets for lack of
                             coherence or to discover sets with any type of nonrandom distribution of tags, a value p < 1
@@ -24,17 +24,17 @@ def enrichment_score(gene_list, correl_vector, gene_set, weighted_score_type=1,
 
     :param correl_vector:   A vector with the correlations (e.g. signal to noise scores) corresponding to the genes in
                             the gene list. Or rankings, rank_metric.values
-    :param nperm:           Only used this parameter when computing esnull for statistical testing. set the esnull value
+    :param nperm:           Only use this parameter when computing esnull for statistical testing. Set the esnull value
                             equal to the permutation number.
-    :param rs:              Random state for initialize gene list shuffling. Default: np.random.RandomState(seed=None)
+    :param rs:              Random state for initializing gene list shuffling. Default: np.random.RandomState(seed=None)
 
     :return:
 
      ES: Enrichment score (real number between -1 and +1)
 
-     ESNULL: Enrichment score calculated from random permutation.
+     ESNULL: Enrichment score calculated from random permutations.
 
-     Hits_Indices: index of a gene in gene_list, if gene included in gene_set.
+     Hits_Indices: Index of a gene in gene_list, if gene is included in gene_set.
 
      RES: Numerical vector containing the running enrichment score for all locations in the gene list .
 
