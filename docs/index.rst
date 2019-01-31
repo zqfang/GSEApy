@@ -36,7 +36,7 @@ For a Python 2 version you can install v0.9.4.
 GSEAPY is a python wrapper for **GSEA** and **Enrichr**. 
 --------------------------------------------------------------------------------------------
 
-GSEAPY has five subcommands: ``gsea``, ``prerank``, ``ssgsea``, ``replot`` ``enrichr``.
+GSEAPY has six subcommands: ``gsea``, ``prerank``, ``ssgsea``, ``replot`` ``enrichr``, ``biomart``.
 
 1. The ``gsea`` module produces **GSEA** results.    
 The input requries a txt file(FPKM, Expected Counts, TPM, et.al), a cls file, and gene_sets file in gmt format. 

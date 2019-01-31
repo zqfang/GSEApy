@@ -42,7 +42,7 @@ GSEAPY is a python wrapper for **GSEA** and **Enrichr**.
 GSEAPY can be used for **RNA-seq, ChIP-seq, Microarry** data. It can be used for convenient GO enrichment and to produce **publication quality figures** in python.
 
 
-GSEAPY has five sub-commands available: ``gsea``, ``prerank``, ``ssgsea``, ``replot`` ``enrichr``.
+GSEAPY has six sub-commands available: ``gsea``, ``prerank``, ``ssgsea``, ``replot`` ``enrichr``, ``biomart``.
 
 
 :gsea:    The ``gsea`` module produces `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ results.  The input requries a txt file(FPKM, Expected Counts, TPM, et.al), a cls file, and gene_sets file in gmt format.

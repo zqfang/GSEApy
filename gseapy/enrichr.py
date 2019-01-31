@@ -184,6 +184,10 @@ class Enrichr(object):
 
     def get_background(self):
         """get background gene"""
+        # if input is a file
+        if os.path.isfile(self.background):
+            with open(self.background) as b:
+                bg = b.readlines()
         DB_FILE = resource_filename("gseapy", "data/{}.background.genes.txt".format(self.background))
         filename = os.path.join(DEFAULT_CACHE_PATH, "{}.background.genes.txt".format(self.background))
         if os.path.exists(filename):
@@ -197,8 +201,13 @@ class Enrichr(object):
             df.dropna(subset=['go_id'], inplace=True)
         self._logger.info("using all annotated genes with GO_ID as background genes")
         df.dropna(subset=['entrezgene'], inplace=True)     
+        # input id type: entrez or gene_name
+        if self._isezid:
+            bg = df['entrezgene'].astype(int)
+        else:
+            bg = df['external_gene_name']
 
-        return df
+        return set(bg)
 
     def get_organism(self):
         """Select Enrichr organism from below:
@@ -251,16 +260,13 @@ class Enrichr(object):
             self._bg = int(self.background)
         elif isinstance(self.background, str):
             # self.background = set(reduce(lambda x,y: x+y, gmt.values(),[]))
-            df = self.get_background()
-            # input id type: entrez or gene_name
-            if self._isezid:
-                bg = df['entrezgene'].astype(int)
-            else:
-                bg = df['external_gene_name']
+            self._bg = self.get_background()
+            self._logger.info("Background: %s genes with"%(len(self._bg)))
+        elif isinstance(self.background, (list, set, tuple, pd.Series)):
+            self._bg = set(self.background)
+        else:
+            self._logger.info("Unsupported background data type")
 
-            self._bg = set(bg.unique())
-            self._logger.info("Background: %s %s genes with GO_IDs. "%(len(self._bg), self.background))
-            self._logger.info("If this is not you wanted, please give a number to background argument")
         hgtest = list(calc_pvalues(query=self._gls, gene_sets=gmt, 
                                    background=self._bg))
         if len(hgtest) > 0:
