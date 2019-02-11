@@ -10,6 +10,7 @@ from collections import OrderedDict
 from pkg_resources import resource_filename
 from time import sleep
 from tempfile import TemporaryDirectory
+from numpy import isscalar
 from gseapy.plot import barplot
 from gseapy.parser import Biomart
 from gseapy.utils import *
@@ -256,17 +257,23 @@ class Enrichr(object):
             Term Overlap P-value Adjusted_P-value Genes
 
         """
-        if isinstance(self.background, int) or self.background.isdigit():
-            self._bg = int(self.background)
-        elif isinstance(self.background, str):
-            # self.background = set(reduce(lambda x,y: x+y, gmt.values(),[]))
-            self._bg = self.get_background()
-            self._logger.info("Background: %s genes with"%(len(self._bg)))
-        elif isinstance(self.background, (list, set, tuple, pd.Series)):
-            self._bg = set(self.background)
+        if isscalar(self.background):
+            if isinstance(self.background, int) or self.background.isdigit():
+                self._bg = int(self.background)
+            elif isinstance(self.background, str):
+                # self.background = set(reduce(lambda x,y: x+y, gmt.values(),[]))
+                self._bg = self.get_background()
+                self._logger.info("Background: %s genes with"%(len(self._bg)))
+            else:
+                raise Exception("Unsupported background data type")
         else:
-            self._logger.info("Unsupported background data type")
-
+            # handle array object: nd.array, list, tuple, set, Series
+            try:
+                it = iter(self.background)
+                self._bg = set(self.background)
+            except TypeError:
+                self._logger.error("Unsupported background data type")
+        # statistical testing
         hgtest = list(calc_pvalues(query=self._gls, gene_sets=gmt, 
                                    background=self._bg))
         if len(hgtest) > 0:
