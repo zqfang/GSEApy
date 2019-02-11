@@ -121,14 +121,14 @@ def add_output_option(parser):
                               choose from {'pdf', 'png', 'jpeg','ps', 'eps','svg'}. Default: 'pdf'.")
     parser.add_argument("--fs", "--figsize", action='store', nargs=2, dest='figsize',
                         metavar=('width', 'height'),type=float, default=(6.5, 6),
-                        help="The figsize keyword argument need two parameter to define. Default: (6.5, 6)")
+                        help="The figsize keyword argument need two parameters to define. Default: (6.5, 6)")
     parser.add_argument("--graph", dest = "graph", action="store", type=int, default=20, metavar='int',
                         help="Numbers of top graphs produced. Default: 20")
     parser.add_argument("--no-plot", action='store_true', dest='noplot', default=False,
                         help="Speed up computing by suppressing the plot output."+\
                              "This is useful only if data are interested. Default: False.")
     parser.add_argument("-v", "--verbose", action="store_true", default=False, dest='verbose',
-                        help="increase output verbosity, print out progress of your job", )
+                        help="Increase output verbosity, print out progress of your job", )
 
 
 def add_output_group(parser, required=True):
@@ -171,7 +171,7 @@ def add_gsea_parser(subparsers):
     group_opt.add_argument("--max-size", dest = "maxs", action="store", type=int, default=500, metavar='int',
                            help="Max size of input genes presented in Gene Sets. Default: 500")
     group_opt.add_argument("-w", "--weight", action='store', dest='weight', default=1.0, type=float, metavar='float',
-                           help='Weighted_score of rank_metrics.For weighting input genes. Choose from {0, 1, 1.5, 2},default: 1',)
+                           help='Weighted_score of rank_metrics. For weighting input genes. Choose from {0, 1, 1.5, 2}. Default: 1',)
     group_opt.add_argument("-m", "--method", action="store", dest="method", type=str, metavar='',
                            choices=("signal_to_noise", "t_test", "ratio_of_classes", "diff_of_classes", "log2_ratio_of_classes"),
                            default="log2_ratio_of_classes",
@@ -196,12 +196,12 @@ def add_prerank_parser(subparsers):
     # group for input files
     prerank_input = argparser_prerank.add_argument_group("Input files arguments")
     prerank_input.add_argument("-r", "--rnk", dest="rnk", action="store", type=str, required=True,
-                             help="ranking metric file in .rnk format.Same with GSEA.")
+                             help="Ranking metric file in .rnk format. Same with GSEA.")
     prerank_input.add_argument("-g", "--gmt", dest="gmt", action="store", type=str, required=True,
                              help="Gene set database in GMT format. Same with GSEA.")
     prerank_input.add_argument("-l", "--label", action='store', nargs=2, dest='label',
                              metavar=('pos', 'neg'), type=str, default=('Pos','Neg'),
-                             help="The phenotype label argument need two parameter to define. Default: ('Pos','Neg')")
+                             help="The phenotype label argument need two parameters to define. Default: ('Pos','Neg')")
 
     # group for output files
     prerank_output = argparser_prerank.add_argument_group("Output arguments")
@@ -216,7 +216,7 @@ def add_prerank_parser(subparsers):
     prerank_opt.add_argument("--max-size", dest = "maxs", action="store", type=int, default=500, metavar='int',
                              help="Max size of input genes presented in Gene Sets. Default: 500")
     prerank_opt.add_argument("-w", "--weight", action='store', dest='weight', default=1.0, type=float, metavar='float',
-                             help='Weighted_score of rank_metrics.For weighting input genes. Choose from {0, 1, 1.5, 2},default: 1',)
+                             help='Weighted_score of rank_metrics. For weighting input genes. Choose from {0, 1, 1.5, 2}. Default: 1',)
     prerank_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
                              help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
     prerank_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=None, metavar='',
@@ -243,7 +243,7 @@ def add_singlesample_parser(subparsers):
     add_output_option(group_output)
 
     # group for General options.
-    group_opt = argparser_gsea.add_argument_group("GSEA advanced arguments")
+    group_opt = argparser_gsea.add_argument_group("Single Sample GSEA advanced arguments")
     group_opt.add_argument("--sn", "--sample-norm", dest = "norm", action="store", type=str,
                            default='rank', metavar='normalize',
                            choices=("rank", "log", "log_rank", "custom"),
@@ -257,7 +257,7 @@ def add_singlesample_parser(subparsers):
     group_opt.add_argument("--max-size", dest = "maxs", action="store", type=int, default=2000,metavar='int',
                            help="Max size of input genes presented in Gene Sets. Default: 2000")
     group_opt.add_argument("-w", "--weight", action='store', dest='weight', default=0.25, type=float, metavar='weight',
-                           help='Weighted_score of rank_metrics.For weighting input genes.default: 0.25',)
+                           help='Weighted_score of rank_metrics. For weighting input genes. Default: 0.25',)
     group_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
                            help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
     group_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=None, metavar='',
@@ -293,7 +293,7 @@ def add_enrichr_parser(subparsers):
     # group for required options.
     enrichr_opt = argparser_enrichr.add_argument_group("Input arguments")
     enrichr_opt.add_argument("-i", "--input-list", action="store", dest="gene_list", type=str, required=True, metavar='IDs',
-                              help="Enrichr uses a list of gene name as input.")
+                              help="Enrichr uses a list of gene names as input.")
     enrichr_opt.add_argument("-g", "--gene-sets", action="store", dest="library", type=str, required=True, metavar='GMT',
                               help="Enrichr library name(s) required. Separate each name by comma.")
     enrichr_opt.add_argument("--org", "--organism", action="store", dest="organism", type=str, default='',
@@ -303,10 +303,10 @@ def add_enrichr_parser(subparsers):
                               can be differentiated from each other if you choose to save or share your list.")
     enrichr_opt.add_argument("--cut", "--cut-off", action="store", dest="thresh", metavar='float', type=float, default=0.05,
                               help="Adjust-Pval cutoff, used for generating plots. Default: 0.05.")
-    enrichr_opt.add_argument("--bg", "--backgroud", action="store", dest="bg", default='hsapiens_gene_ensembl', metavar='BGNUM',
+    enrichr_opt.add_argument("--bg", "--background", action="store", dest="bg", default='hsapiens_gene_ensembl', metavar='BGNUM',
                               help="BioMart Dataset name or Background total genes number. Default: None")
     enrichr_opt.add_argument("-t", "--top-term", dest="term", action="store", type=int, default=10, metavar='int',
-                              help="Numbers of top terms showed in the plot. Default: 10")
+                              help="Numbers of top terms shown in the plot. Default: 10")
     # enrichr_opt.add_argument("--scale", dest = "scale", action="store", type=float, default=0.5, metavar='float',
     #                          help="scatter dot scale in the dotplot. Default: 0.5")
     # enrichr_opt.add_argument("--no-plot", action='store_true', dest='no_plot', default=False,
@@ -334,8 +334,8 @@ def add_biomart_parser(subparsers):
     biomart_opt.add_argument("-o", "--ofile", dest="ofile", type=str, required=True, help="Output file name")                               
     biomart_opt.add_argument("-d", "--dataset", action="store", dest="bg", type=str, default='hsapiens_gene_ensembl', metavar='DATA',
                              help="Which dataset to use. Default: hsapiens_gene_ensembl")
-    biomart_opt.add_argument("--host", action="store", dest="host", type=str, default='www.ensemble.org', metavar='HOST',
-                             help="Which host to use. Select from {'www.ensemble.org', 'asia.ensembl.org', 'useast.ensembl.org'}.")
+    biomart_opt.add_argument("--host", action="store", dest="host", type=str, default='www.ensembl.org', metavar='HOST',
+                             help="Which host to use. Select from {'www.ensembl.org', 'asia.ensembl.org', 'useast.ensembl.org'}.")
     biomart_opt.add_argument("-m", "--mart", action="store", dest="mart", type=str, metavar='MART',
                              default="ENSEMBL_MART_ENSEMBL", help="Which mart to use. Default: ENSEMBL_MART_ENSEMBL.")
     biomart_opt.add_argument("-v", "--verbose", action="store_true", default=False, dest='verbose',

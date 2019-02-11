@@ -70,8 +70,8 @@ class GSEAbase(object):
         """Parse ranking file. This file contains ranking correlation vector( or expression values)
            and gene names or ids.
 
-            :param rnk: the .rnk file of GSEA input or a pandas DataFrame, Series instance.
-            :return: a pandas Series with gene name indexed rankings
+            :param rnk: the .rnk file of GSEA input or a Pandas DataFrame, Series instance.
+            :return: a Pandas Series with gene name indexed rankings
 
         """
         # load data
@@ -431,7 +431,7 @@ class GSEA(GSEAbase):
                            figsize=self.figsize, format=self.format,
                            pheno_pos=phenoPos, pheno_neg=phenoNeg)
 
-        self._logger.info("Congratulations. GSEApy run successfully................\n")
+        self._logger.info("Congratulations. GSEApy runs successfully................\n")
         if self._outdir is None:
             self._tmpdir.cleanup()
 
@@ -508,7 +508,7 @@ class Prerank(GSEAbase):
                            figsize=self.figsize, format=self.format,
                            pheno_pos=self.pheno_pos, pheno_neg=self.pheno_neg)
 
-        self._logger.info("Congratulations. GSEApy run successfully................\n")
+        self._logger.info("Congratulations. GSEApy runs successfully................\n")
         if self._outdir is None:
             self._tmpdir.cleanup()
 
@@ -755,7 +755,7 @@ class SingleSampleGSEA(GSEAbase):
         samplesNES = samplesNES.copy()
         samplesNES.index.rename('Term|NES', inplace=True)
         self.res2d = samplesNES
-        self._logger.info("Congratulations. GSEApy run successfully................\n")
+        self._logger.info("Congratulations. GSEApy runs successfully................\n")
         if self._outdir is None: return
         # write es
         outESfile = os.path.join(outdir, "gseapy.samples.raw.es.txt")
@@ -777,7 +777,7 @@ class SingleSampleGSEA(GSEAbase):
         return
 
 class Replot(GSEAbase):
-    """To Reproduce GSEA desktop output results."""
+    """To reproduce GSEA desktop output results."""
     def __init__(self, indir, outdir='GSEApy_Replot', weighted_score_type=1,
                   min_size=3, max_size=1000, figsize=(6.5,6), graph_num=20, format='pdf', verbose=False):
         self.indir=indir
@@ -859,9 +859,9 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
           graph_num=20, no_plot=False, seed=None, verbose=False):
     """ Run Gene Set Enrichment Analysis.
 
-    :param data: Gene expression data table, pandas DataFrame, gct file.
+    :param data: Gene expression data table, Pandas DataFrame, gct file.
     :param gene_sets: Enrichr Library name or .gmt gene sets file or dict of gene sets. Same input with GSEA.
-    :param cls: a list or a .cls file format required for GSEA.
+    :param cls: A list or a .cls file format required for GSEA.
     :param str outdir: Results output directory.
     :param int permutation_num: Number of permutations for significance computation. Default: 1000.
     :param str permutation_type: Permutation type, "phenotype" for phenotypes, "gene_set" for genes.
@@ -905,7 +905,7 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
     :param str format: Matplotlib figure format. Default: 'pdf'.
     :param int graph_num: Plot graphs for top sets of each phenotype.
-    :param bool no_plot: if equal to True, no figure will be draw. Default: False.
+    :param bool no_plot: If equals to True, no figure will be drawn. Default: False.
     :param seed: Random seed. expect an integer. Default:None.
     :param bool verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
 
@@ -936,14 +936,14 @@ def ssgsea(data, gene_sets, outdir="ssGSEA_", sample_norm_method='rank', min_siz
            figsize=(7,6), format='pdf', graph_num=20, no_plot=False, seed=None, verbose=False):
     """Run Gene Set Enrichment Analysis with single sample GSEA tool
 
-    :param data: expression table, pd.Series, pd.DataFrame, GCT file, or .rnk file format.
+    :param data: Expression table, pd.Series, pd.DataFrame, GCT file, or .rnk file format.
     :param gene_sets: Enrichr Library name or .gmt gene sets file or dict of gene sets. Same input with GSEA.
-    :param outdir: results output directory.
+    :param outdir: Results output directory.
     :param str sample_norm_method: "Sample normalization method. Choose from {'rank', 'log', 'log_rank'}. Default: rank.
 
-               1. 'rank': Rank your expression data, and transformed by 10000*rank_dat/gene_numbers
-               2. 'log' : Do not rank, but transformed data by log(data + exp(1)), while  data = data[data<1] =1.
-               3. 'log_rank': Rank your expression data, and transformed by log(10000*rank_dat/gene_numbers+ exp(1))
+               1. 'rank': Rank your expression data, and transform by 10000*rank_dat/gene_numbers
+               2. 'log' : Do not rank, but transform data by log(data + exp(1)), while data = data[data<1] =1.
+               3. 'log_rank': Rank your expression data, and transform by log(10000*rank_dat/gene_numbers+ exp(1))
                4. 'custom': Do nothing, and use your own rank value to calculate enrichment score.
     
     see here: https://github.com/GSEA-MSigDB/ssGSEAProjection-gpmodule/blob/master/src/ssGSEAProjection.Library.R, line 86
@@ -958,7 +958,7 @@ def ssgsea(data, gene_sets, outdir="ssGSEA_", sample_norm_method='rank', min_siz
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [7,6].
     :param str format: Matplotlib figure format. Default: 'pdf'.
     :param int graph_num: Plot graphs for top sets of each phenotype.
-    :param bool no_plot: if equal to True, no figure will be draw. Default: False.
+    :param bool no_plot: If equals to True, no figure will be drawn. Default: False.
     :param seed: Random seed. expect an integer. Default:None.
     :param bool verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
 
@@ -1004,7 +1004,7 @@ def prerank(rnk, gene_sets, outdir='GSEA_Prerank', pheno_pos='Pos', pheno_neg='N
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
     :param str format: Matplotlib figure format. Default: 'pdf'.
     :param int graph_num: Plot graphs for top sets of each phenotype.
-    :param bool no_plot: if equal to True, no figure will be draw. Default: False.
+    :param bool no_plot: If equals to True, no figure will be drawn. Default: False.
     :param seed: Random seed. expect an integer. Default:None.
     :param bool verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
 
@@ -1036,12 +1036,12 @@ def replot(indir, outdir='GSEA_Replot', weighted_score_type=1,
     :param indir: GSEA desktop results directory. In the sub folder, you must contain edb file foder.
     :param outdir: Output directory.
     :param float weighted_score_type: weighted score type. choose from {0,1,1.5,2}. Default: 1.
-    :param list figsize: matplotlib output figure figsize. Default: [6.5,6].
-    :param str format: matplotlib output figure format. Default: 'pdf'.
-    :param int min_size: min size of input genes presented in Gene Sets. Default: 3.
-    :param int max_size: max size of input genes presented in Gene Sets. Default: 5000.
-                     you will not encourage to use min_size, or max_size argument in :func:`replot` function.
-                     Because gmt file has already been filter.
+    :param list figsize: Matplotlib output figure figsize. Default: [6.5,6].
+    :param str format: Matplotlib output figure format. Default: 'pdf'.
+    :param int min_size: Min size of input genes presented in Gene Sets. Default: 3.
+    :param int max_size: Max size of input genes presented in Gene Sets. Default: 5000.
+                     You are not encouraged to use min_size, or max_size argument in :func:`replot` function.
+                     Because gmt file has already been filtered.
     :param verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
 
     :return: Generate new figures with selected figure format. Default: 'pdf'.

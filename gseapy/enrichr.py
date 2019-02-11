@@ -142,7 +142,7 @@ class Enrichr(object):
 
     def check_genes(self, gene_list, usr_list_id):
         '''
-        Compare the genes send and received to get succesfully recognized genes
+        Compare the genes sent and received to get succesfully recognized genes
         '''
         response = requests.get('http://amp.pharm.mssm.edu/Enrichr/view?userListId=%s' % usr_list_id)
         if not response.ok:
@@ -265,6 +265,7 @@ class Enrichr(object):
                 self._bg = self.get_background()
                 self._logger.info("Background: %s genes with"%(len(self._bg)))
             else:
+<<<<<<< HEAD
                 raise Exception("Unsupported background data type")
         else:
             # handle array object: nd.array, list, tuple, set, Series
@@ -274,6 +275,13 @@ class Enrichr(object):
             except TypeError:
                 self._logger.error("Unsupported background data type")
         # statistical testing
+=======
+                bg = df['external_gene_name']
+
+            self._bg = set(bg.unique())
+            self._logger.info("Background: %s %s genes with GO_IDs. "%(len(self._bg), self.background))
+            self._logger.info("If this is not what you wanted, please give a number to the background argument")
+>>>>>>> cf6d246fbefe75e29379fe465a85e5042dcba839
         hgtest = list(calc_pvalues(query=self._gls, gene_sets=gmt, 
                                    background=self._bg))
         if len(hgtest) > 0:
@@ -357,14 +365,14 @@ def enrichr(gene_list, gene_sets, organism='human', description='',
                      see here for details: https://amp.pharm.mssm.edu/modEnrichr
     :param description: name of analysis. optional.
     :param outdir: Output file directory
-    :param float cutoff: Adjust P-value (benjamini-hochberg correction)cutoff. Default: 0.05
+    :param float cutoff: Adjusted P-value (benjamini-hochberg correction) cutoff. Default: 0.05
     :param int background: BioMart dataset name for retrieving background gene information.
                            This argument only works when gene_sets input is a gmt file or python dict.
                            You could also specify a number by yourself, e.g. total expressed genes number.
                            In this case, you will skip retrieving background infos from biomart.
     
-    use the code below to see validated background dataset name from BioMart.
-    Here are examle code:
+    Use the code below to see valid background dataset names from BioMart.
+    Here are example code:
     >>> from gseapy.parser import Biomart 
     >>> bm = Biomart(verbose=False, host="asia.ensembl.org")
     >>> ## view validated marts
@@ -374,7 +382,7 @@ def enrichr(gene_list, gene_sets, organism='human', description='',
 
     :param str format: Output figure format supported by matplotlib,('pdf','png','eps'...). Default: 'pdf'.
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. (width,height). Default: (6.5,6).
-    :param bool no_plot: if equal to True, no figure will be draw. Default: False.
+    :param bool no_plot: If equals to True, no figure will be drawn. Default: False.
     :param bool verbose: Increase output verbosity, print out progress of your job, Default: False.
 
     :return: An Enrichr object, which obj.res2d stores your last query, obj.results stores your all queries.

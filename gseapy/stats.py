@@ -12,11 +12,11 @@ def calc_pvalues(query, gene_sets, background=20000, **kwargs):
 
     :param set query: set of identifiers for which the p value is calculated
     :param dict gene_sets: gmt file dict after background was set
-    :param set background: total number of genes in your annoated database.
+    :param set background: total number of genes in your annotated database.
     :returns: pvalues
-              x: overlaped gene number
-              n:legth of gene_set belongs to each terms
-              hits: overlaped gene names.
+              x: overlapped gene number
+              n: length of gene_set which belongs to each terms
+              hits: overlapped gene names.
 
 
     For 2*2 contingency table: 
@@ -26,7 +26,7 @@ def calc_pvalues(query, gene_sets, background=20000, **kwargs):
     =>  not in gene_set  |        c     |       d       |       c+d  
            column total                                 | a+b+c+d = anno database
     =============================================================================
-    backgroud genes number = a + b + c + d.
+    background genes number = a + b + c + d.
 
     Then, in R
         x=a     the number of white balls drawn without replacement 
@@ -42,7 +42,7 @@ def calc_pvalues(query, gene_sets, background=20000, **kwargs):
         k: the random variate represents the number of Type I objects in N drawn 
            without replacement from the total population.
     
-    Therefore, these two fuction are same when using parameters from 2*2 table:
+    Therefore, these two functions are the same when using parameters from 2*2 table:
     R:     >   phyper(x-1, m, n, k, lower.tail=FALSE)
     Scipy: >>> hypergeom.sf(x-1, m+n, m, k)
      
@@ -61,7 +61,7 @@ def calc_pvalues(query, gene_sets, background=20000, **kwargs):
     elif isinstance(background, int):
         bg = background
     else:
-        raise ValueError("backgroud should be set or int object")
+        raise ValueError("background should be set or int object")
     # pval
     subsets = sorted(gene_sets.keys())
     for s in subsets:
