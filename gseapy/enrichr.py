@@ -265,7 +265,6 @@ class Enrichr(object):
                 self._bg = self.get_background()
                 self._logger.info("Background: %s genes with"%(len(self._bg)))
             else:
-<<<<<<< HEAD
                 raise Exception("Unsupported background data type")
         else:
             # handle array object: nd.array, list, tuple, set, Series
@@ -275,13 +274,6 @@ class Enrichr(object):
             except TypeError:
                 self._logger.error("Unsupported background data type")
         # statistical testing
-=======
-                bg = df['external_gene_name']
-
-            self._bg = set(bg.unique())
-            self._logger.info("Background: %s %s genes with GO_IDs. "%(len(self._bg), self.background))
-            self._logger.info("If this is not what you wanted, please give a number to the background argument")
->>>>>>> cf6d246fbefe75e29379fe465a85e5042dcba839
         hgtest = list(calc_pvalues(query=self._gls, gene_sets=gmt, 
                                    background=self._bg))
         if len(hgtest) > 0:
