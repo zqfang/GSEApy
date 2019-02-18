@@ -185,17 +185,23 @@ class Enrichr(object):
 
     def get_background(self):
         """get background gene"""
-        # if input is a file
+
+        # input is a file
         if os.path.isfile(self.background):
             with open(self.background) as b:
-                bg = b.readlines()
+                bg2 = b.readlines() 
+            bg = [g.strip() for g in bg2]  
+            return set(bg)
+        
+        # package included data
         DB_FILE = resource_filename("gseapy", "data/{}.background.genes.txt".format(self.background))
-        filename = os.path.join(DEFAULT_CACHE_PATH, "{}.background.genes.txt".format(self.background))
+        filename = os.path.join(DEFAULT_CACHE_PATH, "{}.background.genes.txt".format(self.background))  
         if os.path.exists(filename):
             df = pd.read_table(filename)
         elif os.path.exists(DB_FILE):
             df = pd.read_table(DB_FILE)
         else:
+            # background is a biomart database name
             self._logger.warning("Downloading %s for the first time. It might take a couple of miniutes."%self.background)
             bm = Biomart()
             df = bm.query(dataset=self.background)
@@ -263,7 +269,7 @@ class Enrichr(object):
             elif isinstance(self.background, str):
                 # self.background = set(reduce(lambda x,y: x+y, gmt.values(),[]))
                 self._bg = self.get_background()
-                self._logger.info("Background: %s genes with"%(len(self._bg)))
+                self._logger.info("Background: found %s genes"%(len(self._bg)))
             else:
                 raise Exception("Unsupported background data type")
         else:
