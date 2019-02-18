@@ -146,7 +146,10 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
         return genesets_filter
 
 def get_library_name(database=''):
-    """return enrichr active enrichr library name. """
+    """return enrichr active enrichr library name. 
+    :param str database: Select one from { 'Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm' } 
+    
+    """
 
     # make a get request to get the gmt names and meta data from Enrichr
     """old code
@@ -161,7 +164,11 @@ def get_library_name(database=''):
             libs.append(inst_gmt['libraryName'])
     """
 
-    # species should be : "Fly Yeast Worm Fish", default Human & Mouse
+    if database not in ['Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm']:
+        sys.stderr.write("""No supported database. Please input one of these:
+                            'Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm' """)
+        return 
+    if database in ['Human', 'Mouse']: database=''
     lib_url='http://amp.pharm.mssm.edu/%sEnrichr/datasetStatistics'%database
     libs_json = json.loads(requests.get(lib_url).text)
     libs = [lib['libraryName'] for lib in libs_json['statistics']]
