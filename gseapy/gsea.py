@@ -8,7 +8,7 @@ from tempfile import TemporaryDirectory
 from numpy import log, exp
 import numpy as np
 import pandas as pd
-
+import requests
 from gseapy.algorithm import enrichment_score, gsea_compute, ranking_metric
 from gseapy.algorithm import enrichment_score_tensor, gsea_compute_tensor
 from gseapy.parser import gsea_edb_parser, gsea_cls_parser
