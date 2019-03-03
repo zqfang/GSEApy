@@ -189,6 +189,7 @@ class GSEAbase(object):
         if not response.ok:
             raise Exception('Error fetching enrichment results, check internet connection first.')
         # reformat to dict and wirte to disk
+        mkdirs(DEFAULT_CACHE_PATH)
         genesets_dict = {}
         outname = "enrichr.%s.gmt"%libname
         gmtout = open(os.path.join(DEFAULT_CACHE_PATH, outname), "w")

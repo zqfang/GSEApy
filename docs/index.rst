@@ -31,7 +31,7 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
 **Please note** : from version 0.9.5 on, GSEApy only works on Python 3.5+ and Python 2.x will no longer be supported.
 For a Python 2 version you can install v0.9.4.
 
-**Release notes** : https://github.com/BioNinja/gseapy/releases 
+**Release notes** : https://github.com/zqfang/GSEApy/releases 
 
 GSEAPY is a python wrapper for **GSEA** and **Enrichr**. 
 --------------------------------------------------------------------------------------------
