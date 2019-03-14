@@ -564,7 +564,8 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
     # compute pvals.
     enrichmentPVals = gsea_pval(enrichment_scores, enrichment_nulls).tolist()
 
-    # new normalize enrichment score calculating method. this could speed up significantly.
+    # new normalize enrichment score implementation. 
+    # this could speed up significantly.
     esnull_meanPos = []
     esnull_meanNeg = []
 
@@ -587,14 +588,14 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
     try:
         condlist1 = [ es >= 0, es < 0]
         choicelist1 = [ es/esnull_meanPos, -es/esnull_meanNeg ]
-        nEnrichmentScores = np.select(condlist1, choicelist1).tolist()
+        nEnrichmentScores = np.select(condlist1, choicelist1)
 
         condlist2 = [ esnull >= 0, esnull < 0]
         choicelist2 = [ esnull/pos, -esnull/neg ]
         nEnrichmentNulls = np.select(condlist2, choicelist2)
 
     except:  #return if according nes, nesnull is uncalculable
-        nEnrichmentScores = np.repeat(0.0, es.size).tolist()
+        nEnrichmentScores = np.repeat(0.0, es.size)
         nEnrichmentNulls = np.repeat(0.0 , es.size).reshape(esnull.shape)
 
 
@@ -607,27 +608,35 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
     # nvals = np.array(sorted(vals))
     # or
     nvals = np.sort(nEnrichmentNulls.flatten())
-    nnes = np.array(sorted(nEnrichmentScores))
+    nnes = np.sort(nEnrichmentScores)
     fdrs = []
     # FDR computation
     for i in range(len(enrichment_scores)):
         nes = nEnrichmentScores[i]
-
+        # use the same pval method to calculate fdr
         if nes >= 0:
-            allPos = int(len(nvals) - np.searchsorted(nvals, 0, side="left"))
-            allHigherAndPos = int(len(nvals) - np.searchsorted(nvals, nes, side="left"))
-            nesPos = len(nnes) - int(np.searchsorted(nnes, 0, side="left"))
-            nesHigherAndPos = len(nnes) - int(np.searchsorted(nnes, nes, side="left"))
+            # allPos = int(len(nvals) - np.searchsorted(nvals, 0, side="left"))
+            # allHigherAndPos = int(len(nvals) - np.searchsorted(nvals, nes, side="left"))
+            # nesPos = len(nnes) - int(np.searchsorted(nnes, 0, side="left"))
+            # nesHigherAndPos = len(nnes) - int(np.searchsorted(nnes, nes, side="left"))
+            allPos = (nvals >= 0).sum()
+            allHigherAndPos = (nvals >= nes).sum()
+            nesPos = (nnes >=0).sum()
+            nesHigherAndPos = (nnes >= nes).sum()
         else:
-            allPos = int(np.searchsorted(nvals, 0, side="left"))
-            allHigherAndPos = int(np.searchsorted(nvals, nes, side="right"))
-            nesPos = int(np.searchsorted(nnes, 0, side="left"))
-            nesHigherAndPos = int(np.searchsorted(nnes, nes, side="right"))
+            # allPos = int(np.searchsorted(nvals, 0, side="left"))
+            # allHigherAndPos = int(np.searchsorted(nvals, nes, side="right"))
+            # nesPos = int(np.searchsorted(nnes, 0, side="left"))
+            # nesHigherAndPos = int(np.searchsorted(nnes, nes, side="right"))
+            allPos = (nvals < 0).sum()
+            allHigherAndPos = (nvals < nes).sum()
+            nesPos = (nnes < 0).sum()
+            nesHigherAndPos = (nnes < nes).sum()
+        
         try:
-            pi_norm = allHigherAndPos/float(allPos) #p value
+            pi_norm = allHigherAndPos/float(allPos) 
             pi_obs = nesHigherAndPos/float(nesPos)
-
-            fdr = pi_norm/pi_obs if pi_norm/pi_obs < 1.0  else 1.0
+            fdr = pi_norm/pi_obs 
             fdrs.append(fdr)
         except:
             fdrs.append(1000000000.0)
