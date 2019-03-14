@@ -218,8 +218,8 @@ class Biomart(BioMart):
     def get_datasets(self, mart='ENSEMBL_MART_ENSEMBL'):
         """Get available datasets from mart you've selected"""
         datasets = self.datasets(mart, raw=True)
-        return pd.read_table(StringIO(datasets), header=None, usecols=[1, 2],
-                            names = ["Name", "Description"])
+        return pd.read_csv(StringIO(datasets), header=None, usecols=[1, 2],
+                            names = ["Name", "Description"],sep="\t")
 
     def get_attributes(self, dataset):
         """Get available attritbutes from dataset you've selected"""
@@ -283,7 +283,8 @@ class Biomart(BioMart):
 
         xml_query = self.get_xml()
         results = super(Biomart, self).query(xml_query)
-        df = pd.read_table(StringIO(results), header=None, names=attributes, index_col=None)
+        df = pd.read_csv(StringIO(results), header=None, sep="\t",
+                         names=attributes, index_col=None)
         # save file to cache path.
         if filename is None: 
             mkdirs(DEFAULT_CACHE_PATH)

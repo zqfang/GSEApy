@@ -82,7 +82,7 @@ class GSEAbase(object):
         elif isinstance(rnk, pd.Series):
             rank_metric = rnk.reset_index()
         elif os.path.isfile(rnk):
-            rank_metric = pd.read_table(rnk, header=None, comment='#')
+            rank_metric = pd.read_csv(rnk, header=None, comment='#', sep="\t")
         else:
             raise Exception('Error parsing gene ranking values!')
         # sort ranking values from high to low
@@ -357,9 +357,9 @@ class GSEA(GSEAbase):
         elif os.path.isfile(self.data) :
             # GCT input format?
             if self.data.endswith("gct"):
-                exprs = pd.read_table(self.data, skiprows=1, comment='#')
+                exprs = pd.read_csv(self.data, skiprows=1, comment='#',sep="\t")
             else:
-                exprs = pd.read_table(self.data, comment='#')
+                exprs = pd.read_csv(self.data, comment='#',sep="\t")
         else:
             raise Exception('Error parsing gene expression dataframe!')
             sys.exit(1)
@@ -575,14 +575,14 @@ class SingleSampleGSEA(GSEAbase):
         elif os.path.isfile(exprs):
             # GCT input format?
             if exprs.endswith("gct"):
-                rank_metric = pd.read_table(exprs, skiprows=1, comment='#', index_col=0)
+                rank_metric = pd.read_csv(exprs, skiprows=1, comment='#', index_col=0,sep="\t")
             else:
                 # just txt file like input
-                rank_metric = pd.read_table(exprs, comment='#', index_col=0)
+                rank_metric = pd.read_csv(exprs, comment='#', index_col=0,sep="\t")
                 if rank_metric.shape[1] ==1:
                     # rnk file like input
-                    rank_metric = pd.read_table(exprs, header=None, comment='#',
-                                                names=['sample1'], index_col=0)
+                    rank_metric = pd.read_csv(exprs, header=None, comment='#',
+                                                names=['sample1'], index_col=0,sep="\t")
             # select numbers
             rank_metric = rank_metric.select_dtypes(include=[np.number])
         else:

@@ -166,7 +166,7 @@ class Enrichr(object):
         response = s.get(url, stream=True, timeout=None)
         # response = requests.get(RESULTS_URL + query_string % (user_list_id, gene_set))
         sleep(1)
-        res = pd.read_table(StringIO(response.content.decode('utf-8')))
+        res = pd.read_csv(StringIO(response.content.decode('utf-8')),sep="\t")
         return [job_id['shortId'], res]
 
     def _is_entrez_id(self, idx):
@@ -197,9 +197,9 @@ class Enrichr(object):
         DB_FILE = resource_filename("gseapy", "data/{}.background.genes.txt".format(self.background))
         filename = os.path.join(DEFAULT_CACHE_PATH, "{}.background.genes.txt".format(self.background))  
         if os.path.exists(filename):
-            df = pd.read_table(filename)
+            df = pd.read_csv(filename,sep="\t")
         elif os.path.exists(DB_FILE):
-            df = pd.read_table(DB_FILE)
+            df = pd.read_csv(DB_FILE,sep="\t")
         else:
             # background is a biomart database name
             self._logger.warning("Downloading %s for the first time. It might take a couple of miniutes."%self.background)
@@ -332,7 +332,7 @@ class Enrichr(object):
                 # Remember gene set library used
             res.insert(0, "Gene_set", self._gs)
             # Append to master dataframe
-            self.results = self.results.append(res, ignore_index=True)
+            self.results = self.results.append(res, ignore_index=True, sort=True)
             self.res2d = res
             if self._outdir is None: continue
             self._logger.info('Save file of enrichment results: Job Id:' + str(shortID))
