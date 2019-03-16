@@ -42,8 +42,8 @@ def enrichment_score(gene_list, correl_vector, gene_set, weighted_score_type=1,
 
     N = len(gene_list)
     # Test whether each element of a 1-D array is also present in a second array
-    # It's more intuitived here than orginal enrichment_score source code.
-    # use .astype to covert bool to intergers
+    # It's more intuitive here than original enrichment_score source code.
+    # use .astype to covert bool to integer
     tag_indicator = np.in1d(gene_list, gene_set, assume_unique=True).astype(int)  # notice that the sign is 0 (no tag) or 1 (tag)
 
     if weighted_score_type == 0 :
@@ -55,7 +55,7 @@ def enrichment_score(gene_list, correl_vector, gene_set, weighted_score_type=1,
     hit_ind = np.flatnonzero(tag_indicator).tolist()
     # if used for compute esnull, set esnull equal to permutation number, e.g. 1000
     # else just compute enrichment scores
-    # set axis to 1, because we have 2 dimentional array
+    # set axis to 1, because we have 2D array
     axis = 1
     tag_indicator = np.tile(tag_indicator, (nperm+1,1))
     correl_vector = np.tile(correl_vector,(nperm+1,1))
@@ -209,8 +209,8 @@ def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
        :return:
                 returns two 2d ndarray with shape (nperm, gene_num).
 
-                | cor_mat_indices: the indices of sorted and permutate (exclude last row) ranking matrix.
-                | cor_mat: sorted and permutate (exclude last row) ranking matrix.
+                | cor_mat_indices: the indices of sorted and permutated (exclude last row) ranking matrix.
+                | cor_mat: sorted and permutated (exclude last row) ranking matrix.
 
     """
     # S: samples, G: gene number
@@ -518,19 +518,19 @@ def gsea_pval(es, esnull):
     # to speed up, using numpy function to compute pval in parallel.
     es = np.array(es)
     esnull = np.array(esnull)
-    # try:
+
     condlist = [ es < 0, es >=0]
     choicelist = [np.sum(esnull < es.reshape(len(es),1), axis=1)/ np.sum(esnull < 0, axis=1),
                   np.sum(esnull >= es.reshape(len(es),1), axis=1)/ np.sum(esnull >= 0, axis=1)]
     pval = np.select(condlist, choicelist)
 
     return pval
-    # except:
-    #    return np.repeat(1.0 ,len(es))
+
 
 def normalize(es, esnull):
     """normalize the ES(S,pi) and the observed ES(S), separately rescaling
        the positive and negative scores by dividing the mean of the ES(S,pi).
+       
     """
 
     try:
@@ -545,7 +545,7 @@ def normalize(es, esnull):
             #print es, meanNeg
             return -es/meanNeg
     except:
-        return 0.0 #return if according mean value is uncalculable
+        return 0.0 #return if according mean value is could not be determined
 
 
 def gsea_significance(enrichment_scores, enrichment_nulls):
@@ -615,28 +615,28 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
         nes = nEnrichmentScores[i]
         # use the same pval method to calculate fdr
         if nes >= 0:
-            # allPos = int(len(nvals) - np.searchsorted(nvals, 0, side="left"))
-            # allHigherAndPos = int(len(nvals) - np.searchsorted(nvals, nes, side="left"))
-            # nesPos = len(nnes) - int(np.searchsorted(nnes, 0, side="left"))
-            # nesHigherAndPos = len(nnes) - int(np.searchsorted(nnes, nes, side="left"))
-            allPos = (nvals >= 0).sum()
-            allHigherAndPos = (nvals >= nes).sum()
-            nesPos = (nnes >=0).sum()
-            nesHigherAndPos = (nnes >= nes).sum()
+            allPos = int(len(nvals) - np.searchsorted(nvals, 0, side="left"))
+            allHigherAndPos = int(len(nvals) - np.searchsorted(nvals, nes, side="left"))
+            nesPos = len(nnes) - int(np.searchsorted(nnes, 0, side="left"))
+            nesHigherAndPos = len(nnes) - int(np.searchsorted(nnes, nes, side="left"))
+            # allPos = (nvals >= 0).sum()
+            # allHigherAndPos = (nvals >= nes).sum()
+            # nesPos = (nnes >=0).sum()
+            # nesHigherAndPos = (nnes >= nes).sum()
         else:
-            # allPos = int(np.searchsorted(nvals, 0, side="left"))
-            # allHigherAndPos = int(np.searchsorted(nvals, nes, side="right"))
-            # nesPos = int(np.searchsorted(nnes, 0, side="left"))
-            # nesHigherAndPos = int(np.searchsorted(nnes, nes, side="right"))
-            allPos = (nvals < 0).sum()
-            allHigherAndPos = (nvals < nes).sum()
-            nesPos = (nnes < 0).sum()
-            nesHigherAndPos = (nnes < nes).sum()
+            allPos = int(np.searchsorted(nvals, 0, side="left"))
+            allHigherAndPos = int(np.searchsorted(nvals, nes, side="right"))
+            nesPos = int(np.searchsorted(nnes, 0, side="left"))
+            nesHigherAndPos = int(np.searchsorted(nnes, nes, side="right"))
+            # allPos = (nvals < 0).sum()
+            # allHigherAndPos = (nvals < nes).sum()
+            # nesPos = (nnes < 0).sum()
+            # nesHigherAndPos = (nnes < nes).sum()
         
         try:
             pi_norm = allHigherAndPos/float(allPos) 
             pi_obs = nesHigherAndPos/float(nesPos)
-            fdr = pi_norm/pi_obs 
+            fdr = pi_obs / pi_norm
             fdrs.append(fdr)
         except:
             fdrs.append(1000000000.0)
