@@ -37,7 +37,7 @@ def zscore(data2d, axis=0):
 
     """
     if axis is None:
-        # nnormalized to mean and std using entire matrix
+        # normalized to mean and std using entire matrix
         # z_scored = (data2d - data2d.values.mean()) / data2d.values.std(ddof=1)
         return data2d
     assert axis in [0,1]

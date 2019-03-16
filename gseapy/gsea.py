@@ -146,7 +146,6 @@ class GSEAbase(object):
         """gmt parser"""
 
         if gmt.lower().endswith(".gmt"):
-            self._logger.info("User Defined gene sets is given.......continue..........")
             with open(gmt) as genesets:
                  genesets_dict = { line.strip().split("\t")[0]: line.strip().split("\t")[2:]
                                   for line in genesets.readlines()}
@@ -160,7 +159,6 @@ class GSEAbase(object):
             self._logger.error("No supported gene_sets: %s"%gmt)
             sys.exit(0)
 
-        self._logger.info("Downloading and generating Enrichr library gene sets......")
         tmpname = "enrichr." + gmt + ".gmt"
         tempath = os.path.join(DEFAULT_CACHE_PATH, tmpname)
         # if file already download
@@ -180,6 +178,7 @@ class GSEAbase(object):
 
     def _download_libraries(self, libname):
         """ download enrichr libraries."""
+        self._logger.info("Downloading and generating Enrichr library gene sets......")
         s = retry(5)
         # queery string
         ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary'
@@ -188,7 +187,7 @@ class GSEAbase(object):
         response = s.get( ENRICHR_URL + query_string % libname, timeout=None)
         if not response.ok:
             raise Exception('Error fetching enrichment results, check internet connection first.')
-        # reformat to dict and wirte to disk
+        # reformat to dict and save to disk
         mkdirs(DEFAULT_CACHE_PATH)
         genesets_dict = {}
         outname = "enrichr.%s.gmt"%libname
@@ -203,6 +202,7 @@ class GSEAbase(object):
         gmtout.close()
 
         return genesets_dict
+
     def _heatmat(self, df, classes, pheno_pos, pheno_neg):
         """only use for gsea heatmap"""
         width = len(classes) if len(classes) >= 6 else  5
@@ -250,7 +250,7 @@ class GSEAbase(object):
                 # heatmap(df=self.heatmat.iloc[hit, :], title=term, ofname=outfile2, 
                 #         z_score=0, figsize=(self._width, len(hit)/2))
                 pool.apply_async(heatmap, args=(self.heatmat.iloc[hit, :], 0, term, 
-                                               (self._width, len(hit)/2), 'RdBu_r',
+                                               (self._width, len(hit)/2+2), 'RdBu_r',
                                                 True, True, outfile2))
         pool.close()
         pool.join()
@@ -361,8 +361,7 @@ class GSEA(GSEAbase):
             else:
                 exprs = pd.read_csv(self.data, comment='#',sep="\t")
         else:
-            raise Exception('Error parsing gene expression dataframe!')
-            sys.exit(1)
+            raise Exception('Error parsing gene expression DataFrame!')
 
         #drop duplicated gene names
         if exprs.iloc[:,0].duplicated().sum() > 0:
@@ -394,7 +393,7 @@ class GSEA(GSEAbase):
         phenoPos, phenoNeg, cls_vector = gsea_cls_parser(self.classes)
         # select correct expression genes and values.
         dat = self.load_data(cls_vector)
-        # data frame must have lenght > 1
+        # data frame must have length > 1
         assert len(dat) > 1
         # ranking metrics calculation.
         dat2 = ranking_metric(df=dat, method=self.method, pos=phenoPos, neg=phenoNeg,
@@ -417,7 +416,7 @@ class GSEA(GSEAbase):
                                                              classes=cls_vector, ascending=self.ascending,
                                                              processes=self._processes, seed=self.seed)
         
-        self._logger.info("Start to generate gseapy reports, and produce figures...")
+        self._logger.info("Start to generate GSEApy reports and figures............")
         res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
         self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
                                    gmt=gmt, rank_metric=dat2, permutation_type=self.permutation_type)
@@ -432,7 +431,7 @@ class GSEA(GSEAbase):
                            figsize=self.figsize, format=self.format,
                            pheno_pos=phenoPos, pheno_neg=phenoNeg)
 
-        self._logger.info("Congratulations. GSEApy runs successfully................\n")
+        self._logger.info("Congratulations. GSEApy ran successfully.................\n")
         if self._outdir is None:
             self._tmpdir.cleanup()
 
@@ -549,9 +548,11 @@ class SingleSampleGSEA(GSEAbase):
 
     def corplot(self):
         """NES Correlation plot
+        TODO
         """
     def setplot(self):
         """ranked genes' location plot
+        TODO
         """
 
     def load_data(self):
@@ -997,9 +998,9 @@ def prerank(rnk, gene_sets, outdir='GSEA_Prerank', pheno_pos='Pos', pheno_neg='N
     :param gene_sets: Enrichr Library name or .gmt gene sets file or dict of gene sets. Same input with GSEA.
     :param outdir: results output directory.
     :param int permutation_num: Number of permutations for significance computation. Default: 1000.
-    :param int min_size: Minimum allowed number of genes from gene set also the data set. Defaut: 15.
+    :param int min_size: Minimum allowed number of genes from gene set also the data set. Default: 15.
     :param int max_size: Maximum allowed number of genes from gene set also the data set. Defaults: 500.
-    :param str weighted_score_type: Refer to :func:`algorithm.enrichment_socre`. Default:1.
+    :param str weighted_score_type: Refer to :func:`algorithm.enrichment_score`. Default:1.
     :param bool ascending: Sorting order of rankings. Default: False.
     :param int processes: Number of Processes you are going to use. Default: 1.
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
@@ -1034,7 +1035,7 @@ def replot(indir, outdir='GSEA_Replot', weighted_score_type=1,
            min_size=3, max_size=1000, figsize=(6.5,6), graph_num=20, format='pdf', verbose=False):
     """The main function to reproduce GSEA desktop outputs.
 
-    :param indir: GSEA desktop results directory. In the sub folder, you must contain edb file foder.
+    :param indir: GSEA desktop results directory. In the sub folder, you must contain edb file folder.
     :param outdir: Output directory.
     :param float weighted_score_type: weighted score type. choose from {0,1,1.5,2}. Default: 1.
     :param list figsize: Matplotlib output figure figsize. Default: [6.5,6].

@@ -142,7 +142,7 @@ class Enrichr(object):
 
     def check_genes(self, gene_list, usr_list_id):
         '''
-        Compare the genes sent and received to get succesfully recognized genes
+        Compare the genes sent and received to get successfully recognized genes
         '''
         response = requests.get('http://amp.pharm.mssm.edu/Enrichr/view?userListId=%s' % usr_list_id)
         if not response.ok:
@@ -177,7 +177,7 @@ class Enrichr(object):
             return False
 
     def get_libraries(self,):
-        """return active enrichr library name. Offical API """
+        """return active enrichr library name. Official API """
         lib_url='http://amp.pharm.mssm.edu/%sEnrichr/datasetStatistics'%self._organism
         libs_json = json.loads(requests.get(lib_url).text)
         libs = [lib['libraryName'] for lib in libs_json['statistics']]

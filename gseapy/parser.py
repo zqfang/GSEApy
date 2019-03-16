@@ -145,24 +145,25 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
     else:
         return genesets_filter
 
-def get_library_name(database=''):
+def get_library_name(database='Human'):
     """return enrichr active enrichr library name. 
     :param str database: Select one from { 'Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm' } 
     
     """
 
     # make a get request to get the gmt names and meta data from Enrichr
-    """old code
-    response = requests.get('http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary?mode=meta')
-    gmt_data = response.json()
-    # generate list of lib names
-    libs = []
-    # get library names
-    for inst_gmt in gmt_data['libraries']:
-        # only include active gmts
-        if inst_gmt['isActive'] == True:
-            libs.append(inst_gmt['libraryName'])
-    """
+
+    # old code
+    # response = requests.get('http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary?mode=meta')
+    # gmt_data = response.json()
+    # # generate list of lib names
+    # libs = []
+    # # get library names
+    # for inst_gmt in gmt_data['libraries']:
+    #     # only include active gmts
+    #     if inst_gmt['isActive'] == True:
+    #         libs.append(inst_gmt['libraryName'])
+
 
     if database not in ['Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm']:
         sys.stderr.write("""No supported database. Please input one of these:
