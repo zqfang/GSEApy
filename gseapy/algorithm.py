@@ -516,9 +516,6 @@ def gsea_pval(es, esnull):
     """
 
     # to speed up, using numpy function to compute pval in parallel.
-    es = np.array(es)
-    esnull = np.array(esnull)
-
     condlist = [ es < 0, es >=0]
     choicelist = [np.sum(esnull < es.reshape(len(es),1), axis=1)/ np.sum(esnull < 0, axis=1),
                   np.sum(esnull >= es.reshape(len(es),1), axis=1)/ np.sum(esnull >= 0, axis=1)]
@@ -531,21 +528,30 @@ def normalize(es, esnull):
     """normalize the ES(S,pi) and the observed ES(S), separately rescaling
        the positive and negative scores by dividing the mean of the ES(S,pi).
        
+       return: NES, NESnull
     """
 
-    try:
-        if es == 0:
-            return 0.0
-        if es >= 0:
-            meanPos = np.mean([a for a in esnull if a >= 0])
-            #print es, meanPos
-            return es/meanPos
+    nEnrichmentScores =np.zeros(es.shape)
+    nEnrichmentNulls=np.zeros(esnull.shape)
+
+    esnull_pos = (esnull * (esnull >= 0)).mean(axis=1)
+    esnull_neg = (esnull * (esnull < 0)).mean(axis=1)
+    # calculate nESnulls
+    for i in range(esnull.shape[0]):
+        # NES
+        if es[i] >= 0:
+            nEnrichmentScores[i] = es[i] / esnull_pos[i]
         else:
-            meanNeg = np.mean([a for a in esnull if a < 0])
-            #print es, meanNeg
-            return -es/meanNeg
-    except:
-        return 0.0 #return if according mean value is could not be determined
+            nEnrichmentScores[i] = - es[i] / esnull_neg[i]
+
+        # NESnull
+        for j in range(esnull.shape[1]):
+            if esnull[i,j] >= 0:
+                nEnrichmentNulls[i,j] = esnull[i,j] / esnull_pos[i]
+            else:
+                nEnrichmentNulls[i,j] = - esnull[i,j] / esnull_neg[i]
+
+    return nEnrichmentScores, nEnrichmentNulls
 
 
 def gsea_significance(enrichment_scores, enrichment_nulls):
@@ -556,48 +562,25 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
         observed S wih NES(S) >= 0, whose NES(S) >= NES*, and similarly if NES(S) = NES* <= 0.
     """
     # For a zero by zero division (undetermined, results in a NaN),
-    # np.seterr(divide='ignore', invalid='ignore')
-    import warnings
-    warnings.simplefilter("ignore")
-    
-    logging.debug("Start to compute pvals..................................")
-    # compute pvals.
-    enrichmentPVals = gsea_pval(enrichment_scores, enrichment_nulls).tolist()
-
-    # new normalize enrichment score implementation. 
-    # this could speed up significantly.
-    esnull_meanPos = []
-    esnull_meanNeg = []
-
+    np.seterr(divide='ignore', invalid='ignore')
+    # import warnings
+    # warnings.simplefilter("ignore")
     es = np.array(enrichment_scores)
     esnull = np.array(enrichment_nulls)
+    logging.debug("Start to compute pvals..................................")
+    # compute pvals.
+    enrichmentPVals = gsea_pval(es, esnull).tolist()
 
-    for i in range(len(enrichment_scores)):
-        enrNull = esnull[i]
-        meanPos = enrNull[enrNull >= 0].mean()
-        esnull_meanPos.append(meanPos)
-        meanNeg = enrNull[enrNull < 0 ].mean()
-        esnull_meanNeg.append(meanNeg)
+    logging.debug("Compute nes and nesnull.................................")
+    # nEnrichmentScores, nEnrichmentNulls = normalize(es, esnull)
 
-    pos = np.array(esnull_meanPos).reshape(len(es), 1)
-    neg = np.array(esnull_meanNeg).reshape(len(es), 1)
-
-    # compute normalized enrichment score and normalized esnull
-    logging.debug("Compute normalized enrichment score and normalized esnull")
-
-    try:
-        condlist1 = [ es >= 0, es < 0]
-        choicelist1 = [ es/esnull_meanPos, -es/esnull_meanNeg ]
-        nEnrichmentScores = np.select(condlist1, choicelist1)
-
-        condlist2 = [ esnull >= 0, esnull < 0]
-        choicelist2 = [ esnull/pos, -esnull/neg ]
-        nEnrichmentNulls = np.select(condlist2, choicelist2)
-
-    except:  #return if according nes, nesnull is uncalculable
-        nEnrichmentScores = np.repeat(0.0, es.size)
-        nEnrichmentNulls = np.repeat(0.0 , es.size).reshape(esnull.shape)
-
+    # new normalized enrichment score implementation.
+    # this could speed up significantly.
+    esnull_pos = (esnull*(esnull>=0)).mean(axis=1)
+    esnull_neg = (esnull*(esnull<0)).mean(axis=1)
+    nEnrichmentScores  = np.where(es>=0, es/esnull_pos, -es/esnull_neg)
+    nEnrichmentNulls = np.where(esnull>=0, esnull/esnull_pos[:,np.newaxis],
+                                          -esnull/esnull_neg[:,np.newaxis])
 
     logging.debug("start to compute fdrs..................................")
 
@@ -636,8 +619,8 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
         try:
             pi_norm = allHigherAndPos/float(allPos) 
             pi_obs = nesHigherAndPos/float(nesPos)
-            fdr = pi_obs / pi_norm
-            fdrs.append(fdr)
+            fdr =  pi_norm / pi_obs
+            fdrs.append(fdr if fdr < 1 else 1.0)
         except:
             fdrs.append(1000000000.0)
 
