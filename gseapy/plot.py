@@ -242,6 +242,13 @@ def gseaplot(rank_metric, term, hits_indices, nes, pval, fdr, RES,
         fig.savefig(ofname, bbox_inches='tight', dpi=300)
     return
 
+def isfloat(x):
+        try:
+            float(x)
+        except:
+            return False
+        else:
+            return True
 
 def dotplot(df, column='Adjusted P-value', title='', cutoff=0.05, top_term=10, 
             sizes=None, norm=None, legend=True, figsize=(6, 5.5), 
@@ -266,7 +273,13 @@ def dotplot(df, column='Adjusted P-value', title='', cutoff=0.05, top_term=10,
 
     colname = column    
     # sorting the dataframe for better visualization
-    if colname in ['Adjusted P-value', 'P-value']: 
+    if colname in ['Adjusted P-value', 'P-value']:
+        # check if any values in `df[colname]` can't be coerced to floats
+        can_be_coerced = df[colname].map(isfloat)
+        if np.sum(~can_be_coerced) > 0:
+            raise ValueError('some value in %s could not be typecast to `float`'%colname)
+        else:
+            df.loc[:, colname] = df[colname].map(float)
         df = df[df[colname] <= cutoff]
         if len(df) < 1: 
             msg = "Warning: No enrich terms when cutoff = %s"%cutoff
