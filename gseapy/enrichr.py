@@ -119,7 +119,7 @@ class Enrichr(object):
 
         self._isezid = all(map(self._is_entrez_id, genes))
         if self._isezid: 
-            self._gls = set(map(int, self._gls))
+            self._gls = set(map(int, genes))
         else:
             self._gls = genes
 
