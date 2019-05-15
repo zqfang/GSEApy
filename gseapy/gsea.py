@@ -82,7 +82,7 @@ class GSEAbase(object):
         elif isinstance(rnk, pd.Series):
             rank_metric = rnk.reset_index()
         elif os.path.isfile(rnk):
-            rank_metric = pd.read_csv(rnk, header=None, comment='#', sep="\t")
+            rank_metric = pd.read_csv(rnk, header=None, sep="\t")
         else:
             raise Exception('Error parsing gene ranking values!')
         # sort ranking values from high to low
