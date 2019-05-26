@@ -218,12 +218,12 @@ class Enrichr(object):
 
     def get_organism(self):
         """Select Enrichr organism from below:
-
-           Human & Mouse: H. sapiens & M. musculus
-           Fly: D. melanogaster
-           Yeast: S. cerevisiae
-           Worm: C. elegans
-           Fish: D. rerio
+       
+           Human & Mouse, H. sapiens & M. musculus
+           Fly, D. melanogaster
+           Yeast, S. cerevisiae
+           Worm, C. elegans
+           Fish, D. rerio
 
         """
 

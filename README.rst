@@ -28,13 +28,12 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
 For a Python 2 version you can install v0.9.4.
 
 
+For examples of using GSEApy please click here: `Example <http://gseapy.readthedocs.io/en/master/gseapy_example.html>`_
 
+**Release notes** : https://github.com/zqfang/GSEApy/releases
 
-The main documentation for GSEApy can be found at http://gseapy.rtfd.io/
+**FAQ**: `wiki <https://github.com/zqfang/GSEApy/wiki/FAQ>`_
 
-For examples of using gseapy please click here: `Example <http://gseapy.readthedocs.io/en/master/gseapy_example.html>`_
-
-**Release notes** : https://github.com/zqfang/gseapy/releases
 
 GSEAPY is a python wrapper for **GSEA** and **Enrichr**.
 --------------------------------------------------------------------------------------------
@@ -142,7 +141,7 @@ Run GSEAPY
 Before you start:
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Unless you know exactly how GSEA works, you should **convert all gene symobl names to uppercase first.**
+Unless you know exactly how GSEA works, you should **convert all gene symbol names to uppercase first.**
 
 
 For command line usage:
@@ -275,10 +274,12 @@ Or use ``get_library_name`` function inside python console.
 Bug Report
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you would like to report any bugs when you running gseapy, don't hesitate to create an issue on github here, or email me: fzq518@gmail.com
+If you would like to report any bugs when use gseapy, don't hesitate to create an issue on github here.
 
 
-To get help of GSEAPY
+To get help of GSEApy
 ------------------------------------
 
+see the wiki page: https://github.com/zqfang/GSEApy/wiki/FAQ
 Visit the document site at http://gseapy.rtfd.io/
+
