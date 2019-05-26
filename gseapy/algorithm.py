@@ -517,8 +517,8 @@ def gsea_pval(es, esnull):
 
     # to speed up, using numpy function to compute pval in parallel.
     condlist = [ es < 0, es >=0]
-    choicelist = [np.sum(esnull < es.reshape(len(es),1), axis=1)/ np.sum(esnull < 0, axis=1),
-                  np.sum(esnull >= es.reshape(len(es),1), axis=1)/ np.sum(esnull >= 0, axis=1)]
+    choicelist = [(esnull < es.reshape(len(es),1)).sum(axis=1)/ (esnull < 0).sum(axis=1),
+                  (esnull >= es.reshape(len(es),1)).sum(axis=1)/ (esnull >= 0).sum(axis=1)]
     pval = np.select(condlist, choicelist)
 
     return pval
