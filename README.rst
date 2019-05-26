@@ -281,5 +281,6 @@ To get help of GSEApy
 ------------------------------------
 
 see the wiki page: https://github.com/zqfang/GSEApy/wiki/FAQ
+
 Visit the document site at http://gseapy.rtfd.io/
 
