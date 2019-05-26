@@ -520,7 +520,7 @@ class SingleSampleGSEA(GSEAbase):
     def __init__(self, data, gene_sets, outdir="GSEA_SingleSample", sample_norm_method='rank',
                  min_size=15, max_size=2000, permutation_num=0, weighted_score_type=0.25,
                  scale=True, ascending=False, processes=1, figsize=(7,6), format='pdf',
-                 graph_num=20, no_plot=False, seed=None, verbose=False):
+                 graph_num=20, no_plot=True, seed=None, verbose=False):
         self.data=data
         self.gene_sets=gene_sets
         self.outdir=outdir
@@ -576,14 +576,14 @@ class SingleSampleGSEA(GSEAbase):
         elif os.path.isfile(exprs):
             # GCT input format?
             if exprs.endswith("gct"):
-                rank_metric = pd.read_csv(exprs, skiprows=1, comment='#', index_col=0,sep="\t")
+                rank_metric = pd.read_csv(exprs, skiprows=1, comment='#', index_col=0, sep="\t")
             else:
                 # just txt file like input
-                rank_metric = pd.read_csv(exprs, comment='#', index_col=0,sep="\t")
+                rank_metric = pd.read_csv(exprs, comment='#', index_col=0, sep="\t")
                 if rank_metric.shape[1] ==1:
                     # rnk file like input
                     rank_metric = pd.read_csv(exprs, header=None, comment='#',
-                                                names=['sample1'], index_col=0,sep="\t")
+                                                names=['sample1'], index_col=0, sep="\t")
             # select numbers
             rank_metric = rank_metric.select_dtypes(include=[np.number])
         else:
@@ -634,7 +634,7 @@ class SingleSampleGSEA(GSEAbase):
         self._logger.info("%04d gene_sets used for further statistical testing....."% len(gmt))
         # set cpu numbers
         self._set_cores()
-        # start analsis
+        # start analysis
         self._logger.info("Start to run ssGSEA...Might take a while................")
         if self.permutation_num == 0 :
             # ssGSEA without permutation
@@ -654,7 +654,7 @@ class SingleSampleGSEA(GSEAbase):
         mkdirs(self.outdir)
         self.resultsOnSamples = OrderedDict()
         outdir = self.outdir
-        # iter throught each sample
+        # iter through each sample
         for name, ser in df.iteritems():
             self.outdir = os.path.join(outdir, str(name))
             self._logger.info("Run Sample: %s " % name)
@@ -676,7 +676,7 @@ class SingleSampleGSEA(GSEAbase):
             # write file
             res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
             self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
-                                       gmt=gmt, rank_metric=dat2, permutation_type="gene_sets")
+                                gmt=gmt, rank_metric=dat2, permutation_type="gene_sets")
             self.resultsOnSamples[name] = self.res2d.es
             # plotting
             if self._noplot: continue
@@ -935,7 +935,7 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
 
 def ssgsea(data, gene_sets, outdir="ssGSEA_", sample_norm_method='rank', min_size=15, max_size=2000,
            permutation_num=0, weighted_score_type=0.25, scale=True, ascending=False, processes=1,
-           figsize=(7,6), format='pdf', graph_num=20, no_plot=False, seed=None, verbose=False):
+           figsize=(7,6), format='pdf', graph_num=20, no_plot=True, seed=None, verbose=False):
     """Run Gene Set Enrichment Analysis with single sample GSEA tool
 
     :param data: Expression table, pd.Series, pd.DataFrame, GCT file, or .rnk file format.

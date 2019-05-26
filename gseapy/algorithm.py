@@ -5,6 +5,7 @@ import numpy as np
 from functools import reduce
 from multiprocessing import Pool
 from math import ceil
+from gseapy.stats import multiple_testing_correction
 
 
 def enrichment_score(gene_list, correl_vector, gene_set, weighted_score_type=1, 
@@ -506,23 +507,6 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
 
     return gsea_significance(es, esnull), hit_ind, RES, subsets
 
-def gsea_pval(es, esnull):
-    """Compute nominal p-value.
-
-    From article (PNAS):
-    estimate nominal p-value for S from esnull by using the positive
-    or negative portion of the distribution corresponding to the sign
-    of the observed ES(S).
-    """
-
-    # to speed up, using numpy function to compute pval in parallel.
-    condlist = [ es < 0, es >=0]
-    choicelist = [(esnull < es.reshape(len(es),1)).sum(axis=1)/ (esnull < 0).sum(axis=1),
-                  (esnull >= es.reshape(len(es),1)).sum(axis=1)/ (esnull >= 0).sum(axis=1)]
-    pval = np.select(condlist, choicelist)
-
-    return pval
-
 
 def normalize(es, esnull):
     """normalize the ES(S,pi) and the observed ES(S), separately rescaling
@@ -553,40 +537,34 @@ def normalize(es, esnull):
 
     return nEnrichmentScores, nEnrichmentNulls
 
+def gsea_pval(es, esnull):
+    """Compute nominal p-value.
 
-def gsea_significance(enrichment_scores, enrichment_nulls):
-    """Compute nominal pvals, normalized ES, and FDR q value.
-
-        For a given NES(S) = NES* >= 0. The FDR is the ratio of the percentage of all (S,pi) with
-        NES(S,pi) >= 0, whose NES(S,pi) >= NES*, divided by the percentage of
-        observed S wih NES(S) >= 0, whose NES(S) >= NES*, and similarly if NES(S) = NES* <= 0.
+    From article (PNAS):
+    estimate nominal p-value for S from esnull by using the positive
+    or negative portion of the distribution corresponding to the sign
+    of the observed ES(S).
     """
-    # For a zero by zero division (undetermined, results in a NaN),
-    np.seterr(divide='ignore', invalid='ignore')
-    # import warnings
-    # warnings.simplefilter("ignore")
-    es = np.array(enrichment_scores)
-    esnull = np.array(enrichment_nulls)
-    logging.debug("Start to compute pvals..................................")
-    # compute pvals.
-    enrichmentPVals = gsea_pval(es, esnull).tolist()
 
-    logging.debug("Compute nes and nesnull.................................")
-    # nEnrichmentScores, nEnrichmentNulls = normalize(es, esnull)
+    # to speed up, using numpy function to compute pval in parallel.
+    condlist = [ es < 0, es >=0]
+    choicelist = [(esnull < es.reshape(len(es),1)).sum(axis=1)/ (esnull < 0).sum(axis=1),
+                  (esnull >= es.reshape(len(es),1)).sum(axis=1)/ (esnull >= 0).sum(axis=1)]
+    pvals = np.select(condlist, choicelist)
 
-    # new normalized enrichment score implementation.
-    # this could speed up significantly.
-    esnull_pos = (esnull*(esnull>=0)).mean(axis=1)
-    esnull_neg = (esnull*(esnull<0)).mean(axis=1)
-    nEnrichmentScores  = np.where(es>=0, es/esnull_pos, -es/esnull_neg)
-    nEnrichmentNulls = np.where(esnull>=0, esnull/esnull_pos[:,np.newaxis],
-                                          -esnull/esnull_neg[:,np.newaxis])
+    return pvals
 
-    logging.debug("start to compute fdrs..................................")
+
+def gsea_fdr(nEnrichmentScores, nEnrichmentNulls):
+    """Create a histogram of all NES(S,pi) over all S and pi.
+       Use this null distribution to compute an FDR q value.
+       
+    :param nEnrichmentScores:  normalized ES
+    :param nEnrichmentNulls:   normalized ESnulls
+    :return: FDR
+    """
 
     # FDR null distribution histogram
-    # create a histogram of all NES(S,pi) over all S and pi
-    # Use this null distribution to compute an FDR q value,
     # vals = reduce(lambda x,y: x+y, nEnrichmentNulls, [])
     # nvals = np.array(sorted(vals))
     # or
@@ -615,16 +593,59 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
             # allHigherAndPos = (nvals < nes).sum()
             # nesPos = (nnes < 0).sum()
             # nesHigherAndPos = (nnes < nes).sum()
-        
+
         try:
-            pi_norm = allHigherAndPos/float(allPos) 
-            pi_obs = nesHigherAndPos/float(nesPos)
-            fdr =  pi_norm / pi_obs
+            pi_norm = allHigherAndPos / float(allPos)
+            pi_obs = nesHigherAndPos / float(nesPos)
+            fdr = pi_norm / pi_obs
             fdrs.append(fdr if fdr < 1 else 1.0)
         except:
             fdrs.append(1000000000.0)
 
     logging.debug("Statistical testing finished.............................")
 
-    return zip(enrichment_scores, nEnrichmentScores, enrichmentPVals, fdrs)
+    return fdrs
+
+
+def gsea_significance(enrichment_scores, enrichment_nulls):
+    """Compute nominal pvals, normalized ES, and FDR q value.
+
+        For a given NES(S) = NES* >= 0. The FDR is the ratio of the percentage of all (S,pi) with
+        NES(S,pi) >= 0, whose NES(S,pi) >= NES*, divided by the percentage of
+        observed S wih NES(S) >= 0, whose NES(S) >= NES*, and similarly if NES(S) = NES* <= 0.
+    """
+    # For a zero by zero division (undetermined, results in a NaN),
+    np.seterr(divide='ignore', invalid='ignore')
+    # import warnings
+    # warnings.simplefilter("ignore")
+    es = np.array(enrichment_scores)
+    esnull = np.array(enrichment_nulls)
+    logging.debug("Start to compute pvals..................................")
+    # P-values.
+    pvals = gsea_pval(es, esnull).tolist()
+
+    logging.debug("Compute nes and nesnull.................................")
+    # NES
+    # nEnrichmentScores, nEnrichmentNulls = normalize(es, esnull)
+    # new normalized enrichment score implementation.
+    # this could speed up significantly.
+    esnull_pos = (esnull*(esnull>=0)).mean(axis=1)
+    esnull_neg = (esnull*(esnull<0)).mean(axis=1)
+    nEnrichmentScores  = np.where(es>=0, es/esnull_pos, -es/esnull_neg)
+    nEnrichmentNulls = np.where(esnull>=0, esnull/esnull_pos[:,np.newaxis],
+                                          -esnull/esnull_neg[:,np.newaxis])
+
+    logging.debug("start to compute fdrs..................................")
+    # FDR
+    fdrs = gsea_fdr(nEnrichmentScores, nEnrichmentNulls)
+
+    #TODO: use multiple testing correction for ssgsea? ssGSEA2.0 use BH correction.
+    # https://github.com/broadinstitute/ssGSEA2.0/blob/master/src/ssGSEA2.0.R
+    # line 969
+    # fdrs, _ = multiple_testing_correction(pvals, alpha=0.05)
+
+    return zip(enrichment_scores, nEnrichmentScores, pvals, fdrs)
+
+
+
 
