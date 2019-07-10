@@ -280,7 +280,7 @@ If you would like to report any bugs when use gseapy, don't hesitate to create a
 To get help of GSEApy
 ------------------------------------
 
-see the wiki page: https://github.com/zqfang/GSEApy/wiki/FAQ
+1. See the wiki page: https://github.com/zqfang/GSEApy/wiki/FAQ
 
-Visit the document site at http://gseapy.rtfd.io/
+2. Visit the document site at http://gseapy.rtfd.io/
 

@@ -172,9 +172,12 @@ def get_library_name(database='Human'):
     if database in ['Human', 'Mouse']: database=''
     lib_url='http://amp.pharm.mssm.edu/%sEnrichr/datasetStatistics'%database
     libs_json = json.loads(requests.get(lib_url).text)
-    libs = [lib['libraryName'] for lib in libs_json['statistics']]
-
-    return sorted(libs)
+    if 'statistics' in libs_json:
+        libs = [lib['libraryName'] for lib in libs_json['statistics']]
+        return sorted(libs)
+    else:
+        self._logger.warning("Enrichr server declined your requests. Try again!")
+    return
 
 
 class Biomart(BioMart):

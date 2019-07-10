@@ -173,8 +173,12 @@ class GSEAbase(object):
 
         lib_url='http://amp.pharm.mssm.edu/%sEnrichr/datasetStatistics'%database
         libs_json = json.loads(requests.get(lib_url).text)
-        libs = [lib['libraryName'] for lib in libs_json['statistics']]
-        return sorted(libs)
+        if 'statistics' in libs_json:
+            libs = [lib['libraryName'] for lib in libs_json['statistics']]
+            return sorted(libs)
+        else:
+            self._logger.warning("Enrichr server declined your requests. Try again!")
+        return
 
     def _download_libraries(self, libname):
         """ download enrichr libraries."""

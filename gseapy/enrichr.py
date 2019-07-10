@@ -163,10 +163,12 @@ class Enrichr(object):
         s = retry(num=5)
         filename = "%s.%s.reports" % (self._gs, self.descriptions)
         url = RESULTS_URL + query_string % (user_list_id, filename, self._gs)
-        response = s.get(url, stream=True, timeout=None)
+        response = s.get(url, timeout=None) # download imediately, set stream=False
         # response = requests.get(RESULTS_URL + query_string % (user_list_id, gene_set))
         sleep(1)
-        res = pd.read_csv(StringIO(response.content.decode('utf-8')),sep="\t")
+        if not response.ok:
+            self._logger.error('Error fetching enrichment results: %s'%self._gs)
+        res = pd.read_csv(StringIO(response.content.decode('utf-8')), sep="\t")
         return [job_id['shortId'], res]
 
     def _is_entrez_id(self, idx):
@@ -180,8 +182,13 @@ class Enrichr(object):
         """return active enrichr library name. Official API """
         lib_url='http://amp.pharm.mssm.edu/%sEnrichr/datasetStatistics'%self._organism
         libs_json = json.loads(requests.get(lib_url).text)
-        libs = [lib['libraryName'] for lib in libs_json['statistics']]
-        return sorted(libs)
+
+        if 'statistics' in libs_json:
+            libs = [lib['libraryName'] for lib in libs_json['statistics']]
+            return sorted(libs)
+        else:
+            self._logger.warning("Enrichr server declined your requests. Try again!")
+        return
 
     def get_background(self):
         """get background gene"""
