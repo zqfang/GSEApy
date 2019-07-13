@@ -258,7 +258,7 @@ def dotplot(df, column='Adjusted P-value', title='', cutoff=0.05, top_term=10,
     :param df: GSEApy DataFrame results.
     :param column: which column of DataFrame to show. Default: Adjusted P-value
     :param title: figure title
-    :param cutoff: p-adjust cut-off.
+    :param cutoff: terms with 'column' value < cut-off are shown.
     :param top_term: number of enriched terms to show.
     :param ascending: bool, the order of y axis.
     :param sizes: tuple, (min, max) scatter size. Not functional for now
@@ -386,7 +386,7 @@ def barplot(df, column='Adjusted P-value', title="", cutoff=0.05, top_term=10,
     :param df: GSEApy DataFrame results.
     :param column: which column of DataFrame to show. Default: Adjusted P-value
     :param title: figure title.
-    :param cutoff: cut-off of the cloumn you've chosen.
+    :param cutoff: terms with 'column' value < cut-off are shown.
     :param top_term: number of top enriched terms to show.
     :param figsize: tuple, matplotlib figsize.
     :param color: color for bars.

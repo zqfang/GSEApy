@@ -154,7 +154,7 @@ def get_library_name(database='Human'):
     # make a get request to get the gmt names and meta data from Enrichr
 
     # old code
-    # response = requests.get('http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary?mode=meta')
+    # response = requests.get('http://amp.pharm.mssm.edu/Enrichr3/geneSetLibrary?mode=meta')
     # gmt_data = response.json()
     # # generate list of lib names
     # libs = []
@@ -167,10 +167,13 @@ def get_library_name(database='Human'):
 
     if database not in ['Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm']:
         sys.stderr.write("""No supported database. Please input one of these:
-                            'Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm' """)
+                            ('Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm') """)
         return 
-    if database in ['Human', 'Mouse']: database=''
-    lib_url='http://amp.pharm.mssm.edu/%sEnrichr/datasetStatistics'%database
+    if database in ['Human', 'Mouse']: 
+        database = 'Enrichr3'
+    else:
+        database += 'Enrichr'
+    lib_url='http://amp.pharm.mssm.edu/%s/datasetStatistics'%database
     libs_json = json.loads(requests.get(lib_url).text)
     if 'statistics' in libs_json:
         libs = [lib['libraryName'] for lib in libs_json['statistics']]

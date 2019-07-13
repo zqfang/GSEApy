@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# see: http://amp.pharm.mssm.edu/Enrichr/help#api for API docs
+# see: http://amp.pharm.mssm.edu/Enrichr3/help#api for API docs
 
 import sys, json, os, logging
 import requests
@@ -144,7 +144,7 @@ class Enrichr(object):
         '''
         Compare the genes sent and received to get successfully recognized genes
         '''
-        response = requests.get('http://amp.pharm.mssm.edu/Enrichr/view?userListId=%s' % usr_list_id)
+        response = requests.get('http://amp.pharm.mssm.edu/%s/view?userListId=%s' %(self._organism, usr_list_id))
         if not response.ok:
             raise Exception('Error getting gene list back')
         returnedL = json.loads(response.text)["genes"]
@@ -153,11 +153,11 @@ class Enrichr(object):
 
     def get_results(self, gene_list):
         """Enrichr API"""
-        ADDLIST_URL = 'http://amp.pharm.mssm.edu/%sEnrichr/addList'%self._organism
+        ADDLIST_URL = 'http://amp.pharm.mssm.edu/%s/addList'%self._organism
         job_id = self.send_genes(gene_list, ADDLIST_URL)
         user_list_id = job_id['userListId']
 
-        RESULTS_URL = 'http://amp.pharm.mssm.edu/%sEnrichr/export'%self._organism
+        RESULTS_URL = 'http://amp.pharm.mssm.edu/%s/export'%self._organism
         query_string = '?userListId=%s&filename=%s&backgroundType=%s'
         # set max retries num =5
         s = retry(num=5)
@@ -178,9 +178,9 @@ class Enrichr(object):
         except:
             return False
 
-    def get_libraries(self,):
+    def get_libraries(self):
         """return active enrichr library name. Official API """
-        lib_url='http://amp.pharm.mssm.edu/%sEnrichr/datasetStatistics'%self._organism
+        lib_url='http://amp.pharm.mssm.edu/%s/datasetStatistics'%self._organism
         libs_json = json.loads(requests.get(lib_url).text)
 
         if 'statistics' in libs_json:
@@ -234,24 +234,28 @@ class Enrichr(object):
 
         """
 
-        organism = {'default': ['', 'hs', 'mm', 'human','mouse',
-                                'homo sapiens', 'mus musculus',
-                                'h. sapiens', 'm. musculus'],
+        default = [ 'human','mouse','hs', 'mm',
+                    'homo sapiens', 'mus musculus',
+                    'h. sapiens', 'm. musculus']
+
+        if self.organism.lower() in default:
+            self._organism = 'Enrichr3'
+            return
+
+        organism = {
                     'Fly': ['fly', 'd. melanogaster', 'drosophila melanogaster'],
                     'Yeast': ['yeast', 's. cerevisiae', 'saccharomyces cerevisiae'],
                     'Worm': ['worm', 'c. elegans', 'caenorhabditis elegans', 'nematode'],
                     'Fish': ['fish', 'd. rerio', 'danio rerio', 'zebrafish']
-                 }
+                  }
 
         for k, v in organism.items():
             if self.organism.lower() in v :
-                self._organism = k
-
+                self._organism = k+'Enrichr'
+                return
+ 
         if self._organism is None:
             raise Exception("No supported organism found !!!")
-
-        if self._organism == 'default':
-            self._organism = ''
         return
 
     def enrich(self, gmt):
@@ -263,7 +267,7 @@ class Enrichr(object):
 
             combine score = log(p)·z
 
-        see here: http://amp.pharm.mssm.edu/Enrichr/help#background&q=4
+        see here: http://amp.pharm.mssm.edu/Enrichr3/help#background&q=4
         
         columns contain:
             
@@ -370,7 +374,8 @@ def enrichr(gene_list, gene_sets, organism='human', description='',
                      see here for details: https://amp.pharm.mssm.edu/modEnrichr
     :param description: name of analysis. optional.
     :param outdir: Output file directory
-    :param float cutoff: Adjusted P-value (benjamini-hochberg correction) cutoff. Default: 0.05
+    :param float cutoff: Show enriched terms which Adjusted P-value < cutoff. 
+                         Only affects the output figure. Default: 0.05
     :param int background: BioMart dataset name for retrieving background gene information.
                            This argument only works when gene_sets input is a gmt file or python dict.
                            You could also specify a number by yourself, e.g. total expressed genes number.
