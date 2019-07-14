@@ -100,8 +100,8 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
             retries = Retry(total=5, backoff_factor=0.1,
                             status_forcelist=[ 500, 502, 503, 504 ])
             s.mount('http://', HTTPAdapter(max_retries=retries))
-            # queery string
-            ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary'
+            # query string
+            ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr3/geneSetLibrary'
             query_string = '?mode=text&libraryName=%s'
             # get
             response = s.get( ENRICHR_URL + query_string % gmt, timeout=None)
@@ -174,13 +174,13 @@ def get_library_name(database='Human'):
     else:
         database += 'Enrichr'
     lib_url='http://amp.pharm.mssm.edu/%s/datasetStatistics'%database
-    libs_json = json.loads(requests.get(lib_url).text)
-    if 'statistics' in libs_json:
-        libs = [lib['libraryName'] for lib in libs_json['statistics']]
-        return sorted(libs)
-    else:
-        self._logger.warning("Enrichr server declined your requests. Try again!")
-    return
+    response = requests.get(lib_url)
+    if not response.ok:
+        raise Exception("Error getting the Enrichr libraries")
+    libs_json = json.loads(response.text)
+    libs = [lib['libraryName'] for lib in libs_json['statistics']]
+
+    return sorted(libs)
 
 
 class Biomart(BioMart):

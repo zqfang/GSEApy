@@ -180,15 +180,16 @@ class Enrichr(object):
 
     def get_libraries(self):
         """return active enrichr library name. Official API """
-        lib_url='http://amp.pharm.mssm.edu/%s/datasetStatistics'%self._organism
-        libs_json = json.loads(requests.get(lib_url).text)
 
-        if 'statistics' in libs_json:
-            libs = [lib['libraryName'] for lib in libs_json['statistics']]
-            return sorted(libs)
-        else:
-            self._logger.warning("Enrichr server declined your requests. Try again!")
-        return
+        lib_url='http://amp.pharm.mssm.edu/%s/datasetStatistics'%self._organism
+        response = requests.get(lib_url)
+        if not response.ok:
+            raise Exception("Error getting the Enrichr libraries")
+        libs_json = json.loads(response.text)
+        libs = [lib['libraryName'] for lib in libs_json['statistics']]
+ 
+        return sorted(libs)
+
 
     def get_background(self):
         """get background gene"""
