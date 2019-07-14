@@ -572,7 +572,7 @@ def gsea_fdr(nEnrichmentScores, nEnrichmentNulls):
     nnes = np.sort(nEnrichmentScores)
     fdrs = []
     # FDR computation
-    for i in range(len(enrichment_scores)):
+    for i in range(len(nEnrichmentScores)):
         nes = nEnrichmentScores[i]
         # use the same pval method to calculate fdr
         if nes >= 0:
