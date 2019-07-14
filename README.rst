@@ -20,12 +20,10 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
 
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg
     :target:  https://img.shields.io/badge/license-MIT-blue.svg
-.. image:: https://img.shields.io/badge/python-3.5%2B-blue.svg
-    :target:   https://img.shields.io/badge/python-3.5%2B-blue.svg
 
+.. image:: https://img.shields.io/pypi/pyversions/gseapy.svg   
+    :alt: PyPI - Python Version
 
-**Please note** : from version 0.9.5 on, GSEApy only works on Python 3.5+ and Python 2.x will no longer be supported.
-For a Python 2 version you can install v0.9.4.
 
 
 For examples of using GSEApy please click here: `Example <http://gseapy.readthedocs.io/en/master/gseapy_example.html>`_
@@ -104,9 +102,6 @@ Installation
    # if you have conda
    $ conda install -c bioconda gseapy
 
-   # for windows users
-   $ conda install -c bioninja gseapy
-
    # or use pip to install the latest release
    $ pip install gseapy
 
@@ -118,7 +113,7 @@ Installation
 
 Dependency
 --------------
-* Python 2.7 or 3.5+
+* Python 3.5+
 
 Mandatory
 ~~~~~~~~~
