@@ -171,7 +171,7 @@ class GSEAbase(object):
     def get_libraries(self):
         """return active enrichr library name.Offical API """
 
-        lib_url='http://amp.pharm.mssm.edu/Enrichr3/datasetStatistics'
+        lib_url='http://amp.pharm.mssm.edu/Enrichr/datasetStatistics'
         response = requests.get(lib_url)
         if not response.ok:
             raise Exception("Error getting the Enrichr libraries")
@@ -185,7 +185,7 @@ class GSEAbase(object):
         self._logger.info("Downloading and generating Enrichr library gene sets......")
         s = retry(5)
         # queery string
-        ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr3/geneSetLibrary'
+        ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary'
         query_string = '?mode=text&libraryName=%s'
         # get
         response = s.get( ENRICHR_URL + query_string % libname, timeout=None)

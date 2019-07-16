@@ -101,7 +101,7 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
                             status_forcelist=[ 500, 502, 503, 504 ])
             s.mount('http://', HTTPAdapter(max_retries=retries))
             # query string
-            ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr3/geneSetLibrary'
+            ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary'
             query_string = '?mode=text&libraryName=%s'
             # get
             response = s.get( ENRICHR_URL + query_string % gmt, timeout=None)
@@ -154,7 +154,7 @@ def get_library_name(database='Human'):
     # make a get request to get the gmt names and meta data from Enrichr
 
     # old code
-    # response = requests.get('http://amp.pharm.mssm.edu/Enrichr3/geneSetLibrary?mode=meta')
+    # response = requests.get('http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary?mode=meta')
     # gmt_data = response.json()
     # # generate list of lib names
     # libs = []
@@ -170,7 +170,7 @@ def get_library_name(database='Human'):
                             ('Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm') """)
         return 
     if database in ['Human', 'Mouse']: 
-        database = 'Enrichr3'
+        database = 'Enrichr'
     else:
         database += 'Enrichr'
     lib_url='http://amp.pharm.mssm.edu/%s/datasetStatistics'%database

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# see: http://amp.pharm.mssm.edu/Enrichr3/help#api for API docs
+# see: http://amp.pharm.mssm.edu/Enrichr/help#api for API docs
 
 import sys, json, os, logging
 import requests
@@ -240,7 +240,7 @@ class Enrichr(object):
                     'h. sapiens', 'm. musculus']
 
         if self.organism.lower() in default:
-            self._organism = 'Enrichr3'
+            self._organism = 'Enrichr'
             return
 
         organism = {
@@ -268,7 +268,7 @@ class Enrichr(object):
 
             combine score = log(p)·z
 
-        see here: http://amp.pharm.mssm.edu/Enrichr3/help#background&q=4
+        see here: http://amp.pharm.mssm.edu/Enrichr/help#background&q=4
         
         columns contain:
             
