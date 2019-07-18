@@ -100,7 +100,7 @@ Installation
 .. code:: shell
 
    # if you have conda
-   $ conda install -c bioconda gseapy
+   $ conda install -c conda-forge -c bioconda gseapy
 
    # or use pip to install the latest release
    $ pip install gseapy
