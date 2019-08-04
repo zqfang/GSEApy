@@ -62,22 +62,35 @@ class Enrichr(object):
         logfile = os.path.join(self.outdir, "gseapy.%s.%s.log" % (self.module, self.descriptions))
         return logfile
 
+    def __parse_gmt(self, g):
+        with open(g) as genesets:
+            g_dict = { line.strip().split("\t")[0]: line.strip().split("\t")[2:]
+                       for line in genesets.readlines() }
+        return g_dict
+
     def parse_genesets(self):
         """parse gene_sets input file type"""
 
-        enrichr_library = self.get_libraries()
+        
         if isinstance(self.gene_sets, list):
             gss = self.gene_sets
         elif isinstance(self.gene_sets, str):
             gss = [ g.strip() for g in self.gene_sets.strip().split(",") ]
+            # local mode:
+            # if all input are gmts
+            if any([g.lower().endswith(".gmt") and os.path.exists(g) for g in gss]):
+                self._logger.info("User Defined gene sets is given: %s"%(" ".join(gss)))
+                return [self.__parse_gmt(g) for g in gss]
+
         elif isinstance(self.gene_sets, dict):
             gss = [self.gene_sets]
         else:
             raise Exception("Error parsing enrichr libraries, please provided corrected one")
         
-        # gss: a list contain .gmt, dict, enrichr_liraries.
-        # now, convert .gmt to dict
+        # if gss contains .gmt, dict, enrichr_liraries.
+        # convert .gmt to dict
         gss_exist = [] 
+        enrichr_library = self.get_libraries()
         for g in gss:
             if isinstance(g, dict): 
                 gss_exist.append(g)
