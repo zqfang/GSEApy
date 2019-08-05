@@ -78,7 +78,7 @@ class Enrichr(object):
             gss = [ g.strip() for g in self.gene_sets.strip().split(",") ]
             # local mode:
             # if all input are gmts
-            if any([g.lower().endswith(".gmt") and os.path.exists(g) for g in gss]):
+            if all([g.lower().endswith(".gmt") and os.path.exists(g) for g in gss]):
                 self._logger.info("User Defined gene sets is given: %s"%(" ".join(gss)))
                 return [self.__parse_gmt(g) for g in gss]
 
