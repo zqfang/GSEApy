@@ -742,7 +742,7 @@ class SingleSampleGSEA(GSEAbase):
                 term = term.replace('/','_').replace(":","_")
                 outfile = '{0}/{1}.{2}.{3}'.format(self.outdir, term, self.module, self.format)
                 gseaplot(rank_metric=rnk, term=term, 
-                         hits_indices=hit_ind[i], nes=es[i], pval=1, fdr=1, 
+                         hit_indices=hit_ind[i], nes=es[i], pval=1, fdr=1, 
                          RES=RES[i], pheno_pos='', pheno_neg='', 
                          figsize=self.figsize, ofname=outfile)
         # save es, nes to file
@@ -851,7 +851,7 @@ class Replot(GSEAbase):
             term = enrich_term.replace('/','_').replace(":","_")
             outfile = '{0}/{1}.{2}.{3}'.format(self.outdir, term, self.module, self.format)
             gseaplot(rank_metric=rank_metric, term=enrich_term, 
-                         hits_indices=hit_ind, nes=nes, pval=pval, fdr=fdr, 
+                         hit_indices=hit_ind, nes=nes, pval=pval, fdr=fdr, 
                          RES=RES, pheno_pos=pos, pheno_neg=neg, 
                          figsize=self.figsize, ofname=outfile)
 

@@ -13,7 +13,7 @@ import matplotlib.transforms as transforms
 from gseapy.parser import unique
 
 
-class _MidpointNormalize(Normalize):
+class MidpointNormalize(Normalize):
     def __init__(self, vmin=None, vmax=None, midpoint=None, clip=False):
         self.midpoint = midpoint
         Normalize.__init__(self, vmin, vmax, clip)
@@ -41,17 +41,6 @@ def zscore(data2d, axis=0):
         # z_scored = (data2d - data2d.values.mean()) / data2d.values.std(ddof=1)
         return data2d
     assert axis in [0,1]
-    # if axis == 1:
-    #     z_scored = data2d
-    # else:
-    #     z_scored = data2d.T
-
-    # z_scored = (z_scored - z_scored.mean()) / z_scored.std(ddof=1)
-    
-    # if axis == 1:
-    #     return z_scored
-    # else:
-    #     return z_scored.T
     z_scored = data2d.apply(lambda x: (x-x.mean())/x.std(ddof=1), 
                             axis=operator.xor(1, axis))
     return z_scored
@@ -116,14 +105,163 @@ def heatmap(df, z_score=None, title='', figsize=(5,5), cmap='RdBu_r',
         fig.savefig(ofname, bbox_inches='tight', dpi=300)
     return
 
-def gseaplot(rank_metric, term, hits_indices, nes, pval, fdr, RES,
+class GSEAPlot(object):
+    def __init__(self, rank_metric, term, hit_indices, nes, pval, fdr, RES,
+                 pheno_pos='', pheno_neg='', figsize=(6,5.5), 
+                 cmap='seismic', ofname=None, **kwargs):
+        # center color map at midpoint = 0
+        self._norm = MidpointNormalize(midpoint=0)
+        #dataFrame of ranked matrix scores
+        self._x = np.arange(len(rank_metric))
+        self.rankings = rank_metric.values
+        self.RES = RES
+        self._im_matrix = np.tile(self.rankings, (2,1))
+
+        self.figsize = figsize
+        self.term = term
+        self.cmap=cmap
+        self.ofname=ofname
+        
+        self._pos_label = pheno_pos 
+        self._neg_label = pheno_neg
+        self._zero_score_ind = np.abs(self.rankings).argmin()
+        self._z_score_label = 'Zero score at ' + str(self._zero_score_ind)
+        self._hit_indices = hit_indices
+        self.module = 'tmp' if ofname is  None else ofname.split(".")[-2]
+        if self.module == 'ssgsea':
+            self._nes_label = 'ES: '+ "{:.3f}".format(float(nes))
+            self._pval_label='Pval: invliad for ssgsea'
+            self._fdr_label='FDR: invalid for ssgsea'
+        else:
+            self._nes_label = 'NES: '+ "{:.3f}".format(float(nes))
+            self._pval_label = 'Pval: '+ "{:.3f}".format(float(pval))
+            self._fdr_label = 'FDR: '+ "{:.3f}".format(float(fdr))
+
+        # output truetype
+        plt.rcParams.update({'pdf.fonttype':42,'ps.fonttype':42})
+        # in most case, we will have many plots, so do not display plots
+        # It's also usefull to run this script on command line.
+
+        # GSEA Plots
+        self.gs = plt.GridSpec(16,1)
+        if hasattr(sys, 'ps1') and (self.ofname is None):
+            # working inside python console, show figure
+            self.fig = plt.figure(figsize=self.figsize)
+        else:
+            # If working on command line, don't show figure
+            self.fig = Figure(figsize=self.figsize)
+            self._canvas = FigureCanvas(self.fig) 
+
+        self.fig.suptitle(self.term, fontsize=16, fontweight='bold')
+
+    def axes_rank(self):
+        # Ranked Metric Scores Plot
+        ax1 =  self.fig.add_subplot(self.gs[11:])
+        if self.module == 'ssgsea':
+            ax1.fill_between(self._x, y1=np.log(self.rankings), y2=0, color='#C9D3DB')
+            ax1.set_ylabel("log ranked metric", fontsize=14)
+        else:
+            ax1.fill_between(self._x, y1=self.rankings, y2=0, color='#C9D3DB')
+            ax1.set_ylabel("Ranked list metric", fontsize=14)
+
+        ax1.text(.05, .9, self._pos_label, color='red',
+                horizontalalignment='left', verticalalignment='top',
+                transform=ax1.transAxes)
+        ax1.text(.95, .05, self._neg_label, color='Blue',
+                horizontalalignment='right', verticalalignment='bottom',
+                transform=ax1.transAxes)
+        # the x coords of this transformation are data, and the y coord are axes
+        trans1 = transforms.blended_transform_factory(ax1.transData, ax1.transAxes)
+        ax1.vlines(self._zero_score_ind, 0, 1, linewidth=.5, 
+                    transform=trans1, linestyles='--', color='grey')
+
+        hap = self._zero_score_ind / max(self._x) 
+        if hap < 0.25:
+            ha = 'left'
+        elif hap > 0.75:
+            ha = 'right'
+        else:
+            ha = 'center'  
+        ax1.text(hap, 0.5, self._z_score_label,
+                    horizontalalignment=ha,
+                    verticalalignment='center',
+                    transform=ax1.transAxes)
+        ax1.set_xlabel("Rank in Ordered Dataset", fontsize=14)
+        ax1.spines['top'].set_visible(False)
+        ax1.tick_params(axis='both', which='both', top=False, right=False, left=False)
+        ax1.locator_params(axis='y', nbins=5)
+        ax1.yaxis.set_major_formatter(
+            plt.FuncFormatter(lambda tick_loc,tick_num :  '{:.1f}'.format(tick_loc) ))
+
+        self._ax1 = ax1
+
+    def axes_hits(self):
+        # gene hits
+        ax2 = self.fig.add_subplot(self.gs[8:10], sharex=self._ax1)
+        # the x coords of this transformation are data, and the y coord are axes
+        trans2 = transforms.blended_transform_factory(ax2.transData, ax2.transAxes)
+        ax2.vlines(self._hit_indices, 0, 1, linewidth=.5, transform=trans2)
+        ax2.spines['bottom'].set_visible(False)
+        ax2.tick_params(axis='both', which='both', 
+                        bottom=False, top=False,
+                        right=False, left=False, 
+                        labelbottom=False, labelleft=False)
+    def axes_cmap(self):
+        # colormap
+        ax3 =  self.fig.add_subplot(self.gs[10], sharex=self._ax1)
+        ax3.imshow(self._im_matrix, aspect='auto', norm=self._norm, 
+                   cmap=self.cmap, interpolation='none') # cm.coolwarm
+        ax3.spines['bottom'].set_visible(False)
+        ax3.tick_params(axis='both', which='both', 
+                        bottom=False, top=False,
+                        right=False, left=False, 
+                        labelbottom=False, labelleft=False)
+
+    def axes_es(self):
+        # Enrichment score plot
+        ax4 = self.fig.add_subplot(self.gs[:8], sharex=self._ax1)
+        ax4.plot(self._x, self.RES, linewidth=4, color ='#88C544')
+        ax4.text(.1, .1, self._fdr_label, transform=ax4.transAxes)
+        ax4.text(.1, .2, self._pval_label, transform=ax4.transAxes)
+        ax4.text(.1, .3, self._nes_label, transform=ax4.transAxes)
+
+        # the y coords of this transformation are data, and the x coord are axes
+        trans4 = transforms.blended_transform_factory(ax4.transAxes, ax4.transData)
+        ax4.hlines(0, 0, 1, linewidth=.5, transform=trans4, color='grey')
+        ax4.set_ylabel("Enrichment Score", fontsize=14)
+        #ax4.set_xlim(min(self._x), max(self._x))
+        ax4.tick_params(axis='both', which='both', 
+                        bottom=False, top=False, right=False,
+                        labelbottom=False)
+        ax4.locator_params(axis='y', nbins=5)
+        # FuncFormatter need two argument, I don't know why. this lambda function used to format yaxis tick labels.
+        ax4.yaxis.set_major_formatter(
+            plt.FuncFormatter(lambda tick_loc,tick_num :  '{:.1f}'.format(tick_loc)) )
+
+    def add_axes(self):
+        self.axes_rank()
+        self.axes_hits()
+        self.axes_cmap()
+        self.axes_es()
+        self.fig.subplots_adjust(hspace=0)
+        # self.fig.tight_layout()
+
+    def save(self, bbox_inches='tight', dpi=300):   
+        
+        if self.ofname is not None: 
+            # canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
+            self.fig.savefig(self.ofname, bbox_inches=bbox_inches, dpi=dpi)
+        return
+
+
+def gseaplot(rank_metric, term, hit_indices, nes, pval, fdr, RES,
               pheno_pos='', pheno_neg='', figsize=(6,5.5), 
               cmap='seismic', ofname=None, **kwargs):
     """This is the main function for reproducing the gsea plot.
 
     :param rank_metric: pd.Series for rankings, rank_metric.values.
     :param term: gene_set name
-    :param hits_indices: hits indices of rank_metric.index presented in gene set S.
+    :param hit_indices: hits indices of rank_metric.index presented in gene set S.
     :param nes: Normalized enrichment scores.
     :param pval: nominal p-value.
     :param fdr: false discovery rate.
@@ -134,113 +272,12 @@ def gseaplot(rank_metric, term, hits_indices, nes, pval, fdr, RES,
     :param ofname: output file name. If None, don't save figure 
 
     """
-    # plt.style.use('classic')
-    # center color map at midpoint = 0
-    norm = _MidpointNormalize(midpoint=0)
-
-    #dataFrame of ranked matrix scores
-    x = np.arange(len(rank_metric))
-    rankings = rank_metric.values
-    # figsize = (6,6)
-    phenoP_label = pheno_pos + ' (Positively Correlated)'
-    phenoN_label = pheno_neg + ' (Negatively Correlated)'
-    zero_score_ind = np.abs(rankings).argmin()
-    z_score_label = 'Zero score at ' + str(zero_score_ind)
-    nes_label = 'NES: '+ "{:.3f}".format(float(nes))
-    pval_label = 'Pval: '+ "{:.3f}".format(float(pval))
-    fdr_label = 'FDR: '+ "{:.3f}".format(float(fdr))
-    im_matrix = np.tile(rankings, (2,1))
-
-    # output truetype
-    plt.rcParams.update({'pdf.fonttype':42,'ps.fonttype':42})
-    # in most case, we will have many plots, so do not display plots
-    # It's also usefull to run this script on command line.
-
-    # GSEA Plots
-    gs = plt.GridSpec(16,1)
-    if hasattr(sys, 'ps1') and (ofname is None):
-        # working inside python console, show figure
-        fig = plt.figure(figsize=figsize)
-    else:
-        # If working on commandline, don't show figure
-        fig = Figure(figsize=figsize)
-        canvas = FigureCanvas(fig)
-    # Ranked Metric Scores Plot
-    ax1 =  fig.add_subplot(gs[11:])
-    module = 'tmp' if ofname is  None else ofname.split(".")[-2]
-    if module == 'ssgsea':
-        nes_label = 'ES: '+ "{:.3f}".format(float(nes))
-        pval_label='Pval: '
-        fdr_label='FDR: '
-        ax1.fill_between(x, y1=np.log(rankings), y2=0, color='#C9D3DB')
-        ax1.set_ylabel("log ranked metric", fontsize=14)
-    else:
-        ax1.fill_between(x, y1=rankings, y2=0, color='#C9D3DB')
-        ax1.set_ylabel("Ranked list metric", fontsize=14)
-    ax1.text(.05, .9, phenoP_label, color='red',
-             horizontalalignment='left', verticalalignment='top',
-             transform=ax1.transAxes)
-    ax1.text(.95, .05, phenoN_label, color='Blue',
-             horizontalalignment='right', verticalalignment='bottom',
-             transform=ax1.transAxes)
-    # the x coords of this transformation are data, and the y coord are axes
-    trans1 = transforms.blended_transform_factory(ax1.transData, ax1.transAxes)
-    if module != 'ssgsea':
-        ax1.vlines(zero_score_ind, 0, 1, linewidth=.5, transform=trans1, linestyles='--', color='grey')
-        ax1.text(zero_score_ind, 0.5, z_score_label,
-                 horizontalalignment='center',
-                 verticalalignment='center',
-                 transform=trans1)
-    ax1.set_xlabel("Rank in Ordered Dataset", fontsize=14)
-    ax1.spines['top'].set_visible(False)
-    ax1.tick_params(axis='both', which='both', top=False, right=False, left=False)
-    ax1.locator_params(axis='y', nbins=5)
-    ax1.yaxis.set_major_formatter(plt.FuncFormatter(lambda tick_loc,tick_num :  '{:.1f}'.format(tick_loc) ))
-
-    # use round method to control float number
-    # ax1.yaxis.set_major_formatter(plt.FuncFormatter(lambda tick_loc,tick_num :  round(tick_loc, 1) ))
-
-    # gene hits
-    ax2 = fig.add_subplot(gs[8:10], sharex=ax1)
-
-    # the x coords of this transformation are data, and the y coord are axes
-    trans2 = transforms.blended_transform_factory(ax2.transData, ax2.transAxes)
-    ax2.vlines(hits_indices, 0, 1,linewidth=.5,transform=trans2)
-    ax2.spines['bottom'].set_visible(False)
-    ax2.tick_params(axis='both', which='both', bottom=False, top=False,
-                    labelbottom=False, right=False, left=False, labelleft=False)
-    # colormap
-    ax3 =  fig.add_subplot(gs[10], sharex=ax1)
-    ax3.imshow(im_matrix, aspect='auto', norm=norm, cmap=cmap, interpolation='none') # cm.coolwarm
-    ax3.spines['bottom'].set_visible(False)
-    ax3.tick_params(axis='both', which='both', bottom=False, top=False,
-                    labelbottom=False, right=False, left=False,labelleft=False)
-
-    # Enrichment score plot
-    ax4 = fig.add_subplot(gs[:8], sharex=ax1)
-    ax4.plot(x, RES, linewidth=4, color ='#88C544')
-    ax4.text(.1, .1, fdr_label, transform=ax4.transAxes)
-    ax4.text(.1, .2, pval_label, transform=ax4.transAxes)
-    ax4.text(.1, .3, nes_label, transform=ax4.transAxes)
-
-    # the y coords of this transformation are data, and the x coord are axes
-    trans4 = transforms.blended_transform_factory(ax4.transAxes, ax4.transData)
-    ax4.hlines(0, 0, 1, linewidth=.5, transform=trans4, color='grey')
-    ax4.set_ylabel("Enrichment score (ES)", fontsize=14)
-    ax4.set_xlim(min(x), max(x))
-    ax4.tick_params(axis='both', which='both', bottom=False, top=False, labelbottom=False, right=False)
-    ax4.locator_params(axis='y', nbins=5)
-    # FuncFormatter need two argument, I don't know why. this lambda function used to format yaxis tick labels.
-    ax4.yaxis.set_major_formatter(plt.FuncFormatter(lambda tick_loc,tick_num :  '{:.1f}'.format(tick_loc)) )
-
-    # fig adjustment
-    fig.suptitle(term, fontsize=16, fontweight='bold')
-    fig.subplots_adjust(hspace=0)
-    # fig.tight_layout()
+    g = GSEAPlot(rank_metric, term, hit_indices, nes, pval, fdr, RES,
+                 pheno_pos, pheno_neg, figsize, cmap)
+    g.add_axes()
     if ofname is not None: 
-        # canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
-        fig.savefig(ofname, bbox_inches='tight', dpi=300)
-    return
+        g.ofname = ofname
+        g.save()
 
 def isfloat(x):
         try:
@@ -324,7 +361,7 @@ def dotplot(df, column='Adjusted P-value', title='', cutoff=0.05, top_term=10,
     df['sizes'] = df.Hits.map(sizes)
     area = df['sizes'].values
 
-    # creat scatter plot
+    # create scatter plot
     if hasattr(sys, 'ps1') and (ofname is None):
         # working inside python console, show figure
         fig, ax = plt.subplots(figsize=figsize)
@@ -396,6 +433,12 @@ def barplot(df, column='Adjusted P-value', title="", cutoff=0.05, top_term=10,
 
     colname = column   
     if colname in ['Adjusted P-value', 'P-value']: 
+        # check if any values in `df[colname]` can't be coerced to floats
+        can_be_coerced = df[colname].map(isfloat)
+        if np.sum(~can_be_coerced) > 0:
+            raise ValueError('some value in %s could not be typecast to `float`'%colname)
+        else:
+            df.loc[:, colname] = df[colname].map(float)
         df = df[df[colname] <= cutoff]
         if len(df) < 1: 
             msg = "Warning: No enrich terms using library %s when cutoff = %s"%(title, cutoff)
