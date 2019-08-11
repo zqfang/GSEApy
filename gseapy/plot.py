@@ -107,7 +107,7 @@ def heatmap(df, z_score=None, title='', figsize=(5,5), cmap='RdBu_r',
 
 class GSEAPlot(object):
     def __init__(self, rank_metric, term, hit_indices, nes, pval, fdr, RES,
-                 pheno_pos='', pheno_neg='', figsize=(6,5.5), 
+                 pheno_pos='', pheno_neg='', figsize=(6, 5.5), 
                  cmap='seismic', ofname=None, **kwargs):
         # center color map at midpoint = 0
         self._norm = MidpointNormalize(midpoint=0)
@@ -143,7 +143,6 @@ class GSEAPlot(object):
         # It's also usefull to run this script on command line.
 
         # GSEA Plots
-        self.gs = plt.GridSpec(16,1)
         if hasattr(sys, 'ps1') and (self.ofname is None):
             # working inside python console, show figure
             self.fig = plt.figure(figsize=self.figsize)
@@ -154,9 +153,14 @@ class GSEAPlot(object):
 
         self.fig.suptitle(self.term, fontsize=16, fontweight='bold')
 
-    def axes_rank(self):
+    def axes_rank(self, rect):
+        """
+        rect : sequence of float
+               The dimensions [left, bottom, width, height] of the new axes. All
+               quantities are in fractions of figure width and height.
+        """
         # Ranked Metric Scores Plot
-        ax1 =  self.fig.add_subplot(self.gs[11:])
+        ax1 = self.fig.add_axes(rect=rect, sharex=self._ax4)
         if self.module == 'ssgsea':
             ax1.fill_between(self._x, y1=np.log(self.rankings), y2=0, color='#C9D3DB')
             ax1.set_ylabel("log ranked metric", fontsize=14)
@@ -195,9 +199,14 @@ class GSEAPlot(object):
 
         self._ax1 = ax1
 
-    def axes_hits(self):
+    def axes_hits(self, rect):
+        """
+        rect : sequence of float
+               The dimensions [left, bottom, width, height] of the new axes. All
+               quantities are in fractions of figure width and height.
+        """
         # gene hits
-        ax2 = self.fig.add_subplot(self.gs[8:10], sharex=self._ax1)
+        ax2 = self.fig.add_axes(rect=rect, sharex=self._ax1)
         # the x coords of this transformation are data, and the y coord are axes
         trans2 = transforms.blended_transform_factory(ax2.transData, ax2.transAxes)
         ax2.vlines(self._hit_indices, 0, 1, linewidth=.5, transform=trans2)
@@ -206,9 +215,14 @@ class GSEAPlot(object):
                         bottom=False, top=False,
                         right=False, left=False, 
                         labelbottom=False, labelleft=False)
-    def axes_cmap(self):
+    def axes_cmap(self, rect):
+        """
+        rect : sequence of float
+               The dimensions [left, bottom, width, height] of the new axes. All
+               quantities are in fractions of figure width and height.
+        """
         # colormap
-        ax3 =  self.fig.add_subplot(self.gs[10], sharex=self._ax1)
+        ax3 =  self.fig.add_axes(rect=rect, sharex=self._ax1)
         ax3.imshow(self._im_matrix, aspect='auto', norm=self._norm, 
                    cmap=self.cmap, interpolation='none') # cm.coolwarm
         ax3.spines['bottom'].set_visible(False)
@@ -217,9 +231,14 @@ class GSEAPlot(object):
                         right=False, left=False, 
                         labelbottom=False, labelleft=False)
 
-    def axes_es(self):
+    def axes_stat(self, rect):
+        """
+        rect : sequence of float
+               The dimensions [left, bottom, width, height] of the new axes. All
+               quantities are in fractions of figure width and height.
+        """
         # Enrichment score plot
-        ax4 = self.fig.add_subplot(self.gs[:8], sharex=self._ax1)
+        ax4 = self.fig.add_axes(rect=rect)
         ax4.plot(self._x, self.RES, linewidth=4, color ='#88C544')
         ax4.text(.1, .1, self._fdr_label, transform=ax4.transAxes)
         ax4.text(.1, .2, self._pval_label, transform=ax4.transAxes)
@@ -239,11 +258,11 @@ class GSEAPlot(object):
             plt.FuncFormatter(lambda tick_loc,tick_num :  '{:.1f}'.format(tick_loc)) )
 
     def add_axes(self):
-        self.axes_rank()
-        self.axes_hits()
-        self.axes_cmap()
-        self.axes_es()
-        self.fig.subplots_adjust(hspace=0)
+        self.axes_stat([0.1,0.6,0.8,0.3])
+        self.axes_hits([0.1,0.55,0.8,0.05])
+        self.axes_cmap([0.1,0.50,0.8,0.05])
+        self.axes_rank([0.1,0.1,0.8,0.4])
+        # self.fig.subplots_adjust(hspace=0)
         # self.fig.tight_layout()
 
     def save(self, bbox_inches='tight', dpi=300):   

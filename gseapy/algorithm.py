@@ -624,7 +624,7 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
     # P-values.
     pvals = gsea_pval(es, esnull).tolist()
 
-    logging.debug("Compute nes and nesnull.................................")
+    logging.debug("Start to compute nes and nesnull........................")
     # NES
     # nEnrichmentScores, nEnrichmentNulls = normalize(es, esnull)
     # new normalized enrichment score implementation.
@@ -635,7 +635,7 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
     nEnrichmentNulls = np.where(esnull>=0, esnull/esnull_pos[:,np.newaxis],
                                           -esnull/esnull_neg[:,np.newaxis])
 
-    logging.debug("start to compute fdrs..................................")
+    logging.debug("Start to compute fdrs..................................")
     # FDR
     fdrs = gsea_fdr(nEnrichmentScores, nEnrichmentNulls)
 
