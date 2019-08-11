@@ -258,10 +258,10 @@ class GSEAPlot(object):
             plt.FuncFormatter(lambda tick_loc,tick_num :  '{:.1f}'.format(tick_loc)) )
 
     def add_axes(self):
-        self.axes_stat([0.1,0.6,0.8,0.3])
-        self.axes_hits([0.1,0.55,0.8,0.05])
-        self.axes_cmap([0.1,0.50,0.8,0.05])
-        self.axes_rank([0.1,0.1,0.8,0.4])
+        self.axes_stat([0.1,0.5,0.8,0.4])
+        self.axes_hits([0.1,0.45,0.8,0.05])
+        self.axes_cmap([0.1,0.40,0.8,0.05])
+        self.axes_rank([0.1,0.1,0.8,0.3])
         # self.fig.subplots_adjust(hspace=0)
         # self.fig.tight_layout()
 
