@@ -197,7 +197,6 @@ class GSEAPlot(object):
         ax1.yaxis.set_major_formatter(
             plt.FuncFormatter(lambda tick_loc,tick_num :  '{:.1f}'.format(tick_loc) ))
 
-        self._ax1 = ax1
 
     def axes_hits(self, rect):
         """
@@ -206,7 +205,7 @@ class GSEAPlot(object):
                quantities are in fractions of figure width and height.
         """
         # gene hits
-        ax2 = self.fig.add_axes(rect=rect, sharex=self._ax1)
+        ax2 = self.fig.add_axes(rect=rect, sharex=self._ax4)
         # the x coords of this transformation are data, and the y coord are axes
         trans2 = transforms.blended_transform_factory(ax2.transData, ax2.transAxes)
         ax2.vlines(self._hit_indices, 0, 1, linewidth=.5, transform=trans2)
@@ -222,7 +221,7 @@ class GSEAPlot(object):
                quantities are in fractions of figure width and height.
         """
         # colormap
-        ax3 =  self.fig.add_axes(rect=rect, sharex=self._ax1)
+        ax3 =  self.fig.add_axes(rect=rect, sharex=self._ax4)
         ax3.imshow(self._im_matrix, aspect='auto', norm=self._norm, 
                    cmap=self.cmap, interpolation='none') # cm.coolwarm
         ax3.spines['bottom'].set_visible(False)
@@ -256,6 +255,8 @@ class GSEAPlot(object):
         # FuncFormatter need two argument, I don't know why. this lambda function used to format yaxis tick labels.
         ax4.yaxis.set_major_formatter(
             plt.FuncFormatter(lambda tick_loc,tick_num :  '{:.1f}'.format(tick_loc)) )
+
+        self._ax4 = ax4
 
     def add_axes(self):
         self.axes_stat([0.1,0.5,0.8,0.4])
