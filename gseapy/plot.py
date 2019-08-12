@@ -160,7 +160,7 @@ class GSEAPlot(object):
                quantities are in fractions of figure width and height.
         """
         # Ranked Metric Scores Plot
-        ax1 = self.fig.add_axes(rect=rect, sharex=self._ax4)
+        ax1 = self.fig.add_axes(rect=rect, sharex=self.ax)
         if self.module == 'ssgsea':
             ax1.fill_between(self._x, y1=np.log(self.rankings), y2=0, color='#C9D3DB')
             ax1.set_ylabel("log ranked metric", fontsize=14)
@@ -205,7 +205,7 @@ class GSEAPlot(object):
                quantities are in fractions of figure width and height.
         """
         # gene hits
-        ax2 = self.fig.add_axes(rect=rect, sharex=self._ax4)
+        ax2 = self.fig.add_axes(rect=rect, sharex=self.ax)
         # the x coords of this transformation are data, and the y coord are axes
         trans2 = transforms.blended_transform_factory(ax2.transData, ax2.transAxes)
         ax2.vlines(self._hit_indices, 0, 1, linewidth=.5, transform=trans2)
@@ -221,7 +221,7 @@ class GSEAPlot(object):
                quantities are in fractions of figure width and height.
         """
         # colormap
-        ax3 =  self.fig.add_axes(rect=rect, sharex=self._ax4)
+        ax3 =  self.fig.add_axes(rect=rect, sharex=self.ax)
         ax3.imshow(self._im_matrix, aspect='auto', norm=self._norm, 
                    cmap=self.cmap, interpolation='none') # cm.coolwarm
         ax3.spines['bottom'].set_visible(False)
@@ -256,9 +256,12 @@ class GSEAPlot(object):
         ax4.yaxis.set_major_formatter(
             plt.FuncFormatter(lambda tick_loc,tick_num :  '{:.1f}'.format(tick_loc)) )
 
-        self._ax4 = ax4
+        self.ax = ax4
 
     def add_axes(self):
+        """
+        Please check matplotlib docs about how to `add_axes` to figure.
+        """
         self.axes_stat([0.1,0.5,0.8,0.4])
         self.axes_hits([0.1,0.45,0.8,0.05])
         self.axes_cmap([0.1,0.40,0.8,0.05])

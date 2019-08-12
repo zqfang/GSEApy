@@ -235,11 +235,11 @@ class GSEAbase(object):
         # multi-threading
         pool = Pool(self._processes)
         for gs in top_term:
-            hit = results.get(gs)['hits_indices']
+            hit = results.get(gs)['hit_indices']
             NES = 'nes' if self.module != 'ssgsea' else 'es'
             term = gs.replace('/','_').replace(":","_")
             outfile = '{0}/{1}.{2}.{3}'.format(self.outdir, term, self.module, self.format)
-            # gseaplot(rank_metric=rank_metric, term=term, hits_indices=hit,
+            # gseaplot(rank_metric=rank_metric, term=term, hit_indices=hit,
             #           nes=results.get(gs)[NES], pval=results.get(gs)['pval'], 
             #           fdr=results.get(gs)['fdr'], RES=results.get(gs)['RES'],
             #           pheno_pos=pheno_pos, pheno_neg=pheno_neg, figsize=figsize,
@@ -290,7 +290,7 @@ class GSEAbase(object):
                 rdict['ledge_genes'] = ';'.join(list(map(str,rank_metric.iloc[ldg_pos].index)))
                 
             rdict['RES'] = RES
-            rdict['hits_indices'] = ind
+            rdict['hit_indices'] = ind
             # save to one odict
             res[gs] = rdict
         # save
@@ -298,7 +298,7 @@ class GSEAbase(object):
         # save to dataframe
         res_df = pd.DataFrame.from_dict(res, orient='index')
         res_df.index.name = 'Term'
-        res_df.drop(['RES','hits_indices'], axis=1, inplace=True)
+        res_df.drop(['RES','hit_indices'], axis=1, inplace=True)
         res_df.sort_values(by=['fdr','pval'], inplace=True)
         self.res2d = res_df
 
@@ -306,9 +306,11 @@ class GSEAbase(object):
         out = os.path.join(outdir,'gseapy.{b}.{c}.report.csv'.format(b=module, c=permutation_type))
         if self.module == 'ssgsea':
             out = out.replace(".csv",".txt")
+            msg = "# normalize enrichment scores calculated by random permutation procedure (GSEA method)\n" +\
+                  "# It's not proper for publication. Please check the original paper!\n"
+            self._logger.warning(msg)
             with open(out, 'a') as f:
-                f.write('# normalize enrichment scores by random permutation procedure (GSEA method)\n')
-                f.write("# might not proper for publication\n")
+                f.write(msg)
                 res_df.to_csv(f, sep='\t')
         else:
             res_df.to_csv(out)
