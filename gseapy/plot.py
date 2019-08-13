@@ -150,7 +150,7 @@ class GSEAPlot(object):
             # If working on command line, don't show figure
             self.fig = Figure(figsize=self.figsize)
             self._canvas = FigureCanvas(self.fig) 
-
+        
         self.fig.suptitle(self.term, fontsize=16, fontweight='bold')
 
     def axes_rank(self, rect):
@@ -160,7 +160,7 @@ class GSEAPlot(object):
                quantities are in fractions of figure width and height.
         """
         # Ranked Metric Scores Plot
-        ax1 = self.fig.add_axes(rect=rect, sharex=self.ax)
+        ax1 = self.fig.add_axes(rect, sharex=self.ax)
         if self.module == 'ssgsea':
             ax1.fill_between(self._x, y1=np.log(self.rankings), y2=0, color='#C9D3DB')
             ax1.set_ylabel("log ranked metric", fontsize=14)
@@ -205,7 +205,7 @@ class GSEAPlot(object):
                quantities are in fractions of figure width and height.
         """
         # gene hits
-        ax2 = self.fig.add_axes(rect=rect, sharex=self.ax)
+        ax2 = self.fig.add_axes(rect, sharex=self.ax)
         # the x coords of this transformation are data, and the y coord are axes
         trans2 = transforms.blended_transform_factory(ax2.transData, ax2.transAxes)
         ax2.vlines(self._hit_indices, 0, 1, linewidth=.5, transform=trans2)
@@ -222,7 +222,7 @@ class GSEAPlot(object):
                quantities are in fractions of figure width and height.
         """
         # colormap
-        ax3 =  self.fig.add_axes(rect=rect, sharex=self.ax)
+        ax3 =  self.fig.add_axes(rect, sharex=self.ax)
         ax3.imshow(self._im_matrix, aspect='auto', norm=self._norm, 
                    cmap=self.cmap, interpolation='none') # cm.coolwarm
         ax3.spines['bottom'].set_visible(False)
@@ -238,7 +238,8 @@ class GSEAPlot(object):
                quantities are in fractions of figure width and height.
         """
         # Enrichment score plot
-        ax4 = self.fig.add_axes(rect=rect)
+        
+        ax4 = self.fig.add_axes(rect)
         ax4.plot(self._x, self.RES, linewidth=4, color ='#88C544')
         ax4.text(.1, .1, self._fdr_label, transform=ax4.transAxes)
         ax4.text(.1, .2, self._pval_label, transform=ax4.transAxes)
@@ -308,8 +309,8 @@ def gseaplot(rank_metric, term, hit_indices, nes, pval, fdr, RES,
     g = GSEAPlot(rank_metric, term, hit_indices, nes, pval, fdr, RES,
                  pheno_pos, pheno_neg, figsize, cmap, ofname)
     g.add_axes()
-    if ofname is not None: 
-        g.savefig()
+    g.savefig()
+
 
 def isfloat(x):
         try:
