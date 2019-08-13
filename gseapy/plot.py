@@ -214,6 +214,7 @@ class GSEAPlot(object):
                         bottom=False, top=False,
                         right=False, left=False, 
                         labelbottom=False, labelleft=False)
+
     def axes_cmap(self, rect):
         """
         rect : sequence of float
@@ -261,6 +262,15 @@ class GSEAPlot(object):
     def add_axes(self):
         """
         Please check matplotlib docs about how to `add_axes` to figure.
+
+        Here is a more flexible way to create a new gseaplot.
+        For example, don't show ranking and merge hits and colormap together 
+        just used:
+        
+            self.axes_stat([0.1,0.2,0.8,0.8]) # axes_stat should be called first
+            self.axes_cmap([0.1,0.1,0.8,0.1])
+            self.axes_hits([0.1,0.1,0.8,0.1])
+
         """
         self.axes_stat([0.1,0.5,0.8,0.4])
         self.axes_hits([0.1,0.45,0.8,0.05])
@@ -269,7 +279,7 @@ class GSEAPlot(object):
         # self.fig.subplots_adjust(hspace=0)
         # self.fig.tight_layout()
 
-    def save(self, bbox_inches='tight', dpi=300):   
+    def savefig(self, bbox_inches='tight', dpi=300):   
         
         if self.ofname is not None: 
             # canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
@@ -296,11 +306,10 @@ def gseaplot(rank_metric, term, hit_indices, nes, pval, fdr, RES,
 
     """
     g = GSEAPlot(rank_metric, term, hit_indices, nes, pval, fdr, RES,
-                 pheno_pos, pheno_neg, figsize, cmap)
+                 pheno_pos, pheno_neg, figsize, cmap, ofname)
     g.add_axes()
     if ofname is not None: 
-        g.ofname = ofname
-        g.save()
+        g.savefig()
 
 def isfloat(x):
         try:
