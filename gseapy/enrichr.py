@@ -176,12 +176,12 @@ class Enrichr(object):
         s = retry(num=5)
         filename = "%s.%s.reports" % (self._gs, self.descriptions)
         url = RESULTS_URL + query_string % (user_list_id, filename, self._gs)
-        response = s.get(url, timeout=None) # download imediately, set stream=False
-        # response = requests.get(RESULTS_URL + query_string % (user_list_id, gene_set))
-        sleep(1)
+        response = s.get(url, stream=True)
+        response.encoding = 'utf-8'
         if not response.ok:
             self._logger.error('Error fetching enrichment results: %s'%self._gs)
-        res = pd.read_csv(StringIO(response.content.decode('utf-8')), sep="\t")
+        
+        res = pd.read_csv(StringIO(response.text), sep="\t")
         return [job_id['shortId'], res]
 
     def _is_entrez_id(self, idx):

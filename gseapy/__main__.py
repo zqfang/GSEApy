@@ -296,7 +296,7 @@ def add_enrichr_parser(subparsers):
                               help="Enrichr uses a list of gene names as input.")
     enrichr_opt.add_argument("-g", "--gene-sets", action="store", dest="library", type=str, required=True, metavar='GMT',
                               help="Enrichr library name(s) required. Separate each name by comma.")
-    enrichr_opt.add_argument("--org", "--organism", action="store", dest="organism", type=str, default='',
+    enrichr_opt.add_argument("--org", "--organism", action="store", dest="organism", type=str, default='human',
                              help="Enrichr supported organism name. Default: human. See here: https://amp.pharm.mssm.edu/modEnrichr.")
     enrichr_opt.add_argument("--ds", "--description", action="store", dest="descrip", type=str, default='enrichr', metavar='STRING',
                               help="It is recommended to enter a short description for your list so that multiple lists \
