@@ -431,7 +431,7 @@ def dotplot(df, column='Adjusted P-value', title='', cutoff=0.05, top_term=10,
         idx = [area.argmax(), np.abs(area - area.mean()).argmin(), area.argmin()]
         idx = unique(idx)
     else:
-        idx = df.index.values
+        idx = range(len(df))
     label = df.iloc[idx, df.columns.get_loc('Hits')]
     
     if legend:
