@@ -363,7 +363,7 @@ class GSEA(GSEAbase):
         elif os.path.isfile(self.data) :
             # GCT input format?
             if self.data.endswith("gct"):
-                exprs = pd.read_csv(self.data, skiprows=1, comment='#',sep="\t")
+                exprs = pd.read_csv(self.data, skiprows=2, sep="\t")
             else:
                 exprs = pd.read_csv(self.data, comment='#',sep="\t")
         else:
@@ -382,10 +382,12 @@ class GSEA(GSEAbase):
         # select numberic columns
         df = exprs.select_dtypes(include=[np.number])
         # drop any genes which std ==0
-        df_std =  df.groupby(by=cls_vec, axis=1).std()
+        cls_dict = {k:v for k, v in zip(df.columns, cls_vec)}
+        df_std =  df.groupby(by=cls_dict, axis=1).std()
         df =  df[~df_std.isin([0]).any(axis=1)]
         df = df + 0.00001 # we don't like zeros!!!
-        return df
+  
+        return df, cls_dict
 
     def run(self):
         """GSEA main procedure"""
@@ -398,12 +400,12 @@ class GSEA(GSEAbase):
         # phenotype labels parsing
         phenoPos, phenoNeg, cls_vector = gsea_cls_parser(self.classes)
         # select correct expression genes and values.
-        dat = self.load_data(cls_vector)
+        dat, cls_dict = self.load_data(cls_vector)
         # data frame must have length > 1
         assert len(dat) > 1
         # ranking metrics calculation.
         dat2 = ranking_metric(df=dat, method=self.method, pos=phenoPos, neg=phenoNeg,
-                              classes=cls_vector, ascending=self.ascending)
+                              classes= cls_dict, ascending=self.ascending)
         self.ranking = dat2
         # filtering out gene sets and build gene sets dictionary
         gmt = self.load_gmt(gene_list=dat2.index.values, gmt=self.gene_sets)

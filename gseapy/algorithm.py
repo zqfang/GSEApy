@@ -289,7 +289,7 @@ def ranking_metric(df, method, pos, neg, classes, ascending):
 
        :param str pos: one of labels of phenotype's names.
        :param str neg: one of labels of phenotype's names.
-       :param list classes:  a list of phenotype labels, to specify which column of dataframe belongs to what category of phenotype.
+       :param dict classes: column id to group mapping.
        :param bool ascending:  bool or list of bool. Sort ascending vs. descending.
        :return:
 
@@ -301,7 +301,6 @@ def ranking_metric(df, method, pos, neg, classes, ascending):
     # exclude any zero stds.
     df_mean = df.groupby(by=classes, axis=1).mean()
     df_std =  df.groupby(by=classes, axis=1).std()
-
 
     if method == 'signal_to_noise':
         ser = (df_mean[pos] - df_mean[neg])/(df_std[pos] + df_std[neg])
