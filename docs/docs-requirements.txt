@@ -2,6 +2,13 @@ ipython
 ipykernel
 cython
 pyyaml
-sphinx>=1.4
+sphinx
 nbsphinx
 sphinx_rtd_theme
+numpy
+scipy
+bioservices
+matplotlib
+pandas
+beautifulsoup4
+requests
