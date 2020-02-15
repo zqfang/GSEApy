@@ -2,10 +2,8 @@
 import sys, os
 from setuptools import setup
 from setuptools.command.test import test as TestCommand
+from gseapy.__main__ import __version__
 
-
-
-__version__='0.9.16'
 
 if sys.argv[-1] == 'publish':
     os.system("python setup.py sdist bdist_wheel register upload")
