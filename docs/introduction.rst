@@ -30,7 +30,7 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
 GSEAPY is a python wrapper for **GESA** and **Enrichr**. 
 --------------------------------------------------------------------------------------------
 
-It's used for convenient GO enrichments and produce **publication quality figures** from python. 
+It's used for convenient GO enrichments and produce **publication-quality figures** from python. 
 
 GSEAPY could be used for **RNA-seq, ChIP-seq, Microarry** data.
 
@@ -54,7 +54,7 @@ I would like to use Pandas to explore my data, but I did not find a convenient t
 do gene set enrichment analysis in python. So, here are my reasons:
 
 * **Ability to run inside python interactive console without having to switch to R!!!**
-* User friendly for both wet and dry lab users.
+* User-friendly for both wet and dry lab users.
 * Produce or reproduce publishable figures.
 * Perform batch jobs easy.
 * Easy to use in bash shell or your data analysis workflow, e.g. snakemake.
@@ -71,7 +71,7 @@ This is an example of GSEA desktop application output
 
 GSEAPY ``Prerank`` module output
 -----------------------------------------------
-Using the same data from ``GSEA``, GSEAPY reproduce the example above.
+Using the same data from ``GSEA``, GSEAPY reproduces the example above.
 
 Using ``Prerank`` or ``replot`` module will reproduce the same figure for GSEA Java desktop outputs
 
@@ -96,7 +96,7 @@ A graphical introduction of Enrichr
 
 
 
-**The only thing you need to prepeare is a gene list file in txt format(one gene id per row), or a python list object.**
+**The only thing you need to prepare is a gene list file in txt format(one gene id per row), or a python list object.**
 
 **Note**: Enrichr uses a list of Entrez gene symbols as input. You should convert all gene names to uppercase.
 
@@ -171,4 +171,4 @@ You may also need to install **lxml, html5lib**, if you could not parse xml file
 
    
 
-For more information to use this library,see the :ref:`run`. 
+For API information to use this library, see the :ref:`run`. 

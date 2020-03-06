@@ -21,7 +21,7 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg
     :target:  https://img.shields.io/badge/license-MIT-blue.svg
 
-.. image:: https://img.shields.io/pypi/pyversions/gseapy.svg   
+.. image:: https://img.shields.io/pypi/pyversions/gseapy.svg
     :alt: PyPI - Python Version
 
 
@@ -36,7 +36,7 @@ For examples of using GSEApy please click here: `Example <http://gseapy.readthed
 GSEAPY is a python wrapper for **GSEA** and **Enrichr**.
 --------------------------------------------------------------------------------------------
 
-GSEAPY can be used for **RNA-seq, ChIP-seq, Microarry** data. It can be used for convenient GO enrichment and to produce **publication quality figures** in python.
+GSEAPY can be used for **RNA-seq, ChIP-seq, Microarray** data. It can be used for convenient GO enrichment and to produce **publication quality figures** in python.
 
 
 GSEAPY has six sub-commands available: ``gsea``, ``prerank``, ``ssgsea``, ``replot`` ``enrichr``, ``biomart``.
