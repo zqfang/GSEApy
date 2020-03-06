@@ -7,6 +7,8 @@ from multiprocessing import Pool
 from math import ceil
 from gseapy.stats import multiple_testing_correction
 
+from joblib import delayed, Parallel
+
 
 def enrichment_score(gene_list, correl_vector, gene_set, weighted_score_type=1, 
                      nperm=1000, rs=np.random.RandomState(), single=False, scale=False):
@@ -357,21 +359,12 @@ def gsea_compute_tensor(data, gmt, n, weighted_score_type, permutation_type,
         logging.debug("Start to permutate classes..............................")
         genes_ind = []
         cor_mat = []
-        temp_rnk = []
-        pool_rnk = Pool(processes=processes)
-        # split large array into smaller blocks to avoid memory overflow
-        i=1
-        while i <= block:
-            rs = np.random.RandomState(seed)
-            temp_rnk.append(pool_rnk.apply_async(ranking_metric_tensor,
-                                         args=(data, method, base, pheno_pos, pheno_neg, classes,
-                                                ascending, rs)))
-            i +=1
-        pool_rnk.close()
-        pool_rnk.join()
+
+        temp_rnk = Parallel()(delayed(ranking_metric_tensor)(
+            data, method, base, pheno_pos, pheno_neg, classes, ascending, rs) for _ in range(block))
 
         for k, temp in enumerate(temp_rnk):
-            gi, cor = temp.get()
+            gi, cor = temp
             if k+1 == block:
                genes_ind.append(gi)
                cor_mat.append(cor)

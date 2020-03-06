@@ -5,4 +5,5 @@ matplotlib>=1.4.3
 pandas>=0.16
 beautifulsoup4>=4.4.1
 requests
-
+joblib
+bioservices>=1.7.3
