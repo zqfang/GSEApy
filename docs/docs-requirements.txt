@@ -10,6 +10,5 @@ scipy
 bioservices
 matplotlib
 pandas
-beautifulsoup4
 requests
 joblib

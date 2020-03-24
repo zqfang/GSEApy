@@ -1,7 +1,7 @@
 #! python
 # -*- coding: utf-8 -*-
 
-import os, sys, logging, json
+import os, sys, logging, json, glob
 from collections import OrderedDict
 from multiprocessing import Pool, cpu_count
 from tempfile import TemporaryDirectory
@@ -789,14 +789,13 @@ class SingleSampleGSEA(GSEAbase):
 class Replot(GSEAbase):
     """To reproduce GSEA desktop output results."""
     def __init__(self, indir, outdir='GSEApy_Replot', weighted_score_type=1,
-                  min_size=3, max_size=1000, figsize=(6.5,6), graph_num=20, format='pdf', verbose=False):
+                  min_size=3, max_size=1000, figsize=(6.5,6), format='pdf', verbose=False):
         self.indir=indir
         self.outdir=outdir
         self.weighted_score_type=weighted_score_type
         self.min_size=min_size
         self.max_size=max_size
         self.figsize=figsize
-        self.fignum=int(graph_num)
         self.format=format
         self.verbose=bool(verbose)
         self.module='replot'
@@ -810,9 +809,6 @@ class Replot(GSEAbase):
     def run(self):
         """main replot function"""
         assert self.min_size <= self.max_size
-        assert self.fignum > 0
-        import glob
-        from bs4 import BeautifulSoup
 
         # parsing files.......
         try:
@@ -830,20 +826,19 @@ class Replot(GSEAbase):
             # logic for prerank results
             pos, neg = '',''
         # start reploting
-        self.gene_sets=gene_set_path
+        self.gene_sets = gene_set_path
         # obtain gene sets
         gene_set_dict = self.parse_gmt(gmt=gene_set_path)
         # obtain rank_metrics
         rank_metric = self._load_ranking(rank_path)
-        correl_vector =  rank_metric.values
+        correl_vector = rank_metric.values
         gene_list = rank_metric.index.values
         # extract each enriment term in the results.edb files and plot.
-        database = BeautifulSoup(open(results_path), features='xml')
-        length = len(database.findAll('DTG'))
-        fig_num = self.fignum if self.fignum <= length else length
-        for idx in range(fig_num):
+        
+        database = gsea_edb_parser(results_path)
+        for enrich_term, data in database.items():
             # extract statistical resutls from results.edb file
-            enrich_term, hit_ind, nes, pval, fdr= gsea_edb_parser(results_path, index=idx)
+            hit_ind, nes, pval, fdr = data
             gene_set = gene_set_dict.get(enrich_term)
             # calculate enrichment score
             RES = enrichment_score(gene_list=gene_list, 
@@ -1040,7 +1035,7 @@ def prerank(rnk, gene_sets, outdir='GSEA_Prerank', pheno_pos='Pos', pheno_neg='N
 
 
 def replot(indir, outdir='GSEA_Replot', weighted_score_type=1,
-           min_size=3, max_size=1000, figsize=(6.5,6), graph_num=20, format='pdf', verbose=False):
+           min_size=3, max_size=1000, figsize=(6.5,6), format='pdf', verbose=False):
     """The main function to reproduce GSEA desktop outputs.
 
     :param indir: GSEA desktop results directory. In the sub folder, you must contain edb file folder.
@@ -1058,7 +1053,7 @@ def replot(indir, outdir='GSEA_Replot', weighted_score_type=1,
 
     """
     rep = Replot(indir, outdir, weighted_score_type,
-                 min_size, max_size, figsize, graph_num, format, verbose)
+                 min_size, max_size, figsize, format, verbose)
     rep.run()
 
     return

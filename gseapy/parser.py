@@ -3,6 +3,7 @@
 import sys, logging, json, os
 import requests
 import pandas as pd
+import xml.etree.ElementTree as ET 
 from io import StringIO
 from numpy import in1d
 from requests.packages.urllib3.util.retry import Retry
@@ -30,36 +31,35 @@ def gsea_cls_parser(cls):
 
     return sample_name[0], sample_name[1], classes
 
-def gsea_edb_parser(results_path, index=0):
+def gsea_edb_parser(results_path):
     """Parse results.edb file stored under **edb** file folder.
 
     :param results_path: the .results file located inside edb folder.
     :param index: gene_set index of gmt database, used for iterating items.
     :return: enrichment_term, hit_index,nes, pval, fdr.
     """
-    from bs4 import BeautifulSoup
-
-    soup = BeautifulSoup(open(results_path), features='xml')
-    tag = soup.findAll('DTG')
-    term = dict(tag[index].attrs)
+    
+    xtree = ET.parse(results_path)
+    xroot = xtree.getroot() 
+    res = {}
     # dict_keys(['RANKED_LIST', 'GENESET', 'FWER', 'ES_PROFILE',
     # 'HIT_INDICES', 'ES', 'NES', 'TEMPLATE', 'RND_ES', 'RANK_SCORE_AT_ES',
     # 'NP', 'RANK_AT_ES', 'FDR'])
-    enrich_term = term.get('GENESET').split("#")[1]
-    es_profile = term.get('ES_PROFILE').split(" ")
-    # rank_es = term.get('RND_ES').split(" ")
-    hit_ind =term.get('HIT_INDICES').split(" ")
-    es_profile = [float(i) for i in es_profile ]
-    hit_ind = [float(i) for i in hit_ind ]
-    #r ank_es = [float(i) for i in rank_es ]
-    nes = term.get('NES')
-    pval = term.get('NP')
-    fdr =  term.get('FDR')
-    # fwer = term.get('FWER')
-    # index_range = len(tag)-1
-    logging.debug("Enriched Gene set is: "+ enrich_term)
-
-    return enrich_term, hit_ind, nes, pval, fdr
+    for node in xroot.findall('DTG'):
+        enrich_term = node.attrib.get('GENESET').split("#")[1]
+        es_profile = node.attrib.get('ES_PROFILE').split(" ")
+        # rank_es = term.get('RND_ES').split(" ")
+        hit_ind = node.attrib.get('HIT_INDICES').split(" ")
+        es_profile = [float(i) for i in es_profile ]
+        hit_ind = [float(i) for i in hit_ind ]
+        # rank_es = [float(i) for i in rank_es ]
+        nes = node.attrib.get('NES')
+        pval = node.attrib.get('NP')
+        fdr =  node.attrib.get('FDR')
+        # fwer = node.attrib.get('FWER')
+        logging.debug("Enriched Gene set is: "+ enrich_term)
+        res[enrich_term] =[hit_ind, nes, pval, fdr]
+    return res
 
 
 def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):

@@ -161,14 +161,10 @@ Mandatory
 ~~~~~~~~~
 
 * Numpy 
+* Scipy
 * Pandas 
 * Matplotlib
-* Beautifulsoup4
 * Requests(for enrichr API)
-
-You may also need to install **lxml, html5lib**, if you could not parse xml files. 
-
-
    
 
 For API information to use this library, see the :ref:`run`. 

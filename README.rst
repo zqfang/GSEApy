@@ -122,12 +122,8 @@ Mandatory
 * Scipy
 * Pandas
 * Matplotlib
-* Beautifulsoup4
 * Requests (for Enrichr API)
 * Bioservices (for BioMart API)
-
-You may also need to install **lxml, html5lib**, if you could not parse xml files.
-
 
 
 Run GSEAPY

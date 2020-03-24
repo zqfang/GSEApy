@@ -4,7 +4,7 @@ from setuptools import setup
 from setuptools.command.test import test as TestCommand
 #from gseapy.__main__ import __version__
 
-__version__ = "0.9.17"
+__version__ = "0.9.18"
 if sys.argv[-1] == 'publish':
     os.system("python setup.py sdist bdist_wheel register upload")
     print("You probably want to also tag the version now:")
@@ -61,10 +61,7 @@ setup(name='gseapy',
                         'matplotlib',
                         'bioservices',
                         'beautifulsoup4',
-                        'requests',
-                        'html5lib',
-                        'lxml',
-                        'joblib'],
+                        'requests'],
       entry_points={'console_scripts': ['gseapy = gseapy.__main__:main'],},
       tests_require=['pytest'],
       cmdclass = {'test': PyTest},

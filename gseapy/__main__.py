@@ -11,7 +11,7 @@ import argparse as ap
 # or args = argparser.parse_args() will throw bugs!!!
 
 
-__version__ = '0.9.17'
+__version__ = '0.9.18'
 
 def main():
     """The Main function/pipeline for GSEApy."""
@@ -24,10 +24,8 @@ def main():
     if subcommand == "replot":
         # reproduce plots using GSEAPY
         from .gsea import Replot
-        rep = Replot(indir=args.indir, outdir=args.outdir, weighted_score_type=args.weight,
-                     figsize=args.figsize, graph_num=args.graph,
-                     format=args.format, verbose=args.verbose)
-        rep.run()
+        Replot(indir=args.indir, outdir=args.outdir, weighted_score_type=args.weight,
+                     figsize=args.figsize, format=args.format, verbose=args.verbose).run()
 
 
     elif subcommand == "gsea":
