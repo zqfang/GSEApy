@@ -5,7 +5,7 @@
 import numpy as np
 import pandas as pd
 import gseapy as gp
-import logging
+import logging, sys
 
 
 # In[3]:
