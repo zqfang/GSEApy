@@ -8,10 +8,10 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
 .. image:: https://badge.fury.io/py/gseapy.svg
     :target: https://badge.fury.io/py/gseapy
 
-.. image:: https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat-square
+.. image:: https://img.shields.io/conda/vn/bioconda/GSEApy.svg?style=plastic
     :target: http://bioconda.github.io
 
-.. image:: https://github.com/zqfang/GSEApy/workflows/Python%20package/badge.svg?branch=master
+.. image:: https://github.com/zqfang/GSEApy/workflows/GSEApy/badge.svg?branch=master
     :target: https://github.com/zqfang/GSEApy/actions
     :alt: Action Status
 
