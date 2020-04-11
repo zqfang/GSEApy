@@ -12,21 +12,28 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
 .. image:: https://badge.fury.io/py/gseapy.svg
     :target: https://badge.fury.io/py/gseapy
 
-.. image:: https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat-square
+.. image:: https://img.shields.io/conda/vn/bioconda/GSEApy.svg?style=plastic
     :target: http://bioconda.github.io
+
+.. image:: https://github.com/zqfang/GSEApy/workflows/GSEApy/badge.svg?branch=master
+    :target: https://github.com/zqfang/GSEApy/actions
+    :alt: Action Status
 
 .. image:: https://travis-ci.org/zqfang/GSEApy.svg?branch=master
     :target: https://travis-ci.org/zqfang/GSEApy
 
-.. image:: http://readthedocs.org/projects/gseapy/badge/?version=latest
-    :target: http://gseapy.readthedocs.org/en/latest/?badge=latest
+.. image:: http://readthedocs.org/projects/gseapy/badge/?version=master
+    :target: http://gseapy.readthedocs.io/en/master/?badge=master
     :alt: Documentation Status
 
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg
     :target:  https://img.shields.io/badge/license-MIT-blue.svg
 
-.. image:: https://img.shields.io/pypi/pyversions/gseapy.svg   
+.. image:: https://img.shields.io/pypi/pyversions/gseapy.svg
     :alt: PyPI - Python Version
+
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3748085.svg
+   :target: https://doi.org/10.5281/zenodo.3748085
 
 
 **Release notes** : https://github.com/zqfang/GSEApy/releases 

@@ -28,6 +28,9 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
 .. image:: https://img.shields.io/pypi/pyversions/gseapy.svg
     :alt: PyPI - Python Version
 
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3748085.svg
+   :target: https://doi.org/10.5281/zenodo.3748085
+
 
 
 For examples of using GSEApy please click here: `Example <http://gseapy.readthedocs.io/en/master/gseapy_example.html>`_
