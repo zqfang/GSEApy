@@ -5,6 +5,7 @@ import os, sys, logging, json, glob
 from collections import OrderedDict
 from multiprocessing import Pool, cpu_count
 from tempfile import TemporaryDirectory
+from joblib import delayed, Parallel
 from numpy import log, exp
 import numpy as np
 import pandas as pd
@@ -239,25 +240,25 @@ class GSEAbase(object):
             NES = 'nes' if self.module != 'ssgsea' else 'es'
             term = gs.replace('/','_').replace(":","_")
             outfile = '{0}/{1}.{2}.{3}'.format(self.outdir, term, self.module, self.format)
-            # gseaplot(rank_metric=rank_metric, term=term, hit_indices=hit,
-            #           nes=results.get(gs)[NES], pval=results.get(gs)['pval'], 
-            #           fdr=results.get(gs)['fdr'], RES=results.get(gs)['RES'],
-            #           pheno_pos=pheno_pos, pheno_neg=pheno_neg, figsize=figsize,
-            #           ofname=outfile)
-            pool.apply_async(gseaplot, args=(rank_metric, term, hit, results.get(gs)[NES],
-                                              results.get(gs)['pval'],results.get(gs)['fdr'],
-                                              results.get(gs)['RES'],
-                                              pheno_pos, pheno_neg, 
-                                              figsize, 'seismic', outfile))
+            gseaplot(rank_metric=rank_metric, term=term, hit_indices=hit,
+                      nes=results.get(gs)[NES], pval=results.get(gs)['pval'], 
+                      fdr=results.get(gs)['fdr'], RES=results.get(gs)['RES'],
+                      pheno_pos=pheno_pos, pheno_neg=pheno_neg, figsize=figsize,
+                      ofname=outfile)
+            # pool.apply_async(gseaplot, args=(rank_metric, term, hit, results.get(gs)[NES],
+            #                                   results.get(gs)['pval'],results.get(gs)['fdr'],
+            #                                   results.get(gs)['RES'],
+            #                                   pheno_pos, pheno_neg, 
+            #                                   figsize, 'seismic', outfile))
             if self.module == 'gsea':
                 outfile2 = "{0}/{1}.heatmap.{2}".format(self.outdir, term, self.format)
-                # heatmap(df=self.heatmat.iloc[hit, :], title=term, ofname=outfile2, 
-                #         z_score=0, figsize=(self._width, len(hit)/2))
-                pool.apply_async(heatmap, args=(self.heatmat.iloc[hit, :], 0, term, 
-                                               (self._width, len(hit)/2+2), 'RdBu_r',
-                                                True, True, outfile2))
-        pool.close()
-        pool.join()
+                heatmap(df=self.heatmat.iloc[hit, :], title=term, ofname=outfile2, 
+                        z_score=0, figsize=(self._width, len(hit)/2))
+                # pool.apply_async(heatmap, args=(self.heatmat.iloc[hit, :], 0, term, 
+                #                                (self._width, len(hit)/2+2), 'RdBu_r',
+                #                                 True, True, outfile2))
+        # pool.close()
+        # pool.join()
 
        
     def _save_results(self, zipdata, outdir, module, gmt, rank_metric, permutation_type):
@@ -710,30 +711,44 @@ class SingleSampleGSEA(GSEAbase):
         # run ssgsea for gct expression matrix
         #multi-threading
         subsets = sorted(gmt.keys())
+        tempdat=[]
         tempes=[]
         names=[]
         rankings=[]
         pool = Pool(processes=self._processes)
+        np.random.seed(self.seed)
+        random_state = np.random.randint(np.iinfo(np.int32).max, size=df.shape[1])
         for name, ser in df.iteritems():
             #prepare input
             dat = ser.sort_values(ascending=self.ascending)
+            tempdat.append(dat)
             rankings.append(dat)
             names.append(name)
-            genes_sorted, cor_vec = dat.index.values, dat.values
-            rs = np.random.RandomState(self.seed)
-            # apply_async
-            tempes.append(pool.apply_async(enrichment_score_tensor,
-                                           args=(genes_sorted, cor_vec, gmt,
+            # genes_sorted, cor_vec = dat.index.values, dat.values
+            # #rs = np.random.RandomState(self.seed)
+            # # apply_async
+            # tempes.append(pool.apply_async(enrichment_score_tensor,
+            #                                args=(genes_sorted, cor_vec, gmt,
+            #                                    self.weighted_score_type,
+            #                                    self.permutation_num, self.seed, True,
+            #                                    self.scale)))
+        # pool.close()
+        # pool.join()
+
+        tempes = Parallel(n_jobs=self._processes)(
+                             delayed(enrichment_score_tensor)(
+                                               dat.index.values, dat.values, gmt,
                                                self.weighted_score_type,
                                                self.permutation_num, rs, True,
-                                               self.scale)))
-        pool.close()
-        pool.join()
+                                               self.scale) 
+                             for dat, rs in zip(tempdat, random_state))
+
         # save results and plotting
         for i, temp in enumerate(tempes):
             name, rnk = names[i], rankings[i]
             self._logger.info("Calculate Enrichment Score for Sample: %s "%name)
-            es, esnull, hit_ind, RES = temp.get()
+            # es, esnull, hit_ind, RES = temp.get()
+            es, esnull, hit_ind, RES = temp
             # create results subdir
             self.outdir= os.path.join(outdir, str(name))
             mkdirs(self.outdir)
