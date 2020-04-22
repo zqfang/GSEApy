@@ -1,7 +1,5 @@
 
 # -*- coding: utf-8 -*-
-from __future__ import  division
-
 import sys, logging
 import numpy as np
 from scipy.stats import hypergeom

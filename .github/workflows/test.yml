@@ -42,5 +42,6 @@ jobs:
         pip install coverage
         pip install coveralls
         python setup.py install
-        coverage run setup.py test
+        # coverage run setup.py test
+        
 
