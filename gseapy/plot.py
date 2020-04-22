@@ -282,9 +282,13 @@ class GSEAPlot(object):
 
     def savefig(self, bbox_inches='tight', dpi=300):   
         
-        if self.ofname is not None: 
-            # canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
+        #if self.ofname is not None: 
+        if hasattr(sys, 'ps1') and (self.ofname is not None):
             self.fig.savefig(self.ofname, bbox_inches=bbox_inches, dpi=dpi)
+        elif self.ofname is None:
+            return
+        else:
+            self._canvas.print_figure(self.ofname, bbox_inches=bbox_inches, dpi=300)
         return
 
 
@@ -503,9 +507,14 @@ def barplot(df, column='Adjusted P-value', title="", cutoff=0.05, top_term=10,
     bar.legend_.remove()
     adjust_spines(ax, spines=['left','bottom'])
 
-    if ofname is not None: 
+    if hasattr(sys, 'ps1') and (ofname is not None): 
         # canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
         fig.savefig(ofname, bbox_inches='tight', dpi=300)
+        return
+    elif ofname is None:
+        return
+    elif not hasattr(sys, 'ps1') and (ofname is not None):
+        canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
         return
     return ax
 
