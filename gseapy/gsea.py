@@ -210,13 +210,12 @@ class GSEAbase(object):
 
     def _heatmat(self, df, classes, pheno_pos, pheno_neg):
         """only use for gsea heatmap"""
-        width = len(classes) if len(classes) >= 6 else  5
+        
         cls_booA =list(map(lambda x: True if x == pheno_pos else False, classes))
         cls_booB =list(map(lambda x: True if x == pheno_neg else False, classes))
         datA = df.loc[:, cls_booA]
         datB = df.loc[:, cls_booB]
         datAB=pd.concat([datA,datB], axis=1)
-        self._width = width
         self.heatmat = datAB
         return
 
@@ -252,8 +251,13 @@ class GSEAbase(object):
             #                                   figsize, 'seismic', outfile))
             if self.module == 'gsea':
                 outfile2 = "{0}/{1}.heatmap.{2}".format(self.outdir, term, self.format)
-                heatmap(df=self.heatmat.iloc[hit, :], title=term, ofname=outfile2, 
-                        z_score=0, figsize=(self._width, len(hit)/2))
+                heatmat = self.heatmat.iloc[hit, :]
+                width = np.clip(heatmat.shape[1], 4, 20)
+                height = np.clip(heatmat.shape[0], 4, 20)
+                heatmap(df=heatmat, title=term, ofname=outfile2, 
+                        z_score=0, figsize=(width, height), 
+                        xticklabels=True if heatmat.shape[1] <=50 else False, 
+                        yticklabels=True if heatmat.shape[0] <=50 else False )
                 # pool.apply_async(heatmap, args=(self.heatmat.iloc[hit, :], 0, term, 
                 #                                (self._width, len(hit)/2+2), 'RdBu_r',
                 #                                 True, True, outfile2))

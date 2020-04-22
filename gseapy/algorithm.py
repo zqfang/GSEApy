@@ -2,7 +2,7 @@
 
 import sys, logging
 import numpy as np
-from functools import reduce
+#from functools import reduce
 #from multiprocessing import Pool
 from math import ceil
 from gseapy.stats import multiple_testing_correction
