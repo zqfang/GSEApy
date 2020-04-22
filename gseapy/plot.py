@@ -52,6 +52,33 @@ def colorbar(mappable):
     cax = divider.append_axes("right", size="2%", pad=0.05)
     return fig.colorbar(mappable, cax=cax)
 
+def _skip_ticks(labels, tickevery):
+    """Return ticks and labels at evenly spaced intervals."""
+    n = len(labels)
+    if tickevery == 0:
+        ticks, labels = [], []
+    elif tickevery == 1:
+        ticks, labels = np.arange(n) + .5, labels
+    else:
+        start, end, step = 0, n, tickevery
+        ticks = np.arange(start, end, step) + .5
+        labels = labels[start:end:step]
+    return ticks, labels
+
+def _auto_ticks(ax, labels, axis):
+    transform = ax.figure.dpi_scale_trans.inverted()
+    bbox = ax.get_window_extent().transformed(transform)
+    size = [bbox.width, bbox.height][axis]
+    axis = [ax.xaxis, ax.yaxis][axis]
+    tick, = ax.xaxis.set_ticks([0])
+    fontsize = tick.label1.get_size()
+    max_ticks = int(size // (fontsize / 72))
+    if max_ticks < 1: 
+        tickevery = 1
+    else:
+        tickevery = len(labels) // max_ticks + 1
+    return tickevery
+
 
 def heatmap(df, z_score=None, title='', figsize=(5,5), cmap='RdBu_r', 
             xticklabels=True, yticklabels=True, ofname=None, **kwargs):
@@ -68,11 +95,6 @@ def heatmap(df, z_score=None, title='', figsize=(5,5), cmap='RdBu_r',
     """
     df = zscore(df, axis=z_score)
     df = df.iloc[::-1]
-    # Get the positions and used label for the ticks
-    ny, nx = df.shape
-    xticks = np.arange(0, nx, 1) + .5
-    yticks = np.arange(0, ny, 1) + .5
-
     # If working on commandline, don't show figure
     if hasattr(sys, 'ps1') and (ofname is None): 
         fig = plt.figure(figsize=figsize)
@@ -83,10 +105,14 @@ def heatmap(df, z_score=None, title='', figsize=(5,5), cmap='RdBu_r',
     vmin = np.percentile(df.min(), 2)
     vmax =  np.percentile(df.max(), 98)
     matrix = ax.pcolormesh(df.values, cmap=cmap, vmin=vmin, vmax=vmax)
+    xstep = _auto_ticks(ax, df.columns.values, 0)
+    ystep = _auto_ticks(ax, df.index.values, 1)
+    xticks, xlabels = _skip_ticks(df.columns.values, tickevery=xstep)
+    yticks, ylabels = _skip_ticks(df.index.values, tickevery=ystep)
     ax.set_ylim([0,len(df)])
     ax.set(xticks=xticks, yticks=yticks)
-    ax.set_xticklabels(df.columns.values if xticklabels else '', fontsize=14, rotation=90)
-    ax.set_yticklabels(df.index.values if yticklabels else '',  fontsize=14)
+    ax.set_xticklabels(xlabels if xticklabels else '', fontsize=14, rotation=90)
+    ax.set_yticklabels(ylabels if yticklabels else '',  fontsize=14)
     ax.set_title("%s\nHeatmap of the Analyzed Geneset"%title, fontsize=20)
     ax.tick_params(axis='both', which='both', bottom=False, top=False,
                    right=False, left=False)

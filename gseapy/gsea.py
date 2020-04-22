@@ -256,8 +256,7 @@ class GSEAbase(object):
                 height = np.clip(heatmat.shape[0], 4, 20)
                 heatmap(df=heatmat, title=term, ofname=outfile2, 
                         z_score=0, figsize=(width, height), 
-                        xticklabels=True if heatmat.shape[1] <=50 else False, 
-                        yticklabels=True if heatmat.shape[0] <=50 else False )
+                        xticklabels=True, yticklabels=True)
                 # pool.apply_async(heatmap, args=(self.heatmat.iloc[hit, :], 0, term, 
                 #                                (self._width, len(hit)/2+2), 'RdBu_r',
                 #                                 True, True, outfile2))
