@@ -234,7 +234,7 @@ class GSEAbase(object):
         #Plotting
         top_term = self.res2d.index[:graph_num]
         # multi-threading
-        pool = Pool(self._processes)
+        #pool = Pool(self._processes)
         for gs in top_term:
             hit = results.get(gs)['hit_indices']
             NES = 'nes' if self.module != 'ssgsea' else 'es'
@@ -715,7 +715,7 @@ class SingleSampleGSEA(GSEAbase):
         tempes=[]
         names=[]
         rankings=[]
-        pool = Pool(processes=self._processes)
+        #pool = Pool(processes=self._processes)
         np.random.seed(self.seed)
         random_state = np.random.randint(np.iinfo(np.int32).max, size=df.shape[1])
         for name, ser in df.iteritems():

@@ -3,10 +3,9 @@
 import sys, logging
 import numpy as np
 from functools import reduce
-from multiprocessing import Pool
+#from multiprocessing import Pool
 from math import ceil
 from gseapy.stats import multiple_testing_correction
-
 from joblib import delayed, Parallel
 
 
@@ -492,7 +491,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
 
         # split large array into smaller blocks to avoid memory overflow
         temp_esnu=[]
-        pool_esnu = Pool(processes=processes)
+        #pool_esnu = Pool(processes=processes)
         # you have to reseed, or all your processes are sharing the same seed value
         np.random.seed(seed)
         random_state = np.random.randint(np.iinfo(np.int32).max, size=len(subsets))
