@@ -146,11 +146,32 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
 def get_library_name(database='Human'):
     """return enrichr active enrichr library name. 
     :param str database: Select one from { 'Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm' } 
+    :return: a list of enrichr libraries from selected database
     
     """
+    default = [ 'human','mouse','hs', 'mm',
+                'homo sapiens', 'mus musculus',
+                'h. sapiens', 'm. musculus']
+    organism = {
+                'Fly': ['fly', 'd. melanogaster', 'drosophila melanogaster'],
+                'Yeast': ['yeast', 's. cerevisiae', 'saccharomyces cerevisiae'],
+                'Worm': ['worm', 'c. elegans', 'caenorhabditis elegans', 'nematode'],
+                'Fish': ['fish', 'd. rerio', 'danio rerio', 'zebrafish']
+                }
+    
+    if database.lower() in default:
+        database = 'Enrichr'
+    else:
+        for k, v in organism.items():
+            if database.lower() in v :
+                database = k+'Enrichr'
+                break
 
+    if not database.endswith('Enrichr'):
+        raise LookupError("""No supported database. Please input one of these:
+                            ('Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm') """)
+        return 
     # make a get request to get the gmt names and meta data from Enrichr
-
     # old code
     # response = requests.get('http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary?mode=meta')
     # gmt_data = response.json()
@@ -161,16 +182,6 @@ def get_library_name(database='Human'):
     #     # only include active gmts
     #     if inst_gmt['isActive'] == True:
     #         libs.append(inst_gmt['libraryName'])
-
-
-    if database not in ['Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm']:
-        sys.stderr.write("""No supported database. Please input one of these:
-                            ('Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm') """)
-        return 
-    if database in ['Human', 'Mouse']: 
-        database = 'Enrichr'
-    else:
-        database += 'Enrichr'
     lib_url='http://amp.pharm.mssm.edu/%s/datasetStatistics'%database
     response = requests.get(lib_url)
     if not response.ok:
@@ -199,9 +210,10 @@ class Biomart(BioMart):
         >>> ## view validated filters
         >>> filters = bm.get_filters(dataset='hsapiens_gene_ensembl')
         >>> ## query results
+        >>> queries = ['ENSG00000125285','ENSG00000182968'] # a python list
         >>> results = bm.query(dataset='hsapiens_gene_ensembl', 
                                attributes=['entrezgene_id', ‘go_id'],
-                               filters={'ensembl_gene_id': [your input list]}
+                               filters={'ensembl_gene_id': queries}
                               )         
         """
         super(Biomart, self).__init__(host=host, verbose=verbose)

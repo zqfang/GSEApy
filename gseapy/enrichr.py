@@ -169,7 +169,7 @@ class Enrichr(object):
         ADDLIST_URL = 'http://amp.pharm.mssm.edu/%s/addList'%self._organism
         job_id = self.send_genes(gene_list, ADDLIST_URL)
         user_list_id = job_id['userListId']
-
+       
         RESULTS_URL = 'http://amp.pharm.mssm.edu/%s/export'%self._organism
         query_string = '?userListId=%s&filename=%s&backgroundType=%s'
         # set max retries num =5
@@ -180,8 +180,23 @@ class Enrichr(object):
         response.encoding = 'utf-8'
         if not response.ok:
             self._logger.error('Error fetching enrichment results: %s'%self._gs)
-        
-        res = pd.read_csv(StringIO(response.text), sep="\t")
+
+        try:
+            res = pd.read_csv(StringIO(response.text), sep="\t")
+        except pd.errors.ParserError as e:
+            RESULTS_URL = 'http://amp.pharm.mssm.edu/Enrichr/enrich'
+            query_string = '?userListId=%s&backgroundType=%s'
+            url = RESULTS_URL + query_string % (user_list_id, self._gs)
+            response = s.get(url)
+            if not response.ok:
+                self._logger.error('Error fetching enrichment results: %s'%self._gs)
+            data = json.loads(response.text)
+            colnames = ["Rank","Term", "P-value", "Z-score", "Combined Score", 
+                        "Genes", "Adjusted P-value", 
+                        "Old P-value", "Old adjusted P-value"]
+            res = pd.DataFrame(data[self._gs], columns=colnames)
+            res['Genes'] = res['Genes'].apply(";".join) 
+
         return [job_id['shortId'], res]
 
     def _is_entrez_id(self, idx):
@@ -396,7 +411,7 @@ def enrichr(gene_list, gene_sets, organism='human', description='',
                            In this case, you will skip retrieving background infos from biomart.
     
     Use the code below to see valid background dataset names from BioMart.
-    Here are example code:
+    Here are example code::
     >>> from gseapy.parser import Biomart 
     >>> bm = Biomart(verbose=False, host="asia.ensembl.org")
     >>> ## view validated marts
