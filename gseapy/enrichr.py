@@ -228,10 +228,10 @@ class Enrichr(object):
             df = bm.query(dataset=self.background)
             df.dropna(subset=['go_id'], inplace=True)
         self._logger.info("using all annotated genes with GO_ID as background genes")
-        df.dropna(subset=['entrezgene'], inplace=True)     
+        df.dropna(subset=['entrezgene_id'], inplace=True)     
         # input id type: entrez or gene_name
         if self._isezid:
-            bg = df['entrezgene'].astype(int)
+            bg = df['entrezgene_id'].astype(int)
         else:
             bg = df['external_gene_name']
 
@@ -335,9 +335,9 @@ class Enrichr(object):
         # if gmt
         self._logger.info("Connecting to Enrichr Server to get latest library names")
         if len(gss) < 1:
-            sys.stderr.write("Not validated Enrichr library name provided\n")
-            sys.stdout.write("Hint: use get_library_name() to view full list of supported names")
-            sys.exit(1)
+            self._logger.error("Hint: Current organism = %s, is this correct?\n"%self.organism +\
+                            "Hint: use get_library_name() to view full list of supported names.")
+            raise LookupError("Not validated Enrichr library name provided!")
         self.results = pd.DataFrame()
 
         for g in gss: 
