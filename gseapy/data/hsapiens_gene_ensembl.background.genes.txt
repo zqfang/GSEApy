@@ -1,4 +1,4 @@
-gene_id	external_gene_name	entrezgene
+gene_id	external_gene_name	entrezgene_id
 ENSG00000283867	MIR1307	100302174
 ENSG00000207975	MIR181B1	406955
 ENSG00000275568	ARHGAP11A	9824

@@ -337,7 +337,7 @@ class Enrichr(object):
         if len(gss) < 1:
             self._logger.error("Hint: Current organism = %s, is this correct?\n"%self.organism +\
                             "Hint: use get_library_name() to view full list of supported names.")
-            raise LookupError("Not validated Enrichr library name provided!")
+            raise LookupError("Not validated Enrichr library! Please provide correct organism and library name!")
         self.results = pd.DataFrame()
 
         for g in gss: 

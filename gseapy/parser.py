@@ -122,8 +122,7 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
     elif sys.version_info[0] == 2:
         genesets_filter =  {k: v for k, v in genesets_dict.iteritems() if len(v) >= min_size and len(v) <= max_size}
     else:
-        logging.error("System failure. Please Provide correct input files")
-        sys.exit(1)
+        raise Exception("System failure. Please Provide correct input files")
     if gene_list is not None:
         subsets = sorted(genesets_filter.keys())
         for subset in subsets:
@@ -139,9 +138,8 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
     logging.info("%04d gene_sets have been filtered out when max_size=%s and min_size=%s"%(filsets_num, max_size, min_size))
 
     if filsets_num == len(genesets_dict):
-        logging.error("No gene sets passed throught filtering condition!!!, try new paramters again!\n" +\
+        raise Exception("No gene sets passed throught filtering condition!!!, try new paramters again!\n" +\
                          "Note: Gene names for gseapy is case sensitive." )
-        sys.exit(1)
     else:
         return genesets_filter
 
@@ -188,8 +186,8 @@ class Biomart(BioMart):
     def __init__(self, host="www.ensembl.org", verbose=False):
         """A wrapper of BioMart() from bioseverices.
 
-        How to query validated dataset, attributes, filters:
-        example:
+        How to query validated dataset, attributes, filters.
+        example::
         >>> from gseapy.parser import Biomart 
         >>> bm = Biomart(verbose=False, host="asia.ensembl.org")
         >>> ## view validated marts
@@ -202,7 +200,7 @@ class Biomart(BioMart):
         >>> filters = bm.get_filters(dataset='hsapiens_gene_ensembl')
         >>> ## query results
         >>> results = bm.query(dataset='hsapiens_gene_ensembl', 
-                               attributes=['entrezgene', ‘go_id'],
+                               attributes=['entrezgene_id', ‘go_id'],
                                filters={'ensembl_gene_id': [your input list]}
                               )         
         """
@@ -272,11 +270,8 @@ class Biomart(BioMart):
                    
         """
         if not attributes: 
-            attributes = ['ensembl_gene_id', 'external_gene_name', 'entrezgene', 'go_id'] 
-        # i=0
-        # while (self.host is None) and (i < 3):
-        #     self.host = self.ghosts[i]
-        #     i +=1 
+            attributes = ['ensembl_gene_id', 'external_gene_name', 'entrezgene_id', 'go_id'] 
+
         self.new_query()
         # 'mmusculus_gene_ensembl'
         self.add_dataset_to_xml(dataset)
@@ -285,17 +280,24 @@ class Biomart(BioMart):
         # add filters
         if filters:
             for k, v in filters.items(): 
-                if isinstance(v, list): v = ",".join(v)
+                if not isinstance(v, list): continue
+                v = ",".join(v)
                 self.add_filter_to_xml(k, v)
 
         xml_query = self.get_xml()
         results = super(Biomart, self).query(xml_query)
         df = pd.read_csv(StringIO(results), header=None, sep="\t",
                          names=attributes, index_col=None)
-        # save file to cache path.
+        if 'entrezgene_id' in attributes:
+            df['entrezgene_id'] = df['entrezgene_id'].astype(pd.Int32Dtype())
+
+        self.results = df
+        if hasattr(sys, 'ps1') and (filename is None):
+            return df
+         # save file to cache path.
         if filename is None: 
             mkdirs(DEFAULT_CACHE_PATH)
-            filename = os.path.join(DEFAULT_CACHE_PATH, "{}.background.genes.txt".format(dataset))
+            filename = os.path.join(DEFAULT_CACHE_PATH, "{}.background.genes.txt".format(dataset))       
         df.to_csv(filename, sep="\t", index=False)
-      
-        return df
+
+        return 

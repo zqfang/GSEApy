@@ -1,4 +1,4 @@
-gene_id	external_gene_name	entrezgene
+gene_id	external_gene_name	entrezgene_id
 ENSMUSG00000064370	mt-Cytb	17711
 ENSMUSG00000064368	mt-Nd6	17722
 ENSMUSG00000064367	mt-Nd5	17721

@@ -834,8 +834,7 @@ class Replot(GSEAbase):
             rank_path =  glob.glob(self.indir+'*/edb/*.rnk')[0]
             gene_set_path =  glob.glob(self.indir+'*/edb/gene_sets.gmt')[0]
         except IndexError as e:
-            sys.stderr.write("Could not locate GSEA files in the given directory!")
-            sys.exit(1)
+            raise Exception("Could not locate GSEA files in the given directory!")
         # extract sample names from .cls file
         cls_path = glob.glob(self.indir+'*/edb/*.cls')
         if cls_path:
