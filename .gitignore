@@ -22,7 +22,7 @@ tmp/
 # vim
 .*swp
 # docs
-docs/_build/doctest
+*_build
 
 # tests
 tests/.ipynb_checkpoints

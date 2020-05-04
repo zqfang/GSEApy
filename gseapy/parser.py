@@ -202,7 +202,7 @@ class Biomart(BioMart):
         """A wrapper of BioMart() from bioseverices.
 
         How to query validated dataset, attributes, filters.
-        example::
+        Example::
         >>> from gseapy.parser import Biomart 
         >>> bm = Biomart(verbose=False, host="asia.ensembl.org")
         >>> ## view validated marts
@@ -267,6 +267,7 @@ class Biomart(BioMart):
         **Note**: it will take a couple of minutes to get the results.
         A xml template for querying biomart. (see https://gist.github.com/keithshep/7776579)
         Example::
+        >>> import requests
         >>> exampleTaxonomy = "mmusculus_gene_ensembl"
         >>> exampleGene = "ENSMUSG00000086981,ENSMUSG00000086982,ENSMUSG00000086983"
         >>> urlTemplate = \
@@ -279,8 +280,7 @@ class Biomart(BioMart):
             '''<Attribute name="transcript_start"/><Attribute name="transcript_end"/>''' \
             '''<Attribute name="exon_chrom_start"/><Attribute name="exon_chrom_end"/>''' \
             '''</Dataset>''' \
-            '''</Query>''' 
-            
+            '''</Query>'''    
         >>> exampleURL = urlTemplate % (exampleTaxonomy, exampleGene)
         >>> req = requests.get(exampleURL, stream=True)
                    
