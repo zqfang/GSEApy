@@ -376,7 +376,7 @@ class Enrichr(object):
             self.res2d = res
             if self._outdir is None: continue
             self._logger.info('Save file of enrichment results: Job Id:' + str(shortID))
-            outfile = "%s/%s.%s.%s.reports.txt" % (self.outdir, self._gs, self.descriptions, self.module)
+            outfile = "%s/%s.%s.%s.reports.txt" % (self.outdir, self._gs, self.organism, self.module)
             self.res2d.to_csv(outfile, index=False, encoding='utf-8', sep="\t")
             # plotting
             if not self.__no_plot:

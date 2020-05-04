@@ -10,6 +10,7 @@ from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 from bioservices import BioMart, BioServicesError
 from gseapy.utils import unique, DEFAULT_LIBRARY, DEFAULT_CACHE_PATH, mkdirs
+from collections.abc import Iterable
 
 def gsea_cls_parser(cls):
     """Extract class(phenotype) name from .cls file.
@@ -18,8 +19,8 @@ def gsea_cls_parser(cls):
     :return: phenotype name and a list of class vector.
     """
 
-    if isinstance(cls, list) :
-        classes = cls
+    if not isinstance(cls, str) and isinstance(cls, Iterable) :
+        classes = list(cls)
         sample_name= unique(classes)
     elif isinstance(cls, str) :
         with open(cls) as c:
@@ -28,6 +29,9 @@ def gsea_cls_parser(cls):
         sample_name = file[1].lstrip("# ").strip('\n').split(" ")
     else:
         raise Exception('Error parsing sample name!')
+    
+    if len(sample_name) != 2:
+            raise Exception("Input groups have to be 2!")
 
     return sample_name[0], sample_name[1], classes
 
@@ -35,8 +39,8 @@ def gsea_edb_parser(results_path):
     """Parse results.edb file stored under **edb** file folder.
 
     :param results_path: the .results file located inside edb folder.
-    :param index: gene_set index of gmt database, used for iterating items.
-    :return: enrichment_term, hit_index,nes, pval, fdr.
+    :return: 
+        a dict contains enrichment_term, hit_index,nes, pval, fdr.
     """
     
     xtree = ET.parse(results_path)
@@ -212,9 +216,9 @@ class Biomart(BioMart):
         >>> ## query results
         >>> queries = ['ENSG00000125285','ENSG00000182968'] # a python list
         >>> results = bm.query(dataset='hsapiens_gene_ensembl', 
-                               attributes=['entrezgene_id', ‘go_id'],
-                               filters={'ensembl_gene_id': queries}
-                              )         
+                            attributes=['entrezgene_id', ‘go_id'],
+                            filters={'ensembl_gene_id': queries}
+                            )         
         """
         super(Biomart, self).__init__(host=host, verbose=verbose)
         hosts=["www.ensembl.org", "asia.ensembl.org", "useast.ensembl.org"]
@@ -262,23 +266,23 @@ class Biomart(BioMart):
 
         **Note**: it will take a couple of minutes to get the results.
         A xml template for querying biomart. (see https://gist.github.com/keithshep/7776579)
-        
-        exampleTaxonomy = "mmusculus_gene_ensembl"
-        exampleGene = "ENSMUSG00000086981,ENSMUSG00000086982,ENSMUSG00000086983"
-        urlTemplate = \
-        '''http://ensembl.org/biomart/martservice?query=''' \
-        '''<?xml version="1.0" encoding="UTF-8"?>''' \
-        '''<!DOCTYPE Query>''' \
-        '''<Query virtualSchemaName="default" formatter="CSV" header="0" uniqueRows="0" count="" datasetConfigVersion="0.6">''' \
-        '''<Dataset name="%s" interface="default"><Filter name="ensembl_gene_id" value="%s"/>''' \
-        '''<Attribute name="ensembl_gene_id"/><Attribute name="ensembl_transcript_id"/>''' \
-        '''<Attribute name="transcript_start"/><Attribute name="transcript_end"/>''' \
-        '''<Attribute name="exon_chrom_start"/><Attribute name="exon_chrom_end"/>''' \
-        '''</Dataset>''' \
-        '''</Query>''' 
-        
-        exampleURL = urlTemplate % (exampleTaxonomy, exampleGene)
-        req = requests.get(exampleURL, stream=True)
+        Example::
+        >>> exampleTaxonomy = "mmusculus_gene_ensembl"
+        >>> exampleGene = "ENSMUSG00000086981,ENSMUSG00000086982,ENSMUSG00000086983"
+        >>> urlTemplate = \
+            '''http://ensembl.org/biomart/martservice?query=''' \
+            '''<?xml version="1.0" encoding="UTF-8"?>''' \
+            '''<!DOCTYPE Query>''' \
+            '''<Query virtualSchemaName="default" formatter="CSV" header="0" uniqueRows="0" count="" datasetConfigVersion="0.6">''' \
+            '''<Dataset name="%s" interface="default"><Filter name="ensembl_gene_id" value="%s"/>''' \
+            '''<Attribute name="ensembl_gene_id"/><Attribute name="ensembl_transcript_id"/>''' \
+            '''<Attribute name="transcript_start"/><Attribute name="transcript_end"/>''' \
+            '''<Attribute name="exon_chrom_start"/><Attribute name="exon_chrom_end"/>''' \
+            '''</Dataset>''' \
+            '''</Query>''' 
+            
+        >>> exampleURL = urlTemplate % (exampleTaxonomy, exampleGene)
+        >>> req = requests.get(exampleURL, stream=True)
                    
         """
         if not attributes: 
@@ -292,8 +296,8 @@ class Biomart(BioMart):
         # add filters
         if filters:
             for k, v in filters.items(): 
-                if not isinstance(v, list): continue
-                v = ",".join(v)
+                if isinstance(v, str) or not isinstance(v, Iterable): continue
+                v = ",".join(list(v))
                 self.add_filter_to_xml(k, v)
 
         xml_query = self.get_xml()
