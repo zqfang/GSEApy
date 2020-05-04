@@ -23,7 +23,7 @@ tmp/
 .*swp
 # docs
 *_build
-
+docs/_build
 # tests
 tests/.ipynb_checkpoints
 .pytest_cache
