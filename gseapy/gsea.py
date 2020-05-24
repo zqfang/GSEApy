@@ -3,7 +3,6 @@
 
 import os, sys, logging, json, glob
 from collections import OrderedDict
-from multiprocessing import Pool, cpu_count
 from tempfile import TemporaryDirectory
 from joblib import delayed, Parallel
 from numpy import log, exp
@@ -57,7 +56,7 @@ class GSEAbase(object):
     def _set_cores(self):
         """set cpu numbers to be used"""
 
-        cpu_num = cpu_count()-1
+        cpu_num = os.cpu_count()-1
         if self._processes > cpu_num:
             cores = cpu_num
         elif self._processes < 1:

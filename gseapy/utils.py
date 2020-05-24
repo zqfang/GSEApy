@@ -5,7 +5,7 @@ from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 from os.path import expanduser
 
-DEFAULT_CACHE_PATH = os.path.join(expanduser("~"), ".gseapy")
+DEFAULT_CACHE_PATH = os.path.join(expanduser("~"), ".cache/gseapy")
 
 def unique(seq):
     """Remove duplicates from a list in Python while preserving order.
@@ -36,9 +36,23 @@ def mkdirs(outdir):
             raise exc
         pass
 
+class GSLogger(object):
+    __instance = None
+    def __new__(cls, outlog, log_level=logging.INFO):
+        """Singleton
+        __new__ handles object creation and __init__ handles object initialization.
+        __new__ accepts cls as it's first parameter and __init__ accepts self.
+        __new__ excute first, then __init__
+        """
+        if GSLogger.__instance is None:
+            GSLogger.__instance = object.__new__(cls)
+        logger = log_init(outlog, log_level)
+        GSLogger.__instance.logger = logger
+        return GSLogger.__instance
+
+
 def log_init(outlog, log_level=logging.INFO):
     """logging start"""
-
     # clear old root logger handlers
     logging.getLogger("gseapy").handlers = []
     # init a root logger
@@ -58,16 +72,9 @@ def log_init(outlog, log_level=logging.INFO):
     logging.getLogger("gseapy").addHandler(console)
     logger = logging.getLogger("gseapy")
     # logger.setLevel(log_level)
+    # logger.handlers.clear()
+    # logger.removeHandler(fh)
     return logger
-
-def log_stop(logger):
-    """log stop"""
-
-    handlers = logger.handlers[:]
-    for handler in handlers:
-        handler.close()
-        logger.removeHandler(handler)
-
 
 def retry(num=5):
     """"retry connection.
