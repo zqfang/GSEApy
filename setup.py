@@ -1,10 +1,21 @@
 # -*- coding: utf-8 -*-
-import sys, os
+import sys, os, re
 from setuptools import setup
 from setuptools.command.test import test as TestCommand
-#from gseapy.__main__ import __version__
 
-__version__ = "0.9.18"
+def find_version():
+    filepath = os.path.join('gseapy', '__main__.py')
+    with open(os.path.join(os.path.dirname(__file__), filepath), encoding="utf8") as fp:
+        content = fp.read()
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]", content, re.M)
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError("Unable to find version string.")
+
+__author__ = 'Zhuoqing Fang'
+__version__ = find_version()
+
+
 if sys.argv[-1] == 'publish':
     os.system("python setup.py sdist bdist_wheel register upload")
     print("You probably want to also tag the version now:")
@@ -23,8 +34,6 @@ class PyTest(TestCommand):
         import pytest
         errno = pytest.main(self.test_args)
         sys.exit(errno)
-
-
 
 
 def readme():
@@ -68,4 +77,4 @@ setup(name='gseapy',
       zip_safe=False,
       download_url='https://github.com/zqfang/gseapy',)
 
-__author__ = 'Zhuoqing Fang'
+
