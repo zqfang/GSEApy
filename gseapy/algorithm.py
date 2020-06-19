@@ -197,7 +197,7 @@ def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
 
        :param exprs:   gene_expression DataFrame, gene_name indexed.
        :param str method:  calculate correlation or ranking. methods including:
-                           1. 'signal_to_noise'.
+                           1. 'signal_to_noise' (s2n) or 'abs_signal_to_noise' (abs_s2n).
                            2. 't_test'.
                            3. 'ratio_of_classes' (also referred to as fold change).
                            4. 'diff_of_classes'.
@@ -232,8 +232,10 @@ def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
     pos_cor_std = perm_cor_tensor[:,pos,:].std(axis=1, ddof=1)
     neg_cor_std = perm_cor_tensor[:,neg,:].std(axis=1, ddof=1)
 
-    if method == 'signal_to_noise':
+    if method in ['signal_to_noise', 's2n']:
         cor_mat = (pos_cor_mean - neg_cor_mean)/(pos_cor_std + neg_cor_std)
+    elif method in ['abs_signal_to_noise', 'abs_s2n']:
+        cor_mat = np.abs((pos_cor_mean - neg_cor_mean)/(pos_cor_std + neg_cor_std))
     elif method == 't_test':
         denom = 1.0/G
         cor_mat = (pos_cor_mean - neg_cor_mean)/ np.sqrt(denom*pos_cor_std**2 + denom*neg_cor_std**2)
@@ -263,11 +265,12 @@ def ranking_metric(df, method, pos, neg, classes, ascending):
        :param method:  The method used to calculate a correlation or ranking. Default: 'log2_ratio_of_classes'.
                        Others methods are:
 
-                       1. 'signal_to_noise'
+                       1. 'signal_to_noise' (s2n) or 'abs_signal_to_noise' (abs_s2n)
 
                           You must have at least three samples for each phenotype to use this metric.
                           The larger the signal-to-noise ratio, the larger the differences of the means (scaled by the standard deviations);
                           that is, the more distinct the gene expression is in each phenotype and the more the gene acts as a “class marker.”
+                       
 
                        2. 't_test'
 
@@ -305,8 +308,10 @@ def ranking_metric(df, method, pos, neg, classes, ascending):
     df_mean = df.groupby(by=classes, axis=1).mean()
     df_std =  df.groupby(by=classes, axis=1).std()
 
-    if method == 'signal_to_noise':
+    if method in ['signal_to_noise', 's2n']:
         ser = (df_mean[pos] - df_mean[neg])/(df_std[pos] + df_std[neg])
+    elif method in ['abs_signal_to_noise', 'abs_s2n']:
+        ser = ((df_mean[pos] - df_mean[neg])/(df_std[pos] + df_std[neg])).abs()
     elif method == 't_test':
         ser = (df_mean[pos] - df_mean[neg])/ np.sqrt(df_std[pos]**2/len(df_std)+df_std[neg]**2/len(df_std) )
     elif method == 'ratio_of_classes':

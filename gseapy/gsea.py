@@ -394,7 +394,8 @@ class GSEA(GSEAbase):
 
     def run(self):
         """GSEA main procedure"""
-
+        assert self.method in ['signal_to_noise', 's2n', 'abs_signal_to_noise', 'abs_s2n',
+                               't_test', 'ratio_of_classes', 'diff_of_classes', 'log2_ratio_of_classes']
         assert self.permutation_type in ["phenotype", "gene_set"]
         assert self.min_size <= self.max_size
 

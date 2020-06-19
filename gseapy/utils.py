@@ -37,6 +37,7 @@ def mkdirs(outdir):
         pass
 
 class GSLogger(object):
+    # singleton
     __instance = None
     def __new__(cls, outlog, log_level=logging.INFO):
         """Singleton
@@ -46,8 +47,8 @@ class GSLogger(object):
         """
         if GSLogger.__instance is None:
             GSLogger.__instance = object.__new__(cls)
-        logger = log_init(outlog, log_level)
-        GSLogger.__instance.logger = logger
+            logger = log_init(outlog, log_level)
+            GSLogger.__instance.logger = logger
         return GSLogger.__instance
 
 

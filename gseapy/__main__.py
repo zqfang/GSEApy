@@ -171,10 +171,11 @@ def add_gsea_parser(subparsers):
     group_opt.add_argument("-w", "--weight", action='store', dest='weight', default=1.0, type=float, metavar='float',
                            help='Weighted_score of rank_metrics. For weighting input genes. Choose from {0, 1, 1.5, 2}. Default: 1',)
     group_opt.add_argument("-m", "--method", action="store", dest="method", type=str, metavar='',
-                           choices=("signal_to_noise", "t_test", "ratio_of_classes", "diff_of_classes", "log2_ratio_of_classes"),
+                           choices=("signal_to_noise", "s2n", "abs_signal_to_noise", "abs_s2n", 
+                                     "t_test", "ratio_of_classes", "diff_of_classes", "log2_ratio_of_classes"),
                            default="log2_ratio_of_classes",
                            help="Methods to calculate correlations of ranking metrics. \
-                           Choose from {'signal_to_noise', 't_test', 'ratio_of_classes', 'diff_of_classes','log2_ratio_of_classes'}.\
+                           Choose from {'signal_to_noise', 'abs_signal_to_noise', 't_test', 'ratio_of_classes', 'diff_of_classes','log2_ratio_of_classes'}.\
                            Default: 'log2_ratio_of_classes'")
     group_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
                            help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
