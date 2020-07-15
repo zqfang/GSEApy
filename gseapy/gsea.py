@@ -137,7 +137,7 @@ class GSEAbase(object):
         if filsets_num == len(subsets):
             self._logger.error("No gene sets passed through filtering condition!!!, try new parameters again!\n" +\
                                "Note: check gene name, gmt file format, or filtering size." )
-            sys.exit(0)
+            raise Exception("No gene sets passed through filtering condition")
 
         self._gmtdct=genesets_dict
         return genesets_dict
@@ -157,7 +157,7 @@ class GSEAbase(object):
             pass
         else:
             self._logger.error("No supported gene_sets: %s"%gmt)
-            sys.exit(0)
+            raise Exception("No supported gene_sets: %s"%gmt)
 
         tmpname = "enrichr." + gmt + ".gmt"
         tempath = os.path.join(DEFAULT_CACHE_PATH, tmpname)
@@ -629,8 +629,7 @@ class SingleSampleGSEA(GSEAbase):
             self._logger.info("Use custom rank metric for ssGSEA")
             data = dat
         else:
-            sys.stderr.write("No supported method: %s"%self.sample_norm_method)
-            sys.exit(0)
+            raise Exception("No supported method: %s"%self.sample_norm_method)
 
         return data
 
