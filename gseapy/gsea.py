@@ -322,7 +322,7 @@ class GSEAbase(object):
 
 class GSEA(GSEAbase):
     """GSEA main tool"""
-    def __init__(self, data, gene_sets, classes, outdir='GSEA_ouput',
+    def __init__(self, data, gene_sets, classes, outdir='GSEA_output',
                  min_size=15, max_size=500, permutation_num=1000,
                  weighted_score_type=1, permutation_type='gene_set',
                  method='log2_ratio_of_classes', ascending=False,
