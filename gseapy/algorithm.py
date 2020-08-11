@@ -534,22 +534,36 @@ def normalize(es, esnull):
     nEnrichmentScores =np.zeros(es.shape)
     nEnrichmentNulls=np.zeros(esnull.shape)
 
-    esnull_pos = (esnull * (esnull >= 0)).mean(axis=1)
-    esnull_neg = (esnull * (esnull < 0)).mean(axis=1)
-    # calculate nESnulls
-    for i in range(esnull.shape[0]):
-        # NES
-        if es[i] >= 0:
-            nEnrichmentScores[i] = es[i] / esnull_pos[i]
-        else:
-            nEnrichmentScores[i] = - es[i] / esnull_neg[i]
+    esnull_pos = []
+    esnull_neg = []
+    # calculate mean
+    for enrNull in esnull:        
+        esnull_pos.append(enrNull[enrNull >= 0].mean()) 
+        esnull_neg.append(enrNull[enrNull < 0 ].mean())
 
-        # NESnull
-        for j in range(esnull.shape[1]):
-            if esnull[i,j] >= 0:
-                nEnrichmentNulls[i,j] = esnull[i,j] / esnull_pos[i]
-            else:
-                nEnrichmentNulls[i,j] = - esnull[i,j] / esnull_neg[i]
+
+    esnull_pos = np.array(esnull_pos)
+    esnull_neg = np.array(esnull_neg)
+    # calculate nESnulls
+    # for i in range(esnull.shape[0]):
+    #     # NES
+    #     if es[i] >= 0:
+    #         nEnrichmentScores[i] = es[i] / esnull_pos[i]
+    #     else:
+    #         nEnrichmentScores[i] = - es[i] / esnull_neg[i]
+
+    #     # NESnull
+    #     for j in range(esnull.shape[1]):
+    #         if esnull[i,j] >= 0:
+    #             nEnrichmentNulls[i,j] = esnull[i,j] / esnull_pos[i]
+    #         else:
+    #             nEnrichmentNulls[i,j] = - esnull[i,j] / esnull_neg[i]
+
+    # NES
+    nEnrichmentScores  = np.where(es>=0, es/esnull_pos, -es/esnull_neg)
+    # NES_NULL
+    nEnrichmentNulls = np.where(esnull>=0, esnull/esnull_pos[:,np.newaxis],
+                                          -esnull/esnull_neg[:,np.newaxis])
 
     return nEnrichmentScores, nEnrichmentNulls
 
@@ -642,14 +656,7 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
 
     logging.debug("Start to compute nes and nesnull........................")
     # NES
-    # nEnrichmentScores, nEnrichmentNulls = normalize(es, esnull)
-    # new normalized enrichment score implementation.
-    # this could speed up significantly.
-    esnull_pos = (esnull*(esnull>=0)).mean(axis=1)
-    esnull_neg = (esnull*(esnull<0)).mean(axis=1)
-    nEnrichmentScores  = np.where(es>=0, es/esnull_pos, -es/esnull_neg)
-    nEnrichmentNulls = np.where(esnull>=0, esnull/esnull_pos[:,np.newaxis],
-                                          -esnull/esnull_neg[:,np.newaxis])
+    nEnrichmentScores, nEnrichmentNulls = normalize(es, esnull)
 
     logging.debug("Start to compute fdrs..................................")
     # FDR
