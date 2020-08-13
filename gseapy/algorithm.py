@@ -557,9 +557,7 @@ def normalize(es, esnull):
     esnull_neg = np.ma.MaskedArray(esnull, mask=(esnull>=0)).mean(axis=1)
     esnull_pos = np.array(esnull_pos)
     esnull_neg = np.array(esnull_neg)
-    print(es)
-    print(esnull_pos)
-    print(esnull_neg)
+
     # NES
     nEnrichmentScores  = np.where(es>=0, es/esnull_pos, -es/esnull_neg)
     # NES_NULL
