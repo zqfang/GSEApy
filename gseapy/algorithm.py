@@ -533,38 +533,39 @@ def normalize(es, esnull):
 
     nEnrichmentScores =np.zeros(es.shape)
     nEnrichmentNulls=np.zeros(esnull.shape)
-
-    esnull_pos = []
-    esnull_neg = []
-    # calculate mean
-    for enrNull in esnull:        
-        esnull_pos.append(enrNull[enrNull >= 0].mean()) 
-        esnull_neg.append(enrNull[enrNull < 0 ].mean())
-
-
-    esnull_pos = np.array(esnull_pos)
-    esnull_neg = np.array(esnull_neg)
-    # calculate nESnulls
+    # esnullmean = np.zeros(es.shape)
+    # # calculate nESnulls
     # for i in range(esnull.shape[0]):
     #     # NES
+    #     enrNull = esnull[i]
     #     if es[i] >= 0:
-    #         nEnrichmentScores[i] = es[i] / esnull_pos[i]
+    #         mes = enrNull[enrNull >= 0].mean()
+    #         nEnrichmentScores[i] = es[i] / mes
     #     else:
-    #         nEnrichmentScores[i] = - es[i] / esnull_neg[i]
+    #         mes = enrNull[enrNull < 0 ].mean()
+    #         nEnrichmentScores[i] = - es[i] / mes
+    #     esnullmean[i] = mes
 
     #     # NESnull
     #     for j in range(esnull.shape[1]):
     #         if esnull[i,j] >= 0:
-    #             nEnrichmentNulls[i,j] = esnull[i,j] / esnull_pos[i]
+    #             nEnrichmentNulls[i,j] = esnull[i,j] / esnullmean[i]
     #         else:
-    #             nEnrichmentNulls[i,j] = - esnull[i,j] / esnull_neg[i]
-
+    #             nEnrichmentNulls[i,j] = - esnull[i,j] / esnullmean[i]
+    
+    esnull_pos = np.ma.MaskedArray(esnull, mask=(esnull<0)).mean(axis=1)
+    esnull_neg = np.ma.MaskedArray(esnull, mask=(esnull>=0)).mean(axis=1)
+    esnull_pos = np.array(esnull_pos)
+    esnull_neg = np.array(esnull_neg)
+    print(es)
+    print(esnull_pos)
+    print(esnull_neg)
     # NES
     nEnrichmentScores  = np.where(es>=0, es/esnull_pos, -es/esnull_neg)
     # NES_NULL
     nEnrichmentNulls = np.where(esnull>=0, esnull/esnull_pos[:,np.newaxis],
                                           -esnull/esnull_neg[:,np.newaxis])
-
+    
     return nEnrichmentScores, nEnrichmentNulls
 
 def gsea_pval(es, esnull):
