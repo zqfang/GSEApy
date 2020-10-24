@@ -63,11 +63,14 @@ def calc_pvalues(query, gene_sets, background=20000, **kwargs):
     # pval
     subsets = sorted(gene_sets.keys())
     for s in subsets:
-        category = gene_sets.get(s)
-        m = len(category)
-        hits = query.intersection(set(category))
+        category = set(gene_sets.get(s))
+        # the categories should be only exist in custom background too
+        if isinstance(background, set):
+            category = category.intersection(background)
+        hits = query.intersection(category)
         x = len(hits)
         if x < 1 : continue
+        m = len(category)
         # pVal = hypergeom.sf(hitCount-1,popTotal,bgHits,queryTotal) 
         # p(X >= hitCounts)
         vals.append((s, hypergeom.sf(x-1, bg, m, k), x, m, hits))

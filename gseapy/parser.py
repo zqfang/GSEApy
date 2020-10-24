@@ -149,6 +149,8 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
 
 def get_library_name(database='Human'):
     """return enrichr active enrichr library name. 
+    see also: https://maayanlab.cloud/modEnrichr/
+
     :param str database: Select one from { 'Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm' } 
     :return: a list of enrichr libraries from selected database
     
@@ -311,9 +313,9 @@ class Biomart(BioMart):
         if hasattr(sys, 'ps1') and (filename is None):
             return df
          # save file to cache path.
-        if filename is None: 
-            mkdirs(DEFAULT_CACHE_PATH)
-            filename = os.path.join(DEFAULT_CACHE_PATH, "{}.background.genes.txt".format(dataset))       
-        df.to_csv(filename, sep="\t", index=False)
+        if filename is not None: 
+            #mkdirs(DEFAULT_CACHE_PATH)
+            #filename = os.path.join(DEFAULT_CACHE_PATH, "{}.background.genes.txt".format(dataset))       
+            df.to_csv(filename, sep="\t", index=False)
 
         return 
