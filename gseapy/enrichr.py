@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# see: http://amp.pharm.mssm.edu/Enrichr/help#api for API docs
+# see: %s/Enrichr/help#api for API docs
 
 import sys, json, os, logging
 import requests
@@ -16,6 +16,7 @@ from gseapy.parser import Biomart
 from gseapy.utils import *
 from gseapy.stats import calc_pvalues, multiple_testing_correction
 
+ENRICHR_URL = 'http://maayanlab.cloud/Enrichr/'
 
 class Enrichr(object):
     """Enrichr API"""
@@ -157,7 +158,7 @@ class Enrichr(object):
         '''
         Compare the genes sent and received to get successfully recognized genes
         '''
-        response = requests.get('http://amp.pharm.mssm.edu/%s/view?userListId=%s' %(self._organism, usr_list_id))
+        response = requests.get('%s/%s/view?userListId=%s' %(ENRICHR_URL,self._organism, usr_list_id))
         if not response.ok:
             raise Exception('Error getting gene list back')
         returnedL = json.loads(response.text)["genes"]
@@ -166,11 +167,11 @@ class Enrichr(object):
 
     def get_results(self, gene_list):
         """Enrichr API"""
-        ADDLIST_URL = 'http://amp.pharm.mssm.edu/%s/addList'%self._organism
+        ADDLIST_URL = '%s/addList'%ENRICHR_URL
         job_id = self.send_genes(gene_list, ADDLIST_URL)
         user_list_id = job_id['userListId']
        
-        RESULTS_URL = 'http://amp.pharm.mssm.edu/%s/export'%self._organism
+        RESULTS_URL = '%s/export'%ENRICHR_URL
         query_string = '?userListId=%s&filename=%s&backgroundType=%s'
         # set max retries num =5
         s = retry(num=5)
@@ -184,7 +185,7 @@ class Enrichr(object):
         try:
             res = pd.read_csv(StringIO(response.text), sep="\t")
         except pd.errors.ParserError as e:
-            RESULTS_URL = 'http://amp.pharm.mssm.edu/Enrichr/enrich'
+            RESULTS_URL = '%s/Enrichr/enrich'%ENRICHR_URL
             query_string = '?userListId=%s&backgroundType=%s'
             url = RESULTS_URL + query_string % (user_list_id, self._gs)
             response = s.get(url)
@@ -209,7 +210,7 @@ class Enrichr(object):
     def get_libraries(self):
         """return active enrichr library name. Official API """
 
-        lib_url='http://amp.pharm.mssm.edu/%s/datasetStatistics'%self._organism
+        lib_url='%s/datasetStatistics'%ENRICHR_URL
         response = requests.get(lib_url)
         if not response.ok:
             raise Exception("Error getting the Enrichr libraries")
@@ -260,29 +261,31 @@ class Enrichr(object):
 
         """
 
-        default = [ 'human','mouse','hs', 'mm',
-                    'homo sapiens', 'mus musculus',
-                    'h. sapiens', 'm. musculus']
+        raise NotImplementedError("Enrichr doesn't loger support organism")
 
-        if self.organism.lower() in default:
-            self._organism = 'Enrichr'
-            return
+        # default = [ 'human','mouse','hs', 'mm',
+        #             'homo sapiens', 'mus musculus',
+        #             'h. sapiens', 'm. musculus']
 
-        organism = {
-                    'Fly': ['fly', 'd. melanogaster', 'drosophila melanogaster'],
-                    'Yeast': ['yeast', 's. cerevisiae', 'saccharomyces cerevisiae'],
-                    'Worm': ['worm', 'c. elegans', 'caenorhabditis elegans', 'nematode'],
-                    'Fish': ['fish', 'd. rerio', 'danio rerio', 'zebrafish']
-                  }
+        # if self.organism.lower() in default:
+        #     self._organism = 'Enrichr'
+        #     return
 
-        for k, v in organism.items():
-            if self.organism.lower() in v :
-                self._organism = k+'Enrichr'
-                return
+        # organism = {
+        #             'Fly': ['fly', 'd. melanogaster', 'drosophila melanogaster'],
+        #             'Yeast': ['yeast', 's. cerevisiae', 'saccharomyces cerevisiae'],
+        #             'Worm': ['worm', 'c. elegans', 'caenorhabditis elegans', 'nematode'],
+        #             'Fish': ['fish', 'd. rerio', 'danio rerio', 'zebrafish']
+        #           }
+
+        # for k, v in organism.items():
+        #     if self.organism.lower() in v :
+        #         self._organism = k+'Enrichr'
+        #         return
  
-        if self._organism is None:
-            raise Exception("No supported organism found !!!")
-        return
+        # if self._organism is None:
+        #     raise Exception("No supported organism found !!!")
+        # return
 
     def filter_gmt(self, gmt, background):
         """the gmt values should be filtered only for genes that exist in background
@@ -300,7 +303,7 @@ class Enrichr(object):
         return gmt2
 
     def enrich(self, gmt):
-        """use local mode
+        f"""use local mode
          
         p = p-value computed using the Fisher exact test (Hypergeometric test)  
 
@@ -308,7 +311,7 @@ class Enrichr(object):
 
             combine score = log(p)·z
 
-        see here: http://amp.pharm.mssm.edu/Enrichr/help#background&q=4
+        see here: {ENRICHR_URL}/Enrichr/help#background&q=4
         
         columns contain:
             
@@ -355,7 +358,7 @@ class Enrichr(object):
         """run enrichr for one sample gene list but multi-libraries"""
 
         # set organism
-        self.get_organism()
+        #self.get_organism()
         # read input file
         genes_list = self.parse_genelists()
         gss = self.parse_genesets()
