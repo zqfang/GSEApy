@@ -552,7 +552,7 @@ def normalize(es, esnull):
     #             nEnrichmentNulls[i,j] = esnull[i,j] / esnullmean[i]
     #         else:
     #             nEnrichmentNulls[i,j] = - esnull[i,j] / esnullmean[i]
-    
+
     esnull_pos = np.ma.MaskedArray(esnull, mask=(esnull<0)).mean(axis=1)
     esnull_neg = np.ma.MaskedArray(esnull, mask=(esnull>=0)).mean(axis=1)
     esnull_pos = np.array(esnull_pos)

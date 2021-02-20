@@ -241,10 +241,7 @@ class Enrichr(object):
         
         # package included data
         DB_FILE = resource_filename("gseapy", "data/{}.background.genes.txt".format(self.background))
-        filename = os.path.join(DEFAULT_CACHE_PATH, "{}.background.genes.txt".format(self.background))  
-        if os.path.exists(filename):
-            df = pd.read_csv(filename,sep="\t")
-        elif os.path.exists(DB_FILE):
+        if os.path.exists(DB_FILE):
             df = pd.read_csv(DB_FILE,sep="\t")
         else:
             # background is a biomart database name
@@ -252,7 +249,7 @@ class Enrichr(object):
             bm = Biomart()
             df = bm.query(dataset=self.background)
             df.dropna(subset=['go_id'], inplace=True)
-        self._logger.info("using all annotated genes with GO_ID as background genes")
+        self._logger.info("Using all annotated genes with GO_ID as background: %s"%self.background)
         df.dropna(subset=['entrezgene_id'], inplace=True)     
         # input id type: entrez or gene_name
         if self._isezid:
@@ -296,6 +293,21 @@ class Enrichr(object):
         if self._organism is None:
             raise Exception("No supported organism found !!!")
         return
+
+    def filter_gmt(self, gmt, background):
+        """the gmt values should be filtered only for genes that exist in background
+           this substantially affect the significance of the test, the hypergeometric distribution.
+
+           :param gmt: a dict of gene sets.
+           :param background: list, set, or tuple. A list of custom backgound genes.  
+        """
+        gmt2 = {}
+        for term, genes in gmt.items():
+            # If value satisfies the condition, then store it in new_dict
+            newgenes = [g for g in genes if g in background]
+            if len(newgenes) > 0:
+                gmt2[term] = newgenes 
+        return gmt2
 
     def enrich(self, gmt):
         """use local mode
@@ -407,30 +419,64 @@ def enrichr(gene_list, gene_sets, organism='human', description='',
             format='pdf', figsize=(8,6), top_term=10, no_plot=False, verbose=False):
     """Enrichr API.
 
-    :param gene_list: Flat file with list of genes, one gene id per row, or a python list object
-    :param gene_sets: Enrichr Library to query. Required enrichr library name(s). Separate each name by comma.
-    :param organism: Enrichr supported organism. Select from (human, mouse, yeast, fly, fish, worm).
-                     see here for details: https://amp.pharm.mssm.edu/modEnrichr
-    :param description: name of analysis. Optional.
-    :param outdir: Output file directory
-    :param float cutoff: Show enriched terms which Adjusted P-value < cutoff. 
-                         Only affects the output figure. Default: 0.05
-    :param int background: BioMart dataset name for retrieving background gene information.
-                           This argument only works when gene_sets input is a gmt file or python dict.
-                           You could also specify a number by yourself, e.g. total expressed genes number.
-                           In this case, you will skip retrieving background infos from biomart.
-    
-    Use the code below to see valid background dataset names from BioMart.
-    Here are example code::
-    >>> from gseapy.parser import Biomart 
-    >>> bm = Biomart(verbose=False, host="asia.ensembl.org")
-    >>> ## view validated marts
-    >>> marts = bm.get_marts()
-    >>> ## view validated dataset
-    >>> datasets = bm.get_datasets(mart='ENSEMBL_MART_ENSEMBL')
+    :param gene_list: str, list, tuple, series, dataframe. Also support input txt file with one gene id per row. 
+                      The input `identifier` should be the same type to `gene_sets`.
 
-    :param str format: Output figure format supported by matplotlib,('pdf','png','eps'...). Default: 'pdf'.
-    :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. (width,height). Default: (6.5,6).
+    :param gene_sets: str, list, tuple of Enrichr Library name(s). 
+                      or custom defined gene_sets (dict, or gmt file). 
+                      
+                      Examples: 
+
+                      Input Enrichr Libraries (https://maayanlab.cloud/Enrichr/#stats):
+                        str: 'KEGG_2016'
+                        list: ['KEGG_2016','KEGG_2013']
+                        Use comma to separate each other, e.g. "KEGG_2016,huMAP,GO_Biological_Process_2018"
+
+                      Input custom files:
+                        dict: gene_sets={'A':['gene1', 'gene2',...],
+                                        'B':['gene2', 'gene4',...], ...}
+                        gmt: "genes.gmt"
+
+                      see also the online docs: 
+                      https://gseapy.readthedocs.io/en/latest/gseapy_example.html#2.-Enrichr-Example
+
+
+    :param organism: Enrichr supported organism. Select from (human, mouse, yeast, fly, fish, worm).
+                     This argument only affects the Enrichr library names you've chosen.
+                     No any affects to gmt or dict input of `gene_sets`.
+
+                     see here for more details: https://amp.pharm.mssm.edu/modEnrichr.
+                     
+    :param description: optional. name of the job.
+    :param outdir:   Output file directory
+
+    :param background: int, list, str. Please ignore this argument if your input are just Enrichr library names.
+                       
+                       However, this argument is not straightforward when `gene_sets` is given a custom input (a gmt file or dict).
+                       There are 3 ways to set this argument:
+ 
+                       (1) (Recommended) Input a list of background genes. 
+                           The background gene list is defined by your experment. e.g. the expressed genes in your RNA-seq.
+                           The gene identifer in gmt/dict should be the same type to the backgound genes.  
+                       
+                       (2) Specify a number, e.g. the number of total expressed genes.
+                           This works, but not recommend. It assumes that all your genes could be found in background.
+                           If genes exist in gmt but not included in background, 
+                           they will affect the significance of the statistical test.  
+
+                       (3) (Default) Set a Biomart dataset name.
+                           The background will be all annotated genes from the `BioMart datasets` you've choosen. 
+                           The program will try to retrieve the background information automatically.
+
+                           Please Use the example code below to choose the correct dataset name:
+                            >>> from gseapy.parser import Biomart 
+                            >>> bm = Biomart()
+                            >>> datasets = bm.get_datasets(mart='ENSEMBL_MART_ENSEMBL')
+
+    :param cutoff:   Show enriched terms which Adjusted P-value < cutoff. 
+                     Only affects the output figure, not the final output file. Default: 0.05
+    :param format:  Output figure format supported by matplotlib,('pdf','png','eps'...). Default: 'pdf'.
+    :param figsize: Matplotlib figsize, accept a tuple or list, e.g. (width,height). Default: (6.5,6).
     :param bool no_plot: If equals to True, no figure will be drawn. Default: False.
     :param bool verbose: Increase output verbosity, print out progress of your job, Default: False.
 
