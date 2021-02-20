@@ -64,6 +64,8 @@ def main():
                       outdir=args.outdir, format=args.format, cutoff=args.thresh, 
                       background=args.bg, figsize=args.figsize,
                       top_term=args.term, no_plot=args.noplot, verbose=args.verbose)
+        # set organism
+        enr.set_organism()
         enr.run()
     elif subcommand == "biomart":
         from .parser import Biomart

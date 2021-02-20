@@ -259,7 +259,7 @@ class Enrichr(object):
 
         return set(bg)
 
-    def get_organism(self):
+    def set_organism(self):
         """Select Enrichr organism from below:
        
            Human & Mouse, H. sapiens & M. musculus
@@ -364,8 +364,6 @@ class Enrichr(object):
     def run(self):
         """run enrichr for one sample gene list but multi-libraries"""
 
-        # set organism
-        self.get_organism()
         # read input file
         genes_list = self.parse_genelists()
         gss = self.parse_genesets()
@@ -485,6 +483,8 @@ def enrichr(gene_list, gene_sets, organism='human', description='',
     """
     enr = Enrichr(gene_list, gene_sets, organism, description, outdir,
                   cutoff, background, format, figsize, top_term, no_plot, verbose)
+    # set organism
+    enr.set_organism()
     enr.run()
 
     return enr
