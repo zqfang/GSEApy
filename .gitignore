@@ -25,7 +25,7 @@ tmp/
 *_build
 docs/_build
 # tests
-tests/.ipynb_checkpoints
-.pytest_cache
-tests/__pycache__ 
-gseapy/__pycache__
+*.ipynb_checkpoints
+*.pytest_cache
+*__pycache__ 
+*.vscode

@@ -165,10 +165,12 @@ def get_library_name(database='Human'):
     
     if database.lower() in default:
         database = 'Enrichr'
+        ENRICHR_URL = 'http://maayanlab.cloud'
     else:
         for k, v in organism.items():
             if database.lower() in v :
                 database = k+'Enrichr'
+                ENRICHR_URL = 'http://amp.pharm.mssm.edu'
                 break
 
     if not database.endswith('Enrichr'):
@@ -186,7 +188,7 @@ def get_library_name(database='Human'):
     #     # only include active gmts
     #     if inst_gmt['isActive'] == True:
     #         libs.append(inst_gmt['libraryName'])
-    lib_url='http://amp.pharm.mssm.edu/%s/datasetStatistics'%database
+    lib_url='%s/%s/datasetStatistics'%(ENRICHR_URL, database)
     response = requests.get(lib_url)
     if not response.ok:
         raise Exception("Error getting the Enrichr libraries")

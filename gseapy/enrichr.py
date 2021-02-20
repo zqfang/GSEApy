@@ -3,6 +3,7 @@
 # see: http://amp.pharm.mssm.edu/Enrichr/help#api for API docs
 
 import sys, json, os, logging
+from typing import Iterable, Tuple
 import requests
 import pandas as pd
 from io import StringIO
@@ -15,14 +16,22 @@ from gseapy.plot import barplot
 from gseapy.parser import Biomart
 from gseapy.utils import *
 from gseapy.stats import calc_pvalues, multiple_testing_correction
-
+from typing import Tuple, Union, List, Dict, Iterable, Optional
 
 class Enrichr(object):
     """Enrichr API"""
-    def __init__(self, gene_list, gene_sets, organism='human', descriptions='',
-                 outdir='Enrichr', cutoff=0.05, background='hsapiens_gene_ensembl',
-                 format='pdf', figsize=(6.5,6), top_term=10, no_plot=False, 
-                 verbose=False):
+    def __init__(self, gene_list: Iterable[str], 
+                 gene_sets: Union[List[str],str,Dict[str,str]], 
+                 organism: str='human', 
+                 descriptions: Optional[str]='',
+                 outdir: Optional[str]='Enrichr', 
+                 cutoff: float=0.05, 
+                 background: Union[List[str],int,str] ='hsapiens_gene_ensembl',
+                 format: str='pdf', 
+                 figsize: Tuple[float, float] =(6.5,6), 
+                 top_term: int =10, 
+                 no_plot: bool=False, 
+                 verbose: bool=False):
 
         self.gene_list = gene_list
         self.gene_sets = gene_sets
@@ -41,6 +50,7 @@ class Enrichr(object):
         self._bg = None
         self.organism = organism
         self._organism = None
+        self.ENRICHR_URL = "http://maayanlab.cloud" 
         # init logger
         logfile = self.prepare_outdir()
         self._logger = log_init(outlog=logfile,
@@ -62,7 +72,7 @@ class Enrichr(object):
         logfile = os.path.join(self.outdir, "gseapy.%s.%s.log" % (self.module, self.descriptions))
         return logfile
 
-    def __parse_gmt(self, g):
+    def __parse_gmt(self, g: str):
         with open(g) as genesets:
             g_dict = { line.strip().split("\t")[0]: line.strip().split("\t")[2:]
                        for line in genesets.readlines() }
@@ -157,7 +167,7 @@ class Enrichr(object):
         '''
         Compare the genes sent and received to get successfully recognized genes
         '''
-        response = requests.get('http://amp.pharm.mssm.edu/%s/view?userListId=%s' %(self._organism, usr_list_id))
+        response = requests.get('%s/%s/view?userListId=%s' %(self.ENRICHR_URL, self._organism, usr_list_id))
         if not response.ok:
             raise Exception('Error getting gene list back')
         returnedL = json.loads(response.text)["genes"]
@@ -166,11 +176,11 @@ class Enrichr(object):
 
     def get_results(self, gene_list):
         """Enrichr API"""
-        ADDLIST_URL = 'http://amp.pharm.mssm.edu/%s/addList'%self._organism
+        ADDLIST_URL = '%s/%s/addList'%(self.ENRICHR_URL,  self._organism)
         job_id = self.send_genes(gene_list, ADDLIST_URL)
         user_list_id = job_id['userListId']
        
-        RESULTS_URL = 'http://amp.pharm.mssm.edu/%s/export'%self._organism
+        RESULTS_URL = '%s/%s/export'%(self.ENRICHR_URL,  self._organism)
         query_string = '?userListId=%s&filename=%s&backgroundType=%s'
         # set max retries num =5
         s = retry(num=5)
@@ -184,7 +194,7 @@ class Enrichr(object):
         try:
             res = pd.read_csv(StringIO(response.text), sep="\t")
         except pd.errors.ParserError as e:
-            RESULTS_URL = 'http://amp.pharm.mssm.edu/Enrichr/enrich'
+            RESULTS_URL = '%s/Enrichr/enrich'%self.ENRICHR_URL
             query_string = '?userListId=%s&backgroundType=%s'
             url = RESULTS_URL + query_string % (user_list_id, self._gs)
             response = s.get(url)
@@ -209,7 +219,7 @@ class Enrichr(object):
     def get_libraries(self):
         """return active enrichr library name. Official API """
 
-        lib_url='http://amp.pharm.mssm.edu/%s/datasetStatistics'%self._organism
+        lib_url='%s/%s/datasetStatistics'%(self.ENRICHR_URL,  self._organism)
         response = requests.get(lib_url)
         if not response.ok:
             raise Exception("Error getting the Enrichr libraries")
@@ -282,7 +292,7 @@ class Enrichr(object):
             if self.organism.lower() in v :
                 self._organism = k+'Enrichr'
                 return
- 
+        self.ENRICHR_URL = 'http://amp.pharm.mssm.edu'
         if self._organism is None:
             raise Exception("No supported organism found !!!")
         return
@@ -401,7 +411,7 @@ def enrichr(gene_list, gene_sets, organism='human', description='',
     :param gene_sets: Enrichr Library to query. Required enrichr library name(s). Separate each name by comma.
     :param organism: Enrichr supported organism. Select from (human, mouse, yeast, fly, fish, worm).
                      see here for details: https://amp.pharm.mssm.edu/modEnrichr
-    :param description: name of analysis. optional.
+    :param description: name of analysis. Optional.
     :param outdir: Output file directory
     :param float cutoff: Show enriched terms which Adjusted P-value < cutoff. 
                          Only affects the output figure. Default: 0.05

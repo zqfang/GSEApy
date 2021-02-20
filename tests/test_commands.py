@@ -74,8 +74,10 @@ def test_enrichr(genelist, geneGMT):
     # doesnt't check the image
     tmpdir= TemporaryDirectory(dir="tests")
     enrichr(genelist, gene_sets=['KEGG_2016', geneGMT], outdir=tmpdir.name)
-    tmpdir.cleanup()
-    #enrichr(genelist, gene_sets='KEGG_2013,KEGG_2016', outdir=None)
+    #tmpdir.cleanup()
+    tmpdir= TemporaryDirectory(dir="tests")
+    enrichr(genelist, organism='Fly', gene_sets='KEGG_2019', outdir=tmpdir.name)
+    #tmpdir.cleanup()
 
 def test_replot(edbDIR):
     # Only tests of the command runs successfully,
