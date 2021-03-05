@@ -289,9 +289,23 @@ class Enrichr(object):
             if self.organism.lower() in v :
                 self._organism = k+'Enrichr'
                 return
-        self.ENRICHR_URL = 'http://amp.pharm.mssm.edu'
+
         if self._organism is None:
             raise Exception("No supported organism found !!!")
+
+        ENRICHR_SERVER = "%s/%s"%(self.ENRICHR_URL, self._organism) 
+        
+        if requests.get(ENRICHR_SERVER).ok:
+            return
+
+        self.ENRICHR_URL = 'http://amp.pharm.mssm.edu'
+        ENRICHR_SERVER = "%s/%s"%(self.ENRICHR_URL, self._organism) 
+
+        if requests.get(ENRICHR_SERVER).ok:
+            return
+        else:
+            raise Exception("Please check Enrichr URL is OK: %s"%self.ENRICHR_URL)
+
         return
 
     def filter_gmt(self, gmt, background):
@@ -443,7 +457,7 @@ def enrichr(gene_list, gene_sets, organism='human', description='',
                      This argument only affects the Enrichr library names you've chosen.
                      No any affects to gmt or dict input of `gene_sets`.
 
-                     see here for more details: https://amp.pharm.mssm.edu/modEnrichr.
+                     see here for more details: https://maayanlab.cloud/modEnrichr/.
                      
     :param description: optional. name of the job.
     :param outdir:   Output file directory
