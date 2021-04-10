@@ -164,15 +164,13 @@ def get_library_name(database='Human'):
                 'Worm': ['worm', 'c. elegans', 'caenorhabditis elegans', 'nematode'],
                 'Fish': ['fish', 'd. rerio', 'danio rerio', 'zebrafish']
                 }
-    
+    ENRICHR_URL = 'http://maayanlab.cloud'
     if database.lower() in default:
         database = 'Enrichr'
-        ENRICHR_URL = 'http://maayanlab.cloud'
     else:
         for k, v in organism.items():
             if database.lower() in v :
                 database = k+'Enrichr'
-                ENRICHR_URL = 'http://amp.pharm.mssm.edu'
                 break
 
     if not database.endswith('Enrichr'):
@@ -208,7 +206,7 @@ class Biomart(BioMart):
         How to query validated dataset, attributes, filters.
         Example::
         >>> from gseapy.parser import Biomart 
-        >>> bm = Biomart(verbose=False, host="asia.ensembl.org")
+        >>> bm = Biomart(verbose=False, host="ensembl.org")
         >>> ## view validated marts
         >>> marts = bm.get_marts()
         >>> ## view validated dataset

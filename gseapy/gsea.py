@@ -740,7 +740,7 @@ class SingleSampleGSEA(GSEAbase):
         # pool.close()
         # pool.join()
 
-        tempes = Parallel(n_jobs=self._processes)(
+        tempes = Parallel(n_jobs=self._processes, require='sharedmem')(
                              delayed(enrichment_score_tensor)(
                                                dat.index.values, dat.values, gmt,
                                                self.weighted_score_type,

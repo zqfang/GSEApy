@@ -508,8 +508,8 @@ def barplot(df, column='Adjusted P-value', title="", cutoff=0.05, top_term=10,
             return msg
         df = df.assign(logAP = lambda x: - x[colname].apply(np.log10))
         colname = 'logAP' 
+        
     dd = df.sort_values(by=colname).iloc[-top_term:,:]
-    # dd = d.head(top_term).sort_values('logAP')
     # create bar plot
     if hasattr(sys, 'ps1') and (ofname is None):
         # working inside python console, show (True) figure

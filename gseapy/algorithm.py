@@ -369,7 +369,7 @@ def gsea_compute_tensor(data, gmt, n, weighted_score_type, permutation_type,
         genes_ind = []
         cor_mat = []
 
-        temp_rnk = Parallel(n_jobs=processes)(delayed(ranking_metric_tensor)(
+        temp_rnk = Parallel(n_jobs=processes, require='sharedmem')(delayed(ranking_metric_tensor)(
             data, method, base, pheno_pos, pheno_neg, classes, ascending, rs) for rs in random_state)
 
         for k, temp in enumerate(temp_rnk):
@@ -408,7 +408,7 @@ def gsea_compute_tensor(data, gmt, n, weighted_score_type, permutation_type,
         m = base * i
         i += 1
     # use joblib
-    temp_esnu = Parallel(n_jobs=processes)(delayed(enrichment_score_tensor)(
+    temp_esnu = Parallel(n_jobs=processes, require='sharedmem')(delayed(enrichment_score_tensor)(
                     genes_mat, cor_mat, gmtrim, w, n, rs, single, scale) 
                     for gmtrim, rs in zip(gmt_block, random_state))
     # pool_esnu.close()
@@ -508,7 +508,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
         # pool_esnu.close()
         # pool_esnu.join()
 
-        temp_esnu = Parallel(n_jobs=processes)(delayed(enrichment_score)(
+        temp_esnu = Parallel(n_jobs=processes, require='sharedmem')(delayed(enrichment_score)(
                         gl, cor_vec, gmt.get(subset), w, n, 
                         rs, single, scale) 
                         for subset, rs in zip(subsets, random_state))        
