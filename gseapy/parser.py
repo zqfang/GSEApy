@@ -108,7 +108,7 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
             ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary'
             query_string = '?mode=text&libraryName=%s'
             # get
-            response = s.get( ENRICHR_URL + query_string % gmt, timeout=None)
+            response = s.get( ENRICHR_URL + query_string % gmt, timeout=None, verify=False)
         else:
             raise Exception("gene_set files(.gmt) not found")
         if not response.ok:
@@ -189,7 +189,7 @@ def get_library_name(database='Human'):
     #     if inst_gmt['isActive'] == True:
     #         libs.append(inst_gmt['libraryName'])
     lib_url='%s/%s/datasetStatistics'%(ENRICHR_URL, database)
-    response = requests.get(lib_url)
+    response = requests.get(lib_url, verify=False)
     if not response.ok:
         raise Exception("Error getting the Enrichr libraries")
     libs_json = json.loads(response.text)

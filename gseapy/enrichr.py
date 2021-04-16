@@ -155,7 +155,7 @@ class Enrichr(object):
           'description': (None, self.descriptions)
            }
         # response
-        response = requests.post(url, files=payload)
+        response = requests.post(url, files=payload, verify=False)
         if not response.ok:
             raise Exception('Error analyzing gene list')
         sleep(1)
@@ -220,7 +220,7 @@ class Enrichr(object):
         """return active enrichr library name. Official API """
 
         lib_url='%s/%s/datasetStatistics'%(self.ENRICHR_URL,  self._organism)
-        response = requests.get(lib_url)
+        response = requests.get(lib_url, verify=False)
         if not response.ok:
             raise Exception("Error getting the Enrichr libraries")
         libs_json = json.loads(response.text)
