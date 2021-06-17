@@ -128,7 +128,9 @@ class GSEAbase(object):
                 genesets_dict[subset] = subset_list
             tag_indicator = np.in1d(gene_list, subset_list, assume_unique=True)
             tag_len = tag_indicator.sum()
-            if  self.min_size <= tag_len <= self.max_size: continue
+            if  (self.min_size <= tag_len <= self.max_size) and tag_len < len(gene_list): 
+                # tag_len should < gene_list
+                continue
             del genesets_dict[subset]
 
         filsets_num = len(subsets) - len(genesets_dict)
@@ -387,6 +389,10 @@ class GSEA(GSEAbase):
         exprs.set_index(keys=exprs.columns[0], inplace=True)
         # select numberic columns
         df = exprs.select_dtypes(include=[np.number])
+
+        # in case the description column is numeric
+        if len(cls_vec) == (df.shape[1] -1) :
+            df = df.iloc[:,1:]
         # drop any genes which std ==0
         cls_dict = {k:v for k, v in zip(df.columns, cls_vec)}
         df_std =  df.groupby(by=cls_dict, axis=1).std()
