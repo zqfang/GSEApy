@@ -15,9 +15,6 @@ GSEApy: Gene Set Enrichment Analysis in Python.
     :target: https://github.com/zqfang/GSEApy/actions
     :alt: Action Status
 
-.. image:: https://travis-ci.org/zqfang/GSEApy.svg?branch=master
-    :target: https://travis-ci.org/zqfang/GSEApy
-
 .. image:: http://readthedocs.org/projects/gseapy/badge/?version=master
     :target: http://gseapy.readthedocs.io/en/master/?badge=master
     :alt: Documentation Status
