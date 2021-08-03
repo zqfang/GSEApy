@@ -189,7 +189,7 @@ def get_library_name(database='Human'):
     #     if inst_gmt['isActive'] == True:
     #         libs.append(inst_gmt['libraryName'])
     lib_url='%s/%s/datasetStatistics'%(ENRICHR_URL, database)
-    response = requests.get(lib_url, verify=False)
+    response = requests.get(lib_url, verify=True)
     if not response.ok:
         raise Exception("Error getting the Enrichr libraries")
     libs_json = json.loads(response.text)

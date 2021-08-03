@@ -30,6 +30,7 @@ class GSEAbase(object):
         self.verbose=False
         self._processes=1
         self._logger=None
+        self.ENRICHR_URL = "http://maayanlab.cloud"
 
     def prepare_outdir(self):
         """create temp directory."""
@@ -173,8 +174,8 @@ class GSEAbase(object):
     def get_libraries(self):
         """return active enrichr library name.Offical API """
 
-        lib_url='http://amp.pharm.mssm.edu/Enrichr/datasetStatistics'
-        response = requests.get(lib_url)
+        lib_url=self.ENRICHR_URL+'/Enrichr/datasetStatistics' 
+        response = requests.get(lib_url, verify=True)
         if not response.ok:
             raise Exception("Error getting the Enrichr libraries")
         libs_json = json.loads(response.text)
@@ -187,7 +188,7 @@ class GSEAbase(object):
         self._logger.info("Downloading and generating Enrichr library gene sets......")
         s = retry(5)
         # queery string
-        ENRICHR_URL = 'http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary'
+        ENRICHR_URL = self.ENRICHR_URL+'/Enrichr/geneSetLibrary'
         query_string = '?mode=text&libraryName=%s'
         # get
         response = s.get( ENRICHR_URL + query_string % libname, timeout=None)
@@ -333,7 +334,7 @@ class GSEA(GSEAbase):
                  method='log2_ratio_of_classes', ascending=False,
                  processes=1, figsize=(6.5,6), format='pdf', graph_num=20,
                  no_plot=False, seed=None, verbose=False):
-
+        super(GSEA, self).__init__()
         self.data = data
         self.gene_sets=gene_sets
         self.classes=classes
@@ -466,7 +467,7 @@ class Prerank(GSEAbase):
                  permutation_num=1000, weighted_score_type=1,
                  ascending=False, processes=1, figsize=(6.5,6), format='pdf',
                  graph_num=20, no_plot=False, seed=None, verbose=False):
-
+        super(Prerank, self).__init__()
         self.rnk =rnk
         self.gene_sets=gene_sets
         self.outdir=outdir
@@ -542,6 +543,7 @@ class SingleSampleGSEA(GSEAbase):
                  min_size=15, max_size=2000, permutation_num=0, weighted_score_type=0.25,
                  scale=True, ascending=False, processes=1, figsize=(7,6), format='pdf',
                  graph_num=20, no_plot=True, seed=None, verbose=False):
+        super(SingleSampleGSEA, self).__init__()
         self.data=data
         self.gene_sets=gene_sets
         self.outdir=outdir

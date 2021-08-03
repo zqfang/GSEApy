@@ -155,7 +155,7 @@ class Enrichr(object):
           'description': (None, self.descriptions)
            }
         # response
-        response = requests.post(url, files=payload, verify=False)
+        response = requests.post(url, files=payload, verify=True)
         if not response.ok:
             raise Exception('Error analyzing gene list')
         sleep(1)
@@ -167,7 +167,7 @@ class Enrichr(object):
         '''
         Compare the genes sent and received to get successfully recognized genes
         '''
-        response = requests.get('%s/%s/view?userListId=%s' %(self.ENRICHR_URL, self._organism, usr_list_id))
+        response = requests.get('%s/%s/view?userListId=%s' %(self.ENRICHR_URL, self._organism, usr_list_id), verify=True)
         if not response.ok:
             raise Exception('Error getting gene list back')
         returnedL = json.loads(response.text)["genes"]
@@ -220,7 +220,7 @@ class Enrichr(object):
         """return active enrichr library name. Official API """
 
         lib_url='%s/%s/datasetStatistics'%(self.ENRICHR_URL,  self._organism)
-        response = requests.get(lib_url, verify=False)
+        response = requests.get(lib_url, verify=True)
         if not response.ok:
             raise Exception("Error getting the Enrichr libraries")
         libs_json = json.loads(response.text)
@@ -295,13 +295,13 @@ class Enrichr(object):
 
         ENRICHR_SERVER = "%s/%s"%(self.ENRICHR_URL, self._organism) 
         
-        if requests.get(ENRICHR_SERVER).ok:
+        if requests.get(ENRICHR_SERVER, verify=True).ok:
             return
 
         self.ENRICHR_URL = 'http://amp.pharm.mssm.edu'
         ENRICHR_SERVER = "%s/%s"%(self.ENRICHR_URL, self._organism) 
 
-        if requests.get(ENRICHR_SERVER).ok:
+        if requests.get(ENRICHR_SERVER, verify=True).ok:
             return
         else:
             raise Exception("Please check Enrichr URL is OK: %s"%self.ENRICHR_URL)
@@ -384,9 +384,10 @@ class Enrichr(object):
         # if gmt
         self._logger.info("Connecting to Enrichr Server to get latest library names")
         if len(gss) < 1:
+            self._logger.error("None of your input gene set matched ! %s"%self.gene_sets)
             self._logger.error("Hint: Current organism = %s, is this correct?\n"%self.organism +\
-                            "Hint: use get_library_name() to view full list of supported names.")
-            raise LookupError("Not validated Enrichr library! Please provide correct organism and library name!")
+                               "Hint: use get_library_name() to view full list of supported names.")
+            raise LookupError("Not validated Enrichr library ! Please provide correct organism and library name!")
         self.results = pd.DataFrame()
 
         for g in gss: 
