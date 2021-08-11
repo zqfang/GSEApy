@@ -27,12 +27,21 @@ def gsea_cls_parser(cls):
             file = c.readlines()
         classes = file[2].strip('\n').split(" ")
         sample_name = file[1].lstrip("# ").strip('\n').split(" ")
+        
+        tmp = set(sample_name) & set(classes) 
+        if len(tmp) < 2: # classes and sample_name are different
+            s1 = classes[0]
+            for i, c in enumerate(classes):
+                if c == s1:
+                    classes[i] = sample_name[0]
+                else:
+                    classes[i] = sample_name[1]
     else:
         raise Exception('Error parsing sample name!')
     
     if len(sample_name) != 2:
             raise Exception("Input groups have to be 2!")
-
+    
     return sample_name[0], sample_name[1], classes
 
 def gsea_edb_parser(results_path):
