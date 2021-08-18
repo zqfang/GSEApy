@@ -34,7 +34,7 @@ For examples of using GSEApy please click here: `Example <http://gseapy.readthed
 
 **Release notes** : https://github.com/zqfang/GSEApy/releases
 
-**FAQ**: `wiki <https://github.com/zqfang/GSEApy/wiki/FAQ>`_
+**FAQ**: `Frequently Asked Questions <https://gseapy.readthedocs.io/en/latest/faq.html>`_
 
 
 GSEApy is a python implementation for **GSEA** and wrapper for **Enrichr**.
@@ -275,7 +275,9 @@ If you would like to report any bugs when use gseapy, don't hesitate to create a
 To get help of GSEApy
 ------------------------------------
 
-1. See the wiki page: https://github.com/zqfang/GSEApy/wiki/FAQ
+1. See `Frequently Asked Questions <https://gseapy.readthedocs.io/en/latest/faq.html>`_
 
 2. Visit the document site at http://gseapy.rtfd.io/
+
+3. The GSEApy discussion channel: `Q&A <https://github.com/zqfang/GSEApy/discussions>`_ 
 
