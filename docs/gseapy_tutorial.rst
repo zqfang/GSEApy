@@ -1,12 +1,12 @@
 .. _tutorial:
 
 ======================================
-A Protocol to Prepare files for GSEAPY
+A Protocol to Prepare files for GSEApy
 ======================================
 
-As a biological researcher, I like protocols, so as other researchers, too.
+As a biological researcher, I like protocols.
 
-Here is an short tutorial to walk you through gseapy.
+Here is a short tutorial for you to walk you through gseapy.
 
 For file format explanation, please see `here <http://software.broadinstitute.org/gsea/doc/GSEAUserGuideFrame.html.>`_
 
@@ -26,7 +26,7 @@ Use ``gsea`` command, or :func:`gsea`
 
 Follow the steps blow.
 
-One thing you should know is that the gseapy input files are totally the same as
+One thing you should know is that the gseapy input files are the same as
 ``GSEA`` desktop required. You can use these files below to run ``GSEA`` desktop, too.
 
 
@@ -35,8 +35,7 @@ One thing you should know is that the gseapy input files are totally the same as
 
 **RNA-seq,ChIP-seq, Microarry data** are all supported.
 
-Here is to see what the structure of expression table looks like, you don't have to run
-commands below:
+Here is to see what the structure of expression table looks like
 
 .. code:: python
 
@@ -44,7 +43,7 @@ commands below:
     df = pd.read_table('./test/gsea_data.txt')
     df.head()
 
-    #or assign df to the parameter 'data'
+    #or assign dataframe to the parameter 'data'
 
 
 .. raw:: html
@@ -144,9 +143,9 @@ An example of cls file looks like below.
     C1OE C1OE C1OE Vector Vector Vector
 
 
-| The first line specify the total samples and phenotype numbers. Leave number 1 alway be 1.
+| The first line specify the total samples and phenotype numbers. Leave number 1 always be 1.
 | The second line specify the phenotype class(name).
-| The third line specify column attributes in setp 1.
+| The third line specify column attributes in step 1.
 
 
 
@@ -159,8 +158,8 @@ All you need to do is to download gene set database file from ``GSEA`` website.
 
 Or you could use enrichr library. In this case, just provide library name to parameter 'gene_sets'
 
-If you would like to use you own gene_sets.gmts files, build such a file use excel,
-and then rename to gene_sets.gmt.
+If you would like to use you own gene_sets.gmts files, build such a file use excel:
+
 
 An example of gmt file looks like below:
 
@@ -232,7 +231,7 @@ Let's see what the txt file looks like.
     PTX3
 
 
-Select the library you want to do enrichment analysis. For a view all avilable libraries,run
+Select the library you want to do enrichment analysis. To get a list of all available libraries, run
 
 .. code:: python
 
@@ -347,7 +346,7 @@ Select the library you want to do enrichment analysis. For a view all avilable l
   'Panther_2016']
 
 
-for for details, please track the offical links: http://amp.pharm.mssm.edu/Enrichr/
+For more details, please track the official links: http://amp.pharm.mssm.edu/Enrichr/
 
 
 Use ``replot`` Command, or :func:`replot`
@@ -382,4 +381,4 @@ If you prefer to run in command line, it's more simple.
    gseapy replot -i gsea -o gseapy_out
 
 
-| For advanced usage of library,see the :ref:`run`.
+| For advanced usage of library, see the :ref:`run`.

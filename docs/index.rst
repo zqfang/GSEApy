@@ -19,9 +19,6 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
     :target: https://github.com/zqfang/GSEApy/actions
     :alt: Action Status
 
-.. image:: https://travis-ci.org/zqfang/GSEApy.svg?branch=master
-    :target: https://travis-ci.org/zqfang/GSEApy
-
 .. image:: http://readthedocs.org/projects/gseapy/badge/?version=master
     :target: http://gseapy.readthedocs.io/en/master/?badge=master
     :alt: Documentation Status
@@ -38,10 +35,10 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
 
 **Release notes** : https://github.com/zqfang/GSEApy/releases 
 
-GSEAPY is a python wrapper for **GSEA** and **Enrichr**. 
+GSEApy is a python wrapper for **GSEA** and **Enrichr**. 
 --------------------------------------------------------------------------------------------
 
-GSEAPY has six subcommands: ``gsea``, ``prerank``, ``ssgsea``, ``replot`` ``enrichr``, ``biomart``.
+GSEApy has six subcommands: ``gsea``, ``prerank``, ``ssgsea``, ``replot`` ``enrichr``, ``biomart``.
 
 1. The ``gsea`` module produces **GSEA** results.    
 The input requries a txt file(FPKM, Expected Counts, TPM, et.al), a cls file, and gene_sets file in gmt format. 
@@ -61,7 +58,7 @@ Enrichr is open source and freely available online at: http://amp.pharm.mssm.edu
 6. The ``biomart`` module helps you convert gene ids using BioMart API.
 
 
-GSEAPY could be used for **RNA-seq, ChIP-seq, Microarry** data. It's used for convenient GO enrichments and produce **publishable quality figures** in python. 
+GSEApy could be used for **RNA-seq, ChIP-seq, Microarry** data. It's used for convenient GO enrichments and produce **publishable quality figures** in python. 
 
 
 The full ``GSEA`` is far too extensive to describe here; see
@@ -83,14 +80,14 @@ do gene set enrichment analysis in python. So, here are my reasons:
 * Easy to use in bash shell or your data analysis workflow, e.g. snakemake.
 
 
-
 .. toctree::
     :maxdepth: 3
    
     introduction.rst
-    run.rst
     gseapy_tutorial
     gseapy_example.ipynb
+    run.rst
+    faq.rst
 	
 
 

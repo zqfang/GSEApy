@@ -12,6 +12,7 @@ from bioservices import BioMart, BioServicesError
 from gseapy.utils import unique, DEFAULT_LIBRARY, DEFAULT_CACHE_PATH, mkdirs
 from collections.abc import Iterable
 
+
 def gsea_cls_parser(cls):
     """Extract class(phenotype) name from .cls file.
 
@@ -75,15 +76,20 @@ def gsea_edb_parser(results_path):
     return res
 
 
-def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
+def gsea_gmt_parser(gmt, organism='Human', min_size = 3, max_size = 1000, gene_list=None):
     """Parse gene_sets.gmt(gene set database) file or download from enrichr server.
 
-    :param gmt: the gene_sets.gmt file of GSEA input or an enrichr library name.
-                checkout full enrichr library name here: http://amp.pharm.mssm.edu/Enrichr/#stats
+    :param str gmt: the gene_sets.gmt file or an enrichr library name.
+                    checkout full enrichr library name here: https://maayanlab.cloud/Enrichr/#libraries
+    
+    :param str organism: choose one from { 'Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm' }.
+                         This arugment has not effect if input is a `.gmt` file.
 
     :param min_size: Minimum allowed number of genes from gene set also the data set. Default: 3.
-    :param max_size: Maximum allowed number of genes from gene set also the data set. Default: 5000.
-    :param gene_list: Used for filtering gene set. Only used this argument for :func:`call` method.
+    :param max_size: Maximum allowed number of genes from gene set also the data set. Default: 1000.
+
+    :param gene_list: Used for filtering gene set. Only used this argument for :func:`gsea` method.
+
     :return: Return a new filtered gene set database dictionary.
 
     **DO NOT** filter gene sets, when use :func:`replot`. Because ``GSEA`` Desktop have already
@@ -98,10 +104,11 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
                               for line in genesets.readlines()}
     else:
         logging.info("Downloading and generating Enrichr library gene sets...")
-        if gmt in DEFAULT_LIBRARY:
-            names = DEFAULT_LIBRARY
-        else:
-            names = get_library_name()
+
+        names = DEFAULT_LIBRARY
+        if gmt not in DEFAULT_LIBRARY:
+            names = get_library_name(organism=organism)
+
         if gmt in names:
             """
             define max tries num
@@ -120,6 +127,7 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
             response = s.get( ENRICHR_URL + query_string % gmt, timeout=None, verify=False)
         else:
             raise Exception("gene_set files(.gmt) not found")
+            
         if not response.ok:
             raise Exception('Error fetching enrichment results, check internet connection first.')
 
@@ -156,7 +164,7 @@ def gsea_gmt_parser(gmt, min_size = 3, max_size = 1000, gene_list=None):
     else:
         return genesets_filter
 
-def get_library_name(database='Human'):
+def get_library_name(organism='Human'):
     """return enrichr active enrichr library name. 
     see also: https://maayanlab.cloud/modEnrichr/
 
@@ -167,25 +175,25 @@ def get_library_name(database='Human'):
     default = [ 'human','mouse','hs', 'mm',
                 'homo sapiens', 'mus musculus',
                 'h. sapiens', 'm. musculus']
-    organism = {
+    _organisms = {
                 'Fly': ['fly', 'd. melanogaster', 'drosophila melanogaster'],
                 'Yeast': ['yeast', 's. cerevisiae', 'saccharomyces cerevisiae'],
                 'Worm': ['worm', 'c. elegans', 'caenorhabditis elegans', 'nematode'],
                 'Fish': ['fish', 'd. rerio', 'danio rerio', 'zebrafish']
                 }
     ENRICHR_URL = 'http://maayanlab.cloud'
-    if database.lower() in default:
-        database = 'Enrichr'
+    database=''
+    if organism.lower() in default:
+        database = 'Enrichr' 
     else:
-        for k, v in organism.items():
-            if database.lower() in v :
+        for k, v in _organisms.items():
+            if organism.lower() in v :
                 database = k+'Enrichr'
                 break
 
     if not database.endswith('Enrichr'):
         raise LookupError("""No supported database. Please input one of these:
                             ('Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm') """)
-        return 
     # make a get request to get the gmt names and meta data from Enrichr
     # old code
     # response = requests.get('http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary?mode=meta')
