@@ -30,11 +30,7 @@ GSEApy: Gene Set Enrichment Analysis in Python.
 
 
 
-For examples of using GSEApy please click here: `Example <http://gseapy.readthedocs.io/en/master/gseapy_example.html>`_
-
 **Release notes** : https://github.com/zqfang/GSEApy/releases
-
-**FAQ**: `Frequently Asked Questions <https://gseapy.readthedocs.io/en/latest/faq.html>`_
 
 To get help of GSEApy
 ------------------------------------
