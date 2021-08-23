@@ -99,8 +99,11 @@ class Enrichr(object):
         
         # if gss contains .gmt, dict, enrichr_liraries.
         # convert .gmt to dict
-        gss_exist = [] 
-        enrichr_library = self.get_libraries()
+        gss_exist = []
+        if not isinstance(self.gene_sets, dict):
+            enrichr_library = self.get_libraries()
+        else:
+            pass
         for g in gss:
             if isinstance(g, dict): 
                 gss_exist.append(g)
