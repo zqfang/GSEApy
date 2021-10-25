@@ -117,6 +117,7 @@ class Enrichr(object):
             enrichr_library = self.get_libraries()
         
         # check enrichr libraries are valid 
+
         for g in gss:
             if isinstance(g, dict): 
                 gss_exist.append(g)
