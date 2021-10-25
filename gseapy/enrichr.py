@@ -78,30 +78,33 @@ class Enrichr(object):
                        for line in genesets.readlines() }
         return g_dict
 
+    def __gmt2dict(self, gene_sets: List[str]):
+        """helper function, only convert gmt to dict and keep strings"""
+        gss = []
+        for g in gene_sets:
+            # only convert gmt to dict. local mode
+            if isinstance(g, str) and g.lower().endswith(".gmt"):
+                if os.path.exists(g): 
+                    self._logger.info("User Defined gene sets is given: %s"%g)
+                    gss.append(self.__parse_gmt(g))
+                else:
+                    self._logger.warning("User Defined gene sets is not found: %s"%g)
+            else:
+                gss.append(g) 
+        
+        return gss 
+
     def parse_genesets(self):
         """parse gene_sets input file type"""
 
         gss = []
         if isinstance(self.gene_sets, list):
-            # gss = self.gene_sets
-            for g in self.gene_sets:
-                # only convert gmt to dict
-                if isinstance(g, str) and g.lower().endswith(".gmt"):
-                    if os.path.exists(g): 
-                        self._logger.info("User Defined gene sets is given: %s"%g)
-                        gss.append(self.__parse_gmt(g))
-                    else:
-                        self._logger.warning("User Defined gene sets is not found: %s"%g)
-                else:
-                    gss.append(g)
+            gss = self.__gmt2dict(self.gene_sets)
 
         elif isinstance(self.gene_sets, str):
             gss = [ g.strip() for g in self.gene_sets.strip().split(",") ]
-            # local mode:
-            # if all input are gmts
-            if all([g.lower().endswith(".gmt") and os.path.exists(g) for g in gss]):
-                self._logger.info("User Defined gene sets is given: %s"%(" ".join(gss)))
-                return [self.__parse_gmt(g) for g in gss]
+            gss = self.__gmt2dict(gss)
+
 
         elif isinstance(self.gene_sets, dict):
             gss = [self.gene_sets]
@@ -109,10 +112,11 @@ class Enrichr(object):
             raise Exception("Error parsing enrichr libraries, please provided corrected one")
         
         # now, gss[LIST] contains dict or strings.
-        # convert .gmt to dict
+        if len(gss) < 1:
+            raise Exception("No GeneSets are valid !!! Check your gene_sets input.")
         gss_exist = [] 
         enrichr_library = []
-        # if all local gmts, skip connect to enrichr server
+        # if all local gmts (local mode), skip connect to enrichr server
         if not all([isinstance(g, dict) for g in gss]):
             enrichr_library = self.get_libraries()
         
