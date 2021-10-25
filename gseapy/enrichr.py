@@ -81,9 +81,20 @@ class Enrichr(object):
     def parse_genesets(self):
         """parse gene_sets input file type"""
 
-        
+        gss = []
         if isinstance(self.gene_sets, list):
-            gss = self.gene_sets
+            # gss = self.gene_sets
+            for g in self.gene_sets:
+                # only convert gmt to dict
+                if isinstance(g, str) and g.lower().endswith(".gmt"):
+                    if os.path.exists(g): 
+                        self._logger.info("User Defined gene sets is given: %s"%g)
+                        gss.append(self.__parse_gmt(g))
+                    else:
+                        self._logger.warning("User Defined gene sets is not found: %s"%g)
+                else:
+                    gss.append(g)
+
         elif isinstance(self.gene_sets, str):
             gss = [ g.strip() for g in self.gene_sets.strip().split(",") ]
             # local mode:
@@ -97,25 +108,25 @@ class Enrichr(object):
         else:
             raise Exception("Error parsing enrichr libraries, please provided corrected one")
         
-        # if gss contains .gmt, dict, enrichr_liraries.
+        # now, gss[LIST] contains dict or strings.
         # convert .gmt to dict
         gss_exist = [] 
-        enrichr_library = self.get_libraries()
+        enrichr_library = []
+        # if all local gmts, skip connect to enrichr server
+        if not all([isinstance(g, dict) for g in gss]):
+            enrichr_library = self.get_libraries()
+        
+        # check enrichr libraries are valid 
         for g in gss:
             if isinstance(g, dict): 
                 gss_exist.append(g)
                 continue
-
             if isinstance(g, str): 
                 if g in enrichr_library: 
                     gss_exist.append(g)
-                    continue
-                if g.lower().endswith(".gmt") and os.path.exists(g):
-                    self._logger.info("User Defined gene sets is given: %s"%g)
-                    with open(g) as genesets:
-                        g_dict = { line.strip().split("\t")[0]: line.strip().split("\t")[2:]
-                                        for line in genesets.readlines() }
-                    gss_exist.append(g_dict)
+                else:
+                    self._logger.warning("Enrichr library not found: %s"%g)
+
         return gss_exist
 
     def parse_genelists(self):
@@ -298,7 +309,7 @@ class Enrichr(object):
         if requests.get(ENRICHR_SERVER, verify=True).ok:
             return
 
-        self.ENRICHR_URL = 'http://amp.pharm.mssm.edu'
+        #self.ENRICHR_URL = 'http://amp.pharm.mssm.edu'
         ENRICHR_SERVER = "%s/%s"%(self.ENRICHR_URL, self._organism) 
 
         if requests.get(ENRICHR_SERVER, verify=True).ok:
@@ -380,9 +391,9 @@ class Enrichr(object):
 
         # read input file
         genes_list = self.parse_genelists()
-        gss = self.parse_genesets()
-        # if gmt
+
         self._logger.info("Connecting to Enrichr Server to get latest library names")
+        gss = self.parse_genesets()
         if len(gss) < 1:
             self._logger.error("None of your input gene set matched ! %s"%self.gene_sets)
             self._logger.error("Hint: Current organism = %s, is this correct?\n"%self.organism +\
