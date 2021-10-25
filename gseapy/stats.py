@@ -68,7 +68,7 @@ def calc_pvalues(query, gene_sets, background=20000, **kwargs):
         if isinstance(background, set):
             category = category.intersection(background)
         hits = query.intersection(category)
-        x = len(hits)
+        x = len(hits) # overlap hits
         if x < 1 : continue
         m = len(category)
         # pVal = hypergeom.sf(hitCount-1,popTotal,bgHits,queryTotal) 
