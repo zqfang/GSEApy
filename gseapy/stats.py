@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import sys, logging
 import numpy as np
-from scipy.stats import hypergeom
+from scipy.stats import hypergeom, fisher_exact
 
 
 def calc_pvalues(query, gene_sets, background=20000, **kwargs):
@@ -46,8 +46,6 @@ def calc_pvalues(query, gene_sets, background=20000, **kwargs):
      
     """
 
-    # number of genes in your query data
-    k = len(query) 
     query = set(query)
     vals = []
     # background should be all genes in annotated database
@@ -60,6 +58,8 @@ def calc_pvalues(query, gene_sets, background=20000, **kwargs):
         bg = background
     else:
         raise ValueError("background should be set or int object")
+    # number of genes in your query data
+    k = len(query) 
     # pval
     subsets = sorted(gene_sets.keys())
     for s in subsets:
@@ -73,10 +73,30 @@ def calc_pvalues(query, gene_sets, background=20000, **kwargs):
         m = len(category)
         # pVal = hypergeom.sf(hitCount-1,popTotal,bgHits,queryTotal) 
         # p(X >= hitCounts)
-        vals.append((s, hypergeom.sf(x-1, bg, m, k), x, m, hits))
+        pval = hypergeom.sf(x-1, bg, m, k)
+        #oddr, pval2 = odds_ratio_calc(bg, k, m, x)
+        expect_count = k*m/bg
+        oddr= x / expect_count
+        vals.append((s, pval, oddr, x, m, hits))
 
     return zip(*vals)
 
+
+
+# def odds_ratio_calc(bg_n, gene_list_n, gene_set_n, overlap_n): 
+#     """
+#     bg_n = number of background genes
+#     gene_list_n = number of genes in the gene list (ie query genes)
+#     gene_set_n = number of genes in the (corrected by background) gene set (eg pathways/GO terms)
+#     overlap_n = number of genes overlapping with between the (corrected by background) gene set and the gene list
+#     """
+
+#     # make contingency table
+#     table=np.array([[gene_set_n, bg_n-gene_set_n],[overlap_n, gene_list_n-overlap_n]])
+#     # perform Fisher's exact test
+#     oddsratio, pvalue = fisher_exact(table)
+#     # return (inverse) oddsratio
+#     return 1/oddsratio, pvalue
 
 def _ecdf(x):
     nobs = len(x)

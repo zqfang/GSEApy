@@ -375,7 +375,7 @@ class Enrichr(object):
         hgtest = list(calc_pvalues(query=self._gls, gene_sets=gmt, 
                                    background=self._bg))
         if len(hgtest) > 0:
-            terms, pvals, olsz, gsetsz, genes = hgtest
+            terms, pvals, oddr, olsz, gsetsz, genes = hgtest
             fdrs, rej = multiple_testing_correction(ps = pvals, 
                                                     alpha=self.cutoff,
                                                     method='benjamini-hochberg')
@@ -385,6 +385,7 @@ class Enrichr(object):
             odict['Overlap'] = list(map(lambda h,g: "%s/%s"%(h, g), olsz, gsetsz))
             odict['P-value'] = pvals
             odict['Adjusted P-value'] = fdrs
+            odict['Odds Ratio'] = oddr
             # odict['Reject (FDR< %s)'%self.cutoff ] = rej
             odict['Genes'] = [";".join(g) for g in genes]
             res = pd.DataFrame(odict)
