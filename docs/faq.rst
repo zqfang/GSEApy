@@ -7,7 +7,7 @@ Frequently Asked Questions
 
 
 **Q:** What ``Enrichr`` ``database`` are supported?
---------------------------------------------------------------
+-----------------------------------------------------------------------
 
 **A:** Support modEnrich (https://amp.pharm.mssm.edu/modEnrichr/) .
 Now, Human, Mouse, Fly, Yeast, Worm, Fish are all supported.
@@ -64,14 +64,14 @@ There is no augment ``organism`` in ``prerank``, ``gsea``, ``ssgea``, but you co
 
 
 
-**Q:** How to save plots using ``gseaplot``, ``barplot``, ``dotplot``,``heatmap`` in Jupyter? 
------------------------------------------------------------------------ 
+**Q:** How to save plots using ``gseaplot``, ``barplot``, ``dotplot``,``heatmap`` in Jupyter ? 
+------------------------------------------------------------------------------------------------- 
 
 **A:** e.g. gseaplot(..., ofname='your.plot.pdf'). That's it
 
 
 **Q:** What ``cutoff`` mean in functions, like ``enrichr()``, ``dotplot``, ``barplot`` ?
------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
 
 **A:** This argument control the terms (e.g FDR < 0.05) that will be shown on figures, not the result table output.
 
