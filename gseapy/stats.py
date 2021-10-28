@@ -75,8 +75,9 @@ def calc_pvalues(query, gene_sets, background=20000, **kwargs):
         # p(X >= hitCounts)
         pval = hypergeom.sf(x-1, bg, m, k)
         #oddr, pval2 = odds_ratio_calc(bg, k, m, x)
-        expect_count = k*m/bg
-        oddr= x / expect_count
+        # expect_count = k*m/bg
+        # oddr= x / expect_count
+        oddr= (x*(bg-m))/(m*(k-x)) # thanks to @sreichl. 
         vals.append((s, pval, oddr, x, m, hits))
 
     return zip(*vals)
