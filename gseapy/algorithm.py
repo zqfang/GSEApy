@@ -2,8 +2,6 @@
 
 import sys, logging
 import numpy as np
-#from functools import reduce
-#from multiprocessing import Pool
 from math import ceil
 from gseapy.stats import multiple_testing_correction
 from joblib import delayed, Parallel
@@ -122,7 +120,7 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
         pass
     else:
         logging.error("Using negative values of weighted_score_type, not allowed")
-        sys.exit(0)
+        raise ValueError("weighted_score_type should be postive numerics")
 
     cor_mat = np.abs(cor_mat)
     if cor_mat.ndim ==1:
@@ -167,7 +165,7 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
         rank_alpha = (perm_tag_tensor*cor_mat[np.newaxis,:,:])** weighted_score_type
     else:
         logging.error("Program die because of unsupported input")
-        sys.exit(0)
+        raise ValueError("Correlation vector or matrix (cor_mat) is not supported")
 
     # Nhint = tag_indicator.sum(1)
     # Nmiss =  N - Nhint
@@ -192,7 +190,7 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
 
 
 def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
-                          ascending, rs=None, skip_last=False):
+                          ascending, seed=None, skip_last=False):
     """Build shuffled ranking matrix when permutation_type eq to phenotype.
        Works for 3d array.
 
@@ -209,7 +207,8 @@ def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
        :param list classes:  a list of phenotype labels, to specify which column of
                              dataframe belongs to what class of phenotype.
        :param bool ascending:  bool. Sort ascending vs. descending.
-       :param bool skip_last: whether to skip the permutation of the last rankings 
+       :param seed: random_state seed
+       :param bool skip_last: (internal use only) whether to skip the permutation of the last rankings.  
 
        :return:
                 returns two 2d ndarray with shape (nperm, gene_num).
@@ -218,7 +217,7 @@ def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
                 | cor_mat: sorted and permutated (exclude last row) ranking matrix.
 
     """
-    rs = np.random.RandomState(rs)
+    rs = np.random.RandomState(seed)
     # S: samples, G: gene number
     G, S = exprs.shape
     # genes = exprs.index.values
@@ -253,7 +252,7 @@ def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
         cor_mat  =  np.log2(pos_cor_mean / neg_cor_mean)
     else:
         logging.error("Please provide correct method name!!!")
-        sys.exit(0)
+        raise LookupError("Input method: %s is not supported"%method)
     # return matix[nperm+1, perm_cors]
     cor_mat_ind = cor_mat.argsort()
     # ndarray: sort in place
@@ -328,7 +327,7 @@ def ranking_metric(df, method, pos, neg, classes, ascending):
         ser  =  np.log2(df_mean[pos] / df_mean[neg])
     else:
         logging.error("Please provide correct method name!!!")
-        sys.exit(0)
+        raise LookupError("Input method: %s is not supported"%method)
     ser = ser.sort_values(ascending=ascending)
 
     return ser
@@ -365,7 +364,8 @@ def gsea_compute_tensor(data, gmt, n, weighted_score_type, permutation_type,
     genes_mat, cor_mat = data.index.values, data.values
     base = 5 if data.shape[0] >= 5000 else 10
     ## phenotype permutation
-    np.random.seed(seed)
+    np.random.seed(seed) # control the ranodm numbers
+
     if permutation_type == "phenotype":
         # shuffling classes and generate random correlation rankings
         logging.debug("Start to permutate classes..............................")
@@ -376,14 +376,13 @@ def gsea_compute_tensor(data, gmt, n, weighted_score_type, permutation_type,
         else:
             num_bases = [ base ] * ((n + 1) // base) + [ (n +1) % base]
             skip_last = [0] * ((n + 1) // base) + [ (n +1) % base]
-
-        random_state = np.random.randint(np.iinfo(np.int32).max, size=len(num_bases))
+        random_seeds = np.random.randint(np.iinfo(np.int32).max, size=len(num_bases))
         genes_ind = []
         cor_mat = []
         # split permutation array into smaller blocks to save memory
         temp_rnk = Parallel(n_jobs=processes, require='sharedmem')(delayed(ranking_metric_tensor)(
-            data, method, b, pheno_pos, pheno_neg, classes, ascending, rs, s) 
-            for b, s, rs in zip(num_bases, skip_last, random_state))
+            data, method, b, pheno_pos, pheno_neg, classes, ascending, se, skip) 
+            for b, skip, se in zip(num_bases, skip_last, random_seeds))
 
         for k, temp in enumerate(temp_rnk):
             gi, cor = temp
@@ -403,22 +402,22 @@ def gsea_compute_tensor(data, gmt, n, weighted_score_type, permutation_type,
     
     # split gmt dataset, too
     block = ceil(len(subsets) / base)
-    random_state = np.random.randint(np.iinfo(np.int32).max, size=block)
+    random_seeds = np.random.randint(np.iinfo(np.int32).max, size=block)
     # split large array into smaller blocks to avoid memory overflow
     i, m = 1, 0
     gmt_block = []
     while i <= block:
         # you have to reseed, or all your processes are sharing the same seed value
-        rs = random_state[i-1]
+        rs = random_seeds[i-1]
         gmtrim = {k: gmt.get(k) for k in subsets[m:base * i]}
         gmt_block.append(gmtrim)
         m = base * i
         i += 1
     ## if permutation_type == "phenotype": n = 0
-    ## NOTE for GSEA: cor_mat is 2d array, it won't permute again 
+    ## NOTE for GSEA: cor_mat is 2d array, it won't permute again when call enrichment_score_tensor
     temp_esnu = Parallel(n_jobs=processes, require='sharedmem')(delayed(enrichment_score_tensor)(
                     genes_mat, cor_mat, gmtrim, w, n, rs, single, scale) 
-                    for gmtrim, rs in zip(gmt_block, random_state))
+                    for gmtrim, rs in zip(gmt_block, random_seeds))
 
     # esn is a list, don't need to use append method.
     for si, temp in enumerate(temp_esnu):
