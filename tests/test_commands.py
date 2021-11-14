@@ -41,7 +41,7 @@ def test_gsea(gseaGCT, gseaCLS, geneGMT):
     tmpdir= TemporaryDirectory(dir="tests")
     gsea(data=gseaGCT, gene_sets=geneGMT, cls=gseaCLS, method='abs_s2n',
          outdir=tmpdir.name, permutation_type='phenotype',
-         permutation_num=10)
+         permutation_num=47)
     tmpdir.cleanup()
 
 
@@ -51,7 +51,7 @@ def test_prerank(prernk, geneGMT):
     tmpdir= TemporaryDirectory(dir="tests")
     prerank(prernk, geneGMT, tmpdir.name, permutation_num=10)
     tmpdir.cleanup()
-    prerank(prernk, geneGMT, None, permutation_num=10)
+    prerank(prernk, geneGMT, None, permutation_num=99)
 
 
 def test_ssgsea1(ssGCT, geneGMT):
@@ -73,7 +73,7 @@ def test_enrichr(genelist, geneGMT):
     # Only tests of the command runs successfully,
     # doesnt't check the image
     tmpdir= TemporaryDirectory(dir="tests")
-    enrichr(genelist, gene_sets=['KEGG_2016', geneGMT], outdir=tmpdir.name)
+    enrichr(genelist, gene_sets=['KEGG_2016', geneGMT], outdir=tmpdir.name, verbose=True)
     #tmpdir.cleanup()
     tmpdir= TemporaryDirectory(dir="tests")
     enrichr(genelist, organism='Fly', gene_sets='KEGG_2019', outdir=tmpdir.name)

@@ -90,7 +90,7 @@ def enrichment_score(gene_list, correl_vector, gene_set, weighted_score_type=1,
 
 def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, nperm=1000,
                             rs=None, single=False, scale=False):
-    """Next generation algorithm of GSEA and ssGSEA.
+    """Next generation algorithm of GSEA and ssGSEA. Works for 3d array
 
         :param gene_mat:        the ordered gene list(vector) with or without gene indices matrix.
         :param cor_mat:         correlation vector or matrix  (e.g. signal to noise scores)
@@ -192,8 +192,9 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
 
 
 def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
-                          ascending, rs=None):
+                          ascending, rs=None, skip_last=False):
     """Build shuffled ranking matrix when permutation_type eq to phenotype.
+       Works for 3d array.
 
        :param exprs:   gene_expression DataFrame, gene_name indexed.
        :param str method:  calculate correlation or ranking. methods including:
@@ -208,6 +209,7 @@ def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
        :param list classes:  a list of phenotype labels, to specify which column of
                              dataframe belongs to what class of phenotype.
        :param bool ascending:  bool. Sort ascending vs. descending.
+       :param bool skip_last: whether to skip the permutation of the last rankings 
 
        :return:
                 returns two 2d ndarray with shape (nperm, gene_num).
@@ -221,9 +223,13 @@ def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
     G, S = exprs.shape
     # genes = exprs.index.values
     expr_mat = exprs.values.T
-    perm_cor_tensor = np.tile(expr_mat, (permutation_num+1,1,1))
-    # random shuffle on the first dim, last matrix is not shuffled
-    for arr in perm_cor_tensor[:-1]: rs.shuffle(arr)
+    perm_cor_tensor = np.tile(expr_mat, (permutation_num,1,1))
+    if skip_last:
+        # random shuffle on the first dim, the last matrix (expr_mat) is not shuffled
+        for arr in perm_cor_tensor[:-1]: rs.shuffle(arr)
+    else:
+        for arr in perm_cor_tensor: rs.shuffle(arr)   
+    # metrics     
     classes = np.array(classes)
     pos = classes == pos
     neg = classes == neg
@@ -259,7 +265,7 @@ def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
     return cor_mat_ind[:, ::-1], cor_mat[:, ::-1]
 
 def ranking_metric(df, method, pos, neg, classes, ascending):
-    """The main function to rank an expression table.
+    """The main function to rank an expression table. works for 2d array.
 
        :param df:      gene_expression DataFrame.
        :param method:  The method used to calculate a correlation or ranking. Default: 'log2_ratio_of_classes'.
@@ -332,6 +338,7 @@ def gsea_compute_tensor(data, gmt, n, weighted_score_type, permutation_type,
                  method, pheno_pos, pheno_neg, classes, ascending,
                  processes=1, seed=None, single=False, scale=False):
     """compute enrichment scores and enrichment nulls.
+       This function will split large array into smaller pieces to advoid memroy overflow.
 
         :param data: preprocessed expression dataframe or a pre-ranked file if prerank=True.
         :param dict gmt: all gene sets in .gmt file. need to call load_gmt() to get results.
@@ -355,36 +362,37 @@ def gsea_compute_tensor(data, gmt, n, weighted_score_type, permutation_type,
     """
     w = weighted_score_type
     subsets = sorted(gmt.keys())
-    rs = np.random.RandomState(seed)
     genes_mat, cor_mat = data.index.values, data.values
     base = 5 if data.shape[0] >= 5000 else 10
-    block = ceil(len(subsets) / base)
-
+    ## phenotype permutation
     np.random.seed(seed)
-    random_state = np.random.randint(np.iinfo(np.int32).max, size=block)
-
     if permutation_type == "phenotype":
         # shuffling classes and generate random correlation rankings
         logging.debug("Start to permutate classes..............................")
+
+        if (n + 1) % base == 0: # n+1: last permute is for orignial ES calculation
+            num_bases = [ base ] * ((n + 1) // base)
+            skip_last = [0] * ( n // base) + [1] # last is not permuted
+        else:
+            num_bases = [ base ] * ((n + 1) // base) + [ (n +1) % base]
+            skip_last = [0] * ((n + 1) // base) + [ (n +1) % base]
+
+        random_state = np.random.randint(np.iinfo(np.int32).max, size=len(num_bases))
         genes_ind = []
         cor_mat = []
-
+        # split permutation array into smaller blocks to save memory
         temp_rnk = Parallel(n_jobs=processes, require='sharedmem')(delayed(ranking_metric_tensor)(
-            data, method, base, pheno_pos, pheno_neg, classes, ascending, rs) for rs in random_state)
+            data, method, b, pheno_pos, pheno_neg, classes, ascending, rs, s) 
+            for b, s, rs in zip(num_bases, skip_last, random_state))
 
         for k, temp in enumerate(temp_rnk):
             gi, cor = temp
-            if k+1 == block:
-               genes_ind.append(gi)
-               cor_mat.append(cor)
-            else:
-                genes_ind.append(gi[:-1])
-                cor_mat.append(cor[:-1])
-
+            genes_ind.append(gi)
+            cor_mat.append(cor)
         genes_ind, cor_mat = np.vstack(genes_ind), np.vstack(cor_mat)
         # convert to tuple
         genes_mat = (data.index.values, genes_ind)
-
+    
     logging.debug("Start to compute es and esnulls........................")
     # Prerank, ssGSEA, GSEA
     es = []
@@ -392,7 +400,10 @@ def gsea_compute_tensor(data, gmt, n, weighted_score_type, permutation_type,
     hit_ind = []
     esnull = []
     temp_esnu = []
-    #pool_esnu = Pool(processes=processes)
+    
+    # split gmt dataset, too
+    block = ceil(len(subsets) / base)
+    random_state = np.random.randint(np.iinfo(np.int32).max, size=block)
     # split large array into smaller blocks to avoid memory overflow
     i, m = 1, 0
     gmt_block = []
@@ -401,18 +412,13 @@ def gsea_compute_tensor(data, gmt, n, weighted_score_type, permutation_type,
         rs = random_state[i-1]
         gmtrim = {k: gmt.get(k) for k in subsets[m:base * i]}
         gmt_block.append(gmtrim)
-        # temp_esnu.append(pool_esnu.apply_async(enrichment_score_tensor,
-                                            #    args=(genes_mat, cor_mat,
-                                            #          gmtrim, w, n, rs,
-                                            #          single, scale)))
         m = base * i
         i += 1
-    # use joblib
+    ## if permutation_type == "phenotype": n = 0
+    ## NOTE for GSEA: cor_mat is 2d array, it won't permute again 
     temp_esnu = Parallel(n_jobs=processes, require='sharedmem')(delayed(enrichment_score_tensor)(
                     genes_mat, cor_mat, gmtrim, w, n, rs, single, scale) 
                     for gmtrim, rs in zip(gmt_block, random_state))
-    # pool_esnu.close()
-    # pool_esnu.join()
 
     # esn is a list, don't need to use append method.
     for si, temp in enumerate(temp_esnu):
@@ -468,11 +474,13 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
         logging.debug("Start to permutate classes..............................")
         # shuffling classes and generate random correlation rankings
         rs = np.random.RandomState(seed)
+        # this version don't split large array into smaller ones
         genes_mat, cor_mat = ranking_metric_tensor(exprs=data, method=method,
-                                                   permutation_num=n,
+                                                   permutation_num=n+1,
                                                    pos=pheno_pos, neg=pheno_neg,
                                                    classes=classes,
-                                                   ascending=ascending, rs=rs)
+                                                   ascending=ascending, rs=rs, 
+                                                   skip_last=True)
 
         # compute es, esnulls. hits, RES
         logging.debug("Start to compute enrichment nulls.......................")
@@ -487,6 +495,7 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
         # Prerank, ssGSEA, GSEA with gene_set permutation
         gl, cor_vec = data.index.values, data.values
         logging.debug("Start to compute es and esnulls........................")
+        ## this version don't split large array into smaller ones
         # es, esnull, hit_ind, RES = enrichment_score_tensor(gene_mat=gl,
         #                                                    cor_mat=cor_mat,
         #                                                    gene_sets=gmt,
@@ -494,19 +503,10 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
         #                                                    nperm=n, rs=rs
         #                                                    single=single, scale=scale)
 
-        # split large array into smaller blocks to avoid memory overflow
         temp_esnu=[]
-        #pool_esnu = Pool(processes=processes)
         # you have to reseed, or all your processes are sharing the same seed value
         np.random.seed(seed)
         random_state = np.random.randint(np.iinfo(np.int32).max, size=len(subsets))
-        # for subset, rs in zip(subsets, random_state):
-        #     temp_esnu.append(pool_esnu.apply_async(enrichment_score,
-        #                                            args=(gl, cor_vec, gmt.get(subset), w,
-        #                                                  n, rs, single, scale)))
-
-        # pool_esnu.close()
-        # pool_esnu.join()
 
         temp_esnu = Parallel(n_jobs=processes, require='sharedmem')(delayed(enrichment_score)(
                         gl, cor_vec, gmt.get(subset), w, n, 
@@ -514,7 +514,6 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
                         for subset, rs in zip(subsets, random_state))        
         # esn is a list, don't need to use append method.
         for si, temp in enumerate(temp_esnu):
-            #e, enu, hit, rune = temp.get()
             e, enu, hit, rune = temp
             esnull[si] = enu
             es.append(e)
