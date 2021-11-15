@@ -13,3 +13,4 @@ pandas
 requests
 joblib
 gseapy
+docutils<0.18
