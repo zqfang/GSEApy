@@ -29,3 +29,5 @@ docs/_build
 *.pytest_cache
 *__pycache__ 
 *.vscode
+tests/*.ipynb
+gseapy_example.ipynb
