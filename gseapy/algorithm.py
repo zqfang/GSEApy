@@ -232,6 +232,8 @@ def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
     classes = np.array(classes)
     pos = classes == pos
     neg = classes == neg
+    n_pos = np.sum(pos)
+    n_neg = np.sum(neg)
     pos_cor_mean = perm_cor_tensor[:,pos,:].mean(axis=1)
     neg_cor_mean = perm_cor_tensor[:,neg,:].mean(axis=1)
     pos_cor_std = perm_cor_tensor[:,pos,:].std(axis=1, ddof=1)
@@ -242,8 +244,8 @@ def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
     elif method in ['abs_signal_to_noise', 'abs_s2n']:
         cor_mat = np.abs((pos_cor_mean - neg_cor_mean)/(pos_cor_std + neg_cor_std))
     elif method == 't_test':
-        denom = 1.0/G
-        cor_mat = (pos_cor_mean - neg_cor_mean)/ np.sqrt(denom*pos_cor_std**2 + denom*neg_cor_std**2)
+        denom = np.sqrt((pos_cor_std**2)/n_pos  + (neg_cor_std**2)/n_neg)
+        cor_mat = (pos_cor_mean - neg_cor_mean)/ denom
     elif method == 'ratio_of_classes':
         cor_mat = pos_cor_mean / neg_cor_mean
     elif method == 'diff_of_classes':
