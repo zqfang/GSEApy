@@ -314,13 +314,14 @@ def ranking_metric(df, method, pos, neg, classes, ascending):
     # exclude any zero stds.
     df_mean = df.groupby(by=classes, axis=1).mean()
     df_std =  df.groupby(by=classes, axis=1).std()
-
+    n_pos = np.sum(classes == pos)
+    n_neg = np.sum(classes == neg)
     if method in ['signal_to_noise', 's2n']:
         ser = (df_mean[pos] - df_mean[neg])/(df_std[pos] + df_std[neg])
     elif method in ['abs_signal_to_noise', 'abs_s2n']:
         ser = ((df_mean[pos] - df_mean[neg])/(df_std[pos] + df_std[neg])).abs()
     elif method == 't_test':
-        ser = (df_mean[pos] - df_mean[neg])/ np.sqrt(df_std[pos]**2/len(df_std)+df_std[neg]**2/len(df_std) )
+        ser = (df_mean[pos] - df_mean[neg])/ np.sqrt(df_std[pos]**2/n_pos+df_std[neg]**2/n_neg)
     elif method == 'ratio_of_classes':
         ser = df_mean[pos] / df_mean[neg]
     elif method == 'diff_of_classes':
