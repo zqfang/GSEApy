@@ -39,7 +39,7 @@ def test_gsea(gseaGCT, gseaCLS, geneGMT):
     # Only tests of the command runs successfully,
     # doesnt't check the image
     tmpdir= TemporaryDirectory(dir="tests")
-    gsea(data=gseaGCT, gene_sets=geneGMT, cls=gseaCLS, method='abs_s2n',
+    gsea(data=gseaGCT, gene_sets=geneGMT, cls=gseaCLS, method='t_test',
          outdir=tmpdir.name, permutation_type='phenotype',
          permutation_num=47)
     tmpdir.cleanup()
