@@ -17,7 +17,7 @@ __version__ = find_version()
 
 
 if sys.argv[-1] == 'publish':
-    os.system("python setup.py sdist bdist_wheel register upload")
+    os.system("python setup.py sdist bdist_wheel upload")
     print("You probably want to also tag the version now:")
     print("  git tag -a %s -m 'version %s'" % (__version__,__version__))
     print("  git push --tags")
