@@ -249,11 +249,7 @@ class GSEAbase(object):
                       fdr=results.get(gs)['fdr'], RES=results.get(gs)['RES'],
                       pheno_pos=pheno_pos, pheno_neg=pheno_neg, figsize=figsize,
                       ofname=outfile)
-            # pool.apply_async(gseaplot, args=(rank_metric, term, hit, results.get(gs)[NES],
-            #                                   results.get(gs)['pval'],results.get(gs)['fdr'],
-            #                                   results.get(gs)['RES'],
-            #                                   pheno_pos, pheno_neg, 
-            #                                   figsize, 'seismic', outfile))
+
             if self.module == 'gsea':
                 outfile2 = "{0}/{1}.heatmap.{2}".format(self.outdir, term, self.format)
                 heatmat = self.heatmat.iloc[hit, :]
@@ -262,11 +258,7 @@ class GSEAbase(object):
                 heatmap(df=heatmat, title=term, ofname=outfile2, 
                         z_score=0, figsize=(width, height), 
                         xticklabels=True, yticklabels=True)
-                # pool.apply_async(heatmap, args=(self.heatmat.iloc[hit, :], 0, term, 
-                #                                (self._width, len(hit)/2+2), 'RdBu_r',
-                #                                 True, True, outfile2))
-        # pool.close()
-        # pool.join()
+
 
        
     def _save_results(self, zipdata, outdir, module, gmt, rank_metric, permutation_type):
@@ -737,16 +729,6 @@ class SingleSampleGSEA(GSEAbase):
             tempdat.append(dat)
             rankings.append(dat)
             names.append(name)
-            # genes_sorted, cor_vec = dat.index.values, dat.values
-            # #rs = np.random.RandomState(self.seed)
-            # # apply_async
-            # tempes.append(pool.apply_async(enrichment_score_tensor,
-            #                                args=(genes_sorted, cor_vec, gmt,
-            #                                    self.weighted_score_type,
-            #                                    self.permutation_num, self.seed, True,
-            #                                    self.scale)))
-        # pool.close()
-        # pool.join()
 
         tempes = Parallel(n_jobs=self._processes, require='sharedmem')(
                              delayed(enrichment_score_tensor)(
