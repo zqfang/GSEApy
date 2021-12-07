@@ -730,7 +730,7 @@ class SingleSampleGSEA(GSEAbase):
             rankings.append(dat)
             names.append(name)
 
-        tempes = Parallel(n_jobs=self._processes, require='sharedmem')(
+        tempes = Parallel(n_jobs=self._processes)(
                              delayed(enrichment_score_tensor)(
                                                dat.index.values, dat.values, gmt,
                                                self.weighted_score_type,
