@@ -11,7 +11,7 @@ import sys
 # or args = argparser.parse_args() will throw bugs!!!
 
 
-__version__ = '0.10.8'
+__version__ = "0.10.8"
 
 
 def main():

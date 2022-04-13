@@ -298,7 +298,7 @@ def ranking_metric_tensor(
     elif method in ["abs_signal_to_noise", "abs_s2n"]:
         cor_mat = np.abs((pos_cor_mean - neg_cor_mean) / (pos_cor_std + neg_cor_std))
     elif method == "t_test":
-        denom = np.sqrt((pos_cor_std ** 2) / n_pos + (neg_cor_std ** 2) / n_neg)
+        denom = np.sqrt((pos_cor_std**2) / n_pos + (neg_cor_std**2) / n_neg)
         cor_mat = (pos_cor_mean - neg_cor_mean) / denom
     elif method == "ratio_of_classes":
         cor_mat = pos_cor_mean / neg_cor_mean
