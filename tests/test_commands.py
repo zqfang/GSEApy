@@ -50,7 +50,7 @@ def test_gsea(gseaGCT, gseaCLS, geneGMT):
     # Only tests of the command runs successfully,
     # doesnt't check the image
     tmpdir = TemporaryDirectory(dir="tests")
-    gsea(
+    gs_res = gsea(
         data=gseaGCT,
         gene_sets=geneGMT,
         cls=gseaCLS,
@@ -61,6 +61,22 @@ def test_gsea(gseaGCT, gseaCLS, geneGMT):
     )
     tmpdir.cleanup()
 
+def test_fdr_gsea(gseaGCT, gseaCLS, geneGMT):
+    # Runs and verifies a reasonable result for pval
+    # when method="t_test" and permutation_type="gene_set"
+    tmpdir = TemporaryDirectory(dir="tests")
+    gs_res = gsea(
+        data=gseaGCT,
+        gene_sets=geneGMT,
+        cls=gseaCLS,
+        method="t_test",
+        outdir=tmpdir.name,
+        permutation_type="gene_set",
+        permutation_num=47,
+        seed=7,
+    )
+    assert gs_res.res2d['pval'].max() > 0.0
+    tmpdir.cleanup()
 
 def test_prerank(prernk, geneGMT):
     # Only tests of the command runs successfully,
