@@ -508,7 +508,14 @@ def dotplot(
     df = df.assign(Hits_ratio=lambda x: x.Hits / x.Background)
     # x axis values
     x = df.loc[:, colname].values
-    combined_score = df["Combined Score"].round().astype("int")
+
+    # scatter colormap range
+    cbar_title = 'Odds Ratio'
+    if ('Odds Ratio' in df.columns) and (not 'Combined Score' in df.columns):
+        colmap = df[cbar_title].astype(float)
+    else:
+        cbar_title = "Combined Score"
+        colmap = df[cbar_title].round().astype("int")
     # y axis index and values
     y = [i for i in range(0, len(df))]
     ylabels = df["Term"].values
@@ -547,14 +554,14 @@ def dotplot(
         fig = Figure(figsize=figsize)
         canvas = FigureCanvas(fig)
         ax = fig.add_subplot(111)
-    vmin = np.percentile(combined_score.min(), 2)
-    vmax = np.percentile(combined_score.max(), 98)
+    vmin = np.percentile(colmap.min(), 2)
+    vmax = np.percentile(colmap.max(), 98)
     sc = ax.scatter(
         x=x,
         y=y,
         s=area,
         edgecolors="face",
-        c=combined_score,
+        c=colmap,
         cmap=cmap,
         vmin=vmin,
         vmax=vmax,
@@ -578,7 +585,7 @@ def dotplot(
         cax=cax,
     )
     cbar.ax.tick_params(right=True)
-    cbar.ax.set_title("Combined\nScore", loc="left", fontsize=12)
+    cbar.ax.set_title(cbar_title, loc="left", fontsize=12)
 
     # for terms less than 3
     if len(df) >= 3:
@@ -604,6 +611,22 @@ def dotplot(
         return
     return ax
 
+def ringplot(
+    df,
+):
+    pass
+
+def enrichmap(
+    df,
+):
+    """
+    Node (inner circle) size corresponds to the number of genes in dataset 1 within the geneset
+    Colour of the node (inner circle) corresponds to the significance of the geneset for dataset 1.
+    Edge size corresponds to the number of genes that overlap between the two connected genesets. 
+    Green edges correspond to both datasets when it is the only colour edge. 
+    When there are two different edge colours, green corresponds to dataset 1 and blue corresponds to dataset 2.
+    """
+    pass 
 
 def barplot(
     df,
