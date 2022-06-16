@@ -6,7 +6,7 @@ from math import ceil
 
 import numpy as np
 from joblib import Parallel, delayed
-
+from collections import Counter
 from gseapy.stats import multiple_testing_correction
 
 
@@ -370,9 +370,9 @@ def ranking_metric(df, method, pos, neg, classes, ascending):
     # exclude any zero stds.
     df_mean = df.groupby(by=classes, axis=1).mean()
     df_std = df.groupby(by=classes, axis=1).std()
-    class_values = np.array(list(classes.values()))
-    n_pos = np.sum(class_values == pos)
-    n_neg = np.sum(class_values == neg)
+    class_values  = Counter(classes.values())
+    n_pos = class_values[pos]
+    n_neg = class_values[neg]
 
     if method in ["signal_to_noise", "s2n"]:
         ser = (df_mean[pos] - df_mean[neg]) / (df_std[pos] + df_std[neg])
