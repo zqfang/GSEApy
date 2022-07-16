@@ -5,4 +5,5 @@ matplotlib>=1.4.3
 pandas>=0.16
 requests
 joblib
-
+pip>=19.1
+setuptools-rust>=0.10.2

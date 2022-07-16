@@ -1,7 +1,22 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import sys, os, re
+import sys, os, re, pathlib
 from setuptools import setup
 from setuptools.command.test import test as TestCommand
+from setuptools.command.sdist import sdist as SdistCommand
+
+try:
+    from setuptools_rust import RustExtension
+except ImportError:
+    import subprocess
+
+    errno = subprocess.call([sys.executable, "-m", "pip", "install", "setuptools-rust"])
+    if errno:
+        print("Please install setuptools-rust package")
+        raise SystemExit(errno)
+    else:
+        from setuptools_rust import RustExtension
+
 
 def find_version():
     filepath = os.path.join('gseapy', '__main__.py')
@@ -16,13 +31,6 @@ __author__ = 'Zhuoqing Fang'
 __version__ = find_version()
 
 
-if sys.argv[-1] == 'publish':
-    os.system("python setup.py sdist bdist_wheel upload")
-    print("You probably want to also tag the version now:")
-    print("  git tag -a %s -m 'version %s'" % (__version__,__version__))
-    print("  git push --tags")
-    sys.exit()
-
 class PyTest(TestCommand):
     def finalize_options(self):
         TestCommand.finalize_options(self)
@@ -34,6 +42,14 @@ class PyTest(TestCommand):
         import pytest
         errno = pytest.main(self.test_args)
         sys.exit(errno)
+
+
+class CargoModifiedSdist(SdistCommand):
+    def make_release_tree(self, base_dir, files):
+        """Stages the files to be included in archives"""
+        files.append("Cargo.toml")
+        files += [str(f) for f in pathlib.Path("src").glob("**/*.rs") if f.is_file()]
+        super().make_release_tree(base_dir, files)
 
 
 def readme():
@@ -57,12 +73,13 @@ setup(name='gseapy',
       keywords= ['Gene Ontology', 'GO','Biology', 'Enrichment',
           'Bioinformatics', 'Computational Biology',],
       url='https://github.com/zqfang/gseapy',
-      author='Zhuoqing Fang',
+      author= __author__,
       author_email='fzq518@gmail.com',
       license='MIT',
       packages=['gseapy'],
       package_data={'gseapy': ["data/*.txt"],},
       include_package_data=True,
+      setup_requires = ["setuptools-rust>=0.10.1", "wheel"],
       install_requires=[
                         'numpy>=1.13.0',
                         'scipy',
@@ -71,10 +88,9 @@ setup(name='gseapy',
                         'bioservices',
                         'requests',
                         'joblib'],
+      rust_extensions=[RustExtension("gseapy.gse", "Cargo.toml",  debug="DEBUG" in os.environ)], #  binding=Binding.RustCPython
       entry_points={'console_scripts': ['gseapy = gseapy.__main__:main'],},
       tests_require=['pytest'],
-      cmdclass = {'test': PyTest},
-      zip_safe=False,
+      cmdclass = {"test": PyTest, "sdist": CargoModifiedSdist},
+      zip_safe=False, # Rust extensions are not zip safe
       download_url='https://github.com/zqfang/gseapy',)
-
-

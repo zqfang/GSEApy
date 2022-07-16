@@ -15,6 +15,7 @@ dist
 *.pyc
 *.pyo
 *.tmp*
+*.so
 .cache
 .DS_Store
 .vscode
@@ -31,3 +32,5 @@ docs/_build
 *.vscode
 tests/*.ipynb
 gseapy_example.ipynb
+target
+Cargo.lock

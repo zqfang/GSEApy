@@ -1,0 +1,41 @@
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[package]
+name = "gseapy"
+version = "0.11.0"
+authors = ["Zhuoqing Fang <fangzq@stanford.edu>"]
+description = "Gene Set Enrichment Analysis in Rust."
+license-file = "LICENSE.md"
+homepage = "https://github.com/zqfang/GSEApy"
+documentation ="https://gseapy.readthedocs.io/en/latest/"
+edition = "2021"
+readme = "README-rust.md"
+categories = ["science"]
+
+[lib]
+name = "gse"
+crate-type = ["cdylib"]
+# [[bin]]
+# name = "gsears"
+# path = "src/main.rs"
+
+[features]
+# https://github.com/PyO3/pyo3/discussions/2271
+extension-module = ["pyo3"]
+
+
+[dependencies]
+pyo3 = { version = "0.16.5", features = ["extension-module"], optional = true }
+rand = {version = "*", features = ['small_rng']}
+rayon = "*"
+csv = "*"
+itertools = "*"
+serde = { version = "*", features = ["derive"] }
+# regex = "*"
+# ndarray = "*"
+# ndarray-rand = "*"
+# ndarray-stats = "*"
+# fastrand = "*"
+# rand_xoshiro = "*"
+# rand_pcg = "*"
+# statrs = "0.15" ## statistical package

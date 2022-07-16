@@ -11,7 +11,7 @@ import argparse as ap
 # or args = argparser.parse_args() will throw bugs!!!
 
 
-__version__ = '0.10.8'
+__version__ = '0.11.0'
 
 def main():
     """The Main function/pipeline for GSEApy."""
