@@ -12,7 +12,7 @@ from .gse import prerank_rs, gsea_rs, ssgsea_rs, Metric # import gseapy rust lib
 def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permutation_num=1000,
           weighted_score_type=1,permutation_type='gene_set', method='log2_ratio_of_classes',
 	      ascending=False, processes=1, figsize=(6.5,6), format='pdf',
-          graph_num=20, no_plot=False, seed=None, verbose=False):
+          graph_num=20, no_plot=False, seed=123, verbose=False):
     """ Run Gene Set Enrichment Analysis.
 
     :param data: Gene expression data table, Pandas DataFrame, gct file.
@@ -89,7 +89,7 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
 
 def ssgsea(data, gene_sets, outdir="ssGSEA_", sample_norm_method='rank', min_size=15, max_size=2000,
            permutation_num=0, weighted_score_type=0.25, scale=True, ascending=False, processes=1,
-           figsize=(7,6), format='pdf', graph_num=20, no_plot=True, seed=None, verbose=False):
+           figsize=(7,6), format='pdf', graph_num=20, no_plot=True, seed=123, verbose=False):
     """Run Gene Set Enrichment Analysis with single sample GSEA tool
 
     :param data: Expression table, pd.Series, pd.DataFrame, GCT file, or .rnk file format.
@@ -134,7 +134,6 @@ def ssgsea(data, gene_sets, outdir="ssGSEA_", sample_norm_method='rank', min_siz
 
 
     """
-
     ss = SingleSampleGSEA(data, gene_sets, outdir, sample_norm_method, min_size, max_size,
                           permutation_num, weighted_score_type, scale, ascending,
                           processes, figsize, format, graph_num, no_plot, seed, verbose)
@@ -145,7 +144,7 @@ def ssgsea(data, gene_sets, outdir="ssGSEA_", sample_norm_method='rank', min_siz
 def prerank(rnk, gene_sets, outdir='GSEA_Prerank', pheno_pos='Pos', pheno_neg='Neg',
             min_size=15, max_size=500, permutation_num=1000, weighted_score_type=1,
             ascending=False, processes=1, figsize=(6.5,6), format='pdf',
-            graph_num=20, no_plot=False, seed=None, verbose=False):
+            graph_num=20, no_plot=False, seed=123, verbose=False):
     """ Run Gene Set Enrichment Analysis with pre-ranked correlation defined by user.
 
     :param rnk: pre-ranked correlation table or pandas DataFrame. Same input with ``GSEA`` .rnk file.

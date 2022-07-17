@@ -1,7 +1,7 @@
 import pytest
 from tempfile import NamedTemporaryFile, TemporaryDirectory, mkdtemp
-from gseapy.gsea import gsea, prerank, ssgsea, replot
-from gseapy.enrichr import enrichr
+from gseapy.__init__ import gsea, prerank, ssgsea, replot, enrichr
+
 
 @pytest.fixture
 def edbDIR():
