@@ -405,7 +405,7 @@ class Enrichr(object):
             self._logger.error("Hint: Current organism = %s, is this correct?\n"%self.organism +\
                                "Hint: use get_library_name() to view full list of supported names.")
             raise LookupError("Not validated Enrichr library ! Please provide correct organism and library name!")
-        self.results = pd.DataFrame()
+        self.results = []
 
         for g in gss: 
             if isinstance(g, dict): 
@@ -424,7 +424,7 @@ class Enrichr(object):
                 # Remember gene set library used
             res.insert(0, "Gene_set", self._gs)
             # Append to master dataframe
-            self.results = self.results.append(res, ignore_index=True)
+            self.results.append(res)
             self.res2d = res
             if self._outdir is None: continue
             self._logger.info('Save file of enrichment results: Job Id:' + str(shortID))
@@ -438,6 +438,7 @@ class Enrichr(object):
                               ofname=outfile.replace("txt", self.format))
                 if msg is not None : self._logger.warning(msg)
             self._logger.info('Done.\n')
+        self.results = pd.concat(self.results, ignore_index=True)
         # clean up tmpdir
         if self._outdir is None: self._tmpdir.cleanup()
 

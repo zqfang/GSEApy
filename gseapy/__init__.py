@@ -1,18 +1,15 @@
-#
 from .gsea import Replot, Prerank, GSEA, SingleSampleGSEA
 from .enrichr import Enrichr
 from .parser import get_library_name
 from .plot import dotplot, barplot, heatmap, gseaplot
 from .__main__ import __version__
-from .gse import prerank_rs, gsea_rs, ssgsea_rs, Metric # import gseapy rust lib
-
 
 
 
 def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permutation_num=1000,
-          weighted_score_type=1,permutation_type='gene_set', method='log2_ratio_of_classes',
-	      ascending=False, processes=1, figsize=(6.5,6), format='pdf',
-          graph_num=20, no_plot=False, seed=None, verbose=False):
+         weighted_score_type=1, permutation_type='gene_set', method='log2_ratio_of_classes',
+         ascending=False, processes=1, figsize=(6.5, 6), format='pdf',
+         graph_num=20, no_plot=False, seed=123, verbose=False):
     """ Run Gene Set Enrichment Analysis.
 
     :param data: Gene expression data table, Pandas DataFrame, gct file.
@@ -81,7 +78,7 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
     """
     gs = GSEA(data, gene_sets, cls, outdir, min_size, max_size, permutation_num,
               weighted_score_type, permutation_type, method, ascending, processes,
-               figsize, format, graph_num, no_plot, seed, verbose)
+              figsize, format, graph_num, no_plot, seed, verbose)
     gs.run()
 
     return gs
@@ -89,7 +86,7 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
 
 def ssgsea(data, gene_sets, outdir="ssGSEA_", sample_norm_method='rank', min_size=15, max_size=2000,
            permutation_num=0, weighted_score_type=0.25, scale=True, ascending=False, processes=1,
-           figsize=(7,6), format='pdf', graph_num=20, no_plot=True, seed=None, verbose=False):
+           figsize=(7, 6), format='pdf', graph_num=20, no_plot=True, seed=123, verbose=False):
     """Run Gene Set Enrichment Analysis with single sample GSEA tool
 
     :param data: Expression table, pd.Series, pd.DataFrame, GCT file, or .rnk file format.
@@ -101,7 +98,7 @@ def ssgsea(data, gene_sets, outdir="ssGSEA_", sample_norm_method='rank', min_siz
                2. 'log' : Do not rank, but transform data by log(data + exp(1)), while data = data[data<1] =1.
                3. 'log_rank': Rank your expression data, and transform by log(10000*rank_dat/gene_numbers+ exp(1))
                4. 'custom': Do nothing, and use your own rank value to calculate enrichment score.
-    
+
     see here: https://github.com/GSEA-MSigDB/ssGSEAProjection-gpmodule/blob/master/src/ssGSEAProjection.Library.R, line 86
 
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Default: 15.
@@ -134,7 +131,6 @@ def ssgsea(data, gene_sets, outdir="ssGSEA_", sample_norm_method='rank', min_siz
 
 
     """
-
     ss = SingleSampleGSEA(data, gene_sets, outdir, sample_norm_method, min_size, max_size,
                           permutation_num, weighted_score_type, scale, ascending,
                           processes, figsize, format, graph_num, no_plot, seed, verbose)
@@ -144,8 +140,8 @@ def ssgsea(data, gene_sets, outdir="ssGSEA_", sample_norm_method='rank', min_siz
 
 def prerank(rnk, gene_sets, outdir='GSEA_Prerank', pheno_pos='Pos', pheno_neg='Neg',
             min_size=15, max_size=500, permutation_num=1000, weighted_score_type=1,
-            ascending=False, processes=1, figsize=(6.5,6), format='pdf',
-            graph_num=20, no_plot=False, seed=None, verbose=False):
+            ascending=False, processes=1, figsize=(6.5, 6), format='pdf',
+            graph_num=20, no_plot=False, seed=123, verbose=False):
     """ Run Gene Set Enrichment Analysis with pre-ranked correlation defined by user.
 
     :param rnk: pre-ranked correlation table or pandas DataFrame. Same input with ``GSEA`` .rnk file.
@@ -186,7 +182,7 @@ def prerank(rnk, gene_sets, outdir='GSEA_Prerank', pheno_pos='Pos', pheno_neg='N
 
 
 def replot(indir, outdir='GSEA_Replot', weighted_score_type=1,
-           min_size=3, max_size=1000, figsize=(6.5,6), format='pdf', verbose=False):
+           min_size=3, max_size=1000, figsize=(6.5, 6), format='pdf', verbose=False):
     """The main function to reproduce GSEA desktop outputs.
 
     :param indir: GSEA desktop results directory. In the sub folder, you must contain edb file folder.
@@ -210,11 +206,9 @@ def replot(indir, outdir='GSEA_Replot', weighted_score_type=1,
     return
 
 
-
-
 def enrichr(gene_list, gene_sets, organism='human', description='',
             outdir='Enrichr', background='hsapiens_gene_ensembl', cutoff=0.05,
-            format='pdf', figsize=(8,6), top_term=10, no_plot=False, verbose=False):
+            format='pdf', figsize=(8, 6), top_term=10, no_plot=False, verbose=False):
     """Enrichr API.
 
     :param gene_list: str, list, tuple, series, dataframe. Also support input txt file with one gene id per row. 
@@ -222,7 +216,7 @@ def enrichr(gene_list, gene_sets, organism='human', description='',
 
     :param gene_sets: str, list, tuple of Enrichr Library name(s). 
                       or custom defined gene_sets (dict, or gmt file). 
-                      
+
                       Examples: 
 
                       Input Enrichr Libraries (https://maayanlab.cloud/Enrichr/#stats):
@@ -244,19 +238,19 @@ def enrichr(gene_list, gene_sets, organism='human', description='',
                      No any affects to gmt or dict input of `gene_sets`.
 
                      see here for more details: https://maayanlab.cloud/modEnrichr/.
-                     
+
     :param description: optional. name of the job.
     :param outdir:   Output file directory
 
     :param background: int, list, str. Please ignore this argument if your input are just Enrichr library names.
-                       
+
                        However, this argument is not straightforward when `gene_sets` is given a custom input (a gmt file or dict).
                        There are 3 ways to set this argument:
- 
+
                        (1) (Recommended) Input a list of background genes. 
                            The background gene list is defined by your experment. e.g. the expressed genes in your RNA-seq.
                            The gene identifer in gmt/dict should be the same type to the backgound genes.  
-                       
+
                        (2) Specify a number, e.g. the number of total expressed genes.
                            This works, but not recommend. It assumes that all your genes could be found in background.
                            If genes exist in gmt but not included in background, 
@@ -279,7 +273,7 @@ def enrichr(gene_list, gene_sets, organism='human', description='',
     :param bool verbose: Increase output verbosity, print out progress of your job, Default: False.
 
     :return: An Enrichr object, which obj.res2d stores your last query, obj.results stores your all queries.
-    
+
     """
     enr = Enrichr(gene_list, gene_sets, organism, description, outdir,
                   cutoff, background, format, figsize, top_term, no_plot, verbose)
@@ -290,24 +284,6 @@ def enrichr(gene_list, gene_sets, organism='human', description='',
     return enr
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-__all__ = ['dotplot','barplot','heatmap','gseaplot', 
-           'replot','prerank','gsea','ssgsea',
-           'enrichr','get_library_name']
+__all__ = ['dotplot', 'barplot', 'heatmap', 'gseaplot',
+           'replot', 'prerank', 'gsea', 'ssgsea',
+           'enrichr', 'get_library_name']

@@ -5,6 +5,10 @@ from setuptools import setup
 from setuptools.command.test import test as TestCommand
 from setuptools.command.sdist import sdist as SdistCommand
 
+# if "Could not build wheels for gseapy which use PEP 517 and cannot be installed directly", please 
+# pip install --upgrade pip setuptools wheel
+# or conda update setuptools wheel
+
 try:
     from setuptools_rust import RustExtension
 except ImportError:
