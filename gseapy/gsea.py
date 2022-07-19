@@ -14,6 +14,7 @@ from gseapy.utils import mkdirs, log_init
 from gseapy.gse import prerank_rs, gsea_rs, ssgsea_rs, Metric  # import gseapy rust lib
 
 
+
 class GSEA(GSEAbase):
     """GSEA main tool"""
 
@@ -200,7 +201,7 @@ class GSEA(GSEAbase):
                                    classes=cls_dict, ascending=self.ascending)
         self.ranking = dat2
         # filtering out gene sets and build gene sets dictionary
-        gmt = self.load_gmt(gene_list=dat2.index.values, gmt=self.gene_sets)
+        gmt = self.load_gmt_only(gmt=self.gene_sets)
 
         self._logger.info(
             "%04d gene_sets used for further statistical testing....." % len(gmt))
@@ -295,7 +296,7 @@ class Prerank(GSEAbase):
         self._logger.info(
             "Parsing data files for GSEA.............................")
         # filtering out gene sets and build gene sets dictionary
-        gmt = self.load_gmt(gene_list=dat2.index.values, gmt=self.gene_sets)
+        gmt = self.load_gmt_only(gmt=self.gene_sets)
 
         self._logger.info(
             "%04d gene_sets used for further statistical testing....." % len(gmt))
@@ -538,6 +539,7 @@ class SingleSampleGSEA(GSEAbase):
         outcsv = "gseapy.{a}ssgsea.report.csv".format(a="permut_genes." if self.permutation_num > 0 else '')
         out.to_csv(os.path.join(self.outdir, outcsv), index=False, float_format='%.6e')
         return
+
 
 
 class Replot(GSEAbase):

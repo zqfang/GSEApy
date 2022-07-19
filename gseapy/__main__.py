@@ -1,6 +1,5 @@
 
-import os
-import sys
+import os, sys
 import argparse as ap
 
 
@@ -186,7 +185,7 @@ def add_gsea_parser(subparsers):
                            Default: 'log2_ratio_of_classes'")
     group_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
                            help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
-    group_opt.add_argument("-s", "--seed", dest="seed", action="store", type=int, default=123, metavar='',
+    group_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=123, metavar='',
                            help="Number of random seed. Default: None")
     group_opt.add_argument("-p", "--threads", dest="threads", action="store", type=int, default=1, metavar='procs',
                            help="Number of Processes you are going to use. Default: 1")
@@ -228,7 +227,7 @@ def add_prerank_parser(subparsers):
                              help='Weighted_score of rank_metrics. For weighting input genes. Choose from {0, 1, 1.5, 2}. Default: 1',)
     prerank_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
                              help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
-    prerank_opt.add_argument("-s", "--seed", dest="seed", action="store", type=int, default=123, metavar='',
+    prerank_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=123, metavar='',
                              help="Number of random seed. Default: None")
     prerank_opt.add_argument("-p", "--threads", dest="threads", action="store", type=int, default=1, metavar='procs',
                              help="Number of Processes you are going to use. Default: 1")
@@ -271,7 +270,7 @@ def add_singlesample_parser(subparsers):
                            help='Weighted_score of rank_metrics. For weighting input genes. Default: 0.25',)
     group_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
                            help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
-    group_opt.add_argument("-s", "--seed", dest="seed", action="store", type=int, default=123, metavar='',
+    group_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=123, metavar='',
                            help="Number of random seed. Default: None")
     group_opt.add_argument("-p", "--threads", dest="threads", action="store", type=int, default=1, metavar='procs',
                            help="Number of Processes you are going to use. Default: 1")
