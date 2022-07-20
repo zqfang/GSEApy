@@ -24,7 +24,7 @@ class GSEA(GSEAbase):
                  min_size: int = 15,
                  max_size: int = 500,
                  permutation_num: int = 1000,
-                 weighted_score_type: float = 1.0,
+                 weight: float = 1.0,
                  permutation_type: str = 'gene_set',
                  method: str = 'log2_ratio_of_classes',
                  ascending: bool = False,
@@ -48,7 +48,7 @@ class GSEA(GSEAbase):
         self.max_size = max_size
         self.permutation_num = int(permutation_num) if int(
             permutation_num) > 0 else 0
-        self.weighted_score_type = weighted_score_type
+        self.weight = weight
         self.ascending = ascending
         self.figsize = figsize
         self.format = format
@@ -228,7 +228,7 @@ class GSEA(GSEAbase):
             gsum = prerank_rs(dat2.index.to_list(),  # gene list
                               dat2.squeeze().to_list(),  # ranking values
                               gmt,  # must be a dict object
-                              self.weighted_score_type,
+                              self.weight,
                               self.min_size,
                               self.max_size,
                               self.permutation_num,
@@ -242,7 +242,7 @@ class GSEA(GSEAbase):
                            dat.values.tolist(),  # each row is gene values across samples
                            group,
                            gmt,
-                           self.weighted_score_type,
+                           self.weight,
                            method,
                            self.min_size,
                            self.max_size,
@@ -250,8 +250,9 @@ class GSEA(GSEAbase):
                            self._threads,
                            self.seed)
 
-        self._logger.info(
-            "Start to generate GSEApy reports and figures............")
+        if self._outdir is not None:
+            self._logger.info(
+                "Start to generate GSEApy reports and figures............")
 
         self._to_df(gsum, gmt, dat2)
         # reorder datarame for heatmap
@@ -282,7 +283,7 @@ class Prerank(GSEAbase):
                  min_size: int = 15,
                  max_size: int = 500,
                  permutation_num: int = 1000,
-                 weighted_score_type: float = 1.0,
+                 weight: float = 1.0,
                  ascending: bool = False,
                  threads: int = 1,
                  figsize: Tuple[float, float] = (6.5, 6),
@@ -303,7 +304,7 @@ class Prerank(GSEAbase):
         self.max_size = max_size
         self.permutation_num = int(permutation_num) if int(
             permutation_num) > 0 else 0
-        self.weighted_score_type = weighted_score_type
+        self.weight = weight
         self.ascending = ascending
         self.figsize = figsize
         self.format = format
@@ -336,18 +337,17 @@ class Prerank(GSEAbase):
         gsum = prerank_rs(dat2.index.to_list(),  # gene list
                           dat2.squeeze().to_list(),  # ranking values
                           gmt,  # must be a dict object
-                          self.weighted_score_type,
+                          self.weight,
                           self.min_size,
                           self.max_size,
                           self.permutation_num,
                           self._threads,
                           self.seed,
                           )
-        self._logger.info(
-            "Start to generate gseapy reports, and produce figures...")
-        # res_zip = zip(subsets, list(gsea_results), hit_ind, rank_ES)
-        # self._save_results(zipdata=res_zip, outdir=self.outdir, module=self.module,
-        #                            gmt=gmt, rank_metric=dat2, permutation_type="gene_sets")
+
+        if self._outdir is not None:
+            self._logger.info(
+                "Start to generate gseapy reports, and produce figures...")
         self._to_df(gsum, gmt, rank_metric=dat2)
 
         # Plotting
@@ -372,13 +372,13 @@ class SingleSampleGSEA(GSEAbase):
                  min_size: int = 15,
                  max_size: int = 500,
                  permutation_num: Optional[int]=None, 
-                 weighted_score_type: float =0.25,
+                 weight: float =0.25,
                  ascending: bool = False,
                  threads: int = 1,
                  figsize: Tuple[float, float] = (6.5, 6),
                  format: str = 'pdf',
                  graph_num: int = 20,
-                 no_plot: bool = False,
+                 no_plot: bool = True,
                  seed: int = 123,
                  verbose: bool = False):
         super(SingleSampleGSEA, self).__init__(outdir=outdir,
@@ -388,7 +388,7 @@ class SingleSampleGSEA(GSEAbase):
                                                verbose=verbose)
         self.data = data
         self.sample_norm_method = sample_norm_method
-        self.weighted_score_type = weighted_score_type
+        self.weight = weight
         self.min_size = min_size
         self.max_size = max_size
         self.permutation_num = permutation_num if permutation_num is None else int(permutation_num)
@@ -519,7 +519,7 @@ class SingleSampleGSEA(GSEAbase):
                          df.values.tolist(),
                          df.columns.astype(str).to_list(),  # sample name
                          gmt,
-                         self.weighted_score_type,
+                         self.weight,
                          self.min_size,
                          self.max_size,
                          self.permutation_num,  # permutate just like runing prerank analysis
@@ -593,7 +593,7 @@ class Replot(GSEAbase):
     def __init__(self, 
                  indir: str, 
                  outdir: str='GSEApy_Replot', 
-                 weighted_score_type: float=1.0,
+                 weight: float=1.0,
                  min_size: int=3, 
                  max_size: int=1000, 
                  figsize: Tuple[float, float]=(6.5, 6), 
@@ -601,7 +601,7 @@ class Replot(GSEAbase):
                  verbose: bool=False):
         self.indir = indir
         self.outdir = outdir
-        self.weighted_score_type = weighted_score_type
+        self.weight = weight
         self.min_size = min_size
         self.max_size = max_size
         self.figsize = figsize
@@ -655,7 +655,7 @@ class Replot(GSEAbase):
             RES = self.enrichment_score(gene_list=gene_list,
                                         correl_vector=correl_vector,
                                         gene_set=gene_set,
-                                        weighted_score_type=self.weighted_score_type,
+                                        weight=self.weight,
                                         nperm=0)[-1]
             # plotting
             term = enrich_term.replace('/', '_').replace(":", "_")

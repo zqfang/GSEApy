@@ -19,7 +19,7 @@ from typing import AnyStr, Tuple, Union, List, Dict, Iterable, Optional
 class GSEAbase(object):
     """base class of GSEA."""
 
-    def __init__(self, outdir: str = 'temp_gseapy',
+    def __init__(self, outdir: Optional[str] = None,
                  gene_sets: Union[List[str], str, Dict[str, str]] = 'KEGG_2016',
                  module: str = 'base',
                  threads: int = 1,
@@ -349,7 +349,7 @@ class GSEAbase(object):
                          gene_list: Iterable[str],
                          correl_vector: Iterable[float],
                          gene_set: Dict[str, List[str]],
-                         weighted_score_type: float = 1.0,
+                         weight: float = 1.0,
                          nperm: int = 1000,
                          seed: int = 123,
                          single: bool = False,
@@ -358,7 +358,7 @@ class GSEAbase(object):
 
         :param gene_list:       The ordered gene list gene_name_list, rank_metric.index.values
         :param gene_set:        gene_sets in gmt file, please use gsea_gmt_parser to get gene_set.
-        :param weighted_score_type:  It's the same with gsea's weighted_score method. Weighting by the correlation
+        :param weight:  It's the same with gsea's weighted_score method. Weighting by the correlation
                                 is a very reasonable choice that allows significant gene sets with less than perfect coherence.
                                 options: 0(classic),1,1.5,2. default:1. if one is interested in penalizing sets for lack of
                                 coherence or to discover sets with any type of nonrandom distribution of tags, a value p < 1
@@ -391,10 +391,10 @@ class GSEAbase(object):
         tag_indicator = np.in1d(gene_list, gene_set, assume_unique=True).astype(
             int)  # notice that the sign is 0 (no tag) or 1 (tag)
 
-        if weighted_score_type == 0:
+        if weight == 0:
             correl_vector = np.repeat(1, N)
         else:
-            correl_vector = np.abs(correl_vector)**weighted_score_type
+            correl_vector = np.abs(correl_vector)**weight
 
         # get indices of tag_indicator
         hit_ind = np.flatnonzero(tag_indicator).tolist()

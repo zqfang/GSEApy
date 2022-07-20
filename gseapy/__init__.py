@@ -85,7 +85,7 @@ def gsea(data, gene_sets, cls, outdir=None, min_size=15, max_size=500, permutati
 
 
 def ssgsea(data, gene_sets, outdir=None, sample_norm_method='rank', min_size=15, max_size=2000,
-           permutation_num=None, weighted_score_type=0.25, scale=True, ascending=False, processes=1,
+           permutation_num=None, weighted_score_type=0.25, ascending=False, processes=1,
            figsize=(7, 6), format='pdf', graph_num=20, no_plot=True, seed=123, verbose=False):
     """Run Gene Set Enrichment Analysis with single sample GSEA tool
 
