@@ -6,7 +6,7 @@ from .__main__ import __version__
 
 
 
-def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permutation_num=1000,
+def gsea(data, gene_sets, cls, outdir=None, min_size=15, max_size=500, permutation_num=1000,
          weighted_score_type=1, permutation_type='gene_set', method='log2_ratio_of_classes',
          ascending=False, processes=1, figsize=(6.5, 6), format='pdf',
          graph_num=20, no_plot=False, seed=123, verbose=False):
@@ -15,7 +15,7 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
     :param data: Gene expression data table, Pandas DataFrame, gct file.
     :param gene_sets: Enrichr Library name or .gmt gene sets file or dict of gene sets. Same input with GSEA.
     :param cls: A list or a .cls file format required for GSEA.
-    :param str outdir: Results output directory.
+    :param str outdir: Results output directory. If None, nothing will write to disk.
     :param int permutation_num: Number of permutations for significance computation. Default: 1000.
     :param str permutation_type: Permutation type, "phenotype" for phenotypes, "gene_set" for genes.
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Default: 15.
@@ -84,14 +84,14 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
     return gs
 
 
-def ssgsea(data, gene_sets, outdir="ssGSEA_", sample_norm_method='rank', min_size=15, max_size=2000,
+def ssgsea(data, gene_sets, outdir=None, sample_norm_method='rank', min_size=15, max_size=2000,
            permutation_num=None, weighted_score_type=0.25, scale=True, ascending=False, processes=1,
            figsize=(7, 6), format='pdf', graph_num=20, no_plot=True, seed=123, verbose=False):
     """Run Gene Set Enrichment Analysis with single sample GSEA tool
 
     :param data: Expression table, pd.Series, pd.DataFrame, GCT file, or .rnk file format.
     :param gene_sets: Enrichr Library name or .gmt gene sets file or dict of gene sets. Same input with GSEA.
-    :param outdir: Results output directory.
+    :param outdir: Results output directory. If None, nothing will write to disk.
     :param str sample_norm_method: "Sample normalization method. Choose from {'rank', 'log', 'log_rank'}. Default: rank.
 
                1. 'rank': Rank your expression data, and transform by 10000*rank_dat/gene_numbers
@@ -137,7 +137,7 @@ def ssgsea(data, gene_sets, outdir="ssGSEA_", sample_norm_method='rank', min_siz
     return ss
 
 
-def prerank(rnk, gene_sets, outdir='GSEA_Prerank', pheno_pos='Pos', pheno_neg='Neg',
+def prerank(rnk, gene_sets, outdir=None, pheno_pos='Pos', pheno_neg='Neg',
             min_size=15, max_size=500, permutation_num=1000, weighted_score_type=1,
             ascending=False, processes=1, figsize=(6.5, 6), format='pdf',
             graph_num=20, no_plot=False, seed=123, verbose=False):
@@ -145,7 +145,7 @@ def prerank(rnk, gene_sets, outdir='GSEA_Prerank', pheno_pos='Pos', pheno_neg='N
 
     :param rnk: pre-ranked correlation table or pandas DataFrame. Same input with ``GSEA`` .rnk file.
     :param gene_sets: Enrichr Library name or .gmt gene sets file or dict of gene sets. Same input with GSEA.
-    :param outdir: results output directory.
+    :param outdir: results output directory. If None, nothing will write to disk.
     :param int permutation_num: Number of permutations for significance computation. Default: 1000.
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Default: 15.
     :param int max_size: Maximum allowed number of genes from gene set also the data set. Defaults: 500.

@@ -20,7 +20,7 @@ class GSEA(GSEAbase):
     def __init__(self, data: Union[pd.DataFrame, str],
                  gene_sets: Union[List[str], str, Dict[str, str]],
                  classes: Union[List[str], str],
-                 outdir: str = 'GSEA_output',
+                 outdir: Optional[str] = None,
                  min_size: int = 15,
                  max_size: int = 500,
                  permutation_num: int = 1000,
@@ -276,7 +276,7 @@ class Prerank(GSEAbase):
 
     def __init__(self, rnk: Union[pd.DataFrame, pd.Series, str], 
                  gene_sets: Union[List[str], str, Dict[str, str]],
-                 outdir: str = 'Prerank_output',
+                 outdir: Optional[str] = None,
                  pheno_pos='Pos', 
                  pheno_neg='Neg', 
                  min_size: int = 15,
@@ -367,7 +367,7 @@ class SingleSampleGSEA(GSEAbase):
 
     def __init__(self, data, 
                  gene_sets: Union[List[str], str, Dict[str, str]],
-                 outdir: str = 'ssGSEA_output',
+                 outdir: Optional[str] = None,
                  sample_norm_method: str='rank', 
                  min_size: int = 15,
                  max_size: int = 500,
