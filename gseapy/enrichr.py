@@ -3,7 +3,6 @@
 # see: http://amp.pharm.mssm.edu/Enrichr/help#api for API docs
 
 import sys, json, os, logging
-from typing import Iterable, Tuple
 import requests
 import pandas as pd
 from io import StringIO

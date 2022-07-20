@@ -6,7 +6,6 @@ import logging
 import glob
 import numpy as np
 import pandas as pd
-from collections import OrderedDict
 from gseapy.base import GSEAbase
 from gseapy.parser import gsea_edb_parser, gsea_cls_parser
 from gseapy.plot import gseaplot
