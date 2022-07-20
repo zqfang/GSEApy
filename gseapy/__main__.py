@@ -26,7 +26,7 @@ def main():
     if subcommand == "replot":
         # reproduce plots using GSEAPY
         from .gsea import Replot
-        Replot(indir=args.indir, outdir=args.outdir, weighted_score_type=args.weight,
+        Replot(indir=args.indir, outdir=args.outdir, weight=args.weight,
                figsize=args.figsize, format=args.format, verbose=args.verbose).run()
 
     elif subcommand == "gsea":
@@ -51,7 +51,7 @@ def main():
         ss = SingleSampleGSEA(data=args.data, gene_sets=args.gmt, outdir=args.outdir,
                               sample_norm_method=args.norm,
                               min_size=args.mins, max_size=args.maxs, permutation_num=args.n,
-                              weighted_score_type=args.weight,
+                              weight=args.weight,
                               ascending=args.ascending, threads=args.threads,
                               figsize=args.figsize, format=args.format, graph_num=args.graph,
                               no_plot=args.noplot, seed=args.seed, verbose=args.verbose)
