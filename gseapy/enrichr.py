@@ -44,7 +44,6 @@ class Enrichr(object):
         self.verbose = bool(verbose)
         self.module = "enrichr"
         self.res2d = None
-        self._processes = 1
         self.background = background
         self._bg = None
         self.organism = organism

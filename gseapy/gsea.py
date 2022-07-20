@@ -28,7 +28,7 @@ class GSEA(GSEAbase):
                  permutation_type: str = 'gene_set',
                  method: str = 'log2_ratio_of_classes',
                  ascending: bool = False,
-                 processes: int = 1,
+                 threads: int = 1,
                  figsize: Tuple[float, float] = (6.5, 6),
                  format: str = 'pdf',
                  graph_num: int = 20,
@@ -38,7 +38,7 @@ class GSEA(GSEAbase):
         super(GSEA, self).__init__(outdir=outdir,
                                    gene_sets=gene_sets,
                                    module='gsea',
-                                   processes=processes,
+                                   threads=threads,
                                    verbose=verbose)
         self.data = data
         self.classes = classes
@@ -56,6 +56,8 @@ class GSEA(GSEAbase):
         self.seed = seed
         self.ranking = None
         self._noplot = no_plot
+        self.pheno_pos = "pos"
+        self.pheno_neg = "neg"
 
     def load_data(self, cls_vec: List) -> Tuple[pd.DataFrame, Dict]:
         """pre-processed the data frame.new filtering methods will be implement here.
@@ -230,7 +232,7 @@ class GSEA(GSEAbase):
                               self.min_size,
                               self.max_size,
                               self.permutation_num,
-                              self._processes,
+                              self._threads,
                               self.seed,
                               )
         else:  # phenotype permutation
@@ -245,7 +247,7 @@ class GSEA(GSEAbase):
                            self.min_size,
                            self.max_size,
                            self.permutation_num,
-                           self._processes,
+                           self._threads,
                            self.seed)
 
         self._logger.info(
@@ -282,7 +284,7 @@ class Prerank(GSEAbase):
                  permutation_num: int = 1000,
                  weighted_score_type: float = 1.0,
                  ascending: bool = False,
-                 processes: int = 1,
+                 threads: int = 1,
                  figsize: Tuple[float, float] = (6.5, 6),
                  format: str = 'pdf',
                  graph_num: int = 20,
@@ -292,7 +294,7 @@ class Prerank(GSEAbase):
         super(Prerank, self).__init__(outdir=outdir,
                                       gene_sets=gene_sets,
                                       module='prerank',
-                                      processes=processes,
+                                      threads=threads,
                                       verbose=verbose)
         self.rnk = rnk
         self.pheno_pos = pheno_pos
@@ -338,7 +340,7 @@ class Prerank(GSEAbase):
                           self.min_size,
                           self.max_size,
                           self.permutation_num,
-                          self._processes,
+                          self._threads,
                           self.seed,
                           )
         self._logger.info(
@@ -369,10 +371,10 @@ class SingleSampleGSEA(GSEAbase):
                  sample_norm_method: str='rank', 
                  min_size: int = 15,
                  max_size: int = 500,
-                 permutation_num: int=0, 
+                 permutation_num: Optional[int]=None, 
                  weighted_score_type: float =0.25,
                  ascending: bool = False,
-                 processes: int = 1,
+                 threads: int = 1,
                  figsize: Tuple[float, float] = (6.5, 6),
                  format: str = 'pdf',
                  graph_num: int = 20,
@@ -382,15 +384,14 @@ class SingleSampleGSEA(GSEAbase):
         super(SingleSampleGSEA, self).__init__(outdir=outdir,
                                                gene_sets=gene_sets,
                                                module='ssgsea',
-                                               processes=processes,
+                                               threads=threads,
                                                verbose=verbose)
         self.data = data
         self.sample_norm_method = sample_norm_method
         self.weighted_score_type = weighted_score_type
         self.min_size = min_size
         self.max_size = max_size
-        self.permutation_num = int(permutation_num) if int(
-            permutation_num) > 0 else 0
+        self.permutation_num = permutation_num if permutation_num is None else int(permutation_num)
         self.ascending = ascending
         self.figsize = figsize
         self.format = format
@@ -498,10 +499,10 @@ class SingleSampleGSEA(GSEAbase):
         # start analysis
         self._logger.info(
             "Start to run ssGSEA...Might take a while................")
-        if self.permutation_num > 0:
+        if (self.permutation_num is not None) and self.permutation_num > 0:
             # run permutation procedure and calculate pvals, fdrs
             self._logger.warning(
-                "run ssGSEA with permutation procedure, don't use these part of results for publication.")
+                "run ssGSEA with permutation procedure, don't use the pval, fdr results for publication.")
         self.runSamplesPermu(df=normdat, gmt=gmt)
         # clean up all outputs if _outdir is None
         if self._outdir is None:
@@ -522,7 +523,7 @@ class SingleSampleGSEA(GSEAbase):
                          self.min_size,
                          self.max_size,
                          self.permutation_num,  # permutate just like runing prerank analysis
-                         self._processes,
+                         self._threads,
                          self.seed
                          )
 
@@ -661,7 +662,7 @@ class Replot(GSEAbase):
             outfile = '{0}/{1}.{2}.{3}'.format(self.outdir,
                                                term, self.module, self.format)
             gseaplot(rank_metric=rank_metric, term=enrich_term,
-                     hit_indices=hit_ind, nes=nes, pval=pval, fdr=fdr,
+                     hits=hit_ind, nes=nes, pval=pval, fdr=fdr,
                      RES=RES, pheno_pos=pos, pheno_neg=neg,
                      figsize=self.figsize, ofname=outfile)
 

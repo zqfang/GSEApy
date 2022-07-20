@@ -85,7 +85,7 @@ def gsea(data, gene_sets, cls, outdir='GSEA_', min_size=15, max_size=500, permut
 
 
 def ssgsea(data, gene_sets, outdir="ssGSEA_", sample_norm_method='rank', min_size=15, max_size=2000,
-           permutation_num=0, weighted_score_type=0.25, scale=True, ascending=False, processes=1,
+           permutation_num=None, weighted_score_type=0.25, scale=True, ascending=False, processes=1,
            figsize=(7, 6), format='pdf', graph_num=20, no_plot=True, seed=123, verbose=False):
     """Run Gene Set Enrichment Analysis with single sample GSEA tool
 
@@ -103,9 +103,8 @@ def ssgsea(data, gene_sets, outdir="ssGSEA_", sample_norm_method='rank', min_siz
 
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Default: 15.
     :param int max_size: Maximum allowed number of genes from gene set also the data set. Default: 2000.
-    :param int permutation_num: Number of permutations for significance computation. Default: 0.
+    :param int permutation_num: For ssGSEA, default is None. However, if you try to use ssgsea method to get pval and fdr, set to an interger.
     :param str weighted_score_type: Refer to :func:`algorithm.enrichment_score`. Default:0.25.
-    :param bool scale: If True, normalize the scores by number of genes in the gene sets.
     :param bool ascending: Sorting order of rankings. Default: False.
     :param int processes: Number of Processes you are going to use. Default: 1.
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [7,6].

@@ -22,7 +22,7 @@ class GSEAbase(object):
     def __init__(self, outdir: str = 'temp_gseapy',
                  gene_sets: Union[List[str], str, Dict[str, str]] = 'KEGG_2016',
                  module: str = 'base',
-                 processes: int = 1,
+                 threads: int = 1,
                  enrichr_url: str = "http://maayanlab.cloud",
                  verbose: bool = False):
         self.outdir = outdir
@@ -34,8 +34,10 @@ class GSEAbase(object):
         self.ranking = None
         self.ascending = False
         self.verbose = verbose
-        self._processes = processes
+        self._threads = threads
         self.ENRICHR_URL = enrichr_url
+        self.pheno_pos = None
+        self.pheno_neg = None
 
         self._set_cores()
         # init logger
@@ -70,14 +72,14 @@ class GSEAbase(object):
         """set cpu numbers to be used"""
 
         cpu_num = os.cpu_count()-1
-        if self._processes > cpu_num:
+        if self._threads > cpu_num:
             cores = cpu_num
-        elif self._processes < 1:
+        elif self._threads < 1:
             cores = 1
         else:
-            cores = self._processes
+            cores = self._threads
         # have to be int if user input is float
-        self._processes = int(cores)
+        self._threads = int(cores)
 
     def _load_ranking(self, rnk: Union[pd.DataFrame, pd.Series, str]) -> pd.Series:
         """Parse ranking file. This file contains ranking correlation vector( or expression values)

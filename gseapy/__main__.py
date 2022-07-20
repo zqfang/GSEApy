@@ -52,7 +52,7 @@ def main():
                               sample_norm_method=args.norm,
                               min_size=args.mins, max_size=args.maxs, permutation_num=args.n,
                               weighted_score_type=args.weight,
-                              ascending=args.ascending, processes=args.threads,
+                              ascending=args.ascending, threads=args.threads,
                               figsize=args.figsize, format=args.format, graph_num=args.graph,
                               no_plot=args.noplot, seed=args.seed, verbose=args.verbose)
         ss.run()
@@ -189,7 +189,7 @@ def add_gsea_parser(subparsers):
     group_opt.add_argument("-s", "--seed", dest="seed", action="store", type=int, default=123, metavar='',
                            help="Number of random seed. Default: None")
     group_opt.add_argument("-p", "--threads", dest="threads", action="store", type=int, default=1, metavar='procs',
-                           help="Number of Processes you are going to use. Default: 1")
+                           help="Number of threads you are going to use. Default: 1")
 
     return
 
@@ -231,7 +231,7 @@ def add_prerank_parser(subparsers):
     prerank_opt.add_argument("-s", "--seed", dest="seed", action="store", type=int, default=123, metavar='',
                              help="Number of random seed. Default: None")
     prerank_opt.add_argument("-p", "--threads", dest="threads", action="store", type=int, default=1, metavar='procs',
-                             help="Number of Processes you are going to use. Default: 1")
+                             help="Number of threads you are going to use. Default: 1")
 
     return
 
@@ -272,7 +272,7 @@ def add_singlesample_parser(subparsers):
     group_opt.add_argument("-s", "--seed", dest="seed", action="store", type=int, default=123, metavar='',
                            help="Number of random seed. Default: None")
     group_opt.add_argument("-p", "--threads", dest="threads", action="store", type=int, default=1, metavar='procs',
-                           help="Number of Processes you are going to use. Default: 1")
+                           help="Number of threads you are going to use. Default: 1")
 
     return
 
