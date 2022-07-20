@@ -13,17 +13,18 @@ import requests
 
 from gseapy.plot import gseaplot, heatmap
 from gseapy.utils import mkdirs, log_init, retry, DEFAULT_LIBRARY, DEFAULT_CACHE_PATH
+from typing import AnyStr, Tuple, Union, List, Dict, Iterable, Optional
 
 
 class GSEAbase(object):
     """base class of GSEA."""
 
-    def __init__(self, outdir='temp_gseapy',
-                 gene_sets='KEGG_2016',
-                 module='base',
-                 processes=1,
-                 enrichr_url="http://maayanlab.cloud",
-                 verbose=False):
+    def __init__(self, outdir: str = 'temp_gseapy',
+                 gene_sets: Union[List[str], str, Dict[str, str]] = 'KEGG_2016',
+                 module: str = 'base',
+                 processes: int = 1,
+                 enrichr_url: str = "http://maayanlab.cloud",
+                 verbose: bool = False):
         self.outdir = outdir
         self.gene_sets = gene_sets
         self.fdr = 0.05
@@ -78,7 +79,7 @@ class GSEAbase(object):
         # have to be int if user input is float
         self._processes = int(cores)
 
-    def _load_ranking(self, rnk):
+    def _load_ranking(self, rnk: Union[pd.DataFrame, pd.Series, str]) -> pd.Series:
         """Parse ranking file. This file contains ranking correlation vector( or expression values)
            and gene names or ids.
 
@@ -127,7 +128,7 @@ class GSEAbase(object):
         # return series
         return rankser
 
-    def load_gmt_only(self, gmt):
+    def load_gmt_only(self, gmt: Union[List[str], str, Dict[str, str]]) -> Dict[str, List[str]]:
         if isinstance(gmt, dict):
             genesets_dict = gmt
         elif isinstance(gmt, str):
@@ -137,7 +138,9 @@ class GSEAbase(object):
         # self._gmtdct = genesets_dict
         return genesets_dict
 
-    def load_gmt(self, gene_list, gmt):
+    def load_gmt(self,
+                 gene_list: Iterable[str],
+                 gmt: Union[List[str], str, Dict[str, str]]) -> Dict[str, List[str]]:
         """load gene set dict"""
 
         if isinstance(gmt, dict):
@@ -166,14 +169,15 @@ class GSEAbase(object):
             filsets_num, self.max_size, self.min_size))
 
         if filsets_num == len(subsets):
-            self._logger.error("No gene sets passed through filtering condition!!!, try new parameters again!\n" +
-                               "Note: check gene name, gmt file format, or filtering size.")
+            self._logger.error("No gene sets passed through filtering condition!!! " +
+                               "Try to set min_size or max_size parameters again!\n" +
+                               "Note: check gene name, gmt format, or filtering size.")
             raise Exception("No gene sets passed through filtering condition")
 
         # self._gmtdct = genesets_dict
         return genesets_dict
 
-    def parse_gmt(self, gmt):
+    def parse_gmt(self, gmt: Union[List[str], str, Dict[str, str]]) -> Dict[str, List[str]]:
         """gmt parser"""
 
         if gmt.lower().endswith(".gmt"):
@@ -200,7 +204,7 @@ class GSEAbase(object):
         else:
             return self._download_libraries(gmt)
 
-    def get_libraries(self):
+    def get_libraries(self) -> List[str]:
         """return active enrichr library name.Offical API """
 
         lib_url = self.ENRICHR_URL+'/Enrichr/datasetStatistics'
@@ -212,7 +216,7 @@ class GSEAbase(object):
 
         return sorted(libs)
 
-    def _download_libraries(self, libname):
+    def _download_libraries(self, libname: str) -> Dict[str, List[str]]:
         """ download enrichr libraries."""
         self._logger.info(
             "Downloading and generating Enrichr library gene sets......")
@@ -241,7 +245,7 @@ class GSEAbase(object):
 
         return genesets_dict
 
-    def _heatmat(self, df, classes):
+    def _heatmat(self, df: pd.DataFrame, classes: List[str]):
         """only use for gsea heatmap"""
 
         cls_booA = list(map(lambda x: True if x ==
@@ -254,7 +258,7 @@ class GSEAbase(object):
         self.heatmat = datAB
         return
 
-    def _plotting(self, rank_metric):
+    def _plotting(self, rank_metric: pd.Series):
         """ Plotting API.
             :param rank_metric: sorted pd.Series with rankings values.
         """
@@ -266,7 +270,7 @@ class GSEAbase(object):
         for i, record in self.res2d.iterrows():
             if self.module != 'ssgsea' and record['fdr'] > 0.05:
                 continue
-            if i >= self.graph_num: 
+            if i >= self.graph_num:
                 break
             hit = record['hits']
             NES = 'nes' if self.module != 'ssgsea' else 'es'
@@ -276,8 +280,8 @@ class GSEAbase(object):
             gseaplot(rank_metric=rank_metric, term=term, hit_indices=hit,
                      nes=record[NES], pval=record['pval'],
                      fdr=record['fdr'], RES=record['RES'],
-                     pheno_pos=self.pheno_pos, 
-                     pheno_neg=self.pheno_neg, 
+                     pheno_pos=self.pheno_pos,
+                     pheno_neg=self.pheno_neg,
                      figsize=self.figsize,
                      ofname=outfile)
 
@@ -291,11 +295,13 @@ class GSEAbase(object):
                         z_score=0, figsize=(width, height),
                         xticklabels=True, yticklabels=True)
 
-    def _to_df(self, gsea_summary, gmt, rank_metric=None):
+    def _to_df(self, gsea_summary,
+               gmt: Dict[str, List[str]],
+               rank_metric: pd.Series):
         """Convernt GSEASummary to DataFrame"""
 
-        outcol = ['name', 'term', 'es', 'nes', 'pval', 'fdr', 'overlap', 
-                   'genes', 'lead_genes', 'hits', 'RES']
+        outcol = ['term', 'es', 'nes', 'pval', 'fdr', 'overlap',
+                  'genes', 'lead_genes', 'hits', 'RES']
         res_df = []
         # res = OrderedDict()
         for gs in gsea_summary:
@@ -315,7 +321,7 @@ class GSEAbase(object):
                 ldg_pos = gs.hits  # es == 0 ?
             lead_genes = ';'.join(
                 list(map(str, rank_metric.iloc[ldg_pos].index)))
-            overlap = "%s/%s"%(len(gs.hits), len(gmt[gs.term]))
+            overlap = "%s/%s" % (len(gs.hits), len(gmt[gs.term]))
             e = [gs.term, gs.es, gs.nes, gs.pval, gs.fdr,
                  overlap, genes, lead_genes, gs.hits, gs.run_es]
             res_df.append(e)
@@ -323,7 +329,7 @@ class GSEAbase(object):
         # save to dataframe
         res_df = pd.DataFrame(res_df, columns=outcol)
         self.results = res_df.set_index('term').to_dict(orient='index')
-        ## save
+        # save
         # res_df.set_index('term', inplace=True)
         res_df.drop(['RES', 'hits'], axis=1, inplace=True)
         res_df.sort_values(by=['fdr', 'nes'], inplace=True)
@@ -337,8 +343,15 @@ class GSEAbase(object):
 
         return
 
-    def enrichment_score(self, gene_list, correl_vector, gene_set, weighted_score_type=1,
-                         nperm=1000, seed=None, single=False, scale=False):
+    def enrichment_score(self,
+                         gene_list: Iterable[str],
+                         correl_vector: Iterable[float],
+                         gene_set: Dict[str, List[str]],
+                         weighted_score_type: float = 1.0,
+                         nperm: int = 1000,
+                         seed: int = 123,
+                         single: bool = False,
+                         scale: bool = False):
         """This is the most important function of GSEApy. It has the same algorithm with GSEA and ssGSEA.
 
         :param gene_list:       The ordered gene list gene_name_list, rank_metric.index.values

@@ -132,7 +132,7 @@ def ssgsea(data, gene_sets, outdir="ssGSEA_", sample_norm_method='rank', min_siz
 
     """
     ss = SingleSampleGSEA(data, gene_sets, outdir, sample_norm_method, min_size, max_size,
-                          permutation_num, weighted_score_type, scale, ascending,
+                          permutation_num, weighted_score_type, ascending,
                           processes, figsize, format, graph_num, no_plot, seed, verbose)
     ss.run()
     return ss

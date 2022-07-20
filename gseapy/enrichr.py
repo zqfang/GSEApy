@@ -16,7 +16,7 @@ from gseapy.plot import barplot
 from gseapy.parser import Biomart
 from gseapy.utils import *
 from gseapy.stats import calc_pvalues, multiple_testing_correction
-from typing import Tuple, Union, List, Dict, Iterable, Optional
+from typing import Tuple, Union, List, Dict, Iterable, Optional, AnyStr, Set, Any
 
 class Enrichr(object):
     """Enrichr API"""
@@ -78,7 +78,7 @@ class Enrichr(object):
                        for line in genesets.readlines() }
         return g_dict
 
-    def __gmt2dict(self, gene_sets: List[str]):
+    def __gmt2dict(self, gene_sets: List[str]) -> List[Dict[str, List[str]]]:
         """helper function, only convert gmt to dict and keep strings"""
         gss = []
         for g in gene_sets:
@@ -134,7 +134,7 @@ class Enrichr(object):
 
         return gss_exist
 
-    def parse_genelists(self):
+    def parse_genelists(self) -> str:
         """parse gene list"""
         if isinstance(self.gene_list, list):
             genes = self.gene_list
@@ -164,7 +164,7 @@ class Enrichr(object):
 
         return '\n'.join(genes)
 
-    def send_genes(self, gene_list, url):
+    def send_genes(self, gene_list, url) -> AnyStr:
         """ send gene list to enrichr server"""
         payload = {
           'list': (None, gene_list),
@@ -179,7 +179,7 @@ class Enrichr(object):
 
         return job_id
 
-    def check_genes(self, gene_list, usr_list_id):
+    def check_genes(self, gene_list: List[str], usr_list_id: str):
         '''
         Compare the genes sent and received to get successfully recognized genes
         '''
@@ -190,7 +190,7 @@ class Enrichr(object):
         returnedN = sum([1 for gene in gene_list if gene in returnedL])
         self._logger.info('{} genes successfully recognized by Enrichr'.format(returnedN))
 
-    def get_results(self, gene_list):
+    def get_results(self, gene_list: List[str]) -> Tuple[AnyStr, pd.DataFrame]:
         """Enrichr API"""
         ADDLIST_URL = '%s/%s/addList'%(self.ENRICHR_URL,  self._organism)
         job_id = self.send_genes(gene_list, ADDLIST_URL)
@@ -223,16 +223,16 @@ class Enrichr(object):
             res = pd.DataFrame(data[self._gs], columns=colnames)
             res['Genes'] = res['Genes'].apply(";".join) 
 
-        return [job_id['shortId'], res]
+        return job_id['shortId'], res
 
-    def _is_entrez_id(self, idx):
+    def _is_entrez_id(self, idx: Union[int, str]) -> bool:
         try:
             int(idx)
             return True
         except:
             return False
     
-    def get_libraries(self):
+    def get_libraries(self) -> List[str]:
         """return active enrichr library name. Official API """
 
         lib_url='%s/%s/datasetStatistics'%(self.ENRICHR_URL,  self._organism)
@@ -245,7 +245,7 @@ class Enrichr(object):
         return sorted(libs)
 
 
-    def get_background(self):
+    def get_background(self) -> Set[str]:
         """get background gene"""
 
         # input is a file
@@ -339,7 +339,7 @@ class Enrichr(object):
                 gmt2[term] = newgenes 
         return gmt2
 
-    def enrich(self, gmt):
+    def enrich(self, gmt: Dict[str, List[str]]):
         """use local mode
          
         p = p-value computed using the Fisher exact test (Hypergeometric test)  

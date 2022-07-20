@@ -1,5 +1,6 @@
 
-import os, sys
+import os
+import sys
 import argparse as ap
 
 
@@ -50,7 +51,7 @@ def main():
         ss = SingleSampleGSEA(data=args.data, gene_sets=args.gmt, outdir=args.outdir,
                               sample_norm_method=args.norm,
                               min_size=args.mins, max_size=args.maxs, permutation_num=args.n,
-                              weighted_score_type=args.weight, scale=args.scale,
+                              weighted_score_type=args.weight,
                               ascending=args.ascending, processes=args.threads,
                               figsize=args.figsize, format=args.format, graph_num=args.graph,
                               no_plot=args.noplot, seed=args.seed, verbose=args.verbose)
@@ -185,7 +186,7 @@ def add_gsea_parser(subparsers):
                            Default: 'log2_ratio_of_classes'")
     group_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
                            help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
-    group_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=123, metavar='',
+    group_opt.add_argument("-s", "--seed", dest="seed", action="store", type=int, default=123, metavar='',
                            help="Number of random seed. Default: None")
     group_opt.add_argument("-p", "--threads", dest="threads", action="store", type=int, default=1, metavar='procs',
                            help="Number of Processes you are going to use. Default: 1")
@@ -227,7 +228,7 @@ def add_prerank_parser(subparsers):
                              help='Weighted_score of rank_metrics. For weighting input genes. Choose from {0, 1, 1.5, 2}. Default: 1',)
     prerank_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
                              help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
-    prerank_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=123, metavar='',
+    prerank_opt.add_argument("-s", "--seed", dest="seed", action="store", type=int, default=123, metavar='',
                              help="Number of random seed. Default: None")
     prerank_opt.add_argument("-p", "--threads", dest="threads", action="store", type=int, default=1, metavar='procs',
                              help="Number of Processes you are going to use. Default: 1")
@@ -258,8 +259,6 @@ def add_singlesample_parser(subparsers):
                            default='rank', metavar='normalize',
                            choices=("rank", "log", "log_rank", "custom"),
                            help="Sample normalization method. Choose from {'rank', 'log', 'log_rank','custom'}. Default: rank")
-    group_opt.add_argument("--ns", "--no-scale", action='store_false', dest='scale', default=True,
-                           help="If the flag was set, don't normalize the enrichment scores by number of genes.")
     group_opt.add_argument("-n", "--permu-num", dest="n", action="store", type=int, default=0, metavar='nperm',
                            help="Number of random permutations. For calculating esnulls. Default: 0")
     group_opt.add_argument("--min-size", dest="mins", action="store", type=int, default=15, metavar='int',
@@ -270,7 +269,7 @@ def add_singlesample_parser(subparsers):
                            help='Weighted_score of rank_metrics. For weighting input genes. Default: 0.25',)
     group_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
                            help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
-    group_opt.add_argument("-s", "--seed", dest = "seed", action="store", type=int, default=123, metavar='',
+    group_opt.add_argument("-s", "--seed", dest="seed", action="store", type=int, default=123, metavar='',
                            help="Number of random seed. Default: None")
     group_opt.add_argument("-p", "--threads", dest="threads", action="store", type=int, default=1, metavar='procs',
                            help="Number of Processes you are going to use. Default: 1")
