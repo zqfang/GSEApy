@@ -211,18 +211,18 @@ impl GSEAResult {
     pub fn fdr(&mut self) -> Vec<f64> {
         // let mut nesnull_concat: Vec<&f64> = nesnull.iter().flatten().collect(); // nesnull.concat(); // concat items
         // To speedup, use sorted array and then numpy.searchsorted
+        // sort f64 in descending order in place
         self.nesnull_concat
-            .sort_unstable_by(|a, b| a.partial_cmp(b).unwrap()); // sort f64
-        self.nes_concat
-            .sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
+            .sort_unstable_by(|a, b| b.partial_cmp(a).unwrap()); // ascending -> a.partial_cmp(b)
+        
+        let (indices, nes_sorted) = self.nes_concat.as_slice().argsort(false);
         // partition_point return the index of the first element of the second partition)
-        let all_idx = self.nesnull_concat.partition_point(|&x| x < 0.0);
-        let nes_idx = self.nes_concat.partition_point(|&x| x < 0.0);
+        let all_idx = self.nesnull_concat.partition_point(|&x| x >= 0.0);
+        let nes_idx = nes_sorted.partition_point(|&x| x >= 0.0);
 
         // println!("nes sorted {:?}", &self.nes_concat );
         // println!("nesnull {:?}", &self.nesnull_concat );
-        let fdrs: Vec<f64> = self
-            .nes_concat
+        let mut fdrs: Vec<f64> = nes_sorted
             .iter()
             .map(|&e| {
                 let pi_norm: f64;
@@ -231,22 +231,21 @@ impl GSEAResult {
                 let all_higher: usize;
                 let all_pos: usize;
                 let nes_pos: usize;
-                if e < 0.0 {
+                if e >= 0.0 {
                     // let nes_higher = nes_concat.iter().filter(|&x| *x < e).count();
                     // let all_higher = nesnull_concat.iter().filter(|&x| *x < e).count();
-                    nes_higher = self.nes_concat.partition_point(|&x| x < e); // left side
-                    all_higher = self.nesnull_concat.partition_point(|&x| x < e); // left side
+                    nes_higher = nes_sorted.partition_point(|&x| x >= e); // left side
+                    all_higher = self.nesnull_concat.partition_point(|&x| x >= e); // left side
                     all_pos = all_idx;
                     nes_pos = nes_idx;
                 } else {
                     // let nes_higher = self.nes_concat.iter().filter(|&x| *x >= e).count();
                     // let all_higher = self.nesnull_concat.iter().filter(|&x| *x >= e).count();
-                    nes_higher =
-                        self.nes_concat.len() - self.nes_concat.partition_point(|&x| x < e); // right side
+                    nes_higher = nes_sorted.len() - nes_sorted.partition_point(|&x| x >= e); // right side
                     all_higher =
-                        self.nesnull_concat.len() - self.nesnull_concat.partition_point(|&x| x < e); // right side
+                        self.nesnull_concat.len() - self.nesnull_concat.partition_point(|&x| x >= e); // right side
                     all_pos = self.nesnull_concat.len() - all_idx;
-                    nes_pos = self.nes_concat.len() - nes_idx;
+                    nes_pos = nes_sorted.len() - nes_idx;
                 }
                 // println!("neg_higher {}, all_higher {}, all_pos {}, nes_pos {}", nes_higher, all_higher, all_pos, all_higher);
                 pi_norm = (all_higher as f64) / (all_pos as f64);
@@ -255,7 +254,55 @@ impl GSEAResult {
                 pi_norm / pi_obs
             })
             .collect();
-        return fdrs;
+
+        // adjusted fdr q value
+        self.adjust_fdr(&mut fdrs, nes_idx);
+        let mut fdr_orig_order: Vec<f64> = vec![0.0; fdrs.len()];
+        indices.iter().zip(fdrs.iter()).for_each(|(&i, &v)| {fdr_orig_order[i] = v;} );
+        return fdr_orig_order;
+    }
+
+    /// # adjust fdr q-values
+    /// see line 880:  https://github.com/GSEA-MSigDB/GSEA_R/blob/master/R/GSEA.R
+    /// - fdrs:  Corresponds to the descending order of NES.
+    /// - partition_point_idx: the index of the first element of the second partition
+    /// This function updates fdr value inplace.
+    fn adjust_fdr(&self, fdrs: &mut Vec<f64>, partition_point_idx: usize) 
+    {
+        // If NES is a so screwd distribution, e.g. all positive or negative numbers.
+        // partition_point_idx will be either of fdrs.len() or 0. Need to skip 
+        let mut min_fdr: f64;
+        if partition_point_idx > 0 
+        {
+            let nes_pos_idx =  partition_point_idx - 1;
+            min_fdr = fdrs[nes_pos_idx];
+            for k in (0..nes_pos_idx).rev()
+            { 
+                if fdrs[k] < min_fdr {
+                    min_fdr = fdrs[k]
+                }
+                if min_fdr < fdrs[k] {
+                    fdrs[k] = min_fdr
+                }
+            }
+        }
+
+        if partition_point_idx < fdrs.len() 
+        {
+            let nes_neg_idx = partition_point_idx;
+            min_fdr = fdrs[nes_neg_idx];
+            for k in nes_neg_idx..fdrs.len()
+            { 
+                if fdrs[k] < min_fdr {
+                    min_fdr = fdrs[k]
+                }
+                if min_fdr < fdrs[k] {
+                    fdrs[k] = min_fdr
+                }
+
+            }
+        }
+        
     }
 }
 
