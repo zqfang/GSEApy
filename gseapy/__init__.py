@@ -66,14 +66,16 @@ def gsea(data, gene_sets, cls, outdir=None, min_size=15, max_size=500, permutati
              where contains::
 
                  | {
-                 |  term: gene set name
+                 |  term: gene set name,
                  |  es: enrichment score,
                  |  nes: normalized enrichment score,
-                 |  p: P-value,
-                 |  fdr: FDR qvalue (adjusted FDR),
-                 |  overlap: gene_hits / geneset_size,
-                 |  genes: genes matched to the data,
-                 |  ledge_genes: leading edge genes
+                 |  pval:  Nominal p-value (from the null distribution of the gene set,
+                 |  fdr: FDR qvalue (adjusted False Discory Rate),
+                 |  fwer pval: Family wise error rate p-values, 
+                 |  tag %: Percent of gene set before running enrichment,
+                 |  gene %: Percent of gene list before running enrichment peak,
+                 |  lead_genes: leading edge genes (gene list before running enrichment peak),
+                 |  matched genes: genes matched to the data,
                  | }
 
 
@@ -122,14 +124,16 @@ def ssgsea(data, gene_sets, outdir=None, sample_norm_method='rank', min_size=15,
              if permutation_num > 0, additional results contain::
 
                  | {
-                 |  term: gene set name
+                 |  term: gene set name,
                  |  es: enrichment score,
                  |  nes: normalized enrichment score,
-                 |  p: P-value (if permutation_num > 0),
+                 |  pval:  Nominal p-value (from the null distribution of the gene set (if permutation_num > 0),
                  |  fdr: FDR qvalue (adjusted FDR) (if permutation_num > 0),
-                 |  overlap: gene_hits / geneset_size,
-                 |  genes: genes matched to the data,
-                 |  ledge_genes: leading edge genes
+                 |  fwer pval: Family wise error rate p-values, 
+                 |  tag %: Percent of gene set before running enrichment,
+                 |  gene %: Percent of gene list before running enrichment peak,
+                 |  lead_genes: leading edge genes (gene list before running enrichment peak),
+                 |  matched genes: genes matched to the data,
                  | }
 
 
@@ -167,14 +171,16 @@ def prerank(rnk, gene_sets, outdir=None, pheno_pos='Pos', pheno_neg='Neg',
              where contains::
 
                  | {
-                 |  term: gene set name
+                 |  term: gene set name,
                  |  es: enrichment score,
                  |  nes: normalized enrichment score,
-                 |  p: P-value,
-                 |  fdr: FDR qvalue (adjusted FDR),
-                 |  overlap: gene_hits / geneset_size,
-                 |  genes: genes matched to the data,
-                 |  ledge_genes: leading edge genes
+                 |  pval:  Nominal p-value (from the null distribution of the gene set,
+                 |  fdr: FDR qvalue (adjusted False Discory Rate),
+                 |  fwer pval: Family wise error rate p-values, 
+                 |  tag %: Percent of gene set before running enrichment,
+                 |  gene %: Percent of gene list before running enrichment peak,
+                 |  lead_genes: leading edge genes (gene list before running enrichment peak),
+                 |  matched genes: genes matched to the data,
                  | }
 
 

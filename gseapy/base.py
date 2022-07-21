@@ -302,8 +302,8 @@ class GSEAbase(object):
                rank_metric: pd.Series):
         """Convernt GSEASummary to DataFrame"""
 
-        outcol = ['term', 'es', 'nes', 'pval', 'fdr', 'overlap',
-                  'genes', 'lead_genes', 'hits', 'RES']
+        outcol = ['term', 'es', 'nes', 'pval', 'fdr', 'fwer p-val', 'tag %', 'gene %', 
+                  'lead_genes', 'matched_genes', 'hits', 'RES']
         res_df = []
         # res = OrderedDict()
         for gs in gsea_summary:
@@ -314,18 +314,23 @@ class GSEAbase(object):
 
             RES = np.array(gs.run_es)
             # extract leading edge genes
-            if float(gs.es) > 0:
+            if float(gs.es) >= 0:
                 # RES -> ndarray, ind -> list
-                ldg_pos = list(filter(lambda x: x <= RES.argmax(), gs.hits))
-            elif float(gs.es) < 0:
-                ldg_pos = list(filter(lambda x: x >= RES.argmin(), gs.hits))
+                es_i = RES.argmax()
+                ldg_pos = list(filter(lambda x: x <= es_i, gs.hits))
+                gene_frac = (es_i + 1) / len(rank_metric)
             else:
-                ldg_pos = gs.hits  # es == 0 ?
+                es_i = RES.argmin()
+                ldg_pos = list(filter(lambda x: x >= es_i, gs.hits))
+                ldg_pos.reverse()
+                gene_frac = (len(rank_metric) - es_i)/ len(rank_metric)
+
+            # tag_frac = len(ldg_pos) / len(gmt[gs.term])
             lead_genes = ';'.join(
                 list(map(str, rank_metric.iloc[ldg_pos].index)))
-            overlap = "%s/%s" % (len(gs.hits), len(gmt[gs.term]))
-            e = [gs.term, gs.es, gs.nes, gs.pval, gs.fdr,
-                 overlap, genes, lead_genes, gs.hits, gs.run_es]
+            tag_frac = "%s/%s" % (len(ldg_pos), len(gmt[gs.term]))
+            e = [gs.term, gs.es, gs.nes, gs.pval, gs.fdr, gs.fwerp,
+                 tag_frac, gene_frac, lead_genes, genes, gs.hits, gs.run_es]
             res_df.append(e)
 
         # save to dataframe
@@ -333,8 +338,8 @@ class GSEAbase(object):
         self.results = res_df.set_index('term').to_dict(orient='index')
         # save
         # res_df.set_index('term', inplace=True)
-        res_df.drop(['RES', 'hits'], axis=1, inplace=True)
-        res_df.sort_values(by=['fdr', 'nes'], inplace=True)
+        res_df.drop(['matched_genes', 'hits', 'RES'], axis=1, inplace=True)
+        res_df.sort_values(by=['nes'], inplace=True, ascending=False, ignore_index=True)
         self.res2d = res_df
         # self.results = res
         if self._outdir is None:
