@@ -1,13 +1,13 @@
 #! python
 # -*- coding: utf-8 -*-
 
-import os
-import logging
-import glob
+import os, logging, glob
+import xml.etree.ElementTree as ET
 import numpy as np
 import pandas as pd
+from collections import Counter
 from gseapy.base import GSEAbase
-from gseapy.parser import gsea_edb_parser, gsea_cls_parser
+from gseapy.parser import gsea_cls_parser
 from gseapy.plot import gseaplot
 from gseapy.utils import mkdirs, log_init
 from gseapy.gse import prerank_rs, gsea_rs, ssgsea_rs, Metric  # import gseapy rust lib
@@ -19,7 +19,7 @@ class GSEA(GSEAbase):
 
     def __init__(self, data: Union[pd.DataFrame, str],
                  gene_sets: Union[List[str], str, Dict[str, str]],
-                 classes: Union[List[str], str],
+                 classes: Union[List[str], str, Dict[str, str]],
                  outdir: Optional[str] = None,
                  min_size: int = 15,
                  max_size: int = 500,
@@ -59,7 +59,7 @@ class GSEA(GSEAbase):
         self.pheno_pos = "pos"
         self.pheno_neg = "neg"
 
-    def load_data(self, cls_vec: List) -> Tuple[pd.DataFrame, Dict]:
+    def load_data(self, cls_vec: List[str]) -> Tuple[pd.DataFrame, Dict]:
         """pre-processed the data frame.new filtering methods will be implement here.
         """
         # read data in
@@ -109,7 +109,7 @@ class GSEA(GSEAbase):
                          method: str,
                          pos: str,
                          neg: str,
-                         classes: Dict,
+                         classes: Dict[str, List[str]],
                          ascending: bool) -> pd.Series:
         """The main function to rank an expression table. works for 2d array.
 
@@ -155,21 +155,23 @@ class GSEA(GSEAbase):
         # exclude any zero stds.
         df_mean = df.groupby(by=classes, axis=1).mean()
         df_std = df.groupby(by=classes, axis=1).std()
-        n_pos = np.sum(classes == pos)
-        n_neg = np.sum(classes == neg)
-        if method in ['signal_to_noise', 's2n']:
-            ser = (df_mean[pos] - df_mean[neg])/(df_std[pos] + df_std[neg])
-        elif method in ['abs_signal_to_noise', 'abs_s2n']:
-            ser = ((df_mean[pos] - df_mean[neg]) /
-                   (df_std[pos] + df_std[neg])).abs()
-        elif method == 't_test':
-            ser = (df_mean[pos] - df_mean[neg]) / \
-                np.sqrt(df_std[pos]**2/n_pos+df_std[neg]**2/n_neg)
-        elif method == 'ratio_of_classes':
+        class_values  = Counter(classes.values())
+        n_pos = class_values[pos]
+        n_neg = class_values[neg]
+
+        if method in ["signal_to_noise", "s2n"]:
+            ser = (df_mean[pos] - df_mean[neg]) / (df_std[pos] + df_std[neg])
+        elif method in ["abs_signal_to_noise", "abs_s2n"]:
+            ser = ((df_mean[pos] - df_mean[neg]) / (df_std[pos] + df_std[neg])).abs()
+        elif method == "t_test":
+            ser = (df_mean[pos] - df_mean[neg]) / np.sqrt(
+                df_std[pos] ** 2 / n_pos + df_std[neg] ** 2 / n_neg
+            )
+        elif method == "ratio_of_classes":
             ser = df_mean[pos] / df_mean[neg]
-        elif method == 'diff_of_classes':
+        elif method == "diff_of_classes":
             ser = df_mean[pos] - df_mean[neg]
-        elif method == 'log2_ratio_of_classes':
+        elif method == "log2_ratio_of_classes":
             ser = np.log2(df_mean[pos] / df_mean[neg])
         else:
             logging.error("Please provide correct method name!!!")
@@ -177,6 +179,21 @@ class GSEA(GSEAbase):
         ser = ser.sort_values(ascending=ascending)
 
         return ser
+
+    def load_classes(self, ):
+
+        if isinstance(self.classes, dict):
+            # check
+            # class_values  = Counter(self.classes.values())
+            # n_pos = class_values[pos]
+            # n_neg = class_values[neg]
+            return 
+        else:
+            pos, neg, cls_vector = gsea_cls_parser(self.classes)
+            self.pheno_pos = pos
+            self.pheno_neg = neg
+            return cls_vector
+
 
     def run(self):
         """GSEA main procedure"""
@@ -203,16 +220,15 @@ class GSEA(GSEAbase):
         self._logger.info(
             "Parsing data files for GSEA.............................")
         # phenotype labels parsing
-        phenoPos, phenoNeg, cls_vector = gsea_cls_parser(self.classes)
+        cls_vector = self.load_classes()
         # select correct expression genes and values.
         dat, cls_dict = self.load_data(cls_vector)
         self.cls_dict = cls_dict
-        self.pheno_pos = phenoPos
-        self.pheno_neg = phenoNeg
         # data frame must have length > 1
         assert len(dat) > 1
         # ranking metrics calculation.
-        dat2 = self.calculate_metric(df=dat, method=self.method, pos=phenoPos, neg=phenoNeg,
+        dat2 = self.calculate_metric(df=dat, method=self.method, 
+                                     pos=self.pheno_pos, neg=self.pheno_neg,
                                      classes=cls_dict, ascending=self.ascending)
         self.ranking = dat2
         # filtering out gene sets and build gene sets dictionary
@@ -237,7 +253,7 @@ class GSEA(GSEAbase):
                               )
         else:  # phenotype permutation
             group = list(map(lambda x: True if x ==
-                         phenoPos else False, cls_vector))
+                         self.pheno_pos else False, cls_vector))
             gsum = gsea_rs(dat.index.to_list(),
                            dat.values.tolist(),  # each row is gene values across samples
                            gmt,
@@ -621,6 +637,40 @@ class Replot(GSEAbase):
         self._logger = log_init(outlog=outlog,
                                 log_level=logging.INFO if self.verbose else logging.WARNING)
 
+
+
+    def gsea_edb_parser(self, results_path):
+        """Parse results.edb file stored under **edb** file folder.
+
+        :param results_path: the .results file located inside edb folder.
+        :return: 
+            a dict contains enrichment_term, hit_index,nes, pval, fdr.
+        """
+
+        xtree = ET.parse(results_path)
+        xroot = xtree.getroot()
+        res = {}
+        # dict_keys(['RANKED_LIST', 'GENESET', 'FWER', 'ES_PROFILE',
+        # 'HIT_INDICES', 'ES', 'NES', 'TEMPLATE', 'RND_ES', 'RANK_SCORE_AT_ES',
+        # 'NP', 'RANK_AT_ES', 'FDR'])
+        for node in xroot.findall('DTG'):
+            enrich_term = node.attrib.get('GENESET').split("#")[1]
+            es_profile = node.attrib.get('ES_PROFILE').split(" ")
+            # rank_es = term.get('RND_ES').split(" ")
+            hit_ind = node.attrib.get('HIT_INDICES').split(" ")
+            es_profile = [float(i) for i in es_profile]
+            hit_ind = [float(i) for i in hit_ind]
+            # rank_es = [float(i) for i in rank_es ]
+            nes = node.attrib.get('NES')
+            pval = node.attrib.get('NP')
+            fdr = node.attrib.get('FDR')
+            # fwer = node.attrib.get('FWER')
+            logging.debug("Enriched Gene set is: " + enrich_term)
+            res[enrich_term] = [hit_ind, nes, pval, fdr]
+        return res
+
+
+
     def run(self):
         """main replot function"""
         assert self.min_size <= self.max_size
@@ -650,7 +700,7 @@ class Replot(GSEAbase):
         gene_list = rank_metric.index.values
         # extract each enriment term in the results.edb files and plot.
 
-        database = gsea_edb_parser(results_path)
+        database = self.gsea_edb_parser(results_path)
         for enrich_term, data in database.items():
             # extract statistical resutls from results.edb file
             hit_ind, nes, pval, fdr = data

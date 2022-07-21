@@ -5,6 +5,7 @@ use pyo3::prelude::*;
 use rayon::prelude::*;
 use std::time::Instant;
 use std::collections::HashMap;
+use itertools::izip;
 // serialize struct example
 // let point = Point { x: 1, y: 2 };
 
@@ -25,13 +26,15 @@ pub struct GSEASummary {
     #[pyo3(get, set)]
     pub nes: f64,
     #[pyo3(get, set)]
-    pub pval: f64,
+    pub pval: f64, // Nominal Pvalue
     #[pyo3(get, set)]
-    pub fdr: f64,
+    pub fwerp: f64, // FWER Pvalue
+    #[pyo3(get, set)]
+    pub fdr: f64, // FDR q value. adjusted FDR
     #[pyo3(get, set)]
     pub run_es: Vec<f64>,
     #[pyo3(get, set)]
-    pub hits: Vec<usize>, // tag indicator
+    pub hits: Vec<usize>, // indices of genes that matches
     #[pyo3(get, set)]
     pub esnull: Vec<f64>,
     #[pyo3(get, set)]
@@ -44,7 +47,8 @@ impl GSEASummary {
         term: &str,
         es: f64,
         nes: f64,
-        pvalue: f64,
+        pval: f64,
+        fwerpval: f64,
         fdr: f64,
         run_es: &[f64],
         hits: &[usize],
@@ -55,7 +59,8 @@ impl GSEASummary {
             term: term.to_string(),
             es: es,
             nes: nes,
-            pval: pvalue,
+            pval: pval,
+            fwerp: fwerpval,
             fdr: fdr,
             run_es: run_es.to_vec(),
             hits: hits.to_vec(),
@@ -74,6 +79,7 @@ impl GSEASummary {
             es: 0.0,
             nes: 0.0,
             pval: 1.0,
+            fwerp: 1.0,
             fdr: 1.0,
             run_es: Vec::<f64>::new(),
             hits: Vec::<usize>::new(),
@@ -196,32 +202,37 @@ impl GSEAResult {
             self.nesnull_concat.append(&mut nesnull);
             // g.esnull.clear();
         });
-
+        // FWER p 
+        let fwerps : Vec<f64> = self.fwer_pval();
+        // FDR q
         let fdrs = self.fdr();
-        fdrs.iter()
-            .zip(summary.iter_mut())
-            .for_each(|(fdr, g)| {
-                g.fdr = fdr.clamp(f64::MIN, 1.0);
-            });
+
+
+        for (p, q, g) in izip!(fwerps, fdrs, summary) {
+            g.fdr = q;
+            g.fwerp = p;
+         }
         // clear vector to save some space
         self.nes_concat.clear();
         self.nesnull_concat.clear();
     }
 
+
     pub fn fdr(&mut self) -> Vec<f64> {
         // let mut nesnull_concat: Vec<&f64> = nesnull.iter().flatten().collect(); // nesnull.concat(); // concat items
-        // To speedup, use sorted array and then numpy.searchsorted
-        // sort f64 in descending order in place
-        self.nesnull_concat
-            .sort_unstable_by(|a, b| b.partial_cmp(a).unwrap()); // ascending -> a.partial_cmp(b)
-        
-        let (indices, nes_sorted) = self.nes_concat.as_slice().argsort(false);
-        // partition_point return the index of the first element of the second partition)
-        let all_idx = self.nesnull_concat.partition_point(|&x| x >= 0.0);
-        let nes_idx = nes_sorted.partition_point(|&x| x >= 0.0);
 
-        // println!("nes sorted {:?}", &self.nes_concat );
-        // println!("nesnull {:?}", &self.nesnull_concat );
+        // To speedup, sort f64 in acending order in place, then do a binary search
+        self.nesnull_concat
+            .sort_unstable_by(|a, b| a.partial_cmp(b).unwrap()); // descending -> b.partial_cmp(a)        
+        let (indices, nes_sorted) = self.nes_concat.as_slice().argsort(true); // ascending order
+
+        // binary_search assumes that the elements are sorted in less-to-greater order.
+        // partition_point return the index of the first element of the second partition)
+        // since partition_point is just a wrapper of self.binary_search_by(|x| if pred(x) { Less } else { Greater }).unwrap_or_else(|i| i)
+        let all_idx = self.nesnull_concat.partition_point(|x| *x < 0.0);
+        let nes_idx = nes_sorted.partition_point(|x| *x < 0.0);
+
+        // fdr
         let mut fdrs: Vec<f64> = nes_sorted
             .iter()
             .map(|&e| {
@@ -231,27 +242,27 @@ impl GSEAResult {
                 let all_higher: usize;
                 let all_pos: usize;
                 let nes_pos: usize;
-                if e >= 0.0 {
+                if e < 0.0 {
                     // let nes_higher = nes_concat.iter().filter(|&x| *x < e).count();
                     // let all_higher = nesnull_concat.iter().filter(|&x| *x < e).count();
-                    nes_higher = nes_sorted.partition_point(|&x| x >= e); // left side
-                    all_higher = self.nesnull_concat.partition_point(|&x| x >= e); // left side
+                    nes_higher = nes_sorted.partition_point(|x| *x < e); // left side
+                    all_higher = self.nesnull_concat.partition_point(|x| *x < e); // left side
                     all_pos = all_idx;
                     nes_pos = nes_idx;
                 } else {
                     // let nes_higher = self.nes_concat.iter().filter(|&x| *x >= e).count();
                     // let all_higher = self.nesnull_concat.iter().filter(|&x| *x >= e).count();
-                    nes_higher = nes_sorted.len() - nes_sorted.partition_point(|&x| x >= e); // right side
+                    nes_higher = nes_sorted.len() - nes_sorted.partition_point(|x| *x < e); // right side
                     all_higher =
-                        self.nesnull_concat.len() - self.nesnull_concat.partition_point(|&x| x >= e); // right side
-                    all_pos = self.nesnull_concat.len() - all_idx;
-                    nes_pos = nes_sorted.len() - nes_idx;
+                        self.nesnull_concat.len() - self.nesnull_concat.partition_point(|x| *x < e); // right side
+                    all_pos = self.nesnull_concat.len() - all_idx; // right side
+                    nes_pos = nes_sorted.len() - nes_idx; // right side
                 }
                 // println!("neg_higher {}, all_higher {}, all_pos {}, nes_pos {}", nes_higher, all_higher, all_pos, all_higher);
                 pi_norm = (all_higher as f64) / (all_pos as f64);
                 pi_obs = (nes_higher as f64) / (nes_pos as f64);
                 // FDR
-                pi_norm / pi_obs
+                (pi_norm / pi_obs).clamp(f64::MIN, 1.0)
             })
             .collect();
 
@@ -264,45 +275,83 @@ impl GSEAResult {
 
     /// # adjust fdr q-values
     /// see line 880:  https://github.com/GSEA-MSigDB/GSEA_R/blob/master/R/GSEA.R
-    /// - fdrs:  Corresponds to the descending order of NES.
+    /// - fdrs:  Corresponds to the ascending order of NES.
     /// - partition_point_idx: the index of the first element of the second partition
     /// This function updates fdr value inplace.
-    fn adjust_fdr(&self, fdrs: &mut Vec<f64>, partition_point_idx: usize) 
+    fn adjust_fdr(&self, fdrs: &mut [f64], partition_point_idx: usize) 
     {
         // If NES is a so screwd distribution, e.g. all positive or negative numbers.
-        // partition_point_idx will be either of fdrs.len() or 0. Need to skip 
-        let mut min_fdr: f64;
-        if partition_point_idx > 0 
+        // partition_point_idx will be either of 0 or fdrs.len(). Need to skip. example here:
+        // let s1 = [1,3,4,5,6,9];
+        // let s2 = [-10, -8, -7,-4,-1];
+        // let s3 = [-9,-8,-2,-1,1,2,3];
+        
+        // let b1 = s1.partition_point(|x| *x < 0); 
+        // let b2 = s2.partition_point(|x| *x < 0); neg_nes on the left 
+        // let b3 = s3.partition_point(|x| *x < 0);
+        // the partition_point_idx will be: b1 = 0, b2 = 5, b3 = 4
+        
+        // thus, the transver order is opposit to the R code since we'er using acsending order of nes
+        let mut min_fdr: f64; 
+        if partition_point_idx < fdrs.len()  
         {
-            let nes_pos_idx =  partition_point_idx - 1;
-            min_fdr = fdrs[nes_pos_idx];
-            for k in (0..nes_pos_idx).rev()
+            // pos_nes on the right side, if only have postive numbers, idx must be < .len() 
+            let nes_pos_idx =  partition_point_idx + 1;
+            min_fdr = fdrs[partition_point_idx];
+            for k in nes_pos_idx..fdrs.len()
             { 
-                if fdrs[k] < min_fdr {
-                    min_fdr = fdrs[k]
-                }
-                if min_fdr < fdrs[k] {
-                    fdrs[k] = min_fdr
-                }
+                // if fdrs[k] < min_fdr {
+                //     min_fdr = fdrs[k]
+                // }
+                // if min_fdr < fdrs[k] {
+                //     fdrs[k] = min_fdr
+                // }
+                min_fdr = min_fdr.min(fdrs[k]);
+                fdrs[k] = min_fdr.min(fdrs[k]);
             }
         }
 
-        if partition_point_idx < fdrs.len() 
+        if partition_point_idx > 0
         {
-            let nes_neg_idx = partition_point_idx;
+            // neg_nes on the left side, if only have negative numbers, idx must be > 0
+            let nes_neg_idx = partition_point_idx - 1;
             min_fdr = fdrs[nes_neg_idx];
-            for k in nes_neg_idx..fdrs.len()
+            for k in (0..partition_point_idx).rev()
             { 
-                if fdrs[k] < min_fdr {
-                    min_fdr = fdrs[k]
-                }
-                if min_fdr < fdrs[k] {
-                    fdrs[k] = min_fdr
-                }
-
+                min_fdr = min_fdr.min(fdrs[k]);
+                fdrs[k] = min_fdr.min(fdrs[k]);
             }
         }
         
+    }
+    /// Compute FWER p-vals
+    /// line 788: https://github.com/GSEA-MSigDB/GSEA_R/blob/master/R/GSEA.R
+    fn fwer_pval(&self) -> Vec<f64>
+    {
+        // suppose a matrix of nesnull with shape [ n_genesets, n_perm ]
+        // max_nes_pos = colMax(nesull) for nes >= 0;
+        // min_nes_neg = colMin(nesnull) for nes < 0;
+        let mut max_nes_pos = vec![0.0; self.nperm];
+        let mut min_nes_neg = vec![0.0; self.nperm];
+        self.nesnull_concat.iter().enumerate().for_each(|(i, &e)| {
+            let idx = i % self.nperm;
+            if e >= 0.0 {
+                max_nes_pos[idx] = e.max(max_nes_pos[idx]);
+            } else {
+                min_nes_neg[idx] = e.min(min_nes_neg[idx]);
+            }
+        });
+        
+        let fwerp: Vec<f64> = self.nes_concat.par_iter().map(|e| { 
+            if e < &0.0 {
+                (min_nes_neg.iter().filter(|&x| x < e ).count() as f64)
+                    / (min_nes_neg.iter().filter(|&x| x < &0.0).count() as f64)
+            } else {
+                (max_nes_pos.iter().filter(|&x| x >= e).count() as f64)
+                    / (max_nes_pos.len() as f64)
+            }
+        }).collect();
+        fwerp
     }
 }
 
@@ -443,7 +492,7 @@ impl GSEAResult {
         }).collect();
         
         let es = EnrichmentScore::new(genes, self.nperm, self.seed, true, false);
-        // let end1 = Instant::now();
+        let end1 = Instant::now();
         for (&term, &gset) in gmt.iter() {
             let tag = es.gene.isin(gset);
             let hit = tag.iter().filter(|&x| x > &0.0).count();
@@ -467,16 +516,16 @@ impl GSEAResult {
             }).collect();
             self.summaries.append(&mut summ);
         }
-        // let end2 = Instant::now();
-        // println!("Calculation time: {:.2?}", end2.duration_since(end1));
+        let end2 = Instant::now();
+        println!("Calculation time: {:.2?}", end2.duration_since(end1));
         // self.stat(); // NES
         let max = self.summaries.iter().fold(std::f64::MIN, |a, b| a.max(b.es));
         let min = self.summaries.iter().fold(std::f64::MAX, |a, b| a.min(b.es));
         let norm = max - min;
         self.summaries.iter_mut().for_each(|b| b.nes = b.es / norm);
 
-        // let end3 = Instant::now();
-        // println!("Statistical time: {:.2?}", end3.duration_since(end2));
+        let end3 = Instant::now();
+        println!("Statistical time: {:.2?}", end3.duration_since(end2));
     }
 
 
