@@ -100,7 +100,7 @@ class GSEA(GSEAbase):
         cls_dict = {k: v for k, v in zip(df.columns, cls_vec)}
         df_std = df.groupby(by=cls_dict, axis=1).std()
         df = df[~df_std.isin([0]).any(axis=1)]
-        df = df + 0.00001  # we don't like zeros!!!
+        df = df + 1e-08  # we don't like zeros!!!
 
         return df, cls_dict
 
@@ -240,10 +240,10 @@ class GSEA(GSEAbase):
                          phenoPos else False, cls_vector))
             gsum = gsea_rs(dat.index.to_list(),
                            dat.values.tolist(),  # each row is gene values across samples
-                           group,
                            gmt,
-                           self.weight,
+                           group,
                            method,
+                           self.weight,
                            self.min_size,
                            self.max_size,
                            self.permutation_num,
@@ -517,8 +517,8 @@ class SingleSampleGSEA(GSEAbase):
         mkdirs(self.outdir)
         gsum = ssgsea_rs(df.index.to_list(),
                          df.values.tolist(),
-                         df.columns.astype(str).to_list(),  # sample name
                          gmt,
+                         df.columns.astype(str).to_list(),  # sample name
                          self.weight,
                          self.min_size,
                          self.max_size,

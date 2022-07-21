@@ -40,10 +40,10 @@ fn prerank_rs(
 fn gsea_rs(
     gene_name: Vec<String>,
     gene_exp: Vec<Vec<f64>>,
-    group: Vec<bool>,
     gene_sets: HashMap<String, Vec<String>>,
-    weight: f64,
+    group: Vec<bool>,
     method: Metric,
+    weight: f64,
     min_size: usize,
     max_size: usize,
     nperm: usize,
@@ -74,8 +74,8 @@ fn gsea_rs(
 fn ssgsea_rs(
     gene_name: Vec<String>,
     gene_exp: Vec<Vec<f64>>,
-    sample_names: Vec<String>,
     gene_sets: HashMap<String, Vec<String>>,
+    sample_names: Vec<String>,
     weight: f64,
     min_size: usize,
     max_size: usize,

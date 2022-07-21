@@ -161,7 +161,9 @@ def add_gsea_parser(subparsers):
                              help="Gene set database in GMT format. Same with GSEA.")
     group_input.add_argument("-t", "--permu-type", action="store", dest="type", type=str, metavar='perType',
                              choices=("gene_set", "phenotype"), default="gene_set",
-                             help="Permutation type. Same with GSEA, choose from {'gene_set', 'phenotype'}")
+                             help="Type of permutation reshuffling, "+\
+                                   "Choose from {'phenotype': 'sample.labels' , 'gene_set' : gene.labels}. " +\
+                                   "Default: gene_set")
 
     # group for output files
     group_output = argparser_gsea.add_argument_group("Output arguments")

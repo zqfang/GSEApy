@@ -17,7 +17,7 @@ def gsea(data, gene_sets, cls, outdir=None, min_size=15, max_size=500, permutati
     :param cls: A list or a .cls file format required for GSEA.
     :param str outdir: Results output directory. If None, nothing will write to disk.
     :param int permutation_num: Number of permutations for significance computation. Default: 1000.
-    :param str permutation_type: Permutation type, "phenotype" for phenotypes, "gene_set" for genes.
+    :param str permutation_type: Type of permutation reshuffling, choose from {"phenotype": 'sample.labels' , "gene_set" : gene.labels}. 
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Default: 15.
     :param int max_size: Maximum allowed number of genes from gene set also the data set. Default: 500.
     :param float weighted_score_type: Refer to :func:`algorithm.enrichment_score`. Default:1.
@@ -65,14 +65,16 @@ def gsea(data, gene_sets, cls, outdir=None, min_size=15, max_size=500, permutati
     :return: Return a GSEA obj. All results store to a dictionary, obj.results,
              where contains::
 
-                 | {es: enrichment score,
+                 | {
+                 |  term: gene set name
+                 |  es: enrichment score,
                  |  nes: normalized enrichment score,
                  |  p: P-value,
-                 |  fdr: FDR,
-                 |  size: gene set size,
-                 |  matched_size: genes matched to the data,
-                 |  genes: gene names from the data set
-                 |  ledge_genes: leading edge genes}
+                 |  fdr: FDR qvalue (adjusted FDR),
+                 |  overlap: gene_hits / geneset_size,
+                 |  genes: genes matched to the data,
+                 |  ledge_genes: leading edge genes
+                 | }
 
 
     """
@@ -119,14 +121,16 @@ def ssgsea(data, gene_sets, outdir=None, sample_norm_method='rank', min_size=15,
              and normalized enrichment score by obj.res2d.
              if permutation_num > 0, additional results contain::
 
-                 | {es: enrichment score,
+                 | {
+                 |  term: gene set name
+                 |  es: enrichment score,
                  |  nes: normalized enrichment score,
-                 |  p: P-value,
-                 |  fdr: FDR,
-                 |  size: gene set size,
-                 |  matched_size: genes matched to the data,
-                 |  genes: gene names from the data set
-                 |  ledge_genes: leading edge genes, if permutation_num >0}
+                 |  p: P-value (if permutation_num > 0),
+                 |  fdr: FDR qvalue (adjusted FDR) (if permutation_num > 0),
+                 |  overlap: gene_hits / geneset_size,
+                 |  genes: genes matched to the data,
+                 |  ledge_genes: leading edge genes
+                 | }
 
 
     """
@@ -162,14 +166,16 @@ def prerank(rnk, gene_sets, outdir=None, pheno_pos='Pos', pheno_neg='Neg',
     :return: Return a Prerank obj. All results store to  a dictionary, obj.results,
              where contains::
 
-                 | {es: enrichment score,
+                 | {
+                 |  term: gene set name
+                 |  es: enrichment score,
                  |  nes: normalized enrichment score,
                  |  p: P-value,
-                 |  fdr: FDR,
-                 |  size: gene set size,
-                 |  matched_size: genes matched to the data,
-                 |  genes: gene names from the data set
-                 |  ledge_genes: leading edge genes}
+                 |  fdr: FDR qvalue (adjusted FDR),
+                 |  overlap: gene_hits / geneset_size,
+                 |  genes: genes matched to the data,
+                 |  ledge_genes: leading edge genes
+                 | }
 
 
     """
