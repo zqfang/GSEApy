@@ -154,8 +154,8 @@ class GSEAPlot(object):
         self._norm = MidpointNormalize(midpoint=0)
         # dataFrame of ranked matrix scores
         self._x = np.arange(len(rank_metric))
-        self.rankings = rank_metric.values
-        self.RES = RES
+        self.rankings = np.asarray(rank_metric)
+        self.RES = np.asarray(RES)
         self._im_matrix = np.tile(self.rankings, (2, 1))
 
         self.figsize = figsize

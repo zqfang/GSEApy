@@ -36,8 +36,9 @@ class GSEAbase(object):
         self.verbose = verbose
         self._threads = threads
         self.ENRICHR_URL = enrichr_url
-        self.pheno_pos = None
-        self.pheno_neg = None
+        self.pheno_pos = ''
+        self.pheno_neg = ''
+        self.permutation_num = 0
 
         self._set_cores()
         # init logger
@@ -260,32 +261,36 @@ class GSEAbase(object):
         self.heatmat = datAB
         return
 
-    def _plotting(self, rank_metric: pd.Series):
+    def _plotting(self, metric: Dict[str, Union[pd.Series, pd.DataFrame]]):
         """ Plotting API.
-            :param rank_metric: sorted pd.Series with rankings values.
+            :param metric: sorted pd.Series with rankings values.
         """
 
         # no values need to be returned
         if self._outdir is None:
             return
+        indices = self.res2d['NES'].abs().sort_values(ascending=False).index
+        
         # Plotting
-        for i, record in self.res2d.iterrows():
-            if self.module != 'ssgsea' and record['FDR q-val'] > 0.05:
+        for i, idx in enumerate(indices):
+            record = self.res2d.iloc[idx]
+            if self.module != 'ssgsea' and record['FDR q-val'] > 0.25:
                 continue
-            if i >= self.graph_num:
+            if i >= self.graph_num: # already sorted by abs(NES) in descending order
                 break
-            hit = record['hits']
-            NES = 'NES' if self.module != 'ssgsea' else 'ES'
+            if self.module != 'ssgsea':
+                rank_metric = metric[self.module]
+                outdir = self.outdir 
+                hit = self.results[record['Term']]['hits']
+                RES = self.results[record['Term']]['RES']
+            else:
+                rank_metric = metric[record['Name']]
+                hit = self.results[record['Name']][record['Term']]['hits']
+                outdir = os.path.join(self.outdir, record['Name'])
+                RES = self.results[record['Name']][record['Term']]['RES']
+                mkdirs(outdir)
             term = record['Term'].replace('/', '_').replace(":", "_")
-            outfile = '{0}/{1}.{2}.{3}'.format(self.outdir,
-                                               term, self.module, self.format)
-            gseaplot(rank_metric=rank_metric, term=term, hit_indices=hit,
-                     nes=record[NES], pval=record['NOM p-val'],
-                     fdr=record['FDR q-val'], RES=record['RES'],
-                     pheno_pos=self.pheno_pos,
-                     pheno_neg=self.pheno_neg,
-                     figsize=self.figsize,
-                     ofname=outfile)
+            outfile = os.path.join(outdir, '{0}.{1}'.format(term, self.format))
 
             if self.module == 'gsea':
                 outfile2 = "{0}/{1}.heatmap.{2}".format(
@@ -296,69 +301,111 @@ class GSEAbase(object):
                 heatmap(df=heatmat, title=term, ofname=outfile2,
                         z_score=0, figsize=(width, height),
                         xticklabels=True, yticklabels=True)
+            
+            if not (self.module == 'ssgsea' and self.permutation_num == 0):
+                # skip plotting when ssgsea and nperm=0
+                gseaplot(rank_metric=rank_metric, 
+                    term=term, 
+                    hits=hit,
+                    nes=record['NES'], pval=record['NOM p-val'],
+                    fdr=record['FDR q-val'], RES=RES,
+                    pheno_pos=self.pheno_pos,
+                    pheno_neg=self.pheno_neg,
+                    figsize=self.figsize,
+                    ofname=outfile)
 
-    def _to_df(self, gsea_summary,
+    def _to_df(self, gsea_summary: List[Dict],
                gmt: Dict[str, List[str]],
-               rank_metric: pd.Series):
+               metric: Dict[str, pd.DataFrame]) -> pd.DataFrame:
         """Convernt GSEASummary to DataFrame
 
         rank_metric: Must be sorted in descending order already
         """
 
-        outcol = ['term', 'es', 'nes', 'pval', 'fdr', 'fwerp', 'Tag %', 'Gene %', 
-                  'Lead_genes', 'Matched_genes', 'hits', 'RES']
-        res_df = []
+        res_df = pd.DataFrame(index=range(len(gsea_summary)), 
+                              columns=['name', 'term', 'es', 'nes', 'pval', 'fdr', 
+                              'fwerp', 'tag %', 'gene %', 
+                              'lead_genes', 'matched_genes', 'hits', 'RES'])
         # res = OrderedDict()
-        for gs in gsea_summary:
+
+        for i, gs in enumerate(gsea_summary):
             # sample = '' if gs.name is None else gs.name
             # reformat gene list.
-            _genes = rank_metric.index.values[gs.hits]
+            name = gs.name if gs.name else self.module
+            _genes = metric[name].index.values[gs.hits]
             genes = ",".join([str(g).strip() for g in _genes])
-
             RES = np.array(gs.run_es)
             # extract leading edge genes
             if float(gs.es) >= 0:
                 # RES -> ndarray, ind -> list
                 es_i = RES.argmax()
                 ldg_pos = list(filter(lambda x: x <= es_i, gs.hits))
-                gene_frac = (es_i + 1) / len(rank_metric)
+                gene_frac = (es_i + 1) / len(metric[name])
             else:
                 es_i = RES.argmin()
                 ldg_pos = list(filter(lambda x: x >= es_i, gs.hits))
                 ldg_pos.reverse()
-                gene_frac = (len(rank_metric) - es_i)/ len(rank_metric)
+                gene_frac = (len(metric[name]) - es_i)/ len(metric[name])
 
             # tag_frac = len(ldg_pos) / len(gmt[gs.term])
             lead_genes = ','.join(
-                list(map(str, rank_metric.iloc[ldg_pos].index)))
+                list(map(str, metric[name].iloc[ldg_pos].index)))
             tag_frac = "%s/%s" % (len(ldg_pos), len(gmt[gs.term]))
-            e = [gs.term, gs.es, gs.nes, gs.pval, gs.fdr, gs.fwerp,
-                 tag_frac, gene_frac, lead_genes, genes, gs.hits, gs.run_es]
-            res_df.append(e)
+            e = pd.Series([name, gs.term, gs.es, gs.nes, 
+                           gs.pval, gs.fdr, gs.fwerp,
+                           tag_frac, gene_frac, lead_genes, 
+                           genes, gs.hits, gs.run_es], index=res_df.columns)
+            res_df.iloc[i,:] = e
+        return res_df  
+    
+    def to_df(self, gsea_summary: List[Dict],
+               gmt: Dict[str, List[str]],
+               rank_metric: pd.Series):
+        """Convernt GSEASummary to DataFrame
 
-        # save to dataframe
-        res_df = pd.DataFrame(res_df, columns=outcol)
-        self.results = res_df.set_index('term').to_dict(orient='index')
-        # save
-        # res_df.set_index('term', inplace=True)
-        res_df.drop(['Matched_genes', 'hits', 'RES'], axis=1, inplace=True)
-        res_df.sort_values(by=['nes'], inplace=True, ascending=False, ignore_index=True)
-        res_df.rename(columns={'term':'Term',
+        rank_metric: Must be sorted in descending order already
+        """
+        if isinstance(rank_metric, pd.DataFrame) and self.module == 'ssgsea':
+            metric = {name: rank_metric[name].sort_values(ascending=False, ignore_index=True) 
+                      for name in rank_metric.columns}
+        else:
+            metric = {self.module: rank_metric}
+
+        res_df = self._to_df(gsea_summary, gmt, metric)
+        self.results = {}
+        # save dict
+        if self.module == 'ssgsea':
+            for name, dd in res_df.groupby(['name']):
+                self.results[name] = dd.set_index('term').to_dict(orient='index')
+        else:
+            self.results = res_df.set_index('term').to_dict(orient='index')
+            res_df.sort_values(by=['nes'], inplace=True, ascending=False, ignore_index=True)
+        # trim
+        res_df.rename(columns={'name': 'Name',
+                               'term':'Term',
                                'es':'ES',
                                'nes': 'NES', 
                                'pval': 'NOM p-val', 
                                'fdr': 'FDR q-val',
-                               'fwerp': 'FWER p-val'}, inplace=True)
-
+                               'fwerp': 'FWER p-val',
+                               'tag %': 'Tag %', 
+                               'gene %': 'Gene %', 
+                               'lead_genes': 'Lead_genes'}, inplace=True)
         res_df['Gene %'] = res_df['Gene %'].map(lambda x: '{0:.2%}'.format(x))
+        # trim 
+        dc = ['RES', 'hits', 'matched_genes']
+        if self.module == 'ssgsea' and self.permutation_num == 0:
+            dc += ['NOM p-val','FWER p-val', 'FDR q-val']
+        res_df.drop(dc, axis=1, inplace=True)
         self.res2d = res_df
-        # self.results = res
-        if self._outdir is None:
-            return
-        out = os.path.join(self.outdir, 'gseapy.{b}.{c}.report.csv'.format(
-            b=self.permutation_type, c=self.module))
-        res_df.to_csv(out, index=False, float_format='%.6e')
 
+        if self._outdir is not None:
+            out = os.path.join(self.outdir, 'gseapy.{b}.{c}.report.csv'.format(
+                b=self.permutation_type, c=self.module))
+            self.res2d.to_csv(out, index=False, float_format='%.6e')
+        ## generate gseaplots
+        if not self._noplot:
+            self._plotting(metric)
         return
 
     def enrichment_score(self,
