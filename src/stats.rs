@@ -492,7 +492,7 @@ impl GSEAResult {
         }).collect();
         
         let es = EnrichmentScore::new(genes, self.nperm, self.seed, true, false);
-        let end1 = Instant::now();
+        // let end1 = Instant::now();
         for (&term, &gset) in gmt.iter() {
             let tag = es.gene.isin(gset);
             let hit = tag.iter().filter(|&x| x > &0.0).count();
@@ -516,16 +516,16 @@ impl GSEAResult {
             }).collect();
             self.summaries.append(&mut summ);
         }
-        let end2 = Instant::now();
-        println!("Calculation time: {:.2?}", end2.duration_since(end1));
+        // let end2 = Instant::now();
+        // println!("Calculation time: {:.2?}", end2.duration_since(end1));
         // self.stat(); // NES
         let max = self.summaries.iter().fold(std::f64::MIN, |a, b| a.max(b.es));
         let min = self.summaries.iter().fold(std::f64::MAX, |a, b| a.min(b.es));
         let norm = max - min;
         self.summaries.iter_mut().for_each(|b| b.nes = b.es / norm);
 
-        let end3 = Instant::now();
-        println!("Statistical time: {:.2?}", end3.duration_since(end2));
+        // let end3 = Instant::now();
+        // println!("Statistical time: {:.2?}", end3.duration_since(end2));
     }
 
 

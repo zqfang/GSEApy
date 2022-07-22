@@ -270,18 +270,18 @@ class GSEAbase(object):
             return
         # Plotting
         for i, record in self.res2d.iterrows():
-            if self.module != 'ssgsea' and record['fdr'] > 0.05:
+            if self.module != 'ssgsea' and record['FDR q-val'] > 0.05:
                 continue
             if i >= self.graph_num:
                 break
             hit = record['hits']
-            NES = 'nes' if self.module != 'ssgsea' else 'es'
-            term = record['term'].replace('/', '_').replace(":", "_")
+            NES = 'NES' if self.module != 'ssgsea' else 'ES'
+            term = record['Term'].replace('/', '_').replace(":", "_")
             outfile = '{0}/{1}.{2}.{3}'.format(self.outdir,
                                                term, self.module, self.format)
             gseaplot(rank_metric=rank_metric, term=term, hit_indices=hit,
-                     nes=record[NES], pval=record['pval'],
-                     fdr=record['fdr'], RES=record['RES'],
+                     nes=record[NES], pval=record['NOM p-val'],
+                     fdr=record['FDR q-val'], RES=record['RES'],
                      pheno_pos=self.pheno_pos,
                      pheno_neg=self.pheno_neg,
                      figsize=self.figsize,
@@ -300,10 +300,13 @@ class GSEAbase(object):
     def _to_df(self, gsea_summary,
                gmt: Dict[str, List[str]],
                rank_metric: pd.Series):
-        """Convernt GSEASummary to DataFrame"""
+        """Convernt GSEASummary to DataFrame
 
-        outcol = ['term', 'es', 'nes', 'pval', 'fdr', 'fwer p-val', 'tag %', 'gene %', 
-                  'lead_genes', 'matched_genes', 'hits', 'RES']
+        rank_metric: Must be sorted in descending order already
+        """
+
+        outcol = ['term', 'es', 'nes', 'pval', 'fdr', 'fwerp', 'Tag %', 'Gene %', 
+                  'Lead_genes', 'Matched_genes', 'hits', 'RES']
         res_df = []
         # res = OrderedDict()
         for gs in gsea_summary:
@@ -338,8 +341,14 @@ class GSEAbase(object):
         self.results = res_df.set_index('term').to_dict(orient='index')
         # save
         # res_df.set_index('term', inplace=True)
-        res_df.drop(['matched_genes', 'hits', 'RES'], axis=1, inplace=True)
+        res_df.drop(['Matched_genes', 'hits', 'RES'], axis=1, inplace=True)
         res_df.sort_values(by=['nes'], inplace=True, ascending=False, ignore_index=True)
+        res_df.rename(columns={'term':'Term',
+                               'es':'ES',
+                               'nes': 'NES', 
+                               'pval': 'NOM p-val', 
+                               'fdr': 'FDR q-val',
+                               'fwerp': 'FWER p-val'}, inplace=True)
         self.res2d = res_df
         # self.results = res
         if self._outdir is None:

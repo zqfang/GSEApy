@@ -544,8 +544,8 @@ class SingleSampleGSEA(GSEAbase):
                          self.seed
                          )
 
-        outcol = ['name', 'term', 'es', 'nes', 'pval', 'fdr', 'fwer p-val', 'tag %', 'gene %',
-                  'lead_genes', 'matched_genes','hits', 'RES']
+        outcol = ['Name', 'Term', 'ES', 'NES', 'NOM p-val', 'FDR q-val', 'FWER p-val', 'Tag %', 'Gene %',
+                  'Lead_genes', 'Matched_genes','hits', 'RES']
         out = []
         for i, gs in enumerate(gsum):
             e = [gs.name, gs.term, gs.es, gs.nes, gs.pval,
@@ -553,31 +553,31 @@ class SingleSampleGSEA(GSEAbase):
             out.append(e)
         out = pd.DataFrame(out, columns=outcol)
         # plotting
-        idx_o = outcol.index('tag %')
-        idx_g = outcol.index('gene %')
-        idx_m = outcol.index('matched_genes')
-        idx_l = outcol.index('lead_genes')
-        for name, dd in out.groupby(['name']):
+        idx_o = outcol.index('Tag %')
+        idx_g = outcol.index('Gene %')
+        idx_m = outcol.index('Matched_genes')
+        idx_l = outcol.index('Lead_genes')
+        for name, dd in out.groupby(['Name']):
             rnk = df[name].sort_values(ascending=False, ignore_index=True)
             mkdirs(os.path.join(self.outdir, name))
-            dd2 = dd.sort_values(by=['nes'])
+            dd2 = dd.sort_values(by=['NES'])
             for i, gs in dd2.iterrows():
                 RES = np.array(gs.RES)
                 # extract leading edge genes
-                if float(gs.es) >= 0:
+                if float(gs['ES']) >= 0:
                     es_i = RES.argmax()
                     # RES -> ndarray, ind -> list
-                    ldg_pos = list(filter(lambda x: x <= es_i, gs.hits))
+                    ldg_pos = list(filter(lambda x: x <= es_i, gs['hits']))
                     gene_frac = (es_i + 1) / len(rnk)
                 else:
                     es_i = RES.argmin()
-                    ldg_pos = list(filter(lambda x: x >= es_i, gs.hits))
+                    ldg_pos = list(filter(lambda x: x >= es_i, gs['hits']))
                     ldg_pos.reverse()
                     gene_frac = (len(rnk) - es_i)/ len(rnk)
 
                 lead_genes = ';'.join(
                     list(map(str, rnk.iloc[ldg_pos].index)))
-                tag_frac = "%s/%s" % (len(ldg_pos), len(gmt[gs.term]))
+                tag_frac = "%s/%s" % (len(ldg_pos), len(gmt[gs['Term']]))
                 # reformat gene list.
                 _genes = rnk.index.values[gs.hits]
                 genes = ";".join([str(g).strip() for g in _genes])
@@ -590,14 +590,13 @@ class SingleSampleGSEA(GSEAbase):
                     outfile = "%s/%s/%s.%s.%s" % (self.outdir,
                                                   name, term, self.module, self.format)
                     gseaplot(rank_metric=rnk, term=term,
-                             hit_indices=gs.hits, nes=gs.nes,
-                             pval=gs.pval, fdr=gs.fdr,
-                             RES=gs.RES, pheno_pos='', pheno_neg='',
+                             hit_indices=gs['hits'], nes=gs['NES'],
+                             pval=gs['NOM p-val'], fdr=gs['FDR q-val'],
+                             RES=gs['RES'], pheno_pos='', pheno_neg='',
                              figsize=self.figsize, ofname=outfile)
-
-        out.drop(['RES', 'hits', 'matched_genes'], axis=1, inplace=True)
+        out.drop(['RES', 'hits', 'Matched_genes'], axis=1, inplace=True)
         if self.permutation_num < 1:
-            out.drop(['pval', 'fdr'], axis=1, inplace=True)
+            out.drop(['NOM p-val', 'FDR q-val'], axis=1, inplace=True)
         self.res2d = out
         if self._outdir is None:
             return

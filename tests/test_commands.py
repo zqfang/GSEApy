@@ -72,7 +72,7 @@ def test_fdr_gsea(gseaGCT, gseaCLS, geneGMT):
         permutation_num=47,
         seed=7,
     )
-    assert gs_res.res2d['pval'].max() > 0.0
+    assert gs_res.res2d['NOM p-val'].max() > 0.0
     tmpdir.cleanup()
 
 def test_prerank(prernk, geneGMT):
