@@ -103,7 +103,7 @@ def main():
         enr.set_organism()
         enr.run()
     elif subcommand == "biomart":
-        from .parser import Biomart
+        from .biomart import Biomart
 
         # read input file or a argument
         name, value = args.filter

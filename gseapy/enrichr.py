@@ -12,9 +12,8 @@ from tempfile import TemporaryDirectory
 from time import sleep
 
 from numpy import isscalar
-from pkg_resources import resource_filename
 from gseapy.utils import *
-from gseapy.parser import Biomart
+from gseapy.biomart import Biomart
 from gseapy.plot import barplot
 from gseapy.stats import calc_pvalues, multiple_testing_correction
 from typing import Tuple, Union, List, Dict, Iterable, Optional, AnyStr, Set, Any
