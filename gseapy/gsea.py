@@ -524,6 +524,8 @@ class SingleSampleGSEA(GSEAbase):
         # clean up all outputs if _outdir is None
         if self._outdir is None:
             self._tmpdir.cleanup()
+    
+
 
     def runSamplesPermu(self, 
                         df: pd.DataFrame, 
@@ -544,10 +546,18 @@ class SingleSampleGSEA(GSEAbase):
                          self.seed
                          )
 
-        outcol = ['Name', 'Term', 'ES', 'NES', 'NOM p-val', 'FDR q-val', 'FWER p-val', 'Tag %', 'Gene %',
+        self.to_df(gsum, df)
+        return
+
+    def to_df(self, 
+              summaries: List[Dict], 
+              gmt: Dict[str, List[str]], 
+              gene_exp: pd.DataFrame):
+        outcol = ['Name', 'Term', 'ES', 'NES', 'NOM p-val', 
+                  'FDR q-val', 'FWER p-val', 'Tag %', 'Gene %',
                   'Lead_genes', 'Matched_genes','hits', 'RES']
         out = []
-        for i, gs in enumerate(gsum):
+        for i, gs in enumerate(summaries):
             e = [gs.name, gs.term, gs.es, gs.nes, gs.pval,
                  gs.fdr, gs.fwerp, '', '', '', '', gs.hits, gs.run_es]
             out.append(e)
@@ -558,11 +568,11 @@ class SingleSampleGSEA(GSEAbase):
         idx_m = outcol.index('Matched_genes')
         idx_l = outcol.index('Lead_genes')
         for name, dd in out.groupby(['Name']):
-            rnk = df[name].sort_values(ascending=False, ignore_index=True)
+            rnk = gene_exp[name].sort_values(ascending=False, ignore_index=True)
             mkdirs(os.path.join(self.outdir, name))
             dd2 = dd.sort_values(by=['NES'])
             for i, gs in dd2.iterrows():
-                RES = np.array(gs.RES)
+                RES = np.array(gs['RES'])
                 # extract leading edge genes
                 if float(gs['ES']) >= 0:
                     es_i = RES.argmax()
@@ -575,18 +585,18 @@ class SingleSampleGSEA(GSEAbase):
                     ldg_pos.reverse()
                     gene_frac = (len(rnk) - es_i)/ len(rnk)
 
-                lead_genes = ';'.join(
+                lead_genes = ','.join(
                     list(map(str, rnk.iloc[ldg_pos].index)))
                 tag_frac = "%s/%s" % (len(ldg_pos), len(gmt[gs['Term']]))
                 # reformat gene list.
-                _genes = rnk.index.values[gs.hits]
-                genes = ";".join([str(g).strip() for g in _genes])
+                _genes = rnk.index.values[gs['hits']]
+                genes = ",".join([str(g).strip() for g in _genes])
                 out.iloc[i, idx_o] = tag_frac
                 out.iloc[i, idx_g] = gene_frac
                 out.iloc[i, idx_m] = genes
                 out.iloc[i, idx_l] = lead_genes
                 if (not self._noplot) and i < self.graph_num:
-                    term = gs.term.replace('/', '_').replace(":", "_")
+                    term = gs['Term'].replace('/', '_').replace(":", "_")
                     outfile = "%s/%s/%s.%s.%s" % (self.outdir,
                                                   name, term, self.module, self.format)
                     gseaplot(rank_metric=rnk, term=term,
@@ -597,6 +607,7 @@ class SingleSampleGSEA(GSEAbase):
         out.drop(['RES', 'hits', 'Matched_genes'], axis=1, inplace=True)
         if self.permutation_num < 1:
             out.drop(['NOM p-val', 'FDR q-val'], axis=1, inplace=True)
+        out['Gene %'] = out['Gene %'].map(lambda x: '{0:.2%}'.format(x))
         self.res2d = out
         if self._outdir is None:
             return
@@ -604,8 +615,6 @@ class SingleSampleGSEA(GSEAbase):
             a="permut_genes." if self.permutation_num > 0 else '')
         out.to_csv(os.path.join(self.outdir, outcsv),
                    index=False, float_format='%.6e')
-        return
-
 
 
 class Replot(GSEAbase):

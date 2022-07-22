@@ -313,7 +313,7 @@ class GSEAbase(object):
             # sample = '' if gs.name is None else gs.name
             # reformat gene list.
             _genes = rank_metric.index.values[gs.hits]
-            genes = ";".join([str(g).strip() for g in _genes])
+            genes = ",".join([str(g).strip() for g in _genes])
 
             RES = np.array(gs.run_es)
             # extract leading edge genes
@@ -329,7 +329,7 @@ class GSEAbase(object):
                 gene_frac = (len(rank_metric) - es_i)/ len(rank_metric)
 
             # tag_frac = len(ldg_pos) / len(gmt[gs.term])
-            lead_genes = ';'.join(
+            lead_genes = ','.join(
                 list(map(str, rank_metric.iloc[ldg_pos].index)))
             tag_frac = "%s/%s" % (len(ldg_pos), len(gmt[gs.term]))
             e = [gs.term, gs.es, gs.nes, gs.pval, gs.fdr, gs.fwerp,
@@ -349,6 +349,8 @@ class GSEAbase(object):
                                'pval': 'NOM p-val', 
                                'fdr': 'FDR q-val',
                                'fwerp': 'FWER p-val'}, inplace=True)
+
+        res_df['Gene %'] = res_df['Gene %'].map(lambda x: '{0:.2%}'.format(x))
         self.res2d = res_df
         # self.results = res
         if self._outdir is None:

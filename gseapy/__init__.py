@@ -2,6 +2,7 @@ from .gsea import Replot, Prerank, GSEA, SingleSampleGSEA
 from .enrichr import Enrichr
 from .parser import get_library_name
 from .plot import barplot, dotplot, gseaplot, heatmap
+from .__main__ import __version__
 
 
 def gsea(data, gene_sets, cls, outdir=None, min_size=15, max_size=500, permutation_num=1000,
@@ -69,9 +70,9 @@ def gsea(data, gene_sets, cls, outdir=None, min_size=15, max_size=500, permutati
                  |  nes: normalized enrichment score,
                  |  pval:  Nominal p-value (from the null distribution of the gene set,
                  |  fdr: FDR qvalue (adjusted False Discory Rate),
-                 |  fwer pval: Family wise error rate p-values, 
-                 |  tag %: Percent of gene set before running enrichment,
-                 |  gene %: Percent of gene list before running enrichment peak,
+                 |  fwerp: Family wise error rate p-values, 
+                 |  tag %: Percent of gene set before running enrichment peak (ES),
+                 |  gene %: Percent of gene list before running enrichment peak (ES),
                  |  lead_genes: leading edge genes (gene list before running enrichment peak),
                  |  matched genes: genes matched to the data,
                  | }
@@ -127,9 +128,9 @@ def ssgsea(data, gene_sets, outdir=None, sample_norm_method='rank', min_size=15,
                  |  nes: normalized enrichment score,
                  |  pval:  Nominal p-value (from the null distribution of the gene set (if permutation_num > 0),
                  |  fdr: FDR qvalue (adjusted FDR) (if permutation_num > 0),
-                 |  fwer pval: Family wise error rate p-values, 
-                 |  tag %: Percent of gene set before running enrichment,
-                 |  gene %: Percent of gene list before running enrichment peak,
+                 |  fwerp: Family wise error rate p-values (if permutation_num > 0), 
+                 |  tag %: Percent of gene set before running enrichment peak (ES),
+                 |  gene %: Percent of gene list before running enrichment peak (ES),
                  |  lead_genes: leading edge genes (gene list before running enrichment peak),
                  |  matched genes: genes matched to the data,
                  | }
@@ -174,9 +175,9 @@ def prerank(rnk, gene_sets, outdir=None, pheno_pos='Pos', pheno_neg='Neg',
                  |  nes: normalized enrichment score,
                  |  pval:  Nominal p-value (from the null distribution of the gene set,
                  |  fdr: FDR qvalue (adjusted False Discory Rate),
-                 |  fwer pval: Family wise error rate p-values, 
-                 |  tag %: Percent of gene set before running enrichment,
-                 |  gene %: Percent of gene list before running enrichment peak,
+                 |  fwerp: Family wise error rate p-values, 
+                 |  tag %: Percent of gene set before running enrichment peak (ES),
+                 |  gene %: Percent of gene list before running enrichment peak (ES),
                  |  lead_genes: leading edge genes (gene list before running enrichment peak),
                  |  matched genes: genes matched to the data,
                  | }
