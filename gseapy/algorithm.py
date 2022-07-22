@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import sys, logging
-import numpy as np
+import logging
+import sys
 from math import ceil
+
+import numpy as np
+from joblib import Parallel, delayed
+from collections import Counter
 from gseapy.stats import multiple_testing_correction
-from joblib import delayed, Parallel
 
 
 
@@ -12,23 +15,23 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
                             seed=None, single=False, scale=False):
     """Next generation algorithm of GSEA and ssGSEA. Works for 3d array
 
-        :param gene_mat:        the ordered gene list(vector) with or without gene indices matrix.
-        :param cor_mat:         correlation vector or matrix  (e.g. signal to noise scores)
-                                corresponding to the genes in the gene list or matrix.
-        :param dict gene_sets:  gmt file dict.
-        :param float weighted_score_type:     weighting by the correlation.
-                                options: 0(classic), 1, 1.5, 2. default:1 for GSEA and 0.25 for ssGSEA.
-        :param int nperm:       permutation times.
-        :param bool scale:      If True, normalize the scores by number of genes_mat.
-        :param bool single:     If True, use ssGSEA algorithm, otherwise use GSEA.
-        :param seed:              Random state for initialize gene list shuffling.
-                                Default: seed=None
-        :return: a tuple contains::
+    :param gene_mat:        the ordered gene list(vector) with or without gene indices matrix.
+    :param cor_mat:         correlation vector or matrix  (e.g. signal to noise scores)
+                            corresponding to the genes in the gene list or matrix.
+    :param dict gene_sets:  gmt file dict.
+    :param float weighted_score_type:     weighting by the correlation.
+                            options: 0(classic), 1, 1.5, 2. default:1 for GSEA and 0.25 for ssGSEA.
+    :param int nperm:       permutation times.
+    :param bool scale:      If True, normalize the scores by number of genes_mat.
+    :param bool single:     If True, use ssGSEA algorithm, otherwise use GSEA.
+    :param seed:              Random state for initialize gene list shuffling.
+                            Default: seed=None
+    :return: a tuple contains::
 
-                 | ES: Enrichment score (real number between -1 and +1), for ssGSEA, set scale eq to True.
-                 | ESNULL: Enrichment score calculated from random permutation.
-                 | Hits_Indices: Indices of genes if genes are included in gene_set.
-                 | RES: The running enrichment score for all locations in the gene list.
+             | ES: Enrichment score (real number between -1 and +1), for ssGSEA, set scale eq to True.
+             | ESNULL: Enrichment score calculated from random permutation.
+             | Hits_Indices: Indices of genes if genes are included in gene_set.
+             | RES: The running enrichment score for all locations in the gene list.
 
     """
     rs = np.random.RandomState(seed)
@@ -45,7 +48,7 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
         raise ValueError("weighted_score_type should be postive numerics")
 
     cor_mat = np.abs(cor_mat)
-    if cor_mat.ndim ==1:
+    if cor_mat.ndim == 1:
         # ssGSEA or Prerank
         # genestes->M, genes->N, perm-> axis=2
         N, M = len(gene_mat), len(keys)
@@ -53,18 +56,27 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
         # for 1d ndarray of gene_mat, set assume_unique=True,
         # means the input arrays are both assumed to be unique,
         # which can speed up the calculation.
-        tag_indicator = np.vstack([np.in1d(gene_mat, gene_sets[key], assume_unique=True) for key in keys])
+        tag_indicator = np.vstack(
+            [np.in1d(gene_mat, gene_sets[key], assume_unique=True) for key in keys]
+        )
         tag_indicator = tag_indicator.astype(int)
         # index of hits
-        hit_ind = [ np.flatnonzero(tag).tolist() for tag in tag_indicator ]
+        hit_ind = [np.flatnonzero(tag).tolist() for tag in tag_indicator]
         # generate permutated hits matrix
-        perm_tag_tensor = np.repeat(tag_indicator, nperm+1).reshape((M,N,nperm+1))
+        perm_tag_tensor = np.repeat(tag_indicator, nperm + 1).reshape((M, N, nperm + 1))
         # shuffle matrix, last matrix is not shuffled when nperm > 0
-        if nperm: np.apply_along_axis(lambda x: np.apply_along_axis(rs.shuffle,0,x),1, perm_tag_tensor[:,:,:-1])
+        if nperm:
+            np.apply_along_axis(
+                lambda x: np.apply_along_axis(rs.shuffle, 0, x),
+                1,
+                perm_tag_tensor[:, :, :-1],
+            )
         # missing hits
         no_tag_tensor = 1 - perm_tag_tensor
         # calculate numerator, denominator of each gene hits
-        rank_alpha = (perm_tag_tensor*cor_mat[np.newaxis,:,np.newaxis])** weighted_score_type
+        rank_alpha = (
+            perm_tag_tensor * cor_mat[np.newaxis, :, np.newaxis]
+        ) ** weighted_score_type
 
     elif cor_mat.ndim == 2:
         # GSEA
@@ -76,67 +88,85 @@ def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, n
         # genestes->M, genes->N, perm-> axis=2
         # don't use assume_unique=True in 2d array when use np.isin().
         # elements in gene_mat are not unique, or will cause unwanted results
-        tag_indicator = np.vstack([np.in1d(genes, gene_sets[key], assume_unique=True) for key in keys])
+        tag_indicator = np.vstack(
+            [np.in1d(genes, gene_sets[key], assume_unique=True) for key in keys]
+        )
         tag_indicator = tag_indicator.astype(int)
-        perm_tag_tensor = np.stack([tag.take(genes_ind).T for tag in tag_indicator], axis=0)
-        #index of hits
-        hit_ind = [ np.flatnonzero(tag).tolist() for tag in perm_tag_tensor[:,:,-1] ]
+        perm_tag_tensor = np.stack(
+            [tag.take(genes_ind).T for tag in tag_indicator], axis=0
+        )
+        # index of hits
+        hit_ind = [np.flatnonzero(tag).tolist() for tag in perm_tag_tensor[:, :, -1]]
         # nohits
         no_tag_tensor = 1 - perm_tag_tensor
         # calculate numerator, denominator of each gene hits
-        rank_alpha = (perm_tag_tensor*cor_mat[np.newaxis,:,:])** weighted_score_type
+        rank_alpha = (
+            perm_tag_tensor * cor_mat[np.newaxis, :, :]
+        ) ** weighted_score_type
     else:
         logging.error("Program die because of unsupported input")
         raise ValueError("Correlation vector or matrix (cor_mat) is not supported")
 
     # Nhint = tag_indicator.sum(1)
     # Nmiss =  N - Nhint
-    axis=1
+    axis = 1
     P_GW_denominator = np.sum(rank_alpha, axis=axis, keepdims=True)
     P_NG_denominator = np.sum(no_tag_tensor, axis=axis, keepdims=True)
-    REStensor = np.cumsum(rank_alpha / P_GW_denominator - no_tag_tensor / P_NG_denominator, axis=axis)
+    REStensor = np.cumsum(
+        rank_alpha / P_GW_denominator - no_tag_tensor / P_NG_denominator, axis=axis
+    )
     # ssGSEA: scale es by gene numbers ?
     # https://gist.github.com/gaoce/39e0907146c752c127728ad74e123b33
-    if scale: REStensor = REStensor / len(gene_mat)
+    if scale:
+        REStensor = REStensor / len(gene_mat)
     if single:
-        #ssGSEA
+        # ssGSEA
         esmatrix = REStensor.sum(axis=axis)
     else:
-        #GSEA
+        # GSEA
         esmax, esmin = REStensor.max(axis=axis), REStensor.min(axis=axis)
-        esmatrix = np.where(np.abs(esmax)>np.abs(esmin), esmax, esmin)
+        esmatrix = np.where(np.abs(esmax) > np.abs(esmin), esmax, esmin)
 
-    es, esnull, RES = esmatrix[:,-1], esmatrix[:,:-1], REStensor[:,:,-1]
+    es, esnull, RES = esmatrix[:, -1], esmatrix[:, :-1], REStensor[:, :, -1]
 
     return es, esnull, hit_ind, RES
 
 
-def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
-                          ascending, seed=None, skip_last=False):
+def ranking_metric_tensor(
+    exprs,
+    method,
+    permutation_num,
+    pos,
+    neg,
+    classes,
+    ascending,
+    seed=None,
+    skip_last=False,
+):
     """Build shuffled ranking matrix when permutation_type eq to phenotype.
-       Works for 3d array.
+    Works for 3d array.
 
-       :param exprs:   gene_expression DataFrame, gene_name indexed.
-       :param str method:  calculate correlation or ranking. methods including:
-                           1. 'signal_to_noise' (s2n) or 'abs_signal_to_noise' (abs_s2n).
-                           2. 't_test'.
-                           3. 'ratio_of_classes' (also referred to as fold change).
-                           4. 'diff_of_classes'.
-                           5. 'log2_ratio_of_classes'.
-       :param int permuation_num: how many times of classes is being shuffled
-       :param str pos: one of labels of phenotype's names.
-       :param str neg: one of labels of phenotype's names.
-       :param list classes:  a list of phenotype labels, to specify which column of
-                             dataframe belongs to what class of phenotype.
-       :param bool ascending:  bool. Sort ascending vs. descending.
-       :param seed: random_state seed
-       :param bool skip_last: (internal use only) whether to skip the permutation of the last rankings.  
+    :param exprs:   gene_expression DataFrame, gene_name indexed.
+    :param str method:  calculate correlation or ranking. methods including:
+                        1. 'signal_to_noise' (s2n) or 'abs_signal_to_noise' (abs_s2n).
+                        2. 't_test'.
+                        3. 'ratio_of_classes' (also referred to as fold change).
+                        4. 'diff_of_classes'.
+                        5. 'log2_ratio_of_classes'.
+    :param int permuation_num: how many times of classes is being shuffled
+    :param str pos: one of labels of phenotype's names.
+    :param str neg: one of labels of phenotype's names.
+    :param list classes:  a list of phenotype labels, to specify which column of
+                          dataframe belongs to what class of phenotype.
+    :param bool ascending:  bool. Sort ascending vs. descending.
+    :param seed: random_state seed
+    :param bool skip_last: (internal use only) whether to skip the permutation of the last rankings.
 
-       :return:
-                returns two 2d ndarray with shape (nperm, gene_num).
+    :return:
+             returns two 2d ndarray with shape (nperm, gene_num).
 
-                | cor_mat_indices: the indices of sorted and permutated (exclude last row) ranking matrix.
-                | cor_mat: sorted and permutated (exclude last row) ranking matrix.
+             | cor_mat_indices: the indices of sorted and permutated (exclude last row) ranking matrix.
+             | cor_mat: sorted and permutated (exclude last row) ranking matrix.
 
     """
     rs = np.random.RandomState(seed)
@@ -144,74 +174,90 @@ def ranking_metric_tensor(exprs, method, permutation_num, pos, neg, classes,
     G, S = exprs.shape
     # genes = exprs.index.values
     expr_mat = exprs.values.T
-    perm_cor_tensor = np.tile(expr_mat, (permutation_num,1,1))
+    perm_cor_tensor = np.tile(expr_mat, (permutation_num, 1, 1))
     if skip_last:
         # random shuffle on the first dim, the last matrix (expr_mat) is not shuffled
-        for arr in perm_cor_tensor[:-1]: rs.shuffle(arr)
+        for arr in perm_cor_tensor[:-1]:
+            rs.shuffle(arr)
     else:
-        for arr in perm_cor_tensor: rs.shuffle(arr)   
-    # metrics     
+        for arr in perm_cor_tensor:
+            rs.shuffle(arr)
+    # metrics
     classes = np.array(classes)
     pos = classes == pos
     neg = classes == neg
     n_pos = np.sum(pos)
     n_neg = np.sum(neg)
-    pos_cor_mean = perm_cor_tensor[:,pos,:].mean(axis=1)
-    neg_cor_mean = perm_cor_tensor[:,neg,:].mean(axis=1)
-    pos_cor_std = perm_cor_tensor[:,pos,:].std(axis=1, ddof=1)
-    neg_cor_std = perm_cor_tensor[:,neg,:].std(axis=1, ddof=1)
+    pos_cor_mean = perm_cor_tensor[:, pos, :].mean(axis=1)
+    neg_cor_mean = perm_cor_tensor[:, neg, :].mean(axis=1)
+    pos_cor_std = perm_cor_tensor[:, pos, :].std(axis=1, ddof=1)
+    neg_cor_std = perm_cor_tensor[:, neg, :].std(axis=1, ddof=1)
 
-    if method in ['signal_to_noise', 's2n']:
-        cor_mat = (pos_cor_mean - neg_cor_mean)/(pos_cor_std + neg_cor_std)
-    elif method in ['abs_signal_to_noise', 'abs_s2n']:
-        cor_mat = np.abs((pos_cor_mean - neg_cor_mean)/(pos_cor_std + neg_cor_std))
-    elif method == 't_test':
-        denom = np.sqrt((pos_cor_std**2)/n_pos  + (neg_cor_std**2)/n_neg)
-        cor_mat = (pos_cor_mean - neg_cor_mean)/ denom
-    elif method == 'ratio_of_classes':
+    if method in ["signal_to_noise", "s2n"]:
+        cor_mat = (pos_cor_mean - neg_cor_mean) / (pos_cor_std + neg_cor_std)
+    elif method in ["abs_signal_to_noise", "abs_s2n"]:
+        cor_mat = np.abs((pos_cor_mean - neg_cor_mean) / (pos_cor_std + neg_cor_std))
+    elif method == "t_test":
+        denom = np.sqrt((pos_cor_std**2) / n_pos + (neg_cor_std**2) / n_neg)
+        cor_mat = (pos_cor_mean - neg_cor_mean) / denom
+    elif method == "ratio_of_classes":
         cor_mat = pos_cor_mean / neg_cor_mean
-    elif method == 'diff_of_classes':
-        cor_mat  = pos_cor_mean - neg_cor_mean
-    elif method == 'log2_ratio_of_classes':
-        cor_mat  =  np.log2(pos_cor_mean / neg_cor_mean)
+    elif method == "diff_of_classes":
+        cor_mat = pos_cor_mean - neg_cor_mean
+    elif method == "log2_ratio_of_classes":
+        cor_mat = np.log2(pos_cor_mean / neg_cor_mean)
     else:
         logging.error("Please provide correct method name!!!")
-        raise LookupError("Input method: %s is not supported"%method)
+        raise LookupError("Input method: %s is not supported" % method)
     # return matix[nperm+1, perm_cors]
     cor_mat_ind = cor_mat.argsort()
     # ndarray: sort in place
     cor_mat.sort()
     # genes_mat = genes.take(cor_mat_ind)
-    if ascending: return cor_mat_ind, cor_mat
+    if ascending:
+        return cor_mat_ind, cor_mat
     # descending order of ranking and genes
     # return genes_mat[:,::-1], cor_mat[:,::-1]
     return cor_mat_ind[:, ::-1], cor_mat[:, ::-1]
 
 
-def gsea_compute_tensor(data, gmt, n, weighted_score_type, permutation_type,
-                 method, pheno_pos, pheno_neg, classes, ascending,
-                 processes=1, seed=None, single=False, scale=False):
+def gsea_compute_tensor(
+    data,
+    gmt,
+    n,
+    weighted_score_type,
+    permutation_type,
+    method,
+    pheno_pos,
+    pheno_neg,
+    classes,
+    ascending,
+    processes=1,
+    seed=None,
+    single=False,
+    scale=False,
+):
     """compute enrichment scores and enrichment nulls.
-       This function will split large array into smaller pieces to advoid memroy overflow.
+    This function will split large array into smaller pieces to advoid memroy overflow.
 
-        :param data: preprocessed expression dataframe or a pre-ranked file if prerank=True.
-        :param dict gmt: all gene sets in .gmt file. need to call load_gmt() to get results.
-        :param int n: permutation number. default: 1000.
-        :param str method: ranking_metric method. see above.
-        :param str pheno_pos: one of labels of phenotype's names.
-        :param str pheno_neg: one of labels of phenotype's names.
-        :param list classes: a list of phenotype labels, to specify which column of dataframe belongs to what category of phenotype.
-        :param float weighted_score_type: default:1
-        :param bool ascending: sorting order of rankings. Default: False.
-        :param seed: random seed. Default: np.random.RandomState()
-        :param bool scale: if true, scale es by gene number.
+     :param data: preprocessed expression dataframe or a pre-ranked file if prerank=True.
+     :param dict gmt: all gene sets in .gmt file. need to call load_gmt() to get results.
+     :param int n: permutation number. default: 1000.
+     :param str method: ranking_metric method. see above.
+     :param str pheno_pos: one of labels of phenotype's names.
+     :param str pheno_neg: one of labels of phenotype's names.
+     :param list classes: a list of phenotype labels, to specify which column of dataframe belongs to what category of phenotype.
+     :param float weighted_score_type: default:1
+     :param bool ascending: sorting order of rankings. Default: False.
+     :param seed: random seed. Default: np.random.RandomState()
+     :param bool scale: if true, scale es by gene number.
 
-        :return: a tuple contains::
+     :return: a tuple contains::
 
-                | zipped results of es, nes, pval, fdr.
-                | nested list of hit indices of input gene_list.
-                | nested list of ranked enrichment score of each input gene_sets.
-                | list of enriched terms
+             | zipped results of es, nes, pval, fdr.
+             | nested list of hit indices of input gene_list.
+             | nested list of ranked enrichment score of each input gene_sets.
+             | list of enriched terms
 
     """
     w = weighted_score_type
@@ -219,25 +265,28 @@ def gsea_compute_tensor(data, gmt, n, weighted_score_type, permutation_type,
     genes_mat, cor_mat = data.index.values, data.values
     base = 5 if data.shape[0] >= 5000 else 10
     ## phenotype permutation
-    np.random.seed(seed) # control the ranodm numbers
+    np.random.seed(seed)  # control the ranodm numbers
 
     if permutation_type == "phenotype":
         # shuffling classes and generate random correlation rankings
         logging.debug("Start to permutate classes..............................")
 
-        if (n + 1) % base == 0: # n+1: last permute is for orignial ES calculation
-            num_bases = [ base ] * ((n + 1) // base)
-            skip_last = [0] * ( n // base) + [1] # last is not permuted
+        if (n + 1) % base == 0:  # n+1: last permute is for orignial ES calculation
+            num_bases = [base] * ((n + 1) // base)
+            skip_last = [0] * (n // base) + [1]  # last is not permuted
         else:
-            num_bases = [ base ] * ((n + 1) // base) + [ (n +1) % base]
-            skip_last = [0] * ((n + 1) // base) + [ (n +1) % base]
+            num_bases = [base] * ((n + 1) // base) + [(n + 1) % base]
+            skip_last = [0] * ((n + 1) // base) + [(n + 1) % base]
         random_seeds = np.random.randint(np.iinfo(np.int32).max, size=len(num_bases))
         genes_ind = []
         cor_mat = []
         # split permutation array into smaller blocks to save memory
-        temp_rnk = Parallel(n_jobs=processes)(delayed(ranking_metric_tensor)(
-            data, method, b, pheno_pos, pheno_neg, classes, ascending, se, skip) 
-            for b, skip, se in zip(num_bases, skip_last, random_seeds))
+        temp_rnk = Parallel(n_jobs=processes)(
+            delayed(ranking_metric_tensor)(
+                data, method, b, pheno_pos, pheno_neg, classes, ascending, se, skip
+            )
+            for b, skip, se in zip(num_bases, skip_last, random_seeds)
+        )
 
         for k, temp in enumerate(temp_rnk):
             gi, cor = temp
@@ -246,7 +295,7 @@ def gsea_compute_tensor(data, gmt, n, weighted_score_type, permutation_type,
         genes_ind, cor_mat = np.vstack(genes_ind), np.vstack(cor_mat)
         # convert to tuple
         genes_mat = (data.index.values, genes_ind)
-    
+
     logging.debug("Start to compute es and esnulls........................")
     # Prerank, ssGSEA, GSEA
     es = []
@@ -254,7 +303,7 @@ def gsea_compute_tensor(data, gmt, n, weighted_score_type, permutation_type,
     hit_ind = []
     esnull = []
     temp_esnu = []
-    
+
     # split gmt dataset, too
     block = ceil(len(subsets) / base)
     random_seeds = np.random.randint(np.iinfo(np.int32).max, size=block)
@@ -263,16 +312,19 @@ def gsea_compute_tensor(data, gmt, n, weighted_score_type, permutation_type,
     gmt_block = []
     while i <= block:
         # you have to reseed, or all your processes are sharing the same seed value
-        rs = random_seeds[i-1]
-        gmtrim = {k: gmt.get(k) for k in subsets[m:base * i]}
+        rs = random_seeds[i - 1]
+        gmtrim = {k: gmt.get(k) for k in subsets[m : base * i]}
         gmt_block.append(gmtrim)
         m = base * i
         i += 1
     ## if permutation_type == "phenotype": n = 0
     ## NOTE for GSEA: cor_mat is 2d array, it won't permute again when call enrichment_score_tensor
-    temp_esnu = Parallel(n_jobs=processes)(delayed(enrichment_score_tensor)(
-                    genes_mat, cor_mat, gmtrim, w, n, rs, single, scale) 
-                    for gmtrim, rs in zip(gmt_block, random_seeds))
+    temp_esnu = Parallel(n_jobs=processes)(
+        delayed(enrichment_score_tensor)(
+            genes_mat, cor_mat, gmtrim, w, n, rs, single, scale
+        )
+        for gmtrim, rs in zip(gmt_block, random_seeds)
+    )
 
     # esn is a list, don't need to use append method.
     for si, temp in enumerate(temp_esnu):
@@ -288,60 +340,81 @@ def gsea_compute_tensor(data, gmt, n, weighted_score_type, permutation_type,
     return gsea_significance(es, esnull), hit_ind, RES, subsets
 
 
-
-def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
-                 method, pheno_pos, pheno_neg, classes, ascending,
-                 processes=1, seed=None, single=False, scale=False):
+def gsea_compute(
+    data,
+    gmt,
+    n,
+    weighted_score_type,
+    permutation_type,
+    method,
+    pheno_pos,
+    pheno_neg,
+    classes,
+    ascending,
+    processes=1,
+    seed=None,
+    single=False,
+    scale=False,
+):
     """compute enrichment scores and enrichment nulls.
 
-        :param data: preprocessed expression dataframe or a pre-ranked file if prerank=True.
-        :param dict gmt: all gene sets in .gmt file. need to call load_gmt() to get results.
-        :param int n: permutation number. default: 1000.
-        :param str method: ranking_metric method. see above.
-        :param str pheno_pos: one of labels of phenotype's names.
-        :param str pheno_neg: one of labels of phenotype's names.
-        :param list classes: a list of phenotype labels, to specify which column of dataframe belongs to what category of phenotype.
-        :param float weighted_score_type: default:1
-        :param bool ascending: sorting order of rankings. Default: False.
-        :param seed: random seed. Default: np.random.RandomState()
-        :param bool scale: if true, scale es by gene number.
+    :param data: preprocessed expression dataframe or a pre-ranked file if prerank=True.
+    :param dict gmt: all gene sets in .gmt file. need to call load_gmt() to get results.
+    :param int n: permutation number. default: 1000.
+    :param str method: ranking_metric method. see above.
+    :param str pheno_pos: one of labels of phenotype's names.
+    :param str pheno_neg: one of labels of phenotype's names.
+    :param list classes: a list of phenotype labels, to specify which column of dataframe belongs to what category of phenotype.
+    :param float weighted_score_type: default:1
+    :param bool ascending: sorting order of rankings. Default: False.
+    :param seed: random seed. Default: np.random.RandomState()
+    :param bool scale: if true, scale es by gene number.
 
-        :return: a tuple contains::
+    :return: a tuple contains::
 
-                | zipped results of es, nes, pval, fdr.
-                | nested list of hit indices of input gene_list.
-                | nested list of ranked enrichment score of each input gene_sets.
-                | list of enriched terms
+            | zipped results of es, nes, pval, fdr.
+            | nested list of hit indices of input gene_list.
+            | nested list of ranked enrichment score of each input gene_sets.
+            | list of enriched terms
 
     """
-    
+
     w = weighted_score_type
     subsets = sorted(gmt.keys())
     es = []
-    RES=[]
-    hit_ind=[]
-    esnull = [ [] for a in range(len(subsets)) ]
-    np.random.seed(seed) # control the ranodm numbers
+    RES = []
+    hit_ind = []
+    esnull = [[] for a in range(len(subsets))]
+    np.random.seed(seed)  # control the ranodm numbers
     logging.debug("Start to compute enrichment scores......................")
 
     if permutation_type == "phenotype":
         logging.debug("Start to permutate classes..............................")
         # this version won't split large array into smaller ones
-        genes_mat, cor_mat = ranking_metric_tensor(exprs=data, method=method,
-                                                   permutation_num=n+1,
-                                                   pos=pheno_pos, neg=pheno_neg,
-                                                   classes=classes,
-                                                   ascending=ascending, seed=seed, 
-                                                   skip_last=True)
+        genes_mat, cor_mat = ranking_metric_tensor(
+            exprs=data,
+            method=method,
+            permutation_num=n + 1,
+            pos=pheno_pos,
+            neg=pheno_neg,
+            classes=classes,
+            ascending=ascending,
+            seed=seed,
+            skip_last=True,
+        )
 
         # compute es, esnulls. hits, RES
         logging.debug("Start to compute enrichment nulls.......................")
-        es, esnull, hit_ind, RES = enrichment_score_tensor(gene_mat=genes_mat,
-                                                           cor_mat=cor_mat,
-                                                           gene_sets=gmt,
-                                                           weighted_score_type=w,
-                                                           nperm=n, seed=seed,
-                                                           single=False, scale=False,)
+        es, esnull, hit_ind, RES = enrichment_score_tensor(
+            gene_mat=genes_mat,
+            cor_mat=cor_mat,
+            gene_sets=gmt,
+            weighted_score_type=w,
+            nperm=n,
+            seed=seed,
+            single=False,
+            scale=False,
+        )
 
     else:
         # Prerank, ssGSEA, GSEA with gene_set permutation
@@ -354,14 +427,16 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
         #                                                    weighted_score_type=w,
         #                                                    nperm=n, rs=rs
         #                                                    single=single, scale=scale)
-        temp_esnu=[]
+        temp_esnu = []
         # you have to reseed, or all your processes are sharing the same seed value
         # np.random.seed(seed)
-        random_seeds= np.random.randint(np.iinfo(np.int32).max, size=len(subsets))
-        temp_esnu = Parallel(n_jobs=processes)(delayed(enrichment_score)(
-                        gl, cor_vec, gmt.get(subset), w, n, 
-                        rs, single, scale) 
-                        for subset, rs in zip(subsets, random_seeds))        
+        random_seeds = np.random.randint(np.iinfo(np.int32).max, size=len(subsets))
+        temp_esnu = Parallel(n_jobs=processes)(
+            delayed(enrichment_score)(
+                gl, cor_vec, gmt.get(subset), w, n, rs, single, scale
+            )
+            for subset, rs in zip(subsets, random_seeds)
+        )
         # esn is a list, don't need to use append method.
         for si, temp in enumerate(temp_esnu):
             e, enu, hit, rune = temp
@@ -375,13 +450,13 @@ def gsea_compute(data, gmt, n, weighted_score_type, permutation_type,
 
 def normalize(es, esnull):
     """normalize the ES(S,pi) and the observed ES(S), separately rescaling
-       the positive and negative scores by dividing the mean of the ES(S,pi).
-       
-       return: NES, NESnull
+    the positive and negative scores by dividing the mean of the ES(S,pi).
+
+    return: NES, NESnull
     """
 
-    nEnrichmentScores =np.zeros(es.shape)
-    nEnrichmentNulls=np.zeros(esnull.shape)
+    nEnrichmentScores = np.zeros(es.shape)
+    nEnrichmentNulls = np.zeros(esnull.shape)
     # esnullmean = np.zeros(es.shape)
     # # calculate nESnulls
     # for i in range(esnull.shape[0]):
@@ -402,17 +477,21 @@ def normalize(es, esnull):
     #         else:
     #             nEnrichmentNulls[i,j] = - esnull[i,j] / esnullmean[i]
 
-    esnull_pos = np.ma.MaskedArray(esnull, mask=(esnull<0)).mean(axis=1)
-    esnull_neg = np.ma.MaskedArray(esnull, mask=(esnull>=0)).mean(axis=1)
+    esnull_pos = np.ma.MaskedArray(esnull, mask=(esnull < 0)).mean(axis=1)
+    esnull_neg = np.ma.MaskedArray(esnull, mask=(esnull >= 0)).mean(axis=1)
     esnull_pos = np.array(esnull_pos)
     esnull_neg = np.array(esnull_neg)
     # NES
-    nEnrichmentScores  = np.where(es>=0, es/esnull_pos, -es/esnull_neg)
+    nEnrichmentScores = np.where(es >= 0, es / esnull_pos, -es / esnull_neg)
     # NES_NULL
-    nEnrichmentNulls = np.where(esnull>=0, esnull/esnull_pos[:,np.newaxis],
-                                          -esnull/esnull_neg[:,np.newaxis])
-    
+    nEnrichmentNulls = np.where(
+        esnull >= 0,
+        esnull / esnull_pos[:, np.newaxis],
+        -esnull / esnull_neg[:, np.newaxis],
+    )
+
     return nEnrichmentScores, nEnrichmentNulls
+
 
 def gsea_pval(es, esnull):
     """Compute nominal p-value.
@@ -424,9 +503,11 @@ def gsea_pval(es, esnull):
     """
 
     # to speed up, using numpy function to compute pval in parallel.
-    condlist = [ es < 0, es >=0]
-    choicelist = [(esnull < es.reshape(len(es),1)).sum(axis=1)/ (esnull < 0).sum(axis=1),
-                  (esnull >= es.reshape(len(es),1)).sum(axis=1)/ (esnull >= 0).sum(axis=1)]
+    condlist = [es < 0, es >= 0]
+    choicelist = [
+        (esnull < es.reshape(len(es), 1)).sum(axis=1) / (esnull < 0).sum(axis=1),
+        (esnull >= es.reshape(len(es), 1)).sum(axis=1) / (esnull >= 0).sum(axis=1),
+    ]
     pvals = np.select(condlist, choicelist)
 
     return pvals
@@ -435,7 +516,7 @@ def gsea_pval(es, esnull):
 def gsea_fdr(nEnrichmentScores, nEnrichmentNulls):
     """Create a histogram of all NES(S,pi) over all S and pi.
        Use this null distribution to compute an FDR q value.
-       
+
     :param nEnrichmentScores:  normalized ES
     :param nEnrichmentNulls:   normalized ESnulls
     :return: FDR
@@ -487,12 +568,12 @@ def gsea_fdr(nEnrichmentScores, nEnrichmentNulls):
 def gsea_significance(enrichment_scores, enrichment_nulls):
     """Compute nominal pvals, normalized ES, and FDR q value.
 
-        For a given NES(S) = NES* >= 0. The FDR is the ratio of the percentage of all (S,pi) with
-        NES(S,pi) >= 0, whose NES(S,pi) >= NES*, divided by the percentage of
-        observed S wih NES(S) >= 0, whose NES(S) >= NES*, and similarly if NES(S) = NES* <= 0.
+    For a given NES(S) = NES* >= 0. The FDR is the ratio of the percentage of all (S,pi) with
+    NES(S,pi) >= 0, whose NES(S,pi) >= NES*, divided by the percentage of
+    observed S wih NES(S) >= 0, whose NES(S) >= NES*, and similarly if NES(S) = NES* <= 0.
     """
     # For a zero by zero division (undetermined, results in a NaN),
-    np.seterr(divide='ignore', invalid='ignore')
+    np.seterr(divide="ignore", invalid="ignore")
     # import warnings
     # warnings.simplefilter("ignore")
     es = np.array(enrichment_scores)
@@ -509,13 +590,9 @@ def gsea_significance(enrichment_scores, enrichment_nulls):
     # FDR
     fdrs = gsea_fdr(nEnrichmentScores, nEnrichmentNulls)
 
-    #TODO: use multiple testing correction for ssgsea? ssGSEA2.0 use BH correction.
+    # TODO: use multiple testing correction for ssgsea? ssGSEA2.0 use BH correction.
     # https://github.com/broadinstitute/ssGSEA2.0/blob/master/src/ssGSEA2.0.R
     # line 969
     # fdrs, _ = multiple_testing_correction(pvals, alpha=0.05)
 
     return zip(enrichment_scores, nEnrichmentScores, pvals, fdrs)
-
-
-
-

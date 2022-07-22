@@ -3,3 +3,11 @@
 # build-backend = "maturin"
 requires = ["setuptools>=41.0.0", "wheel", "setuptools_rust>=0.10.2", "toml"]
 build-backend = "setuptools.build_meta"
+[tool.black]
+target-version = ['py36', 'py37', 'py38', 'py39', 'py310']
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+include_trailing_comma = true
+reverse_relative = true

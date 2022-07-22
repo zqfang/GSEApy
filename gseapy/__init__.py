@@ -1,9 +1,7 @@
 from .gsea import Replot, Prerank, GSEA, SingleSampleGSEA
 from .enrichr import Enrichr
 from .parser import get_library_name
-from .plot import dotplot, barplot, heatmap, gseaplot
-from .__main__ import __version__
-
+from .plot import barplot, dotplot, gseaplot, heatmap
 
 
 def gsea(data, gene_sets, cls, outdir=None, min_size=15, max_size=500, permutation_num=1000,
@@ -272,9 +270,14 @@ def enrichr(gene_list, gene_sets, organism='human', description='',
                            The program will try to retrieve the background information automatically.
 
                            Please Use the example code below to choose the correct dataset name:
+
                             >>> from gseapy.parser import Biomart 
-                            >>> bm = Biomart()
-                            >>> datasets = bm.get_datasets(mart='ENSEMBL_MART_ENSEMBL')
+                            >>> bm = Biomart(verbose=False, host="useast.ensembl.org")
+                            >>> bm.query(dataset='hsapiens_gene_ensembl', 
+                                         attributes=['ensembl_gene_id', 'external_gene_name', 'entrezgene_id'], 
+                                         filename='data/hsapiens_gene_ensembl.background.genes.txt')
+                           
+                           The returned file above will be the background genes for enrichr if not input specify by user.
 
     :param cutoff:   Show enriched terms which Adjusted P-value < cutoff. 
                      Only affects the output figure, not the final output file. Default: 0.05

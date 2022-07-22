@@ -22,8 +22,9 @@ except ImportError:
         from setuptools_rust import RustExtension
 
 
+
 def find_version():
-    filepath = os.path.join('gseapy', '__main__.py')
+    filepath = os.path.join("gseapy", "__main__.py")
     with open(os.path.join(os.path.dirname(__file__), filepath), encoding="utf8") as fp:
         content = fp.read()
     version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]", content, re.M)
@@ -31,7 +32,8 @@ def find_version():
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
 
-__author__ = 'Zhuoqing Fang'
+
+__author__ = "Zhuoqing Fang"
 __version__ = find_version()
 
 
@@ -42,8 +44,9 @@ class PyTest(TestCommand):
         self.test_suite = True
 
     def run_tests(self):
-        #import here, cause outside the eggs aren't loaded
+        # import here, cause outside the eggs aren't loaded
         import pytest
+
         errno = pytest.main(self.test_args)
         sys.exit(errno)
 
@@ -57,7 +60,7 @@ class CargoModifiedSdist(SdistCommand):
 
 
 def readme():
-    with open('README.rst') as f:
+    with open("README.rst") as f:
         return f.read()
 
 setup(name='gseapy',

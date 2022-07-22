@@ -14,6 +14,7 @@ from gseapy.gse import prerank_rs, gsea_rs, ssgsea_rs, Metric  # import gseapy r
 from typing import AnyStr, Tuple, Union, List, Dict, Iterable, Optional
 
 
+
 class GSEA(GSEAbase):
     """GSEA main tool"""
 
@@ -66,7 +67,7 @@ class GSEA(GSEAbase):
         if isinstance(self.data, pd.DataFrame):
             exprs = self.data.copy()
             # handle index is gene_names
-            if exprs.index.dtype == 'O':
+            if exprs.index.dtype == "O":
                 exprs = exprs.reset_index()
         elif os.path.isfile(self.data):
             # GCT input format?
@@ -462,7 +463,7 @@ class SingleSampleGSEA(GSEAbase):
             # select numbers
             rank_metric = rank_metric.select_dtypes(include=[np.number])
         else:
-            raise Exception('Error parsing gene ranking values!')
+            raise Exception("Error parsing gene ranking values!")
 
         if rank_metric.index.duplicated().sum() > 0:
             self._logger.warning(
@@ -479,7 +480,7 @@ class SingleSampleGSEA(GSEAbase):
 
     def norm_samples(self, dat: pd.DataFrame) -> pd.DataFrame:
         """normalization samples
-           see here: http://rowley.mit.edu/caw_web/ssGSEAProjection/ssGSEAProjection.Library.R
+        see here: http://rowley.mit.edu/caw_web/ssGSEAProjection/ssGSEAProjection.Library.R
         """
 
         if self.sample_norm_method == 'rank':
@@ -607,6 +608,7 @@ class SingleSampleGSEA(GSEAbase):
         return
 
 
+
 class Replot(GSEAbase):
     """To reproduce GSEA desktop output results."""
 
@@ -684,7 +686,7 @@ class Replot(GSEAbase):
             raise Exception(
                 "Could not locate GSEA files in the given directory!")
         # extract sample names from .cls file
-        cls_path = glob.glob(self.indir+'*/edb/*.cls')
+        cls_path = glob.glob(self.indir + "*/edb/*.cls")
         if cls_path:
             pos, neg, classes = gsea_cls_parser(cls_path[0])
         else:

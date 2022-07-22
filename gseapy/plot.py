@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.transforms as transforms
 from matplotlib.colors import Normalize
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.colors import Normalize
 from matplotlib.figure import Figure
 from matplotlib.ticker import MaxNLocator
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -39,8 +40,9 @@ def zscore(data2d, axis=0):
         # z_scored = (data2d - data2d.values.mean()) / data2d.values.std(ddof=1)
         return data2d
     assert axis in [0, 1]
-    z_scored = data2d.apply(lambda x: (x-x.mean())/x.std(ddof=1),
-                            axis=operator.xor(1, axis))
+    z_scored = data2d.apply(
+        lambda x: (x - x.mean()) / x.std(ddof=1), axis=operator.xor(1, axis)
+    )
     return z_scored
 
 
@@ -58,10 +60,10 @@ def _skip_ticks(labels, tickevery):
     if tickevery == 0:
         ticks, labels = [], []
     elif tickevery == 1:
-        ticks, labels = np.arange(n) + .5, labels
+        ticks, labels = np.arange(n) + 0.5, labels
     else:
         start, end, step = 0, n, tickevery
-        ticks = np.arange(start, end, step) + .5
+        ticks = np.arange(start, end, step) + 0.5
         labels = labels[start:end:step]
     return ticks, labels
 
@@ -71,7 +73,7 @@ def _auto_ticks(ax, labels, axis):
     bbox = ax.get_window_extent().transformed(transform)
     size = [bbox.width, bbox.height][axis]
     axis = [ax.xaxis, ax.yaxis][axis]
-    tick, = ax.xaxis.set_ticks([0])
+    (tick,) = ax.xaxis.set_ticks([0])
     fontsize = tick.label1.get_size()
     max_ticks = int(size // (fontsize / 72))
     if max_ticks < 1:
@@ -81,8 +83,17 @@ def _auto_ticks(ax, labels, axis):
     return tickevery
 
 
-def heatmap(df, z_score=None, title='', figsize=(5, 5), cmap='RdBu_r',
-            xticklabels=True, yticklabels=True, ofname=None, **kwargs):
+def heatmap(
+    df,
+    z_score=None,
+    title="",
+    figsize=(5, 5),
+    cmap="RdBu_r",
+    xticklabels=True,
+    yticklabels=True,
+    ofname=None,
+    **kwargs,
+):
     """Visualize the dataframe.
 
     :param df: DataFrame from expression table.
@@ -91,13 +102,13 @@ def heatmap(df, z_score=None, title='', figsize=(5, 5), cmap='RdBu_r',
     :param outdir: path to save heatmap.
     :param figsize: heatmap figsize.
     :param cmap: matplotlib colormap.
-    :param ofname: output file name. If None, don't save figure 
+    :param ofname: output file name. If None, don't save figure
 
     """
     df = zscore(df, axis=z_score)
     df = df.iloc[::-1]
     # If working on commandline, don't show figure
-    if hasattr(sys, 'ps1') and (ofname is None):
+    if hasattr(sys, "ps1") and (ofname is None):
         fig = plt.figure(figsize=figsize)
     else:
         fig = Figure(figsize=figsize)
@@ -121,8 +132,9 @@ def heatmap(df, z_score=None, title='', figsize=(5, 5), cmap='RdBu_r',
     # cax=fig.add_axes([0.93,0.25,0.05,0.20])
     # cbar = fig.colorbar(matrix, cax=cax)
     cbar = colorbar(matrix)
-    cbar.ax.tick_params(axis='both', which='both', bottom=False, top=False,
-                        right=False, left=False)
+    cbar.ax.tick_params(
+        axis="both", which="both", bottom=False, top=False, right=False, left=False
+    )
     for side in ["top", "right", "left", "bottom"]:
         ax.spines[side].set_visible(False)
         cbar.ax.spines[side].set_visible(False)
@@ -130,7 +142,7 @@ def heatmap(df, z_score=None, title='', figsize=(5, 5), cmap='RdBu_r',
 
     if ofname is not None:
         # canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
-        fig.savefig(ofname, bbox_inches='tight', dpi=300)
+        fig.savefig(ofname, bbox_inches="tight", dpi=300)
     return
 
 
@@ -172,7 +184,7 @@ class GSEAPlot(object):
         # It's also usefull to run this script on command line.
 
         # GSEA Plots
-        if hasattr(sys, 'ps1') and (self.ofname is None):
+        if hasattr(sys, "ps1") and (self.ofname is None):
             # working inside python console, show figure
             self.fig = plt.figure(figsize=self.figsize)
         else:
@@ -212,9 +224,9 @@ class GSEAPlot(object):
 
         hap = self._zero_score_ind / max(self._x)
         if hap < 0.25:
-            ha = 'left'
+            ha = "left"
         elif hap > 0.75:
-            ha = 'right'
+            ha = "right"
         else:
             ha = 'center'
         ax1.text(hap, 0.5, self._z_score_label,
@@ -298,7 +310,7 @@ class GSEAPlot(object):
         Please check matplotlib docs about how to `add_axes` to figure.
 
         Here is a more flexible way to create a new gseaplot.
-        For example, don't show ranking and merge hits and colormap together 
+        For example, don't show ranking and merge hits and colormap together
         just used:
 
             self.axes_stat([0.1,0.2,0.8,0.8]) # axes_stat should be called first
@@ -313,10 +325,10 @@ class GSEAPlot(object):
         # self.fig.subplots_adjust(hspace=0)
         # self.fig.tight_layout()
 
-    def savefig(self, bbox_inches='tight', dpi=300):
+    def savefig(self, bbox_inches="tight", dpi=300):
 
         # if self.ofname is not None:
-        if hasattr(sys, 'ps1') and (self.ofname is not None):
+        if hasattr(sys, "ps1") and (self.ofname is not None):
             self.fig.savefig(self.ofname, bbox_inches=bbox_inches, dpi=dpi)
         elif self.ofname is None:
             return
@@ -341,7 +353,7 @@ def gseaplot(rank_metric, term, hits, nes, pval, fdr, RES,
     :param pheno_pos: phenotype label, positive correlated.
     :param pheno_neg: phenotype label, negative correlated.
     :param figsize: matplotlib figsize.
-    :param ofname: output file name. If None, don't save figure 
+    :param ofname: output file name. If None, don't save figure
 
     """
     g = GSEAPlot(rank_metric, term, hits, nes, pval, fdr, RES,
@@ -359,9 +371,20 @@ def isfloat(x):
         return True
 
 
-def dotplot(df, column='Adjusted P-value', title='', cutoff=0.05, top_term=10,
-            sizes=None, norm=None, legend=True, figsize=(6, 5.5),
-            cmap='RdBu_r', ofname=None, **kwargs):
+def dotplot(
+    df,
+    column="Adjusted P-value",
+    title="",
+    cutoff=0.05,
+    top_term=10,
+    sizes=None,
+    norm=None,
+    legend=True,
+    figsize=(6, 5.5),
+    cmap="RdBu_r",
+    ofname=None,
+    **kwargs,
+):
     """Visualize enrichr results.
 
     :param df: GSEApy Enrichr DataFrame results.
@@ -373,39 +396,47 @@ def dotplot(df, column='Adjusted P-value', title='', cutoff=0.05, top_term=10,
     :param sizes: tuple, (min, max) scatter size. Not functional for now
     :param norm: maplotlib.colors.Normalize object.
     :param legend: bool, whether to show legend.
-    :param figsize: tuple, figure size. 
+    :param figsize: tuple, figure size.
     :param cmap: matplotlib colormap
-    :param ofname: output file name. If None, don't save figure 
+    :param ofname: output file name. If None, don't save figure
 
     """
 
     colname = column
     # sorting the dataframe for better visualization
-    if colname in ['Adjusted P-value', 'P-value']:
+    if colname in ["Adjusted P-value", "P-value"]:
         # check if any values in `df[colname]` can't be coerced to floats
         can_be_coerced = df[colname].map(isfloat)
         if np.sum(~can_be_coerced) > 0:
             raise ValueError(
-                'some value in %s could not be typecast to `float`' % colname)
+                "some value in %s could not be typecast to `float`" % colname
+            )
         else:
             df.loc[:, colname] = df[colname].map(float)
         df = df[df[colname] <= cutoff]
         if len(df) < 1:
             msg = "Warning: No enrich terms when cutoff = %s" % cutoff
             return msg
-        df = df.assign(logAP=lambda x: - x[colname].apply(np.log10))
-        colname = 'logAP'
+        df = df.assign(logAP=lambda x: -x[colname].apply(np.log10))
+        colname = "logAP"
     df = df.sort_values(by=colname).iloc[-top_term:, :]
     #
-    temp = df['Overlap'].str.split("/", expand=True).astype(int)
+    temp = df["Overlap"].str.split("/", expand=True).astype(int)
     df = df.assign(Hits=temp.iloc[:, 0], Background=temp.iloc[:, 1])
     df = df.assign(Hits_ratio=lambda x: x.Hits / x.Background)
     # x axis values
     x = df.loc[:, colname].values
-    combined_score = df['Combined Score'].round().astype('int')
+
+    # scatter colormap range
+    cbar_title = 'Odds Ratio'
+    if ('Odds Ratio' in df.columns) and (not 'Combined Score' in df.columns):
+        colmap = df[cbar_title].astype(float)
+    else:
+        cbar_title = "Combined Score"
+        colmap = df[cbar_title].round().astype("int")
     # y axis index and values
     y = [i for i in range(0, len(df))]
-    ylabels = df['Term'].values
+    ylabels = df["Term"].values
     # Normalise to [0,1]
     # b = (df['Count']  - df['Count'].min())/ np.ptp(df['Count'])
     # area = 100 * b
@@ -417,8 +448,7 @@ def dotplot(df, column='Adjusted P-value', title='', cutoff=0.05, top_term=10,
     elif isinstance(norm, tuple):
         norm = Normalize(*norm)
     elif not isinstance(norm, Normalize):
-        err = ("``size_norm`` must be None, tuple, "
-               "or Normalize object.")
+        err = "``size_norm`` must be None, tuple, " "or Normalize object."
         raise ValueError(err)
     min_width, max_width = np.r_[20, 100] * plt.rcParams["lines.linewidth"]
     norm.clip = True
@@ -430,11 +460,11 @@ def dotplot(df, column='Adjusted P-value', title='', cutoff=0.05, top_term=10,
     if scl.mask.any():
         widths[scl.mask] = 0
     sizes = dict(zip(levels, widths))
-    df['sizes'] = df.Hits.map(sizes)
-    area = df['sizes'].values
+    df["sizes"] = df.Hits.map(sizes)
+    area = df["sizes"].values
 
     # create scatter plot
-    if hasattr(sys, 'ps1') and (ofname is None):
+    if hasattr(sys, "ps1") and (ofname is None):
         # working inside python console, show figure
         fig, ax = plt.subplots(figsize=figsize)
     else:
@@ -442,16 +472,24 @@ def dotplot(df, column='Adjusted P-value', title='', cutoff=0.05, top_term=10,
         fig = Figure(figsize=figsize)
         canvas = FigureCanvas(fig)
         ax = fig.add_subplot(111)
-    vmin = np.percentile(combined_score.min(), 2)
-    vmax = np.percentile(combined_score.max(), 98)
-    sc = ax.scatter(x=x, y=y, s=area, edgecolors='face', c=combined_score,
-                    cmap=cmap, vmin=vmin, vmax=vmax)
+    vmin = np.percentile(colmap.min(), 2)
+    vmax = np.percentile(colmap.max(), 98)
+    sc = ax.scatter(
+        x=x,
+        y=y,
+        s=area,
+        edgecolors="face",
+        c=colmap,
+        cmap=cmap,
+        vmin=vmin,
+        vmax=vmax,
+    )
 
-    if column in ['Adjusted P-value', 'P-value']:
+    if column in ["Adjusted P-value", "P-value"]:
         xlabel = "-log$_{10}$(%s)" % column
     else:
         xlabel = column
-    ax.set_xlabel(xlabel, fontsize=14, fontweight='bold')
+    ax.set_xlabel(xlabel, fontsize=14, fontweight="bold")
     ax.yaxis.set_major_locator(plt.FixedLocator(y))
     ax.yaxis.set_major_formatter(plt.FixedFormatter(ylabels))
     ax.set_yticklabels(ylabels, fontsize=16)
@@ -477,20 +515,45 @@ def dotplot(df, column='Adjusted P-value', title='', cutoff=0.05, top_term=10,
         handles, _ = ax.get_legend_handles_labels()
         legend_markers = []
         for ix in idx:
-            legend_markers.append(ax.scatter([], [], s=area[ix], c='b'))
+            legend_markers.append(ax.scatter([], [], s=area[ix], c="b"))
         # artist = ax.scatter([], [], s=size_levels,)
-        ax.legend(legend_markers, label, title='Hits')
-    ax.set_title(title, fontsize=20, fontweight='bold')
+        ax.legend(legend_markers, label, title="Hits")
+    ax.set_title(title, fontsize=20, fontweight="bold")
 
     if ofname is not None:
         # canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
-        fig.savefig(ofname, bbox_inches='tight', dpi=300)
+        fig.savefig(ofname, bbox_inches="tight", dpi=300)
         return
     return ax
 
+def ringplot(
+    df,
+):
+    pass
 
-def barplot(df, column='Adjusted P-value', title="", cutoff=0.05, top_term=10,
-            figsize=(6.5, 6), color='salmon', ofname=None, **kwargs):
+def enrichmap(
+    df,
+):
+    """
+    Node (inner circle) size corresponds to the number of genes in dataset 1 within the geneset
+    Colour of the node (inner circle) corresponds to the significance of the geneset for dataset 1.
+    Edge size corresponds to the number of genes that overlap between the two connected genesets. 
+    Green edges correspond to both datasets when it is the only colour edge. 
+    When there are two different edge colours, green corresponds to dataset 1 and blue corresponds to dataset 2.
+    """
+    pass 
+
+def barplot(
+    df,
+    column="Adjusted P-value",
+    title="",
+    cutoff=0.05,
+    top_term=10,
+    figsize=(6.5, 6),
+    color="salmon",
+    ofname=None,
+    **kwargs,
+):
     """Visualize enrichr results.
 
     :param df: GSEApy Enrichr DataFrame results.
@@ -500,30 +563,33 @@ def barplot(df, column='Adjusted P-value', title="", cutoff=0.05, top_term=10,
     :param top_term: number of top enriched terms to show.
     :param figsize: tuple, matplotlib figsize.
     :param color: color for bars.
-    :param ofname: output file name. If None, don't save figure    
+    :param ofname: output file name. If None, don't save figure
 
     """
 
     colname = column
-    if colname in ['Adjusted P-value', 'P-value']:
+    if colname in ["Adjusted P-value", "P-value"]:
         # check if any values in `df[colname]` can't be coerced to floats
         can_be_coerced = df[colname].map(isfloat)
         if np.sum(~can_be_coerced) > 0:
             raise ValueError(
-                'some value in %s could not be typecast to `float`' % colname)
+                "some value in %s could not be typecast to `float`" % colname
+            )
         else:
             df.loc[:, colname] = df[colname].map(float)
         df = df[df[colname] <= cutoff]
         if len(df) < 1:
             msg = "Warning: No enrich terms using library %s when cutoff = %s" % (
-                title, cutoff)
+                title,
+                cutoff,
+            )
             return msg
-        df = df.assign(logAP=lambda x: - x[colname].apply(np.log10))
-        colname = 'logAP'
+        df = df.assign(logAP=lambda x: -x[colname].apply(np.log10))
+        colname = "logAP"
 
     dd = df.sort_values(by=colname).iloc[-top_term:, :]
     # create bar plot
-    if hasattr(sys, 'ps1') and (ofname is None):
+    if hasattr(sys, "ps1") and (ofname is None):
         # working inside python console, show (True) figure
         fig = plt.figure(figsize=figsize)
     else:
@@ -531,28 +597,27 @@ def barplot(df, column='Adjusted P-value', title="", cutoff=0.05, top_term=10,
         fig = Figure(figsize=figsize)
         canvas = FigureCanvas(fig)
     ax = fig.add_subplot(111)
-    bar = dd.plot.barh(x='Term', y=colname, color=color,
-                       alpha=0.75, fontsize=16, ax=ax)
+    bar = dd.plot.barh(x="Term", y=colname, color=color, alpha=0.75, fontsize=16, ax=ax)
 
-    if column in ['Adjusted P-value', 'P-value']:
+    if column in ["Adjusted P-value", "P-value"]:
         xlabel = "-log$_{10}$(%s)" % column
     else:
         xlabel = column
-    bar.set_xlabel(xlabel, fontsize=16, fontweight='bold')
+    bar.set_xlabel(xlabel, fontsize=16, fontweight="bold")
     bar.set_ylabel("")
-    bar.set_title(title, fontsize=24, fontweight='bold')
+    bar.set_title(title, fontsize=24, fontweight="bold")
     bar.xaxis.set_major_locator(MaxNLocator(integer=True))
     bar.legend_.remove()
-    adjust_spines(ax, spines=['left', 'bottom'])
+    adjust_spines(ax, spines=["left", "bottom"])
 
-    if hasattr(sys, 'ps1') and (ofname is not None):
+    if hasattr(sys, "ps1") and (ofname is not None):
         # canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
-        fig.savefig(ofname, bbox_inches='tight', dpi=300)
+        fig.savefig(ofname, bbox_inches="tight", dpi=300)
         return
     elif ofname is None:
         return
-    elif not hasattr(sys, 'ps1') and (ofname is not None):
-        canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
+    elif not hasattr(sys, "ps1") and (ofname is not None):
+        canvas.print_figure(ofname, bbox_inches="tight", dpi=300)
         return
     return ax
 
@@ -571,17 +636,17 @@ def adjust_spines(ax, spines):
             # spine.set_smart_bounds(True)
             continue
         else:
-            spine.set_color('none')  # don't draw spine
+            spine.set_color("none")  # don't draw spine
 
     # turn off ticks where there is no spine
-    if 'left' in spines:
-        ax.yaxis.set_ticks_position('left')
+    if "left" in spines:
+        ax.yaxis.set_ticks_position("left")
     else:
         # no yaxis ticks
         ax.yaxis.set_ticks([])
 
-    if 'bottom' in spines:
-        ax.xaxis.set_ticks_position('bottom')
+    if "bottom" in spines:
+        ax.xaxis.set_ticks_position("bottom")
     else:
         # no xaxis ticks
         ax.xaxis.set_ticks([])
