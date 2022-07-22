@@ -8,7 +8,7 @@ import requests
 import pandas as pd
 import xml.etree.ElementTree as ET
 from io import StringIO
-
+from collections.abc import Iterable
 import pandas as pd
 import requests
 from bioservices import BioMart, BioServicesError
@@ -382,12 +382,10 @@ class Biomart(BioMart):
             df["entrezgene_id"] = df["entrezgene_id"].astype(pd.Int32Dtype())
 
         self.results = df
-        if hasattr(sys, "ps1") and (filename is None):
-            return df
         # save file to cache path.
         if filename is not None:
             # mkdirs(DEFAULT_CACHE_PATH)
             # filename = os.path.join(DEFAULT_CACHE_PATH, "{}.background.genes.txt".format(dataset))
             df.to_csv(filename, sep="\t", index=False)
 
-        return
+        return df

@@ -284,9 +284,7 @@ class Enrichr(object):
             return set(bg)
 
         # package included data
-        DB_FILE = resource_filename(
-            "gseapy", "data/{}.background.genes.txt".format(self.background)
-        )
+        DB_FILE = os.path.join(DEFAULT_CACHE_PATH, "{}.background.genes.txt".format(self.background))
         if os.path.exists(DB_FILE):
             df = pd.read_csv(DB_FILE, sep="\t")
         else:
@@ -296,8 +294,9 @@ class Enrichr(object):
                 % self.background
             )
             bm = Biomart()
-            df = bm.query(dataset=self.background)
-            df.dropna(subset=["go_id"], inplace=True)
+            df = bm.query(dataset=self.background, 
+                          attributes=['ensembl_gene_id', 'external_gene_name', 'entrezgene_id'], 
+                          filename=os.path.join(DEFAULT_CACHE_PATH, "{}.background.genes.txt".format(self.background)))
         self._logger.info(
             "Using all annotated genes with GO_ID as background: %s" % self.background
         )

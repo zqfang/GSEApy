@@ -254,6 +254,8 @@ def enrichr(gene_list, gene_sets, organism='human', description='',
 
     :param background: int, list, str. Please ignore this argument if your input are just Enrichr library names.
 
+                       This argument works only if `gene_sets` has a type Dict or gmt file.
+
                        However, this argument is not straightforward when `gene_sets` is given a custom input (a gmt file or dict).
                        There are 3 ways to set this argument:
 
@@ -270,15 +272,15 @@ def enrichr(gene_list, gene_sets, organism='human', description='',
                            The background will be all annotated genes from the `BioMart datasets` you've choosen. 
                            The program will try to retrieve the background information automatically.
 
-                           Please Use the example code below to choose the correct dataset name:
-
+                           Enrichr module use the code below to get the background genes:
                             >>> from gseapy.parser import Biomart 
                             >>> bm = Biomart(verbose=False, host="useast.ensembl.org")
-                            >>> bm.query(dataset='hsapiens_gene_ensembl', 
+                            >>> df = bm.query(dataset=background, #  e.g. 'hsapiens_gene_ensembl'
                                          attributes=['ensembl_gene_id', 'external_gene_name', 'entrezgene_id'], 
-                                         filename='data/hsapiens_gene_ensembl.background.genes.txt')
+                                         filename=f'~/.cache/gseapy/{background}.background.genes.txt')
+                            >>> df.dropna(subset=["entrezgene_id"], inplace=True)
                            
-                           The returned file above will be the background genes for enrichr if not input specify by user.
+                           So only genes with entrezid above will be the background genes if not input specify by user.
 
     :param cutoff:   Show enriched terms which Adjusted P-value < cutoff. 
                      Only affects the output figure, not the final output file. Default: 0.05
