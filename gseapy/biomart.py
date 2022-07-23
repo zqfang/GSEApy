@@ -70,7 +70,10 @@ class Biomart(BioMart):
         return pd.DataFrame(filt_, columns=["Filter", "Description"])
 
     def query(
-        self, dataset="hsapiens_gene_ensembl", attributes=[], filters={}, filename=None
+        self, dataset="hsapiens_gene_ensembl", 
+        attributes=[], 
+        filters={}, 
+        filename=None
     ):
         """mapping ids using BioMart.  
 
@@ -124,10 +127,16 @@ class Biomart(BioMart):
 
         xml_query = self.get_xml()
         results = super(Biomart, self).query(xml_query)
-        df = pd.read_csv(
-            StringIO(results), header=None, sep="\t", names=attributes, index_col=None
-        )
-        if "entrezgene_id" in attributes:
+        if str(results).startswith("Query ERROR"):
+            print(results)
+            return results
+
+        df = pd.read_csv( StringIO(results), 
+                          header=None, 
+                          sep="\t", 
+                          index_col=None, 
+                          names=attributes)
+        if "entrezgene_id" in df.columns:
             df["entrezgene_id"] = df["entrezgene_id"].astype(pd.Int32Dtype())
 
         self.results = df
