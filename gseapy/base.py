@@ -333,7 +333,7 @@ class GSEAbase(object):
             # reformat gene list.
             name = gs.name if gs.name else self.module
             _genes = metric[name].index.values[gs.hits]
-            genes = ",".join([str(g).strip() for g in _genes])
+            genes = ";".join([str(g).strip() for g in _genes])
             RES = np.array(gs.run_es)
             # extract leading edge genes
             if float(gs.es) >= 0:
@@ -348,7 +348,7 @@ class GSEAbase(object):
                 gene_frac = (len(metric[name]) - es_i)/ len(metric[name])
 
             # tag_frac = len(ldg_pos) / len(gmt[gs.term])
-            lead_genes = ','.join(
+            lead_genes = ';'.join(
                 list(map(str, metric[name].iloc[ldg_pos].index)))
             tag_frac = "%s/%s" % (len(ldg_pos), len(gmt[gs.term]))
             e = pd.Series([name, gs.term, gs.es, gs.nes, 
@@ -366,7 +366,7 @@ class GSEAbase(object):
         rank_metric: Must be sorted in descending order already
         """
         if isinstance(rank_metric, pd.DataFrame) and self.module == 'ssgsea':
-            metric = {name: rank_metric[name].sort_values(ascending=False, ignore_index=True) 
+            metric = {name: rank_metric[name].sort_values(ascending=False) 
                       for name in rank_metric.columns}
         else:
             metric = {self.module: rank_metric}

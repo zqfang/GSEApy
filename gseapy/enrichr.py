@@ -485,7 +485,7 @@ class Enrichr(object):
                 self.organism,
                 self.module,
             )
-            self.res2d.to_csv(outfile, index=False, encoding="utf-8", sep="\t")
+            self.res2d.to_csv(outfile, index=False, encoding="utf-8", float_format='%.6e', sep="\t")
             # plotting
             if not self.__no_plot:
                 msg = barplot(df=res, cutoff=self.cutoff, figsize=self.figsize,
