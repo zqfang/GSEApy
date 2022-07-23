@@ -104,7 +104,7 @@ impl GSEASummary {
             tmp = self
                 .esnull
                 .iter()
-                .filter_map(|&x| {if x >= 0.0 {Some(x)} else {None}})
+                .filter_map(|&x| {if x < 0.0 {Some(x)} else {None}})
                 .collect();    
         }
 
@@ -115,7 +115,7 @@ impl GSEASummary {
         // a tricky fixed here: set n_mean as itself
         // so esnull = [-27, 13, 24, 57, 88]
         n_mean = if tmp.len() > 0 { tmp.iter().sum::<f64>() / (tmp.len() as f64) } else { e };
-        self.nes = if e > 0.0 {e / n_mean} else {-1.0 * e / n_mean};
+        self.nes = if e >= 0.0 {e / n_mean} else {-1.0 * e / n_mean};
 
         let nesnull: Vec<f64> = self
             .esnull
@@ -133,16 +133,27 @@ impl GSEASummary {
     }
 
     fn pval(&mut self) {
-        let p: f64;
-
+        let deno: usize;
+        let nomi: usize;
+        // When input a rare causes of an extreamly screwed null distribution. e.g.
+        // es = - 27, esnull = [13, 24, 57, 88]
+        // pval will be NaN. 
         if self.es < 0.0 {
-            p = (self.esnull.iter().filter(|&x| x < &self.es).count() as f64)
-                / (self.esnull.iter().filter(|&x| *x < 0.0).count() as f64)
+            deno =  self.esnull.iter().filter(|&x| *x < 0.0).count();
+            if deno == 0 { 
+                self.pval = 1.0; 
+                return 
+            }
+            nomi = self.esnull.iter().filter(|&x| x < &self.es).count();
         } else {
-            p = (self.esnull.iter().filter(|&x| x >= &self.es).count() as f64)
-                / (self.esnull.iter().filter(|&x| *x >= 0.0).count() as f64)
+            deno = self.esnull.iter().filter(|&x| *x >= 0.0).count();
+            if deno == 0 { 
+                self.pval = 1.0; 
+                return 
+            }
+            nomi = self.esnull.iter().filter(|&x| x >= &self.es).count();
         }
-        self.pval = p;
+        self.pval = (nomi as f64) / (deno as f64);
     }
 }
 
