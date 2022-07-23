@@ -3,23 +3,47 @@ from .enrichr import Enrichr
 from .parser import get_library_name
 from .plot import barplot, dotplot, gseaplot, heatmap
 from .__main__ import __version__
+from typing import AnyStr, Tuple, Union, List, Dict, Iterable, Optional
+import pandas as pd
 
-
-def gsea(data, gene_sets, cls, outdir=None, min_size=15, max_size=500, permutation_num=1000,
-         weighted_score_type=1, permutation_type='gene_set', method='log2_ratio_of_classes',
-         ascending=False, processes=1, figsize=(6.5, 6), format='pdf',
-         graph_num=20, no_plot=False, seed=123, verbose=False):
+def gsea(data: Union[pd.DataFrame, str],
+        gene_sets: Union[List[str], str, Dict[str, str]],
+        cls: Union[List[str], str],
+        outdir: Optional[str] = None,
+        min_size: int = 15,
+        max_size: int = 500,
+        permutation_num: int = 1000,
+        weighted_score_type: float = 1.0,
+        permutation_type: str = 'gene_set',
+        method: str = 'log2_ratio_of_classes',
+        ascending: bool = False,
+        processes: int = 1,
+        figsize: Tuple[float, float] = (6.5, 6),
+        format: str = 'pdf',
+        graph_num: int = 20,
+        no_plot: bool = False,
+        seed: int = 123,
+        verbose: bool = False) -> GSEA:
     """ Run Gene Set Enrichment Analysis.
 
     :param data: Gene expression data table, Pandas DataFrame, gct file.
+
     :param gene_sets: Enrichr Library name or .gmt gene sets file or dict of gene sets. Same input with GSEA.
+
     :param cls: A list or a .cls file format required for GSEA.
+
     :param str outdir: Results output directory. If None, nothing will write to disk.
+
     :param int permutation_num: Number of permutations for significance computation. Default: 1000.
+
     :param str permutation_type: Type of permutation reshuffling, choose from {"phenotype": 'sample.labels' , "gene_set" : gene.labels}. 
+
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Default: 15.
+
     :param int max_size: Maximum allowed number of genes from gene set also the data set. Default: 500.
+
     :param float weighted_score_type: Refer to :func:`algorithm.enrichment_score`. Default:1.
+
     :param method:  The method used to calculate a correlation or ranking. Default: 'log2_ratio_of_classes'.
                    Others methods are:
 
@@ -53,12 +77,19 @@ def gsea(data, gene_sets, cls, outdir=None, min_size=15, max_size=500, permutati
 
 
     :param bool ascending: Sorting order of rankings. Default: False.
+
     :param int processes: Number of Processes you are going to use. Default: 1.
+
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
+
     :param str format: Matplotlib figure format. Default: 'pdf'.
+
     :param int graph_num: Plot graphs for top sets of each phenotype.
+
     :param bool no_plot: If equals to True, no figure will be drawn. Default: False.
+
     :param seed: Random seed. expect an integer. Default:None.
+
     :param bool verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
 
     :return: Return a GSEA obj. All results store to a dictionary, obj.results,
@@ -73,7 +104,7 @@ def gsea(data, gene_sets, cls, outdir=None, min_size=15, max_size=500, permutati
                  |  fwerp: Family wise error rate p-values, 
                  |  tag %: Percent of gene set before running enrichment peak (ES),
                  |  gene %: Percent of gene list before running enrichment peak (ES),
-                 |  lead_genes: leading edge genes (gene list before running enrichment peak),
+                 |  lead_genes: leading edge genes (gene hits before running enrichment peak),
                  |  matched genes: genes matched to the data,
                  | }
 
@@ -87,14 +118,30 @@ def gsea(data, gene_sets, cls, outdir=None, min_size=15, max_size=500, permutati
     return gs
 
 
-def ssgsea(data, gene_sets, outdir=None, sample_norm_method='rank', min_size=15, max_size=2000,
-           permutation_num=None, weighted_score_type=0.25, ascending=False, processes=1,
-           figsize=(7, 6), format='pdf', graph_num=20, no_plot=True, seed=123, verbose=False):
+def ssgsea(data: Union[pd.Series, pd.DataFrame, str], 
+            gene_sets: Union[List[str], str, Dict[str, str]],
+            outdir: Optional[str] = None,
+            sample_norm_method: str='rank', 
+            min_size: int = 15,
+            max_size: int = 500,
+            permutation_num: Optional[int]=None, 
+            weighted_score_type: float = 0.25,
+            ascending: bool = False,
+            processes: int = 1,
+            figsize: Tuple[float, float] = (6.5, 6),
+            format: str = 'pdf',
+            graph_num: int = 20,
+            no_plot: bool = True,
+            seed: int = 123,
+            verbose: bool = False):
     """Run Gene Set Enrichment Analysis with single sample GSEA tool
 
     :param data: Expression table, pd.Series, pd.DataFrame, GCT file, or .rnk file format.
+
     :param gene_sets: Enrichr Library name or .gmt gene sets file or dict of gene sets. Same input with GSEA.
+
     :param outdir: Results output directory. If None, nothing will write to disk.
+
     :param str sample_norm_method: "Sample normalization method. Choose from {'rank', 'log', 'log_rank'}. Default: rank.
 
                1. 'rank': Rank your expression data, and transform by 10000*rank_dat/gene_numbers
@@ -104,17 +151,29 @@ def ssgsea(data, gene_sets, outdir=None, sample_norm_method='rank', min_size=15,
 
     see here: https://github.com/GSEA-MSigDB/ssGSEAProjection-gpmodule/blob/master/src/ssGSEAProjection.Library.R, line 86
 
+
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Default: 15.
+
     :param int max_size: Maximum allowed number of genes from gene set also the data set. Default: 2000.
+
     :param int permutation_num: For ssGSEA, default is None. However, if you try to use ssgsea method to get pval and fdr, set to an interger.
+
     :param str weighted_score_type: Refer to :func:`algorithm.enrichment_score`. Default:0.25.
+
     :param bool ascending: Sorting order of rankings. Default: False.
+
     :param int processes: Number of Processes you are going to use. Default: 1.
+
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [7,6].
+
     :param str format: Matplotlib figure format. Default: 'pdf'.
+
     :param int graph_num: Plot graphs for top sets of each phenotype.
+
     :param bool no_plot: If equals to True, no figure will be drawn. Default: False.
+
     :param seed: Random seed. expect an integer. Default:None.
+
     :param bool verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
 
     :return: Return a ssGSEA obj. 
@@ -131,7 +190,7 @@ def ssgsea(data, gene_sets, outdir=None, sample_norm_method='rank', min_size=15,
                  |  fwerp: Family wise error rate p-values (if permutation_num > 0), 
                  |  tag %: Percent of gene set before running enrichment peak (ES),
                  |  gene %: Percent of gene list before running enrichment peak (ES),
-                 |  lead_genes: leading edge genes (gene list before running enrichment peak),
+                 |  lead_genes: leading edge genes (gene hits before running enrichment peak),
                  |  matched genes: genes matched to the data,
                  | }
 
@@ -144,26 +203,53 @@ def ssgsea(data, gene_sets, outdir=None, sample_norm_method='rank', min_size=15,
     return ss
 
 
-def prerank(rnk, gene_sets, outdir=None, pheno_pos='Pos', pheno_neg='Neg',
-            min_size=15, max_size=500, permutation_num=1000, weighted_score_type=1,
-            ascending=False, processes=1, figsize=(6.5, 6), format='pdf',
-            graph_num=20, no_plot=False, seed=123, verbose=False):
+def prerank(rnk: Union[pd.DataFrame, pd.Series, str], 
+            gene_sets: Union[List[str], str, Dict[str, str]],
+            outdir: Optional[str] = None,
+            pheno_pos='Pos', 
+            pheno_neg='Neg', 
+            min_size: int = 15,
+            max_size: int = 500,
+            permutation_num: int = 1000,
+            weighted_score_type: float = 1.0,
+            ascending: bool = False,
+            processes: int = 1,
+            figsize: Tuple[float, float] = (6.5, 6),
+            format: str = 'pdf',
+            graph_num: int = 20,
+            no_plot: bool = False,
+            seed: int = 123,
+            verbose: bool = False) -> Prerank:
     """ Run Gene Set Enrichment Analysis with pre-ranked correlation defined by user.
 
     :param rnk: pre-ranked correlation table or pandas DataFrame. Same input with ``GSEA`` .rnk file.
+
     :param gene_sets: Enrichr Library name or .gmt gene sets file or dict of gene sets. Same input with GSEA.
+
     :param outdir: results output directory. If None, nothing will write to disk.
+
     :param int permutation_num: Number of permutations for significance computation. Default: 1000.
+
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Default: 15.
+
     :param int max_size: Maximum allowed number of genes from gene set also the data set. Defaults: 500.
+
     :param str weighted_score_type: Refer to :func:`algorithm.enrichment_score`. Default:1.
+
     :param bool ascending: Sorting order of rankings. Default: False.
+
     :param int processes: Number of Processes you are going to use. Default: 1.
+
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
+
     :param str format: Matplotlib figure format. Default: 'pdf'.
+
     :param int graph_num: Plot graphs for top sets of each phenotype.
+
     :param bool no_plot: If equals to True, no figure will be drawn. Default: False.
+
     :param seed: Random seed. expect an integer. Default:None.
+
     :param bool verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
 
     :return: Return a Prerank obj. All results store to  a dictionary, obj.results,
@@ -178,7 +264,7 @@ def prerank(rnk, gene_sets, outdir=None, pheno_pos='Pos', pheno_neg='Neg',
                  |  fwerp: Family wise error rate p-values, 
                  |  tag %: Percent of gene set before running enrichment peak (ES),
                  |  gene %: Percent of gene list before running enrichment peak (ES),
-                 |  lead_genes: leading edge genes (gene list before running enrichment peak),
+                 |  lead_genes: leading edge genes (gene hits before running enrichment peak),
                  |  matched genes: genes matched to the data,
                  | }
 
@@ -196,14 +282,21 @@ def replot(indir, outdir='GSEA_Replot', weighted_score_type=1,
     """The main function to reproduce GSEA desktop outputs.
 
     :param indir: GSEA desktop results directory. In the sub folder, you must contain edb file folder.
+
     :param outdir: Output directory.
+
     :param float weighted_score_type: weighted score type. choose from {0,1,1.5,2}. Default: 1.
+
     :param list figsize: Matplotlib output figure figsize. Default: [6.5,6].
+
     :param str format: Matplotlib output figure format. Default: 'pdf'.
+
     :param int min_size: Min size of input genes presented in Gene Sets. Default: 3.
+
     :param int max_size: Max size of input genes presented in Gene Sets. Default: 5000.
                      You are not encouraged to use min_size, or max_size argument in :func:`replot` function.
                      Because gmt file has already been filtered.
+
     :param verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
 
     :return: Generate new figures with selected figure format. Default: 'pdf'.
@@ -216,9 +309,18 @@ def replot(indir, outdir='GSEA_Replot', weighted_score_type=1,
     return
 
 
-def enrichr(gene_list, gene_sets, organism='human', description='',
-            outdir='Enrichr', background='hsapiens_gene_ensembl', cutoff=0.05,
-            format='pdf', figsize=(8, 6), top_term=10, no_plot=False, verbose=False):
+def enrichr(gene_list: Iterable[str],
+            gene_sets: Union[List[str], str, Dict[str, str]],
+            organism: str = "human",
+            outdir: Optional[str] = None,
+            background: Union[List[str], int, str] = "hsapiens_gene_ensembl",
+            cutoff: float = 0.05,
+            format: str = "pdf",
+            figsize: Tuple[float, float] = (6.5, 6),
+            top_term: int = 10,
+            no_plot: bool = False,
+            verbose: bool = False,
+) -> Enrichr:
     """Enrichr API.
 
     :param gene_list: str, list, tuple, series, dataframe. Also support input txt file with one gene id per row. 
@@ -249,7 +351,6 @@ def enrichr(gene_list, gene_sets, organism='human', description='',
 
                      see here for more details: https://maayanlab.cloud/modEnrichr/.
 
-    :param description: optional. name of the job.
     :param outdir:   Output file directory
 
     :param background: int, list, str. Please ignore this argument if your input are just Enrichr library names.
@@ -285,15 +386,18 @@ def enrichr(gene_list, gene_sets, organism='human', description='',
     :param cutoff:   Show enriched terms which Adjusted P-value < cutoff. 
                      Only affects the output figure, not the final output file. Default: 0.05
     :param format:  Output figure format supported by matplotlib,('pdf','png','eps'...). Default: 'pdf'.
+
     :param figsize: Matplotlib figsize, accept a tuple or list, e.g. (width,height). Default: (6.5,6).
+
     :param bool no_plot: If equals to True, no figure will be drawn. Default: False.
+    
     :param bool verbose: Increase output verbosity, print out progress of your job, Default: False.
 
     :return: An Enrichr object, which obj.res2d stores your last query, obj.results stores your all queries.
 
     """
-    enr = Enrichr(gene_list, gene_sets, organism, description, outdir,
-                  cutoff, background, format, figsize, top_term, no_plot, verbose)
+    enr = Enrichr(gene_list, gene_sets, organism, outdir, background, 
+                  cutoff, format, figsize, top_term, no_plot, verbose)
     # set organism
     enr.set_organism()
     enr.run()

@@ -82,23 +82,42 @@ def main():
 
     elif subcommand == "ssgsea":
         from .gsea import SingleSampleGSEA
-        ss = SingleSampleGSEA(data=args.data, gene_sets=args.gmt, outdir=args.outdir,
-                              sample_norm_method=args.norm,
-                              min_size=args.mins, max_size=args.maxs, permutation_num=args.n,
-                              weight=args.weight,
-                              ascending=args.ascending, threads=args.threads,
-                              figsize=args.figsize, format=args.format, graph_num=args.graph,
-                              no_plot=args.noplot, seed=args.seed, verbose=args.verbose)
+        ss = SingleSampleGSEA(
+            data=args.data, 
+            gene_sets=args.gmt, 
+            outdir=args.outdir,
+            sample_norm_method=args.norm,
+            min_size=args.mins, 
+            max_size=args.maxs, 
+            permutation_num=args.n,
+            weight=args.weight,
+            ascending=args.ascending, 
+            threads=args.threads,
+            figsize=args.figsize, 
+            format=args.format, 
+            graph_num=args.graph,
+            no_plot=args.noplot, 
+            seed=args.seed, 
+            verbose=args.verbose
+        )
         ss.run()
 
     elif subcommand == "enrichr":
         # calling enrichr API
         from .enrichr import Enrichr
-        enr = Enrichr(gene_list=args.gene_list, descriptions=args.descrip,
-                      gene_sets=args.library, organism=args.organism,
-                      outdir=args.outdir, format=args.format, cutoff=args.thresh,
-                      background=args.bg, figsize=args.figsize,
-                      top_term=args.term, no_plot=args.noplot, verbose=args.verbose)
+        enr = Enrichr(
+            gene_list=args.gene_list, 
+            gene_sets=args.library, 
+            organism=args.organism,
+            outdir=args.outdir, 
+            format=args.format, 
+            cutoff=args.thresh,
+            background=args.bg, 
+            figsize=args.figsize,
+            top_term=args.term, 
+            no_plot=args.noplot, 
+            verbose=args.verbose
+        )
         # set organism
         enr.set_organism()
         enr.run()

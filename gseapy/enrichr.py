@@ -26,10 +26,9 @@ class Enrichr(object):
         gene_list: Iterable[str],
         gene_sets: Union[List[str], str, Dict[str, str]],
         organism: str = "human",
-        descriptions: Optional[str] = "",
         outdir: Optional[str] = "Enrichr",
-        cutoff: float = 0.05,
         background: Union[List[str], int, str] = "hsapiens_gene_ensembl",
+        cutoff: float = 0.05,
         format: str = "pdf",
         figsize: Tuple[float, float] = (6.5, 6),
         top_term: int = 10,
@@ -39,7 +38,7 @@ class Enrichr(object):
 
         self.gene_list = gene_list
         self.gene_sets = gene_sets
-        self.descriptions = str(descriptions)
+        self.descriptions = ""
         self.outdir = outdir
         self.cutoff = cutoff
         self.format = format
