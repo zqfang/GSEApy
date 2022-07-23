@@ -140,18 +140,15 @@ impl GSEASummary {
         // pval will be NaN. 
         if self.es < 0.0 {
             deno =  self.esnull.iter().filter(|&x| *x < 0.0).count();
-            if deno == 0 { 
-                self.pval = 1.0; 
-                return 
-            }
             nomi = self.esnull.iter().filter(|&x| x < &self.es).count();
         } else {
             deno = self.esnull.iter().filter(|&x| *x >= 0.0).count();
-            if deno == 0 { 
-                self.pval = 1.0; 
-                return 
-            }
             nomi = self.esnull.iter().filter(|&x| x >= &self.es).count();
+        }
+
+        if deno == 0 { 
+            self.pval = 1.0; 
+            return 
         }
         self.pval = (nomi as f64) / (deno as f64);
     }
