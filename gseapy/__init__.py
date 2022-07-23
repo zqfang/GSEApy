@@ -206,8 +206,8 @@ def ssgsea(data: Union[pd.Series, pd.DataFrame, str],
 def prerank(rnk: Union[pd.DataFrame, pd.Series, str], 
             gene_sets: Union[List[str], str, Dict[str, str]],
             outdir: Optional[str] = None,
-            pheno_pos='Pos', 
-            pheno_neg='Neg', 
+            pheno_pos: str = 'Pos', 
+            pheno_neg: str = 'Neg', 
             min_size: int = 15,
             max_size: int = 500,
             permutation_num: int = 1000,
@@ -390,7 +390,7 @@ def enrichr(gene_list: Iterable[str],
     :param figsize: Matplotlib figsize, accept a tuple or list, e.g. (width,height). Default: (6.5,6).
 
     :param bool no_plot: If equals to True, no figure will be drawn. Default: False.
-    
+
     :param bool verbose: Increase output verbosity, print out progress of your job, Default: False.
 
     :return: An Enrichr object, which obj.res2d stores your last query, obj.results stores your all queries.
