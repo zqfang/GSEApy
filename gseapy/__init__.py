@@ -1,5 +1,6 @@
 from .gsea import Replot, Prerank, GSEA, SingleSampleGSEA
 from .enrichr import Enrichr
+from .biomart import Biomart
 from .parser import get_library_name
 from .plot import barplot, dotplot, gseaplot, heatmap
 from .__main__ import __version__
@@ -406,5 +407,6 @@ def enrichr(gene_list: Iterable[str],
 
 
 __all__ = ['dotplot', 'barplot', 'heatmap', 'gseaplot',
-           'replot', 'prerank', 'gsea', 'ssgsea',
-           'enrichr', 'get_library_name']
+           'replot', 'prerank', 'gsea', 'ssgsea','enrichr', 
+           'Replot', 'Prerank', 'GSEA', 'SingleSampleGSEA', 'Enrichr', 'Biomart',
+           'get_library_name']

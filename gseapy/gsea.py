@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os, logging, glob
+from tkinter.tix import InputOnly
 import xml.etree.ElementTree as ET
 import numpy as np
 import pandas as pd
@@ -378,7 +379,7 @@ class Prerank(GSEAbase):
 class SingleSampleGSEA(GSEAbase):
     """GSEA extension: single sample GSEA"""
 
-    def __init__(self, data, 
+    def __init__(self, data: Union[pd.DataFrame, pd.Series, str], 
                  gene_sets: Union[List[str], str, Dict[str, str]],
                  outdir: Optional[str] = None,
                  sample_norm_method: str='rank', 
@@ -435,14 +436,19 @@ class SingleSampleGSEA(GSEAbase):
             if rank_metric.index.dtype != 'O':
                 rank_metric.set_index(
                     keys=rank_metric.columns[0], inplace=True)
+            if rank_metric.columns.dtype != 'O':
+                rank_metric.columns = rank_metric.columns.astype(str)
 
             rank_metric = rank_metric.select_dtypes(include=[np.number])
         elif isinstance(exprs, pd.Series):
             # change to DataFrame
             self._logger.debug("Input data is a Series with gene names")
-            rank_metric = pd.DataFrame(exprs)
-            # rename col if name attr is none
-            rank_metric.columns = ["sample1"]
+            if exprs.name is None:
+                # rename col if name attr is none
+                exprs.name = "sample1"          
+            elif exprs.name.dtype != 'O':
+                exprs.name = exprs.name.astype(str)
+            rank_metric = exprs.to_frame()
         elif os.path.isfile(exprs):
             # GCT input format?
             if exprs.endswith("gct"):
@@ -454,8 +460,7 @@ class SingleSampleGSEA(GSEAbase):
                     exprs, comment='#', index_col=0, sep="\t")
                 if rank_metric.shape[1] == 1:
                     # rnk file like input
-                    rank_metric = pd.read_csv(exprs, header=None, comment='#',
-                                              names=['sample1'], index_col=0, sep="\t")
+                    rank_metric.columns = rank_metric.columns.astype(str)
             # select numbers
             rank_metric = rank_metric.select_dtypes(include=[np.number])
         else:
