@@ -1,3 +1,6 @@
+from importlib.util import resolve_name
+from attr import attr
+import requests
 import pandas as pd
 from io import StringIO
 from collections.abc import Iterable
@@ -38,6 +41,64 @@ class Biomart(BioMart):
             self.host = hosts[i]
             i += 1
 
+        self.attributes_xml = []
+        self.filters_xml = []
+        self.dataset_xml = None
+
+        params = {
+            "version": "1.0",
+            "virtualSchemaName": "default",
+            "formatter": "TSV",
+            "header": 0,
+            "uniqueRows": 0,
+            "configVersion": "0.6",
+            "completionStamp": "1"
+        }
+
+        self.header = \
+            '''http://ensembl.org/biomart/martservice?query=''' \
+            '''<?xml version="%(version)s" encoding="UTF-8"?>''' \
+            '''<!DOCTYPE Query>''' \
+            '''<Query virtualSchemaName="%(virtualSchemaName)s" formatter="%(formatter)s" ''' \
+            '''header="%(header)s" uniqueRows="%(uniqueRows)s" count="" ''' \
+            '''datasetConfigVersion="%(configVersion)s" completionStamp="%(completionStamp)s">'''
+            
+        self.header = self.header%params
+        self.footer = "</Dataset></Query>"
+        self.reset()
+
+    def add_filter(self, name, value):
+
+        _filter = ""
+        if "=" in value:
+            _filter = """<Filter name="%s" %s/>""" % (name, value)
+        else:
+            _filter = """<Filter name="%s" value="%s"/>""" % (name, value)
+        self.filters_xml.append(_filter)
+
+    def add_attribute(self, attribute):
+        _attr = """<Attribute name="%s"/>""" %attribute
+
+        self.attributes_xml.append(_attr)
+
+    def add_dataset(self, dataset):
+        self.dataset_xml = """<Dataset name="%s" interface="default" >""" % dataset
+
+    def reset(self):
+        self.attributes_xml = []
+        self.filters_xml = []
+        self.dataset_xml = None
+
+    def get_xml(self):
+        xml = self.header
+        xml += self.dataset_xml
+        for line in self.filters_xml:
+            xml += line 
+        for line in self.attributes_xml:
+            xml += line
+        xml += self.footer
+        return xml
+
     def get_marts(self):
         """Get available marts and their names."""
 
@@ -48,7 +109,7 @@ class Biomart(BioMart):
 
     def get_datasets(self, mart="ENSEMBL_MART_ENSEMBL"):
         """Get available datasets from mart you've selected"""
-        datasets = self.datasets(mart, raw=True)
+        datasets = super(Biomart, self).datasets(mart, raw=True)
         return pd.read_csv(
             StringIO(datasets),
             header=None,
@@ -59,13 +120,13 @@ class Biomart(BioMart):
 
     def get_attributes(self, dataset):
         """Get available attritbutes from dataset you've selected"""
-        attributes = self.attributes(dataset)
+        attributes = super(Biomart, self).attributes(dataset)
         attr_ = [(k, v[0]) for k, v in attributes.items()]
         return pd.DataFrame(attr_, columns=["Attribute", "Description"])
 
     def get_filters(self, dataset):
         """Get available filters from dataset you've selected"""
-        filters = self.filters(dataset)
+        filters = super(Biomart, self).filters(dataset)
         filt_ = [(k, v[0]) for k, v in filters.items()]
         return pd.DataFrame(filt_, columns=["Filter", "Description"])
 
@@ -82,26 +143,6 @@ class Biomart(BioMart):
         :param filters: dict, {'filter name': list(filter value)}
         :param host: www.ensembl.org, asia.ensembl.org, useast.ensembl.org
         :return: a dataframe contains all attributes you selected.
-
-        **Note**: it will take a couple of minutes to get the results.
-        A xml template for querying biomart. (see https://gist.github.com/keithshep/7776579)
-        Example::
-        >>> import requests
-        >>> exampleTaxonomy = "mmusculus_gene_ensembl"
-        >>> exampleGene = "ENSMUSG00000086981,ENSMUSG00000086982,ENSMUSG00000086983"
-        >>> urlTemplate = \
-            '''http://ensembl.org/biomart/martservice?query=''' \
-            '''<?xml version="1.0" encoding="UTF-8"?>''' \
-            '''<!DOCTYPE Query>''' \
-            '''<Query virtualSchemaName="default" formatter="CSV" header="0" uniqueRows="0" count="" datasetConfigVersion="0.6">''' \
-            '''<Dataset name="%s" interface="default"><Filter name="ensembl_gene_id" value="%s"/>''' \
-            '''<Attribute name="ensembl_gene_id"/><Attribute name="ensembl_transcript_id"/>''' \
-            '''<Attribute name="transcript_start"/><Attribute name="transcript_end"/>''' \
-            '''<Attribute name="exon_chrom_start"/><Attribute name="exon_chrom_end"/>''' \
-            '''</Dataset>''' \
-            '''</Query>'''    
-        >>> exampleURL = urlTemplate % (exampleTaxonomy, exampleGene)
-        >>> req = requests.get(exampleURL, stream=True)
 
         """
         if not attributes:
@@ -147,3 +188,44 @@ class Biomart(BioMart):
             df.to_csv(filename, sep="\t", index=False)
 
         return df
+
+    
+    def query_simple(
+        self, dataset="hsapiens_gene_ensembl", 
+        attributes=[], 
+        filters={}, 
+        filename=None
+    ):
+        """
+        This function is a simple version of BioMart REST API.
+        sample parameter to query().
+
+        However, you could get cross page of mapping. such as Mouse 2 human gene names
+        
+        **Note**: it will take a couple of minutes to get the results.
+        A xml template for querying biomart. (see https://gist.github.com/keithshep/7776579)
+
+        Example::
+            >>> from gseapy import Biomart
+            >>> bm = Biomart()
+            >>> results = bm.query_simple(dataset='mmusculus_gene_ensembl',
+                                          attributes=['ensembl_gene_id',
+                                                      'external_gene_name',
+                                                      'hsapiens_homolog_associated_gene_name',
+                                                      'hsapiens_homolog_ensembl_gene'])
+        """
+        self.reset()
+        self.add_dataset(dataset)
+        for at in attributes:
+            self.add_attribute(at)
+        for n, v in filters.items():
+            self.add_filter(n, v)
+        _xml = self.get_xml()
+        response = requests.get(_xml, stream=True)
+        if response.ok:
+            df = pd.read_table(StringIO(response.text), header=None, names=attributes)
+            if filename is not None:
+                df.to_csv(filename, sep="\t", index=False)
+            self.results = df
+            return df
+        return response.text
