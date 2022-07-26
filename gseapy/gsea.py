@@ -13,7 +13,7 @@ from gseapy.plot import gseaplot
 from gseapy.utils import mkdirs, log_init
 from gseapy.gse import prerank_rs, gsea_rs, ssgsea_rs, Metric  # import gseapy rust lib
 from typing import AnyStr, Tuple, Union, List, Dict, Iterable, Optional
-
+# from memory_profiler import profile 
 
 
 class GSEA(GSEAbase):
@@ -27,8 +27,8 @@ class GSEA(GSEAbase):
                  max_size: int = 500,
                  permutation_num: int = 1000,
                  weight: float = 1.0,
-                 permutation_type: str = 'gene_set',
-                 method: str = 'log2_ratio_of_classes',
+                 permutation_type: str = 'phenotype',
+                 method: str = 'signal_to_noise',
                  ascending: bool = False,
                  threads: int = 1,
                  figsize: Tuple[float, float] = (6.5, 6),
@@ -234,7 +234,7 @@ class GSEA(GSEAbase):
                                      classes=cls_dict, ascending=self.ascending)
         self.ranking = dat2
         # filtering out gene sets and build gene sets dictionary
-        gmt = self.load_gmt_only(gmt=self.gene_sets)
+        gmt = self.load_gmt(gene_list=dat2.index.values, gmt=self.gene_sets)
 
         self._logger.info(
             "%04d gene_sets used for further statistical testing....." % len(gmt))
@@ -331,7 +331,7 @@ class Prerank(GSEAbase):
         self.ranking = None
         self._noplot = no_plot
         self.permutation_type = 'gene_set'
-
+    
     def run(self):
         """GSEA prerank workflow"""
 
@@ -345,7 +345,7 @@ class Prerank(GSEAbase):
         self._logger.info(
             "Parsing data files for GSEA.............................")
         # filtering out gene sets and build gene sets dictionary
-        gmt = self.load_gmt_only(gmt=self.gene_sets)
+        gmt = self.load_gmt(gene_list=dat2.index.values, gmt=self.gene_sets)
 
         self._logger.info(
             "%04d gene_sets used for further statistical testing....." % len(gmt))

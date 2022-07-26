@@ -227,10 +227,10 @@ def add_gsea_parser(subparsers):
     group_input.add_argument("-g", "--gmt", dest="gmt", action="store", type=str, required=True,
                              help="Gene set database in GMT format. Same with GSEA.")
     group_input.add_argument("-t", "--permu-type", action="store", dest="type", type=str, metavar='perType',
-                             choices=("gene_set", "phenotype"), default="gene_set",
+                             choices=("gene_set", "phenotype"), default="phenotype",
                              help="Type of permutation reshuffling, "+\
                                    "Choose from {'phenotype': 'sample.labels' , 'gene_set' : gene.labels}. " +\
-                                   "Default: gene_set")
+                                   "Default: phenotype")
 
     # group for output files
     group_output = argparser_gsea.add_argument_group("Output arguments")
@@ -249,10 +249,10 @@ def add_gsea_parser(subparsers):
     group_opt.add_argument("-m", "--method", action="store", dest="method", type=str, metavar='',
                            choices=("signal_to_noise", "s2n", "abs_signal_to_noise", "abs_s2n",
                                     "t_test", "ratio_of_classes", "diff_of_classes", "log2_ratio_of_classes"),
-                           default="log2_ratio_of_classes",
+                           default="signal_to_noise",
                            help="Methods to calculate correlations of ranking metrics. \
                            Choose from {'signal_to_noise', 'abs_signal_to_noise', 't_test', 'ratio_of_classes', 'diff_of_classes','log2_ratio_of_classes'}.\
-                           Default: 'log2_ratio_of_classes'")
+                           Default: 'signal_to_noise'")
     group_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
                            help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
     group_opt.add_argument("-s", "--seed", dest="seed", action="store", type=int, default=123, metavar='',
