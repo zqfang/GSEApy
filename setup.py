@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import sys, os, re, pathlib
+import os
+import pathlib
+import re
+import sys
+
 from setuptools import setup
-from setuptools.command.test import test as TestCommand
 from setuptools.command.sdist import sdist as SdistCommand
+from setuptools.command.test import test as TestCommand
 
 # if "Could not build wheels for gseapy which use PEP 517 and cannot be installed directly", please 
 # pip install --upgrade pip setuptools wheel
