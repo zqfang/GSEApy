@@ -331,7 +331,8 @@ class Prerank(GSEAbase):
         self.ranking = None
         self._noplot = no_plot
         self.permutation_type = 'gene_set'
-    
+        
+    # @profile
     def run(self):
         """GSEA prerank workflow"""
 
