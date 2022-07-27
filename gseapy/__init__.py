@@ -6,6 +6,7 @@ from .plot import barplot, dotplot, gseaplot, heatmap
 from .__main__ import __version__
 from typing import AnyStr, Tuple, Union, List, Dict, Iterable, Optional
 import pandas as pd
+import warnings
 
 def gsea(data: Union[pd.DataFrame, str],
         gene_sets: Union[List[str], str, Dict[str, str]],
@@ -18,13 +19,14 @@ def gsea(data: Union[pd.DataFrame, str],
         permutation_type: str = 'phenotype',
         method: str = 'signal_to_noise',
         ascending: bool = False,
-        processes: int = 1,
+        threads: int = 1,
         figsize: Tuple[float, float] = (6.5, 6),
         format: str = 'pdf',
         graph_num: int = 20,
         no_plot: bool = False,
         seed: int = 123,
-        verbose: bool = False) -> GSEA:
+        verbose: bool = False,
+        processes = None, *arg, **kwarg) -> GSEA:
     """ Run Gene Set Enrichment Analysis.
 
     :param data: Gene expression data table, Pandas DataFrame, gct file.
@@ -79,7 +81,7 @@ def gsea(data: Union[pd.DataFrame, str],
 
     :param bool ascending: Sorting order of rankings. Default: False.
 
-    :param int processes: Number of Processes you are going to use. Default: 1.
+    :param int threads: Number of threads you are going to use. Default: 1.
 
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
 
@@ -111,8 +113,12 @@ def gsea(data: Union[pd.DataFrame, str],
 
 
     """
+    if processes is not None:
+        warnings.warn("processes is deprecated; use threads", DeprecationWarning, 2)
+        threads = processes
+
     gs = GSEA(data, gene_sets, cls, outdir, min_size, max_size, permutation_num,
-              weighted_score_type, permutation_type, method, ascending, processes,
+              weighted_score_type, permutation_type, method, ascending, threads,
               figsize, format, graph_num, no_plot, seed, verbose)
     gs.run()
 
@@ -128,13 +134,14 @@ def ssgsea(data: Union[pd.Series, pd.DataFrame, str],
             permutation_num: Optional[int]=None, 
             weighted_score_type: float = 0.25,
             ascending: bool = False,
-            processes: int = 1,
+            threads: int = 1,
             figsize: Tuple[float, float] = (6.5, 6),
             format: str = 'pdf',
             graph_num: int = 20,
             no_plot: bool = True,
             seed: int = 123,
-            verbose: bool = False):
+            verbose: bool = False,
+            processes = None, *arg, **kwarg) -> SingleSampleGSEA:
     """Run Gene Set Enrichment Analysis with single sample GSEA tool
 
     :param data: Expression table, pd.Series, pd.DataFrame, GCT file, or .rnk file format.
@@ -163,7 +170,7 @@ def ssgsea(data: Union[pd.Series, pd.DataFrame, str],
 
     :param bool ascending: Sorting order of rankings. Default: False.
 
-    :param int processes: Number of Processes you are going to use. Default: 1.
+    :param int threads: Number of threads you are going to use. Default: 1.
 
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [7,6].
 
@@ -197,9 +204,12 @@ def ssgsea(data: Union[pd.Series, pd.DataFrame, str],
 
 
     """
+    if processes is not None:
+        warnings.warn("processes is deprecated; use threads", DeprecationWarning, 2)
+        threads = processes
     ss = SingleSampleGSEA(data, gene_sets, outdir, sample_norm_method, min_size, max_size,
                           permutation_num, weighted_score_type, ascending,
-                          processes, figsize, format, graph_num, no_plot, seed, verbose)
+                          threads, figsize, format, graph_num, no_plot, seed, verbose)
     ss.run()
     return ss
 
@@ -214,13 +224,14 @@ def prerank(rnk: Union[pd.DataFrame, pd.Series, str],
             permutation_num: int = 1000,
             weighted_score_type: float = 1.0,
             ascending: bool = False,
-            processes: int = 1,
+            threads: int = 1,
             figsize: Tuple[float, float] = (6.5, 6),
             format: str = 'pdf',
             graph_num: int = 20,
             no_plot: bool = False,
             seed: int = 123,
-            verbose: bool = False) -> Prerank:
+            verbose: bool = False,
+            processes = None, *arg, **kwarg) -> Prerank:
     """ Run Gene Set Enrichment Analysis with pre-ranked correlation defined by user.
 
     :param rnk: pre-ranked correlation table or pandas DataFrame. Same input with ``GSEA`` .rnk file.
@@ -239,7 +250,7 @@ def prerank(rnk: Union[pd.DataFrame, pd.Series, str],
 
     :param bool ascending: Sorting order of rankings. Default: False.
 
-    :param int processes: Number of Processes you are going to use. Default: 1.
+    :param int threads: Number of threads you are going to use. Default: 1.
 
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
 
@@ -271,9 +282,12 @@ def prerank(rnk: Union[pd.DataFrame, pd.Series, str],
 
 
     """
+    if processes is not None:
+        warnings.warn("processes is deprecated; use threads", DeprecationWarning, 2)
+        threads = processes
     pre = Prerank(rnk, gene_sets, outdir, pheno_pos, pheno_neg,
                   min_size, max_size, permutation_num, weighted_score_type,
-                  ascending, processes, figsize, format, graph_num, no_plot, seed, verbose)
+                  ascending, threads, figsize, format, graph_num, no_plot, seed, verbose)
     pre.run()
     return pre
 

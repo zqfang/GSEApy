@@ -4,7 +4,6 @@
 import os
 import logging
 import json
-from collections import OrderedDict
 from tempfile import TemporaryDirectory
 
 import numpy as np
