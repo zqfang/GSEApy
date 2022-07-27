@@ -15,12 +15,12 @@ def genelist():
 
 @pytest.fixture
 def gseaGCT():
-    return "tests/data/P53_resampling_data.txt"
+    return "tests/extdata/Leukemia_hgu95av2.trim.txt"
 
 
 @pytest.fixture
 def gseaCLS():
-    return "tests/data/P53.cls"
+    return "tests/extdata/Leukemia.cls"
 
 
 @pytest.fixture
@@ -35,12 +35,12 @@ def geneGMT():
 
 @pytest.fixture
 def ssGMT():
-    return "tests/data/randomSets.gmt"
+    return "tests/data/temp.gmt"
 
 
 @pytest.fixture
 def ssGCT():
-    return "tests/data/testSet_rand1200.gct"
+    return "tests/extdata/Leukemia_hgu95av2.trim.txt"
 
 
 def test_gsea(gseaGCT, gseaCLS, geneGMT):
@@ -105,9 +105,7 @@ def test_enrichr(genelist, geneGMT):
     # Only tests of the command runs successfully,
     # doesnt't check the image
     tmpdir = TemporaryDirectory(dir="tests")
-    enrichr(
-        genelist, gene_sets=["KEGG_2016", geneGMT], outdir=None, verbose=True
-    )
+    enrichr(genelist, gene_sets=["KEGG_2016", geneGMT], outdir=None)
     tmpdir.cleanup()
     tmpdir = TemporaryDirectory(dir="tests")
     enrichr(genelist, organism="Fly", gene_sets="KEGG_2019", outdir=tmpdir.name)
