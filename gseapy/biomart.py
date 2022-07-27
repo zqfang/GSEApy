@@ -1,11 +1,9 @@
-from importlib.util import resolve_name
-from attr import attr
-import requests
-import pandas as pd
-from io import StringIO
 from collections.abc import Iterable
-from bioservices import BioMart
+from io import StringIO
 
+import pandas as pd
+import requests
+from bioservices import BioMart
 
 
 class Biomart(BioMart):
@@ -52,18 +50,19 @@ class Biomart(BioMart):
             "header": 0,
             "uniqueRows": 0,
             "configVersion": "0.6",
-            "completionStamp": "1"
+            "completionStamp": "1",
         }
 
-        self.header = \
-            '''http://ensembl.org/biomart/martservice?query=''' \
-            '''<?xml version="%(version)s" encoding="UTF-8"?>''' \
-            '''<!DOCTYPE Query>''' \
-            '''<Query virtualSchemaName="%(virtualSchemaName)s" formatter="%(formatter)s" ''' \
-            '''header="%(header)s" uniqueRows="%(uniqueRows)s" count="" ''' \
-            '''datasetConfigVersion="%(configVersion)s" completionStamp="%(completionStamp)s">'''
-            
-        self.header = self.header%params
+        self.header = (
+            """http://ensembl.org/biomart/martservice?query="""
+            """<?xml version="%(version)s" encoding="UTF-8"?>"""
+            """<!DOCTYPE Query>"""
+            """<Query virtualSchemaName="%(virtualSchemaName)s" formatter="%(formatter)s" """
+            """header="%(header)s" uniqueRows="%(uniqueRows)s" count="" """
+            """datasetConfigVersion="%(configVersion)s" completionStamp="%(completionStamp)s">"""
+        )
+
+        self.header = self.header % params
         self.footer = "</Dataset></Query>"
         self.reset()
 
@@ -77,7 +76,7 @@ class Biomart(BioMart):
         self.filters_xml.append(_filter)
 
     def add_attribute(self, attribute):
-        _attr = """<Attribute name="%s"/>""" %attribute
+        _attr = """<Attribute name="%s"/>""" % attribute
 
         self.attributes_xml.append(_attr)
 
@@ -93,7 +92,7 @@ class Biomart(BioMart):
         xml = self.header
         xml += self.dataset_xml
         for line in self.filters_xml:
-            xml += line 
+            xml += line
         for line in self.attributes_xml:
             xml += line
         xml += self.footer
@@ -131,12 +130,9 @@ class Biomart(BioMart):
         return pd.DataFrame(filt_, columns=["Filter", "Description"])
 
     def query(
-        self, dataset="hsapiens_gene_ensembl", 
-        attributes=[], 
-        filters={}, 
-        filename=None
+        self, dataset="hsapiens_gene_ensembl", attributes=[], filters={}, filename=None
     ):
-        """mapping ids using BioMart.  
+        """mapping ids using BioMart.
 
         :param dataset: str, default: 'hsapiens_gene_ensembl'
         :param attributes: str, list, tuple
@@ -172,11 +168,9 @@ class Biomart(BioMart):
             print(results)
             return results
 
-        df = pd.read_csv( StringIO(results), 
-                          header=None, 
-                          sep="\t", 
-                          index_col=None, 
-                          names=attributes)
+        df = pd.read_csv(
+            StringIO(results), header=None, sep="\t", index_col=None, names=attributes
+        )
         if "entrezgene_id" in df.columns:
             df["entrezgene_id"] = df["entrezgene_id"].astype(pd.Int32Dtype())
 
@@ -189,19 +183,15 @@ class Biomart(BioMart):
 
         return df
 
-    
     def query_simple(
-        self, dataset="hsapiens_gene_ensembl", 
-        attributes=[], 
-        filters={}, 
-        filename=None
+        self, dataset="hsapiens_gene_ensembl", attributes=[], filters={}, filename=None
     ):
         """
         This function is a simple version of BioMart REST API.
         sample parameter to query().
 
         However, you could get cross page of mapping. such as Mouse 2 human gene names
-        
+
         **Note**: it will take a couple of minutes to get the results.
         A xml template for querying biomart. (see https://gist.github.com/keithshep/7776579)
 

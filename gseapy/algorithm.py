@@ -2,17 +2,119 @@
 
 import logging
 import sys
+from collections import Counter
 from math import ceil
+from typing import AnyStr, Dict, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
 from joblib import Parallel, delayed
-from collections import Counter
+
 from gseapy.stats import multiple_testing_correction
 
 
+def enrichment_score(
+    gene_list: Iterable[str],
+    correl_vector: Iterable[float],
+    gene_set: Dict[str, List[str]],
+    weight: float = 1.0,
+    nperm: int = 1000,
+    seed: int = 123,
+    single: bool = False,
+    scale: bool = False,
+):
+    """This is the most important function of GSEApy. It has the same algorithm with GSEA and ssGSEA.
 
-def enrichment_score_tensor(gene_mat, cor_mat, gene_sets, weighted_score_type, nperm=1000,
-                            seed=None, single=False, scale=False):
+    :param gene_list:       The ordered gene list gene_name_list, rank_metric.index.values
+    :param gene_set:        gene_sets in gmt file, please use gsea_gmt_parser to get gene_set.
+    :param weight:  It's the same with gsea's weighted_score method. Weighting by the correlation
+                            is a very reasonable choice that allows significant gene sets with less than perfect coherence.
+                            options: 0(classic),1,1.5,2. default:1. if one is interested in penalizing sets for lack of
+                            coherence or to discover sets with any type of nonrandom distribution of tags, a value p < 1
+                            might be appropriate. On the other hand, if one uses sets with large number of genes and only
+                            a small subset of those is expected to be coherent, then one could consider using p > 1.
+                            Our recommendation is to use p = 1 and use other settings only if you are very experienced
+                            with the method and its behavior.
+
+    :param correl_vector:   A vector with the correlations (e.g. signal to noise scores) corresponding to the genes in
+                            the gene list. Or rankings, rank_metric.values
+    :param nperm:           Only use this parameter when computing esnull for statistical testing. Set the esnull value
+                            equal to the permutation number.
+    :param seed:            Random state for initializing gene list shuffling. Default: seed=None
+
+    :return:
+
+    ES: Enrichment score (real number between -1 and +1)
+
+    ESNULL: Enrichment score calculated from random permutations.
+
+    Hits_Indices: Index of a gene in gene_list, if gene is included in gene_set.
+
+    RES: Numerical vector containing the running enrichment score for all locations in the gene list .
+
+    """
+    N = len(gene_list)
+    # Test whether each element of a 1-D array is also present in a second array
+    # It's more intuitive here than original enrichment_score source code.
+    # use .astype to covert bool to integer
+    tag_indicator = np.in1d(gene_list, gene_set, assume_unique=True).astype(
+        int
+    )  # notice that the sign is 0 (no tag) or 1 (tag)
+
+    if weight == 0:
+        correl_vector = np.repeat(1, N)
+    else:
+        correl_vector = np.abs(correl_vector) ** weight
+
+    # get indices of tag_indicator
+    hit_ind = np.flatnonzero(tag_indicator).tolist()
+    # if used for compute esnull, set esnull equal to permutation number, e.g. 1000
+    # else just compute enrichment scores
+    # set axis to 1, because we have 2D array
+    axis = 1
+    tag_indicator = np.tile(tag_indicator, (nperm + 1, 1))
+    correl_vector = np.tile(correl_vector, (nperm + 1, 1))
+    # gene list permutation
+    rs = np.random.RandomState(seed)
+    for i in range(nperm):
+        rs.shuffle(tag_indicator[i])
+    # np.apply_along_axis(rs.shuffle, 1, tag_indicator)
+
+    Nhint = tag_indicator.sum(axis=axis, keepdims=True)
+    sum_correl_tag = np.sum(correl_vector * tag_indicator, axis=axis, keepdims=True)
+    # compute ES score, the code below is identical to gsea enrichment_score method.
+    no_tag_indicator = 1 - tag_indicator
+    Nmiss = N - Nhint
+    norm_tag = 1.0 / sum_correl_tag
+    norm_no_tag = 1.0 / Nmiss
+
+    RES = np.cumsum(
+        tag_indicator * correl_vector * norm_tag - no_tag_indicator * norm_no_tag,
+        axis=axis,
+    )
+
+    if scale:
+        RES = RES / N
+    if single:
+        es_vec = RES.sum(axis=axis)
+    else:
+        max_ES, min_ES = RES.max(axis=axis), RES.min(axis=axis)
+        es_vec = np.where(np.abs(max_ES) > np.abs(min_ES), max_ES, min_ES)
+    # extract values
+    es, esnull, RES = es_vec[-1], es_vec[:-1], RES[-1, :]
+
+    return es, esnull, hit_ind, RES
+
+
+def enrichment_score_tensor(
+    gene_mat,
+    cor_mat,
+    gene_sets,
+    weighted_score_type,
+    nperm=1000,
+    seed=None,
+    single=False,
+    scale=False,
+):
     """Next generation algorithm of GSEA and ssGSEA. Works for 3d array
 
     :param gene_mat:        the ordered gene list(vector) with or without gene indices matrix.

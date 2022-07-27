@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-import sys
 import logging
+
 import numpy as np
 from scipy.stats import fisher_exact, hypergeom
 

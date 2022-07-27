@@ -1,6 +1,3 @@
-
-import os
-import sys
 import argparse as ap
 import logging
 import os
@@ -14,7 +11,7 @@ import sys
 # or args = argparser.parse_args() will throw bugs!!!
 
 
-__version__ = '1.0.0'
+__version__ = "1.0.0"
 
 
 def main():
@@ -28,8 +25,15 @@ def main():
     if subcommand == "replot":
         # reproduce plots using GSEAPY
         from .gsea import Replot
-        Replot(indir=args.indir, outdir=args.outdir, weight=args.weight,
-               figsize=args.figsize, format=args.format, verbose=args.verbose).run()
+
+        Replot(
+            indir=args.indir,
+            outdir=args.outdir,
+            weight=args.weight,
+            figsize=args.figsize,
+            format=args.format,
+            verbose=args.verbose,
+        ).run()
 
     elif subcommand == "gsea":
         # compute using GSEAPY
@@ -82,41 +86,43 @@ def main():
 
     elif subcommand == "ssgsea":
         from .gsea import SingleSampleGSEA
+
         ss = SingleSampleGSEA(
-            data=args.data, 
-            gene_sets=args.gmt, 
+            data=args.data,
+            gene_sets=args.gmt,
             outdir=args.outdir,
             sample_norm_method=args.norm,
-            min_size=args.mins, 
-            max_size=args.maxs, 
+            min_size=args.mins,
+            max_size=args.maxs,
             permutation_num=args.n,
             weight=args.weight,
-            ascending=args.ascending, 
+            ascending=args.ascending,
             threads=args.threads,
-            figsize=args.figsize, 
-            format=args.format, 
+            figsize=args.figsize,
+            format=args.format,
             graph_num=args.graph,
-            no_plot=args.noplot, 
-            seed=args.seed, 
-            verbose=args.verbose
+            no_plot=args.noplot,
+            seed=args.seed,
+            verbose=args.verbose,
         )
         ss.run()
 
     elif subcommand == "enrichr":
         # calling enrichr API
         from .enrichr import Enrichr
+
         enr = Enrichr(
-            gene_list=args.gene_list, 
-            gene_sets=args.library, 
+            gene_list=args.gene_list,
+            gene_sets=args.library,
             organism=args.organism,
-            outdir=args.outdir, 
-            format=args.format, 
+            outdir=args.outdir,
+            format=args.format,
             cutoff=args.thresh,
-            background=args.bg, 
+            background=args.bg,
             figsize=args.figsize,
-            top_term=args.term, 
-            no_plot=args.noplot, 
-            verbose=args.verbose
+            top_term=args.term,
+            no_plot=args.noplot,
+            verbose=args.verbose,
         )
         # set organism
         enr.set_organism()
@@ -150,9 +156,12 @@ def prepare_argparser():
 
     # top-level parser
     argparser = ap.ArgumentParser(description=description, epilog=epilog)
-    argparser.add_argument("--version", action="version",
-                           version="%(prog)s " + __version__)
-    subparsers = argparser.add_subparsers(dest='subcommand_name')  # help="sub-command help")
+    argparser.add_argument(
+        "--version", action="version", version="%(prog)s " + __version__
+    )
+    subparsers = argparser.add_subparsers(
+        dest="subcommand_name"
+    )  # help="sub-command help")
 
     # command for 'gsea'
     add_gsea_parser(subparsers)
@@ -173,23 +182,64 @@ def prepare_argparser():
 def add_output_option(parser):
     """output option"""
 
-    parser.add_argument("-o", "--outdir", dest="outdir", type=str, default='GSEApy_reports',
-                        metavar='', action="store",
-                        help="The GSEApy output directory. Default: the current working directory")
-    parser.add_argument("-f", "--format", dest="format", type=str, metavar='', action="store",
-                        choices=("pdf", "png", "jpeg", "eps", "svg"), default="pdf",
-                        help="File extensions supported by Matplotlib active backend,\
-                              choose from {'pdf', 'png', 'jpeg','ps', 'eps','svg'}. Default: 'pdf'.")
-    parser.add_argument("--fs", "--figsize", action='store', nargs=2, dest='figsize',
-                        metavar=('width', 'height'), type=float, default=(6.5, 6),
-                        help="The figsize keyword argument need two parameters to define. Default: (6.5, 6)")
-    parser.add_argument("--graph", dest="graph", action="store", type=int, default=20, metavar='int',
-                        help="Numbers of top graphs produced. Default: 20")
-    parser.add_argument("--no-plot", action='store_true', dest='noplot', default=False,
-                        help="Speed up computing by suppressing the plot output." +
-                             "This is useful only if data are interested. Default: False.")
-    parser.add_argument("-v", "--verbose", action="store_true", default=False, dest='verbose',
-                        help="Increase output verbosity, print out progress of your job", )
+    parser.add_argument(
+        "-o",
+        "--outdir",
+        dest="outdir",
+        type=str,
+        default="GSEApy_reports",
+        metavar="",
+        action="store",
+        help="The GSEApy output directory. Default: the current working directory",
+    )
+    parser.add_argument(
+        "-f",
+        "--format",
+        dest="format",
+        type=str,
+        metavar="",
+        action="store",
+        choices=("pdf", "png", "jpeg", "eps", "svg"),
+        default="pdf",
+        help="File extensions supported by Matplotlib active backend,\
+                              choose from {'pdf', 'png', 'jpeg','ps', 'eps','svg'}. Default: 'pdf'.",
+    )
+    parser.add_argument(
+        "--fs",
+        "--figsize",
+        action="store",
+        nargs=2,
+        dest="figsize",
+        metavar=("width", "height"),
+        type=float,
+        default=(6.5, 6),
+        help="The figsize keyword argument need two parameters to define. Default: (6.5, 6)",
+    )
+    parser.add_argument(
+        "--graph",
+        dest="graph",
+        action="store",
+        type=int,
+        default=20,
+        metavar="int",
+        help="Numbers of top graphs produced. Default: 20",
+    )
+    parser.add_argument(
+        "--no-plot",
+        action="store_true",
+        dest="noplot",
+        default=False,
+        help="Speed up computing by suppressing the plot output."
+        + "This is useful only if data are interested. Default: False.",
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        default=False,
+        dest="verbose",
+        help="Increase output verbosity, print out progress of your job",
+    )
 
 
 def add_output_group(parser, required=True):
@@ -216,21 +266,52 @@ def add_output_group(parser, required=True):
 def add_gsea_parser(subparsers):
     """Add main function 'gsea' argument parsers."""
 
-    argparser_gsea = subparsers.add_parser("gsea", help="Main GSEApy Function: run GSEApy instead of GSEA.")
+    argparser_gsea = subparsers.add_parser(
+        "gsea", help="Main GSEApy Function: run GSEApy instead of GSEA."
+    )
 
     # group for input files
     group_input = argparser_gsea.add_argument_group("Input files arguments")
-    group_input.add_argument("-d", "--data", dest="data", action="store", type=str, required=True,
-                             help="Input gene expression dataset file in txt format.Same with GSEA.")
-    group_input.add_argument("-c", "--cls", dest="cls", action="store", type=str, required=True,
-                             help="Input class vector (phenotype) file in CLS format. Same with GSEA.")
-    group_input.add_argument("-g", "--gmt", dest="gmt", action="store", type=str, required=True,
-                             help="Gene set database in GMT format. Same with GSEA.")
-    group_input.add_argument("-t", "--permu-type", action="store", dest="type", type=str, metavar='perType',
-                             choices=("gene_set", "phenotype"), default="phenotype",
-                             help="Type of permutation reshuffling, "+\
-                                   "Choose from {'phenotype': 'sample.labels' , 'gene_set' : gene.labels}. " +\
-                                   "Default: phenotype")
+    group_input.add_argument(
+        "-d",
+        "--data",
+        dest="data",
+        action="store",
+        type=str,
+        required=True,
+        help="Input gene expression dataset file in txt format.Same with GSEA.",
+    )
+    group_input.add_argument(
+        "-c",
+        "--cls",
+        dest="cls",
+        action="store",
+        type=str,
+        required=True,
+        help="Input class vector (phenotype) file in CLS format. Same with GSEA.",
+    )
+    group_input.add_argument(
+        "-g",
+        "--gmt",
+        dest="gmt",
+        action="store",
+        type=str,
+        required=True,
+        help="Gene set database in GMT format. Same with GSEA.",
+    )
+    group_input.add_argument(
+        "-t",
+        "--permu-type",
+        action="store",
+        dest="type",
+        type=str,
+        metavar="perType",
+        choices=("gene_set", "phenotype"),
+        default="phenotype",
+        help="Type of permutation reshuffling, "
+        + "Choose from {'phenotype': 'sample.labels' , 'gene_set' : gene.labels}. "
+        + "Default: phenotype",
+    )
 
     # group for output files
     group_output = argparser_gsea.add_argument_group("Output arguments")
@@ -238,27 +319,94 @@ def add_gsea_parser(subparsers):
 
     # group for General options.
     group_opt = argparser_gsea.add_argument_group("GSEA advanced arguments")
-    group_opt.add_argument("-n", "--permu-num", dest="n", action="store", type=int, default=1000, metavar='nperm',
-                           help="Number of random permutations. For calculating esnulls. Default: 1000")
-    group_opt.add_argument("--min-size",  dest="mins", action="store", type=int, default=15, metavar='int',
-                           help="Min size of input genes presented in Gene Sets. Default: 15")
-    group_opt.add_argument("--max-size", dest="maxs", action="store", type=int, default=500, metavar='int',
-                           help="Max size of input genes presented in Gene Sets. Default: 500")
-    group_opt.add_argument("-w", "--weight", action='store', dest='weight', default=1.0, type=float, metavar='float',
-                           help='Weighted_score of rank_metrics. For weighting input genes. Choose from {0, 1, 1.5, 2}. Default: 1',)
-    group_opt.add_argument("-m", "--method", action="store", dest="method", type=str, metavar='',
-                           choices=("signal_to_noise", "s2n", "abs_signal_to_noise", "abs_s2n",
-                                    "t_test", "ratio_of_classes", "diff_of_classes", "log2_ratio_of_classes"),
-                           default="signal_to_noise",
-                           help="Methods to calculate correlations of ranking metrics. \
+    group_opt.add_argument(
+        "-n",
+        "--permu-num",
+        dest="n",
+        action="store",
+        type=int,
+        default=1000,
+        metavar="nperm",
+        help="Number of random permutations. For calculating esnulls. Default: 1000",
+    )
+    group_opt.add_argument(
+        "--min-size",
+        dest="mins",
+        action="store",
+        type=int,
+        default=15,
+        metavar="int",
+        help="Min size of input genes presented in Gene Sets. Default: 15",
+    )
+    group_opt.add_argument(
+        "--max-size",
+        dest="maxs",
+        action="store",
+        type=int,
+        default=500,
+        metavar="int",
+        help="Max size of input genes presented in Gene Sets. Default: 500",
+    )
+    group_opt.add_argument(
+        "-w",
+        "--weight",
+        action="store",
+        dest="weight",
+        default=1.0,
+        type=float,
+        metavar="float",
+        help="Weighted_score of rank_metrics. For weighting input genes. Choose from {0, 1, 1.5, 2}. Default: 1",
+    )
+    group_opt.add_argument(
+        "-m",
+        "--method",
+        action="store",
+        dest="method",
+        type=str,
+        metavar="",
+        choices=(
+            "signal_to_noise",
+            "s2n",
+            "abs_signal_to_noise",
+            "abs_s2n",
+            "t_test",
+            "ratio_of_classes",
+            "diff_of_classes",
+            "log2_ratio_of_classes",
+        ),
+        default="signal_to_noise",
+        help="Methods to calculate correlations of ranking metrics. \
                            Choose from {'signal_to_noise', 'abs_signal_to_noise', 't_test', 'ratio_of_classes', 'diff_of_classes','log2_ratio_of_classes'}.\
-                           Default: 'signal_to_noise'")
-    group_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
-                           help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
-    group_opt.add_argument("-s", "--seed", dest="seed", action="store", type=int, default=123, metavar='',
-                           help="Number of random seed. Default: None")
-    group_opt.add_argument("-p", "--threads", dest="threads", action="store", type=int, default=1, metavar='procs',
-                           help="Number of threads you are going to use. Default: 1")
+                           Default: 'signal_to_noise'",
+    )
+    group_opt.add_argument(
+        "-a",
+        "--ascending",
+        action="store_true",
+        dest="ascending",
+        default=False,
+        help="Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.",
+    )
+    group_opt.add_argument(
+        "-s",
+        "--seed",
+        dest="seed",
+        action="store",
+        type=int,
+        default=123,
+        metavar="",
+        help="Number of random seed. Default: None",
+    )
+    group_opt.add_argument(
+        "-p",
+        "--threads",
+        dest="threads",
+        action="store",
+        type=int,
+        default=1,
+        metavar="procs",
+        help="Number of threads you are going to use. Default: 1",
+    )
 
     return
 
@@ -266,18 +414,41 @@ def add_gsea_parser(subparsers):
 def add_prerank_parser(subparsers):
     """Add function 'prerank' argument parsers."""
 
-    argparser_prerank = subparsers.add_parser("prerank", help="Run GSEApy Prerank tool on preranked gene list.")
+    argparser_prerank = subparsers.add_parser(
+        "prerank", help="Run GSEApy Prerank tool on preranked gene list."
+    )
 
     # group for input files
-    prerank_input = argparser_prerank.add_argument_group(
-        "Input files arguments")
-    prerank_input.add_argument("-r", "--rnk", dest="rnk", action="store", type=str, required=True,
-                               help="Ranking metric file in .rnk format. Same with GSEA.")
-    prerank_input.add_argument("-g", "--gmt", dest="gmt", action="store", type=str, required=True,
-                               help="Gene set database in GMT format. Same with GSEA.")
-    prerank_input.add_argument("-l", "--label", action='store', nargs=2, dest='label',
-                               metavar=('pos', 'neg'), type=str, default=('Pos', 'Neg'),
-                               help="The phenotype label argument need two parameters to define. Default: ('Pos','Neg')")
+    prerank_input = argparser_prerank.add_argument_group("Input files arguments")
+    prerank_input.add_argument(
+        "-r",
+        "--rnk",
+        dest="rnk",
+        action="store",
+        type=str,
+        required=True,
+        help="Ranking metric file in .rnk format. Same with GSEA.",
+    )
+    prerank_input.add_argument(
+        "-g",
+        "--gmt",
+        dest="gmt",
+        action="store",
+        type=str,
+        required=True,
+        help="Gene set database in GMT format. Same with GSEA.",
+    )
+    prerank_input.add_argument(
+        "-l",
+        "--label",
+        action="store",
+        nargs=2,
+        dest="label",
+        metavar=("pos", "neg"),
+        type=str,
+        default=("Pos", "Neg"),
+        help="The phenotype label argument need two parameters to define. Default: ('Pos','Neg')",
+    )
 
     # group for output files
     prerank_output = argparser_prerank.add_argument_group("Output arguments")
@@ -285,20 +456,72 @@ def add_prerank_parser(subparsers):
 
     # group for General options.
     prerank_opt = argparser_prerank.add_argument_group("GSEA advanced arguments")
-    prerank_opt.add_argument("-n", "--permu-num", dest="n", action="store", type=int, default=1000, metavar='nperm',
-                             help="Number of random permutations. For calculating esnulls. Default: 1000")
-    prerank_opt.add_argument("--min-size",  dest="mins", action="store", type=int, default=15, metavar='int',
-                             help="Min size of input genes presented in Gene Sets. Default: 15")
-    prerank_opt.add_argument("--max-size", dest="maxs", action="store", type=int, default=500, metavar='int',
-                             help="Max size of input genes presented in Gene Sets. Default: 500")
-    prerank_opt.add_argument("-w", "--weight", action='store', dest='weight', default=1.0, type=float, metavar='float',
-                             help='Weighted_score of rank_metrics. For weighting input genes. Choose from {0, 1, 1.5, 2}. Default: 1',)
-    prerank_opt.add_argument("-a", "--ascending", action='store_true', dest='ascending', default=False,
-                             help='Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.')
-    prerank_opt.add_argument("-s", "--seed", dest="seed", action="store", type=int, default=123, metavar='',
-                             help="Number of random seed. Default: None")
-    prerank_opt.add_argument("-p", "--threads", dest="threads", action="store", type=int, default=1, metavar='procs',
-                             help="Number of threads you are going to use. Default: 1")
+    prerank_opt.add_argument(
+        "-n",
+        "--permu-num",
+        dest="n",
+        action="store",
+        type=int,
+        default=1000,
+        metavar="nperm",
+        help="Number of random permutations. For calculating esnulls. Default: 1000",
+    )
+    prerank_opt.add_argument(
+        "--min-size",
+        dest="mins",
+        action="store",
+        type=int,
+        default=15,
+        metavar="int",
+        help="Min size of input genes presented in Gene Sets. Default: 15",
+    )
+    prerank_opt.add_argument(
+        "--max-size",
+        dest="maxs",
+        action="store",
+        type=int,
+        default=500,
+        metavar="int",
+        help="Max size of input genes presented in Gene Sets. Default: 500",
+    )
+    prerank_opt.add_argument(
+        "-w",
+        "--weight",
+        action="store",
+        dest="weight",
+        default=1.0,
+        type=float,
+        metavar="float",
+        help="Weighted_score of rank_metrics. For weighting input genes. Choose from {0, 1, 1.5, 2}. Default: 1",
+    )
+    prerank_opt.add_argument(
+        "-a",
+        "--ascending",
+        action="store_true",
+        dest="ascending",
+        default=False,
+        help="Rank metric sorting order. If the -a flag was chosen, then ascending equals to True. Default: False.",
+    )
+    prerank_opt.add_argument(
+        "-s",
+        "--seed",
+        dest="seed",
+        action="store",
+        type=int,
+        default=123,
+        metavar="",
+        help="Number of random seed. Default: None",
+    )
+    prerank_opt.add_argument(
+        "-p",
+        "--threads",
+        dest="threads",
+        action="store",
+        type=int,
+        default=1,
+        metavar="procs",
+        help="Number of threads you are going to use. Default: 1",
+    )
 
     return
 
@@ -306,8 +529,7 @@ def add_prerank_parser(subparsers):
 def add_singlesample_parser(subparsers):
     """Add function 'singlesample' argument parsers."""
 
-    argparser_gsea = subparsers.add_parser(
-        "ssgsea", help="Run Single Sample GSEA.")
+    argparser_gsea = subparsers.add_parser("ssgsea", help="Run Single Sample GSEA.")
 
     # group for input files
     group_input = argparser_gsea.add_argument_group("Input files arguments")
@@ -543,8 +765,7 @@ def add_enrichr_parser(subparsers):
     # enrichr_opt.add_argument("--no-plot", action='store_true', dest='no_plot', default=False,
     #                           help="Suppress the plot output.This is useful only if data are interested. Default: False.")
 
-    enrichr_output = argparser_enrichr.add_argument_group(
-        "Output figure arguments")
+    enrichr_output = argparser_enrichr.add_argument_group("Output figure arguments")
     add_output_option(enrichr_output)
     return
 

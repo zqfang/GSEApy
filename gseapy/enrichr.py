@@ -2,21 +2,24 @@
 # -*- coding: utf-8 -*-
 # see: http://amp.pharm.mssm.edu/Enrichr/help#api for API docs
 
-import sys, json, os, logging
-import requests
-import pandas as pd
-from io import StringIO
+import json
+import logging
+import os
 from collections import OrderedDict
-
+from io import StringIO
 from tempfile import TemporaryDirectory
 from time import sleep
+from typing import Any, AnyStr, Dict, Iterable, List, Optional, Set, Tuple, Union
 
+import pandas as pd
+import requests
 from numpy import isscalar
-from gseapy.utils import *
+
 from gseapy.biomart import Biomart
 from gseapy.plot import barplot
 from gseapy.stats import calc_pvalues, multiple_testing_correction
-from typing import Tuple, Union, List, Dict, Iterable, Optional, AnyStr, Set, Any
+from gseapy.utils import *
+
 
 class Enrichr(object):
     """Enrichr API"""
@@ -178,11 +181,8 @@ class Enrichr(object):
         return "\n".join(genes)
 
     def send_genes(self, gene_list, url) -> AnyStr:
-        """ send gene list to enrichr server"""
-        payload = {
-          'list': (None, gene_list),
-          'description': (None, self.descriptions)
-           }
+        """send gene list to enrichr server"""
+        payload = {"list": (None, gene_list), "description": (None, self.descriptions)}
         # response
         response = requests.post(url, files=payload, verify=True)
         if not response.ok:
@@ -258,9 +258,9 @@ class Enrichr(object):
             return True
         except:
             return False
-    
+
     def get_libraries(self) -> List[str]:
-        """return active enrichr library name. Official API """
+        """return active enrichr library name. Official API"""
 
         lib_url = "%s/%s/datasetStatistics" % (self.ENRICHR_URL, self._organism)
         response = requests.get(lib_url, verify=True)
@@ -282,7 +282,9 @@ class Enrichr(object):
             return set(bg)
 
         # package included data
-        DB_FILE = os.path.join(DEFAULT_CACHE_PATH, "{}.background.genes.txt".format(self.background))
+        DB_FILE = os.path.join(
+            DEFAULT_CACHE_PATH, "{}.background.genes.txt".format(self.background)
+        )
         if os.path.exists(DB_FILE):
             df = pd.read_csv(DB_FILE, sep="\t")
         else:
@@ -292,9 +294,14 @@ class Enrichr(object):
                 % self.background
             )
             bm = Biomart()
-            df = bm.query(dataset=self.background, 
-                          attributes=['ensembl_gene_id', 'external_gene_name', 'entrezgene_id'], 
-                          filename=os.path.join(DEFAULT_CACHE_PATH, "{}.background.genes.txt".format(self.background)))
+            df = bm.query(
+                dataset=self.background,
+                attributes=["ensembl_gene_id", "external_gene_name", "entrezgene_id"],
+                filename=os.path.join(
+                    DEFAULT_CACHE_PATH,
+                    "{}.background.genes.txt".format(self.background),
+                ),
+            )
         self._logger.info(
             "Using all annotated genes with GO_ID as background: %s" % self.background
         )
@@ -484,20 +491,26 @@ class Enrichr(object):
                 self.organism,
                 self.module,
             )
-            self.res2d.to_csv(outfile, index=False, encoding="utf-8", float_format='%.6e', sep="\t")
+            self.res2d.to_csv(
+                outfile, index=False, encoding="utf-8", float_format="%.6e", sep="\t"
+            )
             # plotting
             if not self.__no_plot:
-                msg = barplot(df=res, cutoff=self.cutoff, figsize=self.figsize,
-                              top_term=self.__top_term, color='salmon',
-                              title=self._gs,
-                              ofname=outfile.replace("txt", self.format))
-                if msg is not None : self._logger.warning(msg)
-            self._logger.info('Done.\n')
+                msg = barplot(
+                    df=res,
+                    cutoff=self.cutoff,
+                    figsize=self.figsize,
+                    top_term=self.__top_term,
+                    color="salmon",
+                    title=self._gs,
+                    ofname=outfile.replace("txt", self.format),
+                )
+                if msg is not None:
+                    self._logger.warning(msg)
+            self._logger.info("Done.\n")
         self.results = pd.concat(self.results, ignore_index=True)
         # clean up tmpdir
         if self._outdir is None:
             self._tmpdir.cleanup()
 
         return
-
-

@@ -1,6 +1,8 @@
 from tempfile import NamedTemporaryFile, TemporaryDirectory, mkdtemp
-from gseapy.__init__ import gsea, prerank, ssgsea, replot, enrichr
+
 import pytest
+
+from gseapy.__init__ import enrichr, gsea, prerank, replot, ssgsea
 
 
 @pytest.fixture
@@ -58,6 +60,7 @@ def test_gsea(gseaGCT, gseaCLS, geneGMT):
     )
     tmpdir.cleanup()
 
+
 def test_fdr_gsea(gseaGCT, gseaCLS, geneGMT):
     # Runs and verifies a reasonable result for pval
     # when method="t_test" and permutation_type="gene_set"
@@ -72,8 +75,9 @@ def test_fdr_gsea(gseaGCT, gseaCLS, geneGMT):
         permutation_num=47,
         seed=7,
     )
-    assert gs_res.res2d['NOM p-val'].max() > 0.0
+    assert gs_res.res2d["NOM p-val"].max() > 0.0
     tmpdir.cleanup()
+
 
 def test_prerank(prernk, geneGMT):
     # Only tests of the command runs successfully,

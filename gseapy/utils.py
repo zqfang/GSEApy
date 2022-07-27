@@ -1,5 +1,8 @@
-import errno, logging, os
+import errno
+import logging
+import os
 from os.path import expanduser
+
 import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry

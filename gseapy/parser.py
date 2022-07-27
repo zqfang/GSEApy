@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 
-import sys
-import logging
 import json
-import requests
+import logging
+import sys
 import xml.etree.ElementTree as ET
-from io import StringIO
 from collections.abc import Iterable
+from io import StringIO
+
 import pandas as pd
+import requests
 from numpy import in1d
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
-from gseapy.utils import DEFAULT_CACHE_PATH, DEFAULT_LIBRARY, mkdirs, unique
+
 from gseapy.biomart import Biomart
+from gseapy.utils import DEFAULT_CACHE_PATH, DEFAULT_LIBRARY, mkdirs, unique
 
 
 def gsea_cls_parser(cls):
@@ -101,8 +103,7 @@ def gsea_gmt_parser(gmt, organism="Human", min_size=3, max_size=1000, gene_list=
     """
 
     if gmt.lower().endswith(".gmt"):
-        logging.info(
-            "User Defined gene sets is given.......continue..........")
+        logging.info("User Defined gene sets is given.......continue..........")
         with open(gmt) as genesets:
             genesets_dict = {
                 line.strip().split("\t")[0]: line.strip().split("\t")[2:]
@@ -250,5 +251,3 @@ def get_library_name(organism="Human"):
     libs = [lib["libraryName"] for lib in libs_json["statistics"]]
 
     return sorted(libs)
-
-

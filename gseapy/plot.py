@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
-import sys, operator
-import numpy as np
+import operator
+import sys
+
 import matplotlib.pyplot as plt
 import matplotlib.transforms as transforms
-from matplotlib.colors import Normalize
+import numpy as np
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.colors import Normalize
 from matplotlib.figure import Figure
 from matplotlib.ticker import MaxNLocator
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+
 from gseapy.parser import unique
 
 
@@ -123,12 +125,12 @@ def heatmap(
     yticks, ylabels = _skip_ticks(df.index.values, tickevery=ystep)
     ax.set_ylim([0, len(df)])
     ax.set(xticks=xticks, yticks=yticks)
-    ax.set_xticklabels(xlabels if xticklabels else '',
-                       fontsize=14, rotation=90)
-    ax.set_yticklabels(ylabels if yticklabels else '',  fontsize=14)
+    ax.set_xticklabels(xlabels if xticklabels else "", fontsize=14, rotation=90)
+    ax.set_yticklabels(ylabels if yticklabels else "", fontsize=14)
     ax.set_title("%s\nHeatmap of the Analyzed Geneset" % title, fontsize=20)
-    ax.tick_params(axis='both', which='both', bottom=False, top=False,
-                   right=False, left=False)
+    ax.tick_params(
+        axis="both", which="both", bottom=False, top=False, right=False, left=False
+    )
     # cax=fig.add_axes([0.93,0.25,0.05,0.20])
     # cbar = fig.colorbar(matrix, cax=cax)
     cbar = colorbar(matrix)
@@ -147,9 +149,22 @@ def heatmap(
 
 
 class GSEAPlot(object):
-    def __init__(self, rank_metric, term, hits, nes, pval, fdr, RES,
-                 pheno_pos='', pheno_neg='', figsize=(6, 5.5),
-                 cmap='seismic', ofname=None, **kwargs):
+    def __init__(
+        self,
+        rank_metric,
+        term,
+        hits,
+        nes,
+        pval,
+        fdr,
+        RES,
+        pheno_pos="",
+        pheno_neg="",
+        figsize=(6, 5.5),
+        cmap="seismic",
+        ofname=None,
+        **kwargs,
+    ):
         # center color map at midpoint = 0
         self._norm = MidpointNormalize(midpoint=0)
         # dataFrame of ranked matrix scores
@@ -166,20 +181,20 @@ class GSEAPlot(object):
         self._pos_label = pheno_pos
         self._neg_label = pheno_neg
         self._zero_score_ind = np.abs(self.rankings).argmin()
-        self._z_score_label = 'Zero score at ' + str(self._zero_score_ind)
+        self._z_score_label = "Zero score at " + str(self._zero_score_ind)
         self._hit_indices = hits
-        self.module = 'tmp' if ofname is None else ofname.split(".")[-2]
-        if self.module == 'ssgsea':
-            self._nes_label = 'ES: ' + "{:.3f}".format(float(nes))
-            self._pval_label = 'Pval: invliad for ssgsea'
-            self._fdr_label = 'FDR: invalid for ssgsea'
+        self.module = "tmp" if ofname is None else ofname.split(".")[-2]
+        if self.module == "ssgsea":
+            self._nes_label = "ES: " + "{:.3f}".format(float(nes))
+            self._pval_label = "Pval: invliad for ssgsea"
+            self._fdr_label = "FDR: invalid for ssgsea"
         else:
-            self._nes_label = 'NES: ' + "{:.3f}".format(float(nes))
-            self._pval_label = 'Pval: ' + "{:.3e}".format(float(pval))
-            self._fdr_label = 'FDR: ' + "{:.3e}".format(float(fdr))
+            self._nes_label = "NES: " + "{:.3f}".format(float(nes))
+            self._pval_label = "Pval: " + "{:.3e}".format(float(pval))
+            self._fdr_label = "FDR: " + "{:.3e}".format(float(fdr))
 
         # output truetype
-        plt.rcParams.update({'pdf.fonttype': 42, 'ps.fonttype': 42})
+        plt.rcParams.update({"pdf.fonttype": 42, "ps.fonttype": 42})
         # in most case, we will have many plots, so do not display plots
         # It's also usefull to run this script on command line.
 
@@ -192,7 +207,7 @@ class GSEAPlot(object):
             self.fig = Figure(figsize=self.figsize)
             self._canvas = FigureCanvas(self.fig)
 
-        self.fig.suptitle(self.term, fontsize=16, wrap=True, fontweight='bold')
+        self.fig.suptitle(self.term, fontsize=16, wrap=True, fontweight="bold")
 
     def axes_rank(self, rect):
         """
@@ -202,25 +217,42 @@ class GSEAPlot(object):
         """
         # Ranked Metric Scores Plot
         ax1 = self.fig.add_axes(rect, sharex=self.ax)
-        if self.module == 'ssgsea':
-            ax1.fill_between(self._x, y1=np.log(
-                self.rankings), y2=0, color='#C9D3DB')
-            ax1.set_ylabel("log ranked metric", fontsize=16, fontweight='bold')
+        if self.module == "ssgsea":
+            ax1.fill_between(self._x, y1=np.log(self.rankings), y2=0, color="#C9D3DB")
+            ax1.set_ylabel("log ranked metric", fontsize=16, fontweight="bold")
         else:
-            ax1.fill_between(self._x, y1=self.rankings, y2=0, color='#C9D3DB')
-            ax1.set_ylabel("Ranked list metric", fontsize=16, fontweight='bold')
+            ax1.fill_between(self._x, y1=self.rankings, y2=0, color="#C9D3DB")
+            ax1.set_ylabel("Ranked list metric", fontsize=16, fontweight="bold")
 
-        ax1.text(.05, .9, self._pos_label, color='red',
-                 horizontalalignment='left', verticalalignment='top',
-                 transform=ax1.transAxes)
-        ax1.text(.95, .05, self._neg_label, color='Blue', 
-                 horizontalalignment='right', verticalalignment='bottom',
-                 transform=ax1.transAxes)
+        ax1.text(
+            0.05,
+            0.9,
+            self._pos_label,
+            color="red",
+            horizontalalignment="left",
+            verticalalignment="top",
+            transform=ax1.transAxes,
+        )
+        ax1.text(
+            0.95,
+            0.05,
+            self._neg_label,
+            color="Blue",
+            horizontalalignment="right",
+            verticalalignment="bottom",
+            transform=ax1.transAxes,
+        )
         # the x coords of this transformation are data, and the y coord are axes
-        trans1 = transforms.blended_transform_factory(
-            ax1.transData, ax1.transAxes)
-        ax1.vlines(self._zero_score_ind, 0, 1, linewidth=.5,
-                   transform=trans1, linestyles='--', color='grey')
+        trans1 = transforms.blended_transform_factory(ax1.transData, ax1.transAxes)
+        ax1.vlines(
+            self._zero_score_ind,
+            0,
+            1,
+            linewidth=0.5,
+            transform=trans1,
+            linestyles="--",
+            color="grey",
+        )
 
         hap = self._zero_score_ind / max(self._x)
         if hap < 0.25:
@@ -228,18 +260,25 @@ class GSEAPlot(object):
         elif hap > 0.75:
             ha = "right"
         else:
-            ha = 'center'
-        ax1.text(hap, 0.5, self._z_score_label,
-                 horizontalalignment=ha,
-                 verticalalignment='center',
-                 transform=ax1.transAxes, fontsize=14)
-        ax1.set_xlabel("Rank in Ordered Dataset", fontsize=16, fontweight='bold')
-        ax1.spines['top'].set_visible(False)
-        ax1.tick_params(axis='both', which='both',
-                        top=False, right=False, left=False, labelsize=14)
-        ax1.locator_params(axis='y', nbins=5)
+            ha = "center"
+        ax1.text(
+            hap,
+            0.5,
+            self._z_score_label,
+            horizontalalignment=ha,
+            verticalalignment="center",
+            transform=ax1.transAxes,
+            fontsize=14,
+        )
+        ax1.set_xlabel("Rank in Ordered Dataset", fontsize=16, fontweight="bold")
+        ax1.spines["top"].set_visible(False)
+        ax1.tick_params(
+            axis="both", which="both", top=False, right=False, left=False, labelsize=14
+        )
+        ax1.locator_params(axis="y", nbins=5)
         ax1.yaxis.set_major_formatter(
-            plt.FuncFormatter(lambda tick_loc, tick_num:  '{:.1f}'.format(tick_loc)))
+            plt.FuncFormatter(lambda tick_loc, tick_num: "{:.1f}".format(tick_loc))
+        )
 
     def axes_hits(self, rect):
         """
@@ -250,14 +289,19 @@ class GSEAPlot(object):
         # gene hits
         ax2 = self.fig.add_axes(rect, sharex=self.ax)
         # the x coords of this transformation are data, and the y coord are axes
-        trans2 = transforms.blended_transform_factory(
-            ax2.transData, ax2.transAxes)
-        ax2.vlines(self._hit_indices, 0, 1, linewidth=.5, transform=trans2)
-        ax2.spines['bottom'].set_visible(False)
-        ax2.tick_params(axis='both', which='both',
-                        bottom=False, top=False,
-                        right=False, left=False,
-                        labelbottom=False, labelleft=False)
+        trans2 = transforms.blended_transform_factory(ax2.transData, ax2.transAxes)
+        ax2.vlines(self._hit_indices, 0, 1, linewidth=0.5, transform=trans2)
+        ax2.spines["bottom"].set_visible(False)
+        ax2.tick_params(
+            axis="both",
+            which="both",
+            bottom=False,
+            top=False,
+            right=False,
+            left=False,
+            labelbottom=False,
+            labelleft=False,
+        )
 
     def axes_cmap(self, rect):
         """
@@ -267,13 +311,24 @@ class GSEAPlot(object):
         """
         # colormap
         ax3 = self.fig.add_axes(rect, sharex=self.ax)
-        ax3.imshow(self._im_matrix, aspect='auto', norm=self._norm,
-                   cmap=self.cmap, interpolation='none')  # cm.coolwarm
-        ax3.spines['bottom'].set_visible(False)
-        ax3.tick_params(axis='both', which='both',
-                        bottom=False, top=False,
-                        right=False, left=False,
-                        labelbottom=False, labelleft=False)
+        ax3.imshow(
+            self._im_matrix,
+            aspect="auto",
+            norm=self._norm,
+            cmap=self.cmap,
+            interpolation="none",
+        )  # cm.coolwarm
+        ax3.spines["bottom"].set_visible(False)
+        ax3.tick_params(
+            axis="both",
+            which="both",
+            bottom=False,
+            top=False,
+            right=False,
+            left=False,
+            labelbottom=False,
+            labelleft=False,
+        )
 
     def axes_stat(self, rect):
         """
@@ -284,24 +339,30 @@ class GSEAPlot(object):
         # Enrichment score plot
 
         ax4 = self.fig.add_axes(rect)
-        ax4.plot(self._x, self.RES, linewidth=4, color='#88C544')
-        ax4.text(.1, .1, self._fdr_label, transform=ax4.transAxes, fontsize=14)
-        ax4.text(.1, .2, self._pval_label, transform=ax4.transAxes, fontsize=14)
-        ax4.text(.1, .3, self._nes_label, transform=ax4.transAxes, fontsize=14)
+        ax4.plot(self._x, self.RES, linewidth=4, color="#88C544")
+        ax4.text(0.1, 0.1, self._fdr_label, transform=ax4.transAxes, fontsize=14)
+        ax4.text(0.1, 0.2, self._pval_label, transform=ax4.transAxes, fontsize=14)
+        ax4.text(0.1, 0.3, self._nes_label, transform=ax4.transAxes, fontsize=14)
 
         # the y coords of this transformation are data, and the x coord are axes
-        trans4 = transforms.blended_transform_factory(
-            ax4.transAxes, ax4.transData)
-        ax4.hlines(0, 0, 1, linewidth=.5, transform=trans4, color='grey')
-        ax4.set_ylabel("Enrichment Score", fontsize=16, fontweight='bold')
-        #ax4.set_xlim(min(self._x), max(self._x))
-        ax4.tick_params(axis='both', which='both',
-                        bottom=False, top=False, right=False,
-                        labelbottom=False, labelsize=14)
-        ax4.locator_params(axis='y', nbins=5)
+        trans4 = transforms.blended_transform_factory(ax4.transAxes, ax4.transData)
+        ax4.hlines(0, 0, 1, linewidth=0.5, transform=trans4, color="grey")
+        ax4.set_ylabel("Enrichment Score", fontsize=16, fontweight="bold")
+        # ax4.set_xlim(min(self._x), max(self._x))
+        ax4.tick_params(
+            axis="both",
+            which="both",
+            bottom=False,
+            top=False,
+            right=False,
+            labelbottom=False,
+            labelsize=14,
+        )
+        ax4.locator_params(axis="y", nbins=5)
         # FuncFormatter need two argument, I don't know why. this lambda function used to format yaxis tick labels.
         ax4.yaxis.set_major_formatter(
-            plt.FuncFormatter(lambda tick_loc, tick_num:  '{:.1f}'.format(tick_loc)))
+            plt.FuncFormatter(lambda tick_loc, tick_num: "{:.1f}".format(tick_loc))
+        )
 
         self.ax = ax4
 
@@ -333,14 +394,25 @@ class GSEAPlot(object):
         elif self.ofname is None:
             return
         else:
-            self._canvas.print_figure(
-                self.ofname, bbox_inches=bbox_inches, dpi=300)
+            self._canvas.print_figure(self.ofname, bbox_inches=bbox_inches, dpi=300)
         return
 
 
-def gseaplot(rank_metric, term, hits, nes, pval, fdr, RES,
-             pheno_pos='', pheno_neg='', figsize=(6, 5.5),
-             cmap='seismic', ofname=None, **kwargs):
+def gseaplot(
+    rank_metric,
+    term,
+    hits,
+    nes,
+    pval,
+    fdr,
+    RES,
+    pheno_pos="",
+    pheno_neg="",
+    figsize=(6, 5.5),
+    cmap="seismic",
+    ofname=None,
+    **kwargs,
+):
     """This is the main function for reproducing the gsea plot.
 
     :param rank_metric: pd.Series for rankings, rank_metric.values.
@@ -356,8 +428,20 @@ def gseaplot(rank_metric, term, hits, nes, pval, fdr, RES,
     :param ofname: output file name. If None, don't save figure
 
     """
-    g = GSEAPlot(rank_metric, term, hits, nes, pval, fdr, RES,
-                 pheno_pos, pheno_neg, figsize, cmap, ofname)
+    g = GSEAPlot(
+        rank_metric,
+        term,
+        hits,
+        nes,
+        pval,
+        fdr,
+        RES,
+        pheno_pos,
+        pheno_neg,
+        figsize,
+        cmap,
+        ofname,
+    )
     g.add_axes()
     g.savefig()
 
@@ -428,8 +512,8 @@ def dotplot(
     x = df.loc[:, colname].values
 
     # scatter colormap range
-    cbar_title = 'Odds Ratio'
-    if ('Odds Ratio' in df.columns) and (not 'Combined Score' in df.columns):
+    cbar_title = "Odds Ratio"
+    if ("Odds Ratio" in df.columns) and (not "Combined Score" in df.columns):
         colmap = df[cbar_title].astype(float)
     else:
         cbar_title = "Combined Score"
@@ -498,9 +582,12 @@ def dotplot(
     ax.grid()
     # colorbar
     cax = fig.add_axes([0.95, 0.20, 0.03, 0.22])
-    cbar = fig.colorbar(sc, cax=cax,)
+    cbar = fig.colorbar(
+        sc,
+        cax=cax,
+    )
     cbar.ax.tick_params(right=True)
-    cbar.ax.set_title('Combined\nScore', loc='left', fontsize=12)
+    cbar.ax.set_title("Combined\nScore", loc="left", fontsize=12)
 
     # for terms less than 3
     if len(df) >= 3:
@@ -509,7 +596,7 @@ def dotplot(
         idx = unique(idx)
     else:
         idx = range(len(df))
-    label = df.iloc[idx, df.columns.get_loc('Hits')]
+    label = df.iloc[idx, df.columns.get_loc("Hits")]
 
     if legend:
         handles, _ = ax.get_legend_handles_labels()
@@ -526,10 +613,12 @@ def dotplot(
         return
     return ax
 
+
 def ringplot(
     df,
 ):
     pass
+
 
 def enrichmap(
     df,
@@ -537,11 +626,12 @@ def enrichmap(
     """
     Node (inner circle) size corresponds to the number of genes in dataset 1 within the geneset
     Colour of the node (inner circle) corresponds to the significance of the geneset for dataset 1.
-    Edge size corresponds to the number of genes that overlap between the two connected genesets. 
-    Green edges correspond to both datasets when it is the only colour edge. 
+    Edge size corresponds to the number of genes that overlap between the two connected genesets.
+    Green edges correspond to both datasets when it is the only colour edge.
     When there are two different edge colours, green corresponds to dataset 1 and blue corresponds to dataset 2.
     """
-    pass 
+    pass
+
 
 def barplot(
     df,

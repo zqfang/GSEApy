@@ -1,33 +1,40 @@
-from .gsea import Replot, Prerank, GSEA, SingleSampleGSEA
-from .enrichr import Enrichr
+import warnings
+from typing import AnyStr, Dict, Iterable, List, Optional, Tuple, Union
+
+import pandas as pd
+
+from .__main__ import __version__
 from .biomart import Biomart
+from .enrichr import Enrichr
+from .gsea import GSEA, Prerank, Replot, SingleSampleGSEA
 from .parser import get_library_name
 from .plot import barplot, dotplot, gseaplot, heatmap
-from .__main__ import __version__
-from typing import AnyStr, Tuple, Union, List, Dict, Iterable, Optional
-import pandas as pd
-import warnings
 
-def gsea(data: Union[pd.DataFrame, str],
-        gene_sets: Union[List[str], str, Dict[str, str]],
-        cls: Union[List[str], str],
-        outdir: Optional[str] = None,
-        min_size: int = 15,
-        max_size: int = 500,
-        permutation_num: int = 1000,
-        weighted_score_type: float = 1.0,
-        permutation_type: str = 'phenotype',
-        method: str = 'signal_to_noise',
-        ascending: bool = False,
-        threads: int = 1,
-        figsize: Tuple[float, float] = (6.5, 6),
-        format: str = 'pdf',
-        graph_num: int = 20,
-        no_plot: bool = False,
-        seed: int = 123,
-        verbose: bool = False,
-        processes = None, *arg, **kwarg) -> GSEA:
-    """ Run Gene Set Enrichment Analysis.
+
+def gsea(
+    data: Union[pd.DataFrame, str],
+    gene_sets: Union[List[str], str, Dict[str, str]],
+    cls: Union[List[str], str],
+    outdir: Optional[str] = None,
+    min_size: int = 15,
+    max_size: int = 500,
+    permutation_num: int = 1000,
+    weighted_score_type: float = 1.0,
+    permutation_type: str = "phenotype",
+    method: str = "signal_to_noise",
+    ascending: bool = False,
+    threads: int = 1,
+    figsize: Tuple[float, float] = (6.5, 6),
+    format: str = "pdf",
+    graph_num: int = 20,
+    no_plot: bool = False,
+    seed: int = 123,
+    verbose: bool = False,
+    processes=None,
+    *arg,
+    **kwarg,
+) -> GSEA:
+    """Run Gene Set Enrichment Analysis.
 
     :param data: Gene expression data table, Pandas DataFrame, gct file.
 
@@ -39,7 +46,7 @@ def gsea(data: Union[pd.DataFrame, str],
 
     :param int permutation_num: Number of permutations for significance computation. Default: 1000.
 
-    :param str permutation_type: Type of permutation reshuffling, choose from {"phenotype": 'sample.labels' , "gene_set" : gene.labels}. 
+    :param str permutation_type: Type of permutation reshuffling, choose from {"phenotype": 'sample.labels' , "gene_set" : gene.labels}.
 
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Default: 15.
 
@@ -104,7 +111,7 @@ def gsea(data: Union[pd.DataFrame, str],
                  |  nes: normalized enrichment score,
                  |  pval:  Nominal p-value (from the null distribution of the gene set,
                  |  fdr: FDR qvalue (adjusted False Discory Rate),
-                 |  fwerp: Family wise error rate p-values, 
+                 |  fwerp: Family wise error rate p-values,
                  |  tag %: Percent of gene set before running enrichment peak (ES),
                  |  gene %: Percent of gene list before running enrichment peak (ES),
                  |  lead_genes: leading edge genes (gene hits before running enrichment peak),
@@ -117,31 +124,52 @@ def gsea(data: Union[pd.DataFrame, str],
         warnings.warn("processes is deprecated; use threads", DeprecationWarning, 2)
         threads = processes
 
-    gs = GSEA(data, gene_sets, cls, outdir, min_size, max_size, permutation_num,
-              weighted_score_type, permutation_type, method, ascending, threads,
-              figsize, format, graph_num, no_plot, seed, verbose)
+    gs = GSEA(
+        data,
+        gene_sets,
+        cls,
+        outdir,
+        min_size,
+        max_size,
+        permutation_num,
+        weighted_score_type,
+        permutation_type,
+        method,
+        ascending,
+        threads,
+        figsize,
+        format,
+        graph_num,
+        no_plot,
+        seed,
+        verbose,
+    )
     gs.run()
 
     return gs
 
 
-def ssgsea(data: Union[pd.Series, pd.DataFrame, str], 
-            gene_sets: Union[List[str], str, Dict[str, str]],
-            outdir: Optional[str] = None,
-            sample_norm_method: str='rank', 
-            min_size: int = 15,
-            max_size: int = 500,
-            permutation_num: Optional[int]=None, 
-            weighted_score_type: float = 0.25,
-            ascending: bool = False,
-            threads: int = 1,
-            figsize: Tuple[float, float] = (6.5, 6),
-            format: str = 'pdf',
-            graph_num: int = 20,
-            no_plot: bool = True,
-            seed: int = 123,
-            verbose: bool = False,
-            processes = None, *arg, **kwarg) -> SingleSampleGSEA:
+def ssgsea(
+    data: Union[pd.Series, pd.DataFrame, str],
+    gene_sets: Union[List[str], str, Dict[str, str]],
+    outdir: Optional[str] = None,
+    sample_norm_method: str = "rank",
+    min_size: int = 15,
+    max_size: int = 500,
+    permutation_num: Optional[int] = None,
+    weighted_score_type: float = 0.25,
+    ascending: bool = False,
+    threads: int = 1,
+    figsize: Tuple[float, float] = (6.5, 6),
+    format: str = "pdf",
+    graph_num: int = 20,
+    no_plot: bool = True,
+    seed: int = 123,
+    verbose: bool = False,
+    processes=None,
+    *arg,
+    **kwarg,
+) -> SingleSampleGSEA:
     """Run Gene Set Enrichment Analysis with single sample GSEA tool
 
     :param data: Expression table, pd.Series, pd.DataFrame, GCT file, or .rnk file format.
@@ -184,7 +212,7 @@ def ssgsea(data: Union[pd.Series, pd.DataFrame, str],
 
     :param bool verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
 
-    :return: Return a ssGSEA obj. 
+    :return: Return a ssGSEA obj.
              All results store to  a dictionary, access enrichment score by obj.resultsOnSamples,
              and normalized enrichment score by obj.res2d.
              if permutation_num > 0, additional results contain::
@@ -195,7 +223,7 @@ def ssgsea(data: Union[pd.Series, pd.DataFrame, str],
                  |  nes: normalized enrichment score,
                  |  pval:  Nominal p-value (from the null distribution of the gene set (if permutation_num > 0),
                  |  fdr: FDR qvalue (adjusted FDR) (if permutation_num > 0),
-                 |  fwerp: Family wise error rate p-values (if permutation_num > 0), 
+                 |  fwerp: Family wise error rate p-values (if permutation_num > 0),
                  |  tag %: Percent of gene set before running enrichment peak (ES),
                  |  gene %: Percent of gene list before running enrichment peak (ES),
                  |  lead_genes: leading edge genes (gene hits before running enrichment peak),
@@ -207,32 +235,51 @@ def ssgsea(data: Union[pd.Series, pd.DataFrame, str],
     if processes is not None:
         warnings.warn("processes is deprecated; use threads", DeprecationWarning, 2)
         threads = processes
-    ss = SingleSampleGSEA(data, gene_sets, outdir, sample_norm_method, min_size, max_size,
-                          permutation_num, weighted_score_type, ascending,
-                          threads, figsize, format, graph_num, no_plot, seed, verbose)
+    ss = SingleSampleGSEA(
+        data,
+        gene_sets,
+        outdir,
+        sample_norm_method,
+        min_size,
+        max_size,
+        permutation_num,
+        weighted_score_type,
+        ascending,
+        threads,
+        figsize,
+        format,
+        graph_num,
+        no_plot,
+        seed,
+        verbose,
+    )
     ss.run()
     return ss
 
 
-def prerank(rnk: Union[pd.DataFrame, pd.Series, str], 
-            gene_sets: Union[List[str], str, Dict[str, str]],
-            outdir: Optional[str] = None,
-            pheno_pos: str = 'Pos', 
-            pheno_neg: str = 'Neg', 
-            min_size: int = 15,
-            max_size: int = 500,
-            permutation_num: int = 1000,
-            weighted_score_type: float = 1.0,
-            ascending: bool = False,
-            threads: int = 1,
-            figsize: Tuple[float, float] = (6.5, 6),
-            format: str = 'pdf',
-            graph_num: int = 20,
-            no_plot: bool = False,
-            seed: int = 123,
-            verbose: bool = False,
-            processes = None, *arg, **kwarg) -> Prerank:
-    """ Run Gene Set Enrichment Analysis with pre-ranked correlation defined by user.
+def prerank(
+    rnk: Union[pd.DataFrame, pd.Series, str],
+    gene_sets: Union[List[str], str, Dict[str, str]],
+    outdir: Optional[str] = None,
+    pheno_pos: str = "Pos",
+    pheno_neg: str = "Neg",
+    min_size: int = 15,
+    max_size: int = 500,
+    permutation_num: int = 1000,
+    weighted_score_type: float = 1.0,
+    ascending: bool = False,
+    threads: int = 1,
+    figsize: Tuple[float, float] = (6.5, 6),
+    format: str = "pdf",
+    graph_num: int = 20,
+    no_plot: bool = False,
+    seed: int = 123,
+    verbose: bool = False,
+    processes=None,
+    *arg,
+    **kwarg,
+) -> Prerank:
+    """Run Gene Set Enrichment Analysis with pre-ranked correlation defined by user.
 
     :param rnk: pre-ranked correlation table or pandas DataFrame. Same input with ``GSEA`` .rnk file.
 
@@ -273,7 +320,7 @@ def prerank(rnk: Union[pd.DataFrame, pd.Series, str],
                  |  nes: normalized enrichment score,
                  |  pval:  Nominal p-value (from the null distribution of the gene set,
                  |  fdr: FDR qvalue (adjusted False Discory Rate),
-                 |  fwerp: Family wise error rate p-values, 
+                 |  fwerp: Family wise error rate p-values,
                  |  tag %: Percent of gene set before running enrichment peak (ES),
                  |  gene %: Percent of gene list before running enrichment peak (ES),
                  |  lead_genes: leading edge genes (gene hits before running enrichment peak),
@@ -285,15 +332,39 @@ def prerank(rnk: Union[pd.DataFrame, pd.Series, str],
     if processes is not None:
         warnings.warn("processes is deprecated; use threads", DeprecationWarning, 2)
         threads = processes
-    pre = Prerank(rnk, gene_sets, outdir, pheno_pos, pheno_neg,
-                  min_size, max_size, permutation_num, weighted_score_type,
-                  ascending, threads, figsize, format, graph_num, no_plot, seed, verbose)
+    pre = Prerank(
+        rnk,
+        gene_sets,
+        outdir,
+        pheno_pos,
+        pheno_neg,
+        min_size,
+        max_size,
+        permutation_num,
+        weighted_score_type,
+        ascending,
+        threads,
+        figsize,
+        format,
+        graph_num,
+        no_plot,
+        seed,
+        verbose,
+    )
     pre.run()
     return pre
 
 
-def replot(indir, outdir='GSEA_Replot', weighted_score_type=1,
-           min_size=3, max_size=1000, figsize=(6.5, 6), format='pdf', verbose=False):
+def replot(
+    indir,
+    outdir="GSEA_Replot",
+    weighted_score_type=1,
+    min_size=3,
+    max_size=1000,
+    figsize=(6.5, 6),
+    format="pdf",
+    verbose=False,
+):
     """The main function to reproduce GSEA desktop outputs.
 
     :param indir: GSEA desktop results directory. In the sub folder, you must contain edb file folder.
@@ -317,34 +388,36 @@ def replot(indir, outdir='GSEA_Replot', weighted_score_type=1,
     :return: Generate new figures with selected figure format. Default: 'pdf'.
 
     """
-    rep = Replot(indir, outdir, weighted_score_type,
-                 min_size, max_size, figsize, format, verbose)
+    rep = Replot(
+        indir, outdir, weighted_score_type, min_size, max_size, figsize, format, verbose
+    )
     rep.run()
 
     return
 
 
-def enrichr(gene_list: Iterable[str],
-            gene_sets: Union[List[str], str, Dict[str, str]],
-            organism: str = "human",
-            outdir: Optional[str] = None,
-            background: Union[List[str], int, str] = "hsapiens_gene_ensembl",
-            cutoff: float = 0.05,
-            format: str = "pdf",
-            figsize: Tuple[float, float] = (6.5, 6),
-            top_term: int = 10,
-            no_plot: bool = False,
-            verbose: bool = False,
+def enrichr(
+    gene_list: Iterable[str],
+    gene_sets: Union[List[str], str, Dict[str, str]],
+    organism: str = "human",
+    outdir: Optional[str] = None,
+    background: Union[List[str], int, str] = "hsapiens_gene_ensembl",
+    cutoff: float = 0.05,
+    format: str = "pdf",
+    figsize: Tuple[float, float] = (6.5, 6),
+    top_term: int = 10,
+    no_plot: bool = False,
+    verbose: bool = False,
 ) -> Enrichr:
     """Enrichr API.
 
-    :param gene_list: str, list, tuple, series, dataframe. Also support input txt file with one gene id per row. 
+    :param gene_list: str, list, tuple, series, dataframe. Also support input txt file with one gene id per row.
                       The input `identifier` should be the same type to `gene_sets`.
 
-    :param gene_sets: str, list, tuple of Enrichr Library name(s). 
-                      or custom defined gene_sets (dict, or gmt file). 
+    :param gene_sets: str, list, tuple of Enrichr Library name(s).
+                      or custom defined gene_sets (dict, or gmt file).
 
-                      Examples: 
+                      Examples:
 
                       Input Enrichr Libraries (https://maayanlab.cloud/Enrichr/#stats):
                         str: 'KEGG_2016'
@@ -356,7 +429,7 @@ def enrichr(gene_list: Iterable[str],
                                         'B':['gene2', 'gene4',...], ...}
                         gmt: "genes.gmt"
 
-                      see also the online docs: 
+                      see also the online docs:
                       https://gseapy.readthedocs.io/en/latest/gseapy_example.html#2.-Enrichr-Example
 
 
@@ -375,30 +448,30 @@ def enrichr(gene_list: Iterable[str],
                        However, this argument is not straightforward when `gene_sets` is given a custom input (a gmt file or dict).
                        There are 3 ways to set this argument:
 
-                       (1) (Recommended) Input a list of background genes. 
+                       (1) (Recommended) Input a list of background genes.
                            The background gene list is defined by your experment. e.g. the expressed genes in your RNA-seq.
-                           The gene identifer in gmt/dict should be the same type to the backgound genes.  
+                           The gene identifer in gmt/dict should be the same type to the backgound genes.
 
                        (2) Specify a number, e.g. the number of total expressed genes.
                            This works, but not recommend. It assumes that all your genes could be found in background.
-                           If genes exist in gmt but not included in background, 
-                           they will affect the significance of the statistical test.  
+                           If genes exist in gmt but not included in background,
+                           they will affect the significance of the statistical test.
 
                        (3) (Default) Set a Biomart dataset name.
-                           The background will be all annotated genes from the `BioMart datasets` you've choosen. 
+                           The background will be all annotated genes from the `BioMart datasets` you've choosen.
                            The program will try to retrieve the background information automatically.
 
                            Enrichr module use the code below to get the background genes:
-                            >>> from gseapy.parser import Biomart 
+                            >>> from gseapy.parser import Biomart
                             >>> bm = Biomart(verbose=False, host="useast.ensembl.org")
                             >>> df = bm.query(dataset=background, #  e.g. 'hsapiens_gene_ensembl'
-                                         attributes=['ensembl_gene_id', 'external_gene_name', 'entrezgene_id'], 
+                                         attributes=['ensembl_gene_id', 'external_gene_name', 'entrezgene_id'],
                                          filename=f'~/.cache/gseapy/{background}.background.genes.txt')
                             >>> df.dropna(subset=["entrezgene_id"], inplace=True)
-                           
+
                            So only genes with entrezid above will be the background genes if not input specify by user.
 
-    :param cutoff:   Show enriched terms which Adjusted P-value < cutoff. 
+    :param cutoff:   Show enriched terms which Adjusted P-value < cutoff.
                      Only affects the output figure, not the final output file. Default: 0.05
     :param format:  Output figure format supported by matplotlib,('pdf','png','eps'...). Default: 'pdf'.
 
@@ -411,8 +484,19 @@ def enrichr(gene_list: Iterable[str],
     :return: An Enrichr object, which obj.res2d stores your last query, obj.results stores your all queries.
 
     """
-    enr = Enrichr(gene_list, gene_sets, organism, outdir, background, 
-                  cutoff, format, figsize, top_term, no_plot, verbose)
+    enr = Enrichr(
+        gene_list,
+        gene_sets,
+        organism,
+        outdir,
+        background,
+        cutoff,
+        format,
+        figsize,
+        top_term,
+        no_plot,
+        verbose,
+    )
     # set organism
     enr.set_organism()
     enr.run()
@@ -420,7 +504,21 @@ def enrichr(gene_list: Iterable[str],
     return enr
 
 
-__all__ = ['dotplot', 'barplot', 'heatmap', 'gseaplot',
-           'replot', 'prerank', 'gsea', 'ssgsea','enrichr', 
-           'Replot', 'Prerank', 'GSEA', 'SingleSampleGSEA', 'Enrichr', 'Biomart',
-           'get_library_name']
+__all__ = [
+    "dotplot",
+    "barplot",
+    "heatmap",
+    "gseaplot",
+    "replot",
+    "prerank",
+    "gsea",
+    "ssgsea",
+    "enrichr",
+    "Replot",
+    "Prerank",
+    "GSEA",
+    "SingleSampleGSEA",
+    "Enrichr",
+    "Biomart",
+    "get_library_name",
+]
