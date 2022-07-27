@@ -6,7 +6,7 @@ import logging
 import os
 import xml.etree.ElementTree as ET
 from collections import Counter
-from typing import AnyStr, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd

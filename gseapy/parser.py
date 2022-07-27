@@ -5,16 +5,13 @@ import logging
 import sys
 import xml.etree.ElementTree as ET
 from collections.abc import Iterable
-from io import StringIO
 
-import pandas as pd
 import requests
 from numpy import in1d
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
-from gseapy.biomart import Biomart
-from gseapy.utils import DEFAULT_CACHE_PATH, DEFAULT_LIBRARY, mkdirs, unique
+from gseapy.utils import DEFAULT_LIBRARY, unique
 
 
 def gsea_cls_parser(cls):

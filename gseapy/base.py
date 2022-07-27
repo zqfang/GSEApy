@@ -5,7 +5,7 @@ import json
 import logging
 import os
 from tempfile import TemporaryDirectory
-from typing import AnyStr, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Dict, Iterable, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -467,7 +467,7 @@ class GSEAbase(object):
                 ),
             )
             self.res2d.to_csv(out, index=False, float_format="%.6e")
-        ## generate gseaplots
+        # generate gseaplots
         if not self._noplot:
             self._plotting(metric)
         return

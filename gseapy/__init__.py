@@ -46,7 +46,8 @@ def gsea(
 
     :param int permutation_num: Number of permutations for significance computation. Default: 1000.
 
-    :param str permutation_type: Type of permutation reshuffling, choose from {"phenotype": 'sample.labels' , "gene_set" : gene.labels}.
+    :param str permutation_type: Type of permutation reshuffling, 
+                                 choose from {"phenotype": 'sample.labels' , "gene_set" : gene.labels}.
 
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Default: 15.
 
@@ -60,8 +61,9 @@ def gsea(
                    1. 'signal_to_noise'
 
                       You must have at least three samples for each phenotype to use this metric.
-                      The larger the signal-to-noise ratio, the larger the differences of the means (scaled by the standard deviations);
-                      that is, the more distinct the gene expression is in each phenotype and the more the gene acts as a “class marker.”
+                      The larger the signal-to-noise ratio, the larger the differences of the means 
+                      (scaled by the standard deviations); that is, the more distinct 
+                      the gene expression is in each phenotype and the more the gene acts as a “class marker.”
 
                    2. 't_test'
 
@@ -192,7 +194,8 @@ def ssgsea(
 
     :param int max_size: Maximum allowed number of genes from gene set also the data set. Default: 2000.
 
-    :param int permutation_num: For ssGSEA, default is None. However, if you try to use ssgsea method to get pval and fdr, set to an interger.
+    :param int permutation_num: For ssGSEA, default is 0. 
+                                However, if you try to use ssgsea method to get pval and fdr, set to an interger.
 
     :param str weighted_score_type: Refer to :func:`algorithm.enrichment_score`. Default:0.25.
 
