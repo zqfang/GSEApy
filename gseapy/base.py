@@ -12,7 +12,7 @@ import pandas as pd
 import requests
 
 from gseapy.plot import gseaplot, heatmap
-from gseapy.utils import mkdirs, log_init, retry, DEFAULT_LIBRARY, DEFAULT_CACHE_PATH
+from gseapy.utils import mkdirs, log_init, retry, DEFAULT_CACHE_PATH
 from typing import AnyStr, Tuple, Union, List, Dict, Iterable, Optional
 
 
@@ -154,16 +154,16 @@ class GSEAbase(object):
             raise Exception("Error parsing gmt parameter for gene sets")
 
         subsets = list(genesets_dict.keys())
-        self.n_genesets = len(subsets)
+        gene_dict = {g:i for i, g in enumerate(gene_list)}
         for subset in subsets:
             subset_list = genesets_dict.get(subset)
             if isinstance(subset_list, set):
                 subset_list = list(subset_list)
                 genesets_dict[subset] = subset_list
-            tag_indicator = np.in1d(gene_list, subset_list, assume_unique=True)
-            tag_len = tag_indicator.sum()
+            tag_idx = [1 for k in subset_list if k in gene_dict] 
+            tag_len = len(tag_idx)
             if (self.min_size <= tag_len <= self.max_size) and tag_len < len(gene_list):
-                # tag_len should not < gene_list
+                # tag_len should < gene_list
                 continue
             del genesets_dict[subset]
 
@@ -180,22 +180,14 @@ class GSEAbase(object):
         # self._gmtdct = genesets_dict
         return genesets_dict
 
-    def parse_gmt(self, gmt: Union[List[str], str, Dict[str, str]]) -> Dict[str, List[str]]:
-        """gmt parser"""
+    def parse_gmt(self, gmt: str) -> Dict[str, List[str]]:
+        """gmt parser when input is a string"""
 
         if gmt.lower().endswith(".gmt"):
             with open(gmt) as genesets:
                 genesets_dict = {line.strip().split("\t")[0]: line.strip().split("\t")[2:]
                                  for line in genesets.readlines()}
             return genesets_dict
-
-        elif gmt in DEFAULT_LIBRARY:
-            pass
-        elif gmt in self.get_libraries():
-            pass
-        else:
-            self._logger.error("No supported gene_sets: %s" % gmt)
-            raise Exception("No supported gene_sets: %s" % gmt)
 
         tmpname = "enrichr." + gmt + ".gmt"
         tempath = os.path.join(DEFAULT_CACHE_PATH, tmpname)
@@ -204,8 +196,12 @@ class GSEAbase(object):
             self._logger.info(
                 "Enrichr library gene sets already downloaded in: %s, use local file" % DEFAULT_CACHE_PATH)
             return self.parse_gmt(tempath)
-        else:
+
+        elif gmt in self.get_libraries():
             return self._download_libraries(gmt)
+        else:
+            self._logger.error("No supported gene_sets: %s" % gmt)
+            raise Exception("No supported gene_sets: %s" % gmt)
 
     def get_libraries(self) -> List[str]:
         """return active enrichr library name.Offical API """
