@@ -9,8 +9,8 @@ from setuptools import setup
 from setuptools.command.sdist import sdist as SdistCommand
 from setuptools.command.test import test as TestCommand
 
-# If could not build wheels for gseapy which use PEP 517 and cannot be installed directly 
-# need: pip install --upgrade pip setuptools wheel
+# If could not build wheels for gseapy which use PEP 517
+# need to pip install --upgrade pip setuptools wheel
 # or conda update setuptools wheel
 
 try:
@@ -24,7 +24,6 @@ except ImportError:
         raise SystemExit(errno)
     else:
         from setuptools_rust import RustExtension
-
 
 
 def find_version():
@@ -67,41 +66,56 @@ def readme():
     with open("README.rst") as f:
         return f.read()
 
-setup(name='gseapy',
-      version=__version__,
-      description='Gene Set Enrichment Analysis in Python',
-      long_description=readme(),
-      classifiers=[
-          'Development Status :: 4 - Beta',
-          'Intended Audience :: Science/Research',
-          'License :: OSI Approved :: MIT License',
-          'Programming Language :: Python :: 3',
-          'Operating System :: MacOS :: MacOS X',
-          'Operating System :: Microsoft :: Windows',
-          'Operating System :: POSIX',
-          'Topic :: Scientific/Engineering :: Bio-Informatics',
-          'Topic :: Software Development :: Libraries'],
-      keywords= ['Gene Ontology', 'GO','Biology', 'Enrichment',
-          'Bioinformatics', 'Computational Biology',],
-      url='https://github.com/zqfang/gseapy',
-      author= __author__,
-      author_email='fzq518@gmail.com',
-      license='MIT',
-      packages=['gseapy'],
-      #package_data={'gseapy': ["data/*.txt"],},
-      #include_package_data=True,
-      setup_requires = ["setuptools-rust>=0.10.1", "wheel"],
-      install_requires=[
-                        'numpy>=1.13.0',
-                        'scipy',
-                        'pandas',
-                        'matplotlib',
-                        'bioservices',
-                        'requests',
-                        'joblib'],
-      rust_extensions=[RustExtension("gseapy.gse", "Cargo.toml",  debug="DEBUG" in os.environ)], #  binding=Binding.RustCPython
-      entry_points={'console_scripts': ['gseapy = gseapy.__main__:main'],},
-      tests_require=['pytest'],
-      cmdclass = {"test": PyTest, "sdist": CargoModifiedSdist},
-      zip_safe=False, # Rust extensions are not zip safe
-      download_url='https://github.com/zqfang/gseapy',)
+
+setup(
+    name="gseapy",
+    version=__version__,
+    description="Gene Set Enrichment Analysis in Python",
+    long_description=readme(),
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3",
+        "Operating System :: MacOS :: MacOS X",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: POSIX",
+        "Topic :: Scientific/Engineering :: Bio-Informatics",
+        "Topic :: Software Development :: Libraries",
+    ],
+    keywords=[
+        "Gene Ontology",
+        "GO",
+        "Biology",
+        "Enrichment",
+        "Bioinformatics",
+        "Computational Biology",
+    ],
+    url="https://github.com/zqfang/gseapy",
+    author=__author__,
+    author_email="fzq518@gmail.com",
+    license="MIT",
+    packages=["gseapy"],
+    # package_data={'gseapy': ["data/*.txt"],},
+    # include_package_data=True,
+    setup_requires=["setuptools-rust>=0.10.1", "wheel"],
+    install_requires=[
+        "numpy>=1.13.0",
+        "scipy",
+        "pandas",
+        "matplotlib",
+        "bioservices",
+        "requests",
+        "joblib",
+    ],
+    rust_extensions=[
+        RustExtension("gseapy.gse", "Cargo.toml", debug="DEBUG" in os.environ)
+    ],  #  binding=Binding.RustCPython
+    entry_points={
+        "console_scripts": ["gseapy = gseapy.__main__:main"],
+    },
+    tests_require=["pytest"],
+    cmdclass={"test": PyTest, "sdist": CargoModifiedSdist},
+    zip_safe=False,  # Rust extensions are not zip safe
+    download_url="https://github.com/zqfang/gseapy",
+)
