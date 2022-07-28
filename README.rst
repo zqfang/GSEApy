@@ -36,6 +36,7 @@ GSEApy: Gene Set Enrichment Analysis in Python.
 
 **Release notes** : https://github.com/zqfang/GSEApy/releases
 
+
 To get help of GSEApy
 ------------------------------------
 
@@ -48,7 +49,7 @@ To get help of GSEApy
 
 
 
-GSEApy is a python implementation for **GSEA** and wrapper for **Enrichr**.
+GSEApy is a Python/Rust implementation for **GSEA** and wrapper for **Enrichr**.
 --------------------------------------------------------------------------------------------
 
 GSEApy can be used for **RNA-seq, ChIP-seq, Microarray** data. It can be used for convenient GO enrichment and to produce **publication quality figures** in python.
@@ -72,7 +73,6 @@ The full ``GSEA`` is far too extensive to describe here; see
 `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ documentation for more information. All files' formats for GSEApy are identical to ``GSEA`` desktop version.
 
 
-**If you use gseapy in your research, you should cite the original ``GSEA`` and ``Enrichr`` paper.**
 
 Why GSEApy
 -----------------------------------------------------
@@ -143,11 +143,6 @@ Mandatory
 
 Run GSEApy
 -----------------
-
-Before you start:
-~~~~~~~~~~~~~~~~~~~~~~
-
-Unless you know exactly how GSEA works, you should **convert all gene symbol names to uppercase first.**
 
 
 For command line usage:
@@ -229,10 +224,10 @@ see detail here: `Example <http://gseapy.readthedocs.io/en/master/gseapy_example
     gl = ['SCARA3', 'LOC100044683', 'CMBL', 'CLIC6', 'IL13RA1', 'TACSTD2', 'DKKL1', 'CSF1',
          'SYNPO2L', 'TINAGL1', 'PTX3', 'BGN', 'HERC1', 'EFNA1', 'CIB2', 'PMP22', 'TMEM173']
 
-    gseapy.enrichr(gene_list=gl, description='pathway', gene_sets='KEGG_2016', outdir='test')
+    gseapy.enrichr(gene_list=gl, gene_sets='KEGG_2016', outdir='test')
 
     # or a txt file path.
-    gseapy.enrichr(gene_list='gene_list.txt', description='pathway', gene_sets='KEGG_2016',
+    gseapy.enrichr(gene_list='gene_list.txt', gene_sets='KEGG_2016',
                    outdir='test', cutoff=0.05, format='png' )
 
 
