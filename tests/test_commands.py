@@ -85,7 +85,7 @@ def test_prerank(prernk, geneGMT):
     tmpdir = TemporaryDirectory(dir="tests")
     prerank(prernk, geneGMT, tmpdir.name, permutation_num=10)
     tmpdir.cleanup()
-    prerank(prernk, geneGMT, None, permutation_num=99)
+    prerank(prernk, ['KEGG_2016','GO_Biological_Process_2021'], None, permutation_num=20)
 
 
 def test_ssgsea1(ssGCT, geneGMT):

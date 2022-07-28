@@ -274,8 +274,8 @@ impl GSEAResult {
             })
             .collect();
 
-        // adjusted fdr q value
-        self.adjust_fdr(&mut fdrs, nes_idx);
+        // by default, we'er no gnna adjusted fdr q value
+        // self.adjust_fdr(&mut fdrs, nes_idx);
         let mut fdr_orig_order: Vec<f64> = vec![0.0; fdrs.len()];
         indices.iter().zip(fdrs.iter()).for_each(|(&i, &v)| {fdr_orig_order[i] = v;} );
         return fdr_orig_order;

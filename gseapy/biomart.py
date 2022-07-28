@@ -99,7 +99,12 @@ class Biomart(BioMart):
         return xml
 
     def get_marts(self):
-        """Get available marts and their names."""
+        """Get available marts and their names.
+
+        URL:
+        /martservice/marts  -> return xml format
+        /martservice/marts.json -> return json format
+        """
 
         mart_names = pd.Series(self.names, name="Name")
         mart_descriptions = pd.Series(self.displayNames, name="Description")
@@ -107,7 +112,10 @@ class Biomart(BioMart):
         return pd.concat([mart_names, mart_descriptions], axis=1)
 
     def get_datasets(self, mart="ENSEMBL_MART_ENSEMBL"):
-        """Get available datasets from mart you've selected"""
+        """Get available datasets from mart you've selected
+        URL Example:
+        /martservice/datasets?config=snp_config
+        """
         datasets = super(Biomart, self).datasets(mart, raw=True)
         return pd.read_csv(
             StringIO(datasets),
@@ -118,13 +126,21 @@ class Biomart(BioMart):
         )
 
     def get_attributes(self, dataset):
-        """Get available attritbutes from dataset you've selected"""
+        """Get available attritbutes from dataset you've selected
+        URL Example:
+        /martservice/attributes?datasets=btaurus_snp&config=snp_config
+        """
         attributes = super(Biomart, self).attributes(dataset)
         attr_ = [(k, v[0]) for k, v in attributes.items()]
         return pd.DataFrame(attr_, columns=["Attribute", "Description"])
 
     def get_filters(self, dataset):
-        """Get available filters from dataset you've selected"""
+        """Get available filters from dataset you've selected
+
+         URL Example:
+        /martservice/filters?datasets=btaurus_snp&config=snp_config
+
+        """
         filters = super(Biomart, self).filters(dataset)
         filt_ = [(k, v[0]) for k, v in filters.items()]
         return pd.DataFrame(filt_, columns=["Filter", "Description"])

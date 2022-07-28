@@ -60,15 +60,7 @@ class GSEAbase(object):
         else:
             raise Exception("Error parsing outdir: %s" % type(self.outdir))
 
-        # handle gmt type
-        if isinstance(self.gene_sets, str):
-            _gset = os.path.split(self.gene_sets)[-1].lower().rstrip(".gmt")
-        elif isinstance(self.gene_sets, dict):
-            _gset = "blank_name"
-        else:
-            raise Exception("Error parsing gene_sets parameter for gene sets")
-
-        logfile = os.path.join(self.outdir, "gseapy.%s.%s.log" % (self.module, _gset))
+        logfile = os.path.join(self.outdir, "gseapy.%s.log" % self.module)
         return logfile
 
     def _set_cores(self):
@@ -139,13 +131,44 @@ class GSEAbase(object):
     def load_gmt_only(
         self, gmt: Union[List[str], str, Dict[str, str]]
     ) -> Dict[str, List[str]]:
+        """parse gene_sets.
+        gmt: List, Dict, Strings
+
+        However,this function will merge different gene sets into one big dict to
+        save computation time for later.
+        """
+        genesets_dict = dict()
+
         if isinstance(gmt, dict):
             genesets_dict = gmt
         elif isinstance(gmt, str):
-            genesets_dict = self.parse_gmt(gmt)
+            gmts = gmt.split(",")
+            if len(gmts) > 1:
+                for gm in gmts:
+                    tdt = self.parse_gmt(gm)
+                    for k, v in tdt.items():
+                        new_k = gm + "__" + k
+                        genesets_dict[new_k] = v
+            else:
+                genesets_dict = self.parse_gmt(gmt)
+        elif isinstance(gmt, list):
+            for i, gm in enumerate(gmt):
+                prefix = str(i)
+                if isinstance(gm, dict):
+                    tdt = gm
+                elif isinstance(gm, str):
+                    tdt = self.parse_gmt(gm)
+                    prefix = gm
+                else:
+                    continue
+                for k, v in tdt.items():
+                    new_k = prefix + "__" + k
+                    genesets_dict[new_k] = v
         else:
             raise Exception("Error parsing gmt parameter for gene sets")
-        # self._gmtdct = genesets_dict
+
+        if len(genesets_dict) == 0:
+            raise Exception("Error parsing gmt parameter for gene sets")
         return genesets_dict
 
     def load_gmt(
@@ -153,12 +176,7 @@ class GSEAbase(object):
     ) -> Dict[str, List[str]]:
         """load gene set dict"""
 
-        if isinstance(gmt, dict):
-            genesets_dict = gmt
-        elif isinstance(gmt, str):
-            genesets_dict = self.parse_gmt(gmt)
-        else:
-            raise Exception("Error parsing gmt parameter for gene sets")
+        genesets_dict = self.load_gmt_only(gmt)
 
         subsets = list(genesets_dict.keys())
         gene_dict = {g: i for i, g in enumerate(gene_list)}
@@ -216,7 +234,7 @@ class GSEAbase(object):
             return self._download_libraries(gmt)
         else:
             self._logger.error("No supported gene_sets: %s" % gmt)
-            raise Exception("No supported gene_sets: %s" % gmt)
+        return dict()
 
     def get_libraries(self) -> List[str]:
         """return active enrichr library name.Offical API"""
@@ -289,26 +307,25 @@ class GSEAbase(object):
                 break
             if self.module != "ssgsea":
                 rank_metric = metric[self.module]
-                outdir = self.outdir
                 hit = self.results[record["Term"]]["hits"]
                 RES = self.results[record["Term"]]["RES"]
             else:
                 rank_metric = metric[record["Name"]]
                 hit = self.results[record["Name"]][record["Term"]]["hits"]
-                outdir = os.path.join(self.outdir, record["Name"])
+
                 RES = self.results[record["Name"]][record["Term"]]["RES"]
-                mkdirs(outdir)
+            outdir = os.path.join(self.outdir, record["Name"])
+            mkdirs(outdir)
             term = record["Term"].replace("/", "_").replace(":", "_")
             outfile = os.path.join(outdir, "{0}.{1}".format(term, self.format))
-
             if self.module == "gsea":
-                outfile2 = "{0}/{1}.heatmap.{2}".format(self.outdir, term, self.format)
+                outfile2 = "{0}/{1}.heatmap.{2}".format(outdir, term, self.format)
                 heatmat = self.heatmat.iloc[hit, :]
                 width = np.clip(heatmat.shape[1], 4, 20)
                 height = np.clip(heatmat.shape[0], 4, 20)
                 heatmap(
                     df=heatmat,
-                    title=term,
+                    title=record["Term"].split("__")[-1],
                     ofname=outfile2,
                     z_score=0,
                     figsize=(width, height),
@@ -320,7 +337,7 @@ class GSEAbase(object):
                 # skip plotting when ssgsea and nperm=0
                 gseaplot(
                     rank_metric=rank_metric,
-                    term=term,
+                    term=record["Term"].split("__")[-1],
                     hits=hit,
                     nes=record["NES"],
                     pval=record["NOM p-val"],
