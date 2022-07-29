@@ -44,7 +44,8 @@ def gsea(
 
     :param str outdir: Results output directory. If None, nothing will write to disk.
 
-    :param int permutation_num: Number of permutations for significance computation. Default: 1000.
+    :param int permutation_num: Number of permutations. Default: 1000.
+                                Minimial possible nominal p-value is about 1/nperm.
 
     :param str permutation_type: Type of permutation reshuffling,
                                  choose from {"phenotype": 'sample.labels' , "gene_set" : gene.labels}.
@@ -290,7 +291,8 @@ def prerank(
 
     :param outdir: results output directory. If None, nothing will write to disk.
 
-    :param int permutation_num: Number of permutations for significance computation. Default: 1000.
+    :param int permutation_num: Number of permutations. Default: 1000.
+                                Minimial possible nominal p-value is about 1/nperm.
 
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Default: 15.
 
