@@ -118,7 +118,7 @@ def heatmap(
     ax = fig.add_subplot(111)
     vmin = np.percentile(df.min(), 2)
     vmax = np.percentile(df.max(), 98)
-    matrix = ax.pcolormesh(df.values, cmap=cmap, vmin=vmin, vmax=vmax)
+    matrix = ax.pcolormesh(df.values, cmap=cmap, vmin=vmin, vmax=vmax, rasterized=True)
     xstep = _auto_ticks(ax, df.columns.values, 0)
     ystep = _auto_ticks(ax, df.index.values, 1)
     xticks, xlabels = _skip_ticks(df.columns.values, tickevery=xstep)
