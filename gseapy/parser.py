@@ -4,6 +4,7 @@ import json
 import logging
 import sys
 import xml.etree.ElementTree as ET
+from collections import Counter
 from collections.abc import Iterable
 
 import requests
@@ -27,8 +28,8 @@ def gsea_cls_parser(cls):
     elif isinstance(cls, str):
         with open(cls) as c:
             file = c.readlines()
-        classes = file[2].strip("\n").split(" ")
-        sample_name = file[1].lstrip("# ").strip("\n").split(" ")
+        classes = file[2].strip().split()
+        sample_name = file[1].strip("#").strip().split()
 
         tmp = set(sample_name) & set(classes)
         if len(tmp) < 2:  # classes and sample_name are different
@@ -43,6 +44,10 @@ def gsea_cls_parser(cls):
 
     if len(sample_name) != 2:
         raise Exception("Input groups have to be 2!")
+
+    for c, v in Counter(classes).items():
+        if v < 3:
+            raise Exception(f"Number of {c}: {v}, it must be >= 3!")
 
     return sample_name[0], sample_name[1], classes
 

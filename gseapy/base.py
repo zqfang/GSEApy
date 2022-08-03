@@ -316,7 +316,7 @@ class GSEAbase(object):
                 RES = self.results[record["Name"]][record["Term"]]["RES"]
             outdir = os.path.join(self.outdir, record["Name"])
             mkdirs(outdir)
-            term = record["Term"].replace("/", "_").replace(":", "_")
+            term = record["Term"].replace("/", "-").replace(":", "_")
             outfile = os.path.join(outdir, "{0}.{1}".format(term, self.format))
             if self.module == "gsea":
                 outfile2 = "{0}/{1}.heatmap.{2}".format(outdir, term, self.format)

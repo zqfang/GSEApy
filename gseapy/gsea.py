@@ -105,10 +105,10 @@ class GSEA(GSEAbase):
         # in case the description column is numeric
         if len(cls_vec) == (df.shape[1] - 1):
             df = df.iloc[:, 1:]
-        # drop any genes which std ==0
+        # drop gene which std == 0 in all samples
         cls_dict = {k: v for k, v in zip(df.columns, cls_vec)}
         df_std = df.groupby(by=cls_dict, axis=1).std()
-        df = df[~df_std.isin([0]).any(axis=1)]
+        df = df[df_std.sum(axis=1) > 0]
         df = df + 1e-08  # we don't like zeros!!!
 
         return df, cls_dict
@@ -196,8 +196,15 @@ class GSEA(GSEAbase):
     ):
 
         if isinstance(self.classes, dict):
-            # check
-            # class_values  = Counter(self.classes.values())
+            # check number of samples 
+            class_values = Counter(self.classes.values())
+            s = []
+            for c, v in sorted(class_values.items(), key=lambda item: item[1]):
+                if v < 3:
+                    raise Exception(f"Number of {c}: {v}, it must be >= 3!")
+                s.append(c)
+            self.pheno_pos = s[0]
+            self.pheno_neg = s[1]
             # n_pos = class_values[pos]
             # n_neg = class_values[neg]
             return
@@ -207,6 +214,7 @@ class GSEA(GSEAbase):
             self.pheno_neg = neg
             return cls_vector
 
+    # @profile
     def run(self):
         """GSEA main procedure"""
         m = self.method.lower()
