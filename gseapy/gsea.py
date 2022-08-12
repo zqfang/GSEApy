@@ -196,7 +196,7 @@ class GSEA(GSEAbase):
     ):
 
         if isinstance(self.classes, dict):
-            # check number of samples 
+            # check number of samples
             class_values = Counter(self.classes.values())
             s = []
             for c, v in sorted(class_values.items(), key=lambda item: item[1]):
