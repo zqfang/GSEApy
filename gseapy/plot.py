@@ -461,9 +461,6 @@ def dotplot(
     title="",
     cutoff=0.05,
     top_term=10,
-    sizes=None,
-    norm=None,
-    legend=True,
     figsize=(6, 5.5),
     cmap="RdBu_r",
     ofname=None,
@@ -487,65 +484,47 @@ def dotplot(
     """
 
     colname = column
+
+    # check if any values in `df[colname]` can't be coerced to floats
+    can_be_coerced = df[colname].map(isfloat)
+    if np.sum(~can_be_coerced) > 0:
+        raise ValueError("some value in %s could not be typecast to `float`" % colname)
+    # subset
+    df = df[df[colname] <= cutoff]
+    if len(df) < 1:
+        msg = "Warning: No enrich terms when cutoff = %s" % cutoff
+        return msg
     # sorting the dataframe for better visualization
     if colname in ["Adjusted P-value", "P-value"]:
-        # check if any values in `df[colname]` can't be coerced to floats
-        can_be_coerced = df[colname].map(isfloat)
-        if np.sum(~can_be_coerced) > 0:
-            raise ValueError(
-                "some value in %s could not be typecast to `float`" % colname
-            )
-        else:
-            df.loc[:, colname] = df[colname].map(float)
-        df = df[df[colname] <= cutoff]
-        if len(df) < 1:
-            msg = "Warning: No enrich terms when cutoff = %s" % cutoff
-            return msg
-        df = df.assign(logAP=lambda x: -x[colname].apply(np.log10))
-        colname = "logAP"
+        # df.loc[:, colname] = df[colname].map(float)
+        # df = df.assign(logAP=lambda x: -x[colname].apply(np.log10))
+        df = df.assign(p_inv=np.log(1 / df[colname]))
+        colname = "p_inv"
+        cbar_title = r"$Log \frac{1}{P val}$"
+
+    # get top_terms
     df = df.sort_values(by=colname).iloc[-top_term:, :]
-    #
+    # get scatter area
     temp = df["Overlap"].str.split("/", expand=True).astype(int)
-    df = df.assign(Hits=temp.iloc[:, 0], Background=temp.iloc[:, 1])
-    df = df.assign(Hits_ratio=lambda x: x.Hits / x.Background)
-    # x axis values
-    x = df.loc[:, colname].values
+    df = df.assign(Hits_ratio=temp.iloc[:, 0] / temp.iloc[:, 1])
+    # make area bigger to better visualization
+    area = df["Hits_ratio"] * plt.rcParams["lines.linewidth"] * 100
 
-    # scatter colormap range
-    cbar_title = "Odds Ratio"
-    if ("Odds Ratio" in df.columns) and (not "Combined Score" in df.columns):
-        colmap = df[cbar_title].astype(float)
+    # set xaxis values
+    xlabel = "Combined Score"
+    if "Combined Score" in df.columns:
+        x = df["Combined Score"].values
+    elif "Odds Ratio" in df.columns:
+        x = df["Odds Ratio"].values
+        xlabel = "Odds Ratio"
     else:
-        cbar_title = "Combined Score"
-        colmap = df[cbar_title].round().astype("int")
-    # y axis index and values
-    y = [i for i in range(0, len(df))]
-    ylabels = df["Term"].values
-    # Normalise to [0,1]
-    # b = (df['Count']  - df['Count'].min())/ np.ptp(df['Count'])
-    # area = 100 * b
+        # revert back to p_inv
+        x = df.loc[colname].values
+        xlabel = cbar_title
 
-    # control the size of scatter and legend marker
-    levels = numbers = np.sort(df.Hits.unique())
-    if norm is None:
-        norm = Normalize()
-    elif isinstance(norm, tuple):
-        norm = Normalize(*norm)
-    elif not isinstance(norm, Normalize):
-        err = "``size_norm`` must be None, tuple, " "or Normalize object."
-        raise ValueError(err)
-    min_width, max_width = np.r_[20, 100] * plt.rcParams["lines.linewidth"]
-    norm.clip = True
-    if not norm.scaled():
-        norm(np.asarray(numbers))
-    size_limits = norm.vmin, norm.vmax
-    scl = norm(numbers)
-    widths = np.asarray(min_width + scl * (max_width - min_width))
-    if scl.mask.any():
-        widths[scl.mask] = 0
-    sizes = dict(zip(levels, widths))
-    df["sizes"] = df.Hits.map(sizes)
-    area = df["sizes"].values
+    # y axis index and values
+    # y = [i for i in range(0, len(df))]
+    ylabels = df["Term"].values
 
     # create scatter plot
     if hasattr(sys, "ps1") and (ofname is None):
@@ -556,11 +535,14 @@ def dotplot(
         fig = Figure(figsize=figsize)
         canvas = FigureCanvas(fig)
         ax = fig.add_subplot(111)
+
+    # scatter colormap range
+    colmap = df[colname].round().astype("int")
     vmin = np.percentile(colmap.min(), 2)
     vmax = np.percentile(colmap.max(), 98)
     sc = ax.scatter(
         x=x,
-        y=y,
+        y=ylabels,
         s=area,
         edgecolors="face",
         c=colmap,
@@ -569,44 +551,52 @@ def dotplot(
         vmax=vmax,
     )
 
-    if column in ["Adjusted P-value", "P-value"]:
-        xlabel = "-log$_{10}$(%s)" % column
-    else:
-        xlabel = column
     ax.set_xlabel(xlabel, fontsize=14, fontweight="bold")
-    ax.yaxis.set_major_locator(plt.FixedLocator(y))
-    ax.yaxis.set_major_formatter(plt.FixedFormatter(ylabels))
-    ax.set_yticklabels(ylabels, fontsize=16)
+    # ax.yaxis.set_major_locator(plt.FixedLocator(y))
+    # ax.yaxis.set_major_formatter(plt.FixedFormatter(ylabels))
+    ax.xaxis.set_tick_params(labelsize=14)
+    ax.yaxis.set_tick_params(labelsize=16)
+    ax.set_axisbelow(True)  # set grid blew other element
+    ax.grid(
+        axis="y",
+    )  # zorder=-1.0
 
-    # ax.set_ylim([-1, len(df)])
-    ax.grid()
+    # We change the fontsize of minor ticks label
+    # ax.tick_params(axis='y', which='major', labelsize=16)
+    # ax.tick_params(axis='both', which='minor', labelsize=14)
+
+    # scatter size legend
+    # we use the *func* argument to supply the inverse of the function
+    # used to calculate the sizes from above. The *fmt* ensures to string you want
+    handles, labels = sc.legend_elements(
+        prop="sizes",
+        num=4,  # fmt="$ {x:.2f}",
+        func=lambda s: s / plt.rcParams["lines.linewidth"] / 100,
+    )
+    ax.legend(
+        handles,
+        labels,
+        title="% Path\nis DEG",
+        bbox_to_anchor=(1.02, 0.9),
+        loc="upper left",
+        frameon=False,
+    )
     # colorbar
-    cax = fig.add_axes([0.95, 0.20, 0.03, 0.22])
+    # cax = fig.add_axes([1.0, 0.20, 0.03, 0.22])
     cbar = fig.colorbar(
         sc,
-        cax=cax,
+        shrink=0.2,
+        aspect=10,
+        anchor=(0.0, 0.2),  # (0.0, 0.2),
+        location="right"
+        # cax=cax,
     )
-    cbar.ax.tick_params(right=True)
-    cbar.ax.set_title("Combined\nScore", loc="left", fontsize=12)
+    # cbar.ax.tick_params(right=True)
+    cbar.ax.set_title(cbar_title, loc="left", fontweight="bold")
+    for key, spine in cbar.ax.spines.items():
+        spine.set_visible(False)
 
-    # for terms less than 3
-    if len(df) >= 3:
-        # find the index of the closest value to the median
-        idx = [area.argmax(), np.abs(area - area.mean()).argmin(), area.argmin()]
-        idx = unique(idx)
-    else:
-        idx = range(len(df))
-    label = df.iloc[idx, df.columns.get_loc("Hits")]
-
-    if legend:
-        handles, _ = ax.get_legend_handles_labels()
-        legend_markers = []
-        for ix in idx:
-            legend_markers.append(ax.scatter([], [], s=area[ix], c="b"))
-        # artist = ax.scatter([], [], s=size_levels,)
-        ax.legend(legend_markers, label, title="Hits")
     ax.set_title(title, fontsize=20, fontweight="bold")
-
     if ofname is not None:
         # canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
         fig.savefig(ofname, bbox_inches="tight", dpi=300)
@@ -617,6 +607,9 @@ def dotplot(
 def ringplot(
     df,
 ):
+    """
+    when multiple sample exist in the input dataframe, use ringplot instead of heatmap
+    """
     pass
 
 

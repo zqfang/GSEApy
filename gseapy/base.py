@@ -41,6 +41,7 @@ class GSEAbase(object):
         self.pheno_pos = ""
         self.pheno_neg = ""
         self.permutation_num = 0
+        self._LIBRARY_LIST_URL = "https://maayanlab.cloud/speedrichr/api/listlibs"
 
         self._set_cores()
         # init logger
