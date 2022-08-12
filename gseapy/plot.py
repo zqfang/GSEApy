@@ -10,9 +10,6 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.colors import Normalize
 from matplotlib.figure import Figure
 from matplotlib.ticker import MaxNLocator
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-
-from gseapy.parser import unique
 
 
 class MidpointNormalize(Normalize):
@@ -47,14 +44,6 @@ def zscore(data2d, axis=0):
         lambda x: (x - x.mean()) / x.std(ddof=1), axis=operator.xor(1, axis)
     )
     return z_scored
-
-
-def colorbar(mappable):
-    ax = mappable.axes
-    fig = ax.figure
-    divider = make_axes_locatable(ax)
-    cax = divider.append_axes("right", size="2%", pad=0.05)
-    return fig.colorbar(mappable, cax=cax)
 
 
 def _skip_ticks(labels, tickevery):
@@ -133,16 +122,16 @@ def heatmap(
         axis="both", which="both", bottom=False, top=False, right=False, left=False
     )
     # cax=fig.add_axes([0.93,0.25,0.05,0.20])
-    # cbar = fig.colorbar(matrix, cax=cax)
-    cbar = colorbar(matrix)
-    cbar.ax.tick_params(
-        axis="both", which="both", bottom=False, top=False, right=False, left=False
-    )
+    cbar = fig.colorbar(matrix, shrink=0.3, aspect=10)
+    cbar_title = "z-score" if z_score is not None else ""
+    cbar.ax.set_title(cbar_title, loc="left", fontweight="bold")
+    for key, spine in cbar.ax.spines.items():
+        spine.set_visible(False)
+    # cbar = colorbar(matrix)
+
     for side in ["top", "right", "left", "bottom"]:
         ax.spines[side].set_visible(False)
-        cbar.ax.spines[side].set_visible(False)
-    # cbar.ax.set_title('',loc='left')
-
+        # cbar.ax.spines[side].set_visible(False)
     if ofname is not None:
         # canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
         fig.savefig(ofname, bbox_inches="tight", dpi=300)
@@ -407,11 +396,11 @@ def gseaplot(
     pval: float,
     fdr: float,
     RES: float,
-    pheno_pos: str="",
-    pheno_neg: str="",
-    figsize: Tuple[float]=(6, 5.5),
-    cmap: str="seismic",
-    ofname: Optional[str]=None,
+    pheno_pos: str = "",
+    pheno_neg: str = "",
+    figsize: Tuple[float] = (6, 5.5),
+    cmap: str = "seismic",
+    ofname: Optional[str] = None,
     **kwargs,
 ):
     """This is the main function for reproducing the gsea plot.
@@ -458,14 +447,14 @@ def isfloat(x):
 
 def dotplot(
     df,
-    column: str="Adjusted P-value",
-    title: str="",
-    cutoff:float=0.05,
-    top_term: int=10,
+    column: str = "Adjusted P-value",
+    title: str = "",
+    cutoff: float = 0.05,
+    top_term: int = 10,
     size: float = 10,
-    figsize: Tuple[float]=(6, 5.5),
-    cmap: str="viridis_r",
-    ofname: Optional[str]=None,
+    figsize: Tuple[float] = (6, 5.5),
+    cmap: str = "viridis_r",
+    ofname: Optional[str] = None,
     **kwargs,
 ):
     """Visualize enrichr results.
@@ -511,7 +500,7 @@ def dotplot(
     df = df.assign(Hits_ratio=temp.iloc[:, 0] / temp.iloc[:, 1])
     # make area bigger to better visualization
     # area = df["Hits_ratio"] * plt.rcParams["lines.linewidth"] * 100
-    area = np.pi*(df["Hits_ratio"]* size *plt.rcParams["lines.linewidth"]).pow(2)
+    area = np.pi * (df["Hits_ratio"] * size * plt.rcParams["lines.linewidth"]).pow(2)
 
     # set xaxis values
     xlabel = "Combined Score"
@@ -561,7 +550,7 @@ def dotplot(
     ax.yaxis.set_tick_params(labelsize=16)
     ax.set_axisbelow(True)  # set grid blew other element
     ax.grid(axis="y")  # zorder=-1.0
-    ax.margins(x = 0.25)
+    ax.margins(x=0.25)
 
     # We change the fontsize of minor ticks label
     # ax.tick_params(axis='y', which='major', labelsize=16)
@@ -573,8 +562,8 @@ def dotplot(
     handles, labels = sc.legend_elements(
         prop="sizes",
         num=3,  # fmt="$ {x:.2f}",
-        color='gray',
-        func=lambda s: np.sqrt(s / np.pi) / plt.rcParams["lines.linewidth"]/ size,
+        color="gray",
+        func=lambda s: np.sqrt(s / np.pi) / plt.rcParams["lines.linewidth"] / size,
     )
     ax.legend(
         handles,
@@ -610,14 +599,14 @@ def dotplot(
 def ringplot(
     df,
     x: Optional[str] = None,
-    column: str="Adjusted P-value",
-    title: str="",
-    cutoff:float=0.05,
-    top_term: int=10,
+    column: str = "Adjusted P-value",
+    title: str = "",
+    cutoff: float = 0.05,
+    top_term: int = 10,
     size: float = 10,
-    figsize: Tuple[float]=(6, 5.5),
-    cmap: str="viridis_r",
-    ofname: Optional[str]=None,
+    figsize: Tuple[float] = (6, 5.5),
+    cmap: str = "viridis_r",
+    ofname: Optional[str] = None,
     **kwargs,
 ):
     """
@@ -660,8 +649,10 @@ def ringplot(
     df = df.assign(Hits_ratio=temp.iloc[:, 0] / temp.iloc[:, 1])
     # Because the hits_ratio is much too small when being provided as size for ``s``,
     # we normalize it to some useful point sizes, s=0.3*(raito*3)**2
-    df = df.assign(area = np.pi*(df["Hits_ratio"]* size *plt.rcParams["lines.linewidth"]).pow(2))
-    
+    df = df.assign(
+        area=np.pi * (df["Hits_ratio"] * size * plt.rcParams["lines.linewidth"]).pow(2)
+    )
+
     # set xaxis values
     xlabel = ""
     if (x is not None) and (x in df.columns):
@@ -693,23 +684,23 @@ def ringplot(
     vmax = np.percentile(colmap.max(), 98)
     # outer ring
     ax.scatter(
-        x= x,
+        x=x,
         y="Term",
-        s=df['area'].max() *1.5,
+        s=df["area"].max() * 1.5,
         edgecolors="gray",
-        c="white",#colmap,
-        data = df
+        c="white",  # colmap,
+        data=df,
     )
     sc = ax.scatter(
-        x= x,
+        x=x,
         y="Term",
         s="area",
         edgecolors="face",
-        c=colname,#colmap,
+        c=colname,  # colmap,
         cmap=cmap,
         vmin=vmin,
         vmax=vmax,
-        data = df
+        data=df,
     )
 
     ax.set_xlabel(xlabel, fontsize=14, fontweight="bold")
@@ -719,7 +710,7 @@ def ringplot(
     ax.yaxis.set_tick_params(labelsize=16)
     ax.set_axisbelow(True)  # set grid blew other element
     ax.grid(axis="both")  # zorder=-1.0
-    ax.margins(x = 0.25)
+    ax.margins(x=0.25)
 
     # We change the fontsize of minor ticks label
     # ax.tick_params(axis='y', which='major', labelsize=16)
@@ -731,8 +722,8 @@ def ringplot(
     handles, labels = sc.legend_elements(
         prop="sizes",
         num=4,  # fmt="$ {x:.2f}",
-        color='gray',
-        func=lambda s: np.sqrt(s / np.pi) / plt.rcParams["lines.linewidth"]/ size,
+        color="gray",
+        func=lambda s: np.sqrt(s / np.pi) / plt.rcParams["lines.linewidth"] / size,
     )
     ax.legend(
         handles,
@@ -763,7 +754,6 @@ def ringplot(
         fig.savefig(ofname, bbox_inches="tight", dpi=300)
         return
     return ax
-
 
 
 def enrichmap(
@@ -806,9 +796,7 @@ def barplot(
     # check if any values in `df[colname]` can't be coerced to floats
     can_be_coerced = df[colname].map(isfloat)
     if np.sum(~can_be_coerced) > 0:
-        raise ValueError(
-            "some value in %s could not be typecast to `float`" % colname
-        )
+        raise ValueError("some value in %s could not be typecast to `float`" % colname)
     df.loc[:, colname] = df[colname].map(float)
     df = df[df[colname] <= cutoff]
     if len(df) < 1:
