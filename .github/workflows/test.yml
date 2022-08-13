@@ -45,8 +45,10 @@ jobs:
     #     # coverage run setup.py test
     - name: Test with pytest
       run: |
+        cd ${GITHUB_WORKSPACE}
         pip install pytest
         pip install pytest-cov
+        python setup.py install
         pytest
         
 
