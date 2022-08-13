@@ -35,7 +35,7 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
 
 **Release notes** : https://github.com/zqfang/GSEApy/releases 
 
-GSEApy is a Python/Rust implementation of **GSEA** and wrapper for **Enrichr**.. 
+GSEApy is a Python/Rust implementation of **GSEA** and wrapper for **Enrichr**. 
 --------------------------------------------------------------------------------------------
 
 GSEApy has six subcommands: ``gsea``, ``prerank``, ``ssgsea``, ``replot`` ``enrichr``, ``biomart``.
