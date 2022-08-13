@@ -1,3 +1,5 @@
+pip>=19.1
+wheel
 numpy>=1.9.0
 scipy
 bioservices
@@ -5,5 +7,5 @@ matplotlib>=1.4.3
 pandas>=0.16
 requests
 joblib
-pip>=19.1
 setuptools-rust>=0.10.2
+
