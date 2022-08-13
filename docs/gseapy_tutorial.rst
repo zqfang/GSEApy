@@ -149,12 +149,21 @@ An example of cls file looks like below.
 
 
 
+So you could prepare the cls file in python like this
+.. code:: python
+
+    groups = ['C1OE', 'C1OE', 'C1OE', 'Vector', 'Vector', 'Vector']
+    with open('gsea/edb/C1OE.cls', "w") as cl:
+       line = f"{len(groups)} 2 1\n# C10E Vector\n"
+       cl.write(line)
+       cl.write(" ".join(groups) + "\n")
+
 
 
 3. Gene_sets file in gmt format.
 -----------------------------------------------------
 
-All you need to do is to download gene set database file from ``GSEA`` website.
+All you need to do is to download gene set database file from ``GSEA`` or ``Enrichr`` website.
 
 Or you could use enrichr library. In this case, just provide library name to parameter 'gene_sets'
 
@@ -195,7 +204,7 @@ For ``enrichr`` , you could assign a list object
     l = ['SCARA3', 'LOC100044683', 'CMBL', 'CLIC6', 'IL13RA1', 'TACSTD2', 'DKKL1', 'CSF1',
          'SYNPO2L', 'TINAGL1', 'PTX3', 'BGN', 'HERC1', 'EFNA1', 'CIB2', 'PMP22', 'TMEM173']
 
-    gseapy.enrichr(gene_list=l, description='pathway', gene_sets='KEGG_2016', outfile='test')
+    gseapy.enrichr(gene_list=l, gene_sets='KEGG_2016', outfile='test')
 
 
 
@@ -204,7 +213,7 @@ or a gene list file in txt format(one gene id per row)
 
 .. code:: python
 
-   gseapy.enrichr(gene_list='gene_list.txt', description='pathway', gene_sets='KEGG_2016', outfile='test')
+   gseapy.enrichr(gene_list='gene_list.txt',  gene_sets='KEGG_2016', outfile='test')
 
 
 Let's see what the txt file looks like.
