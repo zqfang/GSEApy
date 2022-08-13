@@ -41,7 +41,7 @@ class Biomart(BioMart):
 
         self.attributes_xml = []
         self.filters_xml = []
-        self.dataset_xml = None
+        self.dataset_xml = ""
 
         params = {
             "version": "1.0",
@@ -86,7 +86,7 @@ class Biomart(BioMart):
     def reset(self):
         self.attributes_xml = []
         self.filters_xml = []
-        self.dataset_xml = None
+        self.dataset_xml = ""
 
     def get_xml(self):
         xml = self.header
@@ -178,7 +178,7 @@ class Biomart(BioMart):
                 v = ",".join(list(v))
                 self.add_filter_to_xml(k, v)
 
-        xml_query = self.get_xml()
+        xml_query = super(Biomart, self).get_xml()
         results = super(Biomart, self).query(xml_query)
         if str(results).startswith("Query ERROR"):
             print(results)
