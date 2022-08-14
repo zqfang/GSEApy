@@ -111,6 +111,8 @@ Installation
 
 | Install gseapy package from bioconda or pypi.
 
+**Please use ``pip install gseapy`` if you got "No module named gseapy.gse" issue !!!**
+
 
 .. code:: shell
 
@@ -118,12 +120,14 @@ Installation
    $ conda install -c conda-forge -c bioconda gseapy
 
    # or use pip to install the latest release
+   # you need to install rust first to compile the code
    $ pip install gseapy
 
 | You may instead want to use the development version from Github, by running
 
 .. code:: shell
 
+   # you need to install rust first to compile the code
    $ pip install git+git://github.com/zqfang/gseapy.git#egg=gseapy
 
 Dependency
@@ -132,7 +136,7 @@ Dependency
 
 Mandatory
 ~~~~~~~~~
-
+* Rust: For gseapy > 0.11.0, Rust compiler is needed
 * Numpy >= 1.13.0
 * Scipy
 * Pandas
