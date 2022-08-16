@@ -108,8 +108,13 @@ setup(
         "requests",
     ],
     rust_extensions=[
-        RustExtension("gseapy.gse", "Cargo.toml", debug="DEBUG" in os.environ,
-        binding=Binding.PyO3)],
+        RustExtension(
+            "gseapy.gse",
+            "Cargo.toml",
+            debug="DEBUG" in os.environ,
+            binding=Binding.PyO3,
+        )
+    ],
     entry_points={
         "console_scripts": ["gseapy = gseapy.__main__:main"],
     },
