@@ -14,7 +14,7 @@ from setuptools.command.test import test as TestCommand
 # or conda update setuptools wheel
 
 try:
-    from setuptools_rust import RustExtension
+    from setuptools_rust import Binding, RustExtension
 except ImportError:
     import subprocess
 
@@ -23,7 +23,7 @@ except ImportError:
         print("Please install setuptools-rust package")
         raise SystemExit(errno)
     else:
-        from setuptools_rust import RustExtension
+        from setuptools_rust import Binding, RustExtension
 
 
 def find_version():
@@ -97,7 +97,7 @@ setup(
     license="MIT",
     packages=["gseapy"],
     # package_data={'gseapy': ["data/*.txt"],},
-    # include_package_data=True,
+    include_package_data=False,
     setup_requires=["setuptools-rust>=0.10.1", "wheel"],
     install_requires=[
         "numpy>=1.13.0",
@@ -106,11 +106,10 @@ setup(
         "matplotlib",
         "bioservices",
         "requests",
-        "joblib",
     ],
     rust_extensions=[
-        RustExtension("gseapy.gse", "Cargo.toml", debug="DEBUG" in os.environ)
-    ],  #  binding=Binding.RustCPython
+        RustExtension("gseapy.gse", "Cargo.toml", debug="DEBUG" in os.environ,
+        binding=Binding.PyO3)],
     entry_points={
         "console_scripts": ["gseapy = gseapy.__main__:main"],
     },

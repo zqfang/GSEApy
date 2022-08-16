@@ -120,7 +120,7 @@ Installation
    $ conda install -c conda-forge -c bioconda gseapy
 
    # or use pip to install the latest release
-   # you need to install rust first to compile the code
+   # you need to install rust first to compile the code: https://www.rust-lang.org/tools/install
    $ pip install gseapy
 
 | You may instead want to use the development version from Github, by running
@@ -128,6 +128,7 @@ Installation
 .. code:: shell
 
    # you need to install rust first to compile the code
+   # rust: https://www.rust-lang.org/tools/install
    $ pip install git+git://github.com/zqfang/gseapy.git#egg=gseapy
 
 Dependency
