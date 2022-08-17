@@ -11,8 +11,8 @@ GSEApy: Gene Set Enrichment Analysis in Python.
 .. image:: https://img.shields.io/conda/vn/bioconda/GSEApy.svg?style=plastic
     :target: http://bioconda.github.io
 
-.. image:: https://static.pepy.tech/personalized-badge/gseapy?period=total&units=international_system&left_color=black&right_color=orange&left_text=Downloads
-    :target: https://pepy.tech/project/gseapy
+.. image:: https://anaconda.org/bioconda/gseapy/badges/downloads.svg   
+    :target: https://anaconda.org/bioconda/gseapy
 
 .. image:: https://github.com/zqfang/GSEApy/workflows/GSEApy/badge.svg?branch=master
     :target: https://github.com/zqfang/GSEApy/actions
