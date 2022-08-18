@@ -639,16 +639,19 @@ def ringplot(
         df = df.assign(p_inv=np.log(1 / df[colname]))
         colname = "p_inv"
         cbar_title = r"$Log \frac{1}{P val}$"
-    
 
     if (x is not None) and (x in df.columns):
         # get top term of each group
-        df = df.groupby(x).apply(lambda x : x.sort_values(by = colname).tail(top_term)).reset_index(drop = True)
+        df = (
+            df.groupby(x)
+            .apply(lambda x: x.sort_values(by=colname).tail(top_term))
+            .reset_index(drop=True)
+        )
     else:
         df = df.sort_values(by=colname).tail(top_term)
 
     xlabel = ""
-    # set xaxis values, so you could get dotplot    
+    # set xaxis values, so you could get dotplot
     if (x is not None) and (x in df.columns):
         xlabel = x
     elif "Combined Score" in df.columns:
@@ -661,7 +664,7 @@ def ringplot(
         # revert back to p_inv
         x = colname
         xlabel = cbar_title
-    
+
     # get scatter area
     temp = df["Overlap"].str.split("/", expand=True).astype(int)
     df = df.assign(Hits_ratio=temp.iloc[:, 0] / temp.iloc[:, 1])
@@ -709,7 +712,10 @@ def ringplot(
     # ax.set_xlabel(xlabel, fontsize=14, fontweight="bold")
     # ax.yaxis.set_major_locator(plt.FixedLocator(y))
     # ax.yaxis.set_major_formatter(plt.FixedFormatter(ylabels))
-    ax.xaxis.set_tick_params(labelsize=14, labelrotation = 90,)
+    ax.xaxis.set_tick_params(
+        labelsize=14,
+        labelrotation=90,
+    )
     ax.yaxis.set_tick_params(labelsize=16)
     ax.set_axisbelow(True)  # set grid blew other element
     ax.grid(axis="both")  # zorder=-1.0
