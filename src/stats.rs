@@ -3,7 +3,6 @@ use crate::algorithm::{EnrichmentScore, EnrichmentScoreTrait};
 use crate::utils::{Metric, Statistic};
 use pyo3::prelude::*;
 use rayon::prelude::*;
-use std::time::Instant;
 use std::collections::HashMap;
 use itertools::izip;
 // serialize struct example
@@ -187,6 +186,7 @@ impl GSEAResult {
             seed: seed,
         }
     }
+    #[allow(dead_code)]
     pub fn default() -> GSEAResult {
         GSEAResult {
             summaries: Vec::<GSEASummary>::new(),
@@ -331,7 +331,7 @@ impl GSEAResult {
             .collect();
 
         // by default, we'er no gnna adjusted fdr q value
-        // self.adjust_fdr(&mut fdrs, nes_idx);
+        // self._adjust_fdr(&mut fdrs, nes_idx);
         let mut fdr_orig_order: Vec<f64> = vec![0.0; fdrs.len()];
         indices.iter().zip(fdrs.iter()).for_each(|(&i, &v)| {
             fdr_orig_order[i] = v;
@@ -344,7 +344,7 @@ impl GSEAResult {
     /// - fdrs:  Corresponds to the ascending order of NES.
     /// - partition_point_idx: the index of the first element of the second partition
     /// This function updates fdr value inplace.
-    fn adjust_fdr(&self, fdrs: &mut [f64], partition_point_idx: usize) {
+    fn _adjust_fdr(&self, fdrs: &mut [f64], partition_point_idx: usize) {
         // If NES is a so screwd distribution, e.g. all positive or negative numbers.
         // partition_point_idx will be either of 0 or fdrs.len(). Need to skip. example here:
         // let s1 = [1,3,4,5,6,9];

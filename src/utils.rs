@@ -1,3 +1,6 @@
+#![allow(dead_code)]
+#![allow(unused_variables)]
+
 use pyo3::prelude::*;
 use std::error::Error;
 use std::fs::File;

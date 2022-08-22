@@ -217,51 +217,51 @@ impl EnrichmentScore {
 }
 
 
-mod tests {
+// mod tests {
 
-    use super::*;
-    use std::time::Instant;
-    use crate::utils::FileReader;
-    #[test]
-    fn test_calcu_metric () {
-        let mut gct = FileReader::new();
-        let _ = gct.read_csv("data/P53.txt", b'\t', true, Some(b'#'));
-        let mut cls = FileReader::new();
-        let _ = cls.read_table("data/P53.cls", ' ', false);
-        // let mut group = cls.record.pop().unwrap();
-        println!("{:?}", &cls.record[2]);
-        let gboo: Vec<bool> = cls.record[2].iter().map(|x| x != "WT").collect();
-        println!("{:?}", &gboo);
-        let weight = 1.0;
-        let mut genes: Vec<String> = Vec::new();
-        // let mut gene_set: Vec<String> = Vec::new();
-        let mut gene_exp: Vec<Vec<f64>> = Vec::new();
-        for r in gct.record.iter() {
-            genes.push(r[0].to_string());
-            let mut vv: Vec<f64> = Vec::new();
-            for v in &r[2..] {
-                vv.push(v.parse::<f64>().unwrap());
-            }
-            vv.iter_mut().for_each(|x| *x = x.abs().powf(weight)); // modified value in place
-            gene_exp.push(vv);
-        }
-        let end1 = Instant::now();
-        let es = EnrichmentScore::new(&genes, 0, 123, false, false);
-        //let gene_metric = es.phenotype_permutation(&gene_exp, &gboo, Metric::Signal2Noise);
-        let _metric = es.calculate_metric(&gene_exp, &gboo, Metric::Signal2Noise);
-        println!("presorted metric checked: {:.4?}", &_metric[..10]);
-        let weighted_sorted_metric = _metric.as_slice().argsort(false);
-        let end2 = Instant::now();
-        println!("metric length: {}", &weighted_sorted_metric.1.len());
-        let idx = weighted_sorted_metric.0;
-        println!("sorted metric checked: ");
-        for (i, v) in (&weighted_sorted_metric.1[..10]).iter().enumerate()
-        {
-            println!("{:?}, {:.4?}", es.gene.elt_of(idx[i]), v);
-        }
-        println!("Overall run time: {:.2?}", end2.duration_since(end1));
-    }
-}
+//     use super::*;
+//     use std::time::Instant;
+//     use crate::utils::FileReader;
+//     #[test]
+//     fn test_calcu_metric () {
+//         let mut gct = FileReader::new();
+//         let _ = gct.read_csv("data/P53.txt", b'\t', true, Some(b'#'));
+//         let mut cls = FileReader::new();
+//         let _ = cls.read_table("data/P53.cls", ' ', false);
+//         // let mut group = cls.record.pop().unwrap();
+//         println!("{:?}", &cls.record[2]);
+//         let gboo: Vec<bool> = cls.record[2].iter().map(|x| x != "WT").collect();
+//         println!("{:?}", &gboo);
+//         let weight = 1.0;
+//         let mut genes: Vec<String> = Vec::new();
+//         // let mut gene_set: Vec<String> = Vec::new();
+//         let mut gene_exp: Vec<Vec<f64>> = Vec::new();
+//         for r in gct.record.iter() {
+//             genes.push(r[0].to_string());
+//             let mut vv: Vec<f64> = Vec::new();
+//             for v in &r[2..] {
+//                 vv.push(v.parse::<f64>().unwrap());
+//             }
+//             vv.iter_mut().for_each(|x| *x = x.abs().powf(weight)); // modified value in place
+//             gene_exp.push(vv);
+//         }
+//         let end1 = Instant::now();
+//         let es = EnrichmentScore::new(&genes, 0, 123, false, false);
+//         //let gene_metric = es.phenotype_permutation(&gene_exp, &gboo, Metric::Signal2Noise);
+//         let _metric = es.calculate_metric(&gene_exp, &gboo, Metric::Signal2Noise);
+//         println!("presorted metric checked: {:.4?}", &_metric[..10]);
+//         let weighted_sorted_metric = _metric.as_slice().argsort(false);
+//         let end2 = Instant::now();
+//         println!("metric length: {}", &weighted_sorted_metric.1.len());
+//         let idx = weighted_sorted_metric.0;
+//         println!("sorted metric checked: ");
+//         for (i, v) in (&weighted_sorted_metric.1[..10]).iter().enumerate()
+//         {
+//             println!("{:?}, {:.4?}", es.gene.elt_of(idx[i]), v);
+//         }
+//         println!("Overall run time: {:.2?}", end2.duration_since(end1));
+//     }
+// }
     //    #[test]
     //    fn gene_permutation_fastrand()
     //    {
