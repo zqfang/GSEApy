@@ -1,2 +1,2 @@
-include LICENSE.txt README.rst requirements.txt Cargo.toml
-recursive-include src
+include LICENSE README.rst requirements.txt Cargo.toml
+recursive-include src *.rs
