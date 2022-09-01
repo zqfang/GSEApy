@@ -148,7 +148,7 @@ class GSEAbase(object):
                 for gm in gmts:
                     tdt = self.parse_gmt(gm)
                     for k, v in tdt.items():
-                        new_k = gm + "__" + k
+                        new_k = os.path.split(gm)[-1] + "__" + k
                         genesets_dict[new_k] = v
             else:
                 genesets_dict = self.parse_gmt(gmt)
@@ -159,7 +159,7 @@ class GSEAbase(object):
                     tdt = gm
                 elif isinstance(gm, str):
                     tdt = self.parse_gmt(gm)
-                    prefix = gm
+                    prefix = os.path.split(gm)[-1]
                 else:
                     continue
                 for k, v in tdt.items():
@@ -297,8 +297,8 @@ class GSEAbase(object):
         # no values need to be returned
         if self._outdir is None:
             return
-        indices = self.res2d["NES"].abs().sort_values(ascending=False).index
-
+        # indices = self.res2d["NES"].abs().sort_values(ascending=False).index
+        indices = self.res2d.index
         # Plotting
         for i, idx in enumerate(indices):
             record = self.res2d.iloc[idx]
@@ -450,9 +450,6 @@ class GSEAbase(object):
                 self.results[name] = dd.set_index("term").to_dict(orient="index")
         else:
             self.results = res_df.set_index("term").to_dict(orient="index")
-            res_df.sort_values(
-                by=["nes"], inplace=True, ascending=False, ignore_index=True
-            )
         # trim
         res_df.rename(
             columns={
@@ -475,7 +472,11 @@ class GSEAbase(object):
         if self.module == "ssgsea" and self.permutation_num == 0:
             dc += ["NOM p-val", "FWER p-val", "FDR q-val"]
         res_df.drop(dc, axis=1, inplace=True)
-        self.res2d = res_df
+        # re-order by NES
+        # for pands > 1.1, use df.sort_values(by='B', key=abs) will sort by abs value
+        self.res2d = res_df.reindex(
+            res_df["NES"].abs().sort_values(ascending=False).index
+        ).reset_index(drop=True)
 
         if self._outdir is not None:
             out = os.path.join(
@@ -485,6 +486,15 @@ class GSEAbase(object):
                 ),
             )
             self.res2d.to_csv(out, index=False, float_format="%.6e")
+            with open(os.path.join(self.outdir, "gene_sets.gmt"), "w") as gout:
+                for term, genes in gmt.items():
+                    collection = ""
+                    if term.find("__") > -1:
+                        collections = term.split("__")
+                        collection = collections[0]
+                        term = collections[1]
+                    gg = "\t".join(genes)
+                    gout.write(f"{term}\t{collection}\t{gg}\n")
         # generate gseaplots
         if not self._noplot:
             self._plotting(metric)
