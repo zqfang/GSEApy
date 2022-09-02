@@ -39,7 +39,6 @@ pub struct GSEASummary {
     #[pyo3(get, set)]
     pub name: Option<String>,
 }
-
 impl GSEASummary {
     pub fn new(
         &mut self,
@@ -87,41 +86,44 @@ impl GSEASummary {
         }
     }
 
+    /// see the normalizatin code: line 710
+    /// https://github.com/GSEA-MSigDB/GSEA_R/blob/master/R/GSEA.R
     fn normalize(&mut self) -> Vec<f64> {
-        let n_mean: f64;
         let e: f64 = self.es;
-        let tmp: Vec<f64>;
-        if e >= 0.0 {
-            // n_mean = esnull[esnull>= 0].mean()
-            tmp = self
-                .esnull
-                .iter()
-                .filter_map(|&x| if x >= 0.0 { Some(x) } else { None })
-                .collect();
-        } else {
-            // n_mean = esnull[esnull< 0].mean()
-            tmp = self
-                .esnull
+        // n_mean = esnull[esnull>= 0].mean()
+        let pos_phi: Vec<f64> = self.esnull
+            .iter()
+            .filter_map(|&x| if x >= 0.0 { Some(x) } else { None })
+            .collect();
+
+        // n_mean = esnull[esnull< 0].mean()
+        let neg_phi: Vec<f64> = self.esnull
                 .iter()
                 .filter_map(|&x| if x < 0.0 { Some(x) } else { None })
                 .collect();
-        }
-
+        
         // FIXME: Potential NaN number here
         // When input a rare causes of an extreamly screwed null distribution. e.g.
         // es = - 27, esnull = [13, 24, 57, 88]
         // nes will be NaN. You have to increased the permutation number for safe
         // a tricky fixed here: set n_mean as itself
         // so esnull = [-27, 13, 24, 57, 88]
-        n_mean = if tmp.len() > 0 {
-            tmp.iter().sum::<f64>() / (tmp.len() as f64)
+        let pos_mean = if pos_phi.len() > 0 {
+            pos_phi.as_slice().mean()
         } else {
             e
         };
-        self.nes = if e >= 0.0 {
-            e / n_mean
+
+        let neg_mean = if neg_phi.len() > 0 {
+            neg_phi.as_slice().mean()
         } else {
-            -1.0 * e / n_mean
+            e
+        };
+
+        self.nes = if e >= 0.0 {
+            e / pos_mean
+        } else {
+            e / neg_mean.abs()
         };
 
         let nesnull: Vec<f64> = self
@@ -129,9 +131,9 @@ impl GSEASummary {
             .iter()
             .map(|&e| {
                 if e >= 0.0 {
-                    e / n_mean
+                    e / pos_mean
                 } else {
-                    -1.0 * e / n_mean
+                    e / neg_mean.abs()
                 }
             })
             .collect();
@@ -331,7 +333,7 @@ impl GSEAResult {
             .collect();
 
         // by default, we'er no gnna adjusted fdr q value
-        // self._adjust_fdr(&mut fdrs, nes_idx);
+        // self.adjust_fdr(&mut fdrs, nes_idx);
         let mut fdr_orig_order: Vec<f64> = vec![0.0; fdrs.len()];
         indices.iter().zip(fdrs.iter()).for_each(|(&i, &v)| {
             fdr_orig_order[i] = v;
@@ -344,7 +346,8 @@ impl GSEAResult {
     /// - fdrs:  Corresponds to the ascending order of NES.
     /// - partition_point_idx: the index of the first element of the second partition
     /// This function updates fdr value inplace.
-    fn _adjust_fdr(&self, fdrs: &mut [f64], partition_point_idx: usize) {
+    #[allow(dead_code)]
+    fn adjust_fdr(&self, fdrs: &mut [f64], partition_point_idx: usize) {
         // If NES is a so screwd distribution, e.g. all positive or negative numbers.
         // partition_point_idx will be either of 0 or fdrs.len(). Need to skip. example here:
         // let s1 = [1,3,4,5,6,9];
@@ -700,9 +703,9 @@ mod tests {
             .build_global()
             .unwrap();
         let mut rnk = FileReader::new();
-        let _ = rnk.read_csv("data/2022-08-16-test-2.rnk", b'\t', false, Some(b'#'));
+        let _ = rnk.read_csv("data/mds.2k.rnk", b'\t', false, Some(b'#'));
         let mut gmt = FileReader::new();
-        let _ = gmt.read_table("data/c2.cp.kegg.v7.5.1.symbols.gmt", '\t', false);
+        let _ = gmt.read_table("data/ribosome.gmt", '\t', false);
 
         // let gene: Vec<String> = vec!["A","B","C","D","E","F","G","H","J","K"].into_iter().map(|s| s.to_string()).collect();
         // let gene_set: Vec<String> = vec!["B","A","D","G"].into_iter().map(|s| s.to_string()).collect();
