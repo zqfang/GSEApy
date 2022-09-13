@@ -231,9 +231,12 @@ class Biomart:
                 "entrezgene_id",
                 "go_id",
             ]
+        if isinstance(attributes, str):
+            attributes = attributes.split(",")
+
         if not isinstance(filters, dict):
             raise ValueError("filters only accept a dict object")
-            
+
         df = self.query_simple(
             dataset=dataset, filters=filters, attributes=attributes, filename=None
         )
