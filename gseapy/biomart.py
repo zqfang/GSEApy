@@ -1,12 +1,13 @@
+import logging
 from collections.abc import Iterable
 from io import StringIO
+from xml.etree import cElementTree as ET
 
 import pandas as pd
 import requests
-from bioservices import BioMart
 
 
-class Biomart(BioMart):
+class Biomart:
     """query from BioMart"""
 
     def __init__(self, host="www.ensembl.org", verbose=False):
@@ -31,30 +32,26 @@ class Biomart(BioMart):
                             filters={'ensembl_gene_id': queries}
                             )
         """
-        super(Biomart, self).__init__(host=host, verbose=verbose)
-        hosts = ["www.ensembl.org", "asia.ensembl.org", "useast.ensembl.org"]
-        # if host not work, select next
-        i = 0
-        while (self.host is None) and (i < 3):
-            self.host = hosts[i]
-            i += 1
+        # super(Biomart, self).__init__(host=host, verbose=verbose)
+        self._set_host(host)
 
         self.attributes_xml = []
         self.filters_xml = []
         self.dataset_xml = ""
 
         params = {
+            "host": self.host,
             "version": "1.0",
             "virtualSchemaName": "default",
             "formatter": "TSV",
             "header": 0,
-            "uniqueRows": 0,
+            "uniqueRows": 1,
             "configVersion": "0.6",
-            "completionStamp": "1",
+            "completionStamp": 1,
         }
 
         self.header = (
-            """http://ensembl.org/biomart/martservice?query="""
+            """https://%(host)s/biomart/martservice?query="""
             """<?xml version="%(version)s" encoding="UTF-8"?>"""
             """<!DOCTYPE Query>"""
             """<Query virtualSchemaName="%(virtualSchemaName)s" formatter="%(formatter)s" """
@@ -66,18 +63,53 @@ class Biomart(BioMart):
         self.footer = "</Dataset></Query>"
         self.reset()
 
-    def add_filter(self, name, value):
+        # get supported marts
+        self._marts = self.get_marts()['name'].to_list()
 
+    def _set_host(self, host):
+        """set host"""
+
+        hosts = ["www.ensembl.org", "asia.ensembl.org", "useast.ensembl.org"]
+        hosts.insert(0, host)
+        secure = ""
+
+        # if self._secure:
+        #     secure = "s"
+        # if host not work, select next
+        i = 0
+        while i < len(hosts):
+            url = "http{}://{}/biomart/martservice".format(secure, hosts[i])
+            request = requests.head(url)
+            if request.status_code in [200]:
+                self.host = hosts[i]
+                break
+            else:
+                logging.warning(
+                    "host {} is not reachable, will try {} ".format(
+                        hosts[i], hosts[i % len(hosts)]
+                    )
+                )
+            i += 1
+        if i == len(hosts):
+            raise ValueError("host {} is not reachable. Please check your input")
+
+    def add_filter(self, name, value):
+        """
+        key: filter names
+        value: Iterable[str]
+        """
+        if isinstance(value, Iterable):
+             value = ",".join([str(v) for v in list(value)])
         _filter = ""
-        if "=" in value:
-            _filter = """<Filter name="%s" %s/>""" % (name, value)
+        if name.lower().startswith("with"):
+            _filter = """<Filter name="%s" excluded="%s"/>""" % (name, value)
         else:
             _filter = """<Filter name="%s" value="%s"/>""" % (name, value)
         self.filters_xml.append(_filter)
 
+
     def add_attribute(self, attribute):
         _attr = """<Attribute name="%s"/>""" % attribute
-
         self.attributes_xml.append(_attr)
 
     def add_dataset(self, dataset):
@@ -99,51 +131,78 @@ class Biomart(BioMart):
         return xml
 
     def get_marts(self):
-        """Get available marts and their names.
+        """Get available marts and their names."""
+        url = (
+            "https://{host}/biomart/martservice?type=registry&requestid=gseapy".format(
+                host=self.host
+            )
+        )
+        resp = requests.get(url)
+        if resp.ok:
+            #marts = pd.read_xml(resp.text)
+            marts = [ e.attrib for e in ET.XML(resp.text) ]
+            marts = pd.DataFrame(marts)
+            return marts.loc[:,['database', 'displayName', 'name']]
 
-        URL:
-        /martservice/marts  -> return xml format
-        /martservice/marts.json -> return json format
-        """
-
-        mart_names = pd.Series(self.names, name="Name")
-        mart_descriptions = pd.Series(self.displayNames, name="Description")
-
-        return pd.concat([mart_names, mart_descriptions], axis=1)
+        return resp.text
 
     def get_datasets(self, mart="ENSEMBL_MART_ENSEMBL"):
-        """Get available datasets from mart you've selected
-        URL Example:
-        /martservice/datasets?config=snp_config
-        """
-        datasets = super(Biomart, self).datasets(mart, raw=True)
-        return pd.read_csv(
-            StringIO(datasets),
-            header=None,
-            usecols=[1, 2],
-            names=["Name", "Description"],
-            sep="\t",
+        """Get available datasets from mart you've selected"""
+        if mart not in self._marts:
+            raise ValueError("Provided mart name (%s) is not valid. see 'names' attribute" % mart)
+
+        url = "https://{host}/biomart/martservice?type=datasets&mart={mart}".format(
+            host=self.host, mart=mart
         )
+        resp = requests.get(url)
+        if resp.ok:
+            if resp.text.startswith("Problem"):
+                return resp.text
+            datasets = [
+                record.split("\t")
+                for record in resp.text.split("\n")
+                if len(record) > 1
+            ]
+            datasets = pd.DataFrame(datasets).iloc[:, 1:3]
+            datasets.columns = ["Name", "Description"]
+            return datasets
+        return resp.text
 
-    def get_attributes(self, dataset):
-        """Get available attritbutes from dataset you've selected
-        URL Example:
-        /martservice/attributes?datasets=btaurus_snp&config=snp_config
-        """
-        attributes = super(Biomart, self).attributes(dataset)
-        attr_ = [(k, v[0]) for k, v in attributes.items()]
-        return pd.DataFrame(attr_, columns=["Attribute", "Description"])
+    def get_attributes(self, dataset="hsapiens_gene_ensembl"):
+        """Get available attritbutes from dataset you've selected"""
+        # assert dataset in 
 
-    def get_filters(self, dataset):
-        """Get available filters from dataset you've selected
+        url = "https://{host}/biomart/martservice?type=attributes&dataset={dataset}".format(
+            host=self.host, dataset=dataset
+        )
+        resp = requests.get(url)
+        if resp.ok:
+            attributes = [text.split("\t") for text in resp.text.strip().split("\n")]
+            attributes = pd.DataFrame(attributes).iloc[:, :3]
+            attributes.columns = ["Attribute", "Description", "Additional"]
+            return attributes
+        return resp.text
 
-         URL Example:
-        /martservice/filters?datasets=btaurus_snp&config=snp_config
-
-        """
-        filters = super(Biomart, self).filters(dataset)
-        filt_ = [(k, v[0]) for k, v in filters.items()]
-        return pd.DataFrame(filt_, columns=["Filter", "Description"])
+    def get_filters(self, dataset="hsapiens_gene_ensembl"):
+        """Get available filters from dataset you've selected"""
+        # filters = super(Biomart, self).filters(dataset)
+        # if dataset not in [x for k in self.valid_attributes.keys() for x in self.valid_attributes[k]]:
+        #     raise ValueError("provided dataset (%s) is not found. see valid_attributes" % dataset)
+        url = "https://{host}/biomart/martservice?type=filters&dataset={dataset}".format(
+                host=self.host, 
+                dataset=dataset
+            )
+        
+        resp = requests.get(url)
+        if resp.ok:
+            if str(resp.text).startswith("Query ERROR"):
+                print(results)
+                return results
+            filters = [text.split("\t") for text in resp.text.strip().split("\n")]
+            filters = pd.DataFrame(filters).iloc[:, [0, 1, 3, 5]]
+            filters.columns = ["Filter", "Description", "Additional", "InputType"]
+            return filters
+        return resp.text
 
     def query(
         self, dataset="hsapiens_gene_ensembl", attributes=[], filters={}, filename=None
@@ -155,7 +214,13 @@ class Biomart(BioMart):
         :param filters: dict, {'filter name': list(filter value)}
         :param host: www.ensembl.org, asia.ensembl.org, useast.ensembl.org
         :return: a dataframe contains all attributes you selected.
+        
+        Example:
 
+            >>> queries = {'ensembl_gene_id': ['ENSG00000125285','ENSG00000182968'] } # need to be a python dict 
+            >>> results = bm.query(dataset='hsapiens_gene_ensembl', 
+                                   attributes=['ensembl_gene_id', 'external_gene_name', 'entrezgene_id', 'go_id'],
+                                   filters=queries)
         """
         if not attributes:
             attributes = [
@@ -164,28 +229,11 @@ class Biomart(BioMart):
                 "entrezgene_id",
                 "go_id",
             ]
-
-        self.new_query()
-        # 'mmusculus_gene_ensembl'
-        self.add_dataset_to_xml(dataset)
-        for at in attributes:
-            self.add_attribute_to_xml(at)
-        # add filters
-        if filters:
-            for k, v in filters.items():
-                if isinstance(v, str) or not isinstance(v, Iterable):
-                    continue
-                v = ",".join(list(v))
-                self.add_filter_to_xml(k, v)
-
-        xml_query = super(Biomart, self).get_xml()
-        results = super(Biomart, self).query(xml_query)
-        if str(results).startswith("Query ERROR"):
-            print(results)
-            return results
-
-        df = pd.read_csv(
-            StringIO(results), header=None, sep="\t", index_col=None, names=attributes
+        df = self.query_simple(
+            dataset=dataset, 
+            filters=filters, 
+            attributes=attributes, 
+            filename=None
         )
         if "entrezgene_id" in df.columns:
             df["entrezgene_id"] = df["entrezgene_id"].astype(pd.Int32Dtype())
@@ -226,8 +274,8 @@ class Biomart(BioMart):
             self.add_attribute(at)
         for n, v in filters.items():
             self.add_filter(n, v)
-        _xml = self.get_xml()
-        response = requests.get(_xml, stream=True)
+        self._xml = self.get_xml()
+        response = requests.get(self._xml)
         if response.ok:
             df = pd.read_table(StringIO(response.text), header=None, names=attributes)
             if filename is not None:

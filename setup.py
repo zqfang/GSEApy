@@ -104,7 +104,6 @@ setup(
         "scipy",
         "pandas",
         "matplotlib",
-        "bioservices",
         "requests",
     ],
     rust_extensions=[
