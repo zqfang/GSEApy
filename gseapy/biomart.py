@@ -198,8 +198,7 @@ class Biomart:
         resp = requests.get(url)
         if resp.ok:
             if str(resp.text).startswith("Query ERROR"):
-                print(results)
-                return results
+                return resp.text
             filters = [text.split("\t") for text in resp.text.strip().split("\n")]
             filters = pd.DataFrame(filters).iloc[:, [0, 1, 3, 5]]
             filters.columns = ["Filter", "Description", "Additional", "InputType"]
@@ -240,6 +239,9 @@ class Biomart:
         df = self.query_simple(
             dataset=dataset, filters=filters, attributes=attributes, filename=None
         )
+        if isinstance(df, str):
+            print(df)
+            return df
         if "entrezgene_id" in df.columns:
             df["entrezgene_id"] = df["entrezgene_id"].astype(pd.Int32Dtype())
 
@@ -282,6 +284,8 @@ class Biomart:
         self._xml = self.get_xml()
         response = requests.get(self._xml)
         if response.ok:
+            if str(response.text).startswith("Query ERROR"):
+                return response.text
             df = pd.read_table(StringIO(response.text), header=None, names=attributes)
             if filename is not None:
                 df.to_csv(filename, sep="\t", index=False)
