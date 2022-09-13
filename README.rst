@@ -133,17 +133,18 @@ Installation
 
 Dependency
 --------------
-* Python 3.5+
+* Python 3.7+
 
 Mandatory
 ~~~~~~~~~
 * Rust: For gseapy > 0.11.0, Rust compiler is needed
+* setuptools-rust
 * Numpy >= 1.13.0
 * Scipy
 * Pandas
 * Matplotlib
-* Requests (for Enrichr API)
-* Bioservices (for BioMart API)
+* Requests
+
 
 
 Run GSEApy
