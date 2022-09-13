@@ -64,7 +64,7 @@ class Biomart:
         self.reset()
 
         # get supported marts
-        self._marts = self.get_marts()['name'].to_list()
+        self._marts = self.get_marts()["name"].to_list()
 
     def _set_host(self, host):
         """set host"""
@@ -99,14 +99,13 @@ class Biomart:
         value: Iterable[str]
         """
         if isinstance(value, Iterable):
-             value = ",".join([str(v) for v in list(value)])
+            value = ",".join([str(v) for v in list(value)])
         _filter = ""
         if name.lower().startswith("with"):
             _filter = """<Filter name="%s" excluded="%s"/>""" % (name, value)
         else:
             _filter = """<Filter name="%s" value="%s"/>""" % (name, value)
         self.filters_xml.append(_filter)
-
 
     def add_attribute(self, attribute):
         _attr = """<Attribute name="%s"/>""" % attribute
@@ -139,17 +138,19 @@ class Biomart:
         )
         resp = requests.get(url)
         if resp.ok:
-            #marts = pd.read_xml(resp.text)
-            marts = [ e.attrib for e in ET.XML(resp.text) ]
+            # marts = pd.read_xml(resp.text)
+            marts = [e.attrib for e in ET.XML(resp.text)]
             marts = pd.DataFrame(marts)
-            return marts.loc[:,['database', 'displayName', 'name']]
+            return marts.loc[:, ["database", "displayName", "name"]]
 
         return resp.text
 
     def get_datasets(self, mart="ENSEMBL_MART_ENSEMBL"):
         """Get available datasets from mart you've selected"""
         if mart not in self._marts:
-            raise ValueError("Provided mart name (%s) is not valid. see 'names' attribute" % mart)
+            raise ValueError(
+                "Provided mart name (%s) is not valid. see 'names' attribute" % mart
+            )
 
         url = "https://{host}/biomart/martservice?type=datasets&mart={mart}".format(
             host=self.host, mart=mart
@@ -170,7 +171,7 @@ class Biomart:
 
     def get_attributes(self, dataset="hsapiens_gene_ensembl"):
         """Get available attritbutes from dataset you've selected"""
-        # assert dataset in 
+        # assert dataset in
 
         url = "https://{host}/biomart/martservice?type=attributes&dataset={dataset}".format(
             host=self.host, dataset=dataset
@@ -188,11 +189,12 @@ class Biomart:
         # filters = super(Biomart, self).filters(dataset)
         # if dataset not in [x for k in self.valid_attributes.keys() for x in self.valid_attributes[k]]:
         #     raise ValueError("provided dataset (%s) is not found. see valid_attributes" % dataset)
-        url = "https://{host}/biomart/martservice?type=filters&dataset={dataset}".format(
-                host=self.host, 
-                dataset=dataset
+        url = (
+            "https://{host}/biomart/martservice?type=filters&dataset={dataset}".format(
+                host=self.host, dataset=dataset
             )
-        
+        )
+
         resp = requests.get(url)
         if resp.ok:
             if str(resp.text).startswith("Query ERROR"):
@@ -214,11 +216,11 @@ class Biomart:
         :param filters: dict, {'filter name': list(filter value)}
         :param host: www.ensembl.org, asia.ensembl.org, useast.ensembl.org
         :return: a dataframe contains all attributes you selected.
-        
+
         Example:
 
-            >>> queries = {'ensembl_gene_id': ['ENSG00000125285','ENSG00000182968'] } # need to be a python dict 
-            >>> results = bm.query(dataset='hsapiens_gene_ensembl', 
+            >>> queries = {'ensembl_gene_id': ['ENSG00000125285','ENSG00000182968'] } # need to be a python dict
+            >>> results = bm.query(dataset='hsapiens_gene_ensembl',
                                    attributes=['ensembl_gene_id', 'external_gene_name', 'entrezgene_id', 'go_id'],
                                    filters=queries)
         """
@@ -229,11 +231,11 @@ class Biomart:
                 "entrezgene_id",
                 "go_id",
             ]
+        if not isinstance(filters, dict):
+            raise ValueError("filters only accept a dict object")
+            
         df = self.query_simple(
-            dataset=dataset, 
-            filters=filters, 
-            attributes=attributes, 
-            filename=None
+            dataset=dataset, filters=filters, attributes=attributes, filename=None
         )
         if "entrezgene_id" in df.columns:
             df["entrezgene_id"] = df["entrezgene_id"].astype(pd.Int32Dtype())
@@ -252,7 +254,7 @@ class Biomart:
     ):
         """
         This function is a simple version of BioMart REST API.
-        sample parameter to query().
+        same parameter to query().
 
         However, you could get cross page of mapping. such as Mouse 2 human gene names
 
