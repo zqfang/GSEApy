@@ -620,6 +620,7 @@ def ringplot(
     figsize: Tuple[float] = (6, 5.5),
     cmap: str = "viridis_r",
     ofname: Optional[str] = None,
+    show_ring: bool = True,
     **kwargs,
 ):
     """
@@ -635,6 +636,7 @@ def ringplot(
     :param figsize: tuple, figure size.
     :param cmap: matplotlib colormap
     :param ofname: output file name. If None, don't save figure
+    :param show_ring bool: whether to show outer ring.
 
     """
 
@@ -713,24 +715,28 @@ def ringplot(
     vmin = np.percentile(colmap.min(), 2)
     vmax = np.percentile(colmap.max(), 98)
     # outer ring
-    ax.scatter(
-        x=x,
-        y="Term",
-        s=df["area"].max() * 1.5,
-        edgecolors="gray",
-        c="white",  # colmap,
-        data=df,
-    )
+    if show_ring:
+        rg = ax.scatter(
+            x=x,
+            y="Term",
+            s=df["area"].max() * 1.5,
+            edgecolors="gray",
+            c="white", 
+            data=df,
+            marker="o",
+        )
+    # inner circle
     sc = ax.scatter(
         x=x,
         y="Term",
         s="area",
         edgecolors="face",
-        c=colname,  # colmap,
+        c=colname, 
         cmap=cmap,
         vmin=vmin,
         vmax=vmax,
         data=df,
+        marker="o",
     )
 
     # ax.set_xlabel(xlabel, fontsize=14, fontweight="bold")
