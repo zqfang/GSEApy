@@ -124,6 +124,7 @@ def heatmap(
     # cax=fig.add_axes([0.93,0.25,0.05,0.20])
     cbar = fig.colorbar(matrix, shrink=0.3, aspect=10)
     cbar_title = "z-score" if z_score is not None else ""
+    cbar.ax.yaxis.set_tick_params(color="white", direction="in", left=True, right=True)
     cbar.ax.set_title(cbar_title, loc="left", fontweight="bold")
     for key, spine in cbar.ax.spines.items():
         spine.set_visible(False)
@@ -474,6 +475,7 @@ def dotplot(
 
     """
 
+    # assert column in ["Adjusted P-value", "P-value", "NOM p-val", "FDR q-val"]
     colname = column
 
     # check if any values in `df[colname]` can't be coerced to floats
@@ -482,25 +484,31 @@ def dotplot(
         raise ValueError("some value in %s could not be typecast to `float`" % colname)
     # subset
     df = df[df[colname] <= cutoff]
+    # get top_terms
+    df = df.sort_values(by=colname).iloc[-top_term:, :]
     if len(df) < 1:
         msg = "Warning: No enrich terms when cutoff = %s" % cutoff
         return msg
     # sorting the dataframe for better visualization
-    if colname in ["Adjusted P-value", "P-value"]:
+    if colname in ["Adjusted P-value", "P-value", "NOM p-val", "FDR q-val"]:
+        df[colname].replace(
+            0, method="bfill", inplace=True
+        )  ## asending order, use bfill
         # df.loc[:, colname] = df[colname].map(float)
         # df = df.assign(logAP=lambda x: -x[colname].apply(np.log10))
-        df = df.assign(p_inv=np.log(1 / df[colname]))
+        df = df.assign(p_inv=np.log(1 / df[colname].astype(float)))
         colname = "p_inv"
         cbar_title = r"$Log \frac{1}{P val}$"
 
-    # get top_terms
-    df = df.sort_values(by=colname).iloc[-top_term:, :]
     # get scatter area
-    temp = df["Overlap"].str.split("/", expand=True).astype(int)
+    ol = df.columns[df.columns.isin(["Overlap", "Tag %"])]
+    temp = df[ol].squeeze().str.split("/", expand=True).astype(int)
     df = df.assign(Hits_ratio=temp.iloc[:, 0] / temp.iloc[:, 1])
     # make area bigger to better visualization
     # area = df["Hits_ratio"] * plt.rcParams["lines.linewidth"] * 100
-    area = np.pi * (df["Hits_ratio"] * size * plt.rcParams["lines.linewidth"]).pow(2)
+    df = df.assign(
+        area=np.pi * (df["Hits_ratio"] * size * plt.rcParams["lines.linewidth"]).pow(2)
+    )
 
     # set xaxis values
     xlabel = "Combined Score"
@@ -509,14 +517,17 @@ def dotplot(
     elif "Odds Ratio" in df.columns:
         x = df["Odds Ratio"].values
         xlabel = "Odds Ratio"
+    elif "NES" in df.columns:
+        xlabel = "NES"
+        x = xlabel
     else:
         # revert back to p_inv
-        x = df.loc[colname].values
+        x = colname
         xlabel = cbar_title
 
     # y axis index and values
     # y = [i for i in range(0, len(df))]
-    ylabels = df["Term"].values
+    # ylabels = df["Term"].values
 
     # create scatter plot
     if hasattr(sys, "ps1") and (ofname is None):
@@ -534,8 +545,9 @@ def dotplot(
     vmax = np.percentile(colmap.max(), 98)
     sc = ax.scatter(
         x=x,
-        y=ylabels,
-        s=area,
+        y="Term",
+        data=df,
+        s="area",
         edgecolors="face",
         c=colmap,
         cmap=cmap,
@@ -575,13 +587,14 @@ def dotplot(
     # cax = fig.add_axes([1.0, 0.20, 0.03, 0.22])
     cbar = fig.colorbar(
         sc,
-        shrink=0.2,
+        shrink=0.25,
         aspect=10,
         anchor=(0.0, 0.2),  # (0.0, 0.2),
         location="right"
         # cax=cax,
     )
-    # cbar.ax.tick_params(right=True)
+    # cbar.ax.tick_params(direction='in')
+    cbar.ax.yaxis.set_tick_params(color="white", direction="in", left=True, right=True)
     cbar.ax.set_title(cbar_title, loc="left", fontweight="bold")
     for key, spine in cbar.ax.spines.items():
         spine.set_visible(False)
@@ -612,7 +625,7 @@ def ringplot(
 
     :param df: GSEApy Enrichr DataFrame results.
     :param x: column name of x axis data from df.
-    :param column: which column of DataFrame to show. Default: Adjusted P-value
+    :param column: which column of DataFrame to show for dot's color. Default: Adjusted P-value
     :param title: figure title
     :param cutoff: terms with 'column' value < cut-off are shown.
     :param top_term: number of enriched terms to show.
@@ -631,12 +644,18 @@ def ringplot(
         raise ValueError("some value in %s could not be typecast to `float`" % colname)
     # subset
     df = df[df[colname] <= cutoff]
+    # get top_terms
+    df = df.sort_values(by=colname)
     if len(df) < 1:
         msg = "Warning: No enrich terms when cutoff = %s" % cutoff
         return msg
     # sorting the dataframe for better visualization
-    if colname in ["Adjusted P-value", "P-value"]:
-        df = df.assign(p_inv=np.log(1 / df[colname]))
+    if colname in ["Adjusted P-value", "P-value", "NOM p-val", "FDR q-val"]:
+        ## handle 0s: fill 0 as the second minimun lowest value
+        df[colname].replace(
+            0, method="bfill", inplace=True
+        )  ## asending order, use bfill
+        df = df.assign(p_inv=np.log(1 / df[colname].astype(float)))
         colname = "p_inv"
         cbar_title = r"$Log \frac{1}{P val}$"
 
@@ -660,13 +679,17 @@ def ringplot(
     elif "Odds Ratio" in df.columns:
         xlabel = "Odds Ratio"
         x = xlabel
+    elif "NES" in df.columns:
+        xlabel = "NES"
+        x = xlabel
     else:
         # revert back to p_inv
         x = colname
         xlabel = cbar_title
 
     # get scatter area
-    temp = df["Overlap"].str.split("/", expand=True).astype(int)
+    ol = df.columns[df.columns.isin(["Overlap", "Tag %"])]
+    temp = df[ol].squeeze().str.split("/", expand=True).astype(int)
     df = df.assign(Hits_ratio=temp.iloc[:, 0] / temp.iloc[:, 1])
     # Because the hits_ratio is much too small when being provided as size for ``s``,
     # we normalize it to some useful point sizes, s=0.3*(raito*3)**2
@@ -747,13 +770,13 @@ def ringplot(
     # cax = fig.add_axes([1.0, 0.20, 0.03, 0.22])
     cbar = fig.colorbar(
         sc,
-        shrink=0.2,
+        shrink=0.25,
         aspect=10,
         anchor=(0.0, 0.2),  # (0.0, 0.2),
         location="right"
         # cax=cax,
     )
-    # cbar.ax.tick_params(right=True)
+    cbar.ax.yaxis.set_tick_params(color="white", direction="in", left=True, right=True)
     cbar.ax.set_title(cbar_title, loc="left", fontweight="bold")
     for key, spine in cbar.ax.spines.items():
         spine.set_visible(False)
@@ -815,7 +838,7 @@ def barplot(
             cutoff,
         )
         return msg
-    if colname in ["Adjusted P-value", "P-value"]:
+    if colname in ["Adjusted P-value", "P-value", "FDR q-val", "NOM p-val"]:
         df = df.assign(logAP=lambda x: -x[colname].apply(np.log10))
         colname = "logAP"
 
@@ -831,7 +854,7 @@ def barplot(
     ax = fig.add_subplot(111)
     bar = dd.plot.barh(x="Term", y=colname, color=color, alpha=0.75, fontsize=16, ax=ax)
 
-    if column in ["Adjusted P-value", "P-value"]:
+    if column in ["Adjusted P-value", "P-value", "FDR q-val", "NOM p-val"]:
         xlabel = "-log$_{10}$(%s)" % column
     else:
         xlabel = column
