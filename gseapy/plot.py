@@ -484,13 +484,13 @@ def dotplot(
         raise ValueError("some value in %s could not be typecast to `float`" % colname)
     # subset
     df = df[df[colname] <= cutoff]
-    # get top_terms
-    df = df.sort_values(by=colname).iloc[-top_term:, :]
     if len(df) < 1:
         msg = "Warning: No enrich terms when cutoff = %s" % cutoff
         return msg
     # sorting the dataframe for better visualization
     if colname in ["Adjusted P-value", "P-value", "NOM p-val", "FDR q-val"]:
+        # get top_terms
+        df = df.sort_values(by=colname)
         df[colname].replace(
             0, method="bfill", inplace=True
         )  ## asending order, use bfill
@@ -499,7 +499,8 @@ def dotplot(
         df = df.assign(p_inv=np.log(1 / df[colname].astype(float)))
         colname = "p_inv"
         cbar_title = r"$Log \frac{1}{P val}$"
-
+    # get top terms; sort ascending
+    df = df.sort_values(by=colname).tail(top_term)
     # get scatter area
     ol = df.columns[df.columns.isin(["Overlap", "Tag %"])]
     temp = df[ol].squeeze().str.split("/", expand=True).astype(int)
@@ -540,16 +541,17 @@ def dotplot(
         ax = fig.add_subplot(111)
 
     # scatter colormap range
-    colmap = df[colname].round().astype("int")
-    vmin = np.percentile(colmap.min(), 2)
-    vmax = np.percentile(colmap.max(), 98)
+    df = df.assign(colmap= df[colname].round().astype("int"))
+    vmin = np.percentile(df.colmap.min(), 2)
+    vmax = np.percentile(df.colmap.max(), 98)
+
     sc = ax.scatter(
         x=x,
         y="Term",
         data=df,
         s="area",
         edgecolors="face",
-        c=colmap,
+        c=colname,
         cmap=cmap,
         vmin=vmin,
         vmax=vmax,
@@ -644,13 +646,12 @@ def ringplot(
         raise ValueError("some value in %s could not be typecast to `float`" % colname)
     # subset
     df = df[df[colname] <= cutoff]
-    # get top_terms
-    df = df.sort_values(by=colname)
     if len(df) < 1:
         msg = "Warning: No enrich terms when cutoff = %s" % cutoff
         return msg
     # sorting the dataframe for better visualization
     if colname in ["Adjusted P-value", "P-value", "NOM p-val", "FDR q-val"]:
+        df = df.sort_values(by=colname)
         ## handle 0s: fill 0 as the second minimun lowest value
         df[colname].replace(
             0, method="bfill", inplace=True
