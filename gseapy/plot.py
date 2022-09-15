@@ -541,7 +541,7 @@ def dotplot(
         ax = fig.add_subplot(111)
 
     # scatter colormap range
-    df = df.assign(colmap= df[colname].round().astype("int"))
+    df = df.assign(colmap=df[colname].round().astype("int"))
     vmin = np.percentile(df.colmap.min(), 2)
     vmax = np.percentile(df.colmap.max(), 98)
 
