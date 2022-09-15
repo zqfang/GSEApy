@@ -721,7 +721,7 @@ def ringplot(
             y="Term",
             s=df["area"].max() * 1.5,
             edgecolors="gray",
-            c="white", 
+            c="white",
             data=df,
             marker="o",
         )
@@ -731,7 +731,7 @@ def ringplot(
         y="Term",
         s="area",
         edgecolors="face",
-        c=colname, 
+        c=colname,
         cmap=cmap,
         vmin=vmin,
         vmax=vmax,
