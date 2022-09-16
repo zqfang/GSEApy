@@ -580,7 +580,7 @@ def dotplot(
     ax.legend(
         handles,
         labels,
-        title="% Path\nis DEG",
+        title="% Genes\nin set",
         bbox_to_anchor=(1.02, 0.9),
         loc="upper left",
         frameon=False,
@@ -768,7 +768,7 @@ def ringplot(
     ax.legend(
         handles,
         labels,
-        title="% Path\nis DEG",
+        title="% Genes\nin set",
         bbox_to_anchor=(1.02, 0.9),
         loc="upper left",
         frameon=False,
