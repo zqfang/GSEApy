@@ -6,6 +6,7 @@ import sys
 import xml.etree.ElementTree as ET
 from collections import Counter
 from collections.abc import Iterable
+from typing import Dict, List, Optional, Tuple, Union
 
 import requests
 from numpy import in1d
@@ -199,7 +200,7 @@ def get_library_name(organism="Human"):
     """return enrichr active enrichr library name.
     see also: https://maayanlab.cloud/modEnrichr/
 
-    :param str database: Select one from { 'Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm' }
+    :param str organism: Select one from { 'Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm' }
     :return: a list of enrichr libraries from selected database
 
     """
@@ -253,3 +254,65 @@ def get_library_name(organism="Human"):
     libs = [lib["libraryName"] for lib in libs_json["statistics"]]
 
     return sorted(libs)
+
+
+def download_library(name: str, organism="human") -> Dict[str, List[str]]:
+    """download enrichr libraries.
+
+    :param str name: the enrichr library name. see `gseapy.get_library_name()`.
+    :param str organism: Select one from { 'Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm' }
+    :return dict: gene_sets of the enrichr library from selected organism
+
+
+    """
+
+    default = [
+        "human",
+        "mouse",
+        "hs",
+        "mm",
+        "homo sapiens",
+        "mus musculus",
+        "h. sapiens",
+        "m. musculus",
+    ]
+    _organisms = {
+        "Fly": ["fly", "d. melanogaster", "drosophila melanogaster"],
+        "Yeast": ["yeast", "s. cerevisiae", "saccharomyces cerevisiae"],
+        "Worm": ["worm", "c. elegans", "caenorhabditis elegans", "nematode"],
+        "Fish": ["fish", "d. rerio", "danio rerio", "zebrafish"],
+    }
+    ENRICHR_URL = "http://maayanlab.cloud"
+    database = ""
+    if organism.lower() in default:
+        database = "Enrichr"
+    else:
+        for k, v in _organisms.items():
+            if organism.lower() in v:
+                database = k + "Enrichr"
+                break
+
+    if not database.endswith("Enrichr"):
+        raise LookupError(
+            """No supported database. Please input one of these:
+                            ('Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm') """
+        )
+    # queery string
+    ENRICHR_URL = ENRICHR_URL + "/%s/geneSetLibrary" % database
+    query_string = "?mode=text&libraryName=%s"
+    # get
+    response = requests.get(ENRICHR_URL + query_string % name, timeout=None)
+    if not response.ok:
+        raise Exception(
+            "Error fetching gene set library, input name is correct for the organism you've set?."
+        )
+    # reformat to dict and save to disk
+    genesets_dict = {}
+    # outname = os.path.join(DEFAULT_CACHE_PATH,  "enrichr.%s.gmt" % libname)
+    for line in response.iter_lines(chunk_size=1024, decode_unicode="utf-8"):
+        line = line.strip().split("\t")
+        k = line[0]
+        v = list(map(lambda x: x.split(",")[0], line[2:]))
+        genesets_dict.update({k: v})
+
+    return genesets_dict

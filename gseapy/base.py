@@ -260,7 +260,7 @@ class GSEAbase(object):
         response = s.get(ENRICHR_URL + query_string % libname, timeout=None)
         if not response.ok:
             raise Exception(
-                "Error fetching enrichment results, check internet connection first."
+                "Error fetching gene set library, input name is correct for the organism you've set?."
             )
         # reformat to dict and save to disk
         mkdirs(DEFAULT_CACHE_PATH)

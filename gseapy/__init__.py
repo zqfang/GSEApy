@@ -7,7 +7,7 @@ from .__main__ import __version__
 from .biomart import Biomart
 from .enrichr import Enrichr
 from .gsea import GSEA, Prerank, Replot, SingleSampleGSEA
-from .parser import get_library_name
+from .parser import download_library, get_library_name
 from .plot import barplot, dotplot, gseaplot, heatmap, ringplot
 
 
@@ -446,29 +446,33 @@ def enrichr(
 
     :param outdir:   Output file directory
 
-    :param background: int, list, str. Please ignore this argument if your input are just Enrichr library names.
+    :param background: int, list, str.
+                       Background genes. This argument works only if `gene_sets` has a type Dict or gmt file.
+                       If your input are just Enrichr library names, this argument will be ignored.
 
-                       This argument works only if `gene_sets` has a type Dict or gmt file.
 
                        However, this argument is not straightforward when `gene_sets` is given a custom input (a gmt file or dict).
-                       There are 3 ways to set this argument:
 
-                       (1) (Recommended) Input a list of background genes.
+                       By default, all genes listed in the `gene_sets` input will be used as background.
+
+                       There are 3 ways to tune this argument:
+
+                       (1) (Recommended) Input a list of background genes: ['gene1', 'gene2',...]
                            The background gene list is defined by your experment. e.g. the expressed genes in your RNA-seq.
                            The gene identifer in gmt/dict should be the same type to the backgound genes.
 
-                       (2) Specify a number, e.g. the number of total expressed genes.
+                       (2) Specify a number: e.g. 20000. (the number of total expressed genes).
                            This works, but not recommend. It assumes that all your genes could be found in background.
-                           If genes exist in gmt but not included in background,
+                           If genes exist in gmt but not included in background provided,
                            they will affect the significance of the statistical test.
 
-                       (3) (Default) Set a Biomart dataset name.
+                       (3) Set a Biomart dataset name: e.g. "hsapiens_gene_ensembl"
                            The background will be all annotated genes from the `BioMart datasets` you've choosen.
                            The program will try to retrieve the background information automatically.
 
                            Enrichr module use the code below to get the background genes:
                             >>> from gseapy.parser import Biomart
-                            >>> bm = Biomart(verbose=False, host="useast.ensembl.org")
+                            >>> bm = Biomart()
                             >>> df = bm.query(dataset=background, #  e.g. 'hsapiens_gene_ensembl'
                                          attributes=['ensembl_gene_id', 'external_gene_name', 'entrezgene_id'],
                                          filename=f'~/.cache/gseapy/{background}.background.genes.txt')
@@ -509,6 +513,111 @@ def enrichr(
     return enr
 
 
+def enrich(
+    gene_list: Iterable[str],
+    gene_sets: Union[List[str], str, Dict[str, str]],
+    background: Union[List[str], int, str] = None,
+    outdir: Optional[str] = None,
+    cutoff: float = 0.05,
+    format: str = "pdf",
+    figsize: Tuple[float, float] = (6.5, 6),
+    top_term: int = 10,
+    no_plot: bool = False,
+    verbose: bool = False,
+) -> Enrichr:
+    """Perform over-representation analysis (hypergeometric test).
+
+    :param gene_list: str, list, tuple, series, dataframe. Also support input txt file with one gene id per row.
+                      The input `identifier` should be the same type to `gene_sets`.
+
+    :param gene_sets: str, list, tuple of Enrichr Library name(s).
+                      or custom defined gene_sets (dict, or gmt file).
+
+                      Examples:
+
+                        dict: gene_sets={'A':['gene1', 'gene2',...],
+                                        'B':['gene2', 'gene4',...], ...}
+                        gmt: "genes.gmt"
+
+    :param outdir:   Output file directory
+
+    :param background: None | int | list | str.
+                       Background genes. This argument works only if `gene_sets` has a type Dict or gmt file.
+
+                       However, this argument is not straightforward when `gene_sets` is given a custom input (a gmt file or dict).
+
+                       By default, all genes listed in the `gene_sets` input will be used as background.
+
+                       There are 3 ways to tune this argument:
+
+                       (1) (Recommended) Input a list of background genes: ['gene1', 'gene2',...]
+                           The background gene list is defined by your experment. e.g. the expressed genes in your RNA-seq.
+                           The gene identifer in gmt/dict should be the same type to the backgound genes.
+
+                       (2) Specify a number: e.g. 20000. (the number of total expressed genes).
+                           This works, but not recommend. It assumes that all your genes could be found in background.
+                           If genes exist in gmt but not included in background provided,
+                           they will affect the significance of the statistical test.
+
+                       (3) Set a Biomart dataset name: e.g. "hsapiens_gene_ensembl"
+                           The background will be all annotated genes from the `BioMart datasets` you've choosen.
+                           The program will try to retrieve the background information automatically.
+
+                           Enrichr module use the code below to get the background genes:
+                            >>> from gseapy.parser import Biomart
+                            >>> bm = Biomart()
+                            >>> df = bm.query(dataset=background, #  e.g. 'hsapiens_gene_ensembl'
+                                         attributes=['ensembl_gene_id', 'external_gene_name', 'entrezgene_id'],
+                                         filename=f'~/.cache/gseapy/{background}.background.genes.txt')
+                            >>> df.dropna(subset=["entrezgene_id"], inplace=True)
+
+                           So only genes with entrezid above will be the background genes if not input specify by user.
+
+    :param cutoff:   Show enriched terms which Adjusted P-value < cutoff.
+                     Only affects the output figure, not the final output file. Default: 0.05
+    :param format:  Output figure format supported by matplotlib,('pdf','png','eps'...). Default: 'pdf'.
+
+    :param figsize: Matplotlib figsize, accept a tuple or list, e.g. (width,height). Default: (6.5,6).
+
+    :param bool no_plot: If equals to True, no figure will be drawn. Default: False.
+
+    :param bool verbose: Increase output verbosity, print out progress of your job, Default: False.
+
+    :return: An Enrichr object, which obj.res2d stores your last query, obj.results stores your all queries.
+
+    """
+    organism = "human"  # has not any effects here
+    if not isinstance(gene_sets, list):
+        _gene_sets = [gene_sets]
+
+    for gs in _gene_sets:
+        if isinstance(gs, dict):
+            continue
+        if not isinstance(gs, str):
+            raise ValueError("gene_sets input must be a dict object or .gmt file !!!")
+        if not gs.lower().endswith(".gmt"):
+            raise ValueError("gene_sets input must be a dict object or .gmt file !!!")
+
+    enr = Enrichr(
+        gene_list,
+        gene_sets,
+        organism,
+        outdir,
+        background,
+        cutoff,
+        format,
+        figsize,
+        top_term,
+        no_plot,
+        verbose,
+    )
+    # set organism
+    enr.set_organism()
+    enr.run()
+
+    return enr
+
+
 __all__ = [
     "dotplot",
     "barplot",
@@ -520,11 +629,13 @@ __all__ = [
     "gsea",
     "ssgsea",
     "enrichr",
+    "enrich",
     "Replot",
     "Prerank",
     "GSEA",
     "SingleSampleGSEA",
     "Enrichr",
     "Biomart",
+    "download_library",
     "get_library_name",
 ]

@@ -103,19 +103,21 @@ class Enrichr(object):
 
         return gss
 
-    def parse_genesets(self):
+    def parse_genesets(self, gene_sets=None):
         """parse gene_sets input file type"""
+        if gene_sets is None:
+            gene_sets = self.gene_sets
 
         gss = []
-        if isinstance(self.gene_sets, list):
-            gss = self.__gmt2dict(self.gene_sets)
+        if isinstance(gene_sets, list):
+            gss = self.__gmt2dict(gene_sets)
 
         elif isinstance(self.gene_sets, str):
-            gss = [g.strip() for g in self.gene_sets.strip().split(",")]
+            gss = [g.strip() for g in gene_sets.strip().split(",")]
             gss = self.__gmt2dict(gss)
 
-        elif isinstance(self.gene_sets, dict):
-            gss = [self.gene_sets]
+        elif isinstance(gene_sets, dict):
+            gss = [gene_sets]
         else:
             raise Exception(
                 "Error parsing enrichr libraries, please provided corrected one"
@@ -401,7 +403,18 @@ class Enrichr(object):
             Term Overlap P-value Adjusted_P-value Genes
 
         """
-        if isscalar(self.background):
+        if self.background is None:
+            # use all genes in the dict input as background if background is None
+            bg = set()
+            for term, genes in gmt.items():
+                bg = bg.union(set(genes))
+            self._logger.warning(
+                "Background is not set!!! Use all %s genes in the input gene_sets."
+                % (len(bg))
+            )
+            self._bg = bg
+
+        elif isscalar(self.background):
             if isinstance(self.background, int) or self.background.isdigit():
                 self._bg = int(self.background)
             elif isinstance(self.background, str):
