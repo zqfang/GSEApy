@@ -4,7 +4,7 @@
 requires = ["setuptools>=41.0.0", "wheel", "setuptools_rust>=0.10.2", "toml"]
 build-backend = "setuptools.build_meta"
 [tool.black]
-target-version = ['py36', 'py37', 'py38', 'py39', 'py310']
+target-version = ['py37', 'py38', 'py39', 'py310']
 
 [tool.isort]
 profile = "black"

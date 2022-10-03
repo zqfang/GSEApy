@@ -72,6 +72,7 @@ setup(
     version=__version__,
     description="Gene Set Enrichment Analysis in Python",
     long_description=readme(),
+    long_description_content_type="text/x-rst",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
@@ -98,6 +99,12 @@ setup(
     packages=["gseapy"],
     # package_data={'gseapy': ["data/*.txt"],},
     include_package_data=False,
+    project_urls={
+        "Documentation": "https://gseapy.readthedocs.io/en/latest/",
+        "Source": "https://github.com/zqfang/GSEApy",
+        "Tracker": "https://github.com/zqfang/GSEApy/issues",
+    },
+    python_requires=">=3.7",
     setup_requires=["setuptools-rust>=0.10.1", "wheel"],
     install_requires=[
         "numpy>=1.13.0",

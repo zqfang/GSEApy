@@ -2,7 +2,7 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory, mkdtemp
 
 import pytest
 
-from gseapy.__init__ import enrichr, gsea, prerank, replot, ssgsea
+from gseapy.__init__ import enrich, enrichr, gsea, prerank, replot, ssgsea
 
 
 @pytest.fixture
@@ -114,7 +114,7 @@ def test_enrichr(genelist, geneGMT):
     enrichr(genelist, gene_sets=["KEGG_2016", geneGMT], outdir=None)
     tmpdir.cleanup()
     tmpdir = TemporaryDirectory(dir="tests")
-    enrichr(genelist, organism="Fly", gene_sets="KEGG_2019", outdir=tmpdir.name)
+    enrich(genelist, gene_sets=geneGMT, background=None, outdir=tmpdir.name)
     tmpdir.cleanup()
 
 
