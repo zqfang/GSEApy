@@ -96,6 +96,7 @@ def heatmap(
     :param ofname: output file name. If None, don't save figure
 
     """
+    df = df.astype(float)
     df = zscore(df, axis=z_score)
     df = df.iloc[::-1]
     # If working on commandline, don't show figure
