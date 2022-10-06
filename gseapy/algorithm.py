@@ -234,6 +234,20 @@ def enrichment_score_tensor(
     return es, esnull, hit_ind, RES
 
 
+def fast_ssgsea(tag_indicator, ranking):
+    """
+    tag_indicator: see `enrichment_score()`
+    ranking: ranking values
+    """
+    n = len(gene_ranking_index)  # number of genes
+    k = tag_indicator.sum()  # number of overalped genes
+    idxs = np.flatnonzero(tag_indicator)  # indices low to high
+    step_cdf_in = np.sum(ranking[idxs] * (n - idxs)) / np.sum(ranking[idxs])
+    step_cdf_out = (n * (n + 1) / 2 - np.sum(n - idxs)) / (n - k)
+    es = step_cdf_in - step_cdf_out
+    return es
+
+
 def ranking_metric_tensor(
     exprs,
     method,

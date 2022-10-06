@@ -168,17 +168,20 @@ def gsea_gmt_parser(gmt, organism="Human", min_size=3, max_size=1000, gene_list=
         }
     else:
         raise Exception("System failure. Please Provide correct input files")
+
     if gene_list is not None:
+        gene_dict = {g: i for i, g in enumerate(gene_list)}
         subsets = sorted(genesets_filter.keys())
         for subset in subsets:
-            tag_indicator = in1d(
-                gene_list, genesets_filter.get(subset), assume_unique=True
-            )
-            tag_len = sum(tag_indicator)
-            if tag_len <= min_size or tag_len >= max_size:
-                del genesets_filter[subset]
-            else:
+            subset_list = set(genesets_filter.get(subset))  # remove duplicates
+            # drop genes not found in the gene_dict
+            gene_overlap = [g for g in subset_list if g in gene_dict]
+            genesets_filter[subset] = gene_overlap
+            tag_len = len(gene_overlap)
+            if (self.min_size <= tag_len <= self.max_size) and tag_len < len(gene_list):
+                # tag_len should < gene_list
                 continue
+            del genesets_filter[subset]
     # some_dict = {key: value for key, value in some_dict.items() if value != value_to_remove}
     # use np.intersect1d() may be faster???
     filsets_num = len(genesets_dict) - len(genesets_filter)

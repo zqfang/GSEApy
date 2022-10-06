@@ -257,7 +257,7 @@ class GSEA(GSEAbase):
         self.ranking = dat2
         # filtering out gene sets and build gene sets dictionary
         gmt = self.load_gmt(gene_list=dat2.index.values, gmt=self.gene_sets)
-
+        self.gmt = gmt
         self._logger.info(
             "%04d gene_sets used for further statistical testing....." % len(gmt)
         )
@@ -371,7 +371,7 @@ class Prerank(GSEAbase):
         self._logger.info("Parsing data files for GSEA.............................")
         # filtering out gene sets and build gene sets dictionary
         gmt = self.load_gmt(gene_list=dat2.index.values, gmt=self.gene_sets)
-
+        self.gmt = gmt
         self._logger.info(
             "%04d gene_sets used for further statistical testing....." % len(gmt)
         )
@@ -497,15 +497,12 @@ class SingleSampleGSEA(GSEAbase):
             rank_metric = rank_metric.select_dtypes(include=[np.number])
         else:
             raise Exception("Error parsing gene ranking values!")
-
         if rank_metric.index.duplicated().sum() > 0:
             self._logger.warning(
-                "Warning: dropping duplicated gene names, only keep the first values"
+                "Warning: dropping duplicated gene names, values averaged by gene names!"
             )
-            rank_metric = rank_metric.loc[
-                rank_metric.index.drop_duplicates(keep="first")
-            ]
             rank_metric = rank_metric.loc[rank_metric.index.dropna()]
+            rank_metric = rank_metric.groupby(level=0).mean()
         if rank_metric.isnull().any().sum() > 0:
             self._logger.warning("Warning: Input data contains NA, filled NA with 0")
             rank_metric = rank_metric.fillna(0)
@@ -543,8 +540,10 @@ class SingleSampleGSEA(GSEAbase):
         data = self.load_data()
         # normalized samples, and rank
         normdat = self.norm_samples(data)
+        self.ranking = normdat
         # filtering out gene sets and build gene sets dictionary
         gmt = self.load_gmt(gene_list=normdat.index.values, gmt=self.gene_sets)
+        self.gmt = gmt
         self._logger.info(
             "%04d gene_sets used for further statistical testing....." % len(gmt)
         )

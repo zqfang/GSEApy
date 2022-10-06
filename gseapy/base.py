@@ -182,12 +182,11 @@ class GSEAbase(object):
         subsets = list(genesets_dict.keys())
         gene_dict = {g: i for i, g in enumerate(gene_list)}
         for subset in subsets:
-            subset_list = genesets_dict.get(subset)
-            if isinstance(subset_list, set):
-                subset_list = list(subset_list)
-                genesets_dict[subset] = subset_list
-            tag_idx = [1 for k in subset_list if k in gene_dict]
-            tag_len = len(tag_idx)
+            subset_list = set(genesets_dict.get(subset)) # remove duplicates
+            # drop genes not found in the gene_dict
+            gene_overlap = [g for g in subset_list if g in gene_dict]
+            genesets_dict[subset] = gene_overlap
+            tag_len = len(gene_overlap)
             if (self.min_size <= tag_len <= self.max_size) and tag_len < len(gene_list):
                 # tag_len should < gene_list
                 continue
@@ -388,21 +387,27 @@ class GSEAbase(object):
             _genes = metric[name].index.values[gs.hits]
             genes = ";".join([str(g).strip() for g in _genes])
             RES = np.array(gs.run_es)
-            # extract leading edge genes
-            if float(gs.es) >= 0:
-                # RES -> ndarray, ind -> list
-                es_i = RES.argmax()
-                ldg_pos = list(filter(lambda x: x <= es_i, gs.hits))
-                gene_frac = (es_i + 1) / len(metric[name])
-            else:
-                es_i = RES.argmin()
-                ldg_pos = list(filter(lambda x: x >= es_i, gs.hits))
-                ldg_pos.reverse()
-                gene_frac = (len(metric[name]) - es_i) / len(metric[name])
+            lead_genes = ""
+            tag_frac = "" 
+            gene_frac = ""
+            if len(RES) > 1:
+                # extract leading edge genes
+                if float(gs.es) >= 0:
+                    # RES -> ndarray, ind -> list
+                    es_i = RES.argmax()
+                    ldg_pos = list(filter(lambda x: x <= es_i, gs.hits))
+                    gene_frac = (es_i + 1) / len(metric[name])
+                else:
+                    es_i = RES.argmin()
+                    ldg_pos = list(filter(lambda x: x >= es_i, gs.hits))
+                    ldg_pos.reverse()
+                    gene_frac = (len(metric[name]) - es_i) / len(metric[name])
 
-            # tag_frac = len(ldg_pos) / len(gmt[gs.term])
-            lead_genes = ";".join(list(map(str, metric[name].iloc[ldg_pos].index)))
-            tag_frac = "%s/%s" % (len(ldg_pos), len(gmt[gs.term]))
+                # tag_frac = len(ldg_pos) / len(gmt[gs.term])
+                gene_frac = "{0:.2%}".format(gene_frac)
+                lead_genes = ";".join(list(map(str, metric[name].iloc[ldg_pos].index)))
+                tag_frac = "%s/%s" % (len(ldg_pos), len(gmt[gs.term]))
+
             e = pd.Series(
                 [
                     name,
@@ -466,14 +471,14 @@ class GSEAbase(object):
             },
             inplace=True,
         )
-        res_df["Gene %"] = res_df["Gene %"].map(lambda x: "{0:.2%}".format(x))
+        # res_df["Gene %"] = res_df["Gene %"].map(lambda x: "{0:.2%}".format(x) if x !="" else "")
         # trim
         dc = ["RES", "hits", "matched_genes"]
         if self.module == "ssgsea" and self.permutation_num == 0:
-            dc += ["NOM p-val", "FWER p-val", "FDR q-val"]
+            dc += ["NOM p-val", "FWER p-val", "FDR q-val", "Tag %", "Gene %", "Lead_genes"]
         res_df.drop(dc, axis=1, inplace=True)
         # re-order by NES
-        # for pands > 1.1, use df.sort_values(by='B', key=abs) will sort by abs value
+        # for pandas > 1.1, use df.sort_values(by='B', key=abs) will sort by abs value
         self.res2d = res_df.reindex(
             res_df["NES"].abs().sort_values(ascending=False).index
         ).reset_index(drop=True)
