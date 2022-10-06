@@ -10,6 +10,17 @@ mod utils;
 use stats::{GSEAResult, GSEASummary};
 use utils::{Metric};
 
+/// Prerank RUST 
+/// Arguments:
+/// - genes: vector of gene_names
+/// - metrics: vector of ranking values
+/// - gene_sets: a hashmap (dict) of GMT file
+/// - weight
+/// - min_size
+/// - max_size
+/// - nperm: number of permutation
+/// - threads: number of threads
+/// - seed: random seed
 #[pyfunction]
 fn prerank_rs(
     genes: Vec<String>,
@@ -36,6 +47,18 @@ fn prerank_rs(
     Ok(gsea.summaries)
 }
 
+/// GSEA RUST 
+/// Arguments:
+/// - gene_name: vector of gene_names
+/// - gene_exp: gene_expression table. each row is gene, each column is sample
+/// - gene_sets: a hashmap (dict) of GMT file
+/// - group: bool vector of the sample group
+/// - weight
+/// - min_size
+/// - max_size
+/// - nperm: number of permutation
+/// - threads: number of threads
+/// - seed: random seed
 #[pyfunction]
 fn gsea_rs(
     gene_name: Vec<String>,
@@ -69,7 +92,18 @@ fn gsea_rs(
 }
 
 
-/// gene_exp: row is sample, column is gene values
+/// ssGSEA RUST
+/// Arguments:
+/// - gene_name: vector of gene_names
+/// - gene_exp: gene_expression table. each row is sample, each column is gene values
+/// - gene_sets: a hashmap (dict) of GMT file
+/// - sample_names: vector of sample names
+/// - weight
+/// - min_size
+/// - max_size
+/// - nperm: number of permutation
+/// - threads: number of threads
+/// - seed: random seed
 #[pyfunction]
 fn ssgsea_rs(
     gene_name: Vec<String>,
