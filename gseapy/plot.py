@@ -89,9 +89,8 @@ def heatmap(
     """Visualize the dataframe.
 
     :param df: DataFrame from expression table.
-    :param z_score: z_score axis{0, 1}. If None, don't normalize data.
-    :param title: gene set name.
-    :param outdir: path to save heatmap.
+    :param z_score: 0, 1, or None. z_score axis{0, 1}. If None, don't normalize data.
+    :param title: figure title.
     :param figsize: heatmap figsize.
     :param cmap: matplotlib colormap.
     :param ofname: output file name. If None, don't save figure
@@ -106,8 +105,8 @@ def heatmap(
         fig = Figure(figsize=figsize)
         canvas = FigureCanvas(fig)
     ax = fig.add_subplot(111)
-    vmin = np.percentile(df.min(), 2)
-    vmax = np.percentile(df.max(), 98)
+    vmin = np.percentile(df, 2)
+    vmax = np.percentile(df, 98)
     matrix = ax.pcolormesh(df.values, cmap=cmap, vmin=vmin, vmax=vmax, rasterized=True)
     xstep = _auto_ticks(ax, df.columns.values, 0)
     ystep = _auto_ticks(ax, df.index.values, 1)
