@@ -182,7 +182,7 @@ class GSEAbase(object):
         subsets = list(genesets_dict.keys())
         gene_dict = {g: i for i, g in enumerate(gene_list)}
         for subset in subsets:
-            subset_list = set(genesets_dict.get(subset)) # remove duplicates
+            subset_list = set(genesets_dict.get(subset))  # remove duplicates
             # drop genes not found in the gene_dict
             gene_overlap = [g for g in subset_list if g in gene_dict]
             genesets_dict[subset] = gene_overlap
@@ -388,7 +388,7 @@ class GSEAbase(object):
             genes = ";".join([str(g).strip() for g in _genes])
             RES = np.array(gs.run_es)
             lead_genes = ""
-            tag_frac = "" 
+            tag_frac = ""
             gene_frac = ""
             if len(RES) > 1:
                 # extract leading edge genes
@@ -475,7 +475,14 @@ class GSEAbase(object):
         # trim
         dc = ["RES", "hits", "matched_genes"]
         if self.module == "ssgsea" and self.permutation_num == 0:
-            dc += ["NOM p-val", "FWER p-val", "FDR q-val", "Tag %", "Gene %", "Lead_genes"]
+            dc += [
+                "NOM p-val",
+                "FWER p-val",
+                "FDR q-val",
+                "Tag %",
+                "Gene %",
+                "Lead_genes",
+            ]
         res_df.drop(dc, axis=1, inplace=True)
         # re-order by NES
         # for pandas > 1.1, use df.sort_values(by='B', key=abs) will sort by abs value

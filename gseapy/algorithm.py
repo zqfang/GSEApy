@@ -239,7 +239,7 @@ def fast_ssgsea(tag_indicator, ranking):
     tag_indicator: see `enrichment_score()`
     ranking: ranking values
     """
-    n = len(gene_ranking_index)  # number of genes
+    n = len(ranking)  # number of genes
     k = tag_indicator.sum()  # number of overalped genes
     idxs = np.flatnonzero(tag_indicator)  # indices low to high
     step_cdf_in = np.sum(ranking[idxs] * (n - idxs)) / np.sum(ranking[idxs])
