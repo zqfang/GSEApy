@@ -84,107 +84,75 @@ def gsea_edb_parser(results_path):
     return res
 
 
-def gsea_gmt_parser(gmt, organism="Human", min_size=3, max_size=1000, gene_list=None):
+def get_library(
+    name: str,
+    organism: str = "Human",
+    min_size: int = 0,
+    max_size: int = 2000,
+    gene_list=None,
+):
     """Parse gene_sets.gmt(gene set database) file or download from enrichr server.
 
-    :param str gmt: the gene_sets.gmt file or an enrichr library name.
+    :param str name: the gene_sets.gmt file or an enrichr library name.
                     checkout full enrichr library name here: https://maayanlab.cloud/Enrichr/#libraries
 
     :param str organism: choose one from { 'Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm' }.
                          This arugment has not effect if input is a `.gmt` file.
 
-    :param min_size: Minimum allowed number of genes from gene set also the data set. Default: 3.
-    :param max_size: Maximum allowed number of genes from gene set also the data set. Default: 1000.
+    :param min_size: Minimum allowed number of genes for each gene set. Default: 0.
+    :param max_size: Maximum allowed number of genes for each gene set. Default: 2000.
 
-    :param gene_list: Used for filtering gene set. Only used this argument for :func:`gsea` method.
+    :param gene_list: if input a gene list, min and max overlapped genes between gene set and gene_list are kept.
 
-    :return: Return a new filtered gene set database dictionary.
+    :return dict: Return a filtered gene set database dictionary.
 
-    **DO NOT** filter gene sets, when use :func:`replot`. Because ``GSEA`` Desktop have already
+    Note: **DO NOT** filter gene sets, when use :func:`replot`. Because ``GSEA`` Desktop have already
     done this for you.
 
     """
-
-    if gmt.lower().endswith(".gmt"):
+    genesets_dict = {}
+    if name.lower().endswith(".gmt"):
         logging.info("User Defined gene sets is given.......continue..........")
-        with open(gmt) as genesets:
+        with open(name) as genesets:
             genesets_dict = {
                 line.strip().split("\t")[0]: line.strip().split("\t")[2:]
                 for line in genesets.readlines()
             }
     else:
-        logging.info("Downloading and generating Enrichr library gene sets...")
-
-        names = DEFAULT_LIBRARY
-        if gmt not in DEFAULT_LIBRARY:
-            names = get_library_name(organism=organism)
-
-        if gmt in names:
-            """
-            define max tries num
-            if the backoff_factor is 0.1, then sleep() will sleep for
-            [0.1s, 0.2s, 0.4s, ...] between retries.
-            It will also force a retry if the status code returned is 500, 502, 503 or 504.
-            """
-            s = requests.Session()
-            retries = Retry(
-                total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504]
-            )
-            s.mount("http://", HTTPAdapter(max_retries=retries))
-            # query string
-            ENRICHR_URL = "http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary"
-            query_string = "?mode=text&libraryName=%s"
-            # get
-            response = s.get(
-                ENRICHR_URL + query_string % gmt, timeout=None, verify=False
-            )
+        # get gene sets from enrichr libary
+        names = get_library_name(organism=organism)
+        if name in names:
+            logging.info("Downloading and generating Enrichr library gene sets...")
+            genesets_dict = download_library(name, organism=organism)
         else:
-            raise Exception("gene_set files(.gmt) not found")
-
-        if not response.ok:
-            raise Exception(
-                "Error fetching enrichment results, check internet connection first."
+            raise ValueError(
+                "Sorry. The input: %s could be be found given organism: %s"
+                % (name, organism)
             )
+            return
 
-        genesets_dict = {
-            line.strip().split("\t")[0]: list(
-                map(lambda x: x.split(",")[0], line.strip().split("\t")[2:])
-            )
-            for line in response.iter_lines(chunk_size=1024, decode_unicode="utf-8")
-        }
-
-    # filtering dict
-    if sys.version_info[0] >= 3:
-        genesets_filter = {
-            k: v
-            for k, v in genesets_dict.items()
-            if len(v) >= min_size and len(v) <= max_size
-        }
-    elif sys.version_info[0] == 2:
-        genesets_filter = {
-            k: v
-            for k, v in genesets_dict.iteritems()
-            if len(v) >= min_size and len(v) <= max_size
-        }
+    # filtering gene_sets
+    total = len(genesets_dict)
+    if gene_list is None:
+        for k, v in genesets_dict.items():
+            if min_size <= len(v) <= max_size:
+                continue
+            del genesets_dict[k]
     else:
-        raise Exception("System failure. Please Provide correct input files")
-
-    if gene_list is not None:
+        # given a gene_list, filter gene sets by gene_overlap numbers
         gene_dict = {g: i for i, g in enumerate(gene_list)}
-        subsets = sorted(genesets_filter.keys())
-        for subset in subsets:
-            subset_list = set(genesets_filter.get(subset))  # remove duplicates
+        for subset, value in genesets_dict.items():
+            subset_list = set(value)  # remove duplicates
             # drop genes not found in the gene_dict
             gene_overlap = [g for g in subset_list if g in gene_dict]
-            genesets_filter[subset] = gene_overlap
             tag_len = len(gene_overlap)
             if (min_size <= tag_len <= max_size) and tag_len < len(gene_list):
                 # tag_len should < gene_list
+                genesets_dict[subset] = gene_overlap
                 continue
-            del genesets_filter[subset]
-    # some_dict = {key: value for key, value in some_dict.items() if value != value_to_remove}
-    # use np.intersect1d() may be faster???
-    filsets_num = len(genesets_dict) - len(genesets_filter)
+            del genesets_dict[subset]
+
+    filsets_num = total - len(genesets_dict)
     logging.info(
         "%04d gene_sets have been filtered out when max_size=%s and min_size=%s"
         % (filsets_num, max_size, min_size)
@@ -195,8 +163,8 @@ def gsea_gmt_parser(gmt, organism="Human", min_size=3, max_size=1000, gene_list=
             "No gene sets passed throught filtering condition!!!, try new paramters again!\n"
             + "Note: Gene names for gseapy is case sensitive."
         )
-    else:
-        return genesets_filter
+
+    return genesets_filter
 
 
 def get_library_name(organism="Human"):
@@ -316,6 +284,6 @@ def download_library(name: str, organism="human") -> Dict[str, List[str]]:
         line = line.strip().split("\t")
         k = line[0]
         v = list(map(lambda x: x.split(",")[0], line[2:]))
-        genesets_dict.update({k: v})
+        genesets_dict[k]=v
 
     return genesets_dict

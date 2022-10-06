@@ -270,7 +270,7 @@ class GSEAbase(object):
             line = line.strip()
             k = line.split("\t")[0]
             v = list(map(lambda x: x.split(",")[0], line.split("\t")[2:]))
-            genesets_dict.update({k: v})
+            genesets_dict[k] = v
             outline = "%s\t\t%s\n" % (k, "\t".join(v))
             gmtout.write(outline)
         gmtout.close()
@@ -526,7 +526,7 @@ class GSEAbase(object):
         """This is the most important function of GSEApy. It has the same algorithm with GSEA and ssGSEA.
 
         :param gene_list:       The ordered gene list gene_name_list, rank_metric.index.values
-        :param gene_set:        gene_sets in gmt file, please use gsea_gmt_parser to get gene_set.
+        :param gene_set:        gene_sets in gmt file, please use gmt_parser to get gene_set.
         :param weight:  It's the same with gsea's weighted_score method. Weighting by the correlation
                                 is a very reasonable choice that allows significant gene sets with less than perfect coherence.
                                 options: 0(classic),1,1.5,2. default:1. if one is interested in penalizing sets for lack of
