@@ -90,7 +90,7 @@ def get_library(
     min_size: int = 0,
     max_size: int = 2000,
     gene_list=None,
-):
+) -> Dict[str, List[str]]:
     """Parse gene_sets.gmt(gene set database) file or download from enrichr server.
 
     :param str name: the gene_sets.gmt file or an enrichr library name.
@@ -153,10 +153,11 @@ def get_library(
             del genesets_dict[subset]
 
     filsets_num = total - len(genesets_dict)
-    logging.info(
-        "%04d gene_sets have been filtered out when max_size=%s and min_size=%s"
-        % (filsets_num, max_size, min_size)
-    )
+    if filsets_num > 0:
+        logging.info(
+            "%04d gene_sets have been filtered out when max_size=%s and min_size=%s"
+            % (filsets_num, max_size, min_size)
+        )
 
     if filsets_num == len(genesets_dict):
         raise Exception(
@@ -164,10 +165,10 @@ def get_library(
             + "Note: Gene names for gseapy is case sensitive."
         )
 
-    return genesets_filter
+    return genesets_dict
 
 
-def get_library_name(organism="Human"):
+def get_library_name(organism="Human") -> List[str]:
     """return enrichr active enrichr library name.
     see also: https://maayanlab.cloud/modEnrichr/
 
@@ -277,13 +278,14 @@ def download_library(name: str, organism="human") -> Dict[str, List[str]]:
         raise Exception(
             "Error fetching gene set library, input name is correct for the organism you've set?."
         )
-    # reformat to dict and save to disk
+    # reformat to dict
     genesets_dict = {}
     # outname = os.path.join(DEFAULT_CACHE_PATH,  "enrichr.%s.gmt" % libname)
     for line in response.iter_lines(chunk_size=1024, decode_unicode="utf-8"):
         line = line.strip().split("\t")
         k = line[0]
-        v = list(map(lambda x: x.split(",")[0], line[2:]))
-        genesets_dict[k]=v
+        v = map(lambda x: x.split(",")[0], line[2:])
+        v = list(filter(lambda x: True if len(x) else False, v))
+        genesets_dict[k] = v
 
     return genesets_dict
