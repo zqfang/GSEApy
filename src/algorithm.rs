@@ -13,6 +13,10 @@ use rayon::prelude::*;
 pub trait EnrichmentScoreTrait {
     /// get run es only
     fn running_enrichment_score(&self, metric: &[f64], tag_indicator: &[f64]) -> Vec<f64>;
+    /// # optimized version of ssGSEA: 30X faster
+    /// https://github.com/rcastelo/GSVA/pull/15
+    /// based on his paper https://doi.org/10.1101/060012
+    fn fast_random_walk(&self, metric: &[f64], tag_indicator: &[f64]) -> f64;
     /// calucalte metric, not sorted
     fn calculate_metric(&self, data: &[Vec<f64>], group: &[bool], method: Metric) -> Vec<f64>;
 }
@@ -89,6 +93,32 @@ impl EnrichmentScoreTrait for EnrichmentScore {
             })
             .collect()
     }
+
+    fn fast_random_walk(&self, metric: &[f64], tag_indicator: &[f64]) -> f64 {
+        let n: f64 = metric.len() as f64;
+        let k: f64 = tag_indicator.iter().sum();
+        // idxs = np.flatnonzero(np.in1d(gene_ranking_index, gset)) # indices low to high
+        let idxs: Vec<usize> = tag_indicator
+            .iter()
+            .enumerate()
+            .filter_map(|(i, &t)| if t > 0.0 { Some(i) } else { None })
+            .collect();
+        let _rnk: Vec<f64> = idxs
+            .iter()
+            .map(|&i| metric.get(i).unwrap().to_owned())
+            .collect();
+        let n_idxs: Vec<f64> = idxs.iter().map(|&i| n - (i as f64)).collect();
+        // np.sum(ranking[idxs] * (n - idxs)) / np.sum(ranking[idxs])
+        let step_cdf_in: f64 = _rnk
+            .iter()
+            .zip(n_idxs.iter())
+            .map(|(r, i)| r * i)
+            .sum::<f64>()
+            / _rnk.iter().sum::<f64>();
+        //  (n * (n + 1) /2 - np.sum(n-idxs)) / (n -k)
+        let step_cdf_out: f64 = (n * (n + 1.0) / 2.0 - n_idxs.iter().sum::<f64>()) / (n - k);
+        step_cdf_in - step_cdf_out
+    }
 }
 
 /// associate and memeber function
@@ -100,14 +130,18 @@ impl EnrichmentScore {
         EnrichmentScore {
             // metric: gene_metric,
             gene: DynamicEnum::from(gene),
-            nperm: nperm+1, // add 1 to kept track of original record
+            nperm: nperm + 1, // add 1 to kept track of original record
             single: single,
             scale: scale,
             rng: rng,
         }
     }
     pub fn hit_index(&self, tag_indicator: &[f64]) -> Vec<usize> {
-        tag_indicator.iter().enumerate().filter_map(|(i, &t)| if t > 0.0 { Some(i) } else { None }).collect()
+        tag_indicator
+            .iter()
+            .enumerate()
+            .filter_map(|(i, &t)| if t > 0.0 { Some(i) } else { None })
+            .collect()
         // let mut hit_ind: Vec<usize> = Vec::new();
         // for (i, b) in tag_indicator.iter().enumerate() {
         //     if b > &0.0 {
@@ -141,23 +175,26 @@ impl EnrichmentScore {
     /// data - 2d vector [m_genes, n_samples]
     pub fn phenotype_permutation(
         &mut self,
-        data: &[Vec<f64>], 
+        data: &[Vec<f64>],
         group: &[bool],
         method: Metric,
-        ascending: bool
+        ascending: bool,
     ) -> Vec<(Vec<usize>, Vec<f64>)> {
         let mut group_nperm = vec![group.to_vec(); self.nperm]; // Note: self.nperm has been ++
-        // let mut g = group.to_vec();
+                                                                // let mut g = group.to_vec();
         for i in 1..self.nperm {
             //fastrand::shuffle(&mut group_arc);
             group_nperm[i].shuffle(&mut self.rng);
         }
-        let arr: Vec<(Vec<usize>, Vec<f64>)> = group_nperm.par_iter().map(|group_rng| {
-            // implement methods in trait so you can call self.member_function in self closure
-            // parallel computation inside 
-            let m = self.calculate_metric(data, &group_rng, method);
-            m.as_slice().argsort(ascending) // default is false 
-        }).collect();
+        let arr: Vec<(Vec<usize>, Vec<f64>)> = group_nperm
+            .par_iter()
+            .map(|group_rng| {
+                // implement methods in trait so you can call self.member_function in self closure
+                // parallel computation inside
+                let m = self.calculate_metric(data, &group_rng, method);
+                m.as_slice().argsort(ascending) // default is false
+            })
+            .collect();
         return arr;
     }
 
@@ -216,7 +253,6 @@ impl EnrichmentScore {
     }
 }
 
-
 // mod tests {
 
 //     use super::*;
@@ -262,90 +298,89 @@ impl EnrichmentScore {
 //         println!("Overall run time: {:.2?}", end2.duration_since(end1));
 //     }
 // }
-    //    #[test]
-    //    fn gene_permutation_fastrand()
-    //    {
-    //        let nperm = 1000;
-    //        let rang = (0..20000).collect();
-    //        let mut tags: Vec<Vec<i64>> = vec![rang; 1+nperm]; // 2d array
-    //        let mut notags: Vec<Vec<i64>> = Vec::new();
-    //        let mut rng = fastrand::Rng::with_seed(43);
-    //        let start = Instant::now();
-    //        for i in 1..=nperm {
-    //            // inplace shuffle
-    //            //fastrand::shuffle(&mut tags[i]);
-    //            rng.shuffle(&mut tags[i]);
-    //            let ntg: Vec<i64>  = tags[i].iter().map( |b| 1- (*b)).collect();
-    //            notags.push(ntg);
-    //        }
+//    #[test]
+//    fn gene_permutation_fastrand()
+//    {
+//        let nperm = 1000;
+//        let rang = (0..20000).collect();
+//        let mut tags: Vec<Vec<i64>> = vec![rang; 1+nperm]; // 2d array
+//        let mut notags: Vec<Vec<i64>> = Vec::new();
+//        let mut rng = fastrand::Rng::with_seed(43);
+//        let start = Instant::now();
+//        for i in 1..=nperm {
+//            // inplace shuffle
+//            //fastrand::shuffle(&mut tags[i]);
+//            rng.shuffle(&mut tags[i]);
+//            let ntg: Vec<i64>  = tags[i].iter().map( |b| 1- (*b)).collect();
+//            notags.push(ntg);
+//        }
 
-    //        let end = Instant::now();
-    //        println!("permutation time: {:.2?}", end.duration_since(start));
-    //        //tags.iter().for_each(|x| println!("{:?}", x))
-    //    }
+//        let end = Instant::now();
+//        println!("permutation time: {:.2?}", end.duration_since(start));
+//        //tags.iter().for_each(|x| println!("{:?}", x))
+//    }
 
-    //    #[test]
-    //    fn gene_permutation_smallrng()
-    //    {
-    //        let nperm = 1000;
-    //        let rang = (0..20000).collect();
-    //        let mut tags: Vec<Vec<i64>> = vec![rang; 1+nperm]; // 2d array
-    //        let mut notags: Vec<Vec<i64>> = Vec::new();
-    //        let mut rng = SmallRng::seed_from_u64(43);
-    //        let start = Instant::now();
-    //        for i in 1..=nperm {
-    //            // inplace shuffle
-    //            //fastrand::shuffle(&mut tags[i]);
-    //            tags[i].shuffle(&mut rng);
-    //            let ntg: Vec<i64>  = tags[i].iter().map( |b| 1- (*b)).collect();
-    //            notags.push(ntg);
-    //        }
+//    #[test]
+//    fn gene_permutation_smallrng()
+//    {
+//        let nperm = 1000;
+//        let rang = (0..20000).collect();
+//        let mut tags: Vec<Vec<i64>> = vec![rang; 1+nperm]; // 2d array
+//        let mut notags: Vec<Vec<i64>> = Vec::new();
+//        let mut rng = SmallRng::seed_from_u64(43);
+//        let start = Instant::now();
+//        for i in 1..=nperm {
+//            // inplace shuffle
+//            //fastrand::shuffle(&mut tags[i]);
+//            tags[i].shuffle(&mut rng);
+//            let ntg: Vec<i64>  = tags[i].iter().map( |b| 1- (*b)).collect();
+//            notags.push(ntg);
+//        }
 
-    //        let end = Instant::now();
-    //        println!("permutation time: {:.2?}", end.duration_since(start));
-    //        //tags.iter().for_each(|x| println!("{:?}", x))
-    //    }
+//        let end = Instant::now();
+//        println!("permutation time: {:.2?}", end.duration_since(start));
+//        //tags.iter().for_each(|x| println!("{:?}", x))
+//    }
 
-    //    #[test]
-    //    fn gene_permutation_xoshiro256plus()
-    //    {
-    //        let nperm = 1000;
-    //        let rang = (0..20000).collect();
-    //        let mut tags: Vec<Vec<i64>> = vec![rang; 1+nperm]; // 2d array
-    //        let mut notags: Vec<Vec<i64>> = Vec::new();
-    //        let mut rng = Xoshiro256Plus::seed_from_u64(0);
-    //        let start = Instant::now();
-    //        for i in 1..=nperm {
-    //            // inplace shuffle
-    //            //fastrand::shuffle(&mut tags[i]);
-    //            tags[i].shuffle(&mut rng);
-    //            let ntg: Vec<i64>  = tags[i].iter().map( |b| 1- (*b)).collect();
-    //            notags.push(ntg);
-    //        }
+//    #[test]
+//    fn gene_permutation_xoshiro256plus()
+//    {
+//        let nperm = 1000;
+//        let rang = (0..20000).collect();
+//        let mut tags: Vec<Vec<i64>> = vec![rang; 1+nperm]; // 2d array
+//        let mut notags: Vec<Vec<i64>> = Vec::new();
+//        let mut rng = Xoshiro256Plus::seed_from_u64(0);
+//        let start = Instant::now();
+//        for i in 1..=nperm {
+//            // inplace shuffle
+//            //fastrand::shuffle(&mut tags[i]);
+//            tags[i].shuffle(&mut rng);
+//            let ntg: Vec<i64>  = tags[i].iter().map( |b| 1- (*b)).collect();
+//            notags.push(ntg);
+//        }
 
-    //        let end = Instant::now();
-    //        println!("permutation time: {:.2?}", end.duration_since(start));
-    //        //tags.iter().for_each(|x| println!("{:?}", x))
-    //    }
-    //    #[test]
-    //    fn gene_permutation_mcg128xsl6()
-    //    {
-    //        let nperm = 1000;
-    //        let rang = (0..20000).collect();
-    //        let mut tags: Vec<Vec<i64>> = vec![rang; 1+nperm]; // 2d array
-    //        let mut notags: Vec<Vec<i64>> = Vec::new();
-    //        let mut rng = Mcg128Xsl64::seed_from_u64(0);
-    //        let start = Instant::now();
-    //        for i in 1..=nperm {
-    //            // inplace shuffle
-    //            //fastrand::shuffle(&mut tags[i]);
-    //            tags[i].shuffle(&mut rng);
-    //            let ntg: Vec<i64>  = tags[i].iter().map( |b| 1- (*b)).collect();
-    //            notags.push(ntg);
-    //        }
+//        let end = Instant::now();
+//        println!("permutation time: {:.2?}", end.duration_since(start));
+//        //tags.iter().for_each(|x| println!("{:?}", x))
+//    }
+//    #[test]
+//    fn gene_permutation_mcg128xsl6()
+//    {
+//        let nperm = 1000;
+//        let rang = (0..20000).collect();
+//        let mut tags: Vec<Vec<i64>> = vec![rang; 1+nperm]; // 2d array
+//        let mut notags: Vec<Vec<i64>> = Vec::new();
+//        let mut rng = Mcg128Xsl64::seed_from_u64(0);
+//        let start = Instant::now();
+//        for i in 1..=nperm {
+//            // inplace shuffle
+//            //fastrand::shuffle(&mut tags[i]);
+//            tags[i].shuffle(&mut rng);
+//            let ntg: Vec<i64>  = tags[i].iter().map( |b| 1- (*b)).collect();
+//            notags.push(ntg);
+//        }
 
-    //        let end = Instant::now();
-    //        println!("permutation time: {:.2?}", end.duration_since(start));
-    //        //tags.iter().for_each(|x| println!("{:?}", x))
-    //   }
-
+//        let end = Instant::now();
+//        println!("permutation time: {:.2?}", end.duration_since(start));
+//        //tags.iter().for_each(|x| println!("{:?}", x))
+//   }

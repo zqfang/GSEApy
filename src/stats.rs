@@ -553,7 +553,20 @@ impl GSEAResult {
         let weighted_sorted_metric: Vec<(Vec<usize>, Vec<f64>)> = gene_metric
             .into_par_iter()
             .map(|rank| {
+                // https://github.com/GSEA-MSigDB/ssGSEA-gpmodule/blob/master/src/ssGSEA.Library.R: line 323
+                // in ssGSEA we rank genes by their expression level rather than by a measure of correlation
+                // between expression profile and phenotype.
+                // transform the normalized expression data for a single sample into ranked (in decreasing order) expression values
                 let mut tmp = rank.as_slice().argsort(false);
+                // line 338
+                if self.weight > 0.0 {
+                    // calculate z.score of normalized (e.g., ranked) expression values
+                    let (m, sd) = tmp.1.as_slice().stat(0);
+                    tmp.1.iter_mut().for_each(|x| {
+                        *x = (*x - m) / sd;
+                    });
+                }
+                // if weight == 0, ranked values turns to 1 automatically
                 tmp.1.iter_mut().for_each(|x| {
                     *x = x.abs().powf(self.weight);
                 });
@@ -575,12 +588,14 @@ impl GSEAResult {
                 .map(|(i, (indices, metric))| {
                     let tag_new: Vec<f64> = indices.iter().map(|&idx| tag[idx]).collect();
                     let gidx = es.hit_index(&tag_new);
-                    let run_es = es.running_enrichment_score(metric, &tag_new);
-                    let es = es.select_es(&run_es);
+                    // let run_es = es.running_enrichment_score(metric, &tag_new);
+                    // let es1 = es.select_es(&run_es);
+                    // faster version of ssGSEA
+                    let es2 = es.fast_random_walk(metric, &tag_new);
                     GSEASummary {
                         term: term.to_string(),
-                        es: es,
-                        run_es: run_es,
+                        es: es2,
+                        run_es:  Vec::<f64>::new(),  // run_es,
                         hits: gidx, // gene hit idx of each sample after sorting
                         name: Some(samples[i].to_string()),
                         ..Default::default()
@@ -628,12 +643,21 @@ impl GSEAResult {
             .into_par_iter()
             .map(|rank| {
                 let mut tmp = rank.as_slice().argsort(false);
+                if self.weight > 0.0 {
+                    // calculate z.score of normalized (e.g., ranked) expression values
+                    let (m, sd) = tmp.1.as_slice().stat(0);
+                    tmp.1.iter_mut().for_each(|x| {
+                        *x = (*x - m) / sd;
+                    });
+                }
                 tmp.1.iter_mut().for_each(|x| {
                     *x = x.abs().powf(self.weight);
                 });
                 return tmp;
             })
             .collect();
+
+
 
         let mut _all = Vec::<GSEASummary>::new();
         // let end1 = Instant::now();
