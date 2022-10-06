@@ -178,7 +178,7 @@ def gsea_gmt_parser(gmt, organism="Human", min_size=3, max_size=1000, gene_list=
             gene_overlap = [g for g in subset_list if g in gene_dict]
             genesets_filter[subset] = gene_overlap
             tag_len = len(gene_overlap)
-            if (self.min_size <= tag_len <= self.max_size) and tag_len < len(gene_list):
+            if (min_size <= tag_len <= max_size) and tag_len < len(gene_list):
                 # tag_len should < gene_list
                 continue
             del genesets_filter[subset]
