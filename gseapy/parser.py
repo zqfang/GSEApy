@@ -89,7 +89,7 @@ def read_gmt(path: str) -> Dict[str, List[str]]:
     :return: a dict object
     """
     if path.lower().endswith("gmt"):
-        return get_library(path, 0, 100000, None)
+        return get_library(name=path, min_size=0, max_size=100000, gene_list=None)
     else:
         raise ValueError("Please input a gmt file")
     return
