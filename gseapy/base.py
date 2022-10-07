@@ -249,8 +249,7 @@ class GSEAbase(object):
         return sorted(libs)
 
     def _download_libraries(self, libname: str) -> Dict[str, List[str]]:
-        """Download enrichr libraries. Only Support Enrichr libraries now
-        """
+        """Download enrichr libraries. Only Support Enrichr libraries now"""
         self._logger.info("Downloading and generating Enrichr library gene sets......")
         s = retry(5)
         # queery string
@@ -265,7 +264,7 @@ class GSEAbase(object):
         # reformat to dict and save to disk
         mkdirs(DEFAULT_CACHE_PATH)
         genesets_dict = {}
-        outname = "Enrichr.%s.gmt" % libname # pattern: database.library.gmt
+        outname = "Enrichr.%s.gmt" % libname  # pattern: database.library.gmt
         gmtout = open(os.path.join(DEFAULT_CACHE_PATH, outname), "w")
         for line in response.iter_lines(chunk_size=1024, decode_unicode="utf-8"):
             line = line.strip().split("\t")
