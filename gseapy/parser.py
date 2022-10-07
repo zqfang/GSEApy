@@ -144,16 +144,17 @@ def get_library(
 
     # filtering gene_sets
     total = len(genesets_dict)
+    keys = list(genesets_dict.keys())
     if gene_list is None:
-        for k, v in genesets_dict.items():
-            if min_size <= len(v) <= max_size:
+        for k in keys:
+            if min_size <= len(genesets_dict[k]) <= max_size:
                 continue
             del genesets_dict[k]
     else:
         # given a gene_list, filter gene sets by gene_overlap numbers
         gene_dict = {g: i for i, g in enumerate(gene_list)}
-        for subset, value in genesets_dict.items():
-            subset_list = set(value)  # remove duplicates
+        for subset in keys:
+            subset_list = set(genesets_dict[subset])  # remove duplicates
             # drop genes not found in the gene_dict
             gene_overlap = [g for g in subset_list if g in gene_dict]
             tag_len = len(gene_overlap)
