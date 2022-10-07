@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-
 import json
 import logging
+import os
 import sys
 import xml.etree.ElementTree as ET
 from collections import Counter
@@ -10,10 +10,8 @@ from typing import Dict, List, Optional, Tuple, Union
 
 import requests
 from numpy import in1d
-from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
 
-from gseapy.utils import DEFAULT_LIBRARY, unique
+from gseapy.utils import DEFAULT_CACHE_PATH, DEFAULT_LIBRARY, unique
 
 
 def gsea_cls_parser(cls):
@@ -84,12 +82,25 @@ def gsea_edb_parser(results_path):
     return res
 
 
+def read_gmt(path: str) -> Dict[str, List[str]]:
+    """Read GMT file
+
+    :param str path: the path to a gmt file.
+    :return: a dict object
+    """
+    if path.lower().endswith("gmt"):
+        return get_library(path, 0, 100000, None)
+    else:
+        raise ValueError("Please input a gmt file")
+    return
+
+
 def get_library(
     name: str,
     organism: str = "Human",
     min_size: int = 0,
     max_size: int = 2000,
-    gene_list=None,
+    gene_list: Optional[List[str]] = None,
 ) -> Dict[str, List[str]]:
     """Parse gene_sets.gmt(gene set database) file or download from enrichr server.
 
@@ -168,7 +179,7 @@ def get_library(
     return genesets_dict
 
 
-def get_library_name(organism="Human") -> List[str]:
+def get_library_name(organism: str = "Human") -> List[str]:
     """return enrichr active enrichr library name.
     see also: https://maayanlab.cloud/modEnrichr/
 
@@ -228,7 +239,7 @@ def get_library_name(organism="Human") -> List[str]:
     return sorted(libs)
 
 
-def download_library(name: str, organism="human") -> Dict[str, List[str]]:
+def download_library(name: str, organism: str = "human") -> Dict[str, List[str]]:
     """download enrichr libraries.
 
     :param str name: the enrichr library name. see `gseapy.get_library_name()`.
@@ -269,6 +280,17 @@ def download_library(name: str, organism="human") -> Dict[str, List[str]]:
             """No supported database. Please input one of these:
                             ('Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm') """
         )
+
+    tmpname = "%s.%s.gmt" % (database, name)
+    tempath = os.path.join(DEFAULT_CACHE_PATH, tmpname)
+    if os.path.isfile(tempath):
+        logging.info("Library is already downloaded in: %s, use local file" % tempath)
+        with open(tempath) as genesets:
+            genesets_dict = {
+                line.strip().split("\t")[0]: line.strip().split("\t")[2:]
+                for line in genesets.readlines()
+            }
+        return genesets_dict
     # queery string
     ENRICHR_URL = ENRICHR_URL + "/%s/geneSetLibrary" % database
     query_string = "?mode=text&libraryName=%s"

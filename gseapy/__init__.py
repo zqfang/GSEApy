@@ -7,7 +7,7 @@ from .__main__ import __version__
 from .biomart import Biomart
 from .enrichr import Enrichr
 from .gsea import GSEA, Prerank, Replot, SingleSampleGSEA
-from .parser import get_library, get_library_name
+from .parser import get_library, get_library_name, read_gmt
 from .plot import barplot, dotplot, gseaplot, heatmap, ringplot
 
 
@@ -638,4 +638,5 @@ __all__ = [
     "Biomart",
     "get_library",
     "get_library_name",
+    "read_gmt",
 ]
