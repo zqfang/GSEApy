@@ -1,4 +1,4 @@
-#![allow(dead_code, unused)] 
+#![allow(dead_code, unused)]
 
 use pyo3::prelude::*;
 use std::error::Error;
@@ -6,11 +6,11 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 // use std::path::{Path};
 use csv;
+use itertools::Itertools;
 use rand::seq::SliceRandom;
 use rand::Rng;
 use std::collections::HashMap;
 use std::hash::Hash;
-use itertools::Itertools;
 
 #[pyclass]
 #[derive(Copy, Clone)]
@@ -73,7 +73,6 @@ impl Statistic for &[f64] {
         (sidx, sval)
     }
 }
-
 
 /// Dynamic Enum
 #[derive(Debug, Clone)]

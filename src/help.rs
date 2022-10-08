@@ -1,4 +1,3 @@
-
 /// phenotype permutation procedure
 /// shuffling group labels and calculate the new ranking metric
 /// return shuffled metric (not sorted)

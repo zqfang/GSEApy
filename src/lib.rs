@@ -1,16 +1,15 @@
-
-use std::env;
-use std::collections::HashMap;
 use pyo3::prelude::*;
+use std::collections::HashMap;
+use std::env;
 // import own modules
 mod algorithm;
 mod stats;
 mod utils;
 // export module fn, struct, trait ...
 use stats::{GSEAResult, GSEASummary};
-use utils::{Metric};
+use utils::Metric;
 
-/// Prerank RUST 
+/// Prerank RUST
 /// Arguments:
 /// - genes: vector of gene_names
 /// - metrics: vector of ranking values
@@ -31,7 +30,7 @@ fn prerank_rs(
     max_size: usize,
     nperm: usize,
     threads: usize,
-    seed: u64
+    seed: u64,
 ) -> PyResult<Vec<GSEASummary>> {
     // rayon::ThreadPoolBuilder::new()
     //     .num_threads(threads)
@@ -39,7 +38,7 @@ fn prerank_rs(
     //     .unwrap_or_default();
     env::set_var("RAYON_NUM_THREADS", threads.to_string());
     let mut gmt = HashMap::<&str, &[String]>::new();
-    for (k, v) in gene_sets.iter(){
+    for (k, v) in gene_sets.iter() {
         gmt.insert(k.as_str(), v.as_slice());
     }
     let mut gsea = GSEAResult::new(weight, max_size, min_size, nperm, seed);
@@ -47,7 +46,7 @@ fn prerank_rs(
     Ok(gsea.summaries)
 }
 
-/// GSEA RUST 
+/// GSEA RUST
 /// Arguments:
 /// - gene_name: vector of gene_names
 /// - gene_exp: gene_expression table. each row is gene, each column is sample
@@ -82,7 +81,7 @@ fn gsea_rs(
 
     // get gene sets dict
     let mut gmt = HashMap::<&str, &[String]>::new();
-    for (k, v) in gene_sets.iter(){
+    for (k, v) in gene_sets.iter() {
         gmt.insert(k.as_str(), v.as_slice());
     }
 
@@ -90,7 +89,6 @@ fn gsea_rs(
     gsea.gsea(&gene_name, &group, &gene_exp, &gmt, method);
     Ok(gsea.summaries)
 }
-
 
 /// ssGSEA RUST
 /// Arguments:
@@ -124,22 +122,18 @@ fn ssgsea_rs(
     env::set_var("RAYON_NUM_THREADS", threads.to_string());
 
     let mut gmt = HashMap::<&str, &[String]>::new();
-    for (k, v) in gene_sets.iter(){
+    for (k, v) in gene_sets.iter() {
         gmt.insert(k.as_str(), v.as_slice());
     }
     let _nperm = nperm.unwrap_or(0);
     let mut gsea = GSEAResult::new(weight, max_size, min_size, _nperm, seed);
     if _nperm > 0 {
         gsea.ss_gsea_permuate(&gene_name, &sample_names, &gene_exp, &gmt);
-    } 
-    else 
-    {
+    } else {
         gsea.ss_gsea(&gene_name, &sample_names, &gene_exp, &gmt);
     }
     Ok(gsea.summaries)
 }
-
-
 
 #[pymodule]
 fn gse(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
