@@ -1,3 +1,5 @@
+#![allow(dead_code, unused)]
+
 use crate::utils::DynamicEnum;
 use crate::utils::{Metric, Statistic};
 use rand::rngs::SmallRng; // use SmallRng intestad of StdRng to speedup shuffling
@@ -5,18 +7,13 @@ use rand::seq::SliceRandom;
 use rand::SeedableRng;
 use rayon::prelude::*;
 
-// use std::sync::mpsc;
-// use std::sync::{Mutex, Arc};
-// use std::collections::HashMap;
-// use fastrand;
-// use statrs::statistics::Variance;  // std_dev
 pub trait EnrichmentScoreTrait {
     /// get run es only
     fn running_enrichment_score(&self, metric: &[f64], tag_indicator: &[f64]) -> Vec<f64>;
-    /// # optimized version of ssGSEA: 30X faster
-    /// https://github.com/rcastelo/GSVA/pull/15
-    /// based on his paper https://doi.org/10.1101/060012
+    /// fast GSEA only ES value return
     fn fast_random_walk(&self, metric: &[f64], tag_indicator: &[f64]) -> f64;
+    /// fast ssGSEA. only ES value return
+    fn fast_random_walk_ss(&self, metric: &[f64], tag_indicator: &[f64]) -> f64;
     /// calucalte metric, not sorted
     fn calculate_metric(&self, data: &[Vec<f64>], group: &[bool], method: Metric) -> Vec<f64>;
 }
@@ -60,6 +57,73 @@ impl EnrichmentScoreTrait for EnrichmentScore {
         return run_es;
     }
 
+    /// see here: https://github.com/ctlab/fgsea/blob/master/src/esCalculation.cpp
+    fn fast_random_walk(&self, metric: &[f64], tag_indicator: &[f64]) -> f64 {
+        // tag_indicator and metric must be sorted
+        let ns: f64 = tag_indicator
+            .iter()
+            .zip(metric.iter())
+            .map(|(&b, &v)| b * v)
+            .sum::<f64>();
+        let n: f64 = metric.len() as f64;
+        let k: f64 = tag_indicator.iter().sum::<f64>() as f64;
+        let mut res: f64 = 0.0; // running_es
+        let mut cur: f64 = 0.0;
+        let q1: f64 = 1.0 / (n - k);
+        let q2: f64 = 1.0 / ns;
+        let mut last: f64 = -1.0;
+        let p: Vec<f64> = tag_indicator
+            .iter()
+            .enumerate()
+            .filter_map(|(i, &t)| if t > 0.0 { Some(i as f64) } else { None })
+            .collect();
+
+        for pos in p {
+            cur -= q1 * (pos - last - 1.0);
+            if cur.abs() > res.abs() {
+                res = cur;
+            }
+            cur += q2 * metric.get(pos as usize).unwrap();
+            if cur.abs() > res.abs() {
+                res = cur;
+            }
+            last = pos;
+        }
+
+        // for pos in p {
+        //     cur += q2 * metric.get(pos as usize).unwrap() - q1 * (pos - last - 1);
+        //     res = max(res, cur);
+        //     last = pos;
+        // }
+        return res;
+    }
+
+    fn fast_random_walk_ss(&self, metric: &[f64], tag_indicator: &[f64]) -> f64 {
+        let n: f64 = metric.len() as f64;
+        let k: f64 = tag_indicator.iter().sum();
+        // idxs = np.flatnonzero(np.in1d(gene_ranking_index, gset)) # indices low to high
+        let idxs: Vec<usize> = tag_indicator
+            .iter()
+            .enumerate()
+            .filter_map(|(i, &t)| if t > 0.0 { Some(i) } else { None })
+            .collect();
+        let _rnk: Vec<f64> = idxs
+            .iter()
+            .map(|&i| metric.get(i).unwrap().to_owned())
+            .collect();
+        let n_idxs: Vec<f64> = idxs.iter().map(|&i| n - (i as f64)).collect();
+        // np.sum(ranking[idxs] * (n - idxs)) / np.sum(ranking[idxs])
+        let step_cdf_in: f64 = _rnk
+            .iter()
+            .zip(n_idxs.iter())
+            .map(|(r, i)| r * i)
+            .sum::<f64>()
+            / _rnk.iter().sum::<f64>();
+        //  (n * (n + 1) /2 - np.sum(n-idxs)) / (n -k)
+        let step_cdf_out: f64 = (n * (n + 1.0) / 2.0 - n_idxs.iter().sum::<f64>()) / (n - k);
+        step_cdf_in - step_cdf_out
+    }
+
     fn calculate_metric(&self, data: &[Vec<f64>], group: &[bool], method: Metric) -> Vec<f64> {
         data.iter()
             .map(|vec| {
@@ -92,32 +156,6 @@ impl EnrichmentScoreTrait for EnrichmentScore {
                 }
             })
             .collect()
-    }
-
-    fn fast_random_walk(&self, metric: &[f64], tag_indicator: &[f64]) -> f64 {
-        let n: f64 = metric.len() as f64;
-        let k: f64 = tag_indicator.iter().sum();
-        // idxs = np.flatnonzero(np.in1d(gene_ranking_index, gset)) # indices low to high
-        let idxs: Vec<usize> = tag_indicator
-            .iter()
-            .enumerate()
-            .filter_map(|(i, &t)| if t > 0.0 { Some(i) } else { None })
-            .collect();
-        let _rnk: Vec<f64> = idxs
-            .iter()
-            .map(|&i| metric.get(i).unwrap().to_owned())
-            .collect();
-        let n_idxs: Vec<f64> = idxs.iter().map(|&i| n - (i as f64)).collect();
-        // np.sum(ranking[idxs] * (n - idxs)) / np.sum(ranking[idxs])
-        let step_cdf_in: f64 = _rnk
-            .iter()
-            .zip(n_idxs.iter())
-            .map(|(r, i)| r * i)
-            .sum::<f64>()
-            / _rnk.iter().sum::<f64>();
-        //  (n * (n + 1) /2 - np.sum(n-idxs)) / (n -k)
-        let step_cdf_out: f64 = (n * (n + 1.0) / 2.0 - n_idxs.iter().sum::<f64>()) / (n - k);
-        step_cdf_in - step_cdf_out
     }
 }
 
@@ -200,19 +238,22 @@ impl EnrichmentScore {
 
     // /// phenotype permutation procedurce
     // /// return (hit_index, es, runing_es) only. not null distribution return
-    // pub fn enrichment_score_pheno(&self, sorted_metric: &[Vec<f64>], tag_indicator: &[f64]) -> (Vec<f64>, Vec<f64>) {
-    //     let run_es: Vec<Vec<f64>> = sorted_metric
-    //         .par_iter()
-    //         .map(|gm| {
-    //             // calculate ES
-    //             let r = self.running_enrichment_score(gm, tag_indicator);
-    //             r
-    //         })
-    //         .collect();
-    //     // ess: Vec<f64>, run_es: Vec<Vec<f64>>
-    //     let es: Vec<f64> = run_es.par_iter().map(|r| self.select_es(r)).collect();
-    //     return (es, run_es[0].to_owned());
-    // }
+    pub fn enrichment_score_pheno(
+        &self,
+        sorted_metric: &[Vec<f64>],
+        tag_indicator: &[Vec<f64>],
+    ) -> (Vec<f64>, Vec<f64>) {
+        let run_es: Vec<f64> = self.running_enrichment_score(&sorted_metric[0], &tag_indicator[0]);
+        let ess: Vec<f64> = sorted_metric
+            .par_iter()
+            .zip(tag_indicator.par_iter())
+            .map(|(gm, tag)| {
+                let r = self.fast_random_walk(gm, tag);
+                r
+            })
+            .collect();
+        return (ess, run_es);
+    }
 
     /// gene permutation percedure.
     /// shufling the genes in the given ranking metric
@@ -241,15 +282,22 @@ impl EnrichmentScore {
         tag_indicators: &[Vec<f64>],
     ) -> (Vec<f64>, Vec<f64>) {
         // pararell computing
-        let run_es: Vec<Vec<f64>> = tag_indicators
+        // let run_es: Vec<Vec<f64>> = tag_indicators
+        //     .par_iter()
+        //     .map(|tag| {
+        //         // implement the function in trait enable you to call self.methods in struct member closure!!!
+        //         self.running_enrichment_score(metric, tag)
+        //     })
+        //     .collect();
+        // let es: Vec<f64> = run_es.par_iter().map(|r| self.select_es(r)).collect();
+
+        let es: Vec<f64> = tag_indicators
             .par_iter()
-            .map(|tag| {
-                // implement the function in trait enable you to call self.methods in struct member closure!!!
-                self.running_enrichment_score(metric, tag)
-            })
+            .map(|tag| self.fast_random_walk(metric, tag))
             .collect();
-        let es = run_es.par_iter().map(|r| self.select_es(r)).collect();
-        return (es, run_es[0].to_owned());
+        let run_es = self.running_enrichment_score(metric, &tag_indicators[0]);
+
+        return (es, run_es);
     }
 }
 

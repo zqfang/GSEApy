@@ -1,10 +1,12 @@
-use serde::{Deserialize, Serialize};
+#![allow(dead_code, unused)]
+
 use crate::algorithm::{EnrichmentScore, EnrichmentScoreTrait};
 use crate::utils::{Metric, Statistic};
+use itertools::izip;
 use pyo3::prelude::*;
 use rayon::prelude::*;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use itertools::izip;
 // serialize struct example
 // let point = Point { x: 1, y: 2 };
 
@@ -39,6 +41,7 @@ pub struct GSEASummary {
     #[pyo3(get, set)]
     pub name: Option<String>,
 }
+
 impl GSEASummary {
     pub fn new(
         &mut self,
@@ -70,7 +73,6 @@ impl GSEASummary {
     /// for default values, you can then init the struct with
     /// let g = GSEASummary { es: 0.5, ..Default::default() };
     /// need trait bound #[derive(Default)]
-    #[allow(dead_code)]
     fn default() -> GSEASummary {
         GSEASummary {
             term: "".to_string(),
@@ -85,23 +87,24 @@ impl GSEASummary {
             name: None,
         }
     }
-
-    /// see the normalizatin code: line 710
+    /// see the normalizatin code from
     /// https://github.com/GSEA-MSigDB/GSEA_R/blob/master/R/GSEA.R
     fn normalize(&mut self) -> Vec<f64> {
         let e: f64 = self.es;
         // n_mean = esnull[esnull>= 0].mean()
-        let pos_phi: Vec<f64> = self.esnull
+        let pos_phi: Vec<f64> = self
+            .esnull
             .iter()
             .filter_map(|&x| if x >= 0.0 { Some(x) } else { None })
             .collect();
 
         // n_mean = esnull[esnull< 0].mean()
-        let neg_phi: Vec<f64> = self.esnull
-                .iter()
-                .filter_map(|&x| if x < 0.0 { Some(x) } else { None })
-                .collect();
-        
+        let neg_phi: Vec<f64> = self
+            .esnull
+            .iter()
+            .filter_map(|&x| if x < 0.0 { Some(x) } else { None })
+            .collect();
+
         // FIXME: Potential NaN number here
         // When input a rare causes of an extreamly screwed null distribution. e.g.
         // es = - 27, esnull = [13, 24, 57, 88]
@@ -188,7 +191,6 @@ impl GSEAResult {
             seed: seed,
         }
     }
-    #[allow(dead_code)]
     pub fn default() -> GSEAResult {
         GSEAResult {
             summaries: Vec::<GSEASummary>::new(),
@@ -229,7 +231,6 @@ impl GSEAResult {
     }
 
     /// see line 844 - 876: https://github.com/GSEA-MSigDB/GSEA_R/blob/master/R/GSEA.R
-    /// this version is the same to the R implement
     pub fn _fdr(&mut self) -> Vec<f64> {
         let nes_idx = self.nes_concat.iter().filter(|&x| *x < 0.0).count();
         // let mut nesnull_concat: Vec<&f64> = nesnull.iter().flatten().collect(); // nesnull.concat(); // concat items
@@ -260,11 +261,19 @@ impl GSEAResult {
                         nes_higher = self.nes_concat.iter().filter(|&x| *x >= e).count();
                         all_higher = nesnull.iter().filter(|&x| *x >= e).count();
                         all_pos = nesnull.iter().filter(|&x| *x >= 0.0).count();
-                        nes_pos = self.nes_concat.len() - nes_idx; 
+                        nes_pos = self.nes_concat.len() - nes_idx;
                     }
                     // println!("neg_higher {}, all_higher {}, all_pos {}, nes_pos {}", nes_higher, all_higher, all_pos, all_higher);
-                    phi_norm = if all_pos > 0 { (all_higher as f64) / (all_pos as f64) } else {0.0}; // count.col
-                    phi_obs = if nes_pos > 0 { (nes_higher as f64) / (nes_pos as f64) } else { 0.0}; // obs.count.col
+                    phi_norm = if all_pos > 0 {
+                        (all_higher as f64) / (all_pos as f64)
+                    } else {
+                        0.0
+                    }; // count.col
+                    phi_obs = if nes_pos > 0 {
+                        (nes_higher as f64) / (nes_pos as f64)
+                    } else {
+                        0.0
+                    }; // obs.count.col
                        // FDR
                     fdrs_all.push((phi_norm / phi_obs).clamp(f64::MIN, 1.0));
                 }
@@ -443,12 +452,29 @@ impl GSEAResult {
             let tag = es.gene.isin(gset);
             // get es hit index of sorted array
             let tag_new: Vec<f64> = sorted_metric[0].0.iter().map(|&i| tag[i]).collect();
-            let gidx = es.hit_index(&tag_new); // need updat the sorted indices
+            let gidx = es.hit_index(&tag_new); // need update the sorted indices
             if gidx.len() > self.max_size || gidx.len() < self.min_size {
                 continue;
             }
+            let run_es = es.running_enrichment_score(&sorted_metric[0].1, &tag_new);
             // get running enrichment score
-            let run_es: Vec<Vec<f64>> = sorted_metric
+            // let run_es: Vec<Vec<f64>> = sorted_metric
+            //     .par_iter()
+            //     .map(|(indices, gm)| {
+            //         // weight the metrics
+            //         let weighted_gm: Vec<f64> =
+            //             gm.iter().map(|x| x.abs().powf(self.weight)).collect();
+            //         // update tag_indicator since you've update metric
+            //         let tag_new: Vec<f64> = indices.iter().map(|&i| tag[i]).collect();
+            //         // calculate ES
+            //         let r = es.running_enrichment_score(&weighted_gm, &tag_new);
+            //         r
+            //     })
+            //     .collect();
+
+            // // get es
+            // let ess: Vec<f64> = run_es.par_iter().map(|r| es.select_es(r)).collect();
+            let ess: Vec<f64> = sorted_metric
                 .par_iter()
                 .map(|(indices, gm)| {
                     // weight the metrics
@@ -457,19 +483,16 @@ impl GSEAResult {
                     // update tag_indicator since you've update metric
                     let tag_new: Vec<f64> = indices.iter().map(|&i| tag[i]).collect();
                     // calculate ES
-                    let r = es.running_enrichment_score(&weighted_gm, &tag_new);
+                    let r = es.fast_random_walk(&weighted_gm, &tag_new);
                     r
                 })
                 .collect();
-
-            // get es
-            let ess: Vec<f64> = run_es.par_iter().map(|r| es.select_es(r)).collect();
             // let (ess, run_es) = es.enrichment_score_pheno(&weighted_metric, &tag);
 
             let gss = GSEASummary {
                 term: term.to_string(),
                 es: ess[0],
-                run_es: run_es[0].to_owned(),
+                run_es: run_es, // run_es[0].to_owned(),
                 hits: gidx,
                 esnull: ess[1..].to_owned(),
                 ..Default::default()
@@ -533,7 +556,6 @@ impl GSEAResult {
         // let end4 = Instant::now();
         // println!("Statistical time: {:.2?}", end4.duration_since(end3));
     }
-    /// single sample gsea
     pub fn ss_gsea(
         &mut self,
         genes: &[String],
@@ -591,12 +613,12 @@ impl GSEAResult {
                     // let run_es = es.running_enrichment_score(metric, &tag_new);
                     // let es1 = es.select_es(&run_es);
                     // faster version of ssGSEA
-                    let es2 = es.fast_random_walk(metric, &tag_new);
+                    let es2 = es.fast_random_walk_ss(metric, &tag_new);
                     GSEASummary {
                         term: term.to_string(),
                         es: es2,
-                        run_es:  Vec::<f64>::new(),  // run_es,
-                        hits: gidx, // gene hit idx of each sample after sorting
+                        run_es: Vec::<f64>::new(), // run_es,
+                        hits: gidx,                // gene hit idx of each sample after sorting
                         name: Some(samples[i].to_string()),
                         ..Default::default()
                     }
@@ -657,8 +679,6 @@ impl GSEAResult {
             })
             .collect();
 
-
-
         let mut _all = Vec::<GSEASummary>::new();
         // let end1 = Instant::now();
         weighted_sorted_metric
@@ -717,7 +737,6 @@ mod tests {
     use super::*;
     use std::time::Instant;
     // use fastrand;
-    use crate::stats::GSEAResult;
     use crate::utils::FileReader;
     #[test]
     fn test_prerank() {
@@ -815,7 +834,7 @@ mod tests {
                 g.term, g.es, g.nes, g.pval, g.fdr
             );
         });
-         
+
         // GSEASummary._fdr() results
         // term: "YvX_UpIN_Y", es: -0.2461258, nes: -0.7333695, pval: 0.89189, fdr: 0.99250
         // term: "DvA_UpIN_A", es: -0.1894728, nes: -0.8517915, pval: 0.80000, fdr: 0.97980
@@ -835,7 +854,6 @@ mod tests {
         // term: "CvA_UpIN_A", es: -0.2987804, nes: -0.6507148, pval: 0.91667, fdr: 1.00000
         // term: "CvA_UpIN_C", es: -0.3799417, nes: -0.6438662, pval: 0.85366, fdr: 0.93167
         // term: "BvA_UpIN_B", es: 0.2250848, nes: 0.8380035, pval: 0.68657, fdr: 1.00000
-
     }
 
     #[test]
