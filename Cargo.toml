@@ -3,7 +3,7 @@
 [package]
 name = "gseapy"
 version = "0.14.0"
-authors = ["Zhuoqing Fang <fangzq@stanford.edu>"]
+authors = ["Zhuoqing Fang <fzq518@gmail.com>"]
 description = "Gene Set Enrichment Analysis in Rust."
 license-file = "LICENSE.md"
 homepage = "https://github.com/zqfang/GSEApy"

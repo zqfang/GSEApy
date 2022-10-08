@@ -15,7 +15,7 @@ class Biomart:
 
         How to query validated dataset, attributes, filters.
         Example::
-        >>> from gseapy.parser import Biomart
+        >>> from gseapy import Biomart
         >>> bm = Biomart(verbose=False, host="ensembl.org")
         >>> ## view validated marts
         >>> marts = bm.get_marts()
