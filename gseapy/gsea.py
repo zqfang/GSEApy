@@ -617,9 +617,9 @@ class Replot(GSEAbase):
     def gsea_edb_parser(self, results_path):
         """Parse results.edb file stored under **edb** file folder.
 
-        :param results_path: the .results file located inside edb folder.
+        :param results_path: the path of results.edb file.
         :return:
-            a dict contains enrichment_term, hit_index,nes, pval, fdr.
+            a dict contains { enrichment_term: [es, nes, pval, fdr, fwer, hit_ind]}
         """
 
         xtree = ET.parse(results_path)
@@ -631,17 +631,18 @@ class Replot(GSEAbase):
         for node in xroot.findall("DTG"):
             enrich_term = node.attrib.get("GENESET").split("#")[1]
             es_profile = node.attrib.get("ES_PROFILE").split(" ")
-            # rank_es = term.get('RND_ES').split(" ")
+            # esnull = term.get('RND_ES').split(" ")
             hit_ind = node.attrib.get("HIT_INDICES").split(" ")
             es_profile = [float(i) for i in es_profile]
-            hit_ind = [float(i) for i in hit_ind]
-            # rank_es = [float(i) for i in rank_es ]
-            nes = node.attrib.get("NES")
-            pval = node.attrib.get("NP")
-            fdr = node.attrib.get("FDR")
-            # fwer = node.attrib.get('FWER')
+            hit_ind = [int(i) for i in hit_ind]
+            # esnull = [float(i) for i in esnull ]
+            es = float(node.attrib.get("ES"))
+            nes = float(node.attrib.get("NES"))
+            pval = float(node.attrib.get("NP"))
+            fdr = float(node.attrib.get("FDR"))
+            fwer = float(node.attrib.get("FWER"))
             logging.debug("Enriched Gene set is: " + enrich_term)
-            res[enrich_term] = [hit_ind, nes, pval, fdr]
+            res[enrich_term] = [es, nes, pval, fdr, fwer, hit_ind]
         return res
 
     def run(self):
@@ -675,7 +676,7 @@ class Replot(GSEAbase):
         database = self.gsea_edb_parser(results_path)
         for enrich_term, data in database.items():
             # extract statistical resutls from results.edb file
-            hit_ind, nes, pval, fdr = data
+            es, nes, pval, fdr, fwer, hit_ind = data
             gene_set = gene_set_dict.get(enrich_term)
             # calculate enrichment score
             RES = self.enrichment_score(

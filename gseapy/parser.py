@@ -14,7 +14,7 @@ from numpy import in1d
 from gseapy.utils import DEFAULT_CACHE_PATH, DEFAULT_LIBRARY, unique
 
 
-def gsea_cls_parser(cls):
+def gsea_cls_parser(cls: str) -> Tuple[str]:
     """Extract class(phenotype) name from .cls file.
 
     :param cls: the a class list instance or .cls file which is identical to GSEA input .
@@ -51,12 +51,12 @@ def gsea_cls_parser(cls):
     return sample_name[0], sample_name[1], classes
 
 
-def gsea_edb_parser(results_path):
+def gsea_edb_parser(results_path: str) -> Dict[str, list[str]]:
     """Parse results.edb file stored under **edb** file folder.
 
-    :param results_path: the .results file located inside edb folder.
+    :param results_path: the path of results.edb file.
     :return:
-        a dict contains enrichment_term, hit_index,nes, pval, fdr.
+        a dict contains { enrichment_term: [es, nes, pval, fdr, fwer, hit_ind]}
     """
 
     xtree = ET.parse(results_path)
@@ -68,17 +68,18 @@ def gsea_edb_parser(results_path):
     for node in xroot.findall("DTG"):
         enrich_term = node.attrib.get("GENESET").split("#")[1]
         es_profile = node.attrib.get("ES_PROFILE").split(" ")
-        # rank_es = term.get('RND_ES').split(" ")
+        # esnull = term.get('RND_ES').split(" ")
         hit_ind = node.attrib.get("HIT_INDICES").split(" ")
         es_profile = [float(i) for i in es_profile]
-        hit_ind = [float(i) for i in hit_ind]
-        # rank_es = [float(i) for i in rank_es ]
-        nes = node.attrib.get("NES")
-        pval = node.attrib.get("NP")
-        fdr = node.attrib.get("FDR")
-        # fwer = node.attrib.get('FWER')
+        hit_ind = [int(i) for i in hit_ind]
+        # esnull = [float(i) for i in esnull ]
+        es = float(node.attrib.get("ES"))
+        nes = float(node.attrib.get("NES"))
+        pval = float(node.attrib.get("NP"))
+        fdr = float(node.attrib.get("FDR"))
+        fwer = float(node.attrib.get("FWER"))
         logging.debug("Enriched Gene set is: " + enrich_term)
-        res[enrich_term] = [hit_ind, nes, pval, fdr]
+        res[enrich_term] = [es, nes, pval, fdr, fwer, hit_ind]
     return res
 
 
