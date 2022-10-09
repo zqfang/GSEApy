@@ -92,10 +92,11 @@ GSEApy vs GSEA(Broad) output
 Using the same data for ``GSEAPreranked``, and ``GSEApy`` reproduce similar results.
 
 
-.. figure:: docs/Preank.py.vs.broad.jpg
+.. image:: docs/Preank.py.vs.broad.jpg
+    :width: 400
 
 
-see more output here: `Example <http://gseapy.readthedocs.io/en/master/gseapy_example.html>`_
+See more output here: `Example <http://gseapy.readthedocs.io/en/master/gseapy_example.html>`_
 
 Installation
 ------------
