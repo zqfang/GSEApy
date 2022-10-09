@@ -51,7 +51,7 @@ def gsea_cls_parser(cls: str) -> Tuple[str]:
     return sample_name[0], sample_name[1], classes
 
 
-def gsea_edb_parser(results_path: str) -> Dict[str, list[str]]:
+def gsea_edb_parser(results_path: str) -> Dict[str, List[str]]:
     """Parse results.edb file stored under **edb** file folder.
 
     :param results_path: the path of results.edb file.
