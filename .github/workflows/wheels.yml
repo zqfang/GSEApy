@@ -45,8 +45,8 @@ jobs:
       - name: Upload to PyPI
         run: twine upload ./dist/*
         env:
-          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
-          TWINE_USERNAME: bioninja
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+          TWINE_USERNAME: __token__
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -85,8 +85,8 @@ jobs:
       - name: Upload to PyPI
         run: twine upload ./wheelhouse/*.whl
         env:
-          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
-          TWINE_USERNAME: bioninja
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+          TWINE_USERNAME: __token__
   build_wheels_aarch64:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -130,8 +130,8 @@ jobs:
       - name: Upload to PyPI
         run: twine upload ./wheelhouse/*.whl
         env:
-          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
-          TWINE_USERNAME: bioninja
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+          TWINE_USERNAME: __token__
 
   build-mac-arm-wheels:
     name: Build wheels on macos for arm and universal2
@@ -158,8 +158,8 @@ jobs:
       - name: Upload to PyPI
         run: twine upload ./wheelhouse/*.whl
         env:
-          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
-          TWINE_USERNAME: bioninja
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+          TWINE_USERNAME: __token__
 
   build-win32-wheels:
     name: Build wheels on win32
@@ -196,5 +196,5 @@ jobs:
       - name: Upload to PyPI
         run: twine upload ./wheelhouse/*.whl
         env:
-          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
-          TWINE_USERNAME: bioninja
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+          TWINE_USERNAME: __token__
