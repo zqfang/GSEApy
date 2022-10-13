@@ -77,8 +77,8 @@ jobs:
           CIBW_MANYLINUX_I686_IMAGE: quay.io/pypa/manylinux2014_i686:latest
           CIBW_SKIP: cp36-* pp* *win32 *musl*
           CIBW_BEFORE_BUILD: pip install -U setuptools-rust pytest
-          # CIBW_TEST_REQUIRES: networkx testtools fixtures
-          CIBW_TEST_COMMAND: python setup.py test
+          # CIBW_TEST_REQUIRES: numpy scipy pandas requests
+          # CIBW_TEST_COMMAND: python -m unittest discover {project}/tests/
       - uses: actions/upload-artifact@v2
         with:
           path: ./wheelhouse/*.whl
@@ -121,7 +121,7 @@ jobs:
           CIBW_MANYLINUX_I686_IMAGE: quay.io/pypa/manylinux2014_i686:latest
           CIBW_SKIP: cp36-* pp* *win32 *musl*
           CIBW_BEFORE_BUILD: pip install -U setuptools-rust
-          # CIBW_TEST_REQUIRES: networkx testtools fixtures
+          # CIBW_TEST_REQUIRES: numpy scipy pandas requests
           # CIBW_TEST_COMMAND: python -m unittest discover {project}/tests/
           CIBW_ARCHS_LINUX: aarch64
       - uses: actions/upload-artifact@v2
@@ -188,8 +188,8 @@ jobs:
           CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.9
           CIBW_SKIP: cp36-* pp* *amd64 *musl*
           CIBW_BEFORE_BUILD: pip install -U setuptools-rust
-          CIBW_TEST_REQUIRES: networkx testtools fixtures
-          CIBW_TEST_COMMAND: python -m unittest discover {project}/tests/rustworkx_tests
+          # CIBW_TEST_REQUIRES: numpy scipy pandas requests
+          # CIBW_TEST_COMMAND: python -m unittest discover {project}/tests/
       - uses: actions/upload-artifact@v2
         with:
           path: ./wheelhouse/*.whl
