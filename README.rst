@@ -103,8 +103,6 @@ Installation
 
 | Install gseapy package from bioconda or pypi.
 
-**Please use ``pip install gseapy`` if you got "No module named gseapy.gse" issue !!!**
-
 
 .. code:: shell
 
@@ -112,7 +110,6 @@ Installation
    $ conda install -c conda-forge -c bioconda gseapy
 
    # or use pip to install the latest release
-   # you need to install rust first to compile the code: https://www.rust-lang.org/tools/install
    $ pip install gseapy
 
 | You may instead want to use the development version from Github, by running
