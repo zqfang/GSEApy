@@ -31,17 +31,13 @@ jobs:
     needs: ["build_wheels","build-win32-wheels"]
     steps:
       - uses: actions/checkout@v2
-      - name: Setup | Rust
-        uses: ATiltedTree/setup-rust@v1
-        with:
-          rust-version: stable
-      # - name: Build | Compile
-      #   run: cargo check
-
       - uses: actions/setup-python@v2
         name: Install Python
         with:
           python-version: '3.7'
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
       - name: Install deps
         run: pip install -U twine setuptools-rust
       - name: Build sdist
@@ -63,12 +59,6 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v2
-      - name: Setup | Rust
-        uses: ATiltedTree/setup-rust@v1
-        with:
-          rust-version: stable
-      # - name: Build | Compile
-      #   run: cargo check
       - uses: actions/setup-python@v2
         name: Install Python
         with:
@@ -84,7 +74,7 @@ jobs:
           python -m cibuildwheel --output-dir wheelhouse
         env:
           # CIBW_BEFORE_ALL_LINUX: "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
-          # CIBW_ENVIRONMENT_LINUX: 'PATH="$PATH:$HOME/.cargo/bin"'
+          CIBW_ENVIRONMENT_LINUX: 'PATH="$PATH:$HOME/.cargo/bin"'
           CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.9
           CIBW_MANYLINUX_X86_64_IMAGE: quay.io/pypa/manylinux2014_x86_64:latest
           CIBW_MANYLINUX_I686_IMAGE: quay.io/pypa/manylinux2014_i686:latest
@@ -128,7 +118,7 @@ jobs:
           python -m cibuildwheel --output-dir wheelhouse
         env:
           # CIBW_BEFORE_ALL_LINUX: "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
-          # CIBW_ENVIRONMENT_LINUX: 'PATH="$PATH:$HOME/.cargo/bin"'
+          CIBW_ENVIRONMENT_LINUX: 'PATH="$PATH:$HOME/.cargo/bin"'
           CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.9
           CIBW_MANYLINUX_X86_64_IMAGE: quay.io/pypa/manylinux2014_x86_64:latest
           CIBW_MANYLINUX_I686_IMAGE: quay.io/pypa/manylinux2014_i686:latest
