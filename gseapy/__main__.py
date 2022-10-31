@@ -11,7 +11,7 @@ import sys
 # or args = argparser.parse_args() will throw bugs!!!
 
 
-__version__ = "0.14.0"
+__version__ = "0.14.1"
 
 
 def main():
@@ -395,7 +395,7 @@ def add_gsea_parser(subparsers):
         type=int,
         default=123,
         metavar="",
-        help="Number of random seed. Default: None",
+        help="Number of random seed. Default: 123",
     )
     group_opt.add_argument(
         "-p",
@@ -510,7 +510,7 @@ def add_prerank_parser(subparsers):
         type=int,
         default=123,
         metavar="",
-        help="Number of random seed. Default: None",
+        help="Number of random seed. Default: 123",
     )
     prerank_opt.add_argument(
         "-p",
@@ -630,9 +630,9 @@ def add_singlesample_parser(subparsers):
         dest="seed",
         action="store",
         type=int,
-        default=None,
+        default=123,
         metavar="",
-        help="Number of random seed. Default: None",
+        help="Number of random seed. Default: 123",
     )
     group_opt.add_argument(
         "-p",
