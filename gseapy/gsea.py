@@ -361,7 +361,7 @@ class Prerank(GSEAbase):
         ranking = self._load_ranking(self.rnk)  # index is gene_names
         if isinstance(ranking, pd.DataFrame):
             # drop na values
-            if rank_metric.isnull().any(axis=1).sum() > 0:
+            if ranking.isnull().any().sum() > 0:
                 self._logger.warning("Input rankings contains NA values!")
                 # fill na
                 ranking.dropna(how="all", inplace=True)
