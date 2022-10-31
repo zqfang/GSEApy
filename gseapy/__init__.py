@@ -30,7 +30,6 @@ def gsea(
     no_plot: bool = False,
     seed: int = 123,
     verbose: bool = False,
-    processes=None,
     *arg,
     **kwarg,
 ) -> GSEA:
@@ -123,7 +122,7 @@ def gsea(
 
 
     """
-    if processes is not None:
+    if 'processes' in kwarg:
         warnings.warn("processes is deprecated; use threads", DeprecationWarning, 2)
         threads = processes
 
@@ -169,7 +168,6 @@ def ssgsea(
     no_plot: bool = True,
     seed: int = 123,
     verbose: bool = False,
-    processes=None,
     *arg,
     **kwarg,
 ) -> SingleSampleGSEA:
@@ -236,7 +234,7 @@ def ssgsea(
 
 
     """
-    if processes is not None:
+    if 'processes' in kwarg:
         warnings.warn("processes is deprecated; use threads", DeprecationWarning, 2)
         threads = processes
     ss = SingleSampleGSEA(
@@ -279,7 +277,6 @@ def prerank(
     no_plot: bool = False,
     seed: int = 123,
     verbose: bool = False,
-    processes=None,
     *arg,
     **kwarg,
 ) -> Prerank:
@@ -334,7 +331,7 @@ def prerank(
 
 
     """
-    if processes is not None:
+    if 'processes' in kwarg:
         warnings.warn("processes is deprecated; use threads", DeprecationWarning, 2)
         threads = processes
     pre = Prerank(
