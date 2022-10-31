@@ -366,7 +366,6 @@ class Prerank(GSEAbase):
                 # fill na
                 ranking.dropna(how="all", inplace=True)
                 ranking.fillna(0, inplace=True)
-                self._logger.debug("NAs list:\n" + NAs.to_string())
             # drop duplicate IDs, keep the first
             if ranking.index.duplicated().sum() > 0:
                 self._logger.warning("Duplicated ID detected!")

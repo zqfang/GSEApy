@@ -122,9 +122,9 @@ def gsea(
 
 
     """
-    if 'processes' in kwarg:
+    if "processes" in kwarg:
         warnings.warn("processes is deprecated; use threads", DeprecationWarning, 2)
-        threads = processes
+        threads = kwarg["processes"]
 
     gs = GSEA(
         data,
@@ -234,9 +234,9 @@ def ssgsea(
 
 
     """
-    if 'processes' in kwarg:
+    if "processes" in kwarg:
         warnings.warn("processes is deprecated; use threads", DeprecationWarning, 2)
-        threads = processes
+        threads = kwarg["processes"]
     ss = SingleSampleGSEA(
         data,
         gene_sets,
@@ -331,9 +331,9 @@ def prerank(
 
 
     """
-    if 'processes' in kwarg:
+    if "processes" in kwarg:
         warnings.warn("processes is deprecated; use threads", DeprecationWarning, 2)
-        threads = processes
+        threads = kwarg["processes"]
     pre = Prerank(
         rnk,
         gene_sets,

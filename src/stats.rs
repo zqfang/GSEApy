@@ -1,20 +1,12 @@
 #![allow(dead_code, unused)]
 
 use crate::algorithm::{EnrichmentScore, EnrichmentScoreTrait};
-use crate::utils::{Metric, Statistic};
-use itertools::izip;
+use crate::utils::{DynamicEnum, Metric, Statistic};
+use itertools::{izip, Itertools};
 use pyo3::prelude::*;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-// serialize struct example
-// let point = Point { x: 1, y: 2 };
-
-// let serialized = serde_json::to_string(&point).unwrap();
-// println!("serialized = {}", serialized);
-
-// let deserialized: Point = serde_json::from_str(&serialized).unwrap();
-// println!("deserialized = {:?}", deserialized);
 
 #[pyclass]
 #[allow(dead_code)]
@@ -39,7 +31,7 @@ pub struct GSEASummary {
     #[pyo3(get, set)]
     pub esnull: Vec<f64>,
     #[pyo3(get, set)]
-    pub name: Option<String>,
+    pub index: Option<usize>, // sample index
 }
 
 impl GSEASummary {
@@ -54,7 +46,7 @@ impl GSEASummary {
         run_es: &[f64],
         hits: &[usize],
         esnull: &[f64],
-        name: &str,
+        index: usize,
     ) -> Self {
         GSEASummary {
             term: term.to_string(),
@@ -66,13 +58,14 @@ impl GSEASummary {
             run_es: run_es.to_vec(),
             hits: hits.to_vec(),
             esnull: esnull.to_vec(),
-            name: Some(name.to_string()),
+            index: Some(index),
         }
     }
 
     /// for default values, you can then init the struct with
     /// let g = GSEASummary { es: 0.5, ..Default::default() };
     /// need trait bound #[derive(Default)]
+    #[allow(dead_code)]
     fn default() -> GSEASummary {
         GSEASummary {
             term: "".to_string(),
@@ -84,7 +77,7 @@ impl GSEASummary {
             run_es: Vec::<f64>::new(),
             hits: Vec::<usize>::new(),
             esnull: Vec::<f64>::new(),
-            name: None,
+            index: None,
         }
     }
     /// see the normalizatin code from
@@ -166,16 +159,28 @@ impl GSEASummary {
     }
 }
 
-#[derive(Debug, Clone, Default)]
+#[pyclass]
+#[allow(dead_code)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GSEAResult {
+    #[pyo3(get, set)]
     pub summaries: Vec<GSEASummary>,
-    weight: f64,
-    min_size: usize,
-    max_size: usize,
-    nperm: usize,
+    #[pyo3(get, set)]
+    pub weight: f64,
+    #[pyo3(get, set)]
+    pub min_size: usize,
+    #[pyo3(get, set)]
+    pub max_size: usize,
+    #[pyo3(get, set)]
+    pub nperm: usize,
     nes_concat: Vec<f64>,
     nesnull_concat: Vec<f64>,
-    seed: u64,
+    #[pyo3(get, set)]
+    pub seed: u64,
+    #[pyo3(get, set)]
+    pub rankings: Vec<Vec<f64>>,
+    #[pyo3(get, set)]
+    pub indices: Vec<Vec<usize>>, // indices after ranking
 }
 
 impl GSEAResult {
@@ -189,6 +194,8 @@ impl GSEAResult {
             nes_concat: Vec::<f64>::new(),
             nesnull_concat: Vec::<f64>::new(),
             seed: seed,
+            rankings: Vec::<Vec<f64>>::new(),
+            indices: Vec::<Vec<usize>>::new(),
         }
     }
     pub fn default() -> GSEAResult {
@@ -201,6 +208,8 @@ impl GSEAResult {
             nes_concat: Vec::<f64>::new(),
             nesnull_concat: Vec::<f64>::new(),
             seed: 0,
+            rankings: Vec::<Vec<f64>>::new(),
+            indices: Vec::<Vec<usize>>::new(),
         }
     }
     pub fn stat(&mut self, summary: &mut [GSEASummary]) {
@@ -457,20 +466,6 @@ impl GSEAResult {
                 continue;
             }
             let run_es = es.running_enrichment_score(&sorted_metric[0].1, &tag_new);
-            // get running enrichment score
-            // let run_es: Vec<Vec<f64>> = sorted_metric
-            //     .par_iter()
-            //     .map(|(indices, gm)| {
-            //         // weight the metrics
-            //         let weighted_gm: Vec<f64> =
-            //             gm.iter().map(|x| x.abs().powf(self.weight)).collect();
-            //         // update tag_indicator since you've update metric
-            //         let tag_new: Vec<f64> = indices.iter().map(|&i| tag[i]).collect();
-            //         // calculate ES
-            //         let r = es.running_enrichment_score(&weighted_gm, &tag_new);
-            //         r
-            //     })
-            //     .collect();
 
             // // get es
             // let ess: Vec<f64> = run_es.par_iter().map(|r| es.select_es(r)).collect();
@@ -488,33 +483,31 @@ impl GSEAResult {
                 })
                 .collect();
             // let (ess, run_es) = es.enrichment_score_pheno(&weighted_metric, &tag);
-
+            let esnull: Vec<f64> = if ess.len() > 1 {
+                ess[1..].to_vec()
+            } else {
+                Vec::new()
+            };
             let gss = GSEASummary {
                 term: term.to_string(),
                 es: ess[0],
                 run_es: run_es, // run_es[0].to_owned(),
                 hits: gidx,
-                esnull: ess[1..].to_owned(),
+                esnull: esnull,
                 ..Default::default()
             };
             summ.push(gss);
         }
 
         // let end2 = Instant::now();
-        // println!("Calculation time: {:.2?}", end2.duration_since(end1));
-        self.stat(&mut summ);
+        if self.nperm > 0 {
+            self.stat(&mut summ);
+        }
         self.summaries = summ;
-
-        // let end3 = Instant::now();
-        // println!("Statistical time: {:.2?}", end3.duration_since(end2));
-
-        // update es.gene attribute since we've kept track of sorted metric indices
-        // let mut sorted_genes =  DynamicEnum::<String>::new();
-        //  sorted_metric[0].0.iter().for_each(|&i| {
-        //     let g = es.gene.elt_of(i).unwrap().to_string();
-        //     sorted_genes.add_if_new(g);
-        // });
-        // es.gene = sorted_genes;
+        // save indices and ranking
+        let (idx, rnk) = sorted_metric.first().unwrap();
+        self.rankings.push(rnk.to_owned());
+        self.indices.push(idx.to_owned());
     }
 
     pub fn prerank(&mut self, genes: &[String], metric: &[f64], gmt: &HashMap<&str, &[String]>) {
@@ -525,8 +518,6 @@ impl GSEAResult {
         let mut es = EnrichmentScore::new(genes, self.nperm, self.seed, false, false);
         // let end1 = Instant::now();
         let gperm = es.gene_permutation(); // gene permutation, only record gene idx here
-                                           // let end2 = Instant::now();
-                                           // println!("Permutation time: {:.2?}", end2.duration_since(end1));
         let mut summ = Vec::<GSEASummary>::new();
 
         for (&term, &gset) in gmt.iter() {
@@ -538,33 +529,132 @@ impl GSEAResult {
             }
             let tag_indicators: Vec<Vec<f64>> = gperm.par_iter().map(|de| de.isin(&gidx)).collect();
             let (ess, run_es) = es.enrichment_score_gene(&weighted_metric, &tag_indicators);
+            let esnull: Vec<f64> = if ess.len() > 1 {
+                ess[1..].to_vec()
+            } else {
+                Vec::new()
+            };
             let gss = GSEASummary {
                 term: term.to_string(),
                 es: ess[0],
                 run_es: run_es,
                 hits: gidx,
-                esnull: ess[1..].to_owned(),
+                esnull: esnull,
                 ..Default::default()
             };
             summ.push(gss);
         }
         // let end3 = Instant::now();
         // println!("Calculation time: {:.2?}", end3.duration_since(end2));
-
-        self.stat(&mut summ);
+        if self.nperm > 0 {
+            self.stat(&mut summ);
+        }
         self.summaries = summ;
+        self.indices.push((0..genes.len()).collect_vec());
+        self.rankings.push(metric.to_owned());
         // let end4 = Instant::now();
         // println!("Statistical time: {:.2?}", end4.duration_since(end3));
     }
+    /// multi-preranking datasets input
+    /// metric: 2d vector with shape: [N_genes, N_samples]
+    pub fn prerank2(
+        &mut self,
+        genes: &[String],
+        metric: &[Vec<f64>], // 2d vector [m_gene, n_sample];
+        gmt: &HashMap<&str, &[String]>,
+    ) {
+        // transpose [m_gene, n_sample] --> [n_sample, m_gene]
+        let mut gene_metric: Vec<Vec<f64>> = vec![vec![]; metric[0].len()];
+        metric.iter().for_each(|row| {
+            row.iter().enumerate().for_each(|(j, e)| {
+                gene_metric[j].push(*e);
+            });
+        });
+
+        // sort first and then set weight,
+        let weighted_sorted_metric: Vec<(Vec<usize>, Vec<f64>)> = gene_metric
+            .into_par_iter()
+            .map(|rank| {
+                let mut tmp = rank.as_slice().argsort(false);
+                tmp.1.iter_mut().for_each(|x| {
+                    *x = x.abs().powf(self.weight);
+                });
+                return tmp;
+            })
+            .collect();
+        // save indices
+        weighted_sorted_metric.iter().for_each(|(idx, m)| {
+            self.indices.push(idx.to_owned());
+        });
+        // build genes permutations
+        let mut es = EnrichmentScore::new(genes, self.nperm, self.seed, false, false);
+        let gperm = es.gene_permutation(); // gene permutation
+
+        let mut _all = Vec::<GSEASummary>::new();
+        // let end1 = Instant::now();
+        weighted_sorted_metric
+            .into_iter()
+            .enumerate()
+            .for_each(|(i, (indices, metric))| {
+                // update the order of genes
+                let _genes: Vec<String> =
+                    indices.into_iter().map(|j| genes[j].to_string()).collect();
+                let od_genes = DynamicEnum::from(&_genes);
+                // write summary
+                let mut summ = Vec::<GSEASummary>::new();
+                for (&term, &gset) in gmt.iter() {
+                    // update tag indicator
+                    let gtag = od_genes.isin(gset);
+                    let gidx = es.hit_index(&gtag);
+                    if gidx.len() > self.max_size || gidx.len() < self.min_size {
+                        continue;
+                    }
+                    // note: update first element of gperm to get correct order of the gene ranking
+                    let mut tag_indicators: Vec<Vec<f64>> =
+                        gperm.par_iter().map(|de| de.isin(&gidx)).collect();
+                    tag_indicators[0] = gtag; // update
+                                              // get runing enrichment score
+                    let run_es: Vec<f64> = es.running_enrichment_score(&metric, &tag_indicators[0]);
+                    // let es0 = es.select_es(&run_es);
+                    let ess: Vec<f64> = tag_indicators
+                        .par_iter()
+                        .map(|tag| es.fast_random_walk(&metric, tag))
+                        .collect();
+
+                    let esnull: Vec<f64> = if ess.len() > 1 {
+                        ess[1..].to_vec()
+                    } else {
+                        Vec::new()
+                    };
+                    let gsu = GSEASummary {
+                        term: term.to_string(),
+                        es: ess[0],
+                        run_es: run_es,
+                        hits: gidx,     // hit index of each sample after sorting
+                        esnull: esnull, // len(ess) == len(gperm) == nperm + 1
+                        index: Some(i),
+                        ..Default::default()
+                    };
+                    summ.push(gsu);
+                }
+                // calculate nes, pval, fdr
+                if self.nperm > 0 {
+                    self.stat(&mut summ);
+                }
+                _all.append(&mut summ);
+            });
+
+        self.summaries = _all;
+    }
+
     pub fn ss_gsea(
         &mut self,
         genes: &[String],
-        samples: &[String],
         gene_exp: &[Vec<f64>], // 2d vector [m_gene, n_sample];
         gmt: &HashMap<&str, &[String]>,
     ) {
         // transpose [m_gene, n_sample] --> [n_sample, m_gene]
-        let mut gene_metric: Vec<Vec<f64>> = vec![vec![]; samples.len()];
+        let mut gene_metric: Vec<Vec<f64>> = vec![vec![]; gene_exp[0].len()];
         gene_exp.iter().for_each(|row| {
             row.iter().enumerate().for_each(|(j, e)| {
                 gene_metric[j].push(*e);
@@ -595,7 +685,10 @@ impl GSEAResult {
                 return tmp;
             })
             .collect();
-
+        // save indices
+        weighted_sorted_metric.iter().for_each(|(idx, m)| {
+            self.indices.push(idx.to_owned());
+        });
         let es = EnrichmentScore::new(genes, self.nperm, self.seed, true, false);
         // let end1 = Instant::now();
         for (&term, &gset) in gmt.iter() {
@@ -619,7 +712,7 @@ impl GSEAResult {
                         es: es2,
                         run_es: Vec::<f64>::new(), // run_es,
                         hits: gidx,                // gene hit idx of each sample after sorting
-                        name: Some(samples[i].to_string()),
+                        index: Some(i),
                         ..Default::default()
                     }
                 })
@@ -648,12 +741,11 @@ impl GSEAResult {
     pub fn ss_gsea_permuate(
         &mut self,
         genes: &[String],
-        samples: &[String],
         gene_exp: &[Vec<f64>], // 2d vector [m_gene, n_sample];
         gmt: &HashMap<&str, &[String]>,
     ) {
         // transpose [m_gene, n_sample] --> [n_sample, m_gene]
-        let mut gene_metric: Vec<Vec<f64>> = vec![vec![]; samples.len()];
+        let mut gene_metric: Vec<Vec<f64>> = vec![vec![]; gene_exp[0].len()];
         gene_exp.iter().for_each(|row| {
             row.iter().enumerate().for_each(|(j, e)| {
                 gene_metric[j].push(*e);
@@ -678,37 +770,58 @@ impl GSEAResult {
                 return tmp;
             })
             .collect();
-
+        // save indices
+        weighted_sorted_metric.iter().for_each(|(idx, m)| {
+            self.indices.push(idx.to_owned());
+        });
+        // build genes permutations
+        let mut es = EnrichmentScore::new(genes, self.nperm, self.seed, true, false);
+        let gperm = es.gene_permutation(); // gene permutation
         let mut _all = Vec::<GSEASummary>::new();
         // let end1 = Instant::now();
         weighted_sorted_metric
             .into_iter()
             .enumerate()
             .for_each(|(i, (indices, metric))| {
-                // just run prerank procedure here
                 // update the order of genes
                 let _genes: Vec<String> =
                     indices.into_iter().map(|j| genes[j].to_string()).collect();
-                // init new ES object
-                let mut es = EnrichmentScore::new(&_genes, self.nperm, self.seed, true, false);
-                let gperm = es.gene_permutation(); // gene permutation, only record gene idx here
+                let od_genes = DynamicEnum::from(&_genes);
+                // write summary
                 let mut summ = Vec::<GSEASummary>::new();
                 for (&term, &gset) in gmt.iter() {
-                    let gtag = es.gene.isin(gset);
+                    // update tag indicator
+                    let gtag = od_genes.isin(gset);
                     let gidx = es.hit_index(&gtag);
-                    let tag_indicators: Vec<Vec<f64>> =
-                        gperm.par_iter().map(|de| de.isin(&gidx)).collect();
                     if gidx.len() > self.max_size || gidx.len() < self.min_size {
                         continue;
                     }
-                    let (ess, run_es) = es.enrichment_score_gene(&metric, &tag_indicators);
+                    // note: update first element of gperm to get correct order of the gene ranking
+                    let mut tag_indicators: Vec<Vec<f64>> =
+                        gperm.par_iter().map(|de| de.isin(&gidx)).collect();
+                    tag_indicators[0] = gtag; // update
+                                              // get runing enrichment score
+                    let run_es: Vec<f64> = es.running_enrichment_score(&metric, &tag_indicators[0]);
+                    let ess: Vec<f64> = tag_indicators
+                        .par_iter()
+                        .map(|tag| {
+                            // calculate ES
+                            es.fast_random_walk_ss(&metric, tag)
+                        })
+                        .collect();
+
+                    let esnull: Vec<f64> = if ess.len() > 1 {
+                        ess[1..].to_vec()
+                    } else {
+                        Vec::new()
+                    };
                     let gsu = GSEASummary {
                         term: term.to_string(),
                         es: ess[0],
                         run_es: run_es,
                         hits: gidx, // hit index of each sample after sorting
-                        esnull: ess[1..].to_owned(),
-                        name: Some(samples[i].to_string()),
+                        esnull: esnull,
+                        index: Some(i),
                         ..Default::default()
                     };
                     summ.push(gsu);
@@ -719,24 +832,14 @@ impl GSEAResult {
             });
 
         self.summaries = _all;
-        // let end2 = Instant::now();
-        // println!("Calculation time: {:.2?}", end2.duration_since(end1));
-        // self.stat(); // NES
-        //let max = self.summaries.iter().fold(std::f64::MIN, |a, b| a.max(b.es));
-        //let min = self.summaries.iter().fold(std::f64::MAX, |a, b| a.min(b.es));
-        //let norm = max - min;
-        //self.summaries.iter_mut().for_each(|b| b.nes = b.es / norm);
-
-        // let end3 = Instant::now();
-        // println!("Statistical time: {:.2?}", end3.duration_since(end2));
     }
 }
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use std::time::Instant;
     // use fastrand;
+    use crate::stats::GSEAResult;
     use crate::utils::FileReader;
     #[test]
     fn test_prerank() {
@@ -748,7 +851,7 @@ mod tests {
         let mut rnk = FileReader::new();
         let _ = rnk.read_csv("data/mds.2k.rnk", b'\t', false, Some(b'#'));
         let mut gmt = FileReader::new();
-        let _ = gmt.read_table("data/ribosome.gmt", '\t', false);
+        let _ = gmt.read_table("data/hallmark.gmt", '\t', false);
 
         // let gene: Vec<String> = vec!["A","B","C","D","E","F","G","H","J","K"].into_iter().map(|s| s.to_string()).collect();
         // let gene_set: Vec<String> = vec!["B","A","D","G"].into_iter().map(|s| s.to_string()).collect();
@@ -775,15 +878,15 @@ mod tests {
         let (gidx, metric) = gene_metric.as_slice().argsort(false);
         gene = gidx.iter().map(|&i| gene[i].clone()).collect();
         // start to calculate
-        let mut gsea = GSEAResult::new(weight, 500, 5, 1000, 123);
+        let mut gsea = GSEAResult::new(weight, 500, 5, 10, 123);
         gsea.prerank(&gene, &metric, &gmt2);
         let end = Instant::now();
         println!("Overall run time: {:.2?}", end.duration_since(start));
-
+        println!("This version 1");
         gsea.summaries.iter().for_each(|g| {
             println!(
-                "term: {:?}, es: {:.7?}, nes: {:.7?}, pval: {:.2e}, fdr: {:.2e}",
-                g.term, g.es, g.nes, g.pval, g.fdr
+                "name: {:?}, term: {:?}, es: {:.7?}, nes: {:.7?}, pval: {:.2e}, fdr: {:.2e}",
+                g.name, g.term, g.es, g.nes, g.pval, g.fdr
             );
         });
     }
@@ -898,6 +1001,26 @@ mod tests {
         gsea.summaries.iter().for_each(|g| {
             println!(
                 "sample: {:?}, term: {:?}, es: {:.7?}, nes: {:.7?}, pval: {:.2e}, fdr: {:.2e}",
+                g.name, g.term, g.es, g.nes, g.pval, g.fdr
+            );
+        });
+
+        let _gx: Vec<f64> = gene_exp.iter().map(|g| g[0]).collect();
+        let (_gx_idx, _gx2) = _gx.as_slice().argsort(false);
+        let _ge: Vec<String> = _gx_idx.into_iter().map(|i| gene[i].to_owned()).collect();
+        gsea.prerank(&_ge, &_gx2, &gmt2);
+        println!("\n\n\nThis version prerank version 1");
+        gsea.summaries.iter().for_each(|g| {
+            println!(
+                "name: {:?}, term: {:?}, es: {:.7?}, nes: {:.7?}, pval: {:.2e}, fdr: {:.2e}",
+                g.name, g.term, g.es, g.nes, g.pval, g.fdr
+            );
+        });
+        println!("\n\n\nThis version prerank version 2");
+        gsea.prerank2(&gene, &gene_exp, &gmt2);
+        gsea.summaries.iter().for_each(|g| {
+            println!(
+                "name: {:?}, term: {:?}, es: {:.7?}, nes: {:.7?}, pval: {:.2e}, fdr: {:.2e}",
                 g.name, g.term, g.es, g.nes, g.pval, g.fdr
             );
         });
