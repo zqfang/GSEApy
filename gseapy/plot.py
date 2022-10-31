@@ -711,7 +711,7 @@ def ringplot(
         ax = fig.add_subplot(111)
 
     # scatter colormap range
-    colmap = df[colname].round().astype("int")
+    colmap = df[colname].astype("int")
     vmin = np.percentile(colmap.min(), 2)
     vmax = np.percentile(colmap.max(), 98)
     # outer ring
@@ -876,10 +876,54 @@ def barplot(
         # canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
         fig.savefig(ofname, bbox_inches="tight", dpi=300)
         return
-    elif ofname is None:
-        return
     elif not hasattr(sys, "ps1") and (ofname is not None):
         canvas.print_figure(ofname, bbox_inches="tight", dpi=300)
+        return
+    return ax
+
+
+def traceplot(
+    obj,
+    terms: Optional[Union[str, List[str]]] = None,
+    pheno_pos: str = "",
+    pheno_neg: str = "",
+    figsize: Tuple[float] = (6, 5.5),
+    pallets: str = "seismic",
+    ofname: Optional[str] = None,
+    **kwargs,
+):
+    """Trace plot for terms
+
+    :param obj: GSEA or Prerank Object.
+    :param terms: terms to show in trace plot
+
+    """
+    # create bar plot
+    if hasattr(sys, "ps1") and (ofname is None):
+        # working inside python console, show (True) figure
+        fig = plt.figure(figsize=figsize)
+    else:
+        # If working on commandline, don't show figure
+        fig = Figure(figsize=figsize)
+        canvas = FigureCanvas(fig)
+    ax = fig.add_subplot(111)
+
+    if isinstance(terms, str):
+        _terms = [terms]
+    elif isinstance(terms, list):
+        _terms = terms
+    else:
+        _terms = list(obj.keys())
+
+    for t in _terms:
+        if t in obj.results:
+            RES = obj.results[t]
+            ax.plot(range(len(RES)), RES)
+    ax.set_xlabel("Gene list ranking", fontsize=14, fontweight="bold")
+    ax.set_ylabel("Enrichment Score", fontsize=14, fontweight="bold")
+    if ofname is not None:
+        # canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
+        fig.savefig(ofname, bbox_inches="tight", dpi=300)
         return
     return ax
 
