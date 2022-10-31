@@ -360,7 +360,14 @@ class Prerank(GSEAbase):
     def load_ranking(self):
         ranking = self._load_ranking(self.rnk)  # index is gene_names
         if isinstance(ranking, pd.DataFrame):
+            # handle index is not gene_names
+            if ranking.index.dtype != "O":
+                ranking.set_index(keys=ranking.columns[0], inplace=True)
+            # handle columns names are intergers
+            if ranking.columns.dtype != "O":
+                ranking.columns = ranking.columns.astype(str)
             # drop na values
+            ranking = ranking.loc[ranking.index.dropna()]
             if ranking.isnull().any().sum() > 0:
                 self._logger.warning("Input rankings contains NA values!")
                 # fill na
@@ -369,7 +376,7 @@ class Prerank(GSEAbase):
             # drop duplicate IDs, keep the first
             if ranking.index.duplicated().sum() > 0:
                 self._logger.warning("Duplicated ID detected!")
-                ranking = ranking.loc[~ranking.index.duplicated(), :]
+                ranking = ranking.loc[~ranking.index.duplicated(keep="first"), :]
 
             # check whether contains infinity values
             if np.isinf(ranking).values.sum() > 0:

@@ -100,7 +100,7 @@ class GSEAbase(object):
             raise Exception("Error parsing gene ranking values!")
 
         if rank_metric.select_dtypes(np.number).shape[1] > 1:
-            return rank_metric.set_index(rank_metric.columns[0])
+            return rank_metric
         # sort ranking values from high to low
         rank_metric.sort_values(
             by=rank_metric.columns[1], ascending=self.ascending, inplace=True
@@ -316,7 +316,7 @@ class GSEAbase(object):
             if i >= self.graph_num:  # already sorted by abs(NES) in descending order
                 break
             if self.res2d["Name"].nunique() > 1 and hasattr(
-                self, "metric_dict"
+                self, "_metric_dict"
             ):  # self.module != "ssgsea":
                 key = record["Name"]
                 rank_metric = metric[key]
