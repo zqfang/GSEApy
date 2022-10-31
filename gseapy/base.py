@@ -94,9 +94,13 @@ class GSEAbase(object):
         elif isinstance(rnk, pd.Series):
             rank_metric = rnk.reset_index()
         elif os.path.isfile(rnk):
-            rank_metric = pd.read_csv(rnk, header=None, sep="\t")
+            sep = "," if rnk.endswith(".csv") else "\t"
+            rank_metric = pd.read_table(rnk, header=None, sep=sep)
         else:
             raise Exception("Error parsing gene ranking values!")
+
+        if rank_metric.select_dtypes(np.number).shape[1] > 1:
+            return rank_metric.set_index(rank_metric.columns[0])
         # sort ranking values from high to low
         rank_metric.sort_values(
             by=rank_metric.columns[1], ascending=self.ascending, inplace=True
@@ -123,9 +127,14 @@ class GSEAbase(object):
             )
         # reset ranking index, because you have sort values and drop duplicates.
         rank_metric.reset_index(drop=True, inplace=True)
-        rank_metric.columns = ["gene_name", "rank"]
-        rankser = rank_metric.set_index("gene_name")["rank"]
-        self.ranking = rankser
+        rank_metric.columns = ["gene_name", "prerank"]
+        rankser = rank_metric.set_index("gene_name", drop=True).squeeze()
+
+        # check whether contains infinity values
+        if np.isinf(rankser).values.sum() > 0:
+            self._logger.warning("Input gene rankings contains inf values!")
+            rankser.replace(-np.inf, method="ffill", inplace=True)
+            rankser.replace(np.inf, method="bfill", inplace=True)
         # return series
         return rankser
 
@@ -306,15 +315,18 @@ class GSEAbase(object):
                 continue
             if i >= self.graph_num:  # already sorted by abs(NES) in descending order
                 break
-            if self.module != "ssgsea":
+            if self.res2d["Name"].nunique() > 1 and hasattr(
+                self, "metric_dict"
+            ):  # self.module != "ssgsea":
+                key = record["Name"]
+                rank_metric = metric[key]
+                hit = self.results[key][record["Term"]]["hits"]
+                RES = self.results[key][record["Term"]]["RES"]
+            else:
                 rank_metric = metric[self.module]
                 hit = self.results[record["Term"]]["hits"]
                 RES = self.results[record["Term"]]["RES"]
-            else:
-                rank_metric = metric[record["Name"]]
-                hit = self.results[record["Name"]][record["Term"]]["hits"]
 
-                RES = self.results[record["Name"]][record["Term"]]["RES"]
             outdir = os.path.join(self.outdir, record["Name"])
             mkdirs(outdir)
             term = record["Term"].replace("/", "-").replace(":", "_")
@@ -334,8 +346,8 @@ class GSEAbase(object):
                     yticklabels=True,
                 )
 
-            if not (self.module == "ssgsea" and self.permutation_num == 0):
-                # skip plotting when ssgsea and nperm=0
+            if self.permutation_num > 0:
+                # skip plotting when nperm=0
                 gseaplot(
                     rank_metric=rank_metric,
                     term=record["Term"].split("__")[-1],
@@ -354,7 +366,7 @@ class GSEAbase(object):
         self,
         gsea_summary: List[Dict],
         gmt: Dict[str, List[str]],
-        metric: Dict[str, pd.DataFrame],
+        metric: Dict[str, pd.Series],
     ) -> pd.DataFrame:
         """Convernt GSEASummary to DataFrame
 
@@ -382,9 +394,12 @@ class GSEAbase(object):
         # res = OrderedDict()
 
         for i, gs in enumerate(gsea_summary):
-            # sample = '' if gs.name is None else gs.name
             # reformat gene list.
-            name = gs.name if gs.name else self.module
+            name = (
+                self._metric_dict[str(gs.index)]
+                if (gs.index is not None)
+                else self.module
+            )
             _genes = metric[name].index.values[gs.hits]
             genes = ";".join([str(g).strip() for g in _genes])
             RES = np.array(gs.run_es)
@@ -434,24 +449,29 @@ class GSEAbase(object):
         self,
         gsea_summary: List[Dict],
         gmt: Dict[str, List[str]],
-        rank_metric: pd.Series,
+        rank_metric: Union[pd.Series, pd.DataFrame],
+        indices: Optional[List] = None,
     ):
         """Convernt GSEASummary to DataFrame
 
-        rank_metric: Must be sorted in descending order already
+        rank_metric: if a Series, then it must be sorted in descending order already
+                     if a DataFrame, indices must not None.
+        indices: Only works for DataFrame input. Stores the indices of sorted array
         """
-        if isinstance(rank_metric, pd.DataFrame) and self.module == "ssgsea":
+        if isinstance(rank_metric, pd.DataFrame) and (indices is not None):
+            self._metric_dict = {str(c): n for c, n in enumerate(rank_metric.columns)}
             metric = {
-                name: rank_metric[name].sort_values(ascending=False)
-                for name in rank_metric.columns
+                n: rank_metric.iloc[indices[i], i]  # .sort_values(ascending=False)
+                for i, n in enumerate(rank_metric.columns)  # indices is a 2d list
             }
         else:
             metric = {self.module: rank_metric}
+            self._metric_dict = {self.module: self.module}
 
         res_df = self._to_df(gsea_summary, gmt, metric)
         self.results = {}
         # save dict
-        if self.module == "ssgsea":
+        if res_df["name"].nunique() >= 2:
             for name, dd in res_df.groupby(["name"]):
                 self.results[name] = dd.set_index("term").to_dict(orient="index")
         else:
@@ -475,7 +495,7 @@ class GSEAbase(object):
         # res_df["Gene %"] = res_df["Gene %"].map(lambda x: "{0:.2%}".format(x) if x !="" else "")
         # trim
         dc = ["RES", "hits", "matched_genes"]
-        if self.module == "ssgsea" and self.permutation_num == 0:
+        if self.permutation_num == 0:
             dc += [
                 "NOM p-val",
                 "FWER p-val",

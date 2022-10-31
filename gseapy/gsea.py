@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 
 from gseapy.base import GSEAbase
-from gseapy.gse import Metric, gsea_rs, prerank_rs, ssgsea_rs  # import gseapy rust lib
+from gseapy.gse import Metric, gsea_rs, prerank2d_rs, prerank_rs, ssgsea_rs
 from gseapy.parser import gsea_cls_parser
 from gseapy.plot import gseaplot
 from gseapy.utils import log_init, mkdirs
@@ -245,18 +245,8 @@ class GSEA(GSEAbase):
         self.cls_dict = cls_dict
         # data frame must have length > 1
         assert len(dat) > 1
-        # ranking metrics calculation.
-        dat2 = self.calculate_metric(
-            df=dat,
-            method=self.method,
-            pos=self.pheno_pos,
-            neg=self.pheno_neg,
-            classes=cls_dict,
-            ascending=self.ascending,
-        )
-        self.ranking = dat2
         # filtering out gene sets and build gene sets dictionary
-        gmt = self.load_gmt(gene_list=dat2.index.values, gmt=self.gene_sets)
+        gmt = self.load_gmt(gene_list=dat.index.values, gmt=self.gene_sets)
         self.gmt = gmt
         self._logger.info(
             "%04d gene_sets used for further statistical testing....." % len(gmt)
@@ -265,9 +255,18 @@ class GSEA(GSEAbase):
         # cpu numbers
         # compute ES, NES, pval, FDR, RES
         if self.permutation_type == "gene_set":
+            # ranking metrics calculation.
+            dat2 = self.calculate_metric(
+                df=dat,
+                method=self.method,
+                pos=self.pheno_pos,
+                neg=self.pheno_neg,
+                classes=cls_dict,
+                ascending=self.ascending,
+            )
             gsum = prerank_rs(
-                dat2.index.to_list(),  # gene list
-                dat2.squeeze().to_list(),  # ranking values
+                dat2.index.values.tolist(),  # gene list
+                dat2.squeeze().values.tolist(),  # ranking values
                 gmt,  # must be a dict object
                 self.weight,
                 self.min_size,
@@ -281,7 +280,7 @@ class GSEA(GSEAbase):
                 map(lambda x: True if x == self.pheno_pos else False, cls_vector)
             )
             gsum = gsea_rs(
-                dat.index.to_list(),
+                dat.index.values.tolist(),
                 dat.values.tolist(),  # each row is gene values across samples
                 gmt,
                 group,
@@ -299,11 +298,12 @@ class GSEA(GSEAbase):
                 "Start to generate GSEApy reports and figures............"
             )
 
+        self.ranking = pd.Series(gsum.rankings[0], index=dat.index[gsum.indices[0]])
         # reorder datarame for heatmap
-        self._heatmat(df=dat.loc[dat2.index], classes=cls_vector)
+        # self._heatmat(df=dat.loc[dat2.index], classes=cls_vector)
+        self._heatmat(df=dat.iloc[gsum.indices[0]], classes=cls_vector)
         # write output and plotting
-        self.to_df(gsum, gmt, dat2)
-
+        self.to_df(gsum.summaries, gmt, self.ranking)
         self._logger.info("Congratulations. GSEApy ran successfully.................\n")
         if self._outdir is None:
             self._tmpdir.cleanup()
@@ -357,6 +357,32 @@ class Prerank(GSEAbase):
         self._noplot = no_plot
         self.permutation_type = "gene_set"
 
+    def load_ranking(self):
+        ranking = self._load_ranking(self.rnk)  # index is gene_names
+        if isinstance(ranking, pd.DataFrame):
+            # drop na values
+            if rank_metric.isnull().any(axis=1).sum() > 0:
+                self._logger.warning("Input rankings contains NA values!")
+                # fill na
+                ranking.dropna(how="all", inplace=True)
+                ranking.fillna(0, inplace=True)
+                self._logger.debug("NAs list:\n" + NAs.to_string())
+            # drop duplicate IDs, keep the first
+            if ranking.index.duplicated().sum() > 0:
+                self._logger.warning("Duplicated ID detected!")
+                ranking = ranking.loc[~ranking.index.duplicated(), :]
+
+            # check whether contains infinity values
+            if np.isinf(ranking).values.sum() > 0:
+                self._logger.warning("Input gene rankings contains inf values!")
+                col_min_max = {
+                    np.inf: ranking[np.isfinite(ranking)].max(),  # column-wise max
+                    -np.inf: ranking[np.isfinite(ranking)].min(),
+                }  # column-wise min
+                ranking = ranking.replace({col: col_min_max for col in ranking.columns})
+
+        return ranking
+
     # @profile
     def run(self):
         """GSEA prerank workflow"""
@@ -364,9 +390,9 @@ class Prerank(GSEAbase):
         assert self.min_size <= self.max_size
 
         # parsing rankings
-        dat2 = self._load_ranking(self.rnk)
+        dat2 = self.load_ranking()
         assert len(dat2) > 1
-
+        self.ranking = dat2
         # Start Analysis
         self._logger.info("Parsing data files for GSEA.............................")
         # filtering out gene sets and build gene sets dictionary
@@ -377,9 +403,14 @@ class Prerank(GSEAbase):
         )
         self._logger.info("Start to run GSEA...Might take a while..................")
         # compute ES, NES, pval, FDR, RES
-        gsum = prerank_rs(
-            dat2.index.to_list(),  # gene list
-            dat2.squeeze().to_list(),  # ranking values
+        if isinstance(dat2, pd.DataFrame):
+            _prerank = prerank2d_rs
+        else:
+            _prerank = prerank_rs
+        # run
+        gsum = _prerank(
+            dat2.index.values.tolist(),  # gene list
+            dat2.values.tolist(),  # ranking values
             gmt,  # must be a dict object
             self.weight,
             self.min_size,
@@ -388,12 +419,16 @@ class Prerank(GSEAbase):
             self._threads,
             self.seed,
         )
-
+        self.to_df(
+            gsea_summary=gsum.summaries,
+            gmt=gmt,
+            rank_metric=dat2,
+            indices=gsum.indices if isinstance(dat2, pd.DataFrame) else None,
+        )
         if self._outdir is not None:
             self._logger.info(
                 "Start to generate gseapy reports, and produce figures..."
             )
-        self.to_df(gsum, gmt, rank_metric=dat2)
 
         self._logger.info("Congratulations. GSEApy runs successfully................\n")
         if self._outdir is None:
@@ -567,10 +602,9 @@ class SingleSampleGSEA(GSEAbase):
         assert self.min_size <= self.max_size
         mkdirs(self.outdir)
         gsum = ssgsea_rs(
-            df.index.to_list(),
+            df.index.values.tolist(),
             df.values.tolist(),
             gmt,
-            df.columns.astype(str).to_list(),  # sample name
             self.weight,
             self.min_size,
             self.max_size,
@@ -578,7 +612,7 @@ class SingleSampleGSEA(GSEAbase):
             self._threads,
             self.seed,
         )
-        self.to_df(gsum, gmt, df)
+        self.to_df(gsum.summaries, gmt, df, gsum.indices)
         return
 
 
@@ -651,13 +685,13 @@ class Replot(GSEAbase):
 
         # parsing files.......
         try:
-            results_path = glob.glob(self.indir + "*/edb/results.edb")[0]
-            rank_path = glob.glob(self.indir + "*/edb/*.rnk")[0]
-            gene_set_path = glob.glob(self.indir + "*/edb/gene_sets.gmt")[0]
+            results_path = glob.glob(os.path.join(self.indir, "edb/results.edb"))[0]
+            rank_path = glob.glob(os.path.join(self.indir, "edb/*.rnk"))[0]
+            gene_set_path = glob.glob(os.path.join(self.indir, "edb/gene_sets.gmt"))[0]
         except IndexError as e:
             raise Exception("Could not locate GSEA files in the given directory!")
         # extract sample names from .cls file
-        cls_path = glob.glob(self.indir + "*/edb/*.cls")
+        cls_path = glob.glob(os.path.join(self.indir, "*/edb/*.cls"))
         if cls_path:
             pos, neg, classes = gsea_cls_parser(cls_path[0])
         else:
