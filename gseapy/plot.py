@@ -337,7 +337,7 @@ class GSEAPlot(object):
 
         # the y coords of this transformation are data, and the x coord are axes
         trans4 = transforms.blended_transform_factory(ax4.transAxes, ax4.transData)
-        ax4.hlines(0, 0, 1, linewidth=0.5, transform=trans4, color="grey")
+        ax4.hlines(0, 0, 1, linewidth=1, transform=trans4, color="grey")
         ax4.set_ylabel("Enrichment Score", fontsize=16, fontweight="bold")
         # ax4.set_xlim(min(self._x), max(self._x))
         ax4.tick_params(
@@ -887,8 +887,8 @@ def traceplot(
     terms: Optional[Union[str, List[str]]] = None,
     pheno_pos: str = "",
     pheno_neg: str = "",
-    figsize: Tuple[float] = (6, 5.5),
-    pallets: str = "seismic",
+    figsize: Tuple[float] = (6, 4),
+    cmap: str = "seismic",
     ofname: Optional[str] = None,
     **kwargs,
 ):
@@ -916,9 +916,18 @@ def traceplot(
         _terms = list(obj.keys())
 
     for t in _terms:
-        if t in obj.results:
-            RES = obj.results[t]
-            ax.plot(range(len(RES)), RES)
+        if obj.res2d["Name"].nunique() > 1:
+            for name, results in obj.results.items():
+                if t in results:
+                    RES = results[t]["RES"]
+                    ax.plot(range(len(RES)), RES, label=name)
+        else:
+            results = obj.results
+            if t in results:
+                RES = results[t]["RES"]
+                ax.plot(range(len(RES)), RES)
+    ax.axhline(0, linewidth=1, linestyle="dashed", color="gray")
+    ax.legend()
     ax.set_xlabel("Gene list ranking", fontsize=14, fontweight="bold")
     ax.set_ylabel("Enrichment Score", fontsize=14, fontweight="bold")
     if ofname is not None:
