@@ -135,6 +135,16 @@ class GSEAbase(object):
             self._logger.warning("Input gene rankings contains inf values!")
             rankser.replace(-np.inf, method="ffill", inplace=True)
             rankser.replace(np.inf, method="bfill", inplace=True)
+
+        # check duplicate values and warning
+        dups = rankser.duplicated().sum()
+        if dups > 0:
+            msg = "Duplicated values found in preranked stats: {:.2%} of genes".format(
+                dups / rankser.size
+            )
+            msg += "The order of those genes will be arbitrary, which may produce unexpected results."
+            self._logger.warning(msg)
+
         # return series
         return rankser
 

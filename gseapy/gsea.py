@@ -387,6 +387,16 @@ class Prerank(GSEAbase):
                 }  # column-wise min
                 ranking = ranking.replace({col: col_min_max for col in ranking.columns})
 
+            # check ties in prerank stats
+            dups = ranking.apply(lambda df: df.duplicated().sum() / df.size)
+            if (dups > 0).sum() > 0:
+                msg = (
+                    "Duplicated values found in preranked stats:\nsample\tratio\n%s\n"
+                    % (dups.to_string(float_format="{:,.2%}".format))
+                )
+                msg += "The order of those genes will be arbitrary, which may produce unexpected results."
+                self._logger.warning(msg)
+
         return ranking
 
     # @profile
