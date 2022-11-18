@@ -4,6 +4,20 @@
 Frequently Asked Questions
 ======================================
 
+**Q:** What kind of gene identifiers are supported in GSEApy?
+-------------------------------------------------------------------------
+**A:**
+
+
+#. If you select ``Enrichr library`` as your input ``gene_sets`` (gmt format), then gene symbols in upper cases are needed.
+#. if you use your own ``GMT`` file, you need to use the same type of your gene identifiers in ``GMT`` and input gene list.   
+
+
+
+**Q:** Why gene symbols in Enrichr library are all ``UPPER cases`` for mouse, fly, fish, worm ?
+-------------------------------------------------------------------------
+**A:**: GSEApy can't change the Enrichr databases. So convert your gene symbols into UPPER cases first, then run the analysis you want. 
+
 
 
 **Q:** Why P-value or FDR is ``0``, not a very small number?
@@ -12,8 +26,8 @@ Frequently Asked Questions
 **A:** GSEA methodology use random permutation procedure (e.g. 1000 permutation) to obtain a null distribution. 
 Then, an observed ES is compared to the 1000 shuffled ES to calculate a P-value.
 When observed ES is not within the null ESs, you'll get 0s. if you don't want 0, you could 
-- set the smallest pvalue to 1 / ( number of permutations)
-- increase the permutation number (but more running time needed)
+#. set the smallest pvalue to 1 / ( number of permutations)
+#. increase the permutation number (but more running time needed)
 
 
 
