@@ -2,16 +2,14 @@
 import json
 import logging
 import os
-import sys
 import xml.etree.ElementTree as ET
 from collections import Counter
 from collections.abc import Iterable
 from typing import Dict, List, Optional, Tuple, Union
 
 import requests
-from numpy import in1d
 
-from gseapy.utils import DEFAULT_CACHE_PATH, DEFAULT_LIBRARY, unique
+from gseapy.utils import DEFAULT_CACHE_PATH, unique
 
 
 def gsea_cls_parser(cls: str) -> Tuple[str]:
@@ -126,10 +124,10 @@ def get_library(
     if name.lower().endswith(".gmt"):
         logging.info("User Defined gene sets is given.......continue..........")
         with open(name) as genesets:
-            genesets_dict = {
-                line.strip().split("\t")[0]: line.strip().split("\t")[2:]
-                for line in genesets.readlines()
-            }
+            for line in genesets:
+                entries = line.strip().split("\t")
+                key = entries[0]
+                genesets_dict[key] = entries[2:]
     else:
         # get gene sets from enrichr libary
         names = get_library_name(organism=organism)
@@ -141,7 +139,6 @@ def get_library(
                 "Sorry. The input: %s could be be found given organism: %s"
                 % (name, organism)
             )
-            return
 
     # filtering gene_sets
     total = len(genesets_dict)
@@ -287,17 +284,20 @@ def download_library(name: str, organism: str = "human") -> Dict[str, List[str]]
     tempath = os.path.join(DEFAULT_CACHE_PATH, tmpname)
     if os.path.isfile(tempath):
         logging.info("Library is already downloaded in: %s, use local file" % tempath)
+        genesets_dict = {}
         with open(tempath) as genesets:
-            genesets_dict = {
-                line.strip().split("\t")[0]: line.strip().split("\t")[2:]
-                for line in genesets.readlines()
-            }
+            for line in genesets:
+                entries = line.strip().split("\t")
+                key = entries[0]
+                genesets_dict[key] = entries[2:]
         return genesets_dict
     # queery string
     ENRICHR_URL = ENRICHR_URL + "/%s/geneSetLibrary" % database
     query_string = "?mode=text&libraryName=%s"
     # get
-    response = requests.get(ENRICHR_URL + query_string % name, timeout=None)
+    response = requests.get(
+        ENRICHR_URL + query_string % name, timeout=None, stream=True
+    )
     if not response.ok:
         raise Exception(
             "Error fetching gene set library, input name is correct for the organism you've set?."

@@ -160,7 +160,7 @@ class GSEAbase(object):
         genesets_dict = dict()
 
         if isinstance(gmt, dict):
-            genesets_dict = gmt
+            genesets_dict = gmt.copy()
         elif isinstance(gmt, str):
             gmts = gmt.split(",")
             if len(gmts) > 1:
@@ -175,7 +175,7 @@ class GSEAbase(object):
             for i, gm in enumerate(gmt):
                 prefix = str(i)
                 if isinstance(gm, dict):
-                    tdt = gm
+                    tdt = gm.copy()
                 elif isinstance(gm, str):
                     tdt = self.parse_gmt(gm)
                     prefix = os.path.split(gm)[-1]
@@ -218,12 +218,19 @@ class GSEAbase(object):
         )
 
         if filsets_num == len(subsets):
-            self._logger.error(
-                "No gene sets passed through filtering condition!!! "
-                + "Try to set min_size or max_size parameters again!\n"
-                + "Note: check gene name, gmt format, or filtering size."
+            msg = (
+                "No gene sets passed through filtering condition !!! \n"
+                + "Hint 1: Try to lower min_size or increase max_size !\n"
+                + "Hint 2: Check gene symbols are identifiable to your gmt input.\n"
+                + "Hint 3: Gene symbols curated in Enrichr web services are all upcases.\n"
             )
-            raise Exception("No gene sets passed through filtering condition")
+            self._logger.error(msg)
+            dict_head = "{ %s: [%s]}" % (subsets[0], genesets_dict[subsets[0]])
+            self._logger.error(
+                "The first entry of your gene_sets (gmt) look like this : %s"
+                % dict_head
+            )
+            raise LookupError(msg)
 
         # self._gmtdct = genesets_dict
         return genesets_dict
@@ -232,11 +239,13 @@ class GSEAbase(object):
         """gmt parser when input is a string"""
 
         if gmt.lower().endswith(".gmt"):
+            genesets_dict = {}
             with open(gmt) as genesets:
-                genesets_dict = {
-                    line.strip().split("\t")[0]: line.strip().split("\t")[2:]
-                    for line in genesets.readlines()
-                }
+                for line in genesets:
+                    entries = line.strip().split("\t")
+                    key = entries[0]
+                    genes = [g.split(",")[0] for g in entries[2:]]
+                    genesets_dict[key] = genes
             return genesets_dict
 
         tmpname = "enrichr." + gmt + ".gmt"
@@ -275,7 +284,9 @@ class GSEAbase(object):
         ENRICHR_URL = self.ENRICHR_URL + "/Enrichr/geneSetLibrary"
         query_string = "?mode=text&libraryName=%s"
         # get
-        response = s.get(ENRICHR_URL + query_string % libname, timeout=None)
+        response = s.get(
+            ENRICHR_URL + query_string % libname, timeout=None, stream=True
+        )
         if not response.ok:
             raise Exception(
                 "Error fetching gene set library, input name is correct for the organism you've set?."

@@ -8,7 +8,6 @@ import os
 from collections import OrderedDict
 from io import StringIO
 from tempfile import TemporaryDirectory
-from time import sleep
 from typing import Any, AnyStr, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 import pandas as pd
@@ -18,7 +17,7 @@ from numpy import isscalar
 from gseapy.biomart import Biomart
 from gseapy.plot import barplot
 from gseapy.stats import calc_pvalues, multiple_testing_correction
-from gseapy.utils import *
+from gseapy.utils import DEFAULT_CACHE_PATH, log_init, mkdirs, retry
 
 
 class Enrichr(object):
@@ -117,7 +116,7 @@ class Enrichr(object):
             gss = self.__gmt2dict(gss)
 
         elif isinstance(gene_sets, dict):
-            gss = [gene_sets]
+            gss = [gene_sets.copy()]
         else:
             raise Exception(
                 "Error parsing enrichr libraries, please provided corrected one"
@@ -188,8 +187,7 @@ class Enrichr(object):
         # response
         response = requests.post(url, files=payload, verify=True)
         if not response.ok:
-            raise Exception("Error analyzing gene list")
-        sleep(1)
+            raise Exception("Error sending gene list, try again later")
         job_id = json.loads(response.text)
 
         return job_id
