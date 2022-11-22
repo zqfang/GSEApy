@@ -139,7 +139,7 @@ class GSEAbase(object):
         # check duplicate values and warning
         dups = rankser.duplicated().sum()
         if dups > 0:
-            msg = "Duplicated values found in preranked stats: {:.2%} of genes".format(
+            msg = "Duplicated values found in preranked stats: {:.2%} of genes\n".format(
                 dups / rankser.size
             )
             msg += "The order of those genes will be arbitrary, which may produce unexpected results."

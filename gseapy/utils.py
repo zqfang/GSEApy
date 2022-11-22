@@ -65,7 +65,7 @@ def log_init(outlog, log_level=logging.INFO):
     # init a root logger
     logging.basicConfig(
         level=logging.DEBUG,
-        format="LINE %(lineno)-4d: %(asctime)s [%(levelname)-8s] %(message)s",
+        format="LINE %(lineno)-4d: %(asctime)s %(name)s::[%(levelname)-8s] %(message)s",
         filename=outlog,
         filemode="w",
     )

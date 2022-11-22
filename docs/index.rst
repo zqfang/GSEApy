@@ -65,7 +65,7 @@ The full ``GSEA`` is far too extensive to describe here; see
 `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ documentation for more information. All files' formats for GSEApy are identical to ``GSEA`` desktop version. 
 
 
-**If you use gseapy, you should cite the original ``GSEA`` and ``Enrichr`` paper.**
+**If you use gseapy, you should cite.**
 
 Why GSEAPY
 -----------------------------------------------------
@@ -84,8 +84,9 @@ do gene set enrichment analysis in python. So, here are my reasons:
     :maxdepth: 3
    
     introduction.rst
-    gseapy_tutorial
     gseapy_example.ipynb
+    singlecell_example.ipynb
+    gseapy_tutorial
     run.rst
     faq.rst
 	
