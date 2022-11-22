@@ -97,7 +97,7 @@ setup(
     author_email="fzq518@gmail.com",
     license="MIT",
     packages=["gseapy"],
-    # package_data={'gseapy': ["data/*.txt"],},
+    package_data={'gseapy': ["data/palette.json"],},
     include_package_data=False,
     project_urls={
         "Documentation": "https://gseapy.readthedocs.io/en/latest/",

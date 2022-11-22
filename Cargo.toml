@@ -2,7 +2,7 @@
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [package]
 name = "gseapy"
-version = "0.14.0"
+version = "1.0.0"
 authors = ["Zhuoqing Fang <fzq518@gmail.com>"]
 description = "Gene Set Enrichment Analysis in Rust."
 license-file = "LICENSE.md"
