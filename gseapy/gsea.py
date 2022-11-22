@@ -107,7 +107,7 @@ class GSEA(GSEAbase):
             df = df.iloc[:, 1:]
         # drop gene which std == 0 in all samples
         cls_dict = {k: v for k, v in zip(df.columns, cls_vec)}
-        df_std = df.groupby(by=cls_dict, axis=1).std()
+        df_std = df.groupby(by=cls_dict, axis=1).std(numeric_only=True)
         df = df[df_std.sum(axis=1) > 0]
         df = df + 1e-08  # we don't like zeros!!!
 
@@ -164,8 +164,8 @@ class GSEA(GSEAbase):
         """
 
         # exclude any zero stds.
-        df_mean = df.groupby(by=classes, axis=1).mean()
-        df_std = df.groupby(by=classes, axis=1).std()
+        df_mean = df.groupby(by=classes, axis=1).mean(numeric_only=True)
+        df_std = df.groupby(by=classes, axis=1).std(numeric_only=True)
         class_values = Counter(classes.values())
         n_pos = class_values[pos]
         n_neg = class_values[neg]
@@ -553,7 +553,7 @@ class SingleSampleGSEA(GSEAbase):
                 "Warning: dropping duplicated gene names, values averaged by gene names!"
             )
             rank_metric = rank_metric.loc[rank_metric.index.dropna()]
-            rank_metric = rank_metric.groupby(level=0).mean()
+            rank_metric = rank_metric.groupby(level=0).mean(numeric_only=True)
         if rank_metric.isnull().any().sum() > 0:
             self._logger.warning("Warning: Input data contains NA, filled NA with 0")
             rank_metric = rank_metric.fillna(0)
