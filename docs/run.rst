@@ -23,18 +23,27 @@ Module APIs
 .. autofunction:: replot()
 
 
-Algorithm
+Interface
 -------------------------
+.. automodule:: gseapy.gsea
+   :members:
 
-
-.. automodule:: gseapy.algorithm
+.. automodule:: gseapy.base
    :members:
 
 
-Enrichr
+Enrichr API
 --------------------------
 
 .. automodule:: gseapy.enrichr
+   :members:
+
+
+
+BioMart API
+--------------------------
+
+.. automodule:: gseapy.biomart
    :members:
 
 
@@ -45,8 +54,15 @@ Parser
    :members:
 
 
-Graph
+Visualization
 --------------------------
 
 .. automodule:: gseapy.plot
+   :members:
+
+
+Scientific Journal and Sci- themed Color Palettes
+--------------------------
+
+.. automodule:: gseapy.scipalette
    :members:
