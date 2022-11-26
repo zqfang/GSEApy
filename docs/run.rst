@@ -9,26 +9,32 @@ Developmental Guide
 Module APIs
 ---------------------
 
-
 .. autofunction:: gsea()
-
 
 .. autofunction:: prerank()
 
 .. autofunction:: ssgsea()
 
-
 .. autofunction:: enrichr()
+
+.. autofunction:: enrich()
 
 .. autofunction:: replot()
 
 
-Interface
+GSEA Statistics
 -------------------------
 .. automodule:: gseapy.gsea
    :members:
 
 .. automodule:: gseapy.base
+   :members:
+
+
+Over-representation Statistics
+-------------------------------------------------------
+
+.. automodule:: gseapy.stats
    :members:
 
 
@@ -62,7 +68,11 @@ Visualization
 
 
 Scientific Journal and Sci- themed Color Palettes
---------------------------
+-------------------------------------------------------
 
 .. automodule:: gseapy.scipalette
    :members:
+
+
+Utils
+-------------------------------------------------------

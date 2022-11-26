@@ -28,11 +28,6 @@ GSEApy: Gene Set Enrichment Analysis in Python.
 .. image:: https://img.shields.io/pypi/pyversions/gseapy.svg
     :alt: PyPI - Python Version
 
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3748084.svg
-   :target: https://doi.org/10.5281/zenodo.3748084
-
-
-
 
 **Release notes** : https://github.com/zqfang/GSEApy/releases
 
@@ -40,15 +35,12 @@ GSEApy: Gene Set Enrichment Analysis in Python.
 
 `Tutorial for general usage <https://gseapy.readthedocs.io/en/latest/gseapy_example.html>`_
 
-To get help of GSEApy
+
+Citation
 ------------------------------------
+::
 
-1. See `Frequently Asked Questions <https://gseapy.readthedocs.io/en/latest/faq.html>`_
-
-2. Visit the document site at `Examples <https://gseapy.readthedocs.io/en/latest/gseapy_example.html>`_
-
-3. The GSEApy discussion channel: `Q&A <https://github.com/zqfang/GSEApy/discussions>`_ 
-
+    Zhuoqing Fang, Xinyuan Liu, Gary Peltz, GSEApy: a comprehensive package for performing gene set enrichment analysis in Python, Bioinformatics, 2022;, btac757, https://doi.org/10.1093/bioinformatics/btac757
 
 
 
@@ -100,6 +92,7 @@ Using the same data for ``GSEAPreranked``, and ``GSEApy`` reproduce similar resu
 
 
 See more output here: `Example <http://gseapy.readthedocs.io/en/master/gseapy_example.html>`_
+
 
 Installation
 ------------

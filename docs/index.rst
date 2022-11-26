@@ -29,11 +29,19 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
 .. image:: https://img.shields.io/pypi/pyversions/gseapy.svg
     :alt: PyPI - Python Version
 
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3748085.svg
-   :target: https://doi.org/10.5281/zenodo.3748085
 
 
 **Release notes** : https://github.com/zqfang/GSEApy/releases 
+
+
+Citation
+------------------------------------
+::
+
+    Zhuoqing Fang, Xinyuan Liu, Gary Peltz, GSEApy: a comprehensive package for performing gene set enrichment analysis in Python, Bioinformatics, 2022;, btac757, https://doi.org/10.1093/bioinformatics/btac757
+
+
+
 
 GSEApy is a Python/Rust implementation of **GSEA** and wrapper for **Enrichr**. 
 --------------------------------------------------------------------------------------------
