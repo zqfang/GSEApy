@@ -8,7 +8,7 @@ As a biological researcher, I like protocols.
 
 Here is a short tutorial for you to walk you through gseapy.
 
-For file format explanation, please see `here <http://software.broadinstitute.org/gsea/doc/GSEAUserGuideFrame.html.>`_
+For file format explanation, please see `here <https://software.broadinstitute.org/cancer/software/gsea/wiki/index.php/Data_formats>`_
 
 In order to run gseapy successfully, install gseapy use pip.
 
