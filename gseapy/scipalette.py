@@ -6,11 +6,10 @@ from matplotlib.colors import LinearSegmentedColormap, ListedColormap
 
 
 class SciPalette:
-    """
-    cateogorical color palette collection of popular-sci journals.
-    """
-
     def __init__(self):
+        """
+        Cateogorical color palette collection of popular-sci journals.
+        """
         handle = importlib.resources.open_binary("gseapy.data", "palette.json")
         self._db = json.load(handle)
         handle.close()
@@ -20,6 +19,10 @@ class SciPalette:
         return str(f"{self.__class__.__name__} color palette collection")
 
     def name_color(self, hex=None):
+        """naming  a color
+
+        :param hex: hex code of color
+        """
         return "go to: http://chir.ag/projects/name-that-color/"
 
     @staticmethod
@@ -28,9 +31,12 @@ class SciPalette:
         positions: List[str] = [0.0, 0.5, 1.0],
         name: str = "navyblue2darkred",
     ):
-        """
-        colors: a list of color names. Default: ["#000080", "#ffffff", "#8b0000"]
-        position: position of each color in range [0,1]. Default: [0.0, 0.5, 1.0]
+        """create colormap given 3 color and break points
+
+        :param colors: a list of color names. Default: ["#000080", "#ffffff", "#8b0000"]
+        :param position: position of each color in range [0,1]. Default: [0.0, 0.5, 1.0]
+        :param name: name of the return cmap
+        :return: matplotlib cmap object
         """
         # cmap = ListedColormap(["#000080", "#ffffff", "#8b0000"])
         # positions = [0.0, 0.5, 1.0]
