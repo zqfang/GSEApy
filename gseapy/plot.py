@@ -503,7 +503,7 @@ def dotplot(
     df = df.sort_values(by=colname).tail(top_term)
     # get scatter area
     ol = df.columns[df.columns.isin(["Overlap", "Tag %"])]
-    temp = df[ol].squeeze().str.split("/", expand=True).astype(int)
+    temp = df[ol].squeeze(axis=1).str.split("/", expand=True).astype(int) # axis=1, in case you have only 1 row
     df = df.assign(Hits_ratio=temp.iloc[:, 0] / temp.iloc[:, 1])
     # make area bigger to better visualization
     # area = df["Hits_ratio"] * plt.rcParams["lines.linewidth"] * 100
@@ -692,7 +692,7 @@ def ringplot(
 
     # get scatter area
     ol = df.columns[df.columns.isin(["Overlap", "Tag %"])]
-    temp = df[ol].squeeze().str.split("/", expand=True).astype(int)
+    temp = df[ol].squeeze(axis=1).str.split("/", expand=True).astype(int)
     df = df.assign(Hits_ratio=temp.iloc[:, 0] / temp.iloc[:, 1])
     # Because the hits_ratio is much too small when being provided as size for ``s``,
     # we normalize it to some useful point sizes, s=0.3*(raito*3)**2
