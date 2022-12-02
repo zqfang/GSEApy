@@ -437,13 +437,251 @@ def gseaplot(
     g.savefig()
 
 
-def isfloat(x):
-    try:
-        float(x)
-    except:
-        return False
-    else:
-        return True
+class DotPlot(object):
+    def __init__(
+        self,
+        df,
+        x: Optional[str] = None,
+        y: str = "Term",
+        hue: str = "Adjusted P-value",
+        title: str = "",
+        thresh: float = 0.05,
+        top_term: int = 10,
+        size: float = 10,
+        figsize: Tuple[float] = (6, 5.5),
+        cmap: str = "viridis_r",
+        ofname: Optional[str] = None,
+        **kwargs,
+    ):
+        # assert column in ["Adjusted P-value", "P-value", "NOM p-val", "FDR q-val"]
+        self.y = y
+        self.x = x
+        self.hue = str(hue)
+        self.colname = hue
+        self.figsize = figsize
+        self.cmap = cmap
+        self.ofname = ofname
+        self.size = size
+        self.title = title
+        self.top_term = top_term
+        self.thresh = thresh
+        self._df = self.process(df)
+
+    def isfloat(self, x):
+        try:
+            float(x)
+        except:
+            return False
+        else:
+            return True
+
+    def process(self, df):
+        # check if any values in `df[colname]` can't be coerced to floats
+        can_be_coerced = df[self.colname].map(self.isfloat).sum()
+        if can_be_coerced < len(df):
+            msg = "some value in %s could not be typecast to `float`" % self.colname
+            raise ValueError(msg)
+        # subset
+        df = df[df[self.colname] <= self.thresh]
+        if len(df) < 1:
+            msg = "Warning: No enrich terms when cutoff = %s" % self.thresh
+            raise ValueError(msg)
+
+        # sorting the dataframe for better visualization
+        if self.colname in ["Adjusted P-value", "P-value", "NOM p-val", "FDR q-val"]:
+            # get top_terms
+            df = df.sort_values(by=self.colname)
+            df[self.colname].replace(
+                0, method="bfill", inplace=True
+            )  ## asending order, use bfill
+            df = df.assign(p_inv=np.log10(1 / df[self.colname].astype(float)))
+            self.colname = "p_inv"
+            self.cbar_title = r"$Log_{10} \frac{1}{P val}$"
+
+        # get top terms; sort ascending
+        if (self.x is not None) and (self.x in df.columns):
+            # get top term of each group
+            df = (
+                df.groupby(self.x)
+                .apply(lambda _x: _x.sort_values(by=self.colname).tail(self.top_term))
+                .reset_index(drop=True)
+            )
+        else:
+            df = df.sort_values(by=self.colname).tail(self.top_term)
+
+        # get scatter area
+        ol = df.columns[df.columns.isin(["Overlap", "Tag %"])]
+        temp = (
+            df[ol].squeeze(axis=1).str.split("/", expand=True).astype(int)
+        )  # axis=1, in case you have only 1 row
+        df = df.assign(Hits_ratio=temp.iloc[:, 0] / temp.iloc[:, 1])
+        return df
+
+    def get_ax(self):
+        """
+        setup figure axes
+        """
+        # create fig
+        if hasattr(sys, "ps1") and (self.ofname is None):
+            # working inside python console, show figure
+            fig = plt.figure(figsize=self.figsize)
+        else:
+            # If working on commandline, don't show figure
+            fig = Figure(figsize=self.figsize)
+            _canvas = FigureCanvas(fig)
+        ax = fig.add_subplot(111)
+        self.fig = fig
+        return ax
+
+    def set_x(self):
+        """
+        set x-axis's value
+        """
+        x = self.x
+        xlabel = ""
+        # set xaxis values, so you could get dotplot
+        if (x is not None) and (x in self._df.columns):
+            xlabel = x
+        elif "Combined Score" in self._df.columns:
+            xlabel = "Combined Score"
+            x = xlabel
+        elif "Odds Ratio" in self._df.columns:
+            xlabel = "Odds Ratio"
+            x = xlabel
+        elif "NES" in self._df.columns:
+            xlabel = "NES"
+            x = xlabel
+        else:
+            # revert back to p_inv
+            x = self.colname
+            xlabel = self.cbar_title
+
+        return x, xlabel
+
+    def scatter(self, outer_ring=False):
+        """
+        build scatter
+        """
+        # scatter colormap range
+        # df = df.assign(colmap=self._df[self.colname].round().astype("int"))
+        # make area bigger to better visualization
+        # area = df["Hits_ratio"] * plt.rcParams["lines.linewidth"] * 100
+        df = self._df.assign(
+            area=np.pi
+            * (
+                self._df["Hits_ratio"] * self.size * plt.rcParams["lines.linewidth"]
+            ).pow(2)
+        )
+        colmap = df[self.colname].round().astype(int)
+        vmin = np.percentile(colmap.min(), 2)
+        vmax = np.percentile(colmap.max(), 98)
+        # vmin = np.percentile(df.colmap.min(), 2)
+        # vmax = np.percentile(df.colmap.max(), 98)
+        ax = self.get_ax()
+        # if self.x is None:
+        x, xlabel = self.set_x()
+        # outer ring
+        if outer_ring:
+            rg = ax.scatter(
+                x=x,
+                y=self.y,
+                s=df["area"].max() * 1.5,
+                edgecolors="gray",
+                c="white",
+                data=df,
+                marker="o",
+            )
+        # inner circle
+        sc = ax.scatter(
+            x=x,
+            y=self.y,
+            data=df,
+            s="area",
+            edgecolors="face",
+            c=self.colname,
+            cmap=self.cmap,
+            vmin=vmin,
+            vmax=vmax,
+            marker="o",
+        )
+
+        ax.set_xlabel(xlabel, fontsize=14, fontweight="bold")
+        ax.xaxis.set_tick_params(labelsize=14)
+        ax.yaxis.set_tick_params(labelsize=16)
+        ax.set_axisbelow(True)  # set grid blew other element
+        ax.grid(axis="y")  # zorder=-1.0
+        ax.margins(x=0.25)
+
+        # We change the fontsize of minor ticks label
+        # ax.tick_params(axis='y', which='major', labelsize=16)
+        # ax.tick_params(axis='both', which='minor', labelsize=14)
+
+        # scatter size legend
+        # we use the *func* argument to supply the inverse of the function
+        # used to calculate the sizes from above. The *fmt* ensures to string you want
+        handles, labels = sc.legend_elements(
+            prop="sizes",
+            num=3,  # fmt="$ {x:.2f}",
+            color="gray",
+            func=lambda s: np.sqrt(s / np.pi)
+            / plt.rcParams["lines.linewidth"]
+            / self.size,
+        )
+        ax.legend(
+            handles,
+            labels,
+            title="% Genes\nin set",
+            bbox_to_anchor=(1.02, 0.9),
+            loc="upper left",
+            frameon=False,
+        )
+        ax.set_title(self.title, fontsize=20, fontweight="bold")
+        self.add_colorbar(sc)
+        return ax
+
+    def add_colorbar(self, sc):
+        """
+        :param sc: matplotlib.Scatter
+        """
+        # colorbar
+        # cax = fig.add_axes([1.0, 0.20, 0.03, 0.22])
+        cbar = self.fig.colorbar(
+            sc,
+            shrink=0.25,
+            aspect=10,
+            anchor=(0.0, 0.2),  # (0.0, 0.2),
+            location="right"
+            # cax=cax,
+        )
+        # cbar.ax.tick_params(direction='in')
+        cbar.ax.yaxis.set_tick_params(
+            color="white", direction="in", left=True, right=True
+        )
+        cbar.ax.set_title(self.cbar_title, loc="left", fontweight="bold")
+        for key, spine in cbar.ax.spines.items():
+            spine.set_visible(False)
+
+    def barh(self, ax=None, color=None):
+        """
+        Barplot
+        """
+        if ax is None:
+            ax = self.get_ax()
+        bar = self._df.plot.barh(
+            x="Term", y=self.colname, color=color, alpha=0.75, fontsize=16, ax=ax
+        )
+        if self.hue in ["Adjusted P-value", "P-value", "FDR q-val", "NOM p-val"]:
+            xlabel = "-log$_{10}$(%s)" % self.hue
+        else:
+            xlabel = self.hue
+        bar.set_xlabel(xlabel, fontsize=16, fontweight="bold")
+        bar.set_ylabel("")
+        bar.set_title(self.title, fontsize=24, fontweight="bold")
+        bar.xaxis.set_major_locator(MaxNLocator(integer=True))
+        bar.legend_.remove()
+        adjust_spines(ax, spines=["left", "bottom"])
+
+        return ax
 
 
 def dotplot(
@@ -474,139 +712,13 @@ def dotplot(
     :param ofname: output file name. If None, don't save figure
 
     """
-
-    # assert column in ["Adjusted P-value", "P-value", "NOM p-val", "FDR q-val"]
-    colname = column
-
-    # check if any values in `df[colname]` can't be coerced to floats
-    can_be_coerced = df[colname].map(isfloat)
-    if np.sum(~can_be_coerced) > 0:
-        raise ValueError("some value in %s could not be typecast to `float`" % colname)
-    # subset
-    df = df[df[colname] <= cutoff]
-    if len(df) < 1:
-        msg = "Warning: No enrich terms when cutoff = %s" % cutoff
-        return msg
-    # sorting the dataframe for better visualization
-    if colname in ["Adjusted P-value", "P-value", "NOM p-val", "FDR q-val"]:
-        # get top_terms
-        df = df.sort_values(by=colname)
-        df[colname].replace(
-            0, method="bfill", inplace=True
-        )  ## asending order, use bfill
-        # df.loc[:, colname] = df[colname].map(float)
-        # df = df.assign(logAP=lambda x: -x[colname].apply(np.log10))
-        df = df.assign(p_inv=np.log(1 / df[colname].astype(float)))
-        colname = "p_inv"
-        cbar_title = r"$Log \frac{1}{P val}$"
-    # get top terms; sort ascending
-    df = df.sort_values(by=colname).tail(top_term)
-    # get scatter area
-    ol = df.columns[df.columns.isin(["Overlap", "Tag %"])]
-    temp = df[ol].squeeze(axis=1).str.split("/", expand=True).astype(int) # axis=1, in case you have only 1 row
-    df = df.assign(Hits_ratio=temp.iloc[:, 0] / temp.iloc[:, 1])
-    # make area bigger to better visualization
-    # area = df["Hits_ratio"] * plt.rcParams["lines.linewidth"] * 100
-    df = df.assign(
-        area=np.pi * (df["Hits_ratio"] * size * plt.rcParams["lines.linewidth"]).pow(2)
+    dot = DotPlot(
+        df, None, "Term", column, title, cutoff, top_term, size, figsize, cmap, ofname
     )
-
-    # set xaxis values
-    xlabel = "Combined Score"
-    if "Combined Score" in df.columns:
-        x = df["Combined Score"].values
-    elif "Odds Ratio" in df.columns:
-        x = df["Odds Ratio"].values
-        xlabel = "Odds Ratio"
-    elif "NES" in df.columns:
-        xlabel = "NES"
-        x = xlabel
-    else:
-        # revert back to p_inv
-        x = colname
-        xlabel = cbar_title
-
-    # y axis index and values
-    # y = [i for i in range(0, len(df))]
-    # ylabels = df["Term"].values
-
-    # create scatter plot
-    if hasattr(sys, "ps1") and (ofname is None):
-        # working inside python console, show figure
-        fig, ax = plt.subplots(figsize=figsize)
-    else:
-        # If working on commandline, don't show figure
-        fig = Figure(figsize=figsize)
-        canvas = FigureCanvas(fig)
-        ax = fig.add_subplot(111)
-
-    # scatter colormap range
-    df = df.assign(colmap=df[colname].round().astype("int"))
-    vmin = np.percentile(df.colmap.min(), 2)
-    vmax = np.percentile(df.colmap.max(), 98)
-
-    sc = ax.scatter(
-        x=x,
-        y="Term",
-        data=df,
-        s="area",
-        edgecolors="face",
-        c=colname,
-        cmap=cmap,
-        vmin=vmin,
-        vmax=vmax,
-    )
-
-    ax.set_xlabel(xlabel, fontsize=14, fontweight="bold")
-    ax.xaxis.set_tick_params(labelsize=14)
-    ax.yaxis.set_tick_params(labelsize=16)
-    ax.set_axisbelow(True)  # set grid blew other element
-    ax.grid(axis="y")  # zorder=-1.0
-    ax.margins(x=0.25)
-
-    # We change the fontsize of minor ticks label
-    # ax.tick_params(axis='y', which='major', labelsize=16)
-    # ax.tick_params(axis='both', which='minor', labelsize=14)
-
-    # scatter size legend
-    # we use the *func* argument to supply the inverse of the function
-    # used to calculate the sizes from above. The *fmt* ensures to string you want
-    handles, labels = sc.legend_elements(
-        prop="sizes",
-        num=3,  # fmt="$ {x:.2f}",
-        color="gray",
-        func=lambda s: np.sqrt(s / np.pi) / plt.rcParams["lines.linewidth"] / size,
-    )
-    ax.legend(
-        handles,
-        labels,
-        title="% Genes\nin set",
-        bbox_to_anchor=(1.02, 0.9),
-        loc="upper left",
-        frameon=False,
-    )
-    # colorbar
-    # cax = fig.add_axes([1.0, 0.20, 0.03, 0.22])
-    cbar = fig.colorbar(
-        sc,
-        shrink=0.25,
-        aspect=10,
-        anchor=(0.0, 0.2),  # (0.0, 0.2),
-        location="right"
-        # cax=cax,
-    )
-    # cbar.ax.tick_params(direction='in')
-    cbar.ax.yaxis.set_tick_params(color="white", direction="in", left=True, right=True)
-    cbar.ax.set_title(cbar_title, loc="left", fontweight="bold")
-    for key, spine in cbar.ax.spines.items():
-        spine.set_visible(False)
-
-    ax.set_title(title, fontsize=20, fontweight="bold")
-    if ofname is not None:
-        # canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
-        fig.savefig(ofname, bbox_inches="tight", dpi=300)
-        return
-    return ax
+    ax = dot.scatter()
+    if ofname is None:
+        return ax
+    dot.fig.savefig(ofname, bbox_inches="tight", dpi=300)
 
 
 def ringplot(
@@ -639,161 +751,13 @@ def ringplot(
     :param show_ring bool: whether to show outer ring.
 
     """
-
-    colname = column
-
-    # check if any values in `df[colname]` can't be coerced to floats
-    can_be_coerced = df[colname].map(isfloat)
-    if np.sum(~can_be_coerced) > 0:
-        raise ValueError("some value in %s could not be typecast to `float`" % colname)
-    # subset
-    df = df[df[colname] <= cutoff]
-    if len(df) < 1:
-        msg = "Warning: No enrich terms when cutoff = %s" % cutoff
-        return msg
-    # sorting the dataframe for better visualization
-    if colname in ["Adjusted P-value", "P-value", "NOM p-val", "FDR q-val"]:
-        df = df.sort_values(by=colname)
-        ## handle 0s: fill 0 as the second minimun lowest value
-        df[colname].replace(
-            0, method="bfill", inplace=True
-        )  ## asending order, use bfill
-        df = df.assign(p_inv=np.log(1 / df[colname].astype(float)))
-        colname = "p_inv"
-        cbar_title = r"$Log \frac{1}{P val}$"
-
-    if (x is not None) and (x in df.columns):
-        # get top term of each group
-        df = (
-            df.groupby(x)
-            .apply(lambda x: x.sort_values(by=colname).tail(top_term))
-            .reset_index(drop=True)
-        )
-    else:
-        df = df.sort_values(by=colname).tail(top_term)
-
-    xlabel = ""
-    # set xaxis values, so you could get dotplot
-    if (x is not None) and (x in df.columns):
-        xlabel = x
-    elif "Combined Score" in df.columns:
-        xlabel = "Combined Score"
-        x = xlabel
-    elif "Odds Ratio" in df.columns:
-        xlabel = "Odds Ratio"
-        x = xlabel
-    elif "NES" in df.columns:
-        xlabel = "NES"
-        x = xlabel
-    else:
-        # revert back to p_inv
-        x = colname
-        xlabel = cbar_title
-
-    # get scatter area
-    ol = df.columns[df.columns.isin(["Overlap", "Tag %"])]
-    temp = df[ol].squeeze(axis=1).str.split("/", expand=True).astype(int)
-    df = df.assign(Hits_ratio=temp.iloc[:, 0] / temp.iloc[:, 1])
-    # Because the hits_ratio is much too small when being provided as size for ``s``,
-    # we normalize it to some useful point sizes, s=0.3*(raito*3)**2
-    df = df.assign(
-        area=np.pi * (df["Hits_ratio"] * size * plt.rcParams["lines.linewidth"]).pow(2)
+    dot = DotPlot(
+        df, x, "Term", column, title, cutoff, top_term, size, figsize, cmap, ofname
     )
-
-    # create scatter plot
-    if hasattr(sys, "ps1") and (ofname is None):
-        # working inside python console, show figure
-        fig, ax = plt.subplots(figsize=figsize)
-    else:
-        # If working on commandline, don't show figure
-        fig = Figure(figsize=figsize)
-        canvas = FigureCanvas(fig)
-        ax = fig.add_subplot(111)
-
-    # scatter colormap range
-    colmap = df[colname].astype("int")
-    vmin = np.percentile(colmap.min(), 2)
-    vmax = np.percentile(colmap.max(), 98)
-    # outer ring
-    if show_ring:
-        rg = ax.scatter(
-            x=x,
-            y="Term",
-            s=df["area"].max() * 1.5,
-            edgecolors="gray",
-            c="white",
-            data=df,
-            marker="o",
-        )
-    # inner circle
-    sc = ax.scatter(
-        x=x,
-        y="Term",
-        s="area",
-        edgecolors="face",
-        c=colname,
-        cmap=cmap,
-        vmin=vmin,
-        vmax=vmax,
-        data=df,
-        marker="o",
-    )
-
-    # ax.set_xlabel(xlabel, fontsize=14, fontweight="bold")
-    # ax.yaxis.set_major_locator(plt.FixedLocator(y))
-    # ax.yaxis.set_major_formatter(plt.FixedFormatter(ylabels))
-    ax.xaxis.set_tick_params(
-        labelsize=14,
-        labelrotation=90,
-    )
-    ax.yaxis.set_tick_params(labelsize=16)
-    ax.set_axisbelow(True)  # set grid blew other element
-    ax.grid(axis="both")  # zorder=-1.0
-    ax.margins(x=0.25)
-    # ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
-
-    # We change the fontsize of minor ticks label
-    # ax.tick_params(axis='y', which='major', labelsize=16)
-    # ax.tick_params(axis='both', which='minor', labelsize=14)
-
-    # scatter size legend
-    # we use the *func* argument to supply the inverse of the function
-    # used to calculate the sizes from above. The *fmt* ensures to string you want
-    handles, labels = sc.legend_elements(
-        prop="sizes",
-        num=4,  # fmt="$ {x:.2f}",
-        color="gray",
-        func=lambda s: np.sqrt(s / np.pi) / plt.rcParams["lines.linewidth"] / size,
-    )
-    ax.legend(
-        handles,
-        labels,
-        title="% Genes\nin set",
-        bbox_to_anchor=(1.02, 0.9),
-        loc="upper left",
-        frameon=False,
-    )
-    # colorbar
-    # cax = fig.add_axes([1.0, 0.20, 0.03, 0.22])
-    cbar = fig.colorbar(
-        sc,
-        shrink=0.25,
-        aspect=10,
-        anchor=(0.0, 0.2),  # (0.0, 0.2),
-        location="right"
-        # cax=cax,
-    )
-    cbar.ax.yaxis.set_tick_params(color="white", direction="in", left=True, right=True)
-    cbar.ax.set_title(cbar_title, loc="left", fontweight="bold")
-    for key, spine in cbar.ax.spines.items():
-        spine.set_visible(False)
-
-    ax.set_title(title, fontsize=20, fontweight="bold")
-    if ofname is not None:
-        # canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
-        fig.savefig(ofname, bbox_inches="tight", dpi=300)
-        return
-    return ax
+    ax = dot.scatter(outer_ring=show_ring)  # ofname=None, so, you get ax
+    if ofname is None:
+        return ax
+    dot.fig.savefig(ofname, bbox_inches="tight", dpi=300)
 
 
 def enrichmap(
@@ -832,54 +796,13 @@ def barplot(
     :param ofname: output file name. If None, don't save figure
 
     """
-    colname = column
-    # check if any values in `df[colname]` can't be coerced to floats
-    can_be_coerced = df[colname].map(isfloat)
-    if np.sum(~can_be_coerced) > 0:
-        raise ValueError("some value in %s could not be typecast to `float`" % colname)
-    df.loc[:, colname] = df[colname].map(float)
-    df = df[df[colname] <= cutoff]
-    if len(df) < 1:
-        msg = "Warning: No enrich terms using library %s when cutoff = %s" % (
-            title,
-            cutoff,
-        )
-        return msg
-    if colname in ["Adjusted P-value", "P-value", "FDR q-val", "NOM p-val"]:
-        df = df.assign(logAP=lambda x: -x[colname].apply(np.log10))
-        colname = "logAP"
-
-    dd = df.sort_values(by=colname).iloc[-top_term:, :]
-    # create bar plot
-    if hasattr(sys, "ps1") and (ofname is None):
-        # working inside python console, show (True) figure
-        fig = plt.figure(figsize=figsize)
-    else:
-        # If working on commandline, don't show figure
-        fig = Figure(figsize=figsize)
-        canvas = FigureCanvas(fig)
-    ax = fig.add_subplot(111)
-    bar = dd.plot.barh(x="Term", y=colname, color=color, alpha=0.75, fontsize=16, ax=ax)
-
-    if column in ["Adjusted P-value", "P-value", "FDR q-val", "NOM p-val"]:
-        xlabel = "-log$_{10}$(%s)" % column
-    else:
-        xlabel = column
-    bar.set_xlabel(xlabel, fontsize=16, fontweight="bold")
-    bar.set_ylabel("")
-    bar.set_title(title, fontsize=24, fontweight="bold")
-    bar.xaxis.set_major_locator(MaxNLocator(integer=True))
-    bar.legend_.remove()
-    adjust_spines(ax, spines=["left", "bottom"])
-
-    if hasattr(sys, "ps1") and (ofname is not None):
-        # canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
-        fig.savefig(ofname, bbox_inches="tight", dpi=300)
-        return
-    elif not hasattr(sys, "ps1") and (ofname is not None):
-        canvas.print_figure(ofname, bbox_inches="tight", dpi=300)
-        return
-    return ax
+    dot = DotPlot(
+        df, None, "Term", column, title, cutoff, top_term, 2, figsize, "viridis", ofname
+    )
+    ax = dot.barh(color=color)
+    if ofname is None:
+        return ax
+    dot.fig.savefig(ofname, bbox_inches="tight", dpi=300)
 
 
 def traceplot(
