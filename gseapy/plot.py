@@ -633,8 +633,11 @@ class DotPlot(object):
         # make area bigger to better visualization
         # area = df["Hits_ratio"] * plt.rcParams["lines.linewidth"] * 100
         df = self._df.assign(
-            area= (np.pi*
-                self._df["Hits_ratio"] * self.size * plt.rcParams["lines.markersize"]
+            area=(
+                np.pi
+                * self._df["Hits_ratio"]
+                * self.size
+                * plt.rcParams["lines.markersize"]
             ).pow(2)
         )
         colmap = df[self.colname].round().astype(int)
@@ -687,12 +690,13 @@ class DotPlot(object):
         # used to calculate the sizes from above. The *fmt* ensures to string you want
         handles, labels = sc.legend_elements(
             prop="sizes",
-            num=3,  # 
+            num=3,  #
             fmt="{x:.2f}",
             color="gray",
             func=lambda s: np.sqrt(s)
             / plt.rcParams["lines.markersize"]
-            / self.size / np.pi,
+            / self.size
+            / np.pi,
         )
         ax.legend(
             handles,
@@ -790,7 +794,7 @@ def dotplot(
     figsize: Tuple[float] = (6, 5.5),
     cmap: str = "viridis_r",
     ofname: Optional[str] = None,
-    xticklabels_rot: Optional[float]= None,
+    xticklabels_rot: Optional[float] = None,
     yticklabels_rot: Optional[float] = None,
     **kwargs,
 ):
@@ -840,7 +844,7 @@ def ringplot(
     cmap: str = "viridis_r",
     ofname: Optional[str] = None,
     show_ring: bool = True,
-    xticklabels_rot: Optional[float]= None,
+    xticklabels_rot: Optional[float] = None,
     yticklabels_rot: Optional[float] = None,
     **kwargs,
 ):
@@ -864,7 +868,7 @@ def ringplot(
         df, x, "Term", column, title, cutoff, top_term, size, figsize, cmap, ofname
     )
     ax = dot.scatter(outer_ring=show_ring)
-    
+
     if xticklabels_rot:
         for label in ax.get_xticklabels():
             label.set_ha("right")
