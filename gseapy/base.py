@@ -250,7 +250,7 @@ class GSEAbase(object):
                     genesets_dict[key] = genes
             return genesets_dict
 
-        tmpname = "enrichr." + gmt + ".gmt"
+        tmpname = "Enrichr." + gmt + ".gmt"
         tempath = os.path.join(DEFAULT_CACHE_PATH, tmpname)
         # if file already download
         if os.path.isfile(tempath):

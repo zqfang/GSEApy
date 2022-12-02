@@ -11,17 +11,24 @@ from matplotlib.colors import Normalize
 from matplotlib.figure import Figure
 from matplotlib.ticker import MaxNLocator
 
+from gseapy.scipalette import SciPalette
+
 
 class MidpointNormalize(Normalize):
-    def __init__(self, vmin=None, vmax=None, midpoint=None, clip=False):
-        self.midpoint = midpoint
+    def __init__(self, vmin=None, vmax=None, vcenter=None, clip=False):
+        self.vcenter = vcenter
         Normalize.__init__(self, vmin, vmax, clip)
 
     def __call__(self, value, clip=None):
         # I'm ignoring masked values and all kinds of edge cases to make a
         # simple example...
-        x, y = [self.vmin, self.midpoint, self.vmax], [0, 0.5, 1]
-        return np.ma.masked_array(np.interp(value, x, y))
+        # Note also that we must extrapolate beyond vmin/vmax
+        x, y = [self.vmin, self.vcenter, self.vmax], [0, 0.5, 1]
+        return np.ma.masked_array(np.interp(value, x, y, left=-np.inf, right=np.inf))
+
+    def inverse(self, value):
+        y, x = [self.vmin, self.vcenter, self.vmax], [0, 0.5, 1]
+        return np.interp(value, x, y, left=-np.inf, right=np.inf)
 
 
 def zscore(data2d, axis=0):
@@ -46,97 +53,155 @@ def zscore(data2d, axis=0):
     return z_scored
 
 
-def _skip_ticks(labels, tickevery):
-    """Return ticks and labels at evenly spaced intervals."""
-    n = len(labels)
-    if tickevery == 0:
-        ticks, labels = [], []
-    elif tickevery == 1:
-        ticks, labels = np.arange(n) + 0.5, labels
-    else:
-        start, end, step = 0, n, tickevery
-        ticks = np.arange(start, end, step) + 0.5
-        labels = labels[start:end:step]
-    return ticks, labels
+class Heatmap(object):
+    def __init__(
+        self,
+        df,
+        z_score: Optional[int] = None,
+        title: Optional[str] = None,
+        figsize: Tuple[float] = (5, 5),
+        cmap: Optional[str] = None,
+        xticklabels: bool = True,
+        yticklabels: bool = True,
+        ofname: Optional[str] = None,
+        **kwargs,
+    ):
+        self.title = "Heatmap of the Analyzed Geneset" if title is None else title
+        self.figsize = figsize
+        self.xticklabels = xticklabels
+        self.yticklabels = yticklabels
+        self.ofname = ofname
 
+        # scale dataframe
+        df = df.astype(float)
+        df = zscore(df, axis=z_score)
+        df = df.iloc[::-1]
+        self._df = df
+        self.cbar_title = "Scaled Exp" if z_score is None else "Z-Score"
+        self.cmap = cmap
+        if cmap is None:
+            self.cmap = SciPalette.create_colormap()  # navyblue2darkred
+        self._zscore = z_score
 
-def _auto_ticks(ax, labels, axis):
-    transform = ax.figure.dpi_scale_trans.inverted()
-    bbox = ax.get_window_extent().transformed(transform)
-    size = [bbox.width, bbox.height][axis]
-    axis = [ax.xaxis, ax.yaxis][axis]
-    (tick,) = ax.xaxis.set_ticks([0])
-    fontsize = tick.label1.get_size()
-    max_ticks = int(size // (fontsize / 72))
-    if max_ticks < 1:
-        tickevery = 1
-    else:
-        tickevery = len(labels) // max_ticks + 1
-    return tickevery
+    def _skip_ticks(self, labels, tickevery):
+        """Return ticks and labels at evenly spaced intervals."""
+        n = len(labels)
+        if tickevery == 0:
+            ticks, labels = [], []
+        elif tickevery == 1:
+            ticks, labels = np.arange(n) + 0.5, labels
+        else:
+            start, end, step = 0, n, tickevery
+            ticks = np.arange(start, end, step) + 0.5
+            labels = labels[start:end:step]
+        return ticks, labels
+
+    def _auto_ticks(self, ax, labels, axis):
+        transform = ax.figure.dpi_scale_trans.inverted()
+        bbox = ax.get_window_extent().transformed(transform)
+        size = [bbox.width, bbox.height][axis]
+        axis = [ax.xaxis, ax.yaxis][axis]
+        (tick,) = ax.xaxis.set_ticks([0])
+        fontsize = tick.label1.get_size()
+        max_ticks = int(size // (fontsize / 72))
+        if max_ticks < 1:
+            tickevery = 1
+        else:
+            tickevery = len(labels) // max_ticks + 1
+        return tickevery
+
+    def get_ax(self):
+        if hasattr(sys, "ps1") and (self.ofname is None):
+            fig = plt.figure(figsize=self.figsize)
+        else:
+            fig = Figure(figsize=self.figsize)
+            canvas = FigureCanvas(fig)
+        ax = fig.add_subplot(111)
+        self.fig = fig
+        return ax
+
+    def draw(
+        self,
+    ):
+        df = self._df
+        ax = self.get_ax()
+        vmin = np.percentile(df, 2)
+        vmax = np.percentile(df, 98)
+        if self._zscore is None:
+            norm = Normalize(vmin=vmin, vmax=vmax)
+            cbar_locator = MaxNLocator(nbins=5, integer=True)
+        else:
+            norm = MidpointNormalize(vmin=vmin, vmax=vmax, vcenter=0)
+            cbar_locator = MaxNLocator(nbins=3, symmetric=True)  # symmetric=True
+        matrix = ax.pcolormesh(
+            df.values,
+            cmap=self.cmap,
+            norm=norm,
+            rasterized=True,
+        )
+        xstep = self._auto_ticks(ax, df.columns.values, 0)
+        ystep = self._auto_ticks(ax, df.index.values, 1)
+        xticks, xlabels = self._skip_ticks(df.columns.values, tickevery=xstep)
+        yticks, ylabels = self._skip_ticks(df.index.values, tickevery=ystep)
+        ax.set_ylim([0, len(df)])
+        ax.set(xticks=xticks, yticks=yticks)
+        ax.set_xticklabels(
+            xlabels if self.xticklabels else "", fontsize=14, rotation=90
+        )
+        ax.set_yticklabels(ylabels if self.yticklabels else "", fontsize=14)
+        ax.set_title(self.title, fontsize=20)
+        ax.tick_params(
+            axis="both", which="both", bottom=False, top=False, right=False, left=False
+        )
+        # cax=fig.add_axes([0.93,0.25,0.05,0.20])
+        cbar = self.fig.colorbar(matrix, shrink=0.3, aspect=10)  #  ticks=[-1, 0, 1]
+        cbar.ax.yaxis.set_tick_params(
+            color="white", direction="in", left=True, right=True
+        )
+        # Add colorbar, make sure to specify tick locations to match desired ticklabels
+        cbar.locator = cbar_locator  # LinearLocator(3)
+        cbar.update_ticks()
+        cbar.ax.set_title(self.cbar_title, loc="left", fontweight="bold")
+        for key, spine in cbar.ax.spines.items():
+            spine.set_visible(False)
+        # cbar = colorbar(matrix)
+
+        for side in ["top", "right", "left", "bottom"]:
+            ax.spines[side].set_visible(False)
+            # cbar.ax.spines[side].set_visible(False)
+        return ax
 
 
 def heatmap(
     df,
-    z_score=None,
-    title="",
-    figsize=(5, 5),
-    cmap="RdBu_r",
-    xticklabels=True,
-    yticklabels=True,
-    ofname=None,
+    z_score: Optional[int] = None,
+    title: str = "",
+    figsize: Tuple[float] = (5, 5),
+    cmap: Optional[str] = None,
+    xticklabels: bool = True,
+    yticklabels: bool = True,
+    ofname: Optional[str] = None,
     **kwargs,
 ):
     """Visualize the dataframe.
 
     :param df: DataFrame from expression table.
-    :param z_score: 0, 1, or None. z_score axis{0, 1}. If None, don't normalize data.
+    :param z_score: 0, 1, or None. z_score axis{0, 1}. If None, not scale.
     :param title: figure title.
     :param figsize: heatmap figsize.
-    :param cmap: matplotlib colormap.
+    :param cmap: matplotlib colormap. e.g. "RdBu_r".
+    :param xticklabels: bool, whether to show xticklabels.
+    :param xticklabels: bool, whether to show xticklabels.
     :param ofname: output file name. If None, don't save figure
 
     """
-    df = df.astype(float)
-    df = zscore(df, axis=z_score)
-    df = df.iloc[::-1]
-    # If working on commandline, don't show figure
-    if hasattr(sys, "ps1") and (ofname is None):
-        fig = plt.figure(figsize=figsize)
-    else:
-        fig = Figure(figsize=figsize)
-        canvas = FigureCanvas(fig)
-    ax = fig.add_subplot(111)
-    vmin = np.percentile(df, 2)
-    vmax = np.percentile(df, 98)
-    matrix = ax.pcolormesh(df.values, cmap=cmap, vmin=vmin, vmax=vmax, rasterized=True)
-    xstep = _auto_ticks(ax, df.columns.values, 0)
-    ystep = _auto_ticks(ax, df.index.values, 1)
-    xticks, xlabels = _skip_ticks(df.columns.values, tickevery=xstep)
-    yticks, ylabels = _skip_ticks(df.index.values, tickevery=ystep)
-    ax.set_ylim([0, len(df)])
-    ax.set(xticks=xticks, yticks=yticks)
-    ax.set_xticklabels(xlabels if xticklabels else "", fontsize=14, rotation=90)
-    ax.set_yticklabels(ylabels if yticklabels else "", fontsize=14)
-    ax.set_title("%s\nHeatmap of the Analyzed Geneset" % title, fontsize=20)
-    ax.tick_params(
-        axis="both", which="both", bottom=False, top=False, right=False, left=False
-    )
-    # cax=fig.add_axes([0.93,0.25,0.05,0.20])
-    cbar = fig.colorbar(matrix, shrink=0.3, aspect=10)
-    cbar_title = "z-score" if z_score is not None else ""
-    cbar.ax.yaxis.set_tick_params(color="white", direction="in", left=True, right=True)
-    cbar.ax.set_title(cbar_title, loc="left", fontweight="bold")
-    for key, spine in cbar.ax.spines.items():
-        spine.set_visible(False)
-    # cbar = colorbar(matrix)
 
-    for side in ["top", "right", "left", "bottom"]:
-        ax.spines[side].set_visible(False)
-        # cbar.ax.spines[side].set_visible(False)
-    if ofname is not None:
-        # canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
-        fig.savefig(ofname, bbox_inches="tight", dpi=300)
-    return
+    ht = Heatmap(df, z_score, title, figsize, cmap, xticklabels, yticklabels, ofname)
+    ax = ht.draw()
+    if ofname is None:
+        return ax
+    # canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
+    ht.fig.savefig(ofname, bbox_inches="tight", dpi=300)
 
 
 class GSEAPlot(object):
@@ -156,13 +221,11 @@ class GSEAPlot(object):
         ofname=None,
         **kwargs,
     ):
-        # center color map at midpoint = 0
-        self._norm = MidpointNormalize(midpoint=0)
+
         # dataFrame of ranked matrix scores
         self._x = np.arange(len(rank_metric))
         self.rankings = np.asarray(rank_metric)
         self.RES = np.asarray(RES)
-        self._im_matrix = np.tile(self.rankings, (2, 1))
 
         self.figsize = figsize
         self.term = term
@@ -300,14 +363,17 @@ class GSEAPlot(object):
                The dimensions [left, bottom, width, height] of the new axes. All
                quantities are in fractions of figure width and height.
         """
+        # center color map at midpoint = 0
+        vmin = np.percentile(self.rankings.min(), 2)
+        vmax = np.percentile(self.rankings.max(), 98)
+        midnorm = MidpointNormalize(vmin=vmin, vcenter=0, vmax=vmax)
         # colormap
         ax3 = self.fig.add_axes(rect, sharex=self.ax)
-        ax3.imshow(
-            self._im_matrix,
-            aspect="auto",
-            norm=self._norm,
+        ax3.pcolormesh(
+            self.rankings[np.newaxis, :],
+            rasterized=True,
+            norm=midnorm,
             cmap=self.cmap,
-            interpolation="none",
         )  # cm.coolwarm
         ax3.spines["bottom"].set_visible(False)
         ax3.tick_params(
@@ -447,7 +513,7 @@ class DotPlot(object):
         title: str = "",
         thresh: float = 0.05,
         top_term: int = 10,
-        size: float = 10,
+        size: float = 1,
         figsize: Tuple[float] = (6, 5.5),
         cmap: str = "viridis_r",
         ofname: Optional[str] = None,
@@ -567,9 +633,8 @@ class DotPlot(object):
         # make area bigger to better visualization
         # area = df["Hits_ratio"] * plt.rcParams["lines.linewidth"] * 100
         df = self._df.assign(
-            area=np.pi
-            * (
-                self._df["Hits_ratio"] * self.size * plt.rcParams["lines.linewidth"]
+            area= (np.pi*
+                self._df["Hits_ratio"] * self.size * plt.rcParams["lines.markersize"]
             ).pow(2)
         )
         colmap = df[self.colname].round().astype(int)
@@ -580,21 +645,23 @@ class DotPlot(object):
         ax = self.get_ax()
         # if self.x is None:
         x, xlabel = self.set_x()
+        y = self.y
         # outer ring
         if outer_ring:
             rg = ax.scatter(
                 x=x,
-                y=self.y,
+                y=y,
                 s=df["area"].max() * 1.5,
                 edgecolors="gray",
                 c="white",
                 data=df,
                 marker="o",
             )
+            # data = np.array(rg.get_offsets()) # get data coordinates
         # inner circle
         sc = ax.scatter(
             x=x,
-            y=self.y,
+            y=y,
             data=df,
             s="area",
             edgecolors="face",
@@ -604,7 +671,6 @@ class DotPlot(object):
             vmax=vmax,
             marker="o",
         )
-
         ax.set_xlabel(xlabel, fontsize=14, fontweight="bold")
         ax.xaxis.set_tick_params(labelsize=14)
         ax.yaxis.set_tick_params(labelsize=16)
@@ -621,11 +687,12 @@ class DotPlot(object):
         # used to calculate the sizes from above. The *fmt* ensures to string you want
         handles, labels = sc.legend_elements(
             prop="sizes",
-            num=3,  # fmt="$ {x:.2f}",
+            num=3,  # 
+            fmt="{x:.2f}",
             color="gray",
-            func=lambda s: np.sqrt(s / np.pi)
-            / plt.rcParams["lines.linewidth"]
-            / self.size,
+            func=lambda s: np.sqrt(s)
+            / plt.rcParams["lines.markersize"]
+            / self.size / np.pi,
         )
         ax.legend(
             handles,
@@ -661,7 +728,7 @@ class DotPlot(object):
         for key, spine in cbar.ax.spines.items():
             spine.set_visible(False)
 
-    def barh(self, ax=None, color=None):
+    def barh(self, color=None, ax=None):
         """
         Barplot
         """
@@ -679,9 +746,38 @@ class DotPlot(object):
         bar.set_title(self.title, fontsize=24, fontweight="bold")
         bar.xaxis.set_major_locator(MaxNLocator(integer=True))
         bar.legend_.remove()
-        adjust_spines(ax, spines=["left", "bottom"])
+        self.adjust_spines(ax, spines=["left", "bottom"])
 
         return ax
+
+    def adjust_spines(self, ax, spines):
+        """function for removing spines and ticks.
+
+        :param ax: axes object
+        :param spines: a list of spines names to keep. e.g [left, right, top, bottom]
+                        if spines = []. remove all spines and ticks.
+
+        """
+        for loc, spine in ax.spines.items():
+            if loc in spines:
+                # spine.set_position(('outward', 10))  # outward by 10 points
+                # spine.set_smart_bounds(True)
+                continue
+            else:
+                spine.set_color("none")  # don't draw spine
+
+        # turn off ticks where there is no spine
+        if "left" in spines:
+            ax.yaxis.set_ticks_position("left")
+        else:
+            # no yaxis ticks
+            ax.yaxis.set_ticks([])
+
+        if "bottom" in spines:
+            ax.xaxis.set_ticks_position("bottom")
+        else:
+            # no xaxis ticks
+            ax.xaxis.set_ticks([])
 
 
 def dotplot(
@@ -690,10 +786,12 @@ def dotplot(
     title: str = "",
     cutoff: float = 0.05,
     top_term: int = 10,
-    size: float = 10,
+    size: float = 1,
     figsize: Tuple[float] = (6, 5.5),
     cmap: str = "viridis_r",
     ofname: Optional[str] = None,
+    xticklabels_rot: Optional[float]= None,
+    yticklabels_rot: Optional[float] = None,
     **kwargs,
 ):
     """Visualize enrichr results.
@@ -703,19 +801,28 @@ def dotplot(
     :param title: figure title
     :param cutoff: terms with 'column' value < cut-off are shown.
     :param top_term: number of enriched terms to show.
-    :param ascending: bool, the order of y axis.
     :param size: float, scale the scatter size to get proper visualization.
-    :param norm: maplotlib.colors.Normalize object.
-    :param legend: bool, whether to show legend.
     :param figsize: tuple, figure size.
     :param cmap: matplotlib colormap
     :param ofname: output file name. If None, don't save figure
-
+    :param xticklabels_rot: rotation angel of xticklabels
+    :param yticklabels_rot: rotation angel of xticklabels
     """
     dot = DotPlot(
         df, None, "Term", column, title, cutoff, top_term, size, figsize, cmap, ofname
     )
     ax = dot.scatter()
+
+    if xticklabels_rot:
+        for label in ax.get_xticklabels():
+            label.set_ha("right")
+            label.set_rotation(xticklabels_rot)
+
+    if yticklabels_rot:
+        for label in ax.get_yticklabels():
+            label.set_ha("right")
+            label.set_rotation(yticklabels_rot)
+
     if ofname is None:
         return ax
     dot.fig.savefig(ofname, bbox_inches="tight", dpi=300)
@@ -728,11 +835,13 @@ def ringplot(
     title: str = "",
     cutoff: float = 0.05,
     top_term: int = 10,
-    size: float = 10,
+    size: float = 1,
     figsize: Tuple[float] = (6, 5.5),
     cmap: str = "viridis_r",
     ofname: Optional[str] = None,
     show_ring: bool = True,
+    xticklabels_rot: Optional[float]= None,
+    yticklabels_rot: Optional[float] = None,
     **kwargs,
 ):
     """
@@ -754,7 +863,18 @@ def ringplot(
     dot = DotPlot(
         df, x, "Term", column, title, cutoff, top_term, size, figsize, cmap, ofname
     )
-    ax = dot.scatter(outer_ring=show_ring)  # ofname=None, so, you get ax
+    ax = dot.scatter(outer_ring=show_ring)
+    
+    if xticklabels_rot:
+        for label in ax.get_xticklabels():
+            label.set_ha("right")
+            label.set_rotation(xticklabels_rot)
+
+    if yticklabels_rot:
+        for label in ax.get_yticklabels():
+            label.set_ha("right")
+            label.set_rotation(yticklabels_rot)
+
     if ofname is None:
         return ax
     dot.fig.savefig(ofname, bbox_inches="tight", dpi=300)
@@ -858,33 +978,3 @@ def traceplot(
         fig.savefig(ofname, bbox_inches="tight", dpi=300)
         return
     return ax
-
-
-def adjust_spines(ax, spines):
-    """function for removing spines and ticks.
-
-    :param ax: axes object
-    :param spines: a list of spines names to keep. e.g [left, right, top, bottom]
-                    if spines = []. remove all spines and ticks.
-
-    """
-    for loc, spine in ax.spines.items():
-        if loc in spines:
-            # spine.set_position(('outward', 10))  # outward by 10 points
-            # spine.set_smart_bounds(True)
-            continue
-        else:
-            spine.set_color("none")  # don't draw spine
-
-    # turn off ticks where there is no spine
-    if "left" in spines:
-        ax.yaxis.set_ticks_position("left")
-    else:
-        # no yaxis ticks
-        ax.yaxis.set_ticks([])
-
-    if "bottom" in spines:
-        ax.xaxis.set_ticks_position("bottom")
-    else:
-        # no xaxis ticks
-        ax.xaxis.set_ticks([])
