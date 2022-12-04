@@ -532,6 +532,7 @@ class DotPlot(object):
         self.top_term = top_term
         self.thresh = thresh
         self._df = self.process(df)
+        plt.rcParams.update({"pdf.fonttype": 42, "ps.fonttype": 42})
 
     def isfloat(self, x):
         try:
