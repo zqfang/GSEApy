@@ -149,7 +149,7 @@ class Heatmap(object):
             xlabels if self.xticklabels else "", fontsize=14, rotation=90
         )
         ax.set_yticklabels(ylabels if self.yticklabels else "", fontsize=14)
-        ax.set_title(self.title, fontsize=20)
+        ax.set_title(self.title, fontsize=20, fontweight="bold")
         ax.tick_params(
             axis="both", which="both", bottom=False, top=False, right=False, left=False
         )
@@ -509,27 +509,30 @@ class DotPlot(object):
         df,
         x: Optional[str] = None,
         y: str = "Term",
-        hue: str = "Adjusted P-value",
-        title: str = "",
+        size: str = "Adjusted P-value",
+        size_scale: float = 5.0,
         thresh: float = 0.05,
-        top_term: int = 10,
-        size: float = 1,
+        n_terms: int = 10,
+        title: str = "",
         figsize: Tuple[float] = (6, 5.5),
         cmap: str = "viridis_r",
         ofname: Optional[str] = None,
         **kwargs,
     ):
+        self.marker = "o"
+        if "marker" in kwargs:
+            self.marker = kwargs["marker"]
         # assert column in ["Adjusted P-value", "P-value", "NOM p-val", "FDR q-val"]
         self.y = y
         self.x = x
-        self.hue = str(hue)
-        self.colname = hue
+        self.size = str(size)
+        self.colname = size
         self.figsize = figsize
         self.cmap = cmap
         self.ofname = ofname
-        self.size = size
+        self.scale = size_scale
         self.title = title
-        self.top_term = top_term
+        self.n_terms = n_terms
         self.thresh = thresh
         self._df = self.process(df)
         plt.rcParams.update({"pdf.fonttype": 42, "ps.fonttype": 42})
@@ -570,11 +573,11 @@ class DotPlot(object):
             # get top term of each group
             df = (
                 df.groupby(self.x)
-                .apply(lambda _x: _x.sort_values(by=self.colname).tail(self.top_term))
+                .apply(lambda _x: _x.sort_values(by=self.colname).tail(self.n_terms))
                 .reset_index(drop=True)
             )
         else:
-            df = df.sort_values(by=self.colname).tail(self.top_term)
+            df = df.sort_values(by=self.colname).tail(self.n_terms)
 
         # get scatter area
         ol = df.columns[df.columns.isin(["Overlap", "Tag %"])]
@@ -635,10 +638,7 @@ class DotPlot(object):
         # area = df["Hits_ratio"] * plt.rcParams["lines.linewidth"] * 100
         df = self._df.assign(
             area=(
-                np.pi
-                * self._df["Hits_ratio"]
-                * self.size
-                * plt.rcParams["lines.markersize"]
+                self._df["Hits_ratio"] * self.scale * plt.rcParams["lines.markersize"]
             ).pow(2)
         )
         colmap = df[self.colname].round().astype(int)
@@ -652,14 +652,30 @@ class DotPlot(object):
         y = self.y
         # outer ring
         if outer_ring:
-            rg = ax.scatter(
+            smax = df["area"].max()
+            # TODO:
+            # Matplotlib BUG: when setting edge colors,
+            # there's the center of scatter could not aligned.
+            # Instead, I have to add more dots in the plot to get the ring
+            blk_sc = ax.scatter(
                 x=x,
                 y=y,
-                s=df["area"].max() * 1.5,
-                edgecolors="gray",
+                s=smax * 1.6,
+                edgecolors="none",
+                c="black",
+                data=df,
+                marker=self.marker,
+                zorder=0,
+            )
+            wht_sc = ax.scatter(
+                x=x,
+                y=y,
+                s=smax * 1.3,
+                edgecolors="none",
                 c="white",
                 data=df,
-                marker="o",
+                marker=self.marker,
+                zorder=1,
             )
             # data = np.array(rg.get_offsets()) # get data coordinates
         # inner circle
@@ -668,18 +684,19 @@ class DotPlot(object):
             y=y,
             data=df,
             s="area",
-            edgecolors="face",
+            edgecolors="none",
             c=self.colname,
             cmap=self.cmap,
             vmin=vmin,
             vmax=vmax,
-            marker="o",
+            marker=self.marker,
+            zorder=2,
         )
         ax.set_xlabel(xlabel, fontsize=14, fontweight="bold")
         ax.xaxis.set_tick_params(labelsize=14)
         ax.yaxis.set_tick_params(labelsize=16)
         ax.set_axisbelow(True)  # set grid blew other element
-        ax.grid(axis="y")  # zorder=-1.0
+        ax.grid(axis="y", zorder=-1)  # zorder=-1.0
         ax.margins(x=0.25)
 
         # We change the fontsize of minor ticks label
@@ -694,10 +711,7 @@ class DotPlot(object):
             num=3,  #
             fmt="{x:.2f}",
             color="gray",
-            func=lambda s: np.sqrt(s)
-            / plt.rcParams["lines.markersize"]
-            / self.size
-            / np.pi,
+            func=lambda s: np.sqrt(s) / plt.rcParams["lines.markersize"] / self.scale,
         )
         ax.legend(
             handles,
@@ -739,50 +753,25 @@ class DotPlot(object):
         """
         if ax is None:
             ax = self.get_ax()
+        x, xlabel = self.set_x()
         bar = self._df.plot.barh(
-            x="Term", y=self.colname, color=color, alpha=0.75, fontsize=16, ax=ax
+            x="Term", y=x, color=color, alpha=0.75, fontsize=16, ax=ax
         )
-        if self.hue in ["Adjusted P-value", "P-value", "FDR q-val", "NOM p-val"]:
-            xlabel = "-log$_{10}$(%s)" % self.hue
+        if self.size in ["Adjusted P-value", "P-value", "FDR q-val", "NOM p-val"]:
+            xlabel = "-log$_{10}$(%s)" % self.size
         else:
-            xlabel = self.hue
+            xlabel = self.size
         bar.set_xlabel(xlabel, fontsize=16, fontweight="bold")
         bar.set_ylabel("")
         bar.set_title(self.title, fontsize=24, fontweight="bold")
-        bar.xaxis.set_major_locator(MaxNLocator(integer=True))
+        bar.xaxis.set_major_locator(MaxNLocator(nbins=5, integer=True))
         bar.legend_.remove()
-        self.adjust_spines(ax, spines=["left", "bottom"])
-
+        # self.adjust_spines(ax, spines=["left", "bottom"])
+        for side in ["right", "top"]:
+            ax.spines[side].set_visible(False)
+        # set ticks
+        ax.tick_params(axis="both", which="both", top=False, right=False)
         return ax
-
-    def adjust_spines(self, ax, spines):
-        """function for removing spines and ticks.
-
-        :param ax: axes object
-        :param spines: a list of spines names to keep. e.g [left, right, top, bottom]
-                        if spines = []. remove all spines and ticks.
-
-        """
-        for loc, spine in ax.spines.items():
-            if loc in spines:
-                # spine.set_position(('outward', 10))  # outward by 10 points
-                # spine.set_smart_bounds(True)
-                continue
-            else:
-                spine.set_color("none")  # don't draw spine
-
-        # turn off ticks where there is no spine
-        if "left" in spines:
-            ax.yaxis.set_ticks_position("left")
-        else:
-            # no yaxis ticks
-            ax.yaxis.set_ticks([])
-
-        if "bottom" in spines:
-            ax.xaxis.set_ticks_position("bottom")
-        else:
-            # no xaxis ticks
-            ax.xaxis.set_ticks([])
 
 
 def dotplot(
@@ -791,30 +780,45 @@ def dotplot(
     title: str = "",
     cutoff: float = 0.05,
     top_term: int = 10,
-    size: float = 1,
+    size: float = 5,
     figsize: Tuple[float] = (6, 5.5),
     cmap: str = "viridis_r",
     ofname: Optional[str] = None,
     xticklabels_rot: Optional[float] = None,
     yticklabels_rot: Optional[float] = None,
+    marker="o",
     **kwargs,
 ):
     """Visualize enrichr results.
 
-    :param df: GSEApy Enrichr DataFrame results.
-    :param column: which column of DataFrame to show. Default: Adjusted P-value
+    :param df: GSEApy DataFrame results.
+    :param column: column name in dataframe to map the dot size. Default: Adjusted P-value
     :param title: figure title
     :param cutoff: terms with 'column' value < cut-off are shown.
     :param top_term: number of enriched terms to show.
-    :param size: float, scale the scatter size to get proper visualization.
+    :param size: float, scale the dot size to get proper visualization.
     :param figsize: tuple, figure size.
     :param cmap: matplotlib colormap
     :param ofname: output file name. If None, don't save figure
     :param xticklabels_rot: rotation angel of xticklabels
     :param yticklabels_rot: rotation angel of xticklabels
+    :param marker: the matplotlib.markers. See https://matplotlib.org/stable/api/markers_api.html
+    :param kwargs: kwargs that maplotlib.pyplot.scatter recognized
     """
     dot = DotPlot(
-        df, None, "Term", column, title, cutoff, top_term, size, figsize, cmap, ofname
+        df,
+        x=None,
+        y="Term",
+        size=column,
+        title=title,
+        thresh=cutoff,
+        n_terms=top_term,
+        size_scale=size,
+        figsize=figsize,
+        cmap=cmap,
+        ofname=ofname,
+        marker=marker,
+        **kwargs,
     )
     ax = dot.scatter()
 
@@ -840,33 +844,47 @@ def ringplot(
     title: str = "",
     cutoff: float = 0.05,
     top_term: int = 10,
-    size: float = 1,
+    size: float = 5,
     figsize: Tuple[float] = (6, 5.5),
     cmap: str = "viridis_r",
     ofname: Optional[str] = None,
-    show_ring: bool = True,
     xticklabels_rot: Optional[float] = None,
     yticklabels_rot: Optional[float] = None,
+    marker="o",
+    show_ring: bool = True,
     **kwargs,
 ):
     """
     when multiple samples exist in the input dataframe, use ringplot instead of heatmap
 
-    :param df: GSEApy Enrichr DataFrame results.
-    :param x: column name of x axis data from df.
-    :param column: which column of DataFrame to show for dot's color. Default: Adjusted P-value
+    :param df: GSEApy DataFrame results.
+    :param x: column name in dataframe to map the x-axis value.
+    :param column: column name in dataframe to map the dot size. Default: Adjusted P-value
     :param title: figure title
     :param cutoff: terms with 'column' value < cut-off are shown.
     :param top_term: number of enriched terms to show.
-    :param sizes: scatter size. Not functional for now
+    :param size: float, scale the dot size to get proper visualization.
     :param figsize: tuple, figure size.
     :param cmap: matplotlib colormap
     :param ofname: output file name. If None, don't save figure
+    :param marker: the matplotlib.markers. See https://matplotlib.org/stable/api/markers_api.html
     :param show_ring bool: whether to show outer ring.
 
     """
     dot = DotPlot(
-        df, x, "Term", column, title, cutoff, top_term, size, figsize, cmap, ofname
+        df,
+        x=x,
+        y="Term",
+        size=column,
+        title=title,
+        thresh=cutoff,
+        n_terms=top_term,
+        size_scale=size,
+        figsize=figsize,
+        cmap=cmap,
+        ofname=ofname,
+        marker=marker,
+        **kwargs,
     )
     ax = dot.scatter(outer_ring=show_ring)
 
@@ -911,18 +929,27 @@ def barplot(
 ):
     """Visualize enrichr results.
 
-    :param df: GSEApy Enrichr DataFrame results.
-    :param column: which column of DataFrame to show. Default: Adjusted P-value
+    :param df: GSEApy DataFrame results.
+    :param column: column name in dataframe to map the x-axis data. Default: Adjusted P-value
     :param title: figure title.
     :param cutoff: terms with 'column' value < cut-off are shown.
     :param top_term: number of top enriched terms to show.
     :param figsize: tuple, matplotlib figsize.
-    :param color: color for bars.
+    :param color: matplotlib.colors. Must be reconigzed by matplotlib
     :param ofname: output file name. If None, don't save figure
 
     """
     dot = DotPlot(
-        df, None, "Term", column, title, cutoff, top_term, 2, figsize, "viridis", ofname
+        df,
+        x=None,  # placeholder only
+        y="Term",
+        size=column,  # it's bar plot
+        title=title,
+        thresh=cutoff,
+        n_terms=top_term,
+        figsize=figsize,
+        cmap="viridis",  # placeholder only
+        ofname=ofname,
     )
     ax = dot.barh(color=color)
     if ofname is None:
