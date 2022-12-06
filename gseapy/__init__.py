@@ -23,7 +23,7 @@ def gsea(
     permutation_type: str = "phenotype",
     method: str = "signal_to_noise",
     ascending: bool = False,
-    threads: int = 1,
+    threads: int = 4,
     figsize: Tuple[float, float] = (6.5, 6),
     format: str = "pdf",
     graph_num: int = 20,
@@ -90,7 +90,7 @@ def gsea(
 
     :param bool ascending: Sorting order of rankings. Default: False.
 
-    :param int threads: Number of threads you are going to use. Default: 1.
+    :param int threads: Number of threads you are going to use. Default: 4.
 
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
 
@@ -161,7 +161,7 @@ def ssgsea(
     permutation_num: Optional[int] = None,
     weighted_score_type: float = 0.25,
     ascending: bool = False,
-    threads: int = 1,
+    threads: int = 4,
     figsize: Tuple[float, float] = (6.5, 6),
     format: str = "pdf",
     graph_num: int = 20,
@@ -200,7 +200,7 @@ def ssgsea(
 
     :param bool ascending: Sorting order of rankings. Default: False.
 
-    :param int threads: Number of threads you are going to use. Default: 1.
+    :param int threads: Number of threads you are going to use. Default: 4.
 
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [7,6].
 
@@ -270,7 +270,7 @@ def prerank(
     permutation_num: int = 1000,
     weighted_score_type: float = 1.0,
     ascending: bool = False,
-    threads: int = 1,
+    threads: int = 4,
     figsize: Tuple[float, float] = (6.5, 6),
     format: str = "pdf",
     graph_num: int = 20,
@@ -299,7 +299,7 @@ def prerank(
 
     :param bool ascending: Sorting order of rankings. Default: False.
 
-    :param int threads: Number of threads you are going to use. Default: 1.
+    :param int threads: Number of threads you are going to use. Default: 4.
 
     :param list figsize: Matplotlib figsize, accept a tuple or list, e.g. [width,height]. Default: [6.5,6].
 

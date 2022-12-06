@@ -403,9 +403,9 @@ def add_gsea_parser(subparsers):
         dest="threads",
         action="store",
         type=int,
-        default=1,
+        default=4,
         metavar="procs",
-        help="Number of threads you are going to use. Default: 1",
+        help="Number of threads you are going to use. Default: 4",
     )
 
     return
@@ -518,9 +518,9 @@ def add_prerank_parser(subparsers):
         dest="threads",
         action="store",
         type=int,
-        default=1,
+        default=4,
         metavar="procs",
-        help="Number of threads you are going to use. Default: 1",
+        help="Number of threads you are going to use. Default: 4",
     )
 
     return
@@ -640,9 +640,9 @@ def add_singlesample_parser(subparsers):
         dest="threads",
         action="store",
         type=int,
-        default=1,
+        default=4,
         metavar="procs",
-        help="Number of Processes you are going to use. Default: 1",
+        help="Number of Processes you are going to use. Default: 4",
     )
 
     return
