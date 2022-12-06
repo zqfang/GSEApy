@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 import operator
 import sys
+import warnings
 from typing import Dict, Iterable, List, Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
 import matplotlib.transforms as transforms
 import numpy as np
+import pandas as pd
+
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.colors import Normalize
 from matplotlib.figure import Figure
@@ -32,7 +35,7 @@ class MidpointNormalize(Normalize):
         return np.interp(value, x, y, left=-np.inf, right=np.inf)
 
 
-def zscore(data2d, axis=0):
+def zscore(data2d: pd.DataFrame, axis: Optional[int] = 0):
     """Standardize the mean and variance of the data axis Parameters.
 
     :param data2d: DataFrame to normalize.
@@ -57,7 +60,7 @@ def zscore(data2d, axis=0):
 class Heatmap(object):
     def __init__(
         self,
-        df,
+        df: pd.DataFrame,
         z_score: Optional[int] = None,
         title: Optional[str] = None,
         figsize: Tuple[float] = (5, 5),
@@ -121,9 +124,7 @@ class Heatmap(object):
         self.fig = fig
         return ax
 
-    def draw(
-        self,
-    ):
+    def draw(self):
         df = self._df
         ax = self.get_ax()
         vmin = np.percentile(df, 2)
@@ -174,7 +175,7 @@ class Heatmap(object):
 
 
 def heatmap(
-    df,
+    df: pd.DataFrame,
     z_score: Optional[int] = None,
     title: str = "",
     figsize: Tuple[float] = (5, 5),
@@ -507,10 +508,10 @@ def gseaplot(
 class DotPlot(object):
     def __init__(
         self,
-        df,
+        df: pd.DataFrame,
         x: Optional[str] = None,
         y: str = "Term",
-        size: str = "Adjusted P-value",
+        hue: str = "Adjusted P-value",
         size_scale: float = 5.0,
         thresh: float = 0.05,
         n_terms: int = 10,
@@ -523,11 +524,10 @@ class DotPlot(object):
         self.marker = "o"
         if "marker" in kwargs:
             self.marker = kwargs["marker"]
-        # assert column in ["Adjusted P-value", "P-value", "NOM p-val", "FDR q-val"]
         self.y = y
         self.x = x
-        self.size = str(size)
-        self.colname = size
+        self.hue = str(hue)
+        self.colname = str(hue)
         self.figsize = figsize
         self.cmap = cmap
         self.ofname = ofname
@@ -553,11 +553,18 @@ class DotPlot(object):
             msg = "some value in %s could not be typecast to `float`" % self.colname
             raise ValueError(msg)
         # subset
-        df = df[df[self.colname] <= self.thresh]
+        mask = df[self.colname] <= self.thresh
+        if self.colname in ["Combined Score", "NES", "ES", "Odds Ratio"]:
+            mask.loc[:] = True
+
+        df = df[mask]
         if len(df) < 1:
             msg = "Warning: No enrich terms when cutoff = %s" % self.thresh
             raise ValueError(msg)
-
+        self.cbar_title = self.colname
+        # clip GSEA lower bounds
+        if self.colname in ["NOM p-val", "FDR q-val"]:
+            df[self.colname].clip(1e-5, 1.0, inplace=True)
         # sorting the dataframe for better visualization
         if self.colname in ["Adjusted P-value", "P-value", "NOM p-val", "FDR q-val"]:
             # get top_terms
@@ -567,7 +574,7 @@ class DotPlot(object):
             )  ## asending order, use bfill
             df = df.assign(p_inv=np.log10(1 / df[self.colname].astype(float)))
             self.colname = "p_inv"
-            self.cbar_title = r"$Log_{10} \frac{1}{P val}$"
+            self.cbar_title = r"$\log_{10} \frac{1}{P val}$"
 
         # get top terms; sort ascending
         if (self.x is not None) and (self.x in df.columns):
@@ -578,8 +585,7 @@ class DotPlot(object):
                 .reset_index(drop=True)
             )
         else:
-            df = df.sort_values(by=self.colname).tail(self.n_terms)
-
+            df = df.sort_values(by=self.colname).tail(self.n_terms)  # acending
         # get scatter area
         ol = df.columns[df.columns.isin(["Overlap", "Tag %"])]
         temp = (
@@ -642,7 +648,7 @@ class DotPlot(object):
                 self._df["Hits_ratio"] * self.scale * plt.rcParams["lines.markersize"]
             ).pow(2)
         )
-        colmap = df[self.colname].round().astype(int)
+        colmap = df[self.colname].astype(int)
         vmin = np.percentile(colmap.min(), 2)
         vmax = np.percentile(colmap.max(), 98)
         # vmin = np.percentile(df.colmap.min(), 2)
@@ -721,6 +727,7 @@ class DotPlot(object):
             bbox_to_anchor=(1.02, 0.9),
             loc="upper left",
             frameon=False,
+            labelspacing=1.0,
         )
         ax.set_title(self.title, fontsize=20, fontweight="bold")
         self.add_colorbar(sc)
@@ -748,7 +755,7 @@ class DotPlot(object):
         for key, spine in cbar.ax.spines.items():
             spine.set_visible(False)
 
-    def barh(self, color=None, ax=None):
+    def barh(self, color=None, group=None, ax=None):
         """
         Barplot
         """
@@ -756,17 +763,58 @@ class DotPlot(object):
             ax = self.get_ax()
         x, xlabel = self.set_x()
         bar = self._df.plot.barh(
-            x="Term", y=self.colname, color=color, alpha=0.75, fontsize=16, ax=ax
+            x=self.y, y=self.colname, alpha=0.75, fontsize=16, ax=ax
         )
-        if self.size in ["Adjusted P-value", "P-value", "FDR q-val", "NOM p-val"]:
-            xlabel = "-log$_{10}$(%s)" % self.size
+        if self.hue in ["Adjusted P-value", "P-value", "FDR q-val", "NOM p-val"]:
+            xlabel = "$- \log_{10}$ (%s)" % self.hue
         else:
-            xlabel = self.size
+            xlabel = self.hue
         bar.set_xlabel(xlabel, fontsize=16, fontweight="bold")
         bar.set_ylabel("")
         bar.set_title(self.title, fontsize=24, fontweight="bold")
         bar.xaxis.set_major_locator(MaxNLocator(nbins=5, integer=True))
+
+        # get default color cycle
+        if (not isinstance(color, str)) and isinstance(color, Iterable):
+            _colors = list(color)
+        else:
+            prop_cycle = plt.rcParams["axes.prop_cycle"]
+            _colors = prop_cycle.by_key()["color"]
+        colors = _colors
+        # remove old legend first
         bar.legend_.remove()
+        if (group is not None) and (group in self._df.columns):
+            num_grp = self._df[group].value_counts(sort=False)
+            # set colors for each bar (groupby hue)
+            colors = []
+            legend_elements = []
+            for i, n in enumerate(num_grp):
+                # cycle _colors if num_grp > len(_colors)
+                c = _colors[i % len(_colors)]
+                colors += [c] * n
+                ele = Line2D(
+                    xdata=[0],
+                    ydata=[0],
+                    marker="o",
+                    color="w",
+                    label=num_grp.index[i],
+                    markerfacecolor=c,
+                    markersize=8,
+                )
+                legend_elements.append(ele)
+            # add custom legend
+            ax.legend(
+                handles=legend_elements,
+                loc="upper left",
+                title=group,
+                bbox_to_anchor=(1.02, 0.5),
+                frameon=False,
+            )
+        # update color of bars
+        for j, b in enumerate(ax.patches):
+            c = colors[j % len(colors)]
+            b.set_facecolor(c)
+
         # self.adjust_spines(ax, spines=["left", "bottom"])
         for side in ["right", "top"]:
             ax.spines[side].set_visible(False)
@@ -774,112 +822,119 @@ class DotPlot(object):
         ax.tick_params(axis="both", which="both", top=False, right=False)
         return ax
 
+    def to_edgelist(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        """
+        return two dataframe of nodes, and edges
+        """
+        num_nodes = len(self._df)
+        # build graph
+        # G = nx.Graph()
+        group_loc = None
+        if self.x is not None:
+            group_loc = self._df.columns.get_loc(self.x)
+        term_loc = self._df.columns.get_loc(self.y)  # "Terms"
+        if "Genes" in self._df.columns:
+            gene_loc = self._df.columns.get_loc("Genes")
+        elif "Lead_genes":
+            gene_loc = self._df.columns.get_loc("Lead_genes")
+        else:
+            raise KeyError("Sorry, could not locate enriched gene list")
+        # build graph
+        genes = self._df.iloc[:, gene_loc].str.split(";")
+        ns_loc = self._df.columns.get_loc("Hits_ratio")
+        edge_list = []
+        nodes = []
+        for i in range(num_nodes):
+            nodes.append([i, self._df.iloc[i, term_loc], self._df.iloc[i, ns_loc]])
+            for j in range(i + 1, num_nodes):
+                set_i = set(genes.iloc[i])
+                set_j = set(genes.iloc[j])
+                ov = set_i.intersection(set_j)
+                if len(ov) < 1:
+                    continue
+                jaccard_coefficient = len(ov) / len(set_i.union(set_j))
+                overlap_coefficient = len(ov) / min(len(set_i), len(set_j))
+                edge = [
+                    i,
+                    j,
+                    self._df.iloc[i, term_loc],
+                    self._df.iloc[j, term_loc],
+                    jaccard_coefficient,
+                    overlap_coefficient,
+                    ",".join(ov),
+                    None,
+                ]
+                if group_loc is not None:
+                    edge[-1] = self._df.iloc[i, group_loc]
+                edge_list.append(edge)
+                # G.add_edge(src,
+                # targ,
+                # jaccard= jaccard_coefficient,
+                # overlap = overlap_coefficient,
+                # genes = list(ov))
+        edges = pd.DataFrame(
+            edge_list,
+            columns=[
+                "src_idx",
+                "targ_idx",
+                "src_name",
+                "targ_name",
+                "jaccard_coef",
+                "overlap_coef",
+                "overlap_genes",
+                "group",
+            ],
+        )
+        nodes = pd.DataFrame(nodes, columns=["node_idx", "node_name", "node_size"])
+        return nodes, edges.dropna(axis=1, how="all")
+
 
 def dotplot(
-    df,
+    df: pd.DataFrame,
     column: str = "Adjusted P-value",
+    group: Optional[str] = None,
     title: str = "",
     cutoff: float = 0.05,
     top_term: int = 10,
     size: float = 5,
-    figsize: Tuple[float] = (6, 5.5),
+    figsize: Tuple[float] = (4, 6),
     cmap: str = "viridis_r",
     ofname: Optional[str] = None,
     xticklabels_rot: Optional[float] = None,
     yticklabels_rot: Optional[float] = None,
-    marker="o",
+    marker: str = "o",
+    show_ring: bool = False,
     **kwargs,
 ):
-    """Visualize enrichr results.
+    """Visualize GSEApy Results.
+    When multiple datasets exist in the input dataframe, the `group` argument is your friend.
 
     :param df: GSEApy DataFrame results.
-    :param column: column name in dataframe to map the dot size. Default: Adjusted P-value
+    :param column: column name in `df` to map the dot colors. Default: Adjusted P-value
+    :param group: group by the variable in `df` that will produce categorical scatterplot.
     :param title: figure title
-    :param cutoff: terms with 'column' value < cut-off are shown.
+    :param cutoff: terms with `column` value < cut-off are shown. Work only for
+                   ("Adjusted P-value", "P-value", "NOM p-val", "FDR q-val")
     :param top_term: number of enriched terms to show.
     :param size: float, scale the dot size to get proper visualization.
-    :param figsize: tuple, figure size.
-    :param cmap: matplotlib colormap
-    :param ofname: output file name. If None, don't save figure
-    :param xticklabels_rot: rotation angel of xticklabels
-    :param yticklabels_rot: rotation angel of xticklabels
-    :param marker: the matplotlib.markers. See https://matplotlib.org/stable/api/markers_api.html
-    :param kwargs: kwargs that maplotlib.pyplot.scatter recognized
-    """
-    dot = DotPlot(
-        df,
-        x=None,
-        y="Term",
-        size=column,
-        title=title,
-        thresh=cutoff,
-        n_terms=top_term,
-        size_scale=size,
-        figsize=figsize,
-        cmap=cmap,
-        ofname=ofname,
-        marker=marker,
-        **kwargs,
-    )
-    ax = dot.scatter()
-
-    if xticklabels_rot:
-        for label in ax.get_xticklabels():
-            label.set_ha("right")
-            label.set_rotation(xticklabels_rot)
-
-    if yticklabels_rot:
-        for label in ax.get_yticklabels():
-            label.set_ha("right")
-            label.set_rotation(yticklabels_rot)
-
-    if ofname is None:
-        return ax
-    dot.fig.savefig(ofname, bbox_inches="tight", dpi=300)
-
-
-def ringplot(
-    df,
-    x: Optional[str] = None,
-    column: str = "Adjusted P-value",
-    title: str = "",
-    cutoff: float = 0.05,
-    top_term: int = 10,
-    size: float = 5,
-    figsize: Tuple[float] = (6, 5.5),
-    cmap: str = "viridis_r",
-    ofname: Optional[str] = None,
-    xticklabels_rot: Optional[float] = None,
-    yticklabels_rot: Optional[float] = None,
-    marker="o",
-    show_ring: bool = True,
-    **kwargs,
-):
-    """
-    when multiple samples exist in the input dataframe, use ringplot instead of heatmap
-
-    :param df: GSEApy DataFrame results.
-    :param x: column name in dataframe to map the x-axis value.
-    :param column: column name in dataframe to map the dot size. Default: Adjusted P-value
-    :param title: figure title
-    :param cutoff: terms with 'column' value < cut-off are shown.
-    :param top_term: number of enriched terms to show.
-    :param size: float, scale the dot size to get proper visualization.
-    :param figsize: tuple, figure size.
-    :param cmap: matplotlib colormap
+    :param figsize: tuple, matplotlib figure size.
+    :param cmap: matplotlib colormap for mapping the `column` semantic.
     :param ofname: output file name. If None, don't save figure
     :param marker: the matplotlib.markers. See https://matplotlib.org/stable/api/markers_api.html
     :param show_ring bool: whether to show outer ring.
 
+    :return: matplotlib.Axes. return None if given ofname.
+             Only terms with `column` <= `cut-off` are plotted.
     """
+
     dot = DotPlot(
-        df,
-        x=x,
+        df=df,
+        x=group,
         y="Term",
-        size=column,
+        hue=column,
         title=title,
         thresh=cutoff,
-        n_terms=top_term,
+        n_terms=int(top_term),
         size_scale=size,
         figsize=figsize,
         cmap=cmap,
@@ -904,90 +959,95 @@ def ringplot(
     dot.fig.savefig(ofname, bbox_inches="tight", dpi=300)
 
 
-def enrichmap(
-    df,
+def ringplot(
+    df: pd.DataFrame,
+    column: str = "Adjusted P-value",
+    group: Optional[str] = None,
+    title: str = "",
+    cutoff: float = 0.05,
+    top_term: int = 10,
+    size: float = 5,
+    figsize: Tuple[float] = (4, 6),
+    cmap: str = "viridis_r",
+    ofname: Optional[str] = None,
+    xticklabels_rot: Optional[float] = None,
+    yticklabels_rot: Optional[float] = None,
+    marker="o",
+    show_ring: bool = True,
+    **kwargs,
 ):
+    """ringplot is deprecated, use dotplot instead
+
+    :param df: GSEApy DataFrame results.
+    :param group: the old `x`. Group by the variable in `df` that will produce categorical scatterplot.
+    :param column: column name in `df` to map the dot colors. Default: Adjusted P-value
+    :param title: figure title
+    :param cutoff: terms with `column` value < cut-off are shown. Work only for
+                   ("Adjusted P-value", "P-value", "NOM p-val", "FDR q-val")
+    :param top_term: number of enriched terms to show.
+    :param size: float, scale the dot size to get proper visualization.
+    :param figsize: tuple, matplotlib figure size.
+    :param cmap: matplotlib colormap for mapping the `column` semantic.
+    :param ofname: output file name. If None, don't save figure
+    :param marker: the matplotlib.markers. See https://matplotlib.org/stable/api/markers_api.html
+    :param show_ring bool: whether to show outer ring.
+
+    :return: matplotlib.Axes. return None if given ofname.
+             Only terms with `column` <= `cut-off` are plotted.
     """
-    Node (inner circle) size corresponds to the number of genes in dataset 1 within the geneset
-    Colour of the node (inner circle) corresponds to the significance of the geneset for dataset 1.
-    Edge size corresponds to the number of genes that overlap between the two connected genesets.
-    Green edges correspond to both datasets when it is the only colour edge.
-    When there are two different edge colours, green corresponds to dataset 1 and blue corresponds to dataset 2.
-    """
-    pass
+    warnings.warn("ringplot is deprecated; use dotplot instead", DeprecationWarning, 2)
+    if "x" in kwargs:
+        warnings.warn("x is deprecated; use group", DeprecationWarning, 2)
+        kwargs["group"] = kwargs["x"]
+        del kwargs["x"]
+    ax = dotplot(df, **kwargs)
+    return ax
 
 
 def barplot(
-    df,
-    column="Adjusted P-value",
-    group=None,
-    title="",
-    cutoff=0.05,
-    top_term=10,
-    figsize=(6.5, 6),
-    color="salmon",
-    ofname=None,
+    df: pd.DataFrame,
+    column: str = "Adjusted P-value",
+    group: Optional[str] = None,
+    title: str = "",
+    cutoff: float = 0.05,
+    top_term: int = 10,
+    figsize: Tuple[float, float] = (4, 6),
+    color: Union[str, List[str]] = "salmon",
+    ofname: Optional[str] = None,
     **kwargs,
 ):
-    """Visualize enrichr results.
+    """Visualize GSEApy Results.
+    When multiple datasets exist in the input dataframe, the `group` argument is your friend.
 
     :param df: GSEApy DataFrame results.
     :param column: column name in `df` to map the x-axis data. Default: Adjusted P-value
     :param group: group by the variable in `df` that will produce bars with different colors.
     :param title: figure title.
-    :param cutoff: terms with `column` value < cut-off are shown.
+    :param cutoff: terms with `column` value < cut-off are shown. Work only for
+                   ("Adjusted P-value", "P-value", "NOM p-val", "FDR q-val")
     :param top_term: number of top enriched terms grouped by `hue` are shown.
     :param figsize: tuple, matplotlib figsize.
     :param color: color or list of matplotlib.colors. Must be reconigzed by matplotlib.
     :param ofname: output file name. If None, don't save figure
 
+    :return: matplotlib.Axes. return None if given ofname.
+             Only terms with `column` <= `cut-off` are plotted.
     """
     dot = DotPlot(
-        df,
-        x=group if group else None,  # placeholder only
+        df=df,
+        x=group if group else None,  # x turns into hue in bar
         y="Term",
-        size=column,  # it's bar plot
+        hue=column,  # hue turns into x in bar
         title=title,
         thresh=cutoff,
-        n_terms=top_term,
+        n_terms=int(top_term),
         figsize=figsize,
         cmap="viridis",  # placeholder only
         ofname=ofname,
     )
-    ax = dot.barh(color=color)
-    if (group is not None) and (group in dot._df):
-        num_grp = dot._df[group].value_counts(sort=False)
-        # get default color cycle
-        if (not isinstance(color, str)) and isinstance(color, Iterable):
-            _colors = list(color)
-        else:
-            prop_cycle = plt.rcParams["axes.prop_cycle"]
-            _colors = prop_cycle.by_key()["color"]
-
-        # set colors for each bar (groupby hue)
-        colors = []
-        legend_elements = []
-        for i, n in enumerate(num_grp):
-            c = _colors[i % len(_colors)]
-            colors += [c] * n
-            ele = Line2D(
-                [0],
-                [0],
-                marker="o",
-                color="w",
-                label=num_grp.index[i],
-                markerfacecolor=c,
-                markersize=8,
-            )
-            legend_elements.append(ele)
-        for b, c in zip(ax.patches, colors):
-            b.set_facecolor(c)
-        # add custom legend
-        ax.legend(
-            handles=legend_elements,
-            loc="upper left",
-            bbox_to_anchor=(1.02, 0.5),
-        )
+    if isinstance(color, str):
+        color = [color]
+    ax = dot.barh(color=color, group=group)
 
     if ofname is None:
         return ax
@@ -1047,3 +1107,43 @@ def traceplot(
         fig.savefig(ofname, bbox_inches="tight", dpi=300)
         return
     return ax
+
+
+def enrichment_map(
+    df: pd.DataFrame,
+    column: str = "Adjusted P-value",
+    group: Optional[str] = None,
+    cutoff: float = 0.05,
+    top_term: int = 10,
+    **kwargs,
+):
+    """Visualize GSEApy Results.
+    Node size corresponds to the percentage of gene overlap in a certain term of interest.
+    Colour of the node corresponds to the significance of the enriched terms.
+    Edge size corresponds to the number of genes that overlap between the two connected nodes.
+    Gray edges correspond to both nodes when it is the only colour edge.
+    When there are two different edge colours, red corresponds to positve nodes and blue corresponds to negative nodes.
+
+    :param df: GSEApy DataFrame results.
+    :param column: column name in `df` to map the x-axis data. Default: Adjusted P-value
+    :param group: group by the variable in `df` that will produce bars with different colors.
+    :param title: figure title.
+    :param cutoff: terms with `column` value < cut-off are shown. Work only for
+                   ("Adjusted P-value", "P-value", "NOM p-val", "FDR q-val")
+    :param top_term: number of top enriched terms grouped by `hue` are shown.
+    :param figsize: tuple, matplotlib figsize.
+    :param color: color or list of matplotlib.colors. Must be reconigzed by matplotlib.
+    :param ofname: output file name. If None, don't save figure
+
+    :return: matplotlib.Axes. return None if given ofname.
+             Only terms with `column` <= `cut-off` are plotted.
+    """
+    dot = DotPlot(
+        df=df,
+        x=group,  # x turns into hue in colors of nodes
+        y="Term",  # node
+        hue=column,  # node size
+        thresh=cutoff,
+        n_terms=int(top_term),
+    )
+    return dot.to_edgelist()
