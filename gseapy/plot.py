@@ -9,6 +9,7 @@ import numpy as np
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.colors import Normalize
 from matplotlib.figure import Figure
+from matplotlib.lines import Line2D
 from matplotlib.ticker import MaxNLocator
 
 from gseapy.scipalette import SciPalette
@@ -755,7 +756,7 @@ class DotPlot(object):
             ax = self.get_ax()
         x, xlabel = self.set_x()
         bar = self._df.plot.barh(
-            x="Term", y=x, color=color, alpha=0.75, fontsize=16, ax=ax
+            x="Term", y=self.colname, color=color, alpha=0.75, fontsize=16, ax=ax
         )
         if self.size in ["Adjusted P-value", "P-value", "FDR q-val", "NOM p-val"]:
             xlabel = "-log$_{10}$(%s)" % self.size
@@ -919,6 +920,7 @@ def enrichmap(
 def barplot(
     df,
     column="Adjusted P-value",
+    group=None,
     title="",
     cutoff=0.05,
     top_term=10,
@@ -930,18 +932,19 @@ def barplot(
     """Visualize enrichr results.
 
     :param df: GSEApy DataFrame results.
-    :param column: column name in dataframe to map the x-axis data. Default: Adjusted P-value
+    :param column: column name in `df` to map the x-axis data. Default: Adjusted P-value
+    :param group: group by the variable in `df` that will produce bars with different colors.
     :param title: figure title.
-    :param cutoff: terms with 'column' value < cut-off are shown.
-    :param top_term: number of top enriched terms to show.
+    :param cutoff: terms with `column` value < cut-off are shown.
+    :param top_term: number of top enriched terms grouped by `hue` are shown.
     :param figsize: tuple, matplotlib figsize.
-    :param color: matplotlib.colors. Must be reconigzed by matplotlib
+    :param color: color or list of matplotlib.colors. Must be reconigzed by matplotlib.
     :param ofname: output file name. If None, don't save figure
 
     """
     dot = DotPlot(
         df,
-        x=None,  # placeholder only
+        x=group if group else None,  # placeholder only
         y="Term",
         size=column,  # it's bar plot
         title=title,
@@ -952,6 +955,40 @@ def barplot(
         ofname=ofname,
     )
     ax = dot.barh(color=color)
+    if (group is not None) and (group in dot._df):
+        num_grp = dot._df[group].value_counts(sort=False)
+        # get default color cycle
+        if (not isinstance(color, str)) and isinstance(color, Iterable):
+            _colors = list(color)
+        else:
+            prop_cycle = plt.rcParams["axes.prop_cycle"]
+            _colors = prop_cycle.by_key()["color"]
+
+        # set colors for each bar (groupby hue)
+        colors = []
+        legend_elements = []
+        for i, n in enumerate(num_grp):
+            c = _colors[i % len(_colors)]
+            colors += [c] * n
+            ele = Line2D(
+                [0],
+                [0],
+                marker="o",
+                color="w",
+                label=num_grp.index[i],
+                markerfacecolor=c,
+                markersize=8,
+            )
+            legend_elements.append(ele)
+        for b, c in zip(ax.patches, colors):
+            b.set_facecolor(c)
+        # add custom legend
+        ax.legend(
+            handles=legend_elements,
+            loc="upper left",
+            bbox_to_anchor=(1.02, 0.5),
+        )
+
     if ofname is None:
         return ax
     dot.fig.savefig(ofname, bbox_inches="tight", dpi=300)
