@@ -556,14 +556,14 @@ class DotPlot(object):
         if self.colname in ["Combined Score", "NES", "ES", "Odds Ratio"]:
             mask.loc[:] = True
 
-        df = df[mask]
+        df = df.loc[mask]
         if len(df) < 1:
             msg = "Warning: No enrich terms when cutoff = %s" % self.thresh
             raise ValueError(msg)
         self.cbar_title = self.colname
         # clip GSEA lower bounds
-        if self.colname in ["NOM p-val", "FDR q-val"]:
-            df.loc[df.index, self.colname] = df[self.colname].clip(1e-5, 1.0)
+        # if self.colname in ["NOM p-val", "FDR q-val"]:
+        #     df[self.colname].clip(1e-5, 1.0, inplace=True)
         # sorting the dataframe for better visualization
         if self.colname in ["Adjusted P-value", "P-value", "NOM p-val", "FDR q-val"]:
             # get top_terms
@@ -845,6 +845,8 @@ class DotPlot(object):
         nodes = []
         for i in range(num_nodes):
             nodes.append([i, self._df.iloc[i, term_loc], self._df.iloc[i, ns_loc]])
+            if group_loc is not None:
+                nodes[-1].append(self._df.iloc[i, group_loc])
             for j in range(i + 1, num_nodes):
                 set_i = set(genes.iloc[i])
                 set_j = set(genes.iloc[j])
@@ -861,10 +863,7 @@ class DotPlot(object):
                     jaccard_coefficient,
                     overlap_coefficient,
                     ",".join(ov),
-                    None,
                 ]
-                if group_loc is not None:
-                    edge[-1] = self._df.iloc[i, group_loc]
                 edge_list.append(edge)
                 # G.add_edge(src,
                 # targ,
@@ -881,11 +880,13 @@ class DotPlot(object):
                 "jaccard_coef",
                 "overlap_coef",
                 "overlap_genes",
-                "group",
             ],
         )
-        nodes = pd.DataFrame(nodes, columns=["node_idx", "node_name", "node_size"])
-        return nodes, edges.dropna(axis=1, how="all")
+        node_c = ["node_idx", "node_name", "node_size"]
+        if group_loc is not None:
+            node_c += ["node_group"]
+        nodes = pd.DataFrame(nodes, columns=node_c)
+        return nodes, edges
 
 
 def dotplot(
@@ -1137,6 +1138,13 @@ def enrichment_map(
     :return: matplotlib.Axes. return None if given ofname.
              Only terms with `column` <= `cut-off` are plotted.
     """
+    # c = column
+    if column not in df.columns:
+        for c in ["Adjusted P-value", "P-value", "FDR q-val", "NOM p-val"]:
+            if c in df:
+                column = c
+                break
+
     dot = DotPlot(
         df=df,
         x=group,  # x turns into hue in colors of nodes
