@@ -157,8 +157,8 @@ For command line usage:
   $ gseapy ssgsea -d expression.txt -g gene_sets.gmt -o test
 
   # An example to use enrichr api
-  # see details of -g below, -d  is optional
-  $ gseapy enrichr -i gene_list.txt -g KEGG_2016 -d pathway_enrichment -o test
+  # see details for -g input -> ``get_library_name`` 
+  $ gseapy enrichr -i gene_list.txt -g KEGG_2016 -o test
 
 
 
