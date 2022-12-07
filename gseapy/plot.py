@@ -839,14 +839,16 @@ class DotPlot(object):
         else:
             raise KeyError("Sorry, could not locate enriched gene list")
         # build graph
+        # nodes = []
+        nodes = self._df.reset_index(drop=True)
+        nodes.index.name = "node_idx"
         genes = self._df.iloc[:, gene_loc].str.split(";")
-        ns_loc = self._df.columns.get_loc("Hits_ratio")
+        # ns_loc = self._df.columns.get_loc("Hits_ratio")
         edge_list = []
-        nodes = []
         for i in range(num_nodes):
-            nodes.append([i, self._df.iloc[i, term_loc], self._df.iloc[i, ns_loc]])
-            if group_loc is not None:
-                nodes[-1].append(self._df.iloc[i, group_loc])
+            # nodes.append([i, self._df.iloc[i, term_loc], self._df.iloc[i, ns_loc]])
+            # if group_loc is not None:
+            #     nodes[-1].append(self._df.iloc[i, group_loc])
             for j in range(i + 1, num_nodes):
                 set_i = set(genes.iloc[i])
                 set_j = set(genes.iloc[j])
@@ -882,10 +884,10 @@ class DotPlot(object):
                 "overlap_genes",
             ],
         )
-        node_c = ["node_idx", "node_name", "node_size"]
-        if group_loc is not None:
-            node_c += ["node_group"]
-        nodes = pd.DataFrame(nodes, columns=node_c)
+        # node_c = ["node_idx", "node_name", "node_size"]
+        # if group_loc is not None:
+        #    node_c += ["node_group"]
+        # nodes = pd.DataFrame(nodes, columns=node_c)
         return nodes, edges
 
 
@@ -1112,11 +1114,10 @@ def traceplot(
 def enrichment_map(
     df: pd.DataFrame,
     column: str = "Adjusted P-value",
-    group: Optional[str] = None,
     cutoff: float = 0.05,
     top_term: int = 10,
     **kwargs,
-):
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Visualize GSEApy Results.
     Node size corresponds to the percentage of gene overlap in a certain term of interest.
     Colour of the node corresponds to the significance of the enriched terms.
@@ -1125,18 +1126,16 @@ def enrichment_map(
     When there are two different edge colours, red corresponds to positve nodes and blue corresponds to negative nodes.
 
     :param df: GSEApy DataFrame results.
-    :param column: column name in `df` to map the x-axis data. Default: Adjusted P-value
+    :param column: column name in `df` to map the node colors. Default: Adjusted P-value or FDR q-val.
+                   choose from ("Adjusted P-value", "P-value", "FDR q-val", "NOM p-val").
+
     :param group: group by the variable in `df` that will produce bars with different colors.
     :param title: figure title.
-    :param cutoff: terms with `column` value < cut-off are shown. Work only for
+    :param cutoff: nodes with `column` value < cut-off are shown. Work only for
                    ("Adjusted P-value", "P-value", "NOM p-val", "FDR q-val")
-    :param top_term: number of top enriched terms grouped by `hue` are shown.
-    :param figsize: tuple, matplotlib figsize.
-    :param color: color or list of matplotlib.colors. Must be reconigzed by matplotlib.
-    :param ofname: output file name. If None, don't save figure
+    :param top_term: number of top enriched terms are selected as nodes.
 
-    :return: matplotlib.Axes. return None if given ofname.
-             Only terms with `column` <= `cut-off` are plotted.
+    :return: tuple of dataframe (nodes, edges)
     """
     # c = column
     if column not in df.columns:
@@ -1147,7 +1146,7 @@ def enrichment_map(
 
     dot = DotPlot(
         df=df,
-        x=group,  # x turns into hue in colors of nodes
+        x=None,  # x turns into hue in colors of nodes
         y="Term",  # node
         hue=column,  # node size
         thresh=cutoff,
