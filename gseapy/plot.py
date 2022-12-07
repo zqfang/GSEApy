@@ -563,7 +563,7 @@ class DotPlot(object):
         self.cbar_title = self.colname
         # clip GSEA lower bounds
         if self.colname in ["NOM p-val", "FDR q-val"]:
-            df[self.colname].clip(1e-5, 1.0, inplace=True)
+            df.loc[df.index, self.colname] = df[self.colname].clip(1e-5, 1.0)
         # sorting the dataframe for better visualization
         if self.colname in ["Adjusted P-value", "P-value", "NOM p-val", "FDR q-val"]:
             # get top_terms
