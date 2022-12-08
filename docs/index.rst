@@ -43,6 +43,21 @@ Citation
 
 
 
+Installation
+------------------------------------------------
+
+| Install gseapy package from bioconda or pypi.
+
+
+.. code:: shell
+   
+   # if you have conda
+   $ conda install -c bioconda gseapy 
+  
+   # or use pip to install the latest release
+   $ pip install gseapy
+
+
 
 GSEApy is a Python/Rust implementation of **GSEA** and wrapper for **Enrichr**. 
 --------------------------------------------------------------------------------------------
@@ -74,7 +89,6 @@ The full ``GSEA`` is far too extensive to describe here; see
 `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ documentation for more information. All files' formats for GSEApy are identical to ``GSEA`` desktop version. 
 
 
-**If you use gseapy, you should cite.**
 
 Why GSEAPY
 -----------------------------------------------------
@@ -89,8 +103,11 @@ do gene set enrichment analysis in python. So, here are my reasons:
 * Easy to use in bash shell or your data analysis workflow, e.g. snakemake.
 
 
+
 .. toctree::
+    :caption: Table of Contents
     :maxdepth: 3
+    :numbered:
    
     introduction.rst
     gseapy_example.ipynb
