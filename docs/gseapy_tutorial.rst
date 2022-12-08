@@ -30,7 +30,7 @@ One thing you should know is that the gseapy input files are the same as
 ``GSEA`` desktop required. You can use these files below to run ``GSEA`` desktop, too.
 
 
-1. Prepare an tabular text file of gene expression like this:
+Prepare an tabular text file of gene expression like this:
 ------------------------------------------------------------------
 
 **RNA-seq,ChIP-seq, Microarry data** are all supported.
@@ -121,7 +121,7 @@ Here is to see what the structure of expression table looks like
 
 
 
-2. An cls file is also expected.
+An cls file is also expected.
 -----------------------------------------------
 
 This file is used to specify column attributes in step 1, just like ``GSEA`` asked.
@@ -160,7 +160,7 @@ So you could prepare the cls file in python like this
 
 
 
-3. Gene_sets file in gmt format.
+Gene_sets file in gmt format.
 -----------------------------------------------------
 
 All you need to do is to download gene set database file from ``GSEA`` or ``Enrichr`` website.

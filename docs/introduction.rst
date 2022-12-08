@@ -24,15 +24,6 @@ GSEAPY: Gene Set Enrichment Analysis in Python.
 
 
 
-Citation
-------------------------------------
-::
-
-    Zhuoqing Fang, Xinyuan Liu, Gary Peltz, GSEApy: a comprehensive package for performing gene set enrichment analysis in Python, 
-    Bioinformatics, 2022;, btac757, https://doi.org/10.1093/bioinformatics/btac757
-
-
-
 GSEApy is a Python/Rust implementation of **GSEA** and wrapper for **Enrichr**.  
 --------------------------------------------------------------------------------------------
 
@@ -51,6 +42,29 @@ The full ``GSEA`` is far too extensive to describe here; see
 
 Enrichr is open source and freely available online at: http://amp.pharm.mssm.edu/Enrichr .
 
+
+Citation
+------------------------------------
+::
+
+    Zhuoqing Fang, Xinyuan Liu, Gary Peltz, GSEApy: a comprehensive package for performing gene set enrichment analysis in Python, 
+    Bioinformatics, 2022;, btac757, https://doi.org/10.1093/bioinformatics/btac757
+
+
+
+Installation
+------------
+
+Install gseapy package from bioconda or pypi.
+
+
+.. code:: shell
+   
+   # if you have conda
+   $ conda install -c conda-forge -c bioconda gseapy 
+  
+   # or use pip to install the latest release
+   $ pip install gseapy
 
 
 GSEA Java version output: 
@@ -140,24 +154,8 @@ Installation
    # or use pip to install the latest release
    $ pip install gseapy
 
-| You may instead want to use the development version from Github, by running
 
-.. code:: shell
 
-   $ pip install git+git://github.com/BioNinja/gseapy.git#egg=gseapy
-
-Dependency
---------------
-* Python 3.7+
-
-Mandatory
-~~~~~~~~~
-
-* Numpy 
-* Scipy
-* Pandas 
-* Matplotlib
-* Requests(for enrichr API)
    
 
 For API information to use this library, see the :ref:`run`. 
