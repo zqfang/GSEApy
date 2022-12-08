@@ -106,7 +106,7 @@ do gene set enrichment analysis in python. So, here are my reasons:
 
 .. toctree::
     :caption: Table of Contents
-    :maxdepth: 3
+    :maxdepth: 1
     :numbered:
    
     introduction.rst
