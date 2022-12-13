@@ -2,13 +2,16 @@
 import operator
 import sys
 import warnings
+from collections.abc import Iterable
 from typing import Iterable, List, Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
 import matplotlib.transforms as transforms
 import numpy as np
 import pandas as pd
+import scipy.cluster.hierarchy as sch
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.category import UnitData
 from matplotlib.colors import Normalize
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
@@ -69,7 +72,7 @@ class Heatmap(object):
         ofname: Optional[str] = None,
         **kwargs,
     ):
-        self.title = "Heatmap of the Analyzed Geneset" if title is None else title
+        self.title = "" if title is None else title
         self.figsize = figsize
         self.xticklabels = xticklabels
         self.yticklabels = yticklabels
@@ -80,7 +83,7 @@ class Heatmap(object):
         df = zscore(df, axis=z_score)
         df = df.iloc[::-1]
         self._df = df
-        self.cbar_title = "Scaled Exp" if z_score is None else "Z-Score"
+        self.cbar_title = "Norm.Exp" if z_score is None else "Z-Score"
         self.cmap = cmap
         if cmap is None:
             self.cmap = SciPalette.create_colormap()  # navyblue2darkred
@@ -511,7 +514,9 @@ class DotPlot(object):
         x: Optional[str] = None,
         y: str = "Term",
         hue: str = "Adjusted P-value",
-        size_scale: float = 5.0,
+        dot_scale: float = 5.0,
+        x_order: Optional[List[str]] = None,
+        y_order: Optional[List[str]] = None,
         thresh: float = 0.05,
         n_terms: int = 10,
         title: str = "",
@@ -525,12 +530,14 @@ class DotPlot(object):
             self.marker = kwargs["marker"]
         self.y = y
         self.x = x
+        self.x_order = x_order
+        self.y_order = y_order
         self.hue = str(hue)
         self.colname = str(hue)
         self.figsize = figsize
         self.cmap = cmap
         self.ofname = ofname
-        self.scale = size_scale
+        self.scale = dot_scale
         self.title = title
         self.n_terms = n_terms
         self.thresh = thresh
@@ -593,6 +600,31 @@ class DotPlot(object):
         df = df.assign(Hits_ratio=temp.iloc[:, 0] / temp.iloc[:, 1])
         return df
 
+    def get_y_order(
+        self, method: str = "single", metric: str = "euclidean"
+    ) -> List[str]:
+        """See scipy.cluster.hierarchy.linkage()
+        Perform hierarchical/agglomerative clustering.
+        Return categorical order.
+        """
+        if isinstance(self.y_order, Iterable):
+            return self.y_order
+        mat = self._df.pivot(
+            index=self.y,
+            columns=self.x,
+            values=self.colname,  # [self.colname, "Hits_ratio"],
+        ).fillna(0)
+        Y0 = sch.linkage(mat, method=method, metric=metric)
+        Z0 = sch.dendrogram(
+            Y0,
+            orientation="left",
+            # labels=mat.index,
+            no_plot=True,
+            distance_sort="descending",
+        )
+        idx = Z0["leaves"][::-1]  # reverse the order to make the view better
+        return list(mat.index[idx])
+
     def get_ax(self):
         """
         setup figure axes
@@ -634,7 +666,10 @@ class DotPlot(object):
 
         return x, xlabel
 
-    def scatter(self, outer_ring=False):
+    def scatter(
+        self,
+        outer_ring: bool = False,
+    ):
         """
         build scatter
         """
@@ -656,13 +691,18 @@ class DotPlot(object):
         # if self.x is None:
         x, xlabel = self.set_x()
         y = self.y
+        # set x, y order
+        xunits = UnitData(self.x_order) if self.x_order else None
+        yunits = UnitData(self.get_y_order()) if self.x else None
+
         # outer ring
         if outer_ring:
             smax = df["area"].max()
             # TODO:
             # Matplotlib BUG: when setting edge colors,
             # there's the center of scatter could not aligned.
-            # Instead, I have to add more dots in the plot to get the ring
+            # Must set backend to TKcario... to fix it
+            # Instead, I just add more dots in the plot to get the ring
             blk_sc = ax.scatter(
                 x=x,
                 y=y,
@@ -671,6 +711,8 @@ class DotPlot(object):
                 c="black",
                 data=df,
                 marker=self.marker,
+                xunits=xunits,  # set x categorical order
+                yunits=yunits,  # set y categorical order
                 zorder=0,
             )
             wht_sc = ax.scatter(
@@ -681,6 +723,8 @@ class DotPlot(object):
                 c="white",
                 data=df,
                 marker=self.marker,
+                xunits=xunits,  # set x categorical order
+                yunits=yunits,  # set y categorical order
                 zorder=1,
             )
             # data = np.array(rg.get_offsets()) # get data coordinates
@@ -696,6 +740,8 @@ class DotPlot(object):
             vmin=vmin,
             vmax=vmax,
             marker=self.marker,
+            xunits=xunits,  # set x categorical order
+            yunits=yunits,  # set y categorical order
             zorder=2,
         )
         ax.set_xlabel(xlabel, fontsize=14, fontweight="bold")
@@ -730,6 +776,7 @@ class DotPlot(object):
         )
         ax.set_title(self.title, fontsize=20, fontweight="bold")
         self.add_colorbar(sc)
+
         return ax
 
     def add_colorbar(self, sc):
@@ -894,7 +941,10 @@ class DotPlot(object):
 def dotplot(
     df: pd.DataFrame,
     column: str = "Adjusted P-value",
-    group: Optional[str] = None,
+    x: Optional[str] = None,
+    y: str = "Term",
+    x_order: Optional[List[str]] = None,
+    y_order: Optional[List[str]] = None,
     title: str = "",
     cutoff: float = 0.05,
     top_term: int = 10,
@@ -908,22 +958,25 @@ def dotplot(
     show_ring: bool = False,
     **kwargs,
 ):
-    """Visualize GSEApy Results.
+    """Visualize GSEApy Results with categorical scatterplot
     When multiple datasets exist in the input dataframe, the `group` argument is your friend.
 
     :param df: GSEApy DataFrame results.
-    :param column: column name in `df` to map the dot colors. Default: Adjusted P-value
-    :param group: group by the variable in `df` that will produce categorical scatterplot.
-    :param title: figure title
-    :param cutoff: terms with `column` value < cut-off are shown. Work only for
+    :param column: column name in `df` that map the dot colors. Default: Adjusted P-value.
+    :param x: Categorical variable in `df` that map the x-axis data. Default: None.
+    :param y: Categorical variable in `df` that map the y-axis data. Default: Term.
+    :param x_order: X-axis order to plot the `x` categorical levels. Default: None.
+    :param y_order: Y-axis order to plot the `y` categorical levels. Default: None.
+    :param title: Figure title.
+    :param cutoff: Terms with `column` value < cut-off are shown. Work only for
                    ("Adjusted P-value", "P-value", "NOM p-val", "FDR q-val")
-    :param top_term: number of enriched terms to show.
+    :param top_term: Number of enriched terms to show.
     :param size: float, scale the dot size to get proper visualization.
     :param figsize: tuple, matplotlib figure size.
-    :param cmap: matplotlib colormap for mapping the `column` semantic.
-    :param ofname: output file name. If None, don't save figure
-    :param marker: the matplotlib.markers. See https://matplotlib.org/stable/api/markers_api.html
-    :param show_ring bool: whether to show outer ring.
+    :param cmap: Matplotlib colormap for mapping the `column` semantic.
+    :param ofname: Output file name. If None, don't save figure
+    :param marker: The matplotlib.markers. See https://matplotlib.org/stable/api/markers_api.html
+    :param show_ring bool: Whether to draw outer ring.
 
     :return: matplotlib.Axes. return None if given ofname.
              Only terms with `column` <= `cut-off` are plotted.
@@ -931,18 +984,19 @@ def dotplot(
 
     dot = DotPlot(
         df=df,
-        x=group,
-        y="Term",
+        x=x,
+        y=y,
+        x_order=x_order,
+        y_order=y_order,
         hue=column,
         title=title,
         thresh=cutoff,
         n_terms=int(top_term),
-        size_scale=size,
+        dot_scale=size,
         figsize=figsize,
         cmap=cmap,
         ofname=ofname,
         marker=marker,
-        **kwargs,
     )
     ax = dot.scatter(outer_ring=show_ring)
 
@@ -964,7 +1018,7 @@ def dotplot(
 def ringplot(
     df: pd.DataFrame,
     column: str = "Adjusted P-value",
-    group: Optional[str] = None,
+    x: Optional[str] = None,
     title: str = "",
     cutoff: float = 0.05,
     top_term: int = 10,
@@ -981,7 +1035,7 @@ def ringplot(
     """ringplot is deprecated, use dotplot instead
 
     :param df: GSEApy DataFrame results.
-    :param group: the old `x`. Group by the variable in `df` that will produce categorical scatterplot.
+    :param x:  Group by the variable in `df` that will produce categorical scatterplot.
     :param column: column name in `df` to map the dot colors. Default: Adjusted P-value
     :param title: figure title
     :param cutoff: terms with `column` value < cut-off are shown. Work only for
@@ -998,12 +1052,7 @@ def ringplot(
              Only terms with `column` <= `cut-off` are plotted.
     """
     warnings.warn("ringplot is deprecated; use dotplot instead", DeprecationWarning, 2)
-    if "x" in kwargs:
-        warnings.warn("x is deprecated; use group", DeprecationWarning, 2)
-        kwargs["group"] = kwargs["x"]
-        del kwargs["x"]
-    ax = dotplot(df, **kwargs)
-    return ax
+    return
 
 
 def barplot(
