@@ -2,7 +2,6 @@
 import operator
 import sys
 import warnings
-from collections.abc import Iterable
 from typing import Iterable, List, Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
@@ -82,7 +81,7 @@ class Heatmap(object):
         df = df.astype(float)
         df = zscore(df, axis=z_score)
         df = df.iloc[::-1]
-        self._df = df
+        self.data = df
         self.cbar_title = "Norm.Exp" if z_score is None else "Z-Score"
         self.cmap = cmap
         if cmap is None:
@@ -127,7 +126,7 @@ class Heatmap(object):
         return ax
 
     def draw(self):
-        df = self._df
+        df = self.data
         ax = self.get_ax()
         vmin = np.percentile(df, 2)
         vmax = np.percentile(df, 98)
@@ -525,6 +524,33 @@ class DotPlot(object):
         ofname: Optional[str] = None,
         **kwargs,
     ):
+        """Visualize GSEApy Results with categorical scatterplot
+        When multiple datasets exist in the input dataframe, the `x` argument is your friend.
+
+        :param df: GSEApy DataFrame results.
+        :param x: Categorical variable in `df` that map the x-axis data. Default: None.
+        :param y: Categorical variable in `df` that map the y-axis data. Default: Term.
+        :param hue: Grouping variable that will produce points with different colors.
+                    Can be either categorical or numeric
+
+        :param x_order: bool, array-like list. Default: False.
+                        If True, peformed hierarchical_clustering on X-axis.
+                        or input a array-like list of `x` categorical levels.
+
+        :param x_order: bool, array-like list. Default: False.
+                        If True, peformed hierarchical_clustering on Y-axis.
+                        or input a array-like list of `y` categorical levels.
+
+        :param title: Figure title.
+        :param thresh: Terms with `column` value < cut-off are shown. Work only for
+                    ("Adjusted P-value", "P-value", "NOM p-val", "FDR q-val")
+        :param n_terms: Number of enriched terms to show.
+        :param dot_scale: float, scale the dot size to get proper visualization.
+        :param figsize: tuple, matplotlib figure size.
+        :param cmap: Matplotlib colormap for mapping the `column` semantic.
+        :param ofname: Output file name. If None, don't save figure
+        :param marker: The matplotlib.markers. See https://matplotlib.org/stable/api/markers_api.html
+        """
         self.marker = "o"
         if "marker" in kwargs:
             self.marker = kwargs["marker"]
@@ -541,7 +567,7 @@ class DotPlot(object):
         self.title = title
         self.n_terms = n_terms
         self.thresh = thresh
-        self._df = self.process(df)
+        self.data = self.process(df)
         plt.rcParams.update({"pdf.fonttype": 42, "ps.fonttype": 42})
 
     def isfloat(self, x):
@@ -600,20 +626,8 @@ class DotPlot(object):
         df = df.assign(Hits_ratio=temp.iloc[:, 0] / temp.iloc[:, 1])
         return df
 
-    def get_y_order(
-        self, method: str = "single", metric: str = "euclidean"
-    ) -> List[str]:
-        """See scipy.cluster.hierarchy.linkage()
-        Perform hierarchical/agglomerative clustering.
-        Return categorical order.
-        """
-        if isinstance(self.y_order, Iterable):
-            return self.y_order
-        mat = self._df.pivot(
-            index=self.y,
-            columns=self.x,
-            values=self.colname,  # [self.colname, "Hits_ratio"],
-        ).fillna(0)
+    def _hierarchical_clustering(self, mat, method, metric) -> List[int]:
+        # mat.shape -> [n_sample, m_features]
         Y0 = sch.linkage(mat, method=method, metric=metric)
         Z0 = sch.dendrogram(
             Y0,
@@ -623,6 +637,40 @@ class DotPlot(object):
             distance_sort="descending",
         )
         idx = Z0["leaves"][::-1]  # reverse the order to make the view better
+        return idx
+
+    def get_x_order(
+        self, method: str = "single", metric: str = "euclidean"
+    ) -> List[str]:
+        """See scipy.cluster.hierarchy.linkage()
+        Perform hierarchical/agglomerative clustering.
+        Return categorical order.
+        """
+        if isinstance(self.x_order, Iterable):
+            return self.x_order
+        mat = self.data.pivot(
+            index=self.y,
+            columns=self.x,
+            values=self.colname,  # [self.colname, "Hits_ratio"],
+        ).fillna(0)
+        idx = self._hierarchical_clustering(mat.T, method, metric)
+        return list(mat.columns[idx])
+
+    def get_y_order(
+        self, method: str = "single", metric: str = "euclidean"
+    ) -> List[str]:
+        """See scipy.cluster.hierarchy.linkage()
+        Perform hierarchical/agglomerative clustering.
+        Return categorical order.
+        """
+        if isinstance(self.y_order, Iterable):
+            return self.y_order
+        mat = self.data.pivot(
+            index=self.y,
+            columns=self.x,
+            values=self.colname,  # [self.colname, "Hits_ratio"],
+        ).fillna(0)
+        idx = self._hierarchical_clustering(mat, method, metric)
         return list(mat.index[idx])
 
     def get_ax(self):
@@ -648,15 +696,15 @@ class DotPlot(object):
         x = self.x
         xlabel = ""
         # set xaxis values, so you could get dotplot
-        if (x is not None) and (x in self._df.columns):
+        if (x is not None) and (x in self.data.columns):
             xlabel = x
-        elif "Combined Score" in self._df.columns:
+        elif "Combined Score" in self.data.columns:
             xlabel = "Combined Score"
             x = xlabel
-        elif "Odds Ratio" in self._df.columns:
+        elif "Odds Ratio" in self.data.columns:
             xlabel = "Odds Ratio"
             x = xlabel
-        elif "NES" in self._df.columns:
+        elif "NES" in self.data.columns:
             xlabel = "NES"
             x = xlabel
         else:
@@ -674,12 +722,12 @@ class DotPlot(object):
         build scatter
         """
         # scatter colormap range
-        # df = df.assign(colmap=self._df[self.colname].round().astype("int"))
+        # df = df.assign(colmap=self.data[self.colname].round().astype("int"))
         # make area bigger to better visualization
         # area = df["Hits_ratio"] * plt.rcParams["lines.linewidth"] * 100
-        df = self._df.assign(
+        df = self.data.assign(
             area=(
-                self._df["Hits_ratio"] * self.scale * plt.rcParams["lines.markersize"]
+                self.data["Hits_ratio"] * self.scale * plt.rcParams["lines.markersize"]
             ).pow(2)
         )
         colmap = df[self.colname].astype(int)
@@ -692,8 +740,8 @@ class DotPlot(object):
         x, xlabel = self.set_x()
         y = self.y
         # set x, y order
-        xunits = UnitData(self.x_order) if self.x_order else None
-        yunits = UnitData(self.get_y_order()) if self.x else None
+        xunits = UnitData(self.get_x_order()) if self.x_order else None
+        yunits = UnitData(self.get_y_order()) if self.y_order else None
 
         # outer ring
         if outer_ring:
@@ -808,7 +856,7 @@ class DotPlot(object):
         if ax is None:
             ax = self.get_ax()
         x, xlabel = self.set_x()
-        bar = self._df.plot.barh(
+        bar = self.data.plot.barh(
             x=self.y, y=self.colname, alpha=0.75, fontsize=16, ax=ax
         )
         if self.hue in ["Adjusted P-value", "P-value", "FDR q-val", "NOM p-val"]:
@@ -829,8 +877,8 @@ class DotPlot(object):
         colors = _colors
         # remove old legend first
         bar.legend_.remove()
-        if (group is not None) and (group in self._df.columns):
-            num_grp = self._df[group].value_counts(sort=False)
+        if (group is not None) and (group in self.data.columns):
+            num_grp = self.data[group].value_counts(sort=False)
             # set colors for each bar (groupby hue)
             colors = []
             legend_elements = []
@@ -872,30 +920,30 @@ class DotPlot(object):
         """
         return two dataframe of nodes, and edges
         """
-        num_nodes = len(self._df)
+        num_nodes = len(self.data)
         # build graph
         # G = nx.Graph()
         group_loc = None
         if self.x is not None:
-            group_loc = self._df.columns.get_loc(self.x)
-        term_loc = self._df.columns.get_loc(self.y)  # "Terms"
-        if "Genes" in self._df.columns:
-            gene_loc = self._df.columns.get_loc("Genes")
+            group_loc = self.data.columns.get_loc(self.x)
+        term_loc = self.data.columns.get_loc(self.y)  # "Terms"
+        if "Genes" in self.data.columns:
+            gene_loc = self.data.columns.get_loc("Genes")
         elif "Lead_genes":
-            gene_loc = self._df.columns.get_loc("Lead_genes")
+            gene_loc = self.data.columns.get_loc("Lead_genes")
         else:
             raise KeyError("Sorry, could not locate enriched gene list")
         # build graph
         # nodes = []
-        nodes = self._df.reset_index(drop=True)
+        nodes = self.data.reset_index(drop=True)
         nodes.index.name = "node_idx"
-        genes = self._df.iloc[:, gene_loc].str.split(";")
-        # ns_loc = self._df.columns.get_loc("Hits_ratio")
+        genes = self.data.iloc[:, gene_loc].str.split(";")
+        # ns_loc = self.data.columns.get_loc("Hits_ratio")
         edge_list = []
         for i in range(num_nodes):
-            # nodes.append([i, self._df.iloc[i, term_loc], self._df.iloc[i, ns_loc]])
+            # nodes.append([i, self.data.iloc[i, term_loc], self.data.iloc[i, ns_loc]])
             # if group_loc is not None:
-            #     nodes[-1].append(self._df.iloc[i, group_loc])
+            #     nodes[-1].append(self.data.iloc[i, group_loc])
             for j in range(i + 1, num_nodes):
                 set_i = set(genes.iloc[i])
                 set_j = set(genes.iloc[j])
@@ -907,8 +955,8 @@ class DotPlot(object):
                 edge = [
                     i,
                     j,
-                    self._df.iloc[i, term_loc],
-                    self._df.iloc[j, term_loc],
+                    self.data.iloc[i, term_loc],
+                    self.data.iloc[j, term_loc],
                     jaccard_coefficient,
                     overlap_coefficient,
                     ",".join(ov),
@@ -943,8 +991,8 @@ def dotplot(
     column: str = "Adjusted P-value",
     x: Optional[str] = None,
     y: str = "Term",
-    x_order: Optional[List[str]] = None,
-    y_order: Optional[List[str]] = None,
+    x_order: Union[List[str], bool] = False,
+    y_order: Union[List[str], bool] = False,
     title: str = "",
     cutoff: float = 0.05,
     top_term: int = 10,
@@ -959,14 +1007,21 @@ def dotplot(
     **kwargs,
 ):
     """Visualize GSEApy Results with categorical scatterplot
-    When multiple datasets exist in the input dataframe, the `group` argument is your friend.
+    When multiple datasets exist in the input dataframe, the `x` argument is your friend.
 
     :param df: GSEApy DataFrame results.
     :param column: column name in `df` that map the dot colors. Default: Adjusted P-value.
     :param x: Categorical variable in `df` that map the x-axis data. Default: None.
     :param y: Categorical variable in `df` that map the y-axis data. Default: Term.
-    :param x_order: X-axis order to plot the `x` categorical levels. Default: None.
-    :param y_order: Y-axis order to plot the `y` categorical levels. Default: None.
+
+    :param x_order: bool, array-like list. Default: False.
+                    If True, peformed hierarchical_clustering on X-axis.
+                    or input a array-like list of `x` categorical levels.
+
+    :param x_order: bool, array-like list. Default: False.
+                    If True, peformed hierarchical_clustering on Y-axis.
+                    or input a array-like list of `y` categorical levels.
+
     :param title: Figure title.
     :param cutoff: Terms with `column` value < cut-off are shown. Work only for
                    ("Adjusted P-value", "P-value", "NOM p-val", "FDR q-val")
@@ -981,6 +1036,9 @@ def dotplot(
     :return: matplotlib.Axes. return None if given ofname.
              Only terms with `column` <= `cut-off` are plotted.
     """
+    if "group" in kwargs:
+        warnings.warn("group is deprecated; use x instead", DeprecationWarning, 2)
+        return
 
     dot = DotPlot(
         df=df,
