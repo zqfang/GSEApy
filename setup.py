@@ -112,7 +112,7 @@ setup(
         "numpy>=1.13.0",
         "scipy",
         "pandas",
-        "matplotlib",
+        "matplotlib>=2.2",
         "requests",
     ],
     rust_extensions=[
