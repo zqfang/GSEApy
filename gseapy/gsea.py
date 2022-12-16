@@ -89,12 +89,12 @@ class GSEA(GSEAbase):
         # drop duplicated gene names
         if exprs.iloc[:, 0].duplicated().sum() > 0:
             self._logger.warning(
-                "Warning: dropping duplicated gene names, only keep the first values"
+                "Dropping duplicated gene names, only keep the first values"
             )
             # drop duplicate gene_names.
             exprs.drop_duplicates(subset=exprs.columns[0], inplace=True)
         if exprs.isnull().any().sum() > 0:
-            self._logger.warning("Warning: Input data contains NA, filled NA with 0")
+            self._logger.warning("Input data contains NA, filled NA with 0")
             exprs.dropna(how="all", inplace=True)  # drop rows with all NAs
             exprs = exprs.fillna(0)
         # set gene name as index
@@ -318,8 +318,6 @@ class GSEA(GSEAbase):
         # write output and plotting
         self.to_df(gsum.summaries, gmt, self.ranking)
         self._logger.info("Congratulations. GSEApy ran successfully.................\n")
-        if self._outdir is None:
-            self._tmpdir.cleanup()
 
         return
 
@@ -460,8 +458,6 @@ class Prerank(GSEAbase):
             )
 
         self._logger.info("Congratulations. GSEApy runs successfully................\n")
-        if self._outdir is None:
-            self._tmpdir.cleanup()
 
         return
 
@@ -563,12 +559,12 @@ class SingleSampleGSEA(GSEAbase):
             raise Exception("Error parsing gene ranking values!")
         if rank_metric.index.duplicated().sum() > 0:
             self._logger.warning(
-                "Warning: dropping duplicated gene names, values averaged by gene names!"
+                "Dropping duplicated gene names, values averaged by gene names!"
             )
             rank_metric = rank_metric.loc[rank_metric.index.dropna()]
             rank_metric = rank_metric.groupby(level=0).mean()
         if rank_metric.isnull().any().sum() > 0:
-            self._logger.warning("Warning: Input data contains NA, filled NA with 0")
+            self._logger.warning("Input data contains NA, filled NA with 0")
             rank_metric = rank_metric.fillna(0)
 
         return rank_metric
@@ -616,12 +612,9 @@ class SingleSampleGSEA(GSEAbase):
         if self.permutation_num > 0:
             # run permutation procedure and calculate pvals, fdrs
             self._logger.warning(
-                "run ssGSEA with permutation procedure, don't use the pval, fdr results for publication."
+                "Run ssGSEA with permutation procedure, don't use the pval, fdr results for publication."
             )
         self.runSamplesPermu(df=normdat, gmt=gmt)
-        # clean up all outputs if _outdir is None
-        if self._outdir is None:
-            self._tmpdir.cleanup()
 
     def runSamplesPermu(
         self, df: pd.DataFrame, gmt: Optional[Dict[str, List[str]]] = None
@@ -629,7 +622,8 @@ class SingleSampleGSEA(GSEAbase):
         """Single Sample GSEA workflow with permutation procedure"""
 
         assert self.min_size <= self.max_size
-        mkdirs(self.outdir)
+        if self._outdir:
+            mkdirs(self.outdir)
         gsum = ssgsea_rs(
             df.index.values.tolist(),
             df.values.tolist(),
@@ -671,11 +665,7 @@ class Replot(GSEAbase):
         self.gene_sets = None
         self.ascending = False
         # init logger
-        mkdirs(self.outdir)
-        outlog = os.path.join(self.outdir, "gseapy.%s.%s.log" % (self.module, "run"))
-        self._logger = log_init(
-            outlog=outlog, log_level=logging.INFO if self.verbose else logging.WARNING
-        )
+        self.prepare_outdir()
 
     def gsea_edb_parser(self, results_path):
         """Parse results.edb file stored under **edb** file folder.

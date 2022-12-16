@@ -45,24 +45,34 @@ class GSEAbase(object):
 
         self._set_cores()
         # init logger
-        logfile = self.prepare_outdir()
-        self._logger = log_init(
-            outlog=logfile, log_level=logging.INFO if self.verbose else logging.WARNING
-        )
+        self.prepare_outdir()
+
+    def __del__(self):
+        handlers = self._logger.handlers[:]
+        for handler in handlers:
+            handler.close()  # close file
+            self._logger.removeHandler(handler)
+        if hasattr(self, "_tmpdir") and os.path.exists(self._logfile):
+            self._tmpdir.cleanup()
 
     def prepare_outdir(self):
         """create temp directory."""
         self._outdir = self.outdir
-        if self._outdir is None:
-            self._tmpdir = TemporaryDirectory()
-            self.outdir = self._tmpdir.name
-        elif isinstance(self.outdir, str):
+
+        if isinstance(self.outdir, str):
             mkdirs(self.outdir)
         else:
-            raise Exception("Error parsing outdir: %s" % type(self.outdir))
-
-        logfile = os.path.join(self.outdir, "gseapy.%s.log" % self.module)
-        return logfile
+            self._tmpdir = TemporaryDirectory()
+            self.outdir = self._tmpdir.name
+        logfile = os.path.join(
+            self.outdir, "gseapy.%s.%s.log" % (self.module, id(self))
+        )
+        self._logfile = logfile
+        self._logger = log_init(
+            name=str(self.module) + str(id(self)),
+            log_level=logging.INFO if self.verbose else logging.WARNING,
+            filename=logfile,
+        )
 
     def _set_cores(self):
         """set cpu numbers to be used"""

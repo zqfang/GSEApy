@@ -53,23 +53,25 @@ class GSLogger(object):
         """
         if GSLogger.__instance is None:
             GSLogger.__instance = object.__new__(cls)
-            logger = log_init(outlog, log_level)
+            logger = log_init("gseapy", log_level, outlog)
             GSLogger.__instance.logger = logger
         return GSLogger.__instance
 
 
-def log_init(outlog, log_level=logging.INFO):
+def log_init(name, log_level=logging.INFO, filename=None):
     """logging start"""
+    logger = logging.getLogger(name)
     # clear old root logger handlers
-    logging.getLogger("gseapy").handlers = []
+    if logger.hasHandlers():
+        log_close(logger)
+        # logger.handlers = []
     # init a root logger
     logging.basicConfig(
         level=logging.DEBUG,
         format="LINE %(lineno)-4d: %(asctime)s %(name)s::[%(levelname)-8s] %(message)s",
-        filename=outlog,
+        filename=filename,
         filemode="w",
     )
-
     # define a Handler which writes INFO messages or higher to the sys.stderr
     console = logging.StreamHandler()
     console.setLevel(log_level)
@@ -78,12 +80,18 @@ def log_init(outlog, log_level=logging.INFO):
     # tell the handler to use this format
     console.setFormatter(formatter)
     # add handlers
-    logging.getLogger("gseapy").addHandler(console)
-    logger = logging.getLogger("gseapy")
+    logger.addHandler(console)
     # logger.setLevel(log_level)
     # logger.handlers.clear()
     # logger.removeHandler(fh)
     return logger
+
+
+def log_close(logger):
+    handlers = logger.handlers[:]
+    for handler in handlers:
+        logger.removeHandler(handler)
+        handler.close()
 
 
 def retry(num=5):
