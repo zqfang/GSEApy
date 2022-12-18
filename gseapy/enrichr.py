@@ -466,7 +466,7 @@ class Enrichr(object):
         # read input file
         genes_list = self.parse_genelists()
 
-        self._logger.info("Connecting to Enrichr Server to get latest library names")
+        # self._logger.info("Connecting to Enrichr Server to get latest library names")
         gss = self.parse_genesets()
         if len(gss) < 1:
             self._logger.error(
