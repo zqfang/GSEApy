@@ -56,7 +56,7 @@ class GSEAbase(object):
     def prepare_outdir(self):
         """create temp directory."""
         self._outdir = self.outdir
-        logfile=None
+        logfile = None
         if isinstance(self.outdir, str):
             mkdirs(self.outdir)
             logfile = os.path.join(

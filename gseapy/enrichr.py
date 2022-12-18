@@ -96,11 +96,11 @@ class Enrichr(object):
             # only convert gmt to dict. local mode
             if isinstance(g, str) and g.lower().endswith(".gmt"):
                 if os.path.exists(g):
-                    self._logger.info("User Defined gene sets is given: %s" % g)
+                    self._logger.info("User defined gene sets is given: %s" % g)
                     gss.append(self.__parse_gmt(g))
                     self._gs_name.append(os.path.basename(g))
                 else:
-                    self._logger.warning("User Defined gene sets is not found: %s" % g)
+                    self._logger.warning("User defined gene sets is not found: %s, skip." % g)
             else:
                 gss.append(g)
                 _name = g
