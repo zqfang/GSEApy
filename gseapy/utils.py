@@ -106,9 +106,7 @@ def retry(num=5):
 
     """
     s = requests.Session()
-    retries = Retry(
-        total=num, backoff_factor=1, status_forcelist=[500, 502, 503, 504]
-    )
+    retries = Retry(total=num, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
     s.mount("http://", HTTPAdapter(max_retries=retries))
 
     return s
