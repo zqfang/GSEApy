@@ -1,13 +1,13 @@
 import errno
 import logging
 import os
-from os.path import expanduser
+import sys
 
 import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
-DEFAULT_CACHE_PATH = os.path.join(expanduser("~"), ".cache/gseapy")
+DEFAULT_CACHE_PATH = os.path.join(os.path.expanduser("~"), ".cache/gseapy")
 
 
 def unique(seq):
@@ -41,47 +41,49 @@ def mkdirs(outdir):
         pass
 
 
-class GSLogger(object):
-    # singleton
-    __instance = None
-
-    def __new__(cls, outlog, log_level=logging.INFO):
-        """Singleton
-        __new__ handles object creation and __init__ handles object initialization.
-        __new__ accepts cls as it's first parameter and __init__ accepts self.
-        __new__ excute first, then __init__
-        """
-        if GSLogger.__instance is None:
-            GSLogger.__instance = object.__new__(cls)
-            logger = log_init("gseapy", log_level, outlog)
-            GSLogger.__instance.logger = logger
-        return GSLogger.__instance
-
-
 def log_init(name, log_level=logging.INFO, filename=None):
-    """logging start"""
+    """logging
+
+    :param name: logger name
+    :log_level: refer to logging module
+    :filename: if given a filename, write log to a file (only works in commandline)
+
+    """
+    # inside python console enviroment. only need one root logger
+    if hasattr(sys, "ps1"):
+        name = "gseapy"
     logger = logging.getLogger(name)
     # clear old root logger handlers
     if logger.hasHandlers():
         log_close(logger)
         # logger.handlers = []
+    logger.setLevel(logging.DEBUG)
+    logger.propagate = False  # don't find root logger
     # init a root logger
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format="LINE %(lineno)-4d: %(asctime)s %(name)s::[%(levelname)-8s] %(message)s",
-        filename=filename,
-        filemode="w",
-    )
-    # define a Handler which writes INFO messages or higher to the sys.stderr
+    # logging.basicConfig(
+    #     level=logging.DEBUG,
+    #     format="%(asctime)s %(name)s::[%(levelname)-8s] %(message)s",
+    #     # filename=filename,
+    #     # filemode="w",
+    # )
+    # # define a Handler which writes INFO messages or higher to the sys.stderr
     console = logging.StreamHandler()
     console.setLevel(log_level)
     # set a format which is simpler for console use
-    formatter = logging.Formatter("%(asctime)s %(message)s")
+    formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
     # tell the handler to use this format
     console.setFormatter(formatter)
     # add handlers
     logger.addHandler(console)
-    # logger.setLevel(log_level)
+    # only write log file when in command line
+    if (not hasattr(sys, "ps1")) and filename:
+        fhandler = logging.FileHandler(filename=filename, mode="w")
+        fhandler.setLevel(logging.DEBUG)
+        formatter = logging.Formatter(
+            "%(asctime)s %(name)s::[%(levelname)-8s] %(message)s"
+        )
+        fhandler.setFormatter(formatter)
+        logger.addHandler(fhandler)
     # logger.handlers.clear()
     # logger.removeHandler(fh)
     return logger

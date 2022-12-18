@@ -63,22 +63,17 @@ class Enrichr(object):
         for handler in handlers:
             handler.close()  # close file
             self._logger.removeHandler(handler)
-        if hasattr(self, "_tmpdir") and os.path.exists(self._logfile):
-            self._tmpdir.cleanup()
 
     def prepare_outdir(self):
         """create temp directory."""
         self._outdir = self.outdir
 
+        logfile = None
         if isinstance(self.outdir, str):
             mkdirs(self.outdir)
-        else:
-            self._tmpdir = TemporaryDirectory()
-            self.outdir = self._tmpdir.name
-        logfile = os.path.join(
-            self.outdir, "gseapy.%s.%s.log" % (self.module, id(self))
-        )
-        self._logfile = logfile
+            logfile = os.path.join(
+                self.outdir, "gseapy.%s.%s.log" % (self.module, id(self))
+            )
         self._logger = log_init(
             name=str(self.module) + str(id(self)),
             log_level=logging.INFO if self.verbose else logging.WARNING,
@@ -111,6 +106,7 @@ class Enrichr(object):
                 _name = g
                 if isinstance(g, dict):
                     _name = "gs_ind_" + str(i)
+                    self._logger.info("Input dict object named with %s" % _name)
                 self._gs_name.append(_name)
         return gss
 
@@ -154,7 +150,7 @@ class Enrichr(object):
                     gss_exist.append(g)
                     gss_name.append(n)
                 else:
-                    self._logger.warning("Enrichr library not found: %s" % g)
+                    self._logger.warning("Input library not found: %s. Skip" % g)
 
         self._gs_name = gss_name  # update names
         if len(gss_exist) < 1:
@@ -279,7 +275,8 @@ class Enrichr(object):
         """return active enrichr library name. Official API"""
 
         lib_url = "%s/%s/datasetStatistics" % (self.ENRICHR_URL, self._organism)
-        response = requests.get(lib_url, verify=True)
+        s = retry(num=5)
+        response = s.get(lib_url, verify=True)
         if not response.ok:
             raise Exception("Error getting the Enrichr libraries")
         libs_json = json.loads(response.text)
@@ -422,9 +419,8 @@ class Enrichr(object):
             bg = set()
             for term, genes in gmt.items():
                 bg = bg.union(set(genes))
-            self._logger.warning(
-                "Background is not set!!! Use all %s genes in the input gene_sets."
-                % (len(bg))
+            self._logger.info(
+                "Background is not set! Use all %s genes in %s." % (len(bg), self._gs)
             )
             self._bg = bg
 
@@ -486,10 +482,11 @@ class Enrichr(object):
         self.results = []
 
         for name, g in zip(self._gs_name, gss):
+            self._logger.info("Run: %s " % name)
             if isinstance(g, dict):
                 ## local mode
-                res = self.enrich(g)
                 shortID, self._gs = str(id(g)), name
+                res = self.enrich(g)
                 if res is None:
                     self._logger.info(
                         "No hits return, for gene set: Custom%s" % shortID
@@ -508,7 +505,6 @@ class Enrichr(object):
             self.res2d = res
             if self._outdir is None:
                 continue
-            self._logger.info("Save file of enrichment results: Job Id:" + str(shortID))
             outfile = "%s/%s.%s.%s.reports.txt" % (
                 self.outdir,
                 self._gs,
@@ -518,9 +514,10 @@ class Enrichr(object):
             self.res2d.to_csv(
                 outfile, index=False, encoding="utf-8", float_format="%.6e", sep="\t"
             )
+            self._logger.info("Save enrichment results for %s " % name)
             # plotting
             if not self.__no_plot:
-                msg = barplot(
+                ax = barplot(
                     df=res,
                     cutoff=self.cutoff,
                     figsize=self.figsize,
@@ -529,9 +526,7 @@ class Enrichr(object):
                     title=self._gs,
                     ofname=outfile.replace("txt", self.format),
                 )
-                if msg is not None:
-                    self._logger.warning(msg)
-            self._logger.info("Done.\n")
+                self._logger.info("Generate figures")
         self.results = pd.concat(self.results, ignore_index=True)
 
         return

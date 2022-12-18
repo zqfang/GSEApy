@@ -52,21 +52,16 @@ class GSEAbase(object):
         for handler in handlers:
             handler.close()  # close file
             self._logger.removeHandler(handler)
-        if hasattr(self, "_tmpdir") and os.path.exists(self._logfile):
-            self._tmpdir.cleanup()
 
     def prepare_outdir(self):
         """create temp directory."""
         self._outdir = self.outdir
-
+        logfile=None
         if isinstance(self.outdir, str):
             mkdirs(self.outdir)
-        else:
-            self._tmpdir = TemporaryDirectory()
-            self.outdir = self._tmpdir.name
-        logfile = os.path.join(
-            self.outdir, "gseapy.%s.%s.log" % (self.module, id(self))
-        )
+            logfile = os.path.join(
+                self.outdir, "gseapy.%s.%s.log" % (self.module, id(self))
+            )
         self._logfile = logfile
         self._logger = log_init(
             name=str(self.module) + str(id(self)),
@@ -280,7 +275,8 @@ class GSEAbase(object):
         """return active enrichr library name.Offical API"""
 
         lib_url = self.ENRICHR_URL + "/Enrichr/datasetStatistics"
-        response = requests.get(lib_url, verify=True)
+        s = retry(num=5)
+        response = s.get(lib_url, verify=True)
         if not response.ok:
             raise Exception("Error getting the Enrichr libraries")
         libs_json = json.loads(response.text)

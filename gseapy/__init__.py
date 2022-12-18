@@ -586,23 +586,12 @@ def enrich(
     """
     organism = "human"  # has not any effects here
     _gene_sets = gene_sets
-    if not isinstance(gene_sets, list):
-        _gene_sets = [gene_sets]
-    gss = []
-    for gs in _gene_sets:
-        if isinstance(gs, dict):
-            gss.append(gs)
-        elif isinstance(gs, str) and os.path.exists(gs):
-            gss.append(gs)
-        else:
-            print("%s is not found, skip" % gs)
-
-    if len(gss) < 1:
-        raise ValueError("gene_sets input is illegal. input dict or gmt files")
+    if isinstance(gene_sets, str):
+        _gene_sets = gene_sets.split(",")
 
     enr = Enrichr(
         gene_list,
-        gss,
+        _gene_sets,
         organism,
         outdir,
         background,
