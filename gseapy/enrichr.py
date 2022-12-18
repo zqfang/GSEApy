@@ -100,7 +100,9 @@ class Enrichr(object):
                     gss.append(self.__parse_gmt(g))
                     self._gs_name.append(os.path.basename(g))
                 else:
-                    self._logger.warning("User defined gene sets is not found: %s, skip." % g)
+                    self._logger.warning(
+                        "User defined gene sets is not found: %s, skip." % g
+                    )
             else:
                 gss.append(g)
                 _name = g
