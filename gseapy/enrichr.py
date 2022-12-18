@@ -486,6 +486,9 @@ class Enrichr(object):
             if isinstance(g, dict):
                 ## local mode
                 shortID, self._gs = str(id(g)), name
+                self._logger.debug(
+                    "Off-line enrichment analysis with library: %s" % (self._gs)
+                )
                 res = self.enrich(g)
                 if res is None:
                     self._logger.info(
@@ -495,7 +498,7 @@ class Enrichr(object):
             else:
                 ## online mode
                 self._gs = name
-                self._logger.debug("Start Enrichr using library: %s" % (self._gs))
+                self._logger.debug("Enrichr service using library: %s" % (self._gs))
                 # self._logger.info("Enrichr Library: %s"% self._gs)
                 shortID, res = self.get_results(genes_list)
                 # Remember gene set library used
@@ -526,7 +529,8 @@ class Enrichr(object):
                     title=self._gs,
                     ofname=outfile.replace("txt", self.format),
                 )
-                self._logger.info("Generate figures")
+                self._logger.debug("Generate figures")
         self.results = pd.concat(self.results, ignore_index=True)
+        self._logger.info("Done.")
 
         return
