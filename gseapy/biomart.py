@@ -7,12 +7,14 @@ from xml.etree import cElementTree as ET
 import pandas as pd
 import requests
 
+from gseapy.utils import log_init, mkdirs, retry
+
 
 class Biomart:
     """query from BioMart"""
 
     def __init__(self, host: str = "www.ensembl.org", verbose: bool = False):
-        """A wrapper of BioMart() from bioseverices.
+        """simple API to BioMart services.
 
         How to query validated dataset, attributes, filters.
         Example::
@@ -33,7 +35,12 @@ class Biomart:
                             filters={'ensembl_gene_id': queries}
                             )
         """
-        # super(Biomart, self).__init__(host=host, verbose=verbose)
+        self._id = str(id(self))
+        self._logger = log_init(
+            name="Biomart" + self._id,
+            log_level=logging.INFO if verbose else logging.WARNING,
+            filename=None,
+        )
         self._set_host(host)
 
         self.attributes_xml = []
@@ -65,7 +72,13 @@ class Biomart:
         self.reset()
 
         # get supported marts
-        self._marts = self.get_marts()["name"].to_list()
+        self._marts = self.get_marts()["Mart"].to_list()
+
+    def __del__(self):
+        handlers = self._logger.handlers[:]
+        for handler in handlers:
+            handler.close()  # close file
+            self._logger.removeHandler(handler)
 
     def _set_host(self, host: str):
         """set host"""
@@ -85,14 +98,16 @@ class Biomart:
                 self.host = hosts[i]
                 break
             else:
-                logging.warning(
+                self._logger.warning(
                     "host {} is not reachable, will try {} ".format(
                         hosts[i], hosts[i % len(hosts)]
                     )
                 )
             i += 1
         if i == len(hosts):
-            raise ValueError("host {} is not reachable. Please check your input")
+            raise ValueError(
+                "host is not reachable. Please check your input or try again later."
+            )
 
     def add_filter(self, name: str, value: Iterable[str]):
         """
@@ -132,21 +147,21 @@ class Biomart:
 
     def get_marts(self):
         """Get available marts and their names."""
-        url = (
-            "https://{host}/biomart/martservice?type=registry&requestid=gseapy".format(
-                host=self.host
-            )
+        url = "https://{host}/biomart/martservice?type=registry&requestid=gseapy{i}".format(
+            host=self.host, i=self._id
         )
         resp = requests.get(url)
         if resp.ok:
             # marts = pd.read_xml(resp.text)
             marts = [e.attrib for e in ET.XML(resp.text)]
             marts = pd.DataFrame(marts)
-            return marts.loc[:, ["database", "displayName", "name"]]
+            marts = marts.loc[:, ["database", "displayName", "name"]]
+            marts.columns = ["Version", "DisplayName", "Mart"]
+            return marts.loc[:, ["Mart", "Version"]]
 
         return resp.text
 
-    def get_datasets(self, mart="ENSEMBL_MART_ENSEMBL"):
+    def get_datasets(self, mart: str = "ENSEMBL_MART_ENSEMBL"):
         """Get available datasets from mart you've selected"""
         if mart not in self._marts:
             raise ValueError(
@@ -166,7 +181,7 @@ class Biomart:
                 if len(record) > 1
             ]
             datasets = pd.DataFrame(datasets).iloc[:, 1:3]
-            datasets.columns = ["Name", "Description"]
+            datasets.columns = ["Dataset", "Description"]
             return datasets
         return resp.text
 
@@ -209,8 +224,8 @@ class Biomart:
     def query(
         self,
         dataset: str = "hsapiens_gene_ensembl",
-        attributes: List[str] = [],
-        filters: Dict[str, Iterable[str]] = {},
+        attributes: Optional[List[str]] = [],
+        filters: Optional[Dict[str, Iterable[str]]] = {},
         filename: Optional[str] = None,
     ):
         """mapping ids using BioMart.
@@ -244,17 +259,18 @@ class Biomart:
         df = self.query_simple(
             dataset=dataset, filters=filters, attributes=attributes, filename=None
         )
-        if isinstance(df, str):
+        if df is None:
+            return
+        elif isinstance(df, str):
             print(df)
             return df
+
         if "entrezgene_id" in df.columns:
             df["entrezgene_id"] = df["entrezgene_id"].astype(pd.Int32Dtype())
 
         self.results = df
         # save file to cache path.
         if filename is not None:
-            # mkdirs(DEFAULT_CACHE_PATH)
-            # filename = os.path.join(DEFAULT_CACHE_PATH, "{}.background.genes.txt".format(dataset))
             df.to_csv(filename, sep="\t", index=False)
 
         return df
@@ -286,15 +302,20 @@ class Biomart:
         """
         self.reset()
         self.add_dataset(dataset)
+        self._logger.debug("Add attributes")
         for at in attributes:
             self.add_attribute(at)
+        self._logger.debug("Add filters")
         for n, v in filters.items():
             self.add_filter(n, v)
+        self._logger.debug("Build xml")
         self._xml = self.get_xml()
-        response = requests.get(self._xml)
+        s = retry(num=5)
+        response = s.get(self._xml)
         if response.ok:
             if str(response.text).startswith("Query ERROR"):
-                return response.text
+                self._logger.error(response.text)
+                return
             df = pd.read_table(StringIO(response.text), header=None, names=attributes)
             if filename is not None:
                 df.to_csv(filename, sep="\t", index=False)
