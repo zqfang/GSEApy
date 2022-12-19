@@ -1,6 +1,7 @@
 import logging
 from collections.abc import Iterable
 from io import StringIO
+from typing import Any, AnyStr, Dict, Iterable, List, Optional, Set, Tuple, Union
 from xml.etree import cElementTree as ET
 
 import pandas as pd
@@ -10,7 +11,7 @@ import requests
 class Biomart:
     """query from BioMart"""
 
-    def __init__(self, host="www.ensembl.org", verbose=False):
+    def __init__(self, host: str = "www.ensembl.org", verbose: bool = False):
         """A wrapper of BioMart() from bioseverices.
 
         How to query validated dataset, attributes, filters.
@@ -47,7 +48,7 @@ class Biomart:
             "header": 0,
             "uniqueRows": 1,
             "configVersion": "0.6",
-            "completionStamp": 1,
+            "completionStamp": 0,
         }
 
         self.header = (
@@ -66,7 +67,7 @@ class Biomart:
         # get supported marts
         self._marts = self.get_marts()["name"].to_list()
 
-    def _set_host(self, host):
+    def _set_host(self, host: str):
         """set host"""
 
         hosts = ["www.ensembl.org", "asia.ensembl.org", "useast.ensembl.org"]
@@ -93,7 +94,7 @@ class Biomart:
         if i == len(hosts):
             raise ValueError("host {} is not reachable. Please check your input")
 
-    def add_filter(self, name, value):
+    def add_filter(self, name: str, value: Iterable[str]):
         """
         key: filter names
         value: Iterable[str]
@@ -107,11 +108,11 @@ class Biomart:
             _filter = """<Filter name="%s" value="%s"/>""" % (name, value)
         self.filters_xml.append(_filter)
 
-    def add_attribute(self, attribute):
+    def add_attribute(self, attribute: str):
         _attr = """<Attribute name="%s"/>""" % attribute
         self.attributes_xml.append(_attr)
 
-    def add_dataset(self, dataset):
+    def add_dataset(self, dataset: str):
         self.dataset_xml = """<Dataset name="%s" interface="default" >""" % dataset
 
     def reset(self):
@@ -169,7 +170,7 @@ class Biomart:
             return datasets
         return resp.text
 
-    def get_attributes(self, dataset="hsapiens_gene_ensembl"):
+    def get_attributes(self, dataset: str = "hsapiens_gene_ensembl"):
         """Get available attritbutes from dataset you've selected"""
         # assert dataset in
 
@@ -184,7 +185,7 @@ class Biomart:
             return attributes
         return resp.text
 
-    def get_filters(self, dataset="hsapiens_gene_ensembl"):
+    def get_filters(self, dataset: str = "hsapiens_gene_ensembl"):
         """Get available filters from dataset you've selected"""
         # filters = super(Biomart, self).filters(dataset)
         # if dataset not in [x for k in self.valid_attributes.keys() for x in self.valid_attributes[k]]:
@@ -206,7 +207,11 @@ class Biomart:
         return resp.text
 
     def query(
-        self, dataset="hsapiens_gene_ensembl", attributes=[], filters={}, filename=None
+        self,
+        dataset: str = "hsapiens_gene_ensembl",
+        attributes: List[str] = [],
+        filters: Dict[str, Iterable[str]] = {},
+        filename: Optional[str] = None,
     ):
         """mapping ids using BioMart.
 
@@ -255,7 +260,11 @@ class Biomart:
         return df
 
     def query_simple(
-        self, dataset="hsapiens_gene_ensembl", attributes=[], filters={}, filename=None
+        self,
+        dataset: str = "hsapiens_gene_ensembl",
+        attributes: List[str] = [],
+        filters: Dict[str, Iterable[str]] = {},
+        filename: Optional[str] = None,
     ):
         """
         This function is a simple version of BioMart REST API.
