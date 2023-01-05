@@ -7,7 +7,7 @@ mod stats;
 mod utils;
 // export module fn, struct, trait ...
 use stats::{GSEAResult, GSEASummary};
-use utils::Metric;
+use utils::{Metric, CorrelType};
 
 
 /// Prerank RUST
@@ -149,6 +149,7 @@ fn ssgsea_rs(
     min_size: usize,
     max_size: usize,
     nperm: Option<usize>,
+    ctype: CorrelType,
     threads: usize,
     seed: u64,
 ) -> PyResult<GSEAResult> {
@@ -165,9 +166,9 @@ fn ssgsea_rs(
     let _nperm = nperm.unwrap_or(0);
     let mut gsea = GSEAResult::new(weight, max_size, min_size, _nperm, seed);
     if _nperm > 0 {
-        gsea.ss_gsea_permuate(&gene_name, &gene_exp, &gmt);
+        gsea.ss_gsea_permuate(&gene_name, &gene_exp, &gmt, ctype);
     } else {
-        gsea.ss_gsea(&gene_name,  &gene_exp, &gmt);
+        gsea.ss_gsea(&gene_name,  &gene_exp, &gmt, ctype);
     }
     Ok(gsea)
 }
@@ -178,6 +179,7 @@ fn gse(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_class::<GSEASummary>()?;
     m.add_class::<GSEAResult>()?;
     m.add_class::<Metric>()?;
+    m.add_class::<CorrelType>()?;
     m.add_function(wrap_pyfunction!(gsea_rs, m)?)?;
     m.add_function(wrap_pyfunction!(prerank_rs, m)?)?;
     m.add_function(wrap_pyfunction!(prerank2d_rs, m)?)?;

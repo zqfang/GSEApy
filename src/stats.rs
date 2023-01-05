@@ -1,7 +1,7 @@
 #![allow(dead_code, unused)]
 
 use crate::algorithm::{EnrichmentScore, EnrichmentScoreTrait};
-use crate::utils::{DynamicEnum, Metric, Statistic};
+use crate::utils::{CorrelType, DynamicEnum, Metric, Statistic};
 use itertools::{izip, Itertools};
 use pyo3::prelude::*;
 use rayon::prelude::*;
@@ -652,6 +652,7 @@ impl GSEAResult {
         genes: &[String],
         gene_exp: &[Vec<f64>], // 2d vector [m_gene, n_sample];
         gmt: &HashMap<&str, &[String]>,
+        correl_type: CorrelType,
     ) {
         // transpose [m_gene, n_sample] --> [n_sample, m_gene]
         let mut gene_metric: Vec<Vec<f64>> = vec![vec![]; gene_exp[0].len()];
@@ -672,11 +673,30 @@ impl GSEAResult {
                 let mut tmp = rank.as_slice().argsort(false);
                 // line 338
                 if self.weight > 0.0 {
-                    // calculate z.score of normalized (e.g., ranked) expression values
-                    let (m, sd) = tmp.1.as_slice().stat(0);
-                    tmp.1.iter_mut().for_each(|x| {
-                        *x = (*x - m) / sd;
-                    });
+                    // see code
+                    // https://github.com/broadinstitute/ssGSEA2.0/blob/f682082f62ae34185421545f25041bae2c78c89b/src/ssGSEA2.0.R#L396
+                    match correl_type {
+                        CorrelType::SymRank => {
+                            let idx = (tmp.1.len() + 2 - 1) / 2; // ceiling div by 2
+                            let mid = tmp.1.get(idx).unwrap().to_owned();
+                            tmp.1.iter_mut().for_each(|x| {
+                                if *x > mid {
+                                    *x
+                                } else {
+                                    (*x) + (*x) - mid
+                                };
+                            })
+                        }
+
+                        CorrelType::ZScore => {
+                            let (m, sd) = tmp.1.as_slice().stat(0);
+                            tmp.1.iter_mut().for_each(|x| {
+                                *x = (*x - m) / sd;
+                            })
+                        }
+                        CorrelType::Rank => {} // do nothing
+                        _ => panic!("unsupported method"),
+                    }
                 }
                 // if weight == 0, ranked values turns to 1 automatically
                 tmp.1.iter_mut().for_each(|x| {
@@ -743,6 +763,7 @@ impl GSEAResult {
         genes: &[String],
         gene_exp: &[Vec<f64>], // 2d vector [m_gene, n_sample];
         gmt: &HashMap<&str, &[String]>,
+        correl_type: CorrelType,
     ) {
         // transpose [m_gene, n_sample] --> [n_sample, m_gene]
         let mut gene_metric: Vec<Vec<f64>> = vec![vec![]; gene_exp[0].len()];
@@ -758,11 +779,29 @@ impl GSEAResult {
             .map(|rank| {
                 let mut tmp = rank.as_slice().argsort(false);
                 if self.weight > 0.0 {
-                    // calculate z.score of normalized (e.g., ranked) expression values
-                    let (m, sd) = tmp.1.as_slice().stat(0);
-                    tmp.1.iter_mut().for_each(|x| {
-                        *x = (*x - m) / sd;
-                    });
+                    // https://github.com/broadinstitute/ssGSEA2.0/blob/f682082f62ae34185421545f25041bae2c78c89b/src/ssGSEA2.0.R#L396
+                    match correl_type {
+                        CorrelType::SymRank => {
+                            let idx = (tmp.1.len() + 2 -1) / 2;
+                            let mid = tmp.1.get(idx).unwrap().to_owned();
+                            tmp.1.iter_mut().for_each(|x| {
+                                if *x > mid {
+                                    *x
+                                } else {
+                                    (*x) + (*x) - mid
+                                };
+                            })
+                        }
+
+                        CorrelType::ZScore => {
+                            let (m, sd) = tmp.1.as_slice().stat(0);
+                            tmp.1.iter_mut().for_each(|x| {
+                                *x = (*x - m) / sd;
+                            })
+                        }
+                        CorrelType::Rank => {}
+                        _ => panic!("unsupported method"),
+                    }
                 }
                 tmp.1.iter_mut().for_each(|x| {
                     *x = x.abs().powf(self.weight);

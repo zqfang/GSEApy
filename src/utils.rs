@@ -23,6 +23,14 @@ pub enum Metric {
     DiffOfClasses = 5,
 }
 
+#[pyclass]
+#[derive(Copy, Clone)]
+pub enum CorrelType {
+    Rank = 0,
+    SymRank = 1,
+    ZScore = 2,
+}
+
 pub trait Statistic {
     fn mean(&self) -> f64;
     fn stat(&self, ddof: usize) -> (f64, f64);
