@@ -860,7 +860,7 @@ class DotPlot(object):
             x=self.y, y=self.colname, alpha=0.75, fontsize=16, ax=ax
         )
         if self.hue in ["Adjusted P-value", "P-value", "FDR q-val", "NOM p-val"]:
-            xlabel = "$- \log_{10}$ (%s)" % self.hue
+            xlabel = r"$- \log_{10}$ (%s)" % self.hue
         else:
             xlabel = self.hue
         bar.set_xlabel(xlabel, fontsize=16, fontweight="bold")
