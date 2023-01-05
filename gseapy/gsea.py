@@ -12,8 +12,7 @@ import numpy as np
 import pandas as pd
 
 from gseapy.base import GSEAbase
-from gseapy.gse import CorrelType, Metric
-from gseapy.gse import gsea_rs, prerank2d_rs, prerank_rs, ssgsea_rs
+from gseapy.gse import CorrelType, Metric, gsea_rs, prerank2d_rs, prerank_rs, ssgsea_rs
 from gseapy.parser import gsea_cls_parser
 from gseapy.plot import gseaplot
 from gseapy.utils import mkdirs

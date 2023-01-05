@@ -581,7 +581,7 @@ def add_singlesample_parser(subparsers):
         default="rank",
         metavar="transform",
         choices=("rank", "symrank", "zscore"),
-        help="Input data transformation after sample normalization. Choose from {'rank','symrank', 'zscore'}. Default: rank" ,
+        help="Input data transformation after sample normalization. Choose from {'rank','symrank', 'zscore'}. Default: rank",
     )
     group_opt.add_argument(
         "--ns",
