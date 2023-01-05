@@ -157,6 +157,7 @@ def ssgsea(
     gene_sets: Union[List[str], str, Dict[str, str]],
     outdir: Optional[str] = None,
     sample_norm_method: str = "rank",
+    correl_norm_type: str = "rank",
     min_size: int = 15,
     max_size: int = 500,
     permutation_num: Optional[int] = None,
@@ -169,8 +170,8 @@ def ssgsea(
     no_plot: bool = True,
     seed: int = 123,
     verbose: bool = False,
-    *arg,
-    **kwarg,
+    *args,
+    **kwargs,
 ) -> SingleSampleGSEA:
     """Run Gene Set Enrichment Analysis with single sample GSEA tool
 
@@ -180,7 +181,8 @@ def ssgsea(
 
     :param outdir: Results output directory. If None, nothing will write to disk.
 
-    :param str sample_norm_method: "Sample normalization method. Choose from {'rank', 'log', 'log_rank'}. Default: rank.
+    :param str sample_norm_method: Sample normalization method. Choose from {'rank', 'log', 'log_rank'}. Default: rank.
+               this argument will be used for ordering genes.
 
                1. 'rank': Rank your expression data, and transform by 10000*rank_dat/gene_numbers
                2. 'log' : Do not rank, but transform data by log(data + exp(1)), while data = data[data<1] =1.
@@ -188,6 +190,22 @@ def ssgsea(
                4. 'custom': Do nothing, and use your own rank value to calculate enrichment score.
 
     see here: https://github.com/GSEA-MSigDB/ssGSEAProjection-gpmodule/blob/master/src/ssGSEAProjection.Library.R, line 86
+
+    :param str correl_norm_type: correlation normalization type. Choose from {'rank', 'symrank', 'zscore'}. Default: rank.
+            After ordering genes by sample_norm_method, further data transformed could be applied to get enrichment score.
+
+            when weighted_score_type==0, sample_norm_method and correl_norm_type do not matter;
+            when weighted_score_type > 0, the combination of sample_norm_method and correl_norm_type
+            dictate how the gene expression values in input data are transformed
+            to obtain the score -- use this setting with care (the transformations
+            can skew scores towards +ve or -ve values)
+
+            sample_norm_method will first transformed and rank original data. the data is named correl_vector for each sample.
+            then correl_vector is transformed again by
+
+            1. correl_norm_type =='rank':  do nothing, genes are weighted by actual correl_vector.
+            2. correl_norm_type =='symrank': symmetric ranking.
+            3. correl_norm_type =='zscore':  standardizes the correl_vector before using them to calculate scores.
 
 
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Default: 15.
@@ -235,27 +253,10 @@ def ssgsea(
 
 
     """
-    if "processes" in kwarg:
+    if "processes" in kwargs:
         warnings.warn("processes is deprecated; use threads", DeprecationWarning, 2)
-        threads = kwarg["processes"]
-    ss = SingleSampleGSEA(
-        data,
-        gene_sets,
-        outdir,
-        sample_norm_method,
-        min_size,
-        max_size,
-        permutation_num,
-        weighted_score_type,
-        ascending,
-        threads,
-        figsize,
-        format,
-        graph_num,
-        no_plot,
-        seed,
-        verbose,
-    )
+        kwargs["threads"] = kwargs["processes"]
+    ss = SingleSampleGSEA(data=data, gene_sets=gene_sets, **kwargs)
     ss.run()
     return ss
 

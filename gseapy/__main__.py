@@ -11,7 +11,7 @@ import sys
 # or args = argparser.parse_args() will throw bugs!!!
 
 
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 
 
 def main():
@@ -92,6 +92,7 @@ def main():
             gene_sets=args.gmt,
             outdir=args.outdir,
             sample_norm_method=args.norm,
+            correl_norm_type=args.correl,
             min_size=args.mins,
             max_size=args.maxs,
             permutation_num=args.n,
@@ -569,6 +570,18 @@ def add_singlesample_parser(subparsers):
         metavar="normalize",
         choices=("rank", "log", "log_rank", "custom"),
         help="Sample normalization method. Choose from {'rank', 'log', 'log_rank','custom'}. Default: rank",
+    )
+
+    group_opt.add_argument(
+        "-c",
+        "--correl-type",
+        dest="correl",
+        action="store",
+        type=str,
+        default="rank",
+        metavar="transform",
+        choices=("rank", "symrank", "zscore"),
+        help="Input data transformation after sample normalization. Choose from {'rank','symrank', 'zscore'}. Default: rank" ,
     )
     group_opt.add_argument(
         "--ns",

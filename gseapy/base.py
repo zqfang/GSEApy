@@ -48,10 +48,11 @@ class GSEAbase(object):
         self.prepare_outdir()
 
     def __del__(self):
-        handlers = self._logger.handlers[:]
-        for handler in handlers:
-            handler.close()  # close file
-            self._logger.removeHandler(handler)
+        if hasattr(self, "_logger"):
+            handlers = self._logger.handlers[:]
+            for handler in handlers:
+                handler.close()  # close file
+                self._logger.removeHandler(handler)
 
     def prepare_outdir(self):
         """create temp directory."""

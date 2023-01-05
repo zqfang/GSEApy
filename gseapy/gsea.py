@@ -12,10 +12,11 @@ import numpy as np
 import pandas as pd
 
 from gseapy.base import GSEAbase
-from gseapy.gse import Metric, gsea_rs, prerank2d_rs, prerank_rs, ssgsea_rs
+from gseapy.gse import CorrelType, Metric
+from gseapy.gse import gsea_rs, prerank2d_rs, prerank_rs, ssgsea_rs
 from gseapy.parser import gsea_cls_parser
 from gseapy.plot import gseaplot
-from gseapy.utils import log_init, mkdirs
+from gseapy.utils import mkdirs
 
 # from memory_profiler import profile
 
@@ -471,6 +472,7 @@ class SingleSampleGSEA(GSEAbase):
         gene_sets: Union[List[str], str, Dict[str, str]],
         outdir: Optional[str] = None,
         sample_norm_method: str = "rank",
+        correl_norm_type: str = "zscore",
         min_size: int = 15,
         max_size: int = 500,
         permutation_num: Optional[int] = None,
@@ -483,6 +485,7 @@ class SingleSampleGSEA(GSEAbase):
         no_plot: bool = True,
         seed: int = 123,
         verbose: bool = False,
+        **kwargs
     ):
         super(SingleSampleGSEA, self).__init__(
             outdir=outdir,
@@ -493,11 +496,12 @@ class SingleSampleGSEA(GSEAbase):
         )
         self.data = data
         self.sample_norm_method = sample_norm_method
+        self.correl_type = self.norm_correl(correl_norm_type)
         self.weight = weight
         self.min_size = min_size
         self.max_size = max_size
         self.permutation_num = (
-            permutation_num if permutation_num is None else int(permutation_num)
+            int(permutation_num) if permutation_num else None
         )
         self.ascending = ascending
         self.figsize = figsize
@@ -571,7 +575,7 @@ class SingleSampleGSEA(GSEAbase):
 
     def norm_samples(self, dat: pd.DataFrame) -> pd.DataFrame:
         """normalization samples
-        see here: http://rowley.mit.edu/caw_web/ssGSEAProjection/ssGSEAProjection.Library.R
+        see here: https://github.com/broadinstitute/ssGSEA2.0/blob/f682082f62ae34185421545f25041bae2c78c89b/src/ssGSEA2.0.R#L237
         """
 
         if self.sample_norm_method == "rank":
@@ -590,6 +594,21 @@ class SingleSampleGSEA(GSEAbase):
             raise Exception("No supported method: %s" % self.sample_norm_method)
 
         return data
+
+    def norm_correl(self, cortype):
+        """
+        After norm_samples, input value will be further nomizalized before using them to calculate scores.
+        see source code:  
+        https://github.com/broadinstitute/ssGSEA2.0/blob/f682082f62ae34185421545f25041bae2c78c89b/src/ssGSEA2.0.R#L396
+        """
+        if cortype == "zscore":
+            return CorrelType.ZScore
+        elif cortype == "rank":
+            return CorrelType.Rank
+        elif cortype == "symrank":
+            return CorrelType.SymRank
+        else:
+            raise Exception("unsupported correl type input")
 
     def run(self):
         """run entry"""
@@ -632,6 +651,7 @@ class SingleSampleGSEA(GSEAbase):
             self.min_size,
             self.max_size,
             self.permutation_num,  # permutate just like runing prerank analysis
+            self.correl_type,
             self._threads,
             self.seed,
         )

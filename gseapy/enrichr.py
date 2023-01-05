@@ -198,7 +198,8 @@ class Enrichr(object):
         """send gene list to enrichr server"""
         payload = {"list": (None, gene_list), "description": (None, self.descriptions)}
         # response
-        response = requests.post(url, files=payload, verify=True)
+        s = retry(num=5)
+        response = s.post(url, files=payload, verify=True)
         if not response.ok:
             raise Exception("Error sending gene list, try again later")
         job_id = json.loads(response.text)
