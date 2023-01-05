@@ -485,7 +485,7 @@ class SingleSampleGSEA(GSEAbase):
         no_plot: bool = True,
         seed: int = 123,
         verbose: bool = False,
-        **kwargs
+        **kwargs,
     ):
         super(SingleSampleGSEA, self).__init__(
             outdir=outdir,
@@ -500,9 +500,7 @@ class SingleSampleGSEA(GSEAbase):
         self.weight = weight
         self.min_size = min_size
         self.max_size = max_size
-        self.permutation_num = (
-            int(permutation_num) if permutation_num else None
-        )
+        self.permutation_num = int(permutation_num) if permutation_num else None
         self.ascending = ascending
         self.figsize = figsize
         self.format = format
@@ -598,7 +596,7 @@ class SingleSampleGSEA(GSEAbase):
     def norm_correl(self, cortype):
         """
         After norm_samples, input value will be further nomizalized before using them to calculate scores.
-        see source code:  
+        see source code:
         https://github.com/broadinstitute/ssGSEA2.0/blob/f682082f62ae34185421545f25041bae2c78c89b/src/ssGSEA2.0.R#L396
         """
         if cortype == "zscore":
