@@ -32,7 +32,7 @@ def unique(seq):
 
 
 def mkdirs(outdir):
-
+    """create new directory"""
     try:
         os.makedirs(outdir)
     except OSError as exc:

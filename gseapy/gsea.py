@@ -207,7 +207,7 @@ class GSEA(GSEAbase):
     def load_classes(
         self,
     ):
-
+        """Parse group (classes)"""
         if isinstance(self.classes, dict):
             # check number of samples
             class_values = Counter(self.classes.values())

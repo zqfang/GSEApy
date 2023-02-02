@@ -28,7 +28,7 @@ class SciPalette:
     @staticmethod
     def create_colormap(
         colors: List[str] = ["#000080", "#ffffff", "#8b0000"],
-        positions: List[str] = [0.0, 0.5, 1.0],
+        positions: List[float] = [0.0, 0.5, 1.0],
         name: str = "navyblue2darkred",
     ):
         """create colormap given 3 color and break points
@@ -74,7 +74,6 @@ class SciPalette:
         return self._db[self.jco.__name__]
 
     def ucscgb(self):
-
         # Color palette inspired by UCSC Genome Browser Chromosome Colors
         return self._db[self.ucscgb.__name__]
 
