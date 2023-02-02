@@ -201,6 +201,8 @@ class Enrichr(object):
         s = retry(num=5)
         response = s.post(url, files=payload, verify=True)
         if not response.ok:
+            self._logger.debug(url)
+            self._logger.debug(payload)
             raise Exception("Error sending gene list, try again later")
         job_id = json.loads(response.text)
 
