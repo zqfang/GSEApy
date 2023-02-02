@@ -210,13 +210,13 @@ def heatmap(
 class GSEAPlot(object):
     def __init__(
         self,
-        rank_metric: List[float],
+        rank_metric: Iterable[float],
         term: str,
-        hits: List[int],
+        hits: Iterable[int],
         nes : float,
         pval: float,
         fdr: float,
-        RES: List[float],
+        RES: Iterable[float],
         pheno_pos: str="",
         pheno_neg: str ="",
         figsize: Tuple[float, float]=(6, 5.5),
@@ -459,16 +459,16 @@ class GSEAPlot(object):
 
 
 def gseaplot(
-    rank_metric: Iterable,
+    rank_metric: Iterable[float],
     term: str,
-    hits: List[int],
+    hits: Iterable[int],
     nes: float,
     pval: float,
     fdr: float,
-    RES: float,
+    RES: Iterable[float],
     pheno_pos: str = "",
     pheno_neg: str = "",
-    figsize: Tuple[float] = (6, 5.5),
+    figsize: Tuple[float, float] = (6, 5.5),
     cmap: str = "seismic",
     ofname: Optional[str] = None,
     **kwargs,
@@ -578,7 +578,7 @@ class DotPlot(object):
         else:
             return True
 
-    def process(self, df):
+    def process(self, df: pd.DataFrame):
         # check if any values in `df[colname]` can't be coerced to floats
         can_be_coerced = df[self.colname].map(self.isfloat).sum()
         if can_be_coerced < len(df):
