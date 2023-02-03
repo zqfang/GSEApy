@@ -446,7 +446,6 @@ class GSEAPlot(object):
         # self.fig.tight_layout()
 
     def savefig(self, bbox_inches="tight", dpi=300):
-
         # if self.ofname is not None:
         if hasattr(sys, "ps1") and (self.ofname is not None):
             self.fig.savefig(self.ofname, bbox_inches=bbox_inches, dpi=dpi)
