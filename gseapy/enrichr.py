@@ -36,7 +36,6 @@ class Enrichr(object):
         no_plot: bool = False,
         verbose: bool = False,
     ):
-
         self.gene_list = gene_list
         self.gene_sets = gene_sets
         self.descriptions = ""

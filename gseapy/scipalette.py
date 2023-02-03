@@ -93,7 +93,6 @@ class SciPalette:
         self._db[self.igv_alternating.__name__]
 
     def locuszoom(self):
-
         # Color palette inspired by LocusZoom
         return self._db[self.locuszoom.__name__]
 

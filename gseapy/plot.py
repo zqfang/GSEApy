@@ -224,7 +224,6 @@ class GSEAPlot(object):
         ofname: Optional[str] = None,
         **kwargs,
     ):
-
         # dataFrame of ranked matrix scores
         self._x = np.arange(len(rank_metric))
         self.rankings = np.asarray(rank_metric)
