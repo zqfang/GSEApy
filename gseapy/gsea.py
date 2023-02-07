@@ -127,7 +127,7 @@ class GSEA(GSEAbase):
         neg: str,
         classes: Dict[str, List[str]],
         ascending: bool,
-    ) -> Tuple[List[int], pd.Series[float]]:
+    ) -> Tuple[List[int], pd.Series]:
         """The main function to rank an expression table. works for 2d array.
 
         :param df:      gene_expression DataFrame.

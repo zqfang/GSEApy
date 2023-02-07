@@ -104,8 +104,8 @@ def test_ssgsea2(ssGCT, geneGMT):
     tmpdir = TemporaryDirectory(dir="tests")
     ssgsea(ssGCT, geneGMT, tmpdir.name, permutation_num=0)
     tmpdir.cleanup()
-    ssgsea(ssGCT, geneGMT, None, permutation_num=0, correl_norm_type='symrank')
-    ssgsea(ssGCT, geneGMT, None, permutation_num=0, correl_norm_type='zscore')
+    ssgsea(ssGCT, geneGMT, None, permutation_num=0, correl_norm_type="symrank")
+    ssgsea(ssGCT, geneGMT, None, permutation_num=0, correl_norm_type="zscore")
 
 
 def test_enrichr(genelist, geneGMT):
