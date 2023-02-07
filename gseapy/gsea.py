@@ -127,7 +127,7 @@ class GSEA(GSEAbase):
         neg: str,
         classes: Dict[str, List[str]],
         ascending: bool,
-    ) -> pd.Series:
+    ) -> Tuple[List[int], pd.Series[float]]:
         """The main function to rank an expression table. works for 2d array.
 
         :param df:      gene_expression DataFrame.
@@ -164,7 +164,9 @@ class GSEA(GSEAbase):
         :param str neg: one of labels of phenotype's names.
         :param dict classes: column id to group mapping.
         :param bool ascending:  bool or list of bool. Sort ascending vs. descending.
-        :return: returns a pd.Series of correlation to class of each variable. Gene_name is index, and value is rankings.
+        :return: returns argsort values of a tuple where
+            0: argsort positions (indices)
+            1: pd.Series of correlation value. Gene_name is index, and value is rankings.
 
         visit here for more docs: http://software.broadinstitute.org/gsea/doc/GSEAUserGuideFrame.html
         """
@@ -200,9 +202,13 @@ class GSEA(GSEAbase):
         else:
             logging.error("Please provide correct method name!!!")
             raise LookupError("Input method: %s is not supported" % method)
-        ser = ser.sort_values(ascending=ascending)
-
-        return ser
+        # ser = ser.sort_values(ascending=ascending)
+        ser_ind = ser.values.argsort().tolist()
+        ser = ser.iloc[ser_ind]
+        if ascending:
+            return ser_ind, ser
+        # descending order
+        return ser_ind[::-1], ser[::-1]
 
     def load_classes(
         self,
@@ -269,7 +275,7 @@ class GSEA(GSEAbase):
         # compute ES, NES, pval, FDR, RES
         if self.permutation_type == "gene_set":
             # ranking metrics calculation.
-            dat2 = self.calculate_metric(
+            idx, dat2 = self.calculate_metric(
                 df=dat,
                 method=self.method,
                 pos=self.pheno_pos,
@@ -288,6 +294,9 @@ class GSEA(GSEAbase):
                 self._threads,
                 self.seed,
             )
+            ## need to update indices, prerank_rs only stores input's order
+            gsum.rankings[0] = dat2.values # so compatible with code code below
+            gsum.indices[0] = idx
         else:  # phenotype permutation
             group = list(
                 map(lambda x: True if x == self.pheno_pos else False, cls_vector)
