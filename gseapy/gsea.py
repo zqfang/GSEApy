@@ -202,7 +202,6 @@ class GSEA(GSEAbase):
         else:
             logging.error("Please provide correct method name!!!")
             raise LookupError("Input method: %s is not supported" % method)
-        # ser = ser.sort_values(ascending=ascending)
         ser_ind = ser.values.argsort().tolist()
         ser = ser.iloc[ser_ind]
         if ascending:
@@ -295,8 +294,10 @@ class GSEA(GSEAbase):
                 self.seed,
             )
             ## need to update indices, prerank_rs only stores input's order
-            gsum.rankings[0] = dat2.values  # so compatible with code code below
-            gsum.indices[0] = idx
+            # so compatible with code code below
+            indices = gsum.indices
+            indices[0] = idx
+            gsum.indices = indices  # only accept [[]]
         else:  # phenotype permutation
             group = list(
                 map(lambda x: True if x == self.pheno_pos else False, cls_vector)
@@ -319,7 +320,6 @@ class GSEA(GSEAbase):
             self._logger.info(
                 "Start to generate GSEApy reports and figures............"
             )
-
         self.ranking = pd.Series(gsum.rankings[0], index=dat.index[gsum.indices[0]])
         # reorder datarame for heatmap
         # self._heatmat(df=dat.loc[dat2.index], classes=cls_vector)
