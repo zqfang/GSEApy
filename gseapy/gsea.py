@@ -295,7 +295,7 @@ class GSEA(GSEAbase):
                 self.seed,
             )
             ## need to update indices, prerank_rs only stores input's order
-            gsum.rankings[0] = dat2.values # so compatible with code code below
+            gsum.rankings[0] = dat2.values  # so compatible with code code below
             gsum.indices[0] = idx
         else:  # phenotype permutation
             group = list(
