@@ -9,8 +9,8 @@ Frequently Asked Questions
 **A:**
 
 
-#. If you select ``Enrichr library`` as your input ``gene_sets`` (gmt format), then gene symbols in upper cases are needed.
-#. if you use your own ``GMT`` file, you need to use the same type of your gene identifiers in ``GMT`` and input gene list.   
+- If you select ``Enrichr library`` as your input ``gene_sets`` (gmt format), then gene symbols in upper cases are needed.
+- If you use your own ``GMT`` file, you need to use the same type of your gene identifiers in ``GMT`` and input gene list.   
 
 
 
@@ -26,8 +26,9 @@ Frequently Asked Questions
 **A:** GSEA methodology use random permutation procedure (e.g. 1000 permutation) to obtain a null distribution. 
 Then, an observed ES is compared to the 1000 shuffled ES to calculate a P-value.
 When observed ES is not within the null ESs, you'll get 0s. if you don't want 0, you could 
-#. set the smallest pvalue to 1 / ( number of permutations)
-#. increase the permutation number (but more running time needed)
+
+- set the smallest pvalue to 1 / ( number of permutations)
+- increase the permutation number (but more running time needed)
 
 
 
@@ -115,7 +116,7 @@ Actually, ssGSEA2.0 use the same method with GSEApy to calculate P-value, but FD
 
 
 **A:** In short, 
--  prerank is used for comparing **two group of samples** (e.g. control and treatment), where the gene ranking are defined by your custom rank method (like t-statistic, signal-to-noise, et.al).
+- prerank is used for comparing **two group of samples** (e.g. control and treatment), where the gene ranking are defined by your custom rank method (like t-statistic, signal-to-noise, et.al).
 - ssGSEA is used for comparing individual samples to the rest of all, trying to find the gene signatures which samples shared the same (use ssGSEA when you have a lot of samples).
 
 The statistic between prerank (GSEA) and ssGSEA are different.

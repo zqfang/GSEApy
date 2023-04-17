@@ -255,8 +255,26 @@ def ssgsea(
     """
     if "processes" in kwargs:
         warnings.warn("processes is deprecated; use threads", DeprecationWarning, 2)
-        kwargs["threads"] = kwargs["processes"]
-    ss = SingleSampleGSEA(data=data, gene_sets=gene_sets, **kwargs)
+        threads = kwargs["processes"]
+    ss = SingleSampleGSEA(
+        data=data,
+        gene_sets=gene_sets,
+        outdir=outdir,
+        sample_norm_method=sample_norm_method,
+        correl_norm_type=correl_norm_type,
+        min_size=min_size,
+        max_size=max_size,
+        permutation_num=permutation_num,
+        weight=weighted_score_type,
+        ascending=ascending,
+        threads=threads,
+        figsize=figsize,
+        format=format,
+        graph_num=graph_num,
+        no_plot=no_plot,
+        seed=seed,
+        verbose=verbose,
+    )
     ss.run()
     return ss
 
