@@ -782,7 +782,7 @@ impl GSEAResult {
                     // https://github.com/broadinstitute/ssGSEA2.0/blob/f682082f62ae34185421545f25041bae2c78c89b/src/ssGSEA2.0.R#L396
                     match correl_type {
                         CorrelType::SymRank => {
-                            let idx = (tmp.1.len() + 2 -1) / 2;
+                            let idx = (tmp.1.len() + 2 - 1) / 2;
                             let mid = tmp.1.get(idx).unwrap().to_owned();
                             tmp.1.iter_mut().for_each(|x| {
                                 if *x > mid {
@@ -882,15 +882,19 @@ mod tests {
     use crate::utils::FileReader;
     #[test]
     fn test_prerank() {
+        let cwd = std::env::current_dir().unwrap(); // prjoject root, directory to Cargo.toml
+        let rnk_path = cwd.join("tests/data/mds.2k.rnk");
+        let gmt_path = cwd.join("tests/data/hallmark.gmt");
+
         let start = Instant::now();
         rayon::ThreadPoolBuilder::new()
             .num_threads(1)
             .build_global()
             .unwrap();
         let mut rnk = FileReader::new();
-        let _ = rnk.read_csv("data/mds.2k.rnk", b'\t', false, Some(b'#'));
+        let _ = rnk.read_csv(rnk_path.to_str().unwrap(), b'\t', false, Some(b'#'));
         let mut gmt = FileReader::new();
-        let _ = gmt.read_table("data/hallmark.gmt", '\t', false);
+        let _ = gmt.read_table(gmt_path.to_str().unwrap(), '\t', false);
 
         // let gene: Vec<String> = vec!["A","B","C","D","E","F","G","H","J","K"].into_iter().map(|s| s.to_string()).collect();
         // let gene_set: Vec<String> = vec!["B","A","D","G"].into_iter().map(|s| s.to_string()).collect();
@@ -924,13 +928,17 @@ mod tests {
         println!("This version 1");
         gsea.summaries.iter().for_each(|g| {
             println!(
-                "name: {:?}, term: {:?}, es: {:.7?}, nes: {:.7?}, pval: {:.2e}, fdr: {:.2e}",
-                g.name, g.term, g.es, g.nes, g.pval, g.fdr
+                "term: {:?}, es: {:.7?}, nes: {:.7?}, pval: {:.2e}, fdr: {:.2e}",
+                g.term, g.es, g.nes, g.pval, g.fdr
             );
         });
     }
     #[test]
     fn test_gsea() {
+        let cwd = std::env::current_dir().unwrap(); // prjoject root, directory to Cargo.toml
+        let gct_path = cwd.join("tests/extdata/Leukemia_hgu95av2.trim2.txt");
+        let gmt_path = cwd.join("tests/extdata/h.all.v7.0.symbols.gmt");
+        let cls_path = cwd.join("tests/extdata/Leukemia.cls");
         let start = Instant::now();
         // set number of threads of rayon at the main()
         // rayon::ThreadPoolBuilder::new()
@@ -939,13 +947,13 @@ mod tests {
         //     .unwrap();
 
         let mut gct = FileReader::new();
-        let _ = gct.read_csv("data/P53.txt", b'\t', true, Some(b'#'));
+        let _ = gct.read_csv(gct_path.to_str().unwrap(), b'\t', true, Some(b'#'));
         let mut gmt = FileReader::new();
-        let _ = gmt.read_table("data/genes.gmt", '\t', false);
+        let _ = gmt.read_table(gmt_path.to_str().unwrap(), '\t', false);
         let mut cls = FileReader::new();
-        let _ = cls.read_table("data/P53.cls", ' ', false);
+        let _ = cls.read_table(cls_path.to_str().unwrap(), ' ', false);
         println!("{:?}", &cls.record[2]);
-        let gboo: Vec<bool> = cls.record[2].iter().map(|x| x != "WT").collect();
+        let gboo: Vec<bool> = cls.record[2].iter().map(|x| x != "AML").collect();
         println!("{:?}", &gboo);
         let weight = 1.0;
         let mut gene: Vec<String> = Vec::new();
@@ -976,38 +984,23 @@ mod tests {
                 g.term, g.es, g.nes, g.pval, g.fdr
             );
         });
-
-        // GSEASummary._fdr() results
-        // term: "YvX_UpIN_Y", es: -0.2461258, nes: -0.7333695, pval: 0.89189, fdr: 0.99250
-        // term: "DvA_UpIN_A", es: -0.1894728, nes: -0.8517915, pval: 0.80000, fdr: 0.97980
-        // term: "DvA_UpIN_D", es: 0.2168890, nes: 0.8320893, pval: 0.72727, fdr: 0.70918
-        // term: "YvX_UpIN_X", es: -0.6054005, nes: -1.2666132, pval: 0.24528, fdr: 0.73196
-        // term: "BvA_UpIN_A", es: -0.2498697, nes: -1.0470712, pval: 0.37143, fdr: 0.91667
-        // term: "CvA_UpIN_C", es: -0.3799417, nes: -0.6438662, pval: 0.85366, fdr: 0.92807
-        // term: "BvA_UpIN_B", es: 0.2250848, nes: 0.8380035, pval: 0.68657, fdr: 0.89362
-        // term: "CvA_UpIN_A", es: -0.2987804, nes: -0.6507148, pval: 0.91667, fdr: 0.98495
-
-        // GSEASummary.fdr() result
-        // term: "DvA_UpIN_A", es: -0.1894728, nes: -0.8517915, pval: 0.80000, fdr: 1.00000
-        // term: "YvX_UpIN_Y", es: -0.2461258, nes: -0.7333695, pval: 0.89189, fdr: 1.00000
-        // term: "DvA_UpIN_D", es: 0.2168890, nes: 0.8320893, pval: 0.72727, fdr: 0.71000
-        // term: "BvA_UpIN_A", es: -0.2498697, nes: -1.0470712, pval: 0.37143, fdr: 1.00000
-        // term: "YvX_UpIN_X", es: -0.6054005, nes: -1.2666132, pval: 0.24528, fdr: 1.00000
-        // term: "CvA_UpIN_A", es: -0.2987804, nes: -0.6507148, pval: 0.91667, fdr: 1.00000
-        // term: "CvA_UpIN_C", es: -0.3799417, nes: -0.6438662, pval: 0.85366, fdr: 0.93167
-        // term: "BvA_UpIN_B", es: 0.2250848, nes: 0.8380035, pval: 0.68657, fdr: 1.00000
     }
 
     #[test]
     fn test_ssgsea() {
+        let cwd = std::env::current_dir().unwrap(); // prjoject root, directory to Cargo.toml
+        let gct_path = cwd.join("tests/extdata/Leukemia_hgu95av2.trim2.txt");
+        let gmt_path = cwd.join("tests/extdata/h.all.v7.0.symbols.gmt");
+        let cls_path = cwd.join("tests/extdata/Leukemia.cls");
+
         let mut gct = FileReader::new();
-        let _ = gct.read_csv("data/P53.txt", b'\t', true, Some(b'#'));
+        let _ = gct.read_csv(gct_path.to_str().unwrap(), b'\t', true, Some(b'#'));
         let mut gmt = FileReader::new();
-        let _ = gmt.read_table("data/genes.gmt", '\t', false);
+        let _ = gmt.read_table(gmt_path.to_str().unwrap(), '\t', false);
         let mut cls = FileReader::new();
-        let _ = cls.read_table("data/P53.cls", ' ', false);
+        let _ = cls.read_table(cls_path.to_str().unwrap(), ' ', false);
         println!("{:?}", &cls.record[2]);
-        let gboo: Vec<bool> = cls.record[2].iter().map(|x| x != "WT").collect();
+        let gboo: Vec<bool> = cls.record[2].iter().map(|x| x != "AML").collect();
         println!("{:?}", &gboo);
         let weight = 1.0;
         let mut gene: Vec<String> = Vec::new();
@@ -1032,15 +1025,15 @@ mod tests {
         let nperm = 10;
         let mut gsea = GSEAResult::new(weight, 500, 3, nperm, 123);
         if nperm > 0 {
-            gsea.ss_gsea_permuate(&gene, &sample_names, &gene_exp, &gmt2);
+            gsea.ss_gsea_permuate(&gene, &gene_exp, &gmt2, CorrelType::Rank);
         } else {
-            gsea.ss_gsea(&gene, &sample_names, &gene_exp, &gmt2);
+            gsea.ss_gsea(&gene, &gene_exp, &gmt2, CorrelType::Rank);
         }
 
         gsea.summaries.iter().for_each(|g| {
             println!(
-                "sample: {:?}, term: {:?}, es: {:.7?}, nes: {:.7?}, pval: {:.2e}, fdr: {:.2e}",
-                g.name, g.term, g.es, g.nes, g.pval, g.fdr
+                "term: {:?}, es: {:.7?}, nes: {:.7?}, pval: {:.2e}, fdr: {:.2e}",
+                g.term, g.es, g.nes, g.pval, g.fdr
             );
         });
 
@@ -1051,16 +1044,16 @@ mod tests {
         println!("\n\n\nThis version prerank version 1");
         gsea.summaries.iter().for_each(|g| {
             println!(
-                "name: {:?}, term: {:?}, es: {:.7?}, nes: {:.7?}, pval: {:.2e}, fdr: {:.2e}",
-                g.name, g.term, g.es, g.nes, g.pval, g.fdr
+                "term: {:?}, es: {:.7?}, nes: {:.7?}, pval: {:.2e}, fdr: {:.2e}",
+                g.term, g.es, g.nes, g.pval, g.fdr
             );
         });
         println!("\n\n\nThis version prerank version 2");
         gsea.prerank2(&gene, &gene_exp, &gmt2);
         gsea.summaries.iter().for_each(|g| {
             println!(
-                "name: {:?}, term: {:?}, es: {:.7?}, nes: {:.7?}, pval: {:.2e}, fdr: {:.2e}",
-                g.name, g.term, g.es, g.nes, g.pval, g.fdr
+                "term: {:?}, es: {:.7?}, nes: {:.7?}, pval: {:.2e}, fdr: {:.2e}",
+                g.term, g.es, g.nes, g.pval, g.fdr
             );
         });
     }
