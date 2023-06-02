@@ -53,6 +53,7 @@ class Enrichr(object):
         self.organism = organism
         self._organism = None
         self.ENRICHR_URL = "http://maayanlab.cloud"
+        self.ENRICHR_URL_SPEED = "https://maayanlab.cloud/speedrichr"
         # init logger
         self.prepare_outdir()
 
@@ -193,9 +194,9 @@ class Enrichr(object):
 
         return "\n".join(genes)
 
-    def send_genes(self, gene_list, url) -> AnyStr:
+    def send_genes(self, payload, url) -> Dict:
         """send gene list to enrichr server"""
-        payload = {"list": (None, gene_list), "description": (None, self.descriptions)}
+        # payload = {"list": (None, gene_list), "description": (None, self.descriptions)}
         # response
         s = retry(num=5)
         response = s.post(url, files=payload, verify=True)
@@ -204,8 +205,25 @@ class Enrichr(object):
             self._logger.debug(payload)
             raise Exception("Error sending gene list, try again later")
         job_id = json.loads(response.text)
-
+        # response.text
+        # {
+        # 	"userListId": 667152768,
+        # 	"shortId": "27c3f180"
+        # }
         return job_id
+
+    def send_background(self, payload, url) -> Dict:
+        s = retry(num=5)
+        res = s.post(url, data=payload)
+        if not res.ok:
+            self._logger.debug(url)
+            self._logger.debug(payload)
+            raise Exception("Error sending background list, try again later")
+        background_response = res.json()
+        # {
+        #     "backgroundid": "3ff7ef9d"
+        # }
+        return background_response
 
     def check_genes(self, gene_list: List[str], usr_list_id: str):
         """
@@ -224,10 +242,51 @@ class Enrichr(object):
             "{} genes successfully recognized by Enrichr".format(returnedN)
         )
 
+    def get_results_with_background(
+        self, gene_list: List[str], background: List[str]
+    ) -> Tuple[AnyStr, pd.DataFrame]:
+        ## add gene list
+        ADDLIST_URL = "%s/api/addList" % (self.ENRICHR_URL_SPEED)
+        payload = {"list": (None, gene_list), "description": (None, self.descriptions)}
+        job_id = self.send_genes(payload, ADDLIST_URL)
+        ## add background list
+        ADDBG_URL = "%s/api/addbackground" % (self.ENRICHR_URL_SPEED)
+        payload = dict(background="\n".join(background))
+        bg_id = self.send_background(payload, ADDBG_URL)
+
+        # now get background enrich result
+        BGENR_URL = "%s/api/backgroundenrich" % (self.ENRICHR_URL_SPEED)
+        payload = dict(
+            userListId=job_id["userListId"],
+            backgroundid=bg_id["backgroundid"],
+            backgroundType=self._gs,
+        )
+        s = retry(num=5)
+        response = s.post(BGENR_URL, data=payload)
+        if not response.ok:
+            self._logger.error("Error fetching enrichment results: %s" % self._gs)
+        data = response.json()
+        # Rank, Term name, P-value, Z-score, Combined score, Overlapping genes, Adjusted p-value, Old p-value, Old adjusted p-value
+        colnames = [
+            "Rank",
+            "Term",
+            "P-value",
+            "Z-score",
+            "Combined Score",
+            "Genes",
+            "Adjusted P-value",
+            "Old P-value",
+            "Old adjusted P-value",
+        ]
+        res = pd.DataFrame(data[self._gs], columns=colnames)
+        res["Genes"] = res["Genes"].apply(";".join)
+        return (job_id["shortId"], res)
+
     def get_results(self, gene_list: List[str]) -> Tuple[AnyStr, pd.DataFrame]:
         """Enrichr API"""
         ADDLIST_URL = "%s/%s/addList" % (self.ENRICHR_URL, self._organism)
-        job_id = self.send_genes(gene_list, ADDLIST_URL)
+        payload = {"list": (None, gene_list), "description": (None, self.descriptions)}
+        job_id = self.send_genes(payload, ADDLIST_URL)
         user_list_id = job_id["userListId"]
 
         RESULTS_URL = "%s/%s/export" % (self.ENRICHR_URL, self._organism)
@@ -265,7 +324,7 @@ class Enrichr(object):
             res = pd.DataFrame(data[self._gs], columns=colnames)
             res["Genes"] = res["Genes"].apply(";".join)
 
-        return [job_id["shortId"], res]
+        return (job_id["shortId"], res)
 
     def _is_entrez_id(self, idx: Union[int, str]) -> bool:
         try:
@@ -321,11 +380,12 @@ class Enrichr(object):
         self._logger.info(
             "Using all annotated genes with GO_ID as background: %s" % self.background
         )
-        df.dropna(subset=["entrezgene_id"], inplace=True)
         # input id type: entrez or gene_name
         if self._isezid:
+            df.dropna(subset=["entrezgene_id"], inplace=True)
             bg = df["entrezgene_id"].astype(int)
         else:
+            df.dropna(subset=["external_gene_name"], inplace=True)
             bg = df["external_gene_name"]
 
         return set(bg)
@@ -401,32 +461,22 @@ class Enrichr(object):
                 gmt2[term] = newgenes
         return gmt2
 
-    def enrich(self, gmt: Dict[str, List[str]]):
-        """use local mode
-
-        p = p-value computed using the Fisher exact test (Hypergeometric test)
-
-        Not implemented here:
-
-            combine score = log(p)·z
-
-        see here: http://amp.pharm.mssm.edu/Enrichr/help#background&q=4
-
-        columns contain:
-
-            Term Overlap P-value Adjusted_P-value Genes
-
+    def parse_background(self, gmt: Dict[str, List[str]] = None):
         """
+        set background genes
+        """
+        self._bg = set()
         if self.background is None:
             # use all genes in the dict input as background if background is None
-            bg = set()
-            for term, genes in gmt.items():
-                bg = bg.union(set(genes))
-            self._logger.info(
-                "Background is not set! Use all %s genes in %s." % (len(bg), self._gs)
-            )
-            self._bg = bg
-
+            if gmt:
+                bg = set()
+                for term, genes in gmt.items():
+                    bg = bg.union(set(genes))
+                self._logger.info(
+                    "Background is not set! Use all %s genes in %s."
+                    % (len(bg), self._gs)
+                )
+                self._bg = bg
         elif isscalar(self.background):
             if isinstance(self.background, int) or self.background.isdigit():
                 self._bg = int(self.background)
@@ -443,6 +493,24 @@ class Enrichr(object):
                 self._bg = set(self.background)
             except TypeError:
                 self._logger.error("Unsupported background data type")
+
+    def enrich(self, gmt: Dict[str, List[str]]):
+        """use local mode
+
+        p = p-value computed using the Fisher exact test (Hypergeometric test)
+
+        Not implemented here:
+
+            combine score = log(p)·z
+
+        see here: http://amp.pharm.mssm.edu/Enrichr/help#background&q=4
+
+        columns contain:
+
+            Term Overlap P-value Adjusted_P-value Genes
+
+        """
+        self.parse_background(gmt)
         # statistical testing
         hgtest = list(calc_pvalues(query=self._gls, gene_sets=gmt, background=self._bg))
         if len(hgtest) > 0:
@@ -501,11 +569,19 @@ class Enrichr(object):
             else:
                 ## online mode
                 self._gs = name
-                self._logger.debug("Enrichr service using library: %s" % (self._gs))
+                self._logger.debug("Enrichr service using library: %s" % (name))
                 # self._logger.info("Enrichr Library: %s"% self._gs)
-                shortID, res = self.get_results(genes_list)
-                # Remember gene set library used
-            res.insert(0, "Gene_set", self._gs)
+                self.parse_background()
+                # whether user input background
+                if isinstance(self._bg, set) and len(self._bg) > 0:
+                    shortID, res = self.get_results_with_background(
+                        genes_list, self._bg
+                    )
+                else:
+                    shortID, res = self.get_results(genes_list)
+                
+            # Remember gene set library used
+            res.insert(0, "Gene_set", name)
             # Append to master dataframe
             self.results.append(res)
             self.res2d = res
