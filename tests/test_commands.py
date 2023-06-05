@@ -112,7 +112,13 @@ def test_enrichr(genelist, geneGMT):
     # Only tests of the command runs successfully,
     # doesnt't check the image
     tmpdir = TemporaryDirectory(dir="tests")
-    enrichr(genelist, gene_sets=["KEGG_2016", geneGMT], background='hsapiens_gene_ensembl', outdir=None, cutoff=0.5)
+    enrichr(
+        genelist,
+        gene_sets=["KEGG_2016", geneGMT],
+        background="hsapiens_gene_ensembl",
+        outdir=None,
+        cutoff=0.5,
+    )
     tmpdir.cleanup()
     tmpdir = TemporaryDirectory(dir="tests")
     enrich(genelist, gene_sets=geneGMT, background=None, outdir=tmpdir.name, cutoff=0.5)

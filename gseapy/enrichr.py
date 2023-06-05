@@ -11,7 +11,7 @@ from typing import Any, AnyStr, Dict, Iterable, List, Optional, Set, Tuple, Unio
 
 import pandas as pd
 import requests
-from numpy import isscalar
+from numpy import isscalar, log
 
 from gseapy.biomart import Biomart
 from gseapy.plot import barplot
@@ -265,13 +265,14 @@ class Enrichr(object):
         response = s.post(BGENR_URL, data=payload)
         if not response.ok:
             self._logger.error("Error fetching enrichment results: %s" % self._gs)
+
         data = response.json()
-        # Rank, Term name, P-value, Z-score, Combined score, Overlapping genes, Adjusted p-value, Old p-value, Old adjusted p-value
+        # Note: missig Overlap column
         colnames = [
             "Rank",
             "Term",
             "P-value",
-            "Z-score",
+            "Odds Ratio",  # Z-Score
             "Combined Score",
             "Genes",
             "Adjusted P-value",
@@ -279,7 +280,19 @@ class Enrichr(object):
             "Old adjusted P-value",
         ]
         res = pd.DataFrame(data[self._gs], columns=colnames)
+        # res.drop(columns=["Rank"], inplace=True)
         res["Genes"] = res["Genes"].apply(";".join)
+        colord = [
+            "Term",
+            "P-value",
+            "Adjusted P-value",
+            "Old P-value",
+            "Old adjusted P-value",
+            "Odds Ratio",  # Z-Score
+            "Combined Score",
+            "Genes",
+        ]
+        res = res.loc[:, colord]
         return (job_id["shortId"], res)
 
     def get_results(self, gene_list: List[str]) -> Tuple[AnyStr, pd.DataFrame]:
@@ -314,7 +327,7 @@ class Enrichr(object):
                 "Rank",
                 "Term",
                 "P-value",
-                "Z-score",
+                "Odds Ratio",  # 'oddsratio'
                 "Combined Score",
                 "Genes",
                 "Adjusted P-value",
@@ -322,7 +335,19 @@ class Enrichr(object):
                 "Old adjusted P-value",
             ]
             res = pd.DataFrame(data[self._gs], columns=colnames)
+            # res.drop(columns=["Rank"], inplace=True)
             res["Genes"] = res["Genes"].apply(";".join)
+            colord = [
+                "Term",
+                "P-value",
+                "Adjusted P-value",
+                "Old P-value",
+                "Old adjusted P-value",
+                "Odds Ratio",  # Z-Score
+                "Combined Score",
+                "Genes",
+            ]
+            res = res.loc[:, colord]
 
         return (job_id["shortId"], res)
 
@@ -498,16 +523,14 @@ class Enrichr(object):
         """use local mode
 
         p = p-value computed using the Fisher exact test (Hypergeometric test)
-
-        Not implemented here:
-
-            combine score = log(p)·z
+        z = z-score (Odds Ratio)
+        combine score = - log(p)·z
 
         see here: http://amp.pharm.mssm.edu/Enrichr/help#background&q=4
 
         columns contain:
 
-            Term Overlap P-value Adjusted_P-value Genes
+            Term Overlap P-value Odds Ratio Combinde Score Adjusted_P-value Genes
 
         """
         self.parse_background(gmt)
@@ -525,6 +548,7 @@ class Enrichr(object):
             odict["P-value"] = pvals
             odict["Adjusted P-value"] = fdrs
             odict["Odds Ratio"] = oddr
+            odict["Combined Score"] = -1 * log(pvals) * oddr
             # odict['Reject (FDR< %s)'%self.cutoff ] = rej
             odict["Genes"] = [";".join(g) for g in genes]
             res = pd.DataFrame(odict)
@@ -579,7 +603,7 @@ class Enrichr(object):
                     )
                 else:
                     shortID, res = self.get_results(genes_list)
-                
+
             # Remember gene set library used
             res.insert(0, "Gene_set", name)
             # Append to master dataframe

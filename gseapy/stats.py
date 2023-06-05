@@ -42,6 +42,17 @@ def calc_pvalues(query, gene_sets, background=20000, **kwargs):
     R:     >   phyper(x-1, m, n, k, lower.tail=FALSE)
     Scipy: >>> hypergeom.sf(x-1, m+n, m, k)
 
+    For Odds ratio in Enrichr (see https://maayanlab.cloud/Enrichr/help#background&q=4)
+
+        oddsRatio = (1.0 * x * d) / Math.max(1.0 * b * c, 1)
+
+    where:
+
+        x are the overlapping genes,
+        b (m-x) are the genes in the annotated set - overlapping genes,
+        c (k-x) are the genes in the input set - overlapping genes,
+        d (bg-m-k+x) are the 20,000 genes (or total genes in the background) - genes in the annotated set - genes in the input set + overlapping genes
+
     """
 
     query = set(query)
