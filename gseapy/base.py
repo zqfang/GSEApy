@@ -4,14 +4,12 @@
 import json
 import logging
 import os
-from tempfile import TemporaryDirectory
-from typing import Dict, Iterable, List, Optional, Union
+from typing import Dict, Iterable, List, Optional, Union, Tuple, Any, Sequence
 
 import numpy as np
 import pandas as pd
-import requests
 
-from gseapy.plot import gseaplot, heatmap
+from gseapy.plot import gseaplot, heatmap, GSEAPlot, TracePlot
 from gseapy.utils import DEFAULT_CACHE_PATH, log_init, mkdirs, retry
 
 
@@ -655,3 +653,24 @@ class GSEAbase(object):
         es, esnull, RES = es_vec[-1], es_vec[:-1], RES[-1, :]
 
         return es, esnull, hit_ind, RES
+
+# def plot(self, 
+#          terms: Union[str, List[str]], 
+#          colors: Optional[List[str]] = None, 
+#          figsize: Tuple[float, float] = (4,5),
+#          ofname: Optional[str] = None):
+#     # if hasattr(self, "results"):
+#     if self.module == 'ssgsea': 
+#         raise NotImplementedError("not for ssgsea")
+
+#     if isinstance(terms, str):
+#         gs = self.results[terms]
+#         g = GSEAPlot(rank_metric=self.ranking, ofname=ofname, pheno_pos=self.pheno_pos, pheno_neg=self.pheno_neg, figsize=figsize, **gs )
+#         g.add_axes()
+#         g.savefig()
+#     elif isinstance(terms, Iterable):
+#         hits = [self.results[t]['hits'] for t in terms]
+#         runes = [self.results[t]['RES'] for t in terms]
+#         t = TracePlot(terms=terms, hits=hits, runes=runes, rank_metric=self.ranking, colors=colors)
+#         t.add_axes()
+#         t.savefig(ofname)

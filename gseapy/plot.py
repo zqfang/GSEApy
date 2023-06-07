@@ -2,7 +2,7 @@
 import operator
 import sys
 import warnings
-from typing import Iterable, List, Optional, Tuple, Union
+from typing import Iterable, List, Optional, Tuple, Union, Dict, Sequence, Any
 
 import matplotlib.pyplot as plt
 import matplotlib.transforms as transforms
@@ -210,13 +210,13 @@ def heatmap(
 class GSEAPlot(object):
     def __init__(
         self,
-        rank_metric: Iterable[float],
         term: str,
-        hits: Iterable[int],
+        hits: Sequence[int],
+        RES: Sequence[float],
+        rank_metric: Sequence[float],
         nes: float,
         pval: float,
         fdr: float,
-        RES: Iterable[float],
         pheno_pos: str = "",
         pheno_neg: str = "",
         figsize: Tuple[float, float] = (6, 5.5),
@@ -278,7 +278,7 @@ class GSEAPlot(object):
             ax1.set_ylabel("log ranked metric", fontsize=16, fontweight="bold")
         else:
             ax1.fill_between(self._x, y1=self.rankings, y2=0, color="#C9D3DB")
-            ax1.set_ylabel("Ranked list metric", fontsize=16, fontweight="bold")
+            ax1.set_ylabel("Ranked metric", fontsize=16, fontweight="bold")
 
         ax1.text(
             0.05,
@@ -326,7 +326,7 @@ class GSEAPlot(object):
             transform=ax1.transAxes,
             fontsize=14,
         )
-        ax1.set_xlabel("Rank in Ordered Dataset", fontsize=16, fontweight="bold")
+        ax1.set_xlabel("Gene Rank", fontsize=16, fontweight="bold")
         ax1.spines["top"].set_visible(False)
         ax1.tick_params(
             axis="both", which="both", top=False, right=False, left=False, labelsize=14
@@ -457,13 +457,13 @@ class GSEAPlot(object):
 
 
 def gseaplot(
-    rank_metric: Iterable[float],
+    rank_metric: Sequence[float],
     term: str,
-    hits: Iterable[int],
+    hits: Sequence[int],
     nes: float,
     pval: float,
     fdr: float,
-    RES: Iterable[float],
+    RES: Sequence[float],
     pheno_pos: str = "",
     pheno_neg: str = "",
     figsize: Tuple[float, float] = (6, 5.5),
@@ -487,13 +487,13 @@ def gseaplot(
 
     """
     g = GSEAPlot(
-        rank_metric,
         term,
         hits,
+        RES,
+        rank_metric,
         nes,
         pval,
         fdr,
-        RES,
         pheno_pos,
         pheno_neg,
         figsize,
@@ -501,6 +501,8 @@ def gseaplot(
         ofname,
     )
     g.add_axes()
+    if ofname is None:
+        return g.fig
     g.savefig()
 
 
@@ -617,11 +619,14 @@ class DotPlot(object):
         else:
             df = df.sort_values(by=self.colname).tail(self.n_terms)  # acending
         # get scatter area
-        ol = df.columns[df.columns.isin(["Overlap", "Tag %"])]
-        temp = (
-            df[ol].squeeze(axis=1).str.split("/", expand=True).astype(int)
-        )  # axis=1, in case you have only 1 row
-        df = df.assign(Hits_ratio=temp.iloc[:, 0] / temp.iloc[:, 1])
+        if df.columns.isin(["Overlap", "Tag %"]).any():
+            ol = df.columns[df.columns.isin(["Overlap", "Tag %"])]
+            temp = (
+                df[ol].squeeze(axis=1).str.split("/", expand=True).astype(int)
+            )  # axis=1, in case you have only 1 row
+            df = df.assign(Hits_ratio=temp.iloc[:, 0] / temp.iloc[:, 1])
+        else:
+            df = df.assign(Hits_ratio=1.0)  # if Overlap column missing
         return df
 
     def _hierarchical_clustering(self, mat, method, metric) -> List[int]:
@@ -1161,59 +1166,218 @@ def barplot(
     dot.fig.savefig(ofname, bbox_inches="tight", dpi=300)
 
 
-def traceplot(
-    obj,
-    terms: Optional[Union[str, List[str]]] = None,
-    pheno_pos: str = "",
-    pheno_neg: str = "",
+class TracePlot(object):
+    def __init__(
+        self,
+        terms: List[str],
+        runes: List[Sequence[float]],
+        hits: List[Sequence[int]],
+        rank_metric: Optional[Sequence[float]] = None,
+        figsize: Tuple[float, float] = (6, 5.5),
+        colors: Union[str, List[str], None] = None,
+        legend_kws: Optional[Dict[str, Any]] = None,
+        ofname: Optional[str] = None,
+        ax: Optional[plt.Axes] = None,
+        **kwargs,
+    ):
+        """
+        terms: list of terms/pathways to show
+        runes: list runing enrichment score for each term
+        hits: list of ranks of the overlap genes in pathway/term.
+        rank_metric: ranking metric in descending order.
+        colors: list of colors for each term/pathway
+        legend_kws: kwargs to pass to ax.legend. e.g. `loc`, `bbox_to_achor`.
+        ofname: savefig
+        ax: matplotlib's Axes.
+        """
+        # dataFrame of ranked matrix scores
+        self.rankings = rank_metric
+        self.terms = terms
+        self.runes = runes
+        self.hits = hits
+        self.figsize = figsize
+        if isinstance(colors, str):
+            colors = [colors]
+        self.colors = colors
+        self.ofname = ofname
+        self.legend_kws = legend_kws
+
+        # self._pos_label = pheno_pos
+        # self._neg_label = pheno_neg
+        # output truetype
+        plt.rcParams.update({"pdf.fonttype": 42, "ps.fonttype": 42})
+        # in most case, we will have many plots, so do not display plots
+        # It's also usefull to run this script on command line.
+        if ax is None:
+            # GSEA Plots
+            if hasattr(sys, "ps1") and (self.ofname is None):
+                # working inside python console, show figure
+                self.fig = plt.figure(figsize=self.figsize, facecolor="white")
+            else:
+                # If working on command line, don't show figure
+                self.fig = Figure(figsize=self.figsize, facecolor="white")
+                self._canvas = FigureCanvas(self.fig)
+        else:
+            self.fig = ax.figure
+        # self.fig.suptitle(self.term, fontsize=16, wrap=True, fontweight="bold")
+
+    def axes_hits(
+        self, tags: Sequence[int], rect: List[float], color="#0033FF", bottom=False
+    ):
+        """
+        hits: 1d array of this
+        rect : sequence of float
+               The dimensions [left, bottom, width, height] of the new axes. All
+               quantities are in fractions of figure width and height.
+        """
+        # gene hits
+        ax2 = self.fig.add_axes(rect)
+        # the x coords of this transformation are data, and the y coord are axes
+        trans2 = transforms.blended_transform_factory(ax2.transData, ax2.transAxes)
+        ax2.vlines(tags, 0, 1, linewidth=0.5, transform=trans2, color=color)
+        ax2.spines["bottom"].set_visible(True)
+        ax2.tick_params(
+            axis="both",
+            which="both",
+            bottom=bottom,
+            top=False,
+            right=False,
+            left=False,
+            labelbottom=bottom,
+            labelleft=False,
+            labelsize=14,
+        )
+        if bottom:
+            ax2.set_xlabel("Gene Rank", fontsize=16, fontweight="bold")
+
+    def axes_stat(self, rect: List[float]):
+        """
+        rect : sequence of float
+               The dimensions [left, bottom, width, height] of the new axes. All
+               quantities are in fractions of figure width and height.
+        """
+        # Enrichment score plot
+
+        ax4 = self.fig.add_axes(rect)
+
+        if self.colors is None:
+            cycle = plt.rcParams["axes.prop_cycle"].by_key()["color"]
+        else:
+            cycle = self.colors
+        for i, r, term in zip(range(len(self.terms)), self.runes, self.terms):
+            ax4.plot(
+                range(len(r)),
+                r,  # linewidth=2,
+                label=term,
+                color=cycle[i % len(cycle)],
+            )  # color=color)
+        if self.rankings is not None:
+            ax44 = ax4.twinx()  # instantiate a second axes that shares the same x-axis
+            ax44.fill_between(range(len(r)), y1=self.rankings, y2=0, color="#C9D3DB", zorder=-1, alpha=0.5)
+            ax44.tick_params(axis="y", labelcolor="#808080")
+            ax44.set_ylabel(
+                "Ranked metric", fontsize=16, fontweight="bold", color="#808080"
+            )
+        # the y coords of this transformation are data, and the x coord are axes
+        trans4 = transforms.blended_transform_factory(ax4.transAxes, ax4.transData)
+        ax4.hlines(0, 0, 1, linewidth=1, transform=trans4, color="grey")
+        ax4.set_ylabel("Enrichment Score", fontsize=16, fontweight="bold")
+        # ax4.set_xlim(min(self._x), max(self._x))
+        ax4.tick_params(
+            axis="both",
+            which="both",
+            bottom=False,
+            top=False,
+            right=False,
+            labelbottom=False,
+            labelsize=14,
+        )
+        ax4.locator_params(axis="y", nbins=5)
+        # FuncFormatter need two argument, I don't know why. this lambda function used to format yaxis tick labels.
+        ax4.yaxis.set_major_formatter(
+            plt.FuncFormatter(lambda tick_loc, tick_num: "{:.1f}".format(tick_loc))
+        )
+        if isinstance(self.legend_kws, dict):
+            ax4.legend(**self.legend_kws)
+        else:
+            ax4.legend(loc=(0, 1.02))
+
+    def add_axes(self):
+        """
+        Please check matplotlib docs about how to `add_axes` to figure.
+        """
+        left = 0.1
+        width = 0.8
+        bottom = 0.1
+        # height = 0
+
+        stat_height_ratio = 4
+        hits_height_ratio = 0.5
+        ## make stat /hits height ratio const
+        # 0.8 = base*(4 + len(terms)*0.05)
+        base = 0.8 / (stat_height_ratio + len(self.terms) * hits_height_ratio)
+        # add each hit track
+        if self.colors is None:
+            cycle = plt.rcParams["axes.prop_cycle"].by_key()["color"]
+        else:
+            cycle = self.colors
+
+        for i, hit in enumerate(self.hits):
+            height = hits_height_ratio * base
+            self.axes_hits(
+                tags=hit,
+                rect=[left, bottom, width, height],
+                color=cycle[i % len(cycle)],
+                bottom=False if bottom > 0.1 else True,
+            )
+            bottom += height
+        height = stat_height_ratio * base
+        # add mountain curve
+        self.axes_stat([left, bottom, width, height])
+        # self.fig.subplots_adjust(hspace=0)
+        # self.fig.tight_layout()
+
+    def savefig(self, ofname: str, bbox_inches: str = "tight", dpi: float = 300):
+        # if self.ofname is not None:
+        if hasattr(sys, "ps1") and (ofname is not None):
+            self.fig.savefig(self.ofname, bbox_inches=bbox_inches, dpi=dpi)
+        elif self.ofname is None:
+            return
+        else:
+            self._canvas.print_figure(ofname, bbox_inches=bbox_inches, dpi=300)
+        return
+
+
+def gseaplot2(
+    terms: List[str],
+    hits: List[Sequence[int]],
+    runes: List[Sequence[float]],
+    rank_metric: Optional[Sequence[float]] = None,
+    colors: Optional[Union[str, List[str]]] = None,
     figsize: Tuple[float, float] = (6, 4),
-    cmap: str = "seismic",
+    legend_kws: Optional[Dict[str, Any]] = None,
     ofname: Optional[str] = None,
     **kwargs,
 ):
     """Trace plot for terms
-
-    :param obj: GSEA or Prerank Object.
     :param terms: terms to show in trace plot
 
     """
-    # create bar plot
-    if hasattr(sys, "ps1") and (ofname is None):
-        # working inside python console, show (True) figure
-        fig = plt.figure(figsize=figsize)
-    else:
-        # If working on commandline, don't show figure
-        fig = Figure(figsize=figsize)
-        canvas = FigureCanvas(fig)
-    ax = fig.add_subplot(111)
-
-    if isinstance(terms, str):
-        _terms = [terms]
-    elif isinstance(terms, list):
-        _terms = terms
-    else:
-        _terms = list(obj.keys())
-
-    for t in _terms:
-        if obj.res2d["Name"].nunique() > 1:
-            for name, results in obj.results.items():
-                if t in results:
-                    RES = results[t]["RES"]
-                    ax.plot(range(len(RES)), RES, label=name)
-        else:
-            results = obj.results
-            if t in results:
-                RES = results[t]["RES"]
-                ax.plot(range(len(RES)), RES)
-    ax.axhline(0, linewidth=1, linestyle="dashed", color="gray")
-    ax.legend()
-    ax.set_xlabel("Gene list ranking", fontsize=14, fontweight="bold")
-    ax.set_ylabel("Enrichment Score", fontsize=14, fontweight="bold")
-    if ofname is not None:
-        # canvas.print_figure(ofname, bbox_inches='tight', dpi=300)
-        fig.savefig(ofname, bbox_inches="tight", dpi=300)
-        return
-    return ax
+    trace = TracePlot(
+        terms=terms,
+        runes=runes,
+        hits=hits,
+        rank_metric=rank_metric,
+        colors=colors,
+        figsize=figsize,
+        ofname=ofname,
+        legend_kws=legend_kws,
+        **kwargs,
+    )
+    trace.add_axes()
+    if ofname is None:
+        return trace.fig
+    trace.savefig(ofname)
 
 
 def enrichment_map(
