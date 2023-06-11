@@ -654,23 +654,39 @@ class GSEAbase(object):
 
         return es, esnull, hit_ind, RES
 
-# def plot(self, 
-#          terms: Union[str, List[str]], 
-#          colors: Optional[List[str]] = None, 
-#          figsize: Tuple[float, float] = (4,5),
-#          ofname: Optional[str] = None):
-#     # if hasattr(self, "results"):
-#     if self.module == 'ssgsea': 
-#         raise NotImplementedError("not for ssgsea")
 
-#     if isinstance(terms, str):
-#         gs = self.results[terms]
-#         g = GSEAPlot(rank_metric=self.ranking, ofname=ofname, pheno_pos=self.pheno_pos, pheno_neg=self.pheno_neg, figsize=figsize, **gs )
-#         g.add_axes()
-#         g.savefig()
-#     elif isinstance(terms, Iterable):
-#         hits = [self.results[t]['hits'] for t in terms]
-#         runes = [self.results[t]['RES'] for t in terms]
-#         t = TracePlot(terms=terms, hits=hits, runes=runes, rank_metric=self.ranking, colors=colors)
-#         t.add_axes()
-#         t.savefig(ofname)
+def plot(
+    self,
+    terms: Union[str, List[str]],
+    colors: Optional[List[str]] = None,
+    figsize: Tuple[float, float] = (4, 5),
+    ofname: Optional[str] = None,
+):
+    # if hasattr(self, "results"):
+    if self.module == "ssgsea":
+        raise NotImplementedError("not for ssgsea")
+
+    if isinstance(terms, str):
+        gs = self.results[terms]
+        g = GSEAPlot(
+            rank_metric=self.ranking,
+            ofname=ofname,
+            pheno_pos=self.pheno_pos,
+            pheno_neg=self.pheno_neg,
+            figsize=figsize,
+            **gs,
+        )
+        g.add_axes()
+        g.savefig()
+        return g.fig
+    elif isinstance(terms, list):
+        hits = [self.results[t]["hits"] for t in terms]
+        runes = [self.results[t]["RES"] for t in terms]
+        t = TracePlot(
+            terms=terms, hits=hits, runes=runes, rank_metric=self.ranking, colors=colors
+        )
+        t.add_axes()
+        t.savefig(ofname)
+        return t.fig
+    else:
+        print("not supported yet !")
