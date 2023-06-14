@@ -1259,7 +1259,20 @@ class TracePlot(object):
         # Enrichment score plot
 
         ax4 = self.fig.add_axes(rect)
-
+        if self.rankings is not None:
+            ax44 = ax4.twinx()  # instantiate a second axes that shares the same x-axis
+            ax44.fill_between(
+                range(len(self.rankings)),
+                y1=self.rankings,
+                y2=0,
+                color="#C9D3DB",
+                zorder=1,
+                alpha=0.5,
+            )
+            ax44.tick_params(axis="y", labelcolor="#808080")
+            ax44.set_ylabel(
+                "Ranked metric", fontsize=16, fontweight="bold", color="#808080"
+            )
         if self.colors is None:
             cycle = plt.rcParams["axes.prop_cycle"].by_key()["color"]
         else:
@@ -1270,14 +1283,9 @@ class TracePlot(object):
                 r,  # linewidth=2,
                 label=term,
                 color=cycle[i % len(cycle)],
+                zorder=2 + i,
             )  # color=color)
-        if self.rankings is not None:
-            ax44 = ax4.twinx()  # instantiate a second axes that shares the same x-axis
-            ax44.fill_between(range(len(r)), y1=self.rankings, y2=0, color="#C9D3DB", zorder=-1, alpha=0.5)
-            ax44.tick_params(axis="y", labelcolor="#808080")
-            ax44.set_ylabel(
-                "Ranked metric", fontsize=16, fontweight="bold", color="#808080"
-            )
+
         # the y coords of this transformation are data, and the x coord are axes
         trans4 = transforms.blended_transform_factory(ax4.transAxes, ax4.transData)
         ax4.hlines(0, 0, 1, linewidth=1, transform=trans4, color="grey")
@@ -1301,6 +1309,9 @@ class TracePlot(object):
             ax4.legend(**self.legend_kws)
         else:
             ax4.legend(loc=(0, 1.02))
+
+        if self.rankings is not None:
+            self.align_yaxis(ax4, ax44)
 
     def add_axes(self):
         """
@@ -1346,6 +1357,22 @@ class TracePlot(object):
         else:
             self._canvas.print_figure(ofname, bbox_inches=bbox_inches, dpi=300)
         return
+
+    def align_yaxis(self, ax1, ax2):
+        """Align zeros of the two axes, zooming them out by same ratio"""
+        axes = np.array([ax1, ax2])
+        extrema = np.array([ax.get_ylim() for ax in axes])
+        tops = extrema[:, 1] / (extrema[:, 1] - extrema[:, 0])
+        # Ensure that plots (intervals) are ordered bottom to top:
+        if tops[0] > tops[1]:
+            axes, extrema, tops = [a[::-1] for a in (axes, extrema, tops)]
+
+        # How much would the plot overflow if we kept current zoom levels?
+        tot_span = tops[1] + 1 - tops[0]
+
+        extrema[0, 1] = extrema[0, 0] + tot_span * (extrema[0, 1] - extrema[0, 0])
+        extrema[1, 0] = extrema[1, 1] + tot_span * (extrema[1, 0] - extrema[1, 1])
+        [axes[i].set_ylim(*extrema[i]) for i in range(2)]
 
 
 def gseaplot2(

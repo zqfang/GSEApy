@@ -4,12 +4,12 @@
 import json
 import logging
 import os
-from typing import Dict, Iterable, List, Optional, Union, Tuple, Any, Sequence
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import pandas as pd
 
-from gseapy.plot import gseaplot, heatmap, GSEAPlot, TracePlot
+from gseapy.plot import GSEAPlot, TracePlot, gseaplot, heatmap
 from gseapy.utils import DEFAULT_CACHE_PATH, log_init, mkdirs, retry
 
 
@@ -29,7 +29,6 @@ class GSEAbase(object):
         self.gene_sets = gene_sets
         self.fdr = 0.05
         self.module = module
-        self.results = None
         self.res2d = None
         self.ranking = None
         self.ascending = False
@@ -343,17 +342,21 @@ class GSEAbase(object):
                 continue
             if i >= self.graph_num:  # already sorted by abs(NES) in descending order
                 break
-            if self.res2d["Name"].nunique() > 1 and hasattr(
-                self, "_metric_dict"
-            ):  # self.module != "ssgsea":
-                key = record["Name"]
-                rank_metric = metric[key]
-                hit = self.results[key][record["Term"]]["hits"]
-                RES = self.results[key][record["Term"]]["RES"]
-            else:
-                rank_metric = metric[self.module]
-                hit = self.results[record["Term"]]["hits"]
-                RES = self.results[record["Term"]]["RES"]
+            # if self.res2d["Name"].nunique() > 1 and hasattr(
+            #     self, "_metric_dict"
+            # ):  # self.module != "ssgsea":
+            #     key = record["Name"]
+            #     rank_metric = metric[key]
+            #     hit = self._results[key][record["Term"]]["hits"]
+            #     RES = self._results[key][record["Term"]]["RES"]
+            # else:
+            #     rank_metric = metric[self.module]
+            #     hit = self._results[record["Term"]]["hits"]
+            #     RES = self._results[record["Term"]]["RES"]
+            key = record["Name"]
+            rank_metric = metric[key]
+            hit = self._results[key][record["Term"]]["hits"]
+            RES = self._results[key][record["Term"]]["RES"]
 
             outdir = os.path.join(self.outdir, record["Name"])
             mkdirs(outdir)
@@ -497,13 +500,15 @@ class GSEAbase(object):
             self._metric_dict = {self.module: self.module}
 
         res_df = self._to_df(gsea_summary, gmt, metric)
-        self.results = {}
+        self._results = {}
         # save dict
-        if res_df["name"].nunique() >= 2:
-            for name, dd in res_df.groupby(["name"]):
-                self.results[name] = dd.set_index("term").to_dict(orient="index")
-        else:
-            self.results = res_df.set_index("term").to_dict(orient="index")
+        # if res_df["name"].nunique() >= 2:
+        #     for name, dd in res_df.groupby(["name"]):
+        #         self._results[name] = dd.set_index("term").to_dict(orient="index")
+        # else:
+        #     self._results = res_df.set_index("term").to_dict(orient="index")
+        for name, dd in res_df.groupby(["name"]):
+            self._results[name] = dd.set_index("term").to_dict(orient="index")
         # trim
         res_df.rename(
             columns={
@@ -560,6 +565,16 @@ class GSEAbase(object):
         if not self._noplot:
             self._plotting(metric)
         return
+
+    @property
+    def results(self):
+        """
+        compatible to old style
+        """
+        keys = list(self._results.keys())
+        if len(keys) == 1:
+            return self._results[keys[0]]
+        return self._results
 
     def enrichment_score(
         self,
@@ -654,39 +669,48 @@ class GSEAbase(object):
 
         return es, esnull, hit_ind, RES
 
+    def plot(
+        self,
+        terms: Union[str, List[str]],
+        colors: Optional[List[str]] = None,
+        figsize: Tuple[float, float] = (4, 5),
+        ofname: Optional[str] = None,
+    ):
+        # if hasattr(self, "results"):
+        if self.module == "ssgsea":
+            raise NotImplementedError("not for ssgsea")
+        keys = list(self._results.keys())
+        if len(keys) > 1:
+            raise NotImplementedError("Multiple Dataset input No supported yet!")
 
-def plot(
-    self,
-    terms: Union[str, List[str]],
-    colors: Optional[List[str]] = None,
-    figsize: Tuple[float, float] = (4, 5),
-    ofname: Optional[str] = None,
-):
-    # if hasattr(self, "results"):
-    if self.module == "ssgsea":
-        raise NotImplementedError("not for ssgsea")
+        if isinstance(terms, str):
+            gsdict = self.results[terms]
+            g = GSEAPlot(
+                term=terms,
+                rank_metric=self.ranking,
+                ofname=ofname,
+                pheno_pos=self.pheno_pos,
+                pheno_neg=self.pheno_neg,
+                figsize=figsize,
+                **gsdict,
+            )
+            g.add_axes()
+            g.savefig()
+            return g.fig
 
-    if isinstance(terms, str):
-        gs = self.results[terms]
-        g = GSEAPlot(
-            rank_metric=self.ranking,
-            ofname=ofname,
-            pheno_pos=self.pheno_pos,
-            pheno_neg=self.pheno_neg,
-            figsize=figsize,
-            **gs,
-        )
-        g.add_axes()
-        g.savefig()
-        return g.fig
-    elif isinstance(terms, list):
-        hits = [self.results[t]["hits"] for t in terms]
-        runes = [self.results[t]["RES"] for t in terms]
-        t = TracePlot(
-            terms=terms, hits=hits, runes=runes, rank_metric=self.ranking, colors=colors
-        )
-        t.add_axes()
-        t.savefig(ofname)
-        return t.fig
-    else:
-        print("not supported yet !")
+        elif hasattr(terms, "__len__"):  # means iterable
+            terms = list(terms)
+            hits = [self.results[t]["hits"] for t in terms]
+            runes = [self.results[t]["RES"] for t in terms]
+            t = TracePlot(
+                terms=terms,
+                hits=hits,
+                runes=runes,
+                rank_metric=self.ranking,
+                colors=colors,
+            )
+            t.add_axes()
+            t.savefig(ofname)
+            return t.fig
+        else:
+            print("not supported yet !")
