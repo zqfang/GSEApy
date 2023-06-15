@@ -507,7 +507,7 @@ class GSEAbase(object):
         #         self._results[name] = dd.set_index("term").to_dict(orient="index")
         # else:
         #     self._results = res_df.set_index("term").to_dict(orient="index")
-        for name, dd in res_df.groupby(["name"]):
+        for name, dd in res_df.groupby("name"):
             self._results[name] = dd.set_index("term").to_dict(orient="index")
         # trim
         res_df.rename(
