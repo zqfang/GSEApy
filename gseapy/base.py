@@ -380,13 +380,13 @@ class GSEAbase(object):
             if self.permutation_num > 0:
                 # skip plotting when nperm=0
                 gseaplot(
-                    rank_metric=rank_metric,
                     term=record["Term"].split("__")[-1],
                     hits=hit,
                     nes=record["NES"],
                     pval=record["NOM p-val"],
                     fdr=record["FDR q-val"],
                     RES=RES,
+                    rank_metric=rank_metric,
                     pheno_pos=self.pheno_pos,
                     pheno_neg=self.pheno_neg,
                     figsize=self.figsize,
@@ -672,10 +672,18 @@ class GSEAbase(object):
     def plot(
         self,
         terms: Union[str, List[str]],
-        colors: Optional[List[str]] = None,
+        colors: Optional[Union[str, List[str]]] = None,
+        legend_kws: Optional[Dict[str, Any]] = None,
         figsize: Tuple[float, float] = (4, 5),
+        show_ranking: bool = True,
         ofname: Optional[str] = None,
     ):
+        """
+        terms: str, list.  terms/pathways to show
+        colors: str, list. list of colors for each term/pathway
+        legend_kws: kwargs to pass to ax.legend. e.g. `loc`, `bbox_to_achor`.
+        ofname: savefig
+        """
         # if hasattr(self, "results"):
         if self.module == "ssgsea":
             raise NotImplementedError("not for ssgsea")
@@ -683,16 +691,22 @@ class GSEAbase(object):
         if len(keys) > 1:
             raise NotImplementedError("Multiple Dataset input No supported yet!")
 
+        ranking = self.ranking if show_ranking else None
         if isinstance(terms, str):
             gsdict = self.results[terms]
             g = GSEAPlot(
                 term=terms,
-                rank_metric=self.ranking,
+                tag=gsdict["hits"],
+                rank_metric=ranking,
+                runes=gsdict["RES"],
+                nes=gsdict["nes"],
+                pval=gsdict["pval"],
+                fdr=gsdict["fdr"],
                 ofname=ofname,
                 pheno_pos=self.pheno_pos,
                 pheno_neg=self.pheno_neg,
+                color=colors,
                 figsize=figsize,
-                **gsdict,
             )
             g.add_axes()
             g.savefig()
@@ -700,17 +714,18 @@ class GSEAbase(object):
 
         elif hasattr(terms, "__len__"):  # means iterable
             terms = list(terms)
-            hits = [self.results[t]["hits"] for t in terms]
+            tags = [self.results[t]["hits"] for t in terms]
             runes = [self.results[t]["RES"] for t in terms]
             t = TracePlot(
                 terms=terms,
-                hits=hits,
+                tags=tags,
                 runes=runes,
-                rank_metric=self.ranking,
+                rank_metric=ranking,
                 colors=colors,
+                legend_kws=legend_kws,
             )
             t.add_axes()
             t.savefig(ofname)
             return t.fig
         else:
-            print("not supported yet !")
+            print("not supported input: terms")

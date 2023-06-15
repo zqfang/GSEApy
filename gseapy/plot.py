@@ -2,7 +2,7 @@
 import operator
 import sys
 import warnings
-from typing import Iterable, List, Optional, Tuple, Union, Dict, Sequence, Any
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import matplotlib.pyplot as plt
 import matplotlib.transforms as transforms
@@ -211,23 +211,46 @@ class GSEAPlot(object):
     def __init__(
         self,
         term: str,
-        hits: Sequence[int],
-        RES: Sequence[float],
-        rank_metric: Sequence[float],
+        tag: Sequence[int],
+        runes: Sequence[float],
         nes: float,
         pval: float,
         fdr: float,
+        rank_metric: Optional[Sequence[float]] = None,
         pheno_pos: str = "",
         pheno_neg: str = "",
+        color: Optional[str] = None,
         figsize: Tuple[float, float] = (6, 5.5),
         cmap: str = "seismic",
         ofname: Optional[str] = None,
+        ax: Optional[plt.Axes] = None,
         **kwargs,
     ):
+        """
+        :param term: gene_set name
+        :param tag: hit indices of rank_metric.index presented in gene set S.
+        :param runes: running enrichment scores.
+        :param nes: Normalized enrichment scores.
+        :param pval: nominal p-value.
+        :param fdr: false discovery rate.
+        :param rank_metric: pd.Series for rankings, rank_metric.values.
+        :param pheno_pos: phenotype label, positive correlated.
+        :param pheno_neg: phenotype label, negative correlated.
+        :param figsize: matplotlib figsize.
+        :param ofname: output file name. If None, don't save figure
+        """
         # dataFrame of ranked matrix scores
-        self._x = np.arange(len(rank_metric))
-        self.rankings = np.asarray(rank_metric)
-        self.RES = np.asarray(RES)
+        self.color = "#88C544" if color is None else color
+        self._x = np.arange(len(runes))
+        self.rankings = None
+        self._zero_score_ind = None
+        self._z_score_label = None
+        if rank_metric is not None:
+            self.rankings = np.asarray(rank_metric)
+            self._zero_score_ind = np.abs(self.rankings).argmin()
+            self._z_score_label = "Zero score at " + str(self._zero_score_ind)
+
+        self.RES = np.asarray(runes)
 
         self.figsize = figsize
         self.term = term
@@ -236,9 +259,7 @@ class GSEAPlot(object):
 
         self._pos_label = pheno_pos
         self._neg_label = pheno_neg
-        self._zero_score_ind = np.abs(self.rankings).argmin()
-        self._z_score_label = "Zero score at " + str(self._zero_score_ind)
-        self._hit_indices = hits
+        self._hit_indices = tag
         self.module = "tmp" if ofname is None else ofname.split(".")[-2]
         if self.module == "ssgsea":
             self._nes_label = "ES: " + "{:.3f}".format(float(nes))
@@ -255,13 +276,16 @@ class GSEAPlot(object):
         # It's also usefull to run this script on command line.
 
         # GSEA Plots
-        if hasattr(sys, "ps1") and (self.ofname is None):
-            # working inside python console, show figure
-            self.fig = plt.figure(figsize=self.figsize)
+        if ax is None:
+            if hasattr(sys, "ps1") and (self.ofname is None):
+                # working inside python console, show figure
+                self.fig = plt.figure(figsize=self.figsize, facecolor="white")
+            else:
+                # If working on command line, don't show figure
+                self.fig = Figure(figsize=self.figsize, facecolor="white")
+                self._canvas = FigureCanvas(self.fig)
         else:
-            # If working on command line, don't show figure
-            self.fig = Figure(figsize=self.figsize)
-            self._canvas = FigureCanvas(self.fig)
+            self.fig = ax.figure
 
         self.fig.suptitle(self.term, fontsize=16, wrap=True, fontweight="bold")
 
@@ -272,7 +296,7 @@ class GSEAPlot(object):
                quantities are in fractions of figure width and height.
         """
         # Ranked Metric Scores Plot
-        ax1 = self.fig.add_axes(rect, sharex=self.ax)
+        ax1 = self.fig.add_axes(rect)
         if self.module == "ssgsea":
             ax1.fill_between(self._x, y1=np.log(self.rankings), y2=0, color="#C9D3DB")
             ax1.set_ylabel("log ranked metric", fontsize=16, fontweight="bold")
@@ -336,28 +360,32 @@ class GSEAPlot(object):
             plt.FuncFormatter(lambda tick_loc, tick_num: "{:.1f}".format(tick_loc))
         )
 
-    def axes_hits(self, rect):
+    def axes_hits(self, rect, bottom: bool = False):
         """
         rect : sequence of float
                The dimensions [left, bottom, width, height] of the new axes. All
                quantities are in fractions of figure width and height.
         """
         # gene hits
-        ax2 = self.fig.add_axes(rect, sharex=self.ax)
+        ax2 = self.fig.add_axes(rect)
         # the x coords of this transformation are data, and the y coord are axes
         trans2 = transforms.blended_transform_factory(ax2.transData, ax2.transAxes)
-        ax2.vlines(self._hit_indices, 0, 1, linewidth=0.5, transform=trans2)
-        ax2.spines["bottom"].set_visible(False)
+        ax2.vlines(
+            self._hit_indices, 0, 1, linewidth=0.5, transform=trans2, color=self.color
+        )
         ax2.tick_params(
             axis="both",
             which="both",
-            bottom=False,
+            bottom=bottom,
             top=False,
             right=False,
             left=False,
-            labelbottom=False,
+            labelbottom=bottom,
             labelleft=False,
         )
+        if bottom:
+            ax2.set_xlabel("Gene Rank", fontsize=16, fontweight="bold")
+            ax2.spines["bottom"].set_visible(True)
 
     def axes_cmap(self, rect):
         """
@@ -366,13 +394,16 @@ class GSEAPlot(object):
                quantities are in fractions of figure width and height.
         """
         # center color map at midpoint = 0
-        vmin = np.percentile(self.rankings.min(), 2)
-        vmax = np.percentile(self.rankings.max(), 98)
+        mat = self.rankings
+        if self.rankings is None:
+            mat = self.RES
+        vmin = np.percentile(mat.min(), 2)
+        vmax = np.percentile(mat.max(), 98)
         midnorm = MidpointNormalize(vmin=vmin, vcenter=0, vmax=vmax)
         # colormap
-        ax3 = self.fig.add_axes(rect, sharex=self.ax)
+        ax3 = self.fig.add_axes(rect)
         ax3.pcolormesh(
-            self.rankings[np.newaxis, :],
+            mat[np.newaxis, :],
             rasterized=True,
             norm=midnorm,
             cmap=self.cmap,
@@ -398,7 +429,7 @@ class GSEAPlot(object):
         # Enrichment score plot
 
         ax4 = self.fig.add_axes(rect)
-        ax4.plot(self._x, self.RES, linewidth=4, color="#88C544")
+        ax4.plot(self._x, self.RES, linewidth=4, color=self.color)
         ax4.text(0.1, 0.1, self._fdr_label, transform=ax4.transAxes, fontsize=14)
         ax4.text(0.1, 0.2, self._pval_label, transform=ax4.transAxes, fontsize=14)
         ax4.text(0.1, 0.3, self._nes_label, transform=ax4.transAxes, fontsize=14)
@@ -438,10 +469,42 @@ class GSEAPlot(object):
             self.axes_hits([0.1,0.1,0.8,0.1])
 
         """
-        self.axes_stat([0.1, 0.5, 0.8, 0.4])
-        self.axes_hits([0.1, 0.45, 0.8, 0.05])
-        self.axes_cmap([0.1, 0.40, 0.8, 0.05])
-        self.axes_rank([0.1, 0.1, 0.8, 0.3])
+
+        left = 0.1
+        width = 0.8
+        bottom = 0.1
+        height = 0
+
+        stat_height_ratio = 0.4
+        hits_height_ratio = 0.05
+        cmap_height_ratio = 0.05
+        rank_height_ratio = 0.3
+        ## make stat /hits height ratio const
+        if self.rankings is None:
+            rank_height_ratio = 0
+            cmap_height_ratio = 0
+        base = 0.8 / (
+            stat_height_ratio
+            + hits_height_ratio
+            + cmap_height_ratio
+            + rank_height_ratio
+        )
+        # for i, hit in enumerate(self.hits):
+        #     height = hits_height_ratio * base
+        if self.rankings is not None:
+            height = rank_height_ratio * base
+            self.axes_rank([left, bottom, width, height])
+            bottom += height
+            height = cmap_height_ratio * base
+            self.axes_cmap([left, bottom, width, height])
+            bottom += height
+        height = hits_height_ratio * base
+        self.axes_hits(
+            [left, bottom, width, height], bottom=False if bottom > 0.1 else True
+        )
+        bottom += height
+        height = stat_height_ratio * base
+        self.axes_stat([left, bottom, width, height])
         # self.fig.subplots_adjust(hspace=0)
         # self.fig.tight_layout()
 
@@ -457,52 +520,56 @@ class GSEAPlot(object):
 
 
 def gseaplot(
-    rank_metric: Sequence[float],
     term: str,
     hits: Sequence[int],
     nes: float,
     pval: float,
     fdr: float,
     RES: Sequence[float],
+    rank_metric: Optional[Sequence[float]] = None,
     pheno_pos: str = "",
     pheno_neg: str = "",
+    color: str = "#88C544",
     figsize: Tuple[float, float] = (6, 5.5),
     cmap: str = "seismic",
     ofname: Optional[str] = None,
     **kwargs,
-):
-    """This is the main function for reproducing the gsea plot.
+) -> Optional[List[plt.Axes]]:
+    """This is the main function for generating the gsea plot.
 
-    :param rank_metric: pd.Series for rankings, rank_metric.values.
     :param term: gene_set name
     :param hits: hits indices of rank_metric.index presented in gene set S.
     :param nes: Normalized enrichment scores.
     :param pval: nominal p-value.
     :param fdr: false discovery rate.
     :param RES: running enrichment scores.
+    :param rank_metric: pd.Series for rankings, rank_metric.values.
     :param pheno_pos: phenotype label, positive correlated.
     :param pheno_neg: phenotype label, negative correlated.
+    :param color: color for RES and hits.
     :param figsize: matplotlib figsize.
     :param ofname: output file name. If None, don't save figure
 
+    return matplotlib.Figure.
     """
     g = GSEAPlot(
         term,
         hits,
         RES,
-        rank_metric,
         nes,
         pval,
         fdr,
+        rank_metric,
         pheno_pos,
         pheno_neg,
+        color,
         figsize,
         cmap,
         ofname,
     )
     g.add_axes()
     if ofname is None:
-        return g.fig
+        return g.fig.axes
     g.savefig()
 
 
@@ -649,7 +716,7 @@ class DotPlot(object):
         Perform hierarchical/agglomerative clustering.
         Return categorical order.
         """
-        if isinstance(self.x_order, Iterable):
+        if hasattr(self.x_order, "__len__"):
             return self.x_order
         mat = self.data.pivot(
             index=self.y,
@@ -666,7 +733,7 @@ class DotPlot(object):
         Perform hierarchical/agglomerative clustering.
         Return categorical order.
         """
-        if isinstance(self.y_order, Iterable):
+        if hasattr(self.y_order, "__len__"):
             return self.y_order
         mat = self.data.pivot(
             index=self.y,
@@ -872,7 +939,7 @@ class DotPlot(object):
         bar.xaxis.set_major_locator(MaxNLocator(nbins=5, integer=True))
 
         # get default color cycle
-        if (not isinstance(color, str)) and isinstance(color, Iterable):
+        if (not isinstance(color, str)) and hasattr(color, "__len__"):
             _colors = list(color)
         else:
             prop_cycle = plt.rcParams["axes.prop_cycle"]
@@ -1170,8 +1237,8 @@ class TracePlot(object):
     def __init__(
         self,
         terms: List[str],
+        tags: List[Sequence[int]],
         runes: List[Sequence[float]],
-        hits: List[Sequence[int]],
         rank_metric: Optional[Sequence[float]] = None,
         figsize: Tuple[float, float] = (6, 5.5),
         colors: Union[str, List[str], None] = None,
@@ -1182,6 +1249,7 @@ class TracePlot(object):
     ):
         """
         terms: list of terms/pathways to show
+        tags: list of hit indices for each term
         runes: list runing enrichment score for each term
         hits: list of ranks of the overlap genes in pathway/term.
         rank_metric: ranking metric in descending order.
@@ -1194,7 +1262,7 @@ class TracePlot(object):
         self.rankings = rank_metric
         self.terms = terms
         self.runes = runes
-        self.hits = hits
+        self.hits = tags
         self.figsize = figsize
         if isinstance(colors, str):
             colors = [colors]
@@ -1280,7 +1348,8 @@ class TracePlot(object):
         for i, r, term in zip(range(len(self.terms)), self.runes, self.terms):
             ax4.plot(
                 range(len(r)),
-                r,  # linewidth=2,
+                r,
+                linewidth=2,
                 label=term,
                 color=cycle[i % len(cycle)],
                 zorder=2 + i,
@@ -1378,22 +1447,40 @@ class TracePlot(object):
 def gseaplot2(
     terms: List[str],
     hits: List[Sequence[int]],
-    runes: List[Sequence[float]],
+    RESs: List[Sequence[float]],
     rank_metric: Optional[Sequence[float]] = None,
     colors: Optional[Union[str, List[str]]] = None,
     figsize: Tuple[float, float] = (6, 4),
     legend_kws: Optional[Dict[str, Any]] = None,
     ofname: Optional[str] = None,
     **kwargs,
-):
-    """Trace plot for terms
-    :param terms: terms to show in trace plot
+) -> Optional[List[plt.Axes]]:
+    """Trace plot for combining multiple terms/pathways into one plot
+    :param terms: list of terms to show in trace plot
+    :param hits: list of hits indices correspond to each term.
+    :param RESs: list of running enrichment scores correspond to each term.
+    :param rank_metric: Optional, rankings.
+    :param figsize: matplotlib figsize.
+    :legend_kws: Optional, contol the location of lengends
+    :param ofname: output file name. If None, don't save figure
 
+    return matplotlib.Figure.
     """
+    # in case you just input one pathway
+    if isinstance(terms, str):
+        terms = [terms]
+    # make the inputs are legal
+    assert (
+        hasattr(terms, "__len__")
+        and hasattr(hits, "__len__")
+        and hasattr(RESs, "__len__")
+    )
+    assert len(terms) == len(hits) == len(RESs)
+
     trace = TracePlot(
-        terms=terms,
-        runes=runes,
-        hits=hits,
+        terms=list(terms),
+        runes=list(RESs),
+        tags=list(hits),
         rank_metric=rank_metric,
         colors=colors,
         figsize=figsize,
@@ -1403,7 +1490,7 @@ def gseaplot2(
     )
     trace.add_axes()
     if ofname is None:
-        return trace.fig
+        return trace.fig.axes
     trace.savefig(ofname)
 
 
