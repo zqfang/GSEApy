@@ -1,4 +1,5 @@
 import logging
+import os
 from collections.abc import Iterable
 from io import StringIO
 from typing import Any, AnyStr, Dict, Iterable, List, Optional, Set, Tuple, Union
@@ -271,6 +272,7 @@ class Biomart:
         self.results = df
         # save file to cache path.
         if filename is not None:
+            mkdirs(os.path.dirname(filename))
             df.to_csv(filename, sep="\t", index=False)
 
         return df

@@ -490,6 +490,9 @@ class Enrichr(object):
         """
         set background genes
         """
+        if hasattr(self, "_bg") and self._bg:
+            return self._bg
+
         self._bg = set()
         if self.background is None:
             # use all genes in the dict input as background if background is None
@@ -519,6 +522,8 @@ class Enrichr(object):
             except TypeError:
                 self._logger.error("Unsupported background data type")
 
+        return self._bg
+
     def enrich(self, gmt: Dict[str, List[str]]):
         """use local mode
 
@@ -533,9 +538,9 @@ class Enrichr(object):
             Term Overlap P-value Odds Ratio Combinde Score Adjusted_P-value Genes
 
         """
-        self.parse_background(gmt)
+        bg = self.parse_background(gmt)
         # statistical testing
-        hgtest = list(calc_pvalues(query=self._gls, gene_sets=gmt, background=self._bg))
+        hgtest = list(calc_pvalues(query=self._gls, gene_sets=gmt, background=bg))
         if len(hgtest) > 0:
             terms, pvals, oddr, olsz, gsetsz, genes = hgtest
             fdrs, rej = multiple_testing_correction(
@@ -595,9 +600,9 @@ class Enrichr(object):
                 self._gs = name
                 self._logger.debug("Enrichr service using library: %s" % (name))
                 # self._logger.info("Enrichr Library: %s"% self._gs)
-                self.parse_background()
+                bg = self.parse_background()
                 # whether user input background
-                if isinstance(self._bg, set) and len(self._bg) > 0:
+                if isinstance(bg, set) and len(bg) > 0:
                     shortID, res = self.get_results_with_background(
                         genes_list, self._bg
                     )
