@@ -665,6 +665,12 @@ class DotPlot(object):
         # if self.colname in ["NOM p-val", "FDR q-val"]:
         #     df[self.colname].clip(1e-5, 1.0, inplace=True)
         # sorting the dataframe for better visualization
+        colnd = {
+            "Adjusted P-value": "FDR",
+            "P-value": "Pval",
+            "NOM p-val": "Pval",
+            "FDR q-val": "FDR",
+        }
         if self.colname in ["Adjusted P-value", "P-value", "NOM p-val", "FDR q-val"]:
             # get top_terms
             df = df.sort_values(by=self.colname)
@@ -672,8 +678,9 @@ class DotPlot(object):
                 0, method="bfill", inplace=True
             )  ## asending order, use bfill
             df = df.assign(p_inv=np.log10(1 / df[self.colname].astype(float)))
+            _t = colnd[self.colname]
             self.colname = "p_inv"
-            self.cbar_title = r"$\log_{10} \frac{1}{P val}$"
+            self.cbar_title = r"$\log_{10} \frac{1}{ " + _t + " }$"
 
         # get top terms; sort ascending
         if (self.x is not None) and (self.x in df.columns):
@@ -890,7 +897,7 @@ class DotPlot(object):
             bbox_to_anchor=(1.02, 0.9),
             loc="upper left",
             frameon=False,
-            labelspacing=1.0,
+            labelspacing=2,
         )
         ax.set_title(self.title, fontsize=20, fontweight="bold")
         self.add_colorbar(sc)
