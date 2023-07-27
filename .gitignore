@@ -31,6 +31,9 @@ docs/_build
 *__pycache__ 
 *.vscode
 tests/*.ipynb
+tests/*.pdf
+tests/*.csv
+tests/benchmark
 gseapy_example.ipynb
 target
 Cargo.lock
