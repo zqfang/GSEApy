@@ -204,6 +204,7 @@ class GSEAbase(object):
         genesets_dict = self.load_gmt_only(gmt)
 
         subsets = list(genesets_dict.keys())
+        entry1st = genesets_dict[subsets[0]]
         gene_dict = {g: i for i, g in enumerate(gene_list)}
         for subset in subsets:
             subset_list = set(genesets_dict.get(subset))  # remove duplicates
@@ -230,10 +231,14 @@ class GSEAbase(object):
                 + "Hint 3: Gene symbols curated in Enrichr web services are all upcases.\n"
             )
             self._logger.error(msg)
-            dict_head = "{ %s: [%s]}" % (subsets[0], genesets_dict[subsets[0]])
+            dict_head = "{ %s: [%s]}" % (subsets[0], ", ".join(entry1st))
             self._logger.error(
                 "The first entry of your gene_sets (gmt) look like this : %s"
                 % dict_head
+            )
+            self._logger.error(
+                "The first 5 genes look like this : [ %s ]"
+                % (", ".join(list(gene_list)[:5]))
             )
             raise LookupError(msg)
 
