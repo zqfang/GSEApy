@@ -555,7 +555,7 @@ class Enrichr(object):
             odict["Odds Ratio"] = oddr
             odict["Combined Score"] = -1 * log(pvals) * oddr
             # odict['Reject (FDR< %s)'%self.cutoff ] = rej
-            odict["Genes"] = [";".join(g) for g in genes]
+            odict["Genes"] = [";".join(map(str, g)) for g in genes]
             res = pd.DataFrame(odict)
             return res
         return
@@ -589,6 +589,8 @@ class Enrichr(object):
                 self._logger.debug(
                     "Off-line enrichment analysis with library: %s" % (self._gs)
                 )
+                if self._isezid:
+                    g = {k: list(map(int, v)) for k, v in g.items()}
                 res = self.enrich(g)
                 if res is None:
                     self._logger.info(
