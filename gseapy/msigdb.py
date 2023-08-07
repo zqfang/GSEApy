@@ -3,8 +3,9 @@ import re
 import pandas as pd
 import requests
 
+
 class Msigdb:
-    def __init__(self, dbver : str ="2023.1.Hs"):
+    def __init__(self, dbver: str = "2023.1.Hs"):
         """
         dbver: MSIGDB version number. default: 2023.1.Hs
         """
@@ -12,7 +13,6 @@ class Msigdb:
         self._db_version = self._get_db_version()
         self.categoires = self.list_category(dbver)
         self._pattern = re.compile("(\w.+)\.(v\d.+)\.(entrez|symbols)\.gmt")
-        
 
     def _get_db_version(self):
         resp = requests.get(self.url)
@@ -25,10 +25,7 @@ class Msigdb:
         return None
 
     def get_gmt(
-        self, 
-        category: str = "h.all", 
-        dbver: str = "7.5.1", 
-        entrez: bool = False
+        self, category: str = "h.all", dbver: str = "2023.1.Hs", entrez: bool = False
     ):
         """
         example: "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/2023.1.Hs/c2.cp.kegg.v2023.1.Hs.entrez.gmt"
