@@ -124,11 +124,11 @@ where
         } else {
             let key = element.clone();
             self._idx_to_elt.push(element);
-            self._num_indices += 1;
             self._elt_to_idx.insert(key, self._num_indices);
+            self._num_indices += 1;
             // self._elt_to_idx[&elt] = self._num_indices;
         }
-        return self._num_indices;
+        return self._num_indices - 1;
     }
     /// get index of element
     pub fn index_of(&self, element: &T) -> Option<&usize> {
