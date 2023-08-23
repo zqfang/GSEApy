@@ -13,6 +13,65 @@ from gseapy.plot import GSEAPlot, TracePlot, gseaplot, heatmap
 from gseapy.utils import DEFAULT_CACHE_PATH, log_init, mkdirs, retry
 
 
+class GMT(dict):
+    def __init__(
+        self,
+        mapping: Optional[Dict[str, str]] = None,
+        description: Optional[str] = None,
+    ):
+        """
+        wrapper of dict. this helps merge multiple dict into one
+        the original key will changed to new key with suffix '__{description}'
+        """
+        if description is None:
+            description = ""
+        self.description = description
+        _mapping = {}
+        if mapping is not None:
+            for key, value in mapping.items():
+                k = key + "__" + self.description
+                _mapping[k] = value
+        super().__init__(_mapping)
+
+    def apply(self, func):
+        """apply function in place"""
+        for key, value in self.items():
+            self[key] = func(value)
+
+    def is_empty(self):
+        return len(self) == 0
+
+    def write(self, ofname: str):
+        """
+        write gmt file to disk
+        """
+        with open(ofname, "w") as out:
+            for key, value in self.items():
+                collections = key.split("__")
+                clollections += list(value)
+                out.write("\t".join(collections) + "\n")
+
+    def _read(path):
+        mapping = {}
+        with open(path, "r") as inp:
+            for line in inp:
+                items = line.strip().split("\t")
+                key = items[0]
+                if items[1] != "":
+                    key += "__" + items[1]
+                mapping[key] = items[2:]
+        return mapping
+
+    @classmethod
+    def read(cls, paths):
+        paths = paths.strip().split(",")
+        # mapping
+        mapping = {}
+        for path in paths:
+            mapping.update(cls._read(path))
+        return cls(mapping)
+
+
 class GSEAbase(object):
     """base class of GSEA."""
 
