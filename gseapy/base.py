@@ -787,6 +787,7 @@ class GSEAbase(object):
                 rank_metric=ranking,
                 colors=colors,
                 legend_kws=legend_kws,
+                ofname=ofname,
             )
             t.add_axes()
             t.savefig(ofname)
