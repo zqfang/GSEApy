@@ -48,7 +48,7 @@ class GMT(dict):
         with open(ofname, "w") as out:
             for key, value in self.items():
                 collections = key.split("__")
-                clollections += list(value)
+                collections += list(value)
                 out.write("\t".join(collections) + "\n")
 
     def _read(path):
