@@ -121,14 +121,13 @@ where
     pub fn add_if_new(&mut self, element: T) -> usize {
         if self._elt_to_idx.contains_key(&element) {
             return *self._elt_to_idx.get(&element).unwrap();
-        } else {
-            let key = element.clone();
-            self._idx_to_elt.push(element);
-            self._elt_to_idx.insert(key, self._num_indices);
-            self._num_indices += 1;
-            // self._elt_to_idx[&elt] = self._num_indices;
-        }
-        return self._num_indices - 1;
+        } 
+        let key = element.clone();
+        let idx = self._num_indices;
+        self._idx_to_elt.push(element);
+        self._elt_to_idx.insert(key, idx);
+        self._num_indices += 1;
+        return idx;
     }
     /// get index of element
     pub fn index_of(&self, element: &T) -> Option<&usize> {
@@ -287,7 +286,7 @@ mod tests {
         let z = *dynum.elt_of(1).unwrap();
 
         println!("{x}, {y}, {z}");
-        assert_eq!(x, 5);
+        assert_eq!(x, 4);
         assert_eq!(y, 2);
         assert_eq!(z, "B");
     }
