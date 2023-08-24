@@ -263,6 +263,18 @@ Or use ``get_library_name`` function inside python console.
 
 
 
+Dev 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: shell
+
+
+        # test rust extension only 
+        cargo test --features=extension-module
+        # test whole package
+        python setup.py test
+
+
 
 Bug Report
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
