@@ -370,9 +370,20 @@ class GSEAPlot(object):
         ax2 = self.fig.add_axes(rect)
         # the x coords of this transformation are data, and the y coord are axes
         trans2 = transforms.blended_transform_factory(ax2.transData, ax2.transAxes)
+        # to make axes shared with same x cooridincates, make the vlines same ranges to x
+        ax2.vlines([self._x[0], self._x[-1]], 0, 1, 
+                   linewidth=0.5, 
+                   transform=trans2, 
+                   color='white',
+                   alpha=0) # alpha 0 to transparency
+        # add hits line
         ax2.vlines(
-            self._hit_indices, 0, 1, linewidth=0.5, transform=trans2, color=self.color
+            self._hit_indices, 0, 1, 
+            linewidth=0.5, 
+            transform=trans2, 
+            color='black'
         )
+
         ax2.tick_params(
             axis="both",
             which="both",
@@ -1309,6 +1320,12 @@ class TracePlot(object):
         ax2 = self.fig.add_axes(rect)
         # the x coords of this transformation are data, and the y coord are axes
         trans2 = transforms.blended_transform_factory(ax2.transData, ax2.transAxes)
+        # align hits to runes
+        ax2.vlines([0, len(self.runes) -1], 0, 1, 
+                   linewidth=0.5, 
+                   transform=trans2, 
+                   color='white',
+                   alpha=0) # alpha 0 to transparency
         ax2.vlines(tags, 0, 1, linewidth=0.5, transform=trans2, color=color)
         ax2.spines["bottom"].set_visible(True)
         ax2.tick_params(
