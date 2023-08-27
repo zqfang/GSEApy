@@ -8,16 +8,9 @@ from .__main__ import __version__
 from .biomart import Biomart
 from .enrichr import Enrichr
 from .gsea import GSEA, Prerank, Replot, SingleSampleGSEA
+from .msigdb import Msigdb
 from .parser import get_library, get_library_name, read_gmt
-from .plot import (
-    barplot,
-    dotplot,
-    enrichment_map,
-    gseaplot,
-    gseaplot2,
-    heatmap,
-    ringplot,
-)
+from .plot import barplot, dotplot, enrichment_map, gseaplot, gseaplot2, heatmap
 
 
 def gsea(
@@ -640,7 +633,6 @@ __all__ = [
     "dotplot",
     "barplot",
     "enrichment_map",
-    "ringplot",
     "heatmap",
     "gseaplot",
     "gseaplot2",
@@ -656,6 +648,7 @@ __all__ = [
     "SingleSampleGSEA",
     "Enrichr",
     "Biomart",
+    "Msigdb",
     "get_library",
     "get_library_name",
     "read_gmt",

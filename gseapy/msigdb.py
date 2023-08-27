@@ -10,9 +10,9 @@ class Msigdb:
         dbver: MSIGDB version number. default: 2023.1.Hs
         """
         self.url = "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/"
+        self._pattern = re.compile("(\w.+)\.(v\d.+)\.(entrez|symbols)\.gmt")
         self._db_version = self._get_db_version()
         self.categoires = self.list_category(dbver)
-        self._pattern = re.compile("(\w.+)\.(v\d.+)\.(entrez|symbols)\.gmt")
 
     def _get_db_version(self):
         resp = requests.get(self.url)
@@ -28,7 +28,10 @@ class Msigdb:
         self, category: str = "h.all", dbver: str = "2023.1.Hs", entrez: bool = False
     ):
         """
-        example: "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/2023.1.Hs/c2.cp.kegg.v2023.1.Hs.entrez.gmt"
+        :params category: choose one from .list_category()
+        :params dbver: choose one from .list_dbver()
+
+        An example of query url: "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/2023.1.Hs/c2.cp.kegg.v2023.1.Hs.entrez.gmt"
         """
         identifier = "symbols"
         if entrez:
@@ -47,9 +50,10 @@ class Msigdb:
         # self._db_version.columns = ["dbver", "date"]
         return self._db_version
 
-    def list_category(self, dbver):
+    def list_category(self, dbver: str = "2023.1.Hs"):
         """
         dbver: MSIGDB version number. default: 2023.1.Hs
+        see a list of dbver, call .list_dbver()
         """
         d = self.list_gmt(dbver)
         if d is not None:
@@ -61,7 +65,7 @@ class Msigdb:
             return categories.to_list()
         return None
 
-    def list_gmt(self, db):
+    def list_gmt(self, db: str):
         url = self.url + db
         resp = requests.get(url)
         if resp.ok:
