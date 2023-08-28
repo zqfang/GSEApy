@@ -98,8 +98,7 @@ See more output here: `Example <http://gseapy.readthedocs.io/en/master/gseapy_ex
 Installation
 ------------
 
-| Install gseapy package from bioconda or pypi.
-| For 
+| Install gseapy package from bioconda or pip.
 
 
 .. code:: shell
