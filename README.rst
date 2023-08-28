@@ -109,12 +109,29 @@ Installation
    # or use pip to install the latest release
    $ pip install gseapy
 
+
+
+| For `ARM-MacOS M1/2-Chip` users, Github build did not have a M1-runner for MacOS. you need do compile rust code by yourself
+
+.. code:: shell 
+    # install rust compiler
+    curl https://sh.rustup.rs -sSf | sh -s -- -y
+    # export rust compiler
+    export PATH="$PATH:$HOME/.cargo/bin"
+    # install gseapy
+    pip install gseapy
+
+
 | You may instead want to use the development version from Github, by running
 
 .. code:: shell
 
    # you need to install rust first to compile the code
    # rust: https://www.rust-lang.org/tools/install
+   curl https://sh.rustup.rs -sSf | sh -s -- -y
+   # export rust compiler 
+   export PATH="$PATH:$HOME/.cargo/bin"
+   # install
    $ pip install git+git://github.com/zqfang/gseapy.git#egg=gseapy
 
 Dependency
