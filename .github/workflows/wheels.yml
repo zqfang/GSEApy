@@ -28,7 +28,7 @@ jobs:
   sdist:
     name: Build sdist
     runs-on: ubuntu-latest
-    needs: ["build_wheels","build-win32-wheels"]
+    # needs: ["build_wheels"]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
