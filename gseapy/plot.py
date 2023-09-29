@@ -974,6 +974,7 @@ class DotPlot(object):
         bar.xaxis.set_major_locator(MaxNLocator(nbins=5, integer=True))
         #
         _colors = self._parse_colors(color=color)
+        colors = _colors
         # remove old legend first
         bar.legend_.remove()
         if (group is not None) and (group in self.data.columns):
