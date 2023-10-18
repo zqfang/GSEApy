@@ -133,6 +133,11 @@ where
     pub fn index_of(&self, element: &T) -> Option<&usize> {
         self._elt_to_idx.get(element)
     }
+    pub fn index_of_any(&self, elements: &[T]) -> Vec<&usize> {
+        elements.iter()
+        .filter_map(|e| self.index_of(e))
+        .collect()
+    }
     #[allow(dead_code)]
     pub fn contain_elt(&self, element: &T) -> bool {
         self._elt_to_idx.contains_key(element)

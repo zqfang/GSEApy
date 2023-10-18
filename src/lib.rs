@@ -3,12 +3,13 @@ use std::collections::HashMap;
 use std::env;
 // import own modules
 mod algorithm;
+mod gsva;
 mod stats;
 mod utils;
 // export module fn, struct, trait ...
+use gsva::gsva;
 use stats::{GSEAResult, GSEASummary};
-use utils::{Metric, CorrelType};
-
+use utils::{CorrelType, Metric};
 
 /// Prerank RUST
 /// Arguments:
@@ -168,9 +169,29 @@ fn ssgsea_rs(
     if _nperm > 0 {
         gsea.ss_gsea_permuate(&gene_name, &gene_exp, &gmt, ctype);
     } else {
-        gsea.ss_gsea(&gene_name,  &gene_exp, &gmt, ctype);
+        gsea.ss_gsea(&gene_name, &gene_exp, &gmt, ctype);
     }
     Ok(gsea)
+}
+#[pyfunction]
+fn gsva_rs(
+    gene_name: Vec<String>,
+    gene_expr: Vec<Vec<f64>>,
+    gene_sets: HashMap<String, Vec<String>>,
+    kcdf: bool,
+    rnaseq: bool,
+    mx_diff: bool,
+    abs_rnk: bool,
+    tau: f64,
+    min_size: usize,
+    max_size: usize,
+    threads: usize
+) -> PyResult<GSEAResult> {
+    env::set_var("RAYON_NUM_THREADS", threads.to_string());
+    let gs = gsva(
+        gene_name, gene_expr, gene_sets, kcdf, rnaseq, mx_diff, abs_rnk, tau, min_size, max_size
+    );
+    Ok(gs)
 }
 
 #[pymodule]
@@ -184,5 +205,6 @@ fn gse(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(prerank_rs, m)?)?;
     m.add_function(wrap_pyfunction!(prerank2d_rs, m)?)?;
     m.add_function(wrap_pyfunction!(ssgsea_rs, m)?)?;
+    m.add_function(wrap_pyfunction!(gsva_rs, m)?)?;
     Ok(())
 }
