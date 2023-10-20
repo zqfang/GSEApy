@@ -51,7 +51,7 @@ GSEApy is a Python/Rust implementation for **GSEA** and wrapper for **Enrichr**.
 GSEApy can be used for **RNA-seq, ChIP-seq, Microarray** data. It can be used for convenient GO enrichment and to produce **publication quality figures** in python.
 
 
-GSEApy has six sub-commands available: ``gsea``, ``prerank``, ``ssgsea``, ``replot`` ``enrichr``, ``biomart``.
+GSEApy has 7 sub-commands available: ``gsea``, ``prerank``, ``ssgsea``, ``gsva``, ``replot`` ``enrichr``, ``biomart``.
 
 
 :gsea:    The ``gsea`` module produces `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ results.  The input requries a txt file(FPKM, Expected Counts, TPM, et.al), a cls file, and gene_sets file in gmt format.
@@ -128,8 +128,12 @@ Dependency
 
 Mandatory
 ~~~~~~~~~
+
+build
 * Rust: For gseapy > 0.11.0, Rust compiler is needed
 * setuptools-rust
+
+run
 * Numpy >= 1.13.0
 * Scipy
 * Pandas
@@ -161,6 +165,9 @@ For command line usage:
   # An example to run ssGSEA using gseapy ssgsea module
   $ gseapy ssgsea -d expression.txt -g gene_sets.gmt -o test
 
+  # An example to run ssGSEA using gseapy ssgsea module
+  $ gseapy gsva -d expression.txt -g gene_sets.gmt -o test
+
   # An example to use enrichr api
   # see details for -g input -> ``get_library_name`` 
   $ gseapy enrichr -i gene_list.txt -g KEGG_2016 -o test
@@ -185,6 +192,8 @@ Run gseapy inside python console:
     # run ssGSEA
     gseapy.ssgsea(data="expression.txt", gene_sets= "gene_sets.gmt", outdir='test')
 
+    # run GSVA
+    gseapy.gsva(data="expression.txt", gene_sets= "gene_sets.gmt", outdir='test')
 
     # An example to reproduce figures using replot module.
     gseapy.replot(indir='./Gsea.reports', outdir='test')
@@ -210,7 +219,10 @@ see detail here: `Example <http://gseapy.readthedocs.io/en/master/gseapy_example
     gseapy.prerank(rnk=gene_ranked_dataframe, gene_sets='KEGG_2016', outdir='test')
 
     # using ssGSEA
-    gseapy.ssgsea(data=ssGSEA_dataframe, gene_sets='KEGG_2016', outdir='test')
+    gseapy.ssgsea(data=expression_dataframe, gene_sets='KEGG_2016', outdir='test')
+
+    # using ssGSEA
+    gseapy.gsva(data=expression_dataframe, gene_sets='KEGG_2016', outdir='test')
 
 
 3. For ``enrichr`` , you could assign a list, pd.Series, pd.DataFrame object, or a txt file (should be one gene name per row.)
