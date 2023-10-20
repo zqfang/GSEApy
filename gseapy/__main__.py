@@ -11,7 +11,7 @@ import sys
 # or args = argparser.parse_args() will throw bugs!!!
 
 
-__version__ = "1.0.6"
+__version__ = "1.1.0"
 
 
 def main():
@@ -108,6 +108,24 @@ def main():
         )
         ss.run()
 
+    elif subcommand == "gsva":
+        from .gsva import GSVA
+
+        gv = GSVA(
+            data=args.data,
+            gene_sets=args.gmt,
+            outdir=args.outdir,
+            kcdf=args.kcdf,
+            weight=args.weight,
+            mx_diff=args.mx_diff,
+            abs_rnk=args.abs_rnk,
+            min_size=args.mins,
+            max_size=args.maxs,
+            threads=args.threads,
+            seed=args.seed,
+            verbose=args.verbose,
+        )
+        gv.run()
     elif subcommand == "enrichr":
         # calling enrichr API
         from .enrichr import Enrichr
@@ -170,6 +188,8 @@ def prepare_argparser():
     add_prerank_parser(subparsers)
     # command for 'ssgsea'
     add_singlesample_parser(subparsers)
+    # command for 'gsva'
+    add_gsva_parser(subparsers)
     # command for 'plot'
     add_plot_parser(subparsers)
     # command for 'enrichr'
@@ -246,21 +266,39 @@ def add_output_option(parser):
 def add_output_group(parser, required=True):
     """output group"""
 
-    output_group = parser.add_mutually_exclusive_group(required=required)
-    output_group.add_argument(
+    # output_group = parser.add_mutually_exclusive_group(required=required)
+    # output_group.add_argument(
+    #     "-o",
+    #     "--ofile",
+    #     dest="ofile",
+    #     type=str,
+    #     default="GSEApy_reports",
+    #     help="Output file name. Mutually exclusive with --o-prefix.",
+    # )
+    # output_group.add_argument(
+    #     "--o-prefix",
+    #     dest="ofile",
+    #     type=str,
+    #     default="GSEApy_reports",
+    #     help="Output file prefix. Mutually exclusive with -o/--ofile.",
+    # )
+    parser.add_argument(
         "-o",
-        "--ofile",
-        dest="ofile",
+        "--outdir",
+        dest="outdir",
         type=str,
         default="GSEApy_reports",
-        help="Output file name. Mutually exclusive with --o-prefix.",
+        metavar="",
+        action="store",
+        help="The GSEApy output directory. Default: the current working directory",
     )
-    output_group.add_argument(
-        "--o-prefix",
-        dest="ofile",
-        type=str,
-        default="GSEApy_reports",
-        help="Output file prefix. Mutually exclusive with -o/--ofile.",
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        default=False,
+        dest="verbose",
+        help="Increase output verbosity, print out progress of your job",
     )
 
 
@@ -626,7 +664,7 @@ def add_singlesample_parser(subparsers):
         dest="weight",
         default=0.25,
         type=float,
-        metavar="weight",
+        metavar="float",
         help="Weighted_score of rank_metrics. For weighting input genes. Default: 0.25",
     )
     group_opt.add_argument(
@@ -655,6 +693,120 @@ def add_singlesample_parser(subparsers):
         type=int,
         default=4,
         metavar="procs",
+        help="Number of Processes you are going to use. Default: 4",
+    )
+
+    return
+
+
+def add_gsva_parser(subparsers):
+    """Add function 'GSVA' argument parsers."""
+
+    argparser_gsva = subparsers.add_parser("gsva", help="Run GSVA.")
+
+    # group for input files
+    group_input = argparser_gsva.add_argument_group("Input files arguments")
+    group_input.add_argument(
+        "-d",
+        "--data",
+        dest="data",
+        action="store",
+        type=str,
+        required=True,
+        help="Input gene expression dataset file in txt format. Same with GSEA.",
+    )
+    group_input.add_argument(
+        "-g",
+        "--gmt",
+        dest="gmt",
+        action="store",
+        type=str,
+        required=True,
+        help="Gene set database in GMT format. Same with GSEA.",
+    )
+    # group for output files
+    group_output = argparser_gsva.add_argument_group("Output arguments")
+    # add_output_option(group_output)
+    add_output_group(group_output)
+    # group for General options.
+    group_opt = argparser_gsva.add_argument_group("GSVA advanced arguments")
+    group_opt.add_argument(
+        "-m",
+        "--mx-diff",
+        dest="mx_diff",
+        action="store_false",
+        default=True,
+        help="When set, ES is calculated as the maximum distance of the random walk from 0. Default: False"
+              "Default: False",
+    )
+
+    group_opt.add_argument(
+        "-k",
+        "--kernel-cdf",
+        dest="kcdf",
+        action="store",
+        type=str,
+        default="Gaussian",
+        metavar="",
+        choices=("Gaussian", "Poisson", "None"),
+        help="Gaussian is suitable when input expression values are continuous. " +\
+             "If input integer counts, then this argument should be set to 'Poisson'",
+    )
+
+    group_opt.add_argument(
+        "-a",
+        "--abs-ranking",
+        action="store_true",
+        dest="abs_rnk",
+        default=False,
+        help="Flag used only when --mx-diff is not set. When set, the original Kuiper statistic is used",
+    )
+    group_opt.add_argument(
+        "--min-size",
+        dest="mins",
+        action="store",
+        type=int,
+        default=15,
+        metavar="int",
+        help="Min size of input genes presented in Gene Sets. Default: 15",
+    )
+    group_opt.add_argument(
+        "--max-size",
+        dest="maxs",
+        action="store",
+        type=int,
+        default=2000,
+        metavar="int",
+        help="Max size of input genes presented in Gene Sets. Default: 2000",
+    )
+    group_opt.add_argument(
+        "-w",
+        "--weight",
+        action="store",
+        dest="weight",
+        default=1,
+        type=float,
+        metavar="float",
+        help="tau in the random walk performed by the gsva. Default: 1",
+    )
+    group_opt.add_argument(
+        "-s",
+        "--seed",
+        dest="seed",
+        action="store",
+        type=int,
+        default=123,
+        metavar="",
+        help="Number of random seed. Default: 123",
+    )
+    group_opt.add_argument(
+        "-p",
+        "--threads",
+        dest="threads",
+        action="store",
+        type=int,
+        default=4,
+        metavar="int",
         help="Number of Processes you are going to use. Default: 4",
     )
 

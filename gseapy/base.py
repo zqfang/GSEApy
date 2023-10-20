@@ -601,13 +601,15 @@ class GSEAbase(object):
                 "Gene %",
                 "Lead_genes",
             ]
-        res_df.drop(dc, axis=1, inplace=True)
+        if self.module == "gsva":
+            dc += ["NES"]
         # re-order by NES
         # for pandas > 1.1, use df.sort_values(by='B', key=abs) will sort by abs value
         self.res2d = res_df.reindex(
             res_df["NES"].abs().sort_values(ascending=False).index
         ).reset_index(drop=True)
-
+        res_df.drop(dc, axis=1, inplace=True)
+        
         if self._outdir is not None:
             out = os.path.join(
                 self.outdir,

@@ -53,6 +53,7 @@ impl GSVA {
         }
     }
     /// default: precomputed_resolution 10000, max_precompute: 10
+    /// default: precomputed_resolution 10000, max_precompute: 10
     fn init_cdfs(&self, pre_res: usize, max_pre: usize) -> Vec<f64> {
         /// https://github.com/rcastelo/GSVA/blob/devel/src/kernel_estimation.c, line 123
         let norm = Normal::new(0.0, 1.0).unwrap();
@@ -62,6 +63,7 @@ impl GSVA {
             .into_iter()
             .map(|i| norm.cdf(((i * max_pre) as f64) / divisor))
             .collect();
+        // println!("{:?}", &res);
         return res;
     }
 
@@ -85,14 +87,14 @@ impl GSVA {
         }
     }
     /// row: input are gene values of all samples.
-    fn apply_ecdf(&self, row: Vec<f64>) -> Vec<f64> {
-        let mut x0 = row.clone();
+    fn apply_ecdf(&self, row: &[f64]) -> Vec<f64> {
+        let mut x0 = row.to_vec();
         let n = row.len() as f64;
         // To speedup, sort f64 in acending order in place, then do a binary search
         x0.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap()); // if descending -> b.partial_cmp(a)
-                                                               // binary_search assumes that the elements are sorted in less-to-greater order.
-                                                               // partition_point return the index of the first element of the second partition)
-                                                               // since partition_point is just a wrapper of self.binary_search_by(|x| if pred(x) { Less } else { Greater }).unwrap_or_else(|i| i)
+        // binary_search assumes that the elements are sorted in less-to-greater order.
+        // partition_point return the index of the first element of the second partition)
+        // since partition_point is just a wrapper of self.binary_search_by(|x| if pred(x) { Less } else { Greater }).unwrap_or_else(|i| i)
         row.iter()
             .map(|v| ((x0.partition_point(|x| x < v)) as f64) / n)
             // .map(|v| (v / (1.0 -v)).ln()) // // https://github.com/rcastelo/GSVA/blob/devel/R/gsva.R, line 820
@@ -102,10 +104,8 @@ impl GSVA {
     /// apply ecdf on th columns (genes)
     /// mat [n_samples, n_genes]
     fn mat_ecdf(&self, mat: &[Vec<f64>]) -> Vec<Vec<f64>> {
-        let mat2: Vec<Vec<f64>> = transpose(mat);
-        let mat3: Vec<Vec<f64>> = mat2.into_iter().map(|v| self.apply_ecdf(v)).collect();
-        let mat4: Vec<Vec<f64>> = transpose(&mat3);
-        return mat4;
+        let mat3: Vec<Vec<f64>> = mat.into_iter().map(|v| self.apply_ecdf(v)).collect();
+        return mat3;
     }
 
     fn row_d(&self, x: &[f64], y: &[f64], pre_cdf: &[f64]) -> Vec<f64> {
@@ -131,18 +131,24 @@ impl GSVA {
             left_tail = left_tail / (size as f64);
             row[j] = -1.0 * ((1.0 - left_tail) / left_tail).ln();
         }
+        // println!("s1 {:?}, s2 {:?}, row: {:?}", x.len(), y.len(), &row);
         return row;
     }
-    ///
+    /// mat_density [n_genes, n_samples] 
+    /// return  gene_density matrix [n_genes, n_samples] 
     fn mat_d(&self, mat_density: &[Vec<f64>], pre_cdf: &[f64]) -> Vec<Vec<f64>> {
         // let D = vec![vec![0;mat[0].lend()]; mat.len()];
         mat_density
-            .par_iter()
-            .map(|vv| self.row_d(vv, vv, pre_cdf))
+            .par_iter().enumerate()
+            .map(|(i, vv)| 
+                
+                {   // print!("gene idx: {:?}", i);
+                    self.row_d(vv, vv, pre_cdf)})
             .collect()
     }
 
-    /// mat: [n_samples, n_genes]
+    /// mat: [n_genes, n_samples]
+    /// return gene_density matrix [n_genes, n_samples]
     pub fn compute_density(&self, mat: &[Vec<f64>]) -> Vec<Vec<f64>> {
         if self.kcdf {
             let pre_cdf = self.init_cdfs(self.pre_res, self.max_pre);
@@ -151,7 +157,7 @@ impl GSVA {
         }
         return self.mat_ecdf(mat);
     }
-
+    /// mat [n_samples, n_genes]
     pub fn compute_rank_score(&self, mat: &[Vec<f64>]) -> (Vec<Vec<f64>>, Vec<Vec<usize>>) {
         let n = mat[0].len();
         let rev_idx: Vec<f64> = (1..=n)
@@ -159,6 +165,7 @@ impl GSVA {
             .rev()
             .map(|v| ((v as f64) - (n as f64) / 2.0).abs())
             .collect();
+        // println!("{:?}", &rev_idx);
         let mut idxs: Vec<Vec<usize>> = vec![vec![0; n]; mat.len()];
         let mut mat2: Vec<Vec<f64>> = vec![vec![0.0; n]; mat.len()];
         // https://github.com/rcastelo/GSVA/blob/devel/R/gsva.R, line 865-874
@@ -171,19 +178,10 @@ impl GSVA {
             idxs[i].iter().enumerate().for_each(|(ii, &j)| {
                 tmp[j] = rev_idx[ii];
             });
+            // println!("row index {:?}, {:?}", i, tmp);
             // get rank score
             mat2[i] = tmp;
         }
-        // mat.par_iter().enumerate().for_each(move |(i, v)| {
-        //     idxs[i] = v.as_slice().argsort(false).0;
-        //     // get rank score, put it in original order
-        //     let mut tmp: Vec<f64> = vec![0.0; n];
-        //     // R code: tmp[sort_idx_vec] <- abs(seq(from=num_genes,to=1) - num_genes/2)
-        //     idxs[i].iter().enumerate().for_each(|(ii, &j)| { tmp[j] = rev_idx[ii];});
-        //     // get rank score
-        //     mat2[i] = tmp;
-
-        // });
         (mat2, idxs)
     }
 
@@ -249,8 +247,8 @@ impl GSVA {
             geneset_mask[*i] = 1;
         });
         // let dec = 1.0 / ((n_genes - n_geneset) as f64);
-        d.iter()
-            .zip(sidxs.iter())
+        d.par_iter()
+            .zip(sidxs.par_iter())
             .map(|(vv, idx)| self.ks_sample(vv, idx, &geneset_mask, fset))
             .collect()
     }
@@ -284,21 +282,13 @@ pub fn gsva(
     // rng = default_rng(seed=seed)
     // idx = np.arange(m.shape[1])
     // rng.shuffle(idx)
-
-    // transpose [m_gene, n_sample] --> [n_sample, m_gene]
-    let mut gene_metric: Vec<Vec<f64>> = vec![vec![]; gene_expr[0].len()];
-    gene_expr.iter().for_each(|row| {
-        row.iter().enumerate().for_each(|(j, e)| {
-            gene_metric[j].push(*e);
-        });
-    });
-
     let es = GSVA::new(&gene_name, kcdf, tau, mx_diff, abs_rnk, rnaseq);
     // run pipeline
     // compute density
-    let mat = es.compute_density(&gene_metric);
+    let mat = es.compute_density(&gene_expr);
+    let mat_density = transpose(&mat);
     // compute rank score
-    let (mat_score, sort_idxs) = es.compute_rank_score(&mat);
+    let (mat_score, sort_idxs) = es.compute_rank_score(&mat_density);
 
     // compute es
     // let mut gmt = HashMap::<&str, Vec<usize>>::new();
@@ -348,9 +338,9 @@ mod tests {
     fn test_run_gsva() {
         let mut gene_name: Vec<String> = Vec::new();
         let mut gct = FileReader::new();
-        let _ = gct.read_csv("data/expr.gsva.csv", b',', true, Some(b'#'));
+        let _ = gct.read_csv("tests/data/expr.gsva.csv", b',', true, Some(b'#'));
         let mut gmt = FileReader::new();
-        let _ = gmt.read_table("data/geneset.gsva.gmt", '\t', false);
+        let _ = gmt.read_table("tests/data/geneset.gsva.gmt", '\t', false);
 
         let mut gene_exp: Vec<Vec<f64>> = Vec::new();
         for r in gct.record.iter() {
@@ -366,16 +356,15 @@ mod tests {
             gene_sets.insert(r[0].to_string(), r[2..].to_vec());
         });
         let sample_names = &gct.header.get_vec()[1..];
-        let expr = transpose(&gene_exp);
+        //let expr = transpose(&gene_exp);
         println!("{:?}", sample_names);
         let gsumm = gsva(
-            gene_name, expr, gene_sets, true, false, true, false, 1.0, 1, 1000, 1, 1,
-        );
+            gene_name, gene_exp, gene_sets, true, false, true, false, 1.0, 1, 1000);
         let file = File::create("data/gsva.rs.out").expect("Cannot write filename");
         let mut wrt = csv::WriterBuilder::new().delimiter(b'\t').from_writer(file);
         let _ = wrt.write_record(gct.header.get_vec().iter());
         let mut record = Vec::<String>::new();
-        for (i, g) in gsumm.iter().enumerate() {
+        for (i, g) in gsumm.summaries.iter().enumerate() {
             if g.index.unwrap() == 0 {
                 if !record.is_empty() {
                     let _ = wrt.write_record(&record);

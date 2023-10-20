@@ -2,7 +2,7 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory, mkdtemp
 
 import pytest
 
-from gseapy.__init__ import enrich, enrichr, gsea, prerank, replot, ssgsea
+from gseapy.__init__ import enrich, enrichr, gsea, prerank, replot, ssgsea, gsva
 
 
 @pytest.fixture
@@ -43,6 +43,16 @@ def ssGMT():
 @pytest.fixture
 def ssGCT():
     return "tests/extdata/Leukemia_hgu95av2.trim.txt"
+
+
+@pytest.fixture
+def gsvaExpr():
+    return "tests/data/expr.gsva.csv"
+
+
+@pytest.fixture
+def gsvaGMT():
+    return "tests/data/geneset.gsva.gmt"
 
 
 def test_gsea(gseaGCT, gseaCLS, geneGMT):
@@ -106,6 +116,18 @@ def test_ssgsea2(ssGCT, geneGMT):
     tmpdir.cleanup()
     ssgsea(ssGCT, geneGMT, None, permutation_num=0, correl_norm_type="symrank")
     ssgsea(ssGCT, geneGMT, None, permutation_num=0, correl_norm_type="zscore")
+
+
+def test_gsva(gsvaExpr, gsvaGMT):
+    # Only tests of the command runs successfully,
+    # doesnt't check the image
+    tmpdir = TemporaryDirectory(dir="tests")
+    gsva(
+        gsvaExpr,
+        gsvaGMT,
+        tmpdir.name,
+    )
+    tmpdir.cleanup()
 
 
 def test_enrichr(genelist, geneGMT):

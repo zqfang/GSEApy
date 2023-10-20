@@ -1,4 +1,3 @@
-import os
 import warnings
 from typing import AnyStr, Dict, Iterable, List, Optional, Tuple, Union
 
@@ -8,6 +7,7 @@ from .__main__ import __version__
 from .biomart import Biomart
 from .enrichr import Enrichr
 from .gsea import GSEA, Prerank, Replot, SingleSampleGSEA
+from .gsva import GSVA
 from .msigdb import Msigdb
 from .parser import get_library, get_library_name, read_gmt
 from .plot import barplot, dotplot, enrichment_map, gseaplot, gseaplot2, heatmap
@@ -629,6 +629,69 @@ def enrich(
     return enr
 
 
+def gsva(
+    data: Union[pd.DataFrame, pd.Series, str],
+    gene_sets: Union[List[str], str, Dict[str, str]],
+    outdir: Optional[str] = None,
+    kcdf: Optional[str] = "Gaussian",
+    weighted_score_type: float = 0.25,
+    mx_diff: bool = True,
+    abs_rnk: bool = False,
+    min_size: int = 15,
+    max_size: int = 1000,
+    threads: int = 1,
+    seed: int = 123,
+    verbose: bool = False,
+    **kwargs,
+):
+    """Run Gene Set Enrichment Analysis with single sample GSEA tool
+
+    :param data: Expression table, pd.Series, pd.DataFrame, GCT file
+
+    :param gene_sets: Enrichr Library name or .gmt gene sets file or dict of gene sets. Same input with GSEA.
+
+    :param outdir: Results output directory. If None, nothing will write to disk.
+
+    :param str kcdf: "Gaussian", "Possion" or None.
+
+    :param str weighted_score_type: tau of gsva. Default: 1.
+
+    :param bool mx_diff: Offers two approaches to calculate the enrichment statistic (ES) from the KS random walk statistic. see GSVA doc
+
+    :param bool abs_rnk: Flag used only when mx_diff=True. see GSVA doc: https://rdrr.io/bioc/GSVA/man/gsva.html
+
+    :param int min_size: Minimum allowed number of genes from gene set also the data set. Default: 15.
+
+    :param int max_size: Maximum allowed number of genes from gene set also the data set. Default: 1000.
+
+
+    :param int threads: Number of threads you are going to use. Default: 4.
+
+    :param seed: Random seed. expect an integer. Default:None.
+
+    :param bool verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
+
+    :return: Return a GSVA obj.
+             All results can be accessed by obj.results or obj.res2d.
+    """
+    gv = GSVA(
+        data=data,
+        gene_sets=gene_sets,
+        outdir=outdir,
+        kcdf=kcdf,
+        weight=weighted_score_type,
+        mx_diff=mx_diff,
+        abs_rnk=abs_rnk,
+        min_size=min_size,
+        max_size=max_size,
+        threads=threads,
+        seed=seed,
+        verbose=verbose,
+    )
+    gv.run()
+    return gv
+
+
 __all__ = [
     "dotplot",
     "barplot",
@@ -639,12 +702,14 @@ __all__ = [
     "replot",
     "prerank",
     "gsea",
+    "gsva",
     "ssgsea",
     "enrichr",
     "enrich",
     "Replot",
     "Prerank",
     "GSEA",
+    "GSVA",
     "SingleSampleGSEA",
     "Enrichr",
     "Biomart",
