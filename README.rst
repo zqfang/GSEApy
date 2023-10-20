@@ -130,10 +130,12 @@ Mandatory
 ~~~~~~~~~
 
 build
+
 * Rust: For gseapy > 0.11.0, Rust compiler is needed
 * setuptools-rust
 
 run
+
 * Numpy >= 1.13.0
 * Scipy
 * Pandas
