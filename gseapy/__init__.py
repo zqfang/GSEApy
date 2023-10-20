@@ -652,13 +652,23 @@ def gsva(
 
     :param outdir: Results output directory. If None, nothing will write to disk.
 
-    :param str kcdf: "Gaussian", "Possion" or None.
+    :param str kcdf: "Gaussian", "Possion" or None. 
+                     The non-parametric estimation of the cumulative distribution function
 
     :param str weighted_score_type: tau of gsva. Default: 1.
 
-    :param bool mx_diff: Offers two approaches to calculate the enrichment statistic (ES) from the KS random walk statistic. see GSVA doc
+    :param bool mx_diff: Offers two approaches to calculate the enrichment statistic (ES) from the KS random walk statistic. 
+                         If True (default), ES is calculated as the difference 
+                         between the maximum positive and negative random walk deviations. 
+                         If False, ES is calculated as the maximum positive to 0.
 
-    :param bool abs_rnk: Flag used only when mx_diff=True. see GSVA doc: https://rdrr.io/bioc/GSVA/man/gsva.html
+    :param bool abs_rnk: Flag used only when mx_diff=True. 
+                         If False (default), the enrichment statistic (ES) is calculated taking the magnitude difference 
+                         between the largest positive and negative random walk deviations. 
+                         If True, feature sets with features enriched on either extreme (high or low) 
+                         will be regarded as 'highly' activated.
+    
+    see GSVA doc: https://rdrr.io/bioc/GSVA/man/gsva.html
 
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Default: 15.
 

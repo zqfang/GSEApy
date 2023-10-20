@@ -122,11 +122,9 @@ def test_gsva(gsvaExpr, gsvaGMT):
     # Only tests of the command runs successfully,
     # doesnt't check the image
     tmpdir = TemporaryDirectory(dir="tests")
-    gsva(
-        gsvaExpr,
-        gsvaGMT,
-        tmpdir.name,
-    )
+    gsva(gsvaExpr, gsvaGMT, tmpdir.name, kcdf="Gaussian")
+    gsva(gsvaExpr, gsvaGMT, tmpdir.name, kcdf="Poisson")
+    gsva(gsvaExpr, gsvaGMT, tmpdir.name, kcdf=None)
     tmpdir.cleanup()
 
 

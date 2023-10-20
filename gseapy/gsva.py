@@ -124,6 +124,16 @@ class GSVA(GSEAbase):
         self._logger.info("Parsing data files for GSVA.............................")
         # load data
         df = self.load_data()
+        if self.rnaseq:
+            self._logger.debug(
+                "Poisson kernel selected. round input values to intergers!"
+            )
+            df = df.astype(int)
+            self._logger.debug(
+                "Poisson kernel selected. convert negative values to 0 !"
+            )
+            df = df.clip(lower=0)
+
         self.data = df
         # normalized samples, and rank
         # filtering out gene sets and build gene sets dictionary

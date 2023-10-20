@@ -121,9 +121,10 @@ impl GSVA {
             for i in 0..x.len() {
                 if self.rnaseq {
                     // ppois(y[j], x[i]+bw, TRUE, FALSE):
-                    // this function returns the value of the inverse Poisson cumulative density function
+                    // this function returns the value of the Poisson cumulative density function
+                    // NOTE: input has to be intergers
                     let pois = Poisson::new(x[i] + bw).unwrap();
-                    left_tail += pois.inverse_cdf(y[j]) as f64;
+                    left_tail += pois.cdf(y[j] as u64) as f64;
                 } else {
                     left_tail += self.precomputed_cdfs(y[j] - x[i], bw, pre_cdf);
                 }
