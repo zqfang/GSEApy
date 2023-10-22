@@ -325,6 +325,7 @@ pub fn gsva(
     let mut gsea = GSEAResult::new(tau, max_size, min_size, 0, 0);
     gsea.summaries = summ;
     gsea.indices = sort_idxs;
+    gsea.rankings = mat_score;
     return gsea;
 
 }

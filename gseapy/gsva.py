@@ -158,5 +158,5 @@ class GSVA(GSEAbase):
             self._threads,
         )
         self.to_df(gsum.summaries, gmt, df, gsum.indices)
-        self.ranking = gsum.indices
+        self.ranking = [rnk[ind] for rnk, ind in zip(gsum.rankings, gsum.indices)]
         self._logger.info("Done")
