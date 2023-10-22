@@ -47,10 +47,10 @@ class GSVA(GSEAbase):
         self.ranking = None
         self.permutation_num = 0
         self._noplot = True
-        if kcdf == "Gaussian":
+        if kcdf in ["Gaussian", "gaussian"]:
             self.kernel = True
             self.rnaseq = False
-        elif kcdf == "Poisson":
+        elif kcdf in ["Poisson", "poisson"]:
             self.kernel = True
             self.rnaseq = True
         else:
@@ -106,15 +106,16 @@ class GSVA(GSEAbase):
             rank_metric = rank_metric.select_dtypes(include=[np.number])
         else:
             raise Exception("Error parsing gene ranking values!")
-        if rank_metric.index.duplicated().sum() > 0:
-            self._logger.warning(
-                "Dropping duplicated gene names, values averaged by gene names!"
-            )
-            rank_metric = rank_metric.loc[rank_metric.index.dropna()]
-            rank_metric = rank_metric.groupby(level=0).mean()
+
         if rank_metric.isnull().any().sum() > 0:
             self._logger.warning("Input data contains NA, filled NA with 0")
             rank_metric = rank_metric.fillna(0)
+
+        if rank_metric.index.duplicated().sum() > 0:
+            self._logger.warning(
+                "Found duplicated gene names, values averaged by gene names!"
+            )
+            rank_metric = rank_metric.groupby(level=0).mean()
 
         return rank_metric
 
@@ -125,13 +126,7 @@ class GSVA(GSEAbase):
         # load data
         df = self.load_data()
         if self.rnaseq:
-            self._logger.debug(
-                "Poisson kernel selected. round input values to intergers!"
-            )
-            df = df.astype(int)
-            self._logger.debug(
-                "Poisson kernel selected. convert negative values to 0 !"
-            )
+            self._logger.info("Poisson kernel selected. Clip negative values to 0 !")
             df = df.clip(lower=0)
 
         self.data = df

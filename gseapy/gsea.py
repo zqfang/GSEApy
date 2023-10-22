@@ -97,13 +97,6 @@ class GSEA(GSEAbase):
         else:
             raise Exception("Error parsing gene expression DataFrame!")
 
-        # drop duplicated gene names
-        if exprs.iloc[:, 0].duplicated().sum() > 0:
-            self._logger.warning(
-                "Dropping duplicated gene names, only keep the first values"
-            )
-            # drop duplicate gene_names.
-            exprs.drop_duplicates(subset=exprs.columns[0], inplace=True)
         if exprs.isnull().any().sum() > 0:
             self._logger.warning("Input data contains NA, filled NA with 0")
             exprs.dropna(how="all", inplace=True)  # drop rows with all NAs
@@ -112,6 +105,12 @@ class GSEA(GSEAbase):
         exprs.set_index(keys=exprs.columns[0], inplace=True)
         # select numberic columns
         df = exprs.select_dtypes(include=[np.number])
+
+        if exprs.index.duplicated().sum() > 0:
+            self._logger.warning(
+                "Found duplicated gene names, values averaged by gene names!"
+            )
+            exprs = exprs.groupby(level=0).mean()
 
         # in case the description column is numeric
         if len(cls_vec) == (df.shape[1] - 1):
@@ -581,16 +580,16 @@ class SingleSampleGSEA(GSEAbase):
             rank_metric = rank_metric.select_dtypes(include=[np.number])
         else:
             raise Exception("Error parsing gene ranking values!")
-        if rank_metric.index.duplicated().sum() > 0:
-            self._logger.warning(
-                "Dropping duplicated gene names, values averaged by gene names!"
-            )
-            rank_metric = rank_metric.loc[rank_metric.index.dropna()]
-            rank_metric = rank_metric.groupby(level=0).mean()
+
         if rank_metric.isnull().any().sum() > 0:
             self._logger.warning("Input data contains NA, filled NA with 0")
             rank_metric = rank_metric.fillna(0)
 
+        if rank_metric.index.duplicated().sum() > 0:
+            self._logger.warning(
+                "Found duplicated gene names, values averaged by gene names!"
+            )
+            rank_metric = rank_metric.groupby(level=0).mean()
         return rank_metric
 
     def norm_samples(self, dat: pd.DataFrame) -> pd.DataFrame:
@@ -677,7 +676,6 @@ class SingleSampleGSEA(GSEAbase):
         )
         self.to_df(gsum.summaries, gmt, df, gsum.indices)
         return
-
 
 
 class Replot(GSEAbase):

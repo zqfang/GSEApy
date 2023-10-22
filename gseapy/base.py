@@ -164,9 +164,8 @@ class GSEAbase(object):
         if rank_metric.select_dtypes(np.number).shape[1] > 1:
             return rank_metric
         # sort ranking values from high to low
-        rank_metric.sort_values(
-            by=rank_metric.columns[1], ascending=self.ascending, inplace=True
-        )
+        rnk_cols = rank_metric.columns
+        rank_metric.sort_values(by=rnk_cols[1], ascending=self.ascending, inplace=True)
         # drop na values
         if rank_metric.isnull().any(axis=1).sum() > 0:
             self._logger.warning(
@@ -177,16 +176,23 @@ class GSEAbase(object):
             self._logger.debug("NAs list:\n" + NAs.to_string())
             rank_metric.dropna(how="any", inplace=True)
         # drop duplicate IDs, keep the first
-        if rank_metric.duplicated(subset=rank_metric.columns[0]).sum() > 0:
-            self._logger.warning(
-                "Input gene rankings contains duplicated IDs, Only use the duplicated ID with highest value!"
+        if rank_metric.duplicated(subset=rnk_cols[0]).sum() > 0:
+            self._logger.info("Input gene rankings contains duplicated IDs")
+            mask = rank_metric.duplicated(subset=rnk_cols[0]).duplicated(keep=False)
+            dups = (
+                rank_metric[mask]
+                .groupby(rnk_cols[0])
+                .cumcount()
+                .map(lambda c: "_" + str(c) if c else "")
             )
-            # print out duplicated IDs.
-            dups = rank_metric[rank_metric.duplicated(subset=rank_metric.columns[0])]
-            self._logger.debug("Dups list:\n" + dups.to_string())
-            rank_metric.drop_duplicates(
-                subset=rank_metric.columns[0], inplace=True, keep="first"
+            rank_metric.loc[mask, rnk_cols[0]] = (
+                rank_metric.loc[mask, rnk_cols[0]] + dups
             )
+            # dups = rank_metric[rank_metric.duplicated(subset=rnk_cols[0])]
+            # self._logger.debug("Dups list:\n" + dups.to_string())
+            # rank_metric.drop_duplicates(
+            #     subset=rank_metric.columns[0], inplace=True, keep="first"
+            # )
         # reset ranking index, because you have sort values and drop duplicates.
         rank_metric.reset_index(drop=True, inplace=True)
         rank_metric.columns = ["gene_name", "prerank"]
@@ -609,7 +615,7 @@ class GSEAbase(object):
             res_df["NES"].abs().sort_values(ascending=False).index
         ).reset_index(drop=True)
         res_df.drop(dc, axis=1, inplace=True)
-        
+
         if self._outdir is not None:
             out = os.path.join(
                 self.outdir,
@@ -751,7 +757,7 @@ class GSEAbase(object):
         ofname: savefig
         """
         # if hasattr(self, "results"):
-        if self.module == "ssgsea":
+        if self.module in ["ssgsea", "gsva"]:
             raise NotImplementedError("not for ssgsea")
         keys = list(self._results.keys())
         if len(keys) > 1:
