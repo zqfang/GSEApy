@@ -121,14 +121,25 @@ class GSVA(GSEAbase):
 
     def run(self):
         """run entry"""
+        assert self.min_size <= self.max_size
+        if self._outdir:
+            mkdirs(self.outdir)
 
         self._logger.info("Parsing data files for GSVA.............................")
         # load data
         df = self.load_data()
-        if self.rnaseq:
-            self._logger.info("Poisson kernel selected. Clip negative values to 0 !")
-            df = df.clip(lower=0)
-
+        # kernel
+        if self.kernel:
+            if self.rnaseq:
+                self._logger.info(
+                    "Estimating ECDFs with Poisson kernels. Clip negative values to 0 !"
+                )
+                df = df.clip(lower=0)
+            else:
+                self._logger.info("Estimating ECDFs with Gaussian kernels.")
+        else:
+            self._logger.info("Estimating ECDFs with directly.")
+        # save data
         self.data = df
         # normalized samples, and rank
         # filtering out gene sets and build gene sets dictionary
@@ -139,11 +150,7 @@ class GSVA(GSEAbase):
         )
         # start analysis
         self._logger.info("Start to run GSVA...Might take a while................")
-
-        assert self.min_size <= self.max_size
-        if self._outdir:
-            mkdirs(self.outdir)
-
+        # run
         gsum = gsva_rs(
             df.index.values.tolist(),
             df.values.tolist(),
@@ -158,5 +165,5 @@ class GSVA(GSEAbase):
             self._threads,
         )
         self.to_df(gsum.summaries, gmt, df, gsum.indices)
-        self.ranking = [rnk[ind] for rnk, ind in zip(gsum.rankings, gsum.indices)]
+        self.ranking = gsum.rankings
         self._logger.info("Done")

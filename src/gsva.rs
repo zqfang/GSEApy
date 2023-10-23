@@ -1,7 +1,7 @@
 #![allow(dead_code, unused)]
 
+use crate::stats::{GSEAResult, GSEASummary};
 use crate::utils::{DynamicEnum, Statistic};
-use crate::stats::{GSEASummary, GSEAResult};
 use rayon::prelude::*;
 use statrs::distribution::{ContinuousCDF, DiscreteCDF, Normal, Poisson};
 use std::collections::HashMap;
@@ -87,17 +87,19 @@ impl GSVA {
         }
     }
     /// row: input are gene values of all samples.
+    /// The empirical CDF is usually formally defined as
+    /// CDF(x) = "number of samples <= x" / "number of samples"
     fn apply_ecdf(&self, row: &[f64]) -> Vec<f64> {
         let mut x0 = row.to_vec();
         let n = row.len() as f64;
         // To speedup, sort f64 in acending order in place, then do a binary search
         x0.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap()); // if descending -> b.partial_cmp(a)
-        // binary_search assumes that the elements are sorted in less-to-greater order.
-        // partition_point return the index of the first element of the second partition)
-        // since partition_point is just a wrapper of self.binary_search_by(|x| if pred(x) { Less } else { Greater }).unwrap_or_else(|i| i)
+                                                               // binary_search assumes that the elements are sorted in less-to-greater order.
+                                                               // partition_point return the index of the first element of the second partition)
+                                                               // since partition_point is just a wrapper of self.binary_search_by(|x| if pred(x) { Less } else { Greater }).unwrap_or_else(|i| i)
         row.iter()
-            .map(|v| ((x0.partition_point(|x| x < v)) as f64) / n)
-            // .map(|v| (v / (1.0 -v)).ln()) // // https://github.com/rcastelo/GSVA/blob/devel/R/gsva.R, line 820
+            .map(|v| ((x0.partition_point(|x| x <= v)) as f64) / n)
+            .map(|v| (v / (1.0 - v)).ln()) // https://github.com/rcastelo/GSVA/blob/devel/R/gsva.R, line 820
             .collect()
     }
 
@@ -135,16 +137,17 @@ impl GSVA {
         // println!("s1 {:?}, s2 {:?}, row: {:?}", x.len(), y.len(), &row);
         return row;
     }
-    /// mat_density [n_genes, n_samples] 
-    /// return  gene_density matrix [n_genes, n_samples] 
+    /// mat_density [n_genes, n_samples]
+    /// return  gene_density matrix [n_genes, n_samples]
     fn mat_d(&self, mat_density: &[Vec<f64>], pre_cdf: &[f64]) -> Vec<Vec<f64>> {
         // let D = vec![vec![0;mat[0].lend()]; mat.len()];
         mat_density
-            .par_iter().enumerate()
-            .map(|(i, vv)| 
-                
-                {   // print!("gene idx: {:?}", i);
-                    self.row_d(vv, vv, pre_cdf)})
+            .par_iter()
+            .enumerate()
+            .map(|(i, vv)| {
+                // print!("gene idx: {:?}", i);
+                self.row_d(vv, vv, pre_cdf)
+            })
             .collect()
     }
 
@@ -277,7 +280,7 @@ pub fn gsva(
     abs_rnk: bool,
     tau: f64,
     min_size: usize,
-    max_size: usize
+    max_size: usize,
 ) -> GSEAResult {
     // # Randomize feature order to break ties randomly
     // rng = default_rng(seed=seed)
@@ -327,7 +330,6 @@ pub fn gsva(
     gsea.indices = sort_idxs;
     gsea.rankings = mat_score;
     return gsea;
-
 }
 
 mod tests {
@@ -361,8 +363,9 @@ mod tests {
         //let expr = transpose(&gene_exp);
         println!("{:?}", sample_names);
         let gsumm = gsva(
-            gene_name, gene_exp, gene_sets, true, false, true, false, 1.0, 1, 1000);
-        let file = File::create("data/gsva.rs.out").expect("Cannot write filename");
+            gene_name, gene_exp, gene_sets, true, false, true, false, 1.0, 1, 1000,
+        );
+        let file = File::create("tests/data/gsva.rs.out").expect("Cannot write filename");
         let mut wrt = csv::WriterBuilder::new().delimiter(b'\t').from_writer(file);
         let _ = wrt.write_record(gct.header.get_vec().iter());
         let mut record = Vec::<String>::new();

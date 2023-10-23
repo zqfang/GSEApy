@@ -614,7 +614,7 @@ class GSEAbase(object):
         self.res2d = res_df.reindex(
             res_df["NES"].abs().sort_values(ascending=False).index
         ).reset_index(drop=True)
-        res_df.drop(dc, axis=1, inplace=True)
+        self.res2d.drop(dc, axis=1, inplace=True)
 
         if self._outdir is not None:
             out = os.path.join(

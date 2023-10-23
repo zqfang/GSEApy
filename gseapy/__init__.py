@@ -21,7 +21,7 @@ def gsea(
     min_size: int = 15,
     max_size: int = 500,
     permutation_num: int = 1000,
-    weighted_score_type: float = 1.0,
+    weight: float = 1.0,
     permutation_type: str = "phenotype",
     method: str = "signal_to_noise",
     ascending: bool = False,
@@ -32,8 +32,8 @@ def gsea(
     no_plot: bool = False,
     seed: int = 123,
     verbose: bool = False,
-    *arg,
-    **kwarg,
+    *args,
+    **kwargs,
 ) -> GSEA:
     """Run Gene Set Enrichment Analysis.
 
@@ -55,7 +55,7 @@ def gsea(
 
     :param int max_size: Maximum allowed number of genes from gene set also the data set. Default: 500.
 
-    :param float weighted_score_type: Refer to :func:`algorithm.enrichment_score`. Default:1.
+    :param float weight: Refer to :func:`algorithm.enrichment_score`. Default:1.
 
     :param method:  The method used to calculate a correlation or ranking. Default: 'log2_ratio_of_classes'.
                    Others methods are:
@@ -124,9 +124,14 @@ def gsea(
 
 
     """
-    if "processes" in kwarg:
+    if "processes" in kwargs:
         warnings.warn("processes is deprecated; use threads", DeprecationWarning, 2)
-        threads = kwarg["processes"]
+        threads = kwargs["processes"]
+    if "weighted_score_type" in kwargs:
+        warnings.warn(
+            "weighted_score_type is deprecated; use weight", DeprecationWarning, 2
+        )
+        weight = kwargs["weighted_score_type"]
 
     gs = GSEA(
         data,
@@ -136,7 +141,7 @@ def gsea(
         min_size,
         max_size,
         permutation_num,
-        weighted_score_type,
+        weight,
         permutation_type,
         method,
         ascending,
@@ -162,7 +167,7 @@ def ssgsea(
     min_size: int = 15,
     max_size: int = 500,
     permutation_num: Optional[int] = None,
-    weighted_score_type: float = 0.25,
+    weight: float = 0.25,
     ascending: bool = False,
     threads: int = 4,
     figsize: Tuple[float, float] = (6.5, 6),
@@ -195,8 +200,8 @@ def ssgsea(
     :param str correl_norm_type: correlation normalization type. Choose from {'rank', 'symrank', 'zscore'}. Default: rank.
             After ordering genes by sample_norm_method, further data transformed could be applied to get enrichment score.
 
-            when weighted_score_type==0, sample_norm_method and correl_norm_type do not matter;
-            when weighted_score_type > 0, the combination of sample_norm_method and correl_norm_type
+            when weight==0, sample_norm_method and correl_norm_type do not matter;
+            when weight > 0, the combination of sample_norm_method and correl_norm_type
             dictate how the gene expression values in input data are transformed
             to obtain the score -- use this setting with care (the transformations
             can skew scores towards +ve or -ve values)
@@ -216,7 +221,7 @@ def ssgsea(
     :param int permutation_num: For ssGSEA, default is 0.
                                 However, if you try to use ssgsea method to get pval and fdr, set to an interger.
 
-    :param str weighted_score_type: Refer to :func:`algorithm.enrichment_score`. Default:0.25.
+    :param str weight: Refer to :func:`algorithm.enrichment_score`. Default:0.25.
 
     :param bool ascending: Sorting order of rankings. Default: False.
 
@@ -257,6 +262,12 @@ def ssgsea(
     if "processes" in kwargs:
         warnings.warn("processes is deprecated; use threads", DeprecationWarning, 2)
         threads = kwargs["processes"]
+    if "weighted_score_type" in kwargs:
+        warnings.warn(
+            "weighted_score_type is deprecated; use weight", DeprecationWarning, 2
+        )
+        weight = kwargs["weighted_score_type"]
+
     ss = SingleSampleGSEA(
         data=data,
         gene_sets=gene_sets,
@@ -266,7 +277,7 @@ def ssgsea(
         min_size=min_size,
         max_size=max_size,
         permutation_num=permutation_num,
-        weight=weighted_score_type,
+        weight=weight,
         ascending=ascending,
         threads=threads,
         figsize=figsize,
@@ -289,7 +300,7 @@ def prerank(
     min_size: int = 15,
     max_size: int = 500,
     permutation_num: int = 1000,
-    weighted_score_type: float = 1.0,
+    weight: float = 1.0,
     ascending: bool = False,
     threads: int = 4,
     figsize: Tuple[float, float] = (6.5, 6),
@@ -299,7 +310,7 @@ def prerank(
     seed: int = 123,
     verbose: bool = False,
     *arg,
-    **kwarg,
+    **kwargs,
 ) -> Prerank:
     """Run Gene Set Enrichment Analysis with pre-ranked correlation defined by user.
 
@@ -316,7 +327,7 @@ def prerank(
 
     :param int max_size: Maximum allowed number of genes from gene set also the data set. Defaults: 500.
 
-    :param str weighted_score_type: Refer to :func:`algorithm.enrichment_score`. Default:1.
+    :param str weight: Refer to :func:`algorithm.enrichment_score`. Default:1.
 
     :param bool ascending: Sorting order of rankings. Default: False.
 
@@ -352,9 +363,16 @@ def prerank(
 
 
     """
-    if "processes" in kwarg:
+    if "processes" in kwargs:
         warnings.warn("processes is deprecated; use threads", DeprecationWarning, 2)
-        threads = kwarg["processes"]
+        threads = kwargs["processes"]
+
+    if "weighted_score_type" in kwargs:
+        warnings.warn(
+            "weighted_score_type is deprecated; use weight", DeprecationWarning, 2
+        )
+        weight = kwargs["weighted_score_type"]
+
     pre = Prerank(
         rnk,
         gene_sets,
@@ -364,7 +382,7 @@ def prerank(
         min_size,
         max_size,
         permutation_num,
-        weighted_score_type,
+        weight,
         ascending,
         threads,
         figsize,
@@ -381,12 +399,14 @@ def prerank(
 def replot(
     indir,
     outdir="GSEA_Replot",
-    weighted_score_type=1,
+    weight=1,
     min_size=3,
     max_size=1000,
     figsize=(6.5, 6),
     format="pdf",
     verbose=False,
+    *args,
+    **kwargs,
 ):
     """The main function to reproduce GSEA desktop outputs.
 
@@ -394,7 +414,7 @@ def replot(
 
     :param outdir: Output directory.
 
-    :param float weighted_score_type: weighted score type. choose from {0,1,1.5,2}. Default: 1.
+    :param float weight: weighted score type. choose from {0,1,1.5,2}. Default: 1.
 
     :param list figsize: Matplotlib output figure figsize. Default: [6.5,6].
 
@@ -411,9 +431,13 @@ def replot(
     :return: Generate new figures with selected figure format. Default: 'pdf'.
 
     """
-    rep = Replot(
-        indir, outdir, weighted_score_type, min_size, max_size, figsize, format, verbose
-    )
+    if "weighted_score_type" in kwargs:
+        warnings.warn(
+            "weighted_score_type is deprecated; use weight", DeprecationWarning, 2
+        )
+        weight = kwargs["weighted_score_type"]
+
+    rep = Replot(indir, outdir, weight, min_size, max_size, figsize, format, verbose)
     rep.run()
 
     return
@@ -634,16 +658,16 @@ def gsva(
     gene_sets: Union[List[str], str, Dict[str, str]],
     outdir: Optional[str] = None,
     kcdf: Optional[str] = "Gaussian",
-    weighted_score_type: float = 0.25,
+    weight: float = 1.0,
     mx_diff: bool = True,
     abs_rnk: bool = False,
     min_size: int = 15,
     max_size: int = 1000,
-    threads: int = 1,
+    threads: int = 4,
     seed: int = 123,
     verbose: bool = False,
     **kwargs,
-):
+) -> GSVA:
     """Run Gene Set Enrichment Analysis with single sample GSEA tool
 
     :param data: Expression table, pd.Series, pd.DataFrame, GCT file
@@ -652,22 +676,22 @@ def gsva(
 
     :param outdir: Results output directory. If None, nothing will write to disk.
 
-    :param str kcdf: "Gaussian", "Possion" or None. 
+    :param str kcdf: "Gaussian", "Possion" or None.
                      The non-parametric estimation of the cumulative distribution function
 
-    :param str weighted_score_type: tau of gsva. Default: 1.
+    :param str weight: tau of gsva. Default: 1.
 
-    :param bool mx_diff: Offers two approaches to calculate the enrichment statistic (ES) from the KS random walk statistic. 
-                         If True (default), ES is calculated as the difference 
-                         between the maximum positive and negative random walk deviations. 
+    :param bool mx_diff: Offers two approaches to calculate the enrichment statistic (ES) from the KS random walk statistic.
+                         If True (default), ES is calculated as the difference
+                         between the maximum positive and negative random walk deviations.
                          If False, ES is calculated as the maximum positive to 0.
 
-    :param bool abs_rnk: Flag used only when mx_diff=True. 
-                         If False (default), the enrichment statistic (ES) is calculated taking the magnitude difference 
-                         between the largest positive and negative random walk deviations. 
-                         If True, feature sets with features enriched on either extreme (high or low) 
+    :param bool abs_rnk: Flag used only when mx_diff=True.
+                         If False (default), the enrichment statistic (ES) is calculated taking the magnitude difference
+                         between the largest positive and negative random walk deviations.
+                         If True, feature sets with features enriched on either extreme (high or low)
                          will be regarded as 'highly' activated.
-    
+
     see GSVA doc: https://rdrr.io/bioc/GSVA/man/gsva.html
 
     :param int min_size: Minimum allowed number of genes from gene set also the data set. Default: 15.
@@ -689,7 +713,7 @@ def gsva(
         gene_sets=gene_sets,
         outdir=outdir,
         kcdf=kcdf,
-        weight=weighted_score_type,
+        weight=weight,
         mx_diff=mx_diff,
         abs_rnk=abs_rnk,
         min_size=min_size,
