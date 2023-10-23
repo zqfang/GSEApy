@@ -85,7 +85,7 @@ def main():
         pre.run()
 
     elif subcommand == "ssgsea":
-        from .gsea import SingleSampleGSEA
+        from .ssgsea import SingleSampleGSEA
 
         ss = SingleSampleGSEA(
             data=args.data,

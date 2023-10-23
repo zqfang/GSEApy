@@ -6,11 +6,12 @@ import pandas as pd
 from .__main__ import __version__
 from .biomart import Biomart
 from .enrichr import Enrichr
-from .gsea import GSEA, Prerank, Replot, SingleSampleGSEA
+from .gsea import GSEA, Prerank, Replot
 from .gsva import GSVA
 from .msigdb import Msigdb
 from .parser import get_library, get_library_name, read_gmt
 from .plot import barplot, dotplot, enrichment_map, gseaplot, gseaplot2, heatmap
+from .ssgsea import SingleSampleGSEA
 
 
 def gsea(
@@ -162,8 +163,8 @@ def ssgsea(
     data: Union[pd.Series, pd.DataFrame, str],
     gene_sets: Union[List[str], str, Dict[str, str]],
     outdir: Optional[str] = None,
-    sample_norm_method: str = "rank",
-    correl_norm_type: str = "rank",
+    sample_norm_method: Optional[str] = "rank",
+    correl_norm_type: Optional[str] = "rank",
     min_size: int = 15,
     max_size: int = 500,
     permutation_num: Optional[int] = None,
@@ -187,20 +188,20 @@ def ssgsea(
 
     :param outdir: Results output directory. If None, nothing will write to disk.
 
-    :param str sample_norm_method: Sample normalization method. Choose from {'rank', 'log', 'log_rank'}. Default: rank.
+    :param str sample_norm_method: Sample normalization method. Choose from {'rank', 'log', 'log_rank', None}. Default: rank.
                this argument will be used for ordering genes.
 
                1. 'rank': Rank your expression data, and transform by 10000*rank_dat/gene_numbers
                2. 'log' : Do not rank, but transform data by log(data + exp(1)), while data = data[data<1] =1.
                3. 'log_rank': Rank your expression data, and transform by log(10000*rank_dat/gene_numbers+ exp(1))
-               4. 'custom': Do nothing, and use your own rank value to calculate enrichment score.
+               4. None or 'custom': Do nothing, and use your own rank value to calculate enrichment score.
 
     see here: https://github.com/GSEA-MSigDB/ssGSEAProjection-gpmodule/blob/master/src/ssGSEAProjection.Library.R, line 86
 
-    :param str correl_norm_type: correlation normalization type. Choose from {'rank', 'symrank', 'zscore'}. Default: rank.
+    :param str correl_norm_type: correlation normalization type. Choose from {'rank', 'symrank', 'zscore', None}. Default: rank.
             After ordering genes by sample_norm_method, further data transformed could be applied to get enrichment score.
 
-            when weight==0, sample_norm_method and correl_norm_type do not matter;
+            when weight == 0, sample_norm_method and correl_norm_type do not matter;
             when weight > 0, the combination of sample_norm_method and correl_norm_type
             dictate how the gene expression values in input data are transformed
             to obtain the score -- use this setting with care (the transformations
@@ -209,7 +210,7 @@ def ssgsea(
             sample_norm_method will first transformed and rank original data. the data is named correl_vector for each sample.
             then correl_vector is transformed again by
 
-            1. correl_norm_type =='rank':  do nothing, genes are weighted by actual correl_vector.
+            1. correl_norm_type is None or 'rank' :  do nothing, genes are weighted by actual correl_vector.
             2. correl_norm_type =='symrank': symmetric ranking.
             3. correl_norm_type =='zscore':  standardizes the correl_vector before using them to calculate scores.
 
