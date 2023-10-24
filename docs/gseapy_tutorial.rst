@@ -150,6 +150,7 @@ An example of cls file looks like below.
 
 
 So you could prepare the cls file in python like this
+
 .. code:: python
 
     groups = ['C1OE', 'C1OE', 'C1OE', 'Vector', 'Vector', 'Vector']
