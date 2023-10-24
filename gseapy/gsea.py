@@ -101,7 +101,7 @@ class GSEA(GSEAbase):
             self._logger.warning(
                 "Found duplicated gene names, values averaged by gene names!"
             )
-            exprs = exprs.groupby(level=0).mean()
+            df = df.groupby(level=0).mean()
 
         # in case the description column is numeric
         if len(cls_vec) == (df.shape[1] - 1):
