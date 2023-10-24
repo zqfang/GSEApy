@@ -62,7 +62,7 @@ Installation
 GSEApy is a Python/Rust implementation of **GSEA** and wrapper for **Enrichr**. 
 --------------------------------------------------------------------------------------------
 
-GSEApy has six subcommands: ``gsea``, ``prerank``, ``ssgsea``, ``replot`` ``enrichr``, ``biomart``.
+GSEApy has multiple subcommands: ``gsea``, ``prerank``, ``ssgsea``, ``gsva``, ``replot`` ``enrichr``, ``biomart``.
 
 1. The ``gsea`` module produces **GSEA** results.    
 The input requries a txt file(FPKM, Expected Counts, TPM, et.al), a cls file, and gene_sets file in gmt format. 
@@ -73,13 +73,15 @@ The input expects a pre-ranked gene list dataset with correlation values, which 
 3. The ``ssgsea`` module performs **single sample GSEA(ssGSEA)** analysis.  
 The input expects a gene list with expression values(same with ``.rnk`` file, and gene_sets file in gmt format. ssGSEA enrichment score for the gene set as described by `D. Barbie et al 2009 <http://www.nature.com/nature/journal/v462/n7269/abs/nature08460.html>`_.
 
-4. The ``replot`` module reproduces GSEA desktop version results.  
+4. The ``gsva`` module performs **GSVA** analysis, which described by `Hänzelmann et al <https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-14-7>`_.
+
+5. The ``replot`` module reproduces GSEA desktop version results.  
 The only input for GSEAPY is the location to GSEA Desktop output results.
 
-5. The ``enrichr`` module enables you to perform gene set enrichment analysis using ``Enrichr`` API.
+6. The ``enrichr`` module enables you to perform gene set enrichment analysis using ``Enrichr`` API.
 Enrichr is open source and freely available online at: http://amp.pharm.mssm.edu/Enrichr . It runs very fast and generates results in txt format.
 
-6. The ``biomart`` module helps you convert gene ids using BioMart API.
+7. The ``biomart`` module helps you convert gene ids using BioMart API.
 
 
 GSEApy could be used for **RNA-seq, ChIP-seq, Microarry** data. It's used for convenient GO enrichments and produce **publishable quality figures** in python. 

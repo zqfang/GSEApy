@@ -30,6 +30,17 @@ When observed ES is not within the null ESs, you'll get 0s. if you don't want 0,
 - set the smallest pvalue to 1 / ( number of permutations)
 - increase the permutation number (but more running time needed)
 
+**Q:** What are ``gene %``, and ``tag %`` mean in the output?
+-----------------------------------------------------------------------
+
+.. math::
+
+    \text{gene \\%} = \text{(the position of the gene coresponding to enrichment score peak)} \div \text{(number of all genes in ranking list)}
+
+
+.. math::
+
+    \text{tag \\%}  = \text{( number of leading genes)} \div \text{(number of genes in certain pathway that overalpped with the input ranking list)}
 
 
 
