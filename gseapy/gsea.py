@@ -12,15 +12,9 @@ import numpy as np
 import pandas as pd
 
 from gseapy.base import GSEAbase
-from gseapy.gse import (
-    Metric,
-    gsea_rs,
-    prerank2d_rs,
-    prerank_rs,
-)
+from gseapy.gse import Metric, gsea_rs, prerank2d_rs, prerank_rs
 from gseapy.parser import gsea_cls_parser
 from gseapy.plot import gseaplot
-from gseapy.utils import mkdirs
 
 # from memory_profiler import profile
 

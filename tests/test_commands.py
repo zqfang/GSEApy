@@ -1,8 +1,8 @@
-from tempfile import NamedTemporaryFile, TemporaryDirectory, mkdtemp
+from tempfile import TemporaryDirectory, mkdtemp
 
 import pytest
 
-from gseapy.__init__ import enrich, enrichr, gsea, prerank, replot, ssgsea, gsva
+from gseapy.__init__ import enrich, enrichr, gsea, gsva, prerank, replot, ssgsea
 
 
 @pytest.fixture

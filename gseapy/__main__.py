@@ -736,8 +736,7 @@ def add_gsva_parser(subparsers):
         dest="mx_diff",
         action="store_false",
         default=True,
-        help="When set, ES is calculated as the maximum distance of the random walk from 0. Default: False"
-              "Default: False",
+        help="When set, ES is calculated as the maximum distance of the random walk from 0. Default: False",
     )
 
     group_opt.add_argument(
@@ -749,8 +748,8 @@ def add_gsva_parser(subparsers):
         default="Gaussian",
         metavar="",
         choices=("Gaussian", "Poisson", "None"),
-        help="Gaussian is suitable when input expression values are continuous. " +\
-             "If input integer counts, then this argument should be set to 'Poisson'",
+        help="Gaussian is suitable when input expression values are continuous. "
+        + "If input integer counts, then this argument should be set to 'Poisson'",
     )
 
     group_opt.add_argument(
