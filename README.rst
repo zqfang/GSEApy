@@ -57,7 +57,7 @@ GSEApy has 7 sub-commands available: ``gsea``, ``prerank``, ``ssgsea``, ``gsva``
 :gsea:    The ``gsea`` module produces `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ results.  The input requries a txt file(FPKM, Expected Counts, TPM, et.al), a cls file, and gene_sets file in gmt format.
 :prerank: The ``prerank`` module produces **Prerank tool** results.  The input expects a pre-ranked gene list dataset with correlation values, provided in .rnk format, and gene_sets file in gmt format.  ``prerank`` module is an API to `GSEA` pre-rank tools.
 :ssgsea: The ``ssgsea`` module performs **single sample GSEA(ssGSEA)** analysis.  The input expects a pd.Series (indexed by gene name), or a pd.DataFrame (include ``GCT`` file) with expression values and a ``GMT`` file. For multiple sample input, ssGSEA reconigzes gct format, too. ssGSEA enrichment score for the gene set is described by `D. Barbie et al 2009 <http://www.nature.com/nature/journal/v462/n7269/abs/nature08460.html>`_.
-:gsva: The ``gsva`` module performs `GSVA <https://github.com/rcastelo/GSVA>`_ method. The input is same to ssgsea.
+:gsva: The ``gsva`` module performs `GSVA <https://github.com/rcastelo/GSVA>`_ method by `Hänzelmann et al <https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-14-7>`_. The input is same to ssgsea.
 :replot: The ``replot`` module reproduce GSEA desktop version results.  The only input for GSEApy is the location to ``GSEA`` Desktop output results.
 :enrichr: The ``enrichr`` module enable you perform gene set enrichment analysis using ``Enrichr`` API. Enrichr is open source and freely available online at: http://amp.pharm.mssm.edu/Enrichr . It runs very fast.
 :biomart: The ``biomart`` module helps you convert gene ids using BioMart API.
@@ -129,20 +129,15 @@ Dependency
 Mandatory
 ~~~~~~~~~
 
-build
-
-* Rust: For gseapy > 0.11.0, Rust compiler is needed
-* setuptools-rust
-
-run
-
-* Numpy >= 1.13.0
-* Scipy
-* Pandas
-* Matplotlib
-* Requests
-
-
+* build
+    * Rust: For gseapy > 0.11.0, Rust compiler is needed
+    * setuptools-rust
+* run
+    * Numpy >= 1.13.0
+    * Scipy
+    * Pandas
+    * Matplotlib
+    * Requests
 
 Run GSEApy
 -----------------
@@ -167,7 +162,7 @@ For command line usage:
   # An example to run ssGSEA using gseapy ssgsea module
   $ gseapy ssgsea -d expression.txt -g gene_sets.gmt -o test
 
-  # An example to run ssGSEA using gseapy ssgsea module
+  # An example to run GSVA using gseapy ssgsea module
   $ gseapy gsva -d expression.txt -g gene_sets.gmt -o test
 
   # An example to use enrichr api
@@ -216,14 +211,14 @@ see detail here: `Example <http://gseapy.readthedocs.io/en/master/gseapy_example
     # assign gene_sets parameter with enrichr library name or gmt file on your local computer.
     gseapy.gsea(data=expression_dataframe, gene_sets='KEGG_2016', cls= sample_names, outdir='test')
 
-    # using prerank tool
+    # prerank tool
     gene_ranked_dataframe = pd.DataFrame()
     gseapy.prerank(rnk=gene_ranked_dataframe, gene_sets='KEGG_2016', outdir='test')
 
-    # using ssGSEA
+    # ssGSEA
     gseapy.ssgsea(data=expression_dataframe, gene_sets='KEGG_2016', outdir='test')
 
-    # using ssGSEA
+    # gsva
     gseapy.gsva(data=expression_dataframe, gene_sets='KEGG_2016', outdir='test')
 
 
