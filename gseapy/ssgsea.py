@@ -70,57 +70,8 @@ class SingleSampleGSEA(GSEAbase):
 
     def load_data(self) -> pd.DataFrame:
         # load data
-        exprs = self.data
-        if isinstance(exprs, pd.DataFrame):
-            rank_metric = exprs.copy()
-            # handle dataframe with gene_name as index.
-            self._logger.debug("Input data is a DataFrame with gene names")
-            # handle index is not gene_names
-            if rank_metric.index.dtype != "O":
-                rank_metric.set_index(keys=rank_metric.columns[0], inplace=True)
-            if rank_metric.columns.dtype != "O":
-                rank_metric.columns = rank_metric.columns.astype(str)
-
-            rank_metric = rank_metric.select_dtypes(include=[np.number])
-        elif isinstance(exprs, pd.Series):
-            # change to DataFrame
-            self._logger.debug("Input data is a Series with gene names")
-            if exprs.name is None:
-                # rename col if name attr is none
-                exprs.name = "sample1"
-            elif exprs.name.dtype != "O":
-                exprs.name = exprs.name.astype(str)
-            rank_metric = exprs.to_frame()
-        elif os.path.isfile(exprs):
-            # GCT input format?
-            if exprs.endswith("gct"):
-                rank_metric = pd.read_csv(
-                    exprs, skiprows=1, comment="#", index_col=0, sep="\t"
-                )
-            else:
-                # just txt file like input
-                sep = "\t"
-                if exprs.endswith("csv"):
-                    sep = ","
-                rank_metric = pd.read_csv(exprs, comment="#", index_col=0, sep=sep)
-                if rank_metric.shape[1] == 1:
-                    # rnk file like input
-                    rank_metric.columns = rank_metric.columns.astype(str)
-            # select numbers
-            rank_metric = rank_metric.select_dtypes(include=[np.number])
-        else:
-            raise Exception("Error parsing gene ranking values!")
-
-        if rank_metric.isnull().any().sum() > 0:
-            self._logger.warning("Input data contains NA, filled NA with 0")
-            rank_metric = rank_metric.fillna(0)
-
-        if rank_metric.index.duplicated().sum() > 0:
-            self._logger.warning(
-                "Found duplicated gene names, values averaged by gene names!"
-            )
-            rank_metric = rank_metric.groupby(level=0).mean()
-        return rank_metric
+        exprs = self._load_data(self.data)
+        return self._check_data(exprs)
 
     def norm_samples(self, dat: pd.DataFrame) -> pd.DataFrame:
         """normalization samples

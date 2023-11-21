@@ -139,84 +139,102 @@ class GSEAbase(object):
         # have to be int if user input is float
         self._threads = int(cores)
 
-    def _load_ranking(self, rnk: Union[pd.DataFrame, pd.Series, str]) -> pd.Series:
-        """Parse ranking file. This file contains ranking correlation vector( or expression values)
-        and gene names or ids.
+    def _read_file(self, path: str) -> pd.DataFrame:
+        """
+        read file, and return dataframe (first column are gene IDs)
+        """
+        # just txt file like input
+        header, sep = "infer", "\t"
+        # GCT input format?
+        if path.endswith(".gct"):
+            rank_metric = pd.read_csv(
+                path, skiprows=1, comment="#", index_col=0, sep=sep
+            )
+        else:
+            if path.endswith(".csv"):
+                sep = ","
+            if path.endswith(".rnk"):
+                header = None
+            rank_metric = pd.read_csv(
+                path, comment="#", index_col=0, sep=sep, header=header
+            )
+            if rank_metric.shape[1] == 1:
+                # rnk file like input
+                rank_metric.columns = rank_metric.columns.astype(str)
 
-         :param rnk: the .rnk file of GSEA input or a Pandas DataFrame, Series instance.
-         :return: a Pandas Series with gene name indexed rankings
+        return rank_metric.select_dtypes(include=[np.number]).reset_index()
 
+    def _load_data(self, exprs: Union[str, pd.Series, pd.DataFrame]) -> pd.DataFrame:
+        """
+        helper function to read data
         """
         # load data
-        if isinstance(rnk, pd.DataFrame):
-            rank_metric = rnk.copy()
+        if isinstance(exprs, pd.DataFrame):
+            rank_metric = exprs.copy()
             # handle dataframe with gene_name as index.
-            if rnk.shape[1] == 1:
-                rank_metric = rnk.reset_index()
-        elif isinstance(rnk, pd.Series):
-            rank_metric = rnk.reset_index()
-        elif os.path.isfile(rnk):
-            sep = "," if rnk.endswith(".csv") else "\t"
-            rank_metric = pd.read_table(rnk, header=None, sep=sep)
+            self._logger.debug("Input data is a DataFrame with gene names")
+            # handle index is already gene_names
+            if rank_metric.index.dtype == "O":
+                rank_metric = rank_metric.reset_index()
+                # rank_metric.set_index(keys=rank_metric.columns[0], inplace=True)
+            # if rank_metric.columns.dtype != "O":
+            rank_metric.columns = rank_metric.columns.astype(str)
+
+        elif isinstance(exprs, pd.Series):
+            # change to DataFrame
+            self._logger.debug("Input data is a Series with gene names")
+            if exprs.name is None:
+                # rename col if name attr is none
+                exprs.name = "sample1"
+            elif exprs.name.dtype != "O":
+                exprs.name = exprs.name.astype(str)
+            rank_metric = exprs.reset_index()
+        elif os.path.isfile(exprs):
+            rank_metric = self._read_file(exprs)
+
         else:
-            raise Exception("Error parsing gene ranking values!")
+            raise Exception("Error parsing expression values!")
+        # select numbers
+        # rank_metric = rank_metric.select_dtypes(include=[np.number])
+        return rank_metric
 
-        if rank_metric.select_dtypes(np.number).shape[1] > 1:
-            return rank_metric
-        # sort ranking values from high to low
-        rnk_cols = rank_metric.columns
-        rank_metric.sort_values(by=rnk_cols[1], ascending=self.ascending, inplace=True)
-        # drop na values
-        if rank_metric.isnull().any(axis=1).sum() > 0:
-            self._logger.warning(
-                "Input gene rankings contains NA values(gene name and ranking value), drop them all!"
-            )
-            # print out NAs
-            NAs = rank_metric[rank_metric.isnull().any(axis=1)]
-            self._logger.debug("NAs list:\n" + NAs.to_string())
-            rank_metric.dropna(how="any", inplace=True)
-        # drop duplicate IDs, keep the first
-        if rank_metric.duplicated(subset=rnk_cols[0]).sum() > 0:
-            self._logger.info("Input gene rankings contains duplicated IDs")
-            mask = rank_metric.duplicated(subset=rnk_cols[0]).duplicated(keep=False)
-            dups = (
-                rank_metric[mask]
-                .groupby(rnk_cols[0])
-                .cumcount()
-                .map(lambda c: "_" + str(c) if c else "")
-            )
-            rank_metric.loc[mask, rnk_cols[0]] = (
-                rank_metric.loc[mask, rnk_cols[0]] + dups
-            )
-            # dups = rank_metric[rank_metric.duplicated(subset=rnk_cols[0])]
-            # self._logger.debug("Dups list:\n" + dups.to_string())
-            # rank_metric.drop_duplicates(
-            #     subset=rank_metric.columns[0], inplace=True, keep="first"
-            # )
-        # reset ranking index, because you have sort values and drop duplicates.
-        rank_metric.reset_index(drop=True, inplace=True)
-        rank_metric.columns = ["gene_name", "prerank"]
-        rankser = rank_metric.set_index("gene_name", drop=True).squeeze()
-
+    def _check_data(self, exprs: pd.DataFrame) -> pd.DataFrame:
+        """
+        check NAs, duplicates.
+        exprs: dataframe, the frist column must be gene identifiers
+        """
+        ## if gene names contain NA, drop them
+        if exprs.iloc[:, 0].isnull().any():
+            exprs.dropna(subset=[exprs.columns[0]])
+        ## then fill na for numeric columns
+        if exprs.isnull().any().sum() > 0:
+            self._logger.warning("Input data contains NA, filled NA with 0")
+            exprs.dropna(how="all", inplace=True)  # drop rows with all NAs
+            exprs = exprs.fillna(0)
+        ## check duplicated IDs
+        # gene_id = exprs.columns[0]
+        # if exprs.duplicated(subset=gene_id).sum() > 0:
+        #     self._logger.info("Found duplicated gene names, make unique")
+        #     mask = exprs.duplicated(subset=gene_id, keep=False) #
+        #     dups = exprs.loc[mask, gene_id].groupby(gene_id).cumcount().map(lambda c: "_" + str(c) if c else "")
+        #     exprs.loc[mask, gene_id] = exprs.loc[mask, gene_id] + dups
         # check whether contains infinity values
-        if np.isinf(rankser).values.sum() > 0:
-            self._logger.warning("Input gene rankings contains inf values!")
-            rankser.replace(-np.inf, method="ffill", inplace=True)
-            rankser.replace(np.inf, method="bfill", inplace=True)
 
-        # check duplicate values and warning
-        dups = rankser.duplicated().sum()
-        if dups > 0:
-            msg = (
-                "Duplicated values found in preranked stats: {:.2%} of genes\n".format(
-                    dups / rankser.size
-                )
+        # set gene name as index
+        exprs.set_index(keys=exprs.columns[0], inplace=True)
+        # select numberic columns
+        df = exprs.select_dtypes(include=[np.number])
+        # microarray data may contained multiple probs of same gene, average them
+        if exprs.index.duplicated().sum() > 0:
+            self._logger.warning(
+                "Found duplicated gene names, values averaged by gene names!"
             )
-            msg += "The order of those genes will be arbitrary, which may produce unexpected results."
-            self._logger.warning(msg)
+            df = df.groupby(level=0).mean()
 
-        # return series
-        return rankser
+        if np.isinf(df).values.sum() > 0:
+            self._logger.warning("Input gene rankings contains inf values!")
+            df = df.apply()
+        return df
 
     def load_gmt_only(
         self, gmt: Union[List[str], str, Dict[str, str]]

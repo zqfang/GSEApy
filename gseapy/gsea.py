@@ -68,51 +68,12 @@ class GSEA(GSEAbase):
         # phenotype labels parsing
         self.load_classes(classes)
 
-    def load_data(
-        self, groups: Union[List[str], Dict[str, Any]]
-    ) -> Tuple[pd.DataFrame, Dict]:
+    def load_data(self) -> Tuple[pd.DataFrame, Dict]:
         """pre-processed the data frame.new filtering methods will be implement here."""
-        # read data in
-        if isinstance(self.data, pd.DataFrame):
-            exprs = self.data.copy()
-            # handle index is gene_names
-            if exprs.index.dtype == "O":
-                exprs = exprs.reset_index()
-        elif os.path.isfile(self.data):
-            # GCT input format?
-            if self.data.endswith("gct"):
-                exprs = pd.read_csv(self.data, skiprows=2, sep="\t")
-            else:
-                sep = "\t"
-                if self.data.endswith("csv"):
-                    sep = ","
-                exprs = pd.read_csv(self.data, comment="#", sep=sep)
-        else:
-            raise Exception("Error parsing gene expression DataFrame!")
-
+        exprs = self._load_data(self.data)
         exprs = self._check_data(exprs)
         exprs, cls_dict = self._filter_data(exprs)
         return exprs, cls_dict
-
-    def _check_data(self, exprs: pd.DataFrame) -> pd.DataFrame:
-        """
-        check NAs, duplicates.
-        """
-        if exprs.isnull().any().sum() > 0:
-            self._logger.warning("Input data contains NA, filled NA with 0")
-            exprs.dropna(how="all", inplace=True)  # drop rows with all NAs
-            exprs = exprs.fillna(0)
-        # set gene name as index
-        exprs.set_index(keys=exprs.columns[0], inplace=True)
-        # select numberic columns
-        df = exprs.select_dtypes(include=[np.number])
-
-        if exprs.index.duplicated().sum() > 0:
-            self._logger.warning(
-                "Found duplicated gene names, values averaged by gene names!"
-            )
-            df = df.groupby(level=0).mean()
-        return df
 
     def _map_classes(self, sample_names: List[str]) -> Dict[str, Any]:
         """
@@ -283,7 +244,7 @@ class GSEA(GSEAbase):
         # Start Analysis
         self._logger.info("Parsing data files for GSEA.............................")
         # select correct expression genes and values.
-        dat, cls_dict = self.load_data(self.groups)
+        dat, cls_dict = self.load_data()
         # data frame must have length > 1
         assert len(dat) > 1
         # filtering out gene sets and build gene sets dictionary
@@ -400,47 +361,111 @@ class Prerank(GSEAbase):
         self._noplot = no_plot
         self.permutation_type = "gene_set"
 
-    def load_ranking(self):
-        ranking = self._load_ranking(self.rnk)  # index is gene_names
-        if isinstance(ranking, pd.DataFrame):
-            # handle index is not gene_names
-            if ranking.index.dtype != "O":
-                ranking.set_index(keys=ranking.columns[0], inplace=True)
-            # handle columns names are intergers
-            if ranking.columns.dtype != "O":
-                ranking.columns = ranking.columns.astype(str)
-            # drop na values
-            ranking = ranking.loc[ranking.index.dropna()]
-            if ranking.isnull().any().sum() > 0:
-                self._logger.warning("Input rankings contains NA values!")
-                # fill na
-                ranking.dropna(how="all", inplace=True)
-                ranking.fillna(0, inplace=True)
-            # drop duplicate IDs, keep the first
-            if ranking.index.duplicated().sum() > 0:
-                self._logger.warning("Duplicated ID detected!")
-                ranking = ranking.loc[~ranking.index.duplicated(keep="first"), :]
+    def make_unique(self, rank_metric: pd.DataFrame, col_idx: int) -> pd.DataFrame:
+        """
+        make gene id column unique
+        """
+        id_col = rank_metric.columns[col_idx]
+        if rank_metric.duplicated(subset=id_col).sum() > 0:
+            self._logger.info("Input gene rankings contains duplicated IDs")
+            mask = rank_metric.duplicated(subset=id_col, keep=False)
+            dups = (
+                rank_metric.loc[mask, id_col]
+                .groupby(id_col)
+                .cumcount()
+                .map(lambda c: "_" + str(c) if c else "")
+            )
+            rank_metric.loc[mask, id_col] = rank_metric.loc[mask, id_col] + dups
+        return rank_metric
 
-            # check whether contains infinity values
-            if np.isinf(ranking).values.sum() > 0:
-                self._logger.warning("Input gene rankings contains inf values!")
-                col_min_max = {
-                    np.inf: ranking[np.isfinite(ranking)].max(),  # column-wise max
-                    -np.inf: ranking[np.isfinite(ranking)].min(),
-                }  # column-wise min
-                ranking = ranking.replace({col: col_min_max for col in ranking.columns})
+    def _load_ranking(self, rank_metric: pd.DataFrame) -> pd.Series:
+        """Parse ranking
+        rank_metric: two column dataframe. first column is gene ids
 
-            # check ties in prerank stats
-            dups = ranking.apply(lambda df: df.duplicated().sum() / df.size)
-            if (dups > 0).sum() > 0:
-                msg = (
-                    "Duplicated values found in preranked stats:\nsample\tratio\n%s\n"
-                    % (dups.to_string(float_format="{:,.2%}".format))
+        """
+        # load data
+        # sort ranking values from high to low
+        rnk_cols = rank_metric.columns
+        # if not ranking.is_monotonic_decreasing:
+        #     ranking = ranking.sort_values(ascending=self.ascending)
+        rank_metric.sort_values(by=rnk_cols[1], ascending=self.ascending, inplace=True)
+        # drop na values
+        if rank_metric.isnull().any(axis=1).sum() > 0:
+            self._logger.warning(
+                "Input gene rankings contains NA values(gene name and ranking value), drop them all!"
+            )
+            # print out NAs
+            NAs = rank_metric[rank_metric.isnull().any(axis=1)]
+            self._logger.debug("NAs list:\n" + NAs.to_string())
+            rank_metric.dropna(how="any", inplace=True)
+        # rename duplicate id, make them unique
+        rank_metric = self.make_unique(rank_metric, col_idx=0)
+        # reset ranking index, because you have sort values and drop duplicates.
+        rank_metric.reset_index(drop=True, inplace=True)
+        rank_metric.columns = ["gene_name", "prerank"]
+        rankser = rank_metric.set_index("gene_name", drop=True).squeeze()
+
+        # check whether contains infinity values
+        if np.isinf(rankser).values.sum() > 0:
+            self._logger.warning("Input gene rankings contains inf values!")
+            rankser.replace(-np.inf, method="ffill", inplace=True)
+            rankser.replace(np.inf, method="bfill", inplace=True)
+
+        # check duplicate values and warning
+        dups = rankser.duplicated().sum()
+        if dups > 0:
+            msg = (
+                "Duplicated values found in preranked stats: {:.2%} of genes\n".format(
+                    dups / rankser.size
                 )
-                msg += "The order of those genes will be arbitrary, which may produce unexpected results."
-                self._logger.warning(msg)
+            )
+            msg += "The order of those genes will be arbitrary, which may produce unexpected results."
+            self._logger.warning(msg)
 
-        return ranking
+        # return series
+        return rankser
+
+    def load_ranking(self):
+        """
+        parse rnk input
+        """
+        rank_metric = self._load_data(self.rnk)  # gene id is the first column
+        if rank_metric.select_dtypes(np.number).shape[1] == 1:
+            # return series
+            return self._load_ranking(rank_metric)
+        ## In case the input type multi-column ranking dataframe
+        # drop na gene id values
+        rank_metric = rank_metric.dropna(subset=rank_metric.columns[0])
+        # make unique
+        rank_metric = self.make_unique(rank_metric, col_idx=0)
+        # set index
+        rank_metric.set_index(keys=rank_metric.columns[0], inplace=True)
+        if rank_metric.isnull().any().sum() > 0:
+            self._logger.warning("Input rankings contains NA values!")
+            # fill na
+            rank_metric.dropna(how="all", inplace=True)
+            rank_metric.fillna(0, inplace=True)
+
+        # check whether contains infinity values
+        if np.isinf(rank_metric).values.sum() > 0:
+            self._logger.warning("Input gene rankings contains inf values!")
+            col_min_max = {
+                np.inf: rank_metric[np.isfinite(rank_metric)].max(),  # column-wise max
+                -np.inf: rank_metric[np.isfinite(rank_metric)].min(),  # column-wise min
+            }
+            rank_metric = rank_metric.replace(
+                {col: col_min_max for col in rank_metric.columns}
+            )
+        # check ties in prerank stats
+        dups = rank_metric.apply(lambda df: df.duplicated().sum() / df.size)
+        if (dups > 0).sum() > 0:
+            msg = "Duplicated values found in preranked stats:\nsample\tratio\n%s\n" % (
+                dups.to_string(float_format="{:,.2%}".format)
+            )
+            msg += "The order of those genes will be arbitrary, which may produce unexpected results."
+            self._logger.warning(msg)
+
+        return rank_metric
 
     # @profile
     def run(self):
@@ -576,9 +601,10 @@ class Replot(GSEAbase):
         # obtain gene sets
         gene_set_dict = self.parse_gmt(gmt=gene_set_path)
         # obtain rank_metrics
-        rank_metric = self._load_ranking(rank_path)
-        correl_vector = rank_metric.values
-        gene_list = rank_metric.index.values
+        rank_metric = self._load_data(rank_path)
+        # rank_metric = rank_metric.set_index(rank_metric.columns[0])
+        correl_vector = rank_metric.iloc[:, 1].values
+        gene_list = rank_metric.iloc[:, 0].values
         # extract each enriment term in the results.edb files and plot.
 
         database = self.gsea_edb_parser(results_path)
@@ -600,7 +626,7 @@ class Replot(GSEAbase):
                 self.outdir, term, self.module, self.format
             )
             gseaplot(
-                rank_metric=rank_metric,
+                rank_metric=correl_vector,
                 term=enrich_term,
                 hits=hit_ind,
                 nes=nes,
