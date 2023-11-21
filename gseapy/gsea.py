@@ -361,23 +361,6 @@ class Prerank(GSEAbase):
         self._noplot = no_plot
         self.permutation_type = "gene_set"
 
-    def make_unique(self, rank_metric: pd.DataFrame, col_idx: int) -> pd.DataFrame:
-        """
-        make gene id column unique
-        """
-        id_col = rank_metric.columns[col_idx]
-        if rank_metric.duplicated(subset=id_col).sum() > 0:
-            self._logger.info("Input gene rankings contains duplicated IDs")
-            mask = rank_metric.duplicated(subset=id_col, keep=False)
-            dups = (
-                rank_metric.loc[mask, id_col]
-                .groupby(id_col)
-                .cumcount()
-                .map(lambda c: "_" + str(c) if c else "")
-            )
-            rank_metric.loc[mask, id_col] = rank_metric.loc[mask, id_col] + dups
-        return rank_metric
-
     def _load_ranking(self, rank_metric: pd.DataFrame) -> pd.Series:
         """Parse ranking
         rank_metric: two column dataframe. first column is gene ids
@@ -439,23 +422,7 @@ class Prerank(GSEAbase):
         # make unique
         rank_metric = self.make_unique(rank_metric, col_idx=0)
         # set index
-        rank_metric.set_index(keys=rank_metric.columns[0], inplace=True)
-        if rank_metric.isnull().any().sum() > 0:
-            self._logger.warning("Input rankings contains NA values!")
-            # fill na
-            rank_metric.dropna(how="all", inplace=True)
-            rank_metric.fillna(0, inplace=True)
-
-        # check whether contains infinity values
-        if np.isinf(rank_metric).values.sum() > 0:
-            self._logger.warning("Input gene rankings contains inf values!")
-            col_min_max = {
-                np.inf: rank_metric[np.isfinite(rank_metric)].max(),  # column-wise max
-                -np.inf: rank_metric[np.isfinite(rank_metric)].min(),  # column-wise min
-            }
-            rank_metric = rank_metric.replace(
-                {col: col_min_max for col in rank_metric.columns}
-            )
+        rank_metric = self._check_data(rank_metric)
         # check ties in prerank stats
         dups = rank_metric.apply(lambda df: df.duplicated().sum() / df.size)
         if (dups > 0).sum() > 0:

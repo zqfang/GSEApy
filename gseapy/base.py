@@ -202,6 +202,8 @@ class GSEAbase(object):
         """
         check NAs, duplicates.
         exprs: dataframe, the frist column must be gene identifiers
+
+        return: dataframe, index is gene ids
         """
         ## if gene names contain NA, drop them
         if exprs.iloc[:, 0].isnull().any():
@@ -212,29 +214,42 @@ class GSEAbase(object):
             exprs.dropna(how="all", inplace=True)  # drop rows with all NAs
             exprs = exprs.fillna(0)
         ## check duplicated IDs
-        # gene_id = exprs.columns[0]
-        # if exprs.duplicated(subset=gene_id).sum() > 0:
-        #     self._logger.info("Found duplicated gene names, make unique")
-        #     mask = exprs.duplicated(subset=gene_id, keep=False) #
-        #     dups = exprs.loc[mask, gene_id].groupby(gene_id).cumcount().map(lambda c: "_" + str(c) if c else "")
-        #     exprs.loc[mask, gene_id] = exprs.loc[mask, gene_id] + dups
-        # check whether contains infinity values
-
         # set gene name as index
         exprs.set_index(keys=exprs.columns[0], inplace=True)
         # select numberic columns
         df = exprs.select_dtypes(include=[np.number])
         # microarray data may contained multiple probs of same gene, average them
-        if exprs.index.duplicated().sum() > 0:
+        if df.index.duplicated().sum() > 0:
             self._logger.warning(
                 "Found duplicated gene names, values averaged by gene names!"
             )
             df = df.groupby(level=0).mean()
-
+        # check whether contains infinity values
         if np.isinf(df).values.sum() > 0:
             self._logger.warning("Input gene rankings contains inf values!")
-            df = df.apply()
+            col_min_max = {
+                np.inf: df[np.isfinite(df)].max(),  # column-wise max
+                -np.inf: df[np.isfinite(df)].min(),  # column-wise min
+            }
+            df = df.replace({col: col_min_max for col in df.columns})
         return df
+
+    def make_unique(self, rank_metric: pd.DataFrame, col_idx: int) -> pd.DataFrame:
+        """
+        make gene id column unique
+        """
+        id_col = rank_metric.columns[col_idx]
+        if rank_metric.duplicated(subset=id_col).sum() > 0:
+            self._logger.info("Input gene rankings contains duplicated IDs")
+            mask = rank_metric.duplicated(subset=id_col, keep=False)
+            dups = (
+                rank_metric.loc[mask, id_col]
+                .groupby(id_col)
+                .cumcount()
+                .map(lambda c: "_" + str(c) if c else "")
+            )
+            rank_metric.loc[mask, id_col] = rank_metric.loc[mask, id_col] + dups
+        return rank_metric
 
     def load_gmt_only(
         self, gmt: Union[List[str], str, Dict[str, str]]
