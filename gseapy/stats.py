@@ -88,9 +88,11 @@ def calc_pvalues(query, gene_sets, background=20000, **kwargs):
         # expect_count = k*m/bg
         # oddr= x / expect_count
         # oddr= (x*(bg-m))/(m*(k-x)) # thanks to @sreichl.
-        oddr = ((x + 0.5) * (bg - m + 0.5)) / (
-            (m + 0.5) * (k - x + 0.5)
-        )  # Haldane-Anscombe correction, issue #132
+        # oddr = ((x + 0.5) * (bg - m + 0.5)) / (
+        #     (m + 0.5) * (k - x + 0.5)
+        # )  # Haldane-Anscombe correction, issue #132
+        bu = 0.5  # base up for Haldane-Anscombe correction. When bu=0, the result is exactly equal to Enrichr.
+        oddr = ((x + bu) * (bg - m - k + x + bu)) / ((m - x + bu) * (k - x + bu))  # issue #237
         vals.append((s, pval, oddr, x, m, hits))
 
     return zip(*vals)
