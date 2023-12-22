@@ -183,11 +183,15 @@ class GSEAbase(object):
         elif isinstance(exprs, pd.Series):
             # change to DataFrame
             self._logger.debug("Input data is a Series with gene names")
-            if exprs.name is None:
-                # rename col if name attr is none
-                exprs.name = "sample1"
-            elif exprs.name.dtype != "O":
-                exprs.name = exprs.name.astype(str)
+            if not isinstance(exprs.name, str):
+                if exprs.name is None:
+                    # rename col if name attr is none
+                    exprs.name = "sample1"
+                elif hasattr(exprs.name, "dtype"):
+                    if exprs.name.dtype != "O":
+                        exprs.name = exprs.name.astype(str)
+                else:
+                    exprs.name = str(exprs.name)
             rank_metric = exprs.reset_index()
         elif os.path.isfile(exprs):
             rank_metric = self._read_file(exprs)
