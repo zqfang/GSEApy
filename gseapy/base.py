@@ -376,6 +376,7 @@ class GSEAbase(object):
         """return active enrichr library name.Offical API"""
 
         lib_url = self.ENRICHR_URL + "/Enrichr/datasetStatistics"
+        # "LIBRARY_LIST_URL": "https://maayanlab.cloud/speedrichr/api/listlibs",
         s = retry(num=5)
         response = s.get(lib_url, verify=True)
         if not response.ok:
