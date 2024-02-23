@@ -927,7 +927,7 @@ class DotPlot(object):
             shrink=0.25,
             aspect=10,
             anchor=(0.0, 0.2),  # (0.0, 0.2),
-            location="right"
+            location="right",
             # cax=cax,
         )
         # cbar.ax.tick_params(direction='in')
@@ -1342,7 +1342,7 @@ class TracePlot(object):
         trans2 = transforms.blended_transform_factory(ax2.transData, ax2.transAxes)
         # align hits to runes
         ax2.vlines(
-            [0, len(self.runes[0])-1],
+            [0, len(self.runes[0]) - 1],
             0,
             1,
             linewidth=0.5,
