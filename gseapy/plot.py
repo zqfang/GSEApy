@@ -1342,7 +1342,7 @@ class TracePlot(object):
         trans2 = transforms.blended_transform_factory(ax2.transData, ax2.transAxes)
         # align hits to runes
         ax2.vlines(
-            [1, len(self.runes[0])],
+            [0, len(self.runes[0])-1],
             0,
             1,
             linewidth=0.5,
