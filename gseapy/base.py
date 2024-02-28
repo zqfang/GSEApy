@@ -240,7 +240,7 @@ class GSEAbase(object):
 
     def make_unique(self, rank_metric: pd.DataFrame, col_idx: int) -> pd.DataFrame:
         """
-        make gene id column unique
+        make gene id column unique by adding a digit, similar to R's make.unique
         """
         id_col = rank_metric.columns[col_idx]
         if rank_metric.duplicated(subset=id_col).sum() > 0:
@@ -248,6 +248,7 @@ class GSEAbase(object):
             mask = rank_metric.duplicated(subset=id_col, keep=False)
             dups = (
                 rank_metric.loc[mask, id_col]
+                .to_frame()
                 .groupby(id_col)
                 .cumcount()
                 .map(lambda c: "_" + str(c) if c else "")
