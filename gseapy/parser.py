@@ -3,7 +3,6 @@ import json
 import logging
 import os
 import xml.etree.ElementTree as ET
-from collections import Counter
 from collections.abc import Iterable
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -41,10 +40,6 @@ def gsea_cls_parser(cls: str) -> Tuple[str]:
 
     if len(sample_name) != 2:
         raise Exception("Input groups have to be 2!")
-
-    for c, v in Counter(classes).items():
-        if v < 3:
-            raise Exception(f"Number of {c}: {v}, it must be >= 3!")
 
     return sample_name[0], sample_name[1], classes
 

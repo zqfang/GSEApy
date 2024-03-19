@@ -65,6 +65,9 @@ class GSEA(GSEAbase):
         self.seed = seed
         self.ranking = None
         self._noplot = no_plot
+        # some preprocessing
+        assert self.permutation_type in ["phenotype", "gene_set"]
+        assert self.min_size <= self.max_size
         # phenotype labels parsing
         self.load_classes(classes)
 
@@ -188,6 +191,9 @@ class GSEA(GSEAbase):
             ser = df_mean[pos] - df_mean[neg]
         elif method == "log2_ratio_of_classes":
             ser = np.log2(df_mean[pos] / df_mean[neg])
+            if ser.isna().sum() > 0:
+                self._logger.warning("Invalid value encountered in log2, and dumped.")
+                ser = ser.dropna()
         else:
             logging.error("Please provide correct method name!!!")
             raise LookupError("Input method: %s is not supported" % method)
@@ -198,16 +204,28 @@ class GSEA(GSEAbase):
         # descending order
         return ser_ind[::-1], ser[::-1]
 
+    def _check_classes(self, counter: Counter) -> List[str]:
+        """
+        check each cls group length
+        """
+        metrics = ["signal_to_noise", "s2n", "abs_signal_to_noise", "abs_s2n", "t_test"]
+        s = []
+        for c, v in sorted(counter.items(), key=lambda item: item[1]):
+            if v < 3:
+                if self.permutation_type == "phenotype":
+                    self._logger.warning(
+                        f"Number of {c}: {v}, it must be >= 3 for permutation type: phenotype !"
+                    )
+                    self._logger.warning("Permutation type change to gene_set.")
+                    self.permutation_type == "gene_set"
+            s.append(c)
+        return s
+
     def load_classes(self, classes: Union[str, List[str], Dict[str, Any]]):
         """Parse group (classes)"""
         if isinstance(classes, dict):
             # check number of samples
-            class_values = Counter(classes.values())
-            s = []
-            for c, v in sorted(class_values.items(), key=lambda item: item[1]):
-                if v < 3:
-                    raise Exception(f"Number of {c}: {v}, it must be >= 3!")
-                s.append(c)
+            s = self._check_classes(Counter(classes.values()))
             self.pheno_pos = s[0]
             self.pheno_neg = s[1]
             # n_pos = class_values[pos]
@@ -215,6 +233,7 @@ class GSEA(GSEAbase):
             self.groups = classes
         else:
             pos, neg, cls_vector = gsea_cls_parser(classes)
+            s = self._check_classes(Counter(cls_vector))
             self.pheno_pos = pos
             self.pheno_neg = neg
             self.groups = cls_vector
@@ -225,7 +244,7 @@ class GSEA(GSEAbase):
         m = self.method.lower()
         if m in ["signal_to_noise", "s2n"]:
             method = Metric.Signal2Noise
-        elif m in ["s2n", "abs_signal_to_noise", "abs_s2n"]:
+        elif m in ["abs_signal_to_noise", "abs_s2n"]:
             method = Metric.AbsSignal2Noise
         elif m == "t_test":
             method = Metric.Ttest
@@ -237,9 +256,6 @@ class GSEA(GSEAbase):
             method = Metric.Log2RatioOfClasses
         else:
             raise Exception("Sorry, input method %s is not supported" % m)
-
-        assert self.permutation_type in ["phenotype", "gene_set"]
-        assert self.min_size <= self.max_size
 
         # Start Analysis
         self._logger.info("Parsing data files for GSEA.............................")
