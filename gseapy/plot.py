@@ -686,7 +686,7 @@ class DotPlot(object):
         ## impute the 0s in pval, fdr for visualization purpose
         if self.colname in ["Adjusted P-value", "P-value", "NOM p-val", "FDR q-val"]:
             # if all values are zeros, raise error
-            if not all(df[self.colname].abs() > 0):
+            if not any(df[self.colname].abs() > 0):
                 raise ValueError(
                     f"Can not detetermine colormap. All values in {self.colname} are 0s"
                 )
@@ -700,7 +700,11 @@ class DotPlot(object):
             self.cbar_title = r"$\log_{10} \frac{1}{ " + _t + " }$"
 
         # get top terms; sort ascending
-        if (self.x is not None) and (self.x in df.columns):
+        if (
+            (self.x is not None)
+            and (self.x in df.columns)
+            and (not all(df[self.x].map(self.isfloat)))
+        ):
             # if x is numeric column
             # get top term of each group
             df = (
@@ -834,7 +838,10 @@ class DotPlot(object):
         # if self.x is None:
         x, xlabel = self.set_x()
         y = self.y
-        # set x, y order
+        # if x axis is numberic, prettifiy the plot with the numberic order
+        if all(df[x].map(self.isfloat)):
+            df = df.sort_values(by=x)
+        # set x, y order if set
         xunits = UnitData(self.get_x_order()) if self.x_order else None
         yunits = UnitData(self.get_y_order()) if self.y_order else None
 
@@ -1138,7 +1145,7 @@ def dotplot(
     :param title: Figure title.
     :param cutoff: Terms with `column` value < cut-off are shown. Work only for
                    ("Adjusted P-value", "P-value", "NOM p-val", "FDR q-val")
-    :param top_term: Number of enriched terms to show.
+    :param top_term: Number of enriched terms to show (based on values in the `column` (colormap)).
     :param size: float, scale the dot size to get proper visualization.
     :param figsize: tuple, matplotlib figure size.
     :param cmap: Matplotlib colormap for mapping the `column` semantic.
