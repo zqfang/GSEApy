@@ -75,7 +75,6 @@ class GSEA(GSEAbase):
         """pre-processed the data frame.new filtering methods will be implement here."""
         exprs = self._load_data(self.data)
         exprs = self._check_data(exprs)
-        print(exprs)
         exprs, cls_dict = self._filter_data(exprs)
 
         return exprs, cls_dict
@@ -110,7 +109,6 @@ class GSEA(GSEAbase):
         else:
             df_std = df.groupby(by=cls_dict, axis=1).std(numeric_only=True, ddof=0)
 
-        print(df)
         # remove rows that are all zeros !
         df = df.loc[df.abs().sum(axis=1) > 0, :]
         # remove rows that std are zeros for sample size >= 3 in each group

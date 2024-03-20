@@ -660,7 +660,7 @@ class DotPlot(object):
     def process(self, df: pd.DataFrame):
         # check if any values in `df[colname]` can't be coerced to floats
         can_be_coerced = df[self.colname].map(self.isfloat).sum()
-        if can_be_coerced < len(df):
+        if can_be_coerced < df.shape[0]:
             msg = "some value in %s could not be typecast to `float`" % self.colname
             raise ValueError(msg)
         # subset
@@ -669,7 +669,7 @@ class DotPlot(object):
             mask.loc[:] = True
 
         df = df.loc[mask]
-        if len(df) < 1:
+        if df.shape[0] < 1:
             msg = "Warning: No enrich terms when cutoff = %s" % self.thresh
             raise ValueError(msg)
         self.cbar_title = self.colname
@@ -683,8 +683,13 @@ class DotPlot(object):
             "NOM p-val": "Pval",
             "FDR q-val": "FDR",
         }
+        ## impute the 0s in pval, fdr for visualization purpose
         if self.colname in ["Adjusted P-value", "P-value", "NOM p-val", "FDR q-val"]:
-            # get top_terms
+            # if all values are zeros, raise error
+            if not all(df[self.colname].abs() > 0):
+                raise ValueError(
+                    f"Can not detetermine colormap. All values in {self.colname} are 0s"
+                )
             df = df.sort_values(by=self.colname)
             df[self.colname].replace(
                 0, method="bfill", inplace=True
@@ -696,6 +701,7 @@ class DotPlot(object):
 
         # get top terms; sort ascending
         if (self.x is not None) and (self.x in df.columns):
+            # if x is numeric column
             # get top term of each group
             df = (
                 df.groupby(self.x)
