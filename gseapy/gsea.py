@@ -75,7 +75,9 @@ class GSEA(GSEAbase):
         """pre-processed the data frame.new filtering methods will be implement here."""
         exprs = self._load_data(self.data)
         exprs = self._check_data(exprs)
+        print(exprs)
         exprs, cls_dict = self._filter_data(exprs)
+
         return exprs, cls_dict
 
     def _map_classes(self, sample_names: List[str]) -> Dict[str, Any]:
@@ -101,13 +103,22 @@ class GSEA(GSEAbase):
         # drop gene which std == 0 in all samples
         # compatible to py3.7
         major, minor, _ = [int(i) for i in pd.__version__.split(".")]
+        # handle cases for samples < 3, use mean
         if (major == 1 and minor < 5) or (major < 1):
             # fix numeric_only error
-            df_std = df.groupby(by=cls_dict, axis=1).std()
+            df_std = df.groupby(by=cls_dict, axis=1).std(ddof=0)
         else:
-            df_std = df.groupby(by=cls_dict, axis=1).std(numeric_only=True)
-        df = df[df_std.sum(axis=1) > 0]
-        df = df + 1e-08  # we don't like zeros!!!
+            df_std = df.groupby(by=cls_dict, axis=1).std(numeric_only=True, ddof=0)
+
+        print(df)
+        # remove rows that are all zeros !
+        df = df.loc[df.abs().sum(axis=1) > 0, :]
+        # remove rows that std are zeros for sample size >= 3 in each group
+        if all(map(lambda a: a[1] >= 3, Counter(cls_dict.values()).items())):
+            df = df[df_std.abs().sum(axis=1) > 0]
+        df = df + 1e-08  # we don't like zeros in denominator !!!
+        # data frame must have length > 1
+        assert df.shape[0] > 1
 
         return df, cls_dict
 
@@ -194,6 +205,7 @@ class GSEA(GSEAbase):
             if ser.isna().sum() > 0:
                 self._logger.warning("Invalid value encountered in log2, and dumped.")
                 ser = ser.dropna()
+                assert len(ser) > 1
         else:
             logging.error("Please provide correct method name!!!")
             raise LookupError("Input method: %s is not supported" % method)
@@ -261,8 +273,6 @@ class GSEA(GSEAbase):
         self._logger.info("Parsing data files for GSEA.............................")
         # select correct expression genes and values.
         dat, cls_dict = self.load_data()
-        # data frame must have length > 1
-        assert len(dat) > 1
         # filtering out gene sets and build gene sets dictionary
         gmt = self.load_gmt(gene_list=dat.index.values, gmt=self.gene_sets)
         self.gmt = gmt
