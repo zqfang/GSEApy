@@ -58,7 +58,7 @@ def gsea(
 
     :param float weight: Refer to :func:`algorithm.enrichment_score`. Default:1.
 
-    :param method:  The method used to calculate a correlation or ranking. Default: 'log2_ratio_of_classes'.
+    :param method:  The method used to calculate a correlation or ranking. Default: 'signal_to_noise'.
                    Others methods are:
 
                    1. 'signal_to_noise'
