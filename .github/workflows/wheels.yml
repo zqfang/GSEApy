@@ -91,7 +91,7 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
           TWINE_USERNAME: __token__
   build_wheels_aarch64:
-    name: Build wheels on ${{ matrix.os }}
+    name: Build linux aarch64 wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -137,7 +137,7 @@ jobs:
           TWINE_USERNAME: __token__
 
   build-mac-arm-wheels:
-    name: Build wheels on macos for arm and universal2
+    name: Build wheels on macos for arm
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -145,7 +145,7 @@ jobs:
         uses: joerick/cibuildwheel@v2.17.0
         env:
           CIBW_BEFORE_ALL: rustup target add aarch64-apple-darwin
-          CIBW_ARCHS_MACOS: arm64 universal2
+          CIBW_ARCHS_MACOS: arm64
           CIBW_BEFORE_BUILD: pip install -U setuptools-rust
           CIBW_ENVIRONMENT: CARGO_BUILD_TARGET="aarch64-apple-darwin" PYO3_CROSS_LIB_DIR="/Library/Frameworks/Python.framework/Versions/$(python -c 'import sys; print(str(sys.version_info[0])+"."+str(sys.version_info[1]))')/lib/python$(python -c 'import sys; print(str(sys.version_info[0])+"."+str(sys.version_info[1]))')"
       # - uses: actions/upload-artifact@v4
