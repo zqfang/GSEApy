@@ -58,17 +58,17 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         name: Install Python
         with:
           python-version: '3.8'
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
       - name: Install cibuildwheel
         run: |
-          python -m pip install cibuildwheel==2.10.1 twine wheel
+          python -m pip install cibuildwheel==2.16.5 twine wheel
       - name: Build wheels
         run: |
           python -m cibuildwheel --output-dir wheelhouse
@@ -82,7 +82,7 @@ jobs:
           CIBW_BEFORE_BUILD: pip install -U setuptools-rust
           # CIBW_TEST_REQUIRES: numpy scipy pandas requests
           # CIBW_TEST_COMMAND: python -m unittest discover {project}/tests/
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           path: ./wheelhouse/*.whl
       - name: Upload to PyPI
@@ -98,12 +98,12 @@ jobs:
       matrix:
         os: [ubuntu-latest]
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         name: Install Python
         with:
           python-version: '3.8'
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
       - name: Set up QEMU
@@ -112,7 +112,7 @@ jobs:
           platforms: all
       - name: Install cibuildwheel
         run: |
-          python -m pip install cibuildwheel==2.10.1 twine
+          python -m pip install cibuildwheel==2.16.5 twine
       - name: Build wheels
         run: |
           python -m cibuildwheel --output-dir wheelhouse
@@ -127,7 +127,7 @@ jobs:
           # CIBW_TEST_REQUIRES: numpy scipy pandas requests
           # CIBW_TEST_COMMAND: python -m unittest discover {project}/tests/
           CIBW_ARCHS_LINUX: aarch64
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           path: ./wheelhouse/*.whl
       - name: Upload to PyPI
@@ -140,18 +140,18 @@ jobs:
     name: Build wheels on macos for arm and universal2
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Build wheels
-        uses: joerick/cibuildwheel@v2.10.1
+        uses: joerick/cibuildwheel@v2.16.5
         env:
           CIBW_BEFORE_ALL: rustup target add aarch64-apple-darwin
           CIBW_ARCHS_MACOS: arm64 universal2
           CIBW_BEFORE_BUILD: pip install -U setuptools-rust
           CIBW_ENVIRONMENT: CARGO_BUILD_TARGET="aarch64-apple-darwin" PYO3_CROSS_LIB_DIR="/Library/Frameworks/Python.framework/Versions/$(python -c 'import sys; print(str(sys.version_info[0])+"."+str(sys.version_info[1]))')/lib/python$(python -c 'import sys; print(str(sys.version_info[0])+"."+str(sys.version_info[1]))')"
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           path: ./wheelhouse/*.whl
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         name: Install Python
         with:
           python-version: '3.8'
@@ -168,13 +168,13 @@ jobs:
     name: Build wheels on win32
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         name: Install Python
         with:
           python-version: '3.8'
           architecture: 'x86'
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
           target: i686-pc-windows-msvc
@@ -183,7 +183,7 @@ jobs:
         run: rustup default stable-i686-pc-windows-msvc
       - name: Install cibuildwheel
         run: |
-          python -m pip install cibuildwheel==2.10.1 twine
+          python -m pip install cibuildwheel==2.16.5 twine
       - name: Build wheels
         run: |
           python -m cibuildwheel --output-dir wheelhouse
@@ -193,7 +193,7 @@ jobs:
           CIBW_BEFORE_BUILD: pip install -U setuptools-rust
           # CIBW_TEST_REQUIRES: numpy scipy pandas requests
           # CIBW_TEST_COMMAND: python -m unittest discover {project}/tests/
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           path: ./wheelhouse/*.whl
       - name: Upload to PyPI
