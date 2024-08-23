@@ -34,7 +34,7 @@ jobs:
       - uses: actions/setup-python@v5
         name: Install Python
         with:
-          python-version: '3.10'
+          python-version: '3.x'
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
@@ -62,7 +62,7 @@ jobs:
       - uses: actions/setup-python@v5
         name: Install Python
         with:
-          python-version: '3.10'
+          python-version: '3.x'
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
@@ -98,7 +98,7 @@ jobs:
       - uses: actions/setup-python@v5
         name: Install Python
         with:
-          python-version: '3.10'
+          python-version: '3.x'
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
@@ -170,7 +170,7 @@ jobs:
       - uses: actions/setup-python@v5
         name: Install Python
         with:
-          python-version: '3.10'
+          python-version: '3.x'
           architecture: 'x86'
       - uses: dtolnay/rust-toolchain@stable
         with:
