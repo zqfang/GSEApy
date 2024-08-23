@@ -107,7 +107,11 @@ class GSEA(GSEAbase):
             # fix numeric_only error
             df_std = df.groupby(by=cls_dict, axis=1).std(ddof=0)
         else:
-            df_std = df.groupby(by=cls_dict, axis=1).std(numeric_only=True, ddof=0)
+            gene_idxs = df.index.to_list()
+            # df_std = df.groupby(by=cls_dict, axis=1).std(numeric_only=True, ddof=0)
+            df_std = (
+                df.T.groupby(by=cls_dict)[gene_idxs].std(numeric_only=True, ddof=0).T
+            )
 
         # remove rows that are all zeros !
         df = df.loc[df.abs().sum(axis=1) > 0, :]
@@ -180,8 +184,11 @@ class GSEA(GSEAbase):
             df_mean = df.groupby(by=classes, axis=1).mean()
             df_std = df.groupby(by=classes, axis=1).std()
         else:
-            df_mean = df.groupby(by=classes, axis=1).mean(numeric_only=True)
-            df_std = df.groupby(by=classes, axis=1).std(numeric_only=True)
+            gene_idxs = df.index.to_list()
+            df_std = df.T.groupby(by=classes)[gene_idxs].std(numeric_only=True).T
+            df_mean = df.T.groupby(by=classes)[gene_idxs].mean(numeric_only=True).T
+            # df_mean = df.groupby(by=classes, axis=1).mean(numeric_only=True)
+            # df_std = df.groupby(by=classes, axis=1).std(numeric_only=True)
         class_values = Counter(classes.values())
         n_pos = class_values[pos]
         n_neg = class_values[neg]
