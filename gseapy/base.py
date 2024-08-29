@@ -204,7 +204,7 @@ class GSEAbase(object):
 
     def _check_data(self, exprs: pd.DataFrame) -> pd.DataFrame:
         """
-        check NAs, duplicates.
+        check NAs, duplicates, and select number columns
         exprs: dataframe, the frist column must be gene identifiers
 
         return: dataframe, index is gene ids

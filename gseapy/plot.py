@@ -911,9 +911,12 @@ class DotPlot(object):
         handles, labels = sc.legend_elements(
             prop="sizes",
             num=3,  #
-            fmt="{x:.2f}",
+            # fmt="{x:.2f}",
             color="gray",
-            func=lambda s: np.sqrt(s) / plt.rcParams["lines.markersize"] / self.scale,
+            func=lambda s: 100
+            * np.sqrt(s)
+            / plt.rcParams["lines.markersize"]
+            / self.scale,
         )
         ax.legend(
             handles,
