@@ -186,6 +186,9 @@ class Enrichr(object):
                 for gene in f:
                     genes.append(gene.strip())
 
+        if not genes:
+            raise ValueError("Gene list cannot be empty")
+
         self._isezid = all(map(self._is_entrez_id, genes))
         if self._isezid:
             self._gls = set(map(int, genes))
