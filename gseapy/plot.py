@@ -616,7 +616,7 @@ class DotPlot(object):
                         If True, peformed hierarchical_clustering on X-axis.
                         or input a array-like list of `x` categorical levels.
 
-        :param x_order: bool, array-like list. Default: False.
+        :param y_order: bool, array-like list. Default: False.
                         If True, peformed hierarchical_clustering on Y-axis.
                         or input a array-like list of `y` categorical levels.
 
