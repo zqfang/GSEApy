@@ -691,9 +691,8 @@ class DotPlot(object):
                     f"Can not detetermine colormap. All values in {self.colname} are 0s"
                 )
             df = df.sort_values(by=self.colname)
-            df[self.colname].replace(
-                0, method="bfill", inplace=True
-            )  ## asending order, use bfill
+            ## asending order, use bfill
+            df[self.colname] = df[self.colname].replace(0, np.nan).bfill()
             df = df.assign(p_inv=np.log10(1 / df[self.colname].astype(float)))
             _t = colnd[self.colname]
             self.colname = "p_inv"
