@@ -732,7 +732,7 @@ class GSEAbase(object):
         # Test whether each element of a 1-D array is also present in a second array
         # It's more intuitive here than original enrichment_score source code.
         # use .astype to covert bool to integer
-        tag_indicator = np.in1d(gene_list, gene_set, assume_unique=True).astype(
+        tag_indicator = np.isin(gene_list, gene_set, assume_unique=True).astype(
             int
         )  # notice that the sign is 0 (no tag) or 1 (tag)
 

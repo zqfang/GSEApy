@@ -10,11 +10,20 @@ class Msigdb:
         dbver: MSIGDB version number. default: 2023.1.Hs
         """
         self.url = "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/"
-        self._pattern = re.compile("(\w.+)\.(v\d.+)\.(entrez|symbols)\.gmt")
+        self._pattern = re.compile(r"(\w.+)\.(v\d.+)\.(entrez|symbols)\.gmt")
         self._db_version = self._get_db_version()
+        if self._db_version is None:
+            raise Exception("Failed to fetch available MSIGDB versions")
         self.categoires = self.list_category(dbver)
 
     def _get_db_version(self):
+        """
+        Get all available MSIGDB versions
+
+        Return:
+            A pd.DataFrame of all available MSIGDB versions.
+            If failed to fetch, return None.
+        """
         resp = requests.get(self.url)
         if resp.ok:
             d = pd.read_html(resp.text)[0]
@@ -48,6 +57,13 @@ class Msigdb:
 
     def list_dbver(self):
         # self._db_version.columns = ["dbver", "date"]
+        """
+        Return a pd.DataFrame of all available MSIGDB versions
+
+        Return:
+            A pd.DataFrame of all available MSIGDB versions.
+            If failed to fetch, return None.
+        """
         return self._db_version
 
     def list_category(self, dbver: str = "2023.1.Hs"):
@@ -66,6 +82,13 @@ class Msigdb:
         return None
 
     def list_gmt(self, db: str):
+        """
+        list all gmt files in MSIGDB database.
+
+        :param db: MSIGDB version number. default: 2023.1.Hs
+        :return: a pandas DataFrame object
+        """
+
         url = self.url + db
         resp = requests.get(url)
         if resp.ok:
