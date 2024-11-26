@@ -141,7 +141,9 @@ fn gsea_rs(
 /// - nperm: number of permutation
 /// - threads: number of threads
 /// - seed: random seed
+/// #[pyo3(signature)]
 #[pyfunction]
+#[pyo3(signature = (gene_name, gene_exp, gene_sets, weight = 1.0, min_size = 5, max_size = 500, nperm = None, ctype = CorrelType::Rank, threads = 4,seed = 0))]
 fn ssgsea_rs(
     gene_name: Vec<String>,
     gene_exp: Vec<Vec<f64>>,
@@ -173,6 +175,39 @@ fn ssgsea_rs(
     }
     Ok(gsea)
 }
+/// Run GSVA (Gene Set Variation Analysis)
+///
+/// Compute gene set variation scores from the input gene expression data
+///
+/// Parameters
+/// ----------
+/// gene_name: list-like of str
+///     Gene names
+/// gene_expr: array-like of float
+///     Gene expression data
+/// gene_sets: dict-like of str : list-like of str
+///     Gene sets
+/// kcdf: bool
+///     Use kernel density estimation
+/// rnaseq: bool
+///     Use RNA-seq data
+/// mx_diff: bool
+///     Use maximum difference between genes
+/// abs_rnk: bool
+///     Use absolute rank
+/// tau: float
+///     Weight for pathway score
+/// min_size: int
+///     Minimum number of genes in a gene set
+/// max_size: int
+///     Maximum number of genes in a gene set
+/// threads: int
+///     Number of threads
+///
+/// Returns
+/// -------
+/// GSEAResult
+///     A GSEAResult object containing the GSVA results
 #[pyfunction]
 fn gsva_rs(
     gene_name: Vec<String>,
@@ -194,8 +229,17 @@ fn gsva_rs(
     Ok(gs)
 }
 
+/// Python module for GSEA (Gene Set Enrichment Analysis) and ssGSEA
+/// 
+/// This module provides four functions:
+/// 
+/// - `gsea_rs`: performs GSEA
+/// - `prerank_rs`: performs GSEA preranking
+/// - `prerank2d_rs`: performs GSEA preranking with multiple input datasets
+/// - `ssgsea_rs`: performs ssGSEA
+/// - `gsva_rs`: performs GSVA
 #[pymodule]
-fn gse(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+fn gse(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     // m.add_class::<GSEAResult>()?;
     m.add_class::<GSEASummary>()?;
     m.add_class::<GSEAResult>()?;

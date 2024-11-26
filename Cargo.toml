@@ -2,7 +2,7 @@
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [package]
 name = "gseapy"
-version = "1.1.0"
+version = "1.1.4"
 authors = ["Zhuoqing Fang <fzq518@gmail.com>"]
 description = "Gene Set Enrichment Analysis in Rust."
 license-file = "LICENSE.md"
@@ -25,7 +25,7 @@ extension-module = ["pyo3"]
 
 
 [dependencies]
-pyo3 = { version = "0.16.5", features = ["extension-module"], optional = true }
+pyo3 = { version = "0.23.2", features = ["extension-module"], optional = true }
 rand = {version = "*", features = ['small_rng']}
 rayon = "*"
 csv = "*"
