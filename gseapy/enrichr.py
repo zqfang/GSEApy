@@ -54,6 +54,8 @@ class Enrichr(object):
         self._organism = None
         self.ENRICHR_URL = "http://maayanlab.cloud"
         self.ENRICHR_URL_SPEED = "https://maayanlab.cloud/speedrichr"
+        self._gene_isupper = True
+        self._gene_toupper = False
         # init logger
         self.prepare_outdir()
 
@@ -168,17 +170,17 @@ class Enrichr(object):
                 genes = (
                     self.gene_list.iloc[:, :3]
                     .apply(lambda x: "\t".join([str(i) for i in x]), axis=1)
-                    .tolist()
+                    .to_list()
                 )
             # input type with weight values
             elif self.gene_list.shape[1] == 2:
                 genes = self.gene_list.apply(
                     lambda x: ",".join([str(i) for i in x]), axis=1
-                ).tolist()
+                ).to_list()
             else:
-                genes = self.gene_list.squeeze().tolist()
+                genes = self.gene_list.squeeze().to_list()
         elif isinstance(self.gene_list, pd.Series):
-            genes = self.gene_list.squeeze().tolist()
+            genes = self.gene_list.squeeze().to_list()
         else:
             # get gene lists or bed file, or gene list with weighted values.
             genes = []
@@ -189,6 +191,8 @@ class Enrichr(object):
         if not genes:
             raise ValueError("Gene list cannot be empty")
 
+        # convert to list and remove whitespace
+        genes = [g.strip() for g in genes]
         self._isezid = all(map(self._is_entrez_id, genes))
         if self._isezid:
             self._gls = set(map(int, genes))
@@ -244,6 +248,25 @@ class Enrichr(object):
         self._logger.info(
             "{} genes successfully recognized by Enrichr".format(returnedN)
         )
+
+    def check_uppercase(self, gene_list: List[str]):
+        """
+        Check whether a list of gene names are mostly in uppercase.
+
+        Parameters
+        ----------
+        gene_list : list
+            A list of gene names
+
+        Returns
+        -------
+        bool
+            Whether the list of gene names are mostly in uppercase
+        """
+        is_upper = [s.isupper() for s in gene_list]
+        if sum(is_upper) / len(is_upper) >= 0.9:
+            return True
+        return False
 
     def get_results_with_background(
         self, gene_list: List[str], background: List[str]
@@ -493,8 +516,6 @@ class Enrichr(object):
         """
         set background genes
         """
-        if hasattr(self, "_bg") and self._bg:
-            return self._bg
 
         self._bg = set()
         if self.background is None:
@@ -504,7 +525,7 @@ class Enrichr(object):
                 for term, genes in gmt.items():
                     bg = bg.union(set(genes))
                 self._logger.info(
-                    "Background is not set! Use all %s genes in %s."
+                    "  Background is not set! Use all %s genes in %s."
                     % (len(bg), self._gs)
                 )
                 self._bg = bg
@@ -514,7 +535,7 @@ class Enrichr(object):
             elif isinstance(self.background, str):
                 # self.background = set(reduce(lambda x,y: x+y, gmt.values(),[]))
                 self._bg = self.get_background()
-                self._logger.info("Background: found %s genes" % (len(self._bg)))
+                self._logger.info("  Background: found %s genes" % (len(self._bg)))
             else:
                 raise Exception("Unsupported background data type")
         else:
@@ -523,7 +544,7 @@ class Enrichr(object):
                 it = iter(self.background)
                 self._bg = set(self.background)
             except TypeError:
-                self._logger.error("Unsupported background data type")
+                self._logger.error("  Unsupported background data type")
 
         return self._bg
 
@@ -541,9 +562,29 @@ class Enrichr(object):
             Term Overlap P-value Odds Ratio Combinde Score Adjusted_P-value Genes
 
         """
+        # check gene cases
+        # self._gene_isupper = self.check_uppercase(self._gls)
+        top10 = list(gmt.keys())[:10]
+        _gls = self._gls
+        ups = []
+        _gene_toupper = False
+        for key in top10:
+            ups.append(self.check_uppercase(gmt[key]))
+        if all(ups) and (not self._gene_isupper):
+            _gls = [x.upper() for x in self._gls]
+            _gene_toupper = True  # set flag
+            self._logger.info(
+                "  Genes in GMT file are all in upper case, convert query to upper case."
+            )
+
         bg = self.parse_background(gmt)
+        self._logger.info(_gls[1:5])
+        self._logger.info(list(bg)[1:5])
+        if isinstance(bg, set) and (not self._gene_isupper) and _gene_toupper:
+            bg = {s.upper() for s in bg}  # convert bg to upper case, too
+            # self._logger.info("  Background is converted to upper case: %s" % list(bg)[1:5])
         # statistical testing
-        hgtest = list(calc_pvalues(query=self._gls, gene_sets=gmt, background=bg))
+        hgtest = list(calc_pvalues(query=_gls, gene_sets=gmt, background=bg))
         if len(hgtest) > 0:
             terms, pvals, oddr, olsz, gsetsz, genes = hgtest
             fdrs, rej = multiple_testing_correction(
@@ -567,7 +608,8 @@ class Enrichr(object):
         """run enrichr for one sample gene list but multi-libraries"""
 
         # read input file
-        genes_list = self.parse_genelists()
+        genes_list = self.parse_genelists()  #
+        self._gene_isupper = self.check_uppercase(self._gls)
 
         # self._logger.info("Connecting to Enrichr Server to get latest library names")
         gss = self.parse_genesets()
@@ -586,39 +628,34 @@ class Enrichr(object):
 
         for name, g in zip(self._gs_name, gss):
             self._logger.info("Run: %s " % name)
+            self._gs = name
             if isinstance(g, dict):
-                ## local mode
-                shortID, self._gs = str(id(g)), name
+                ## local mode, need to check gene cases
                 self._logger.debug(
-                    "Off-line enrichment analysis with library: %s" % (self._gs)
+                    "Off-line enrichment analysis with library: %s" % (name)
                 )
                 if self._isezid:
                     g = {k: list(map(int, v)) for k, v in g.items()}
                 res = self.enrich(g)
                 if res is None:
-                    self._logger.info(
-                        "No hits return, for gene set: Custom%s" % shortID
-                    )
+                    self._logger.info("No hits returned for library: %s" % name)
                     continue
             else:
-                ## online mode
-                self._gs = name
+                ## online mode, no need to check gene cases
                 self._logger.debug("Enrichr service using library: %s" % (name))
                 # self._logger.info("Enrichr Library: %s"% self._gs)
                 bg = self.parse_background()
                 # whether user input background
                 if isinstance(bg, set) and len(bg) > 0:
-                    shortID, res = self.get_results_with_background(
-                        genes_list, self._bg
-                    )
+                    shortID, res = self.get_results_with_background(genes_list, bg)
                 else:
                     shortID, res = self.get_results(genes_list)
 
             # Remember gene set library used
             res.insert(0, "Gene_set", name)
-            # Append to master dataframe
+            # Append to results
             self.results.append(res)
-            self.res2d = res
+            self.res2d = res  # save last result
             if self._outdir is None:
                 continue
             outfile = "%s/%s.%s.%s.reports.txt" % (
@@ -643,6 +680,9 @@ class Enrichr(object):
                     ofname=outfile.replace("txt", self.format),
                 )
                 self._logger.debug("Generate figures")
+        if len(self.results) == 0:
+            self._logger.error("No hits returned for all input gene sets!")
+            return
         self.results = pd.concat(self.results, ignore_index=True)
         self._logger.info("Done.")
 

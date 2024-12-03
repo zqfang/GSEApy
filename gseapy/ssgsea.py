@@ -127,6 +127,7 @@ class SingleSampleGSEA(GSEAbase):
         normdat = self.norm_samples(data)
         self.ranking = normdat
         # filtering out gene sets and build gene sets dictionary
+        self._gene_isupper = self.check_uppercase(gene_list=normdat.index.values)
         gmt = self.load_gmt(gene_list=normdat.index.values, gmt=self.gene_sets)
         self.gmt = gmt
         self._logger.info(
@@ -149,8 +150,14 @@ class SingleSampleGSEA(GSEAbase):
         assert self.min_size <= self.max_size
         if self._outdir:
             mkdirs(self.outdir)
+
+        gene_names = df.index.to_list()
+        if (not self._gene_isupper) and self._gene_toupper:
+            gene_names = [x.upper() for x in gene_names]
+            self._logger.info("Genes are converted to uppercase.")
+
         gsum = ssgsea_rs(
-            df.index.values.tolist(),
+            gene_names,
             df.values.tolist(),
             gmt,
             self.weight,

@@ -13,63 +13,63 @@ from gseapy.plot import GSEAPlot, TracePlot, gseaplot, heatmap
 from gseapy.utils import DEFAULT_CACHE_PATH, log_init, mkdirs, retry
 
 
-class GMT(dict):
+class GMT:
     def __init__(
         self,
         mapping: Optional[Dict[str, str]] = None,
         description: Optional[str] = None,
+        source: Optional[str] = None,
     ):
         """
         wrapper of dict. this helps merge multiple dict into one
         the original key will changed to new key with suffix '__{description}'
         """
-        if description is None:
-            description = ""
         self.description = description
-        _mapping = {}
+        self.source = source
+        self._mapping = {}
         if mapping is not None:
-            for key, value in mapping.items():
-                k = key + "__" + self.description
-                _mapping[k] = value
-        super().__init__(_mapping)
+            self.update(mapping)
+
+    def update(self, mapping: Dict[str, str]):
+        """
+        update the mapping in place
+        """
+        for key, value in mapping.items():
+            k = key + "__" + self.description if self.description else key
+            self._mapping[k] = value
 
     def apply(self, func):
         """apply function in place"""
-        for key, value in self.items():
-            self[key] = func(value)
+        for key, value in self._mapping.items():
+            self._mapping[key] = func(value)
 
     def is_empty(self):
-        return len(self) == 0
+        return len(self._mapping) == 0
 
     def write(self, ofname: str):
         """
         write gmt file to disk
         """
         with open(ofname, "w") as out:
-            for key, value in self.items():
+            for key, value in self._mapping.items():
                 collections = key.split("__")
                 collections += list(value)
                 out.write("\t".join(collections) + "\n")
 
-    def _read(path):
-        mapping = {}
-        with open(path, "r") as inp:
-            for line in inp:
-                items = line.strip().split("\t")
-                key = items[0]
-                if items[1] != "":
-                    key += "__" + items[1]
-                mapping[key] = items[2:]
-        return mapping
-
     @classmethod
-    def read(cls, paths):
+    def read(cls, paths, source=None):
         paths = paths.strip().split(",")
         # mapping
         mapping = {}
         for path in paths:
-            mapping.update(cls._read(path))
-        return cls(mapping)
+            with open(path, "r") as inp:
+                for line in inp:
+                    items = line.strip().split("\t")
+                    key = items[0]
+                    if items[1] != "":
+                        key += "__" + items[1]
+                    mapping[key] = items[2:]
+        return cls(mapping, source=source)
 
 
 class GSEAbase(object):
@@ -98,7 +98,8 @@ class GSEAbase(object):
         self.pheno_neg = ""
         self.permutation_num = 0
         self._LIBRARY_LIST_URL = "https://maayanlab.cloud/speedrichr/api/listlibs"
-
+        self._gene_isupper = True
+        self._gene_toupper = False
         self._set_cores()
         # init logger
         self.prepare_outdir()
@@ -238,6 +239,25 @@ class GSEAbase(object):
             df = df.replace({col: col_min_max for col in df.columns})
         return df
 
+    def check_uppercase(self, gene_list: List[str]):
+        """
+        Check whether a list of gene names are mostly in uppercase.
+
+        Parameters
+        ----------
+        gene_list : list
+            A list of gene names
+
+        Returns
+        -------
+        bool
+            Whether the list of gene names are mostly in uppercase
+        """
+        is_upper = [s.isupper() for s in gene_list]
+        if sum(is_upper) / len(is_upper) >= 0.9:
+            return True
+        return False
+
     def make_unique(self, rank_metric: pd.DataFrame, col_idx: int) -> pd.DataFrame:
         """
         make gene id column unique by adding a digit, similar to R's make.unique
@@ -309,14 +329,23 @@ class GSEAbase(object):
         subsets = list(genesets_dict.keys())
         entry1st = genesets_dict[subsets[0]]
         gene_dict = {g: i for i, g in enumerate(gene_list)}
+        if not self._gene_isupper:
+            gene_dict_upper = {g.upper(): i for i, g in enumerate(gene_list)}
         for subset in subsets:
             subset_list = set(genesets_dict.get(subset))  # remove duplicates
             # drop genes not found in the gene_dict
             gene_overlap = [g for g in subset_list if g in gene_dict]
-            genesets_dict[subset] = gene_overlap
+            # try uppercase version of gene symbols if overlap is too small
+            if (not self._gene_isupper) and len(gene_overlap) < self.min_size:
+                gene_overlap2 = [g for g in subset_list if g in gene_dict_upper]
+                # set flag to True, means use uppercase version of gene symbols
+                if len(gene_overlap2) > len(gene_overlap):
+                    gene_overlap = gene_overlap2
+                    self._gene_toupper = True
             tag_len = len(gene_overlap)
             if (self.min_size <= tag_len <= self.max_size) and tag_len < len(gene_list):
                 # tag_len should < gene_list
+                genesets_dict[subset] = gene_overlap
                 continue
             del genesets_dict[subset]
 

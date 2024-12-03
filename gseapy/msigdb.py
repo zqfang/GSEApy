@@ -1,8 +1,7 @@
 import re
-
 import pandas as pd
 import requests
-
+from io import StringIO
 
 class Msigdb:
     def __init__(self, dbver: str = "2023.1.Hs"):
@@ -26,7 +25,7 @@ class Msigdb:
         """
         resp = requests.get(self.url)
         if resp.ok:
-            d = pd.read_html(resp.text)[0]
+            d = pd.read_html(StringIO(resp.text))[0]
             # remove item : parent dictory and NA columns
             d = d.dropna(how="all").iloc[1:, 1:3].reset_index(drop=True)
             d.iloc[:, 0] = d.iloc[:, 0].str.rstrip("/")
@@ -92,7 +91,7 @@ class Msigdb:
         url = self.url + db
         resp = requests.get(url)
         if resp.ok:
-            d = pd.read_html(resp.text)[0]
+            d = pd.read_html(StringIO(resp.text))[0]
             # remove item : parent dictory and NA columns
             d = d.dropna(how="all").iloc[1:, 1:4]
             d = d[d.iloc[:, 0].str.match(self._pattern)]

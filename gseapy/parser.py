@@ -94,6 +94,7 @@ def get_library(
     organism: str = "Human",
     min_size: int = 0,
     max_size: int = 2000,
+    save: Optional[str] = None,
     gene_list: Optional[List[str]] = None,
 ) -> Dict[str, List[str]]:
     """Parse gene_sets.gmt(gene set database) file or download from enrichr server.
@@ -106,6 +107,8 @@ def get_library(
 
     :param min_size: Minimum allowed number of genes for each gene set. Default: 0.
     :param max_size: Maximum allowed number of genes for each gene set. Default: 2000.
+
+    :param str save: the path to save the filtered gene set database.
 
     :param gene_list: if input a gene list, min and max overlapped genes between gene set and gene_list are kept.
 
@@ -170,6 +173,13 @@ def get_library(
             + "Note: Gene names for gseapy is case sensitive."
         )
 
+    if save is not None:
+        gmtout = open(save, "w")
+        for k, v in genesets_dict.items():
+            outline = "%s\t%s\t%s\n" % (k, name, "\t".join(v))
+            gmtout.write(outline)
+        gmtout.close()
+
     return genesets_dict
 
 
@@ -233,11 +243,14 @@ def get_library_name(organism: str = "Human") -> List[str]:
     return sorted(libs)
 
 
-def download_library(name: str, organism: str = "human") -> Dict[str, List[str]]:
+def download_library(
+    name: str, organism: str = "human", filename: str = None
+) -> Dict[str, List[str]]:
     """download enrichr libraries.
 
     :param str name: the enrichr library name. see `gseapy.get_library_name()`.
     :param str organism: Select one from { 'Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm' }
+    :param str filename: the file name to save if not None.
     :return dict: gene_sets of the enrichr library from selected organism
 
 
@@ -299,12 +312,18 @@ def download_library(name: str, organism: str = "human") -> Dict[str, List[str]]
         )
     # reformat to dict
     genesets_dict = {}
-    # outname = os.path.join(DEFAULT_CACHE_PATH,  "enrichr.%s.gmt" % libname)
     for line in response.iter_lines(chunk_size=1024, decode_unicode="utf-8"):
         line = line.strip().split("\t")
         k = line[0]
         v = map(lambda x: x.split(",")[0], line[2:])
         v = list(filter(lambda x: True if len(x) else False, v))
         genesets_dict[k] = v
+
+    if filename is not None:
+        gmtout = open(filename, "w")
+        for k, v in genesets_dict.items():
+            outline = "%s\t%s\t%s\n" % (k, name, "\t".join(v))
+            gmtout.write(outline)
+        gmtout.close()
 
     return genesets_dict

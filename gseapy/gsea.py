@@ -43,6 +43,59 @@ class GSEA(GSEAbase):
         seed: int = 123,
         verbose: bool = False,
     ):
+        """
+        GSEA main tool.
+
+        Parameters
+        ----------
+        data : pandas.DataFrame or str
+            Data table with genes in the index and samples in the columns.
+            If str, the file path to the data file (e.g. .txt, .csv, .tsv).
+        gene_sets : list or str or dict
+            Gene sets file path or list of gene sets.
+            If str, the file path to the gene sets file (e.g. .gmt, .txt, .csv).
+            If dict, a dictionary of gene sets.
+        classes : list or str or dict
+            Phenotype labels file path or list of phenotype labels.
+            If str, the file path to the phenotype labels file (e.g. .txt, .csv, .tsv).
+            If dict, a dictionary of phenotype labels.
+        outdir : str, optional
+            Output directory. If not provided, the output will be saved.
+        min_size : int, optional
+            Minimum number of genes in a gene set. Default is 15.
+        max_size : int, optional
+            Maximum number of genes in a gene set. Default is 500.
+        permutation_num : int, optional
+            Number of permutations. Default is 1000.
+        weight : float, optional
+            Weighting factor used in the calculation of the ES. Default is 1.0.
+        permutation_type : str, optional
+            Type of permutation, either 'phenotype' or 'gene_set'. Default is 'phenotype'.
+        method : str, optional
+            Metric used in the calculation of the ES. Default is 'signal_to_noise'.
+        ascending : bool, optional
+            If True, the genes will be ranked in ascending order. Default is False.
+        threads : int, optional
+            Number of threads to use. Default is 1.
+        figsize : tuple, optional
+            Figure size for the enrichment plot. Default is (6.5, 6).
+        format : str, optional
+            Format of the output file. Default is 'pdf'.
+        graph_num : int, optional
+            Number of enrichment plots to generate. Default is 20.
+        no_plot : bool, optional
+            If True, no enrichment plots will be generated. Default is False.
+        seed : int, optional
+            Random seed for the permutation test. Default is 123.
+        verbose : bool, optional
+            If True, the progress bar will be shown. Default is False.
+
+        Examples
+        --------
+        >>> from gseapy import GSEA
+        >>> gsea = GSEA(data='expression.txt', gene_sets='gene_sets.gmt', classes='test.cls')
+        >>> gsea.run()
+        """
         super(GSEA, self).__init__(
             outdir=outdir,
             gene_sets=gene_sets,
@@ -255,6 +308,16 @@ class GSEA(GSEAbase):
             self.pheno_neg = neg
             self.groups = cls_vector
 
+        if self._outdir is not None:
+            self.to_cls(outdir=self.outdir)
+
+    def to_cls(self, outdir: str):
+        """Save group information to cls file"""
+        with open(os.path.join(outdir, "group.cls"), "w") as f:
+            f.write(f"{len(self.groups)} 2 1\n")
+            f.write(f"# {self.pheno_pos} {self.pheno_neg}\n")
+            f.write(" ".join(self.groups) + "\n")
+
     # @profile
     def run(self):
         """GSEA main procedure"""
@@ -279,13 +342,19 @@ class GSEA(GSEAbase):
         # select correct expression genes and values.
         dat, cls_dict = self.load_data()
         # filtering out gene sets and build gene sets dictionary
+        self._gene_isupper = self.check_uppercase(gene_list=dat.index.values)
         gmt = self.load_gmt(gene_list=dat.index.values, gmt=self.gene_sets)
         self.gmt = gmt
         self._logger.info(
             "%04d gene_sets used for further statistical testing....." % len(gmt)
         )
         self._logger.info("Start to run GSEA...Might take a while..................")
-        # cpu numbers
+        # gene symbols
+        gene_names = dat.index.to_list()
+        if (not self._gene_isupper) and self._gene_toupper:
+            gene_names = [x.upper() for x in gene_names]
+            self._logger.info("Genes are converted to uppercase.")
+
         # compute ES, NES, pval, FDR, RES
         if self.permutation_type == "gene_set":
             # ranking metrics calculation.
@@ -298,7 +367,7 @@ class GSEA(GSEAbase):
                 ascending=self.ascending,
             )
             gsum = prerank_rs(
-                dat2.index.values.tolist(),  # gene list
+                gene_names,  # gene list
                 dat2.squeeze().values.tolist(),  # ranking values
                 gmt,  # must be a dict object
                 self.weight,
@@ -318,7 +387,7 @@ class GSEA(GSEAbase):
                 map(lambda x: True if x == self.pheno_pos else False, self.groups)
             )
             gsum = gsea_rs(
-                dat.index.values.tolist(),
+                gene_names,
                 dat.values.tolist(),  # each row is gene values across samples
                 gmt,
                 group,
@@ -478,12 +547,17 @@ class Prerank(GSEAbase):
         # Start Analysis
         self._logger.info("Parsing data files for GSEA.............................")
         # filtering out gene sets and build gene sets dictionary
+        self._gene_isupper = self.check_uppercase(gene_list=dat2.index.values)
         gmt = self.load_gmt(gene_list=dat2.index.values, gmt=self.gene_sets)
         self.gmt = gmt
         self._logger.info(
             "%04d gene_sets used for further statistical testing....." % len(gmt)
         )
         self._logger.info("Start to run GSEA...Might take a while..................")
+        gene_names = dat2.index.to_list()
+        if (not self._gene_isupper) and self._gene_toupper:
+            gene_names = [x.upper() for x in gene_names]
+            self._logger.info("Genes are converted to uppercase.")
         # compute ES, NES, pval, FDR, RES
         if isinstance(dat2, pd.DataFrame):
             _prerank = prerank2d_rs
@@ -491,7 +565,7 @@ class Prerank(GSEAbase):
             _prerank = prerank_rs
         # run
         gsum = _prerank(
-            dat2.index.values.tolist(),  # gene list
+            gene_names,  # gene list
             dat2.values.tolist(),  # ranking values
             gmt,  # must be a dict object
             self.weight,

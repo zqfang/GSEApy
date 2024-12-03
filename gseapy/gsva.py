@@ -95,6 +95,7 @@ class GSVA(GSEAbase):
         self.data = df
         # normalized samples, and rank
         # filtering out gene sets and build gene sets dictionary
+        self._gene_isupper = self.check_uppercase(gene_list=df.index.values)
         gmt = self.load_gmt(gene_list=df.index.values, gmt=self.gene_sets)
         self.gmt = gmt
         self._logger.info(
@@ -102,9 +103,13 @@ class GSVA(GSEAbase):
         )
         # start analysis
         self._logger.info("Start to run GSVA...Might take a while................")
+        gene_names = df.index.to_list()
+        if (not self._gene_isupper) and self._gene_toupper:
+            gene_names = [x.upper() for x in gene_names]
+            self._logger.info("Genes are converted to uppercase.")
         # run
         gsum = gsva_rs(
-            df.index.values.tolist(),
+            gene_names,
             df.values.tolist(),
             gmt,
             self.kernel,
