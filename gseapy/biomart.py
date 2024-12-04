@@ -98,7 +98,7 @@ class Biomart:
             # "\n<MartRegistry>\n"
             if request.ok and request.text.startswith("\n<MartRegistry>\n"):
                 self.host = hosts[i]
-                self._marts =self._get_marts(request.text)
+                self._marts = self._get_marts(request.text)
                 break
             self._logger.warning(
                 "host {} is not reachable, try {} ".format(
@@ -144,8 +144,8 @@ class Biomart:
             xml += line
         xml += self.footer
         return xml
-    
-    def _get_mart(self, text:str):
+
+    def _get_mart(self, text: str):
         """
         Parse the xml text and return a dataframe of supported marts.
 
@@ -166,8 +166,7 @@ class Biomart:
         marts = marts.loc[:, ["database", "displayName", "name"]]
         marts.columns = ["Version", "DisplayName", "Mart"]
         # get supported marts
-        return marts.loc[:, ["Mart", "Version"]] 
-
+        return marts.loc[:, ["Mart", "Version"]]
 
     def get_marts(self):
         """Get available marts and their names."""
