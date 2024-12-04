@@ -98,7 +98,7 @@ class Biomart:
             # "\n<MartRegistry>\n"
             if request.ok and request.text.startswith("\n<MartRegistry>\n"):
                 self.host = hosts[i]
-                self._marts = self._get_marts(request.text)
+                self._marts = self._get_mart(request.text)
                 break
             self._logger.warning(
                 "host {} is not reachable, try {} ".format(
