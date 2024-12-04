@@ -410,6 +410,10 @@ class GSEA(GSEAbase):
         self._heatmat(df=dat.iloc[gsum.indices[0]], classes=self.groups)
         # write output and plotting
         self.to_df(gsum.summaries, gmt, self.ranking)
+        if self._outdir is not None:
+            self.ranking.to_csv(
+                os.path.join(self.outdir, "gsea_data.rnk"), sep="\t", header=False
+            )
         self._logger.info("Congratulations. GSEApy ran successfully.................\n")
 
         return
@@ -582,8 +586,8 @@ class Prerank(GSEAbase):
             indices=gsum.indices if isinstance(dat2, pd.DataFrame) else None,
         )
         if self._outdir is not None:
-            self._logger.info(
-                "Start to generate gseapy reports, and produce figures..."
+            self.ranking.to_csv(
+                os.path.join(self.outdir, "prerank_data.rnk"), sep="\t", header=False
             )
 
         self._logger.info("Congratulations. GSEApy runs successfully................\n")
