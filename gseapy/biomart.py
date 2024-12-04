@@ -73,7 +73,7 @@ class Biomart:
         self.reset()
 
         # get supported marts
-        self._marts = self.get_marts()["Mart"].to_list()
+        self._marts = None
 
     def __del__(self):
         handlers = self._logger.handlers[:]
@@ -84,31 +84,29 @@ class Biomart:
     def _set_host(self, host: str):
         """set host"""
 
-        hosts = ["www.ensembl.org", "asia.ensembl.org", "useast.ensembl.org"]
+        hosts = ["useast.ensembl.org", "asia.ensembl.org"]
         hosts.insert(0, host)
-        secure = ""
-
-        # if self._secure:
-        #     secure = "s"
+        secure = "s"
         # if host not work, select next
         i = 0
         while i < len(hosts):
-            url = "http{}://{}/biomart/martservice".format(secure, hosts[i])
-            request = requests.head(url)
-            if request.status_code in [200]:
+            url = "http{}://{}/biomart/martservice?type=registry".format(
+                secure, hosts[i]
+            )
+            request = requests.get(url)
+            # '<html>\n\n<head>\n  <title>Service unavailable</title>\n
+            # "\n<MartRegistry>\n"
+            if request.ok and request.text.startswith("\n<MartRegistry>\n"):
                 self.host = hosts[i]
                 break
-            else:
-                self._logger.warning(
-                    "host {} is not reachable, will try {} ".format(
-                        hosts[i], hosts[i % len(hosts)]
-                    )
+            self._logger.warning(
+                "host {} is not reachable, try {} ".format(
+                    hosts[i], hosts[(i + 1) % len(hosts)]
                 )
+            )
             i += 1
         if i == len(hosts):
-            raise ValueError(
-                "host is not reachable. Please check your input or try again later."
-            )
+            self._logger.warning("hosts is not reachable. Please try again later.")
 
     def add_filter(self, name: str, value: Iterable[str]):
         """
@@ -152,18 +150,21 @@ class Biomart:
             host=self.host, i=self._id
         )
         resp = requests.get(url)
-        if resp.ok:
-            # marts = pd.read_xml(resp.text)
+        if resp.ok and resp.text.startswith("\n<MartRegistry>\n"):
             marts = [e.attrib for e in ET.XML(resp.text)]
             marts = pd.DataFrame(marts)
             marts = marts.loc[:, ["database", "displayName", "name"]]
             marts.columns = ["Version", "DisplayName", "Mart"]
+            # get supported marts
+            self._marts = marts["Mart"].to_list()
             return marts.loc[:, ["Mart", "Version"]]
 
         return resp.text
 
     def get_datasets(self, mart: str = "ENSEMBL_MART_ENSEMBL"):
         """Get available datasets from mart you've selected"""
+        if self._marts is None:
+            self.get_marts()
         if mart not in self._marts:
             raise ValueError(
                 "Provided mart name (%s) is not valid. see 'names' attribute" % mart
