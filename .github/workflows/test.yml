@@ -28,7 +28,7 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install --upgrade setuptools
         python -m pip install wheel
-        python -m pip install tqdm
+        python -m pip install lxml
         pip install -r requirements.txt
     - name: Lint with flake8
       run: |
@@ -83,7 +83,4 @@ jobs:
           CIBW_MANYLINUX_I686_IMAGE: quay.io/pypa/manylinux2014_i686:latest
           CIBW_SKIP: cp36-* pp* *win32 *musl*
           CIBW_PRERELEASE_PYTHONS: True
-          CIBW_BEFORE_BUILD: pip install -U setuptools-rust
-          # CIBW_TEST_REQUIRES: numpy scipy pandas requests
-        
 
