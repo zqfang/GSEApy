@@ -98,6 +98,7 @@ class Biomart:
             # "\n<MartRegistry>\n"
             if request.ok and request.text.startswith("\n<MartRegistry>\n"):
                 self.host = hosts[i]
+                self._marts =self._get_marts(request.text)
                 break
             self._logger.warning(
                 "host {} is not reachable, try {} ".format(
@@ -143,29 +144,50 @@ class Biomart:
             xml += line
         xml += self.footer
         return xml
+    
+    def _get_mart(self, text:str):
+        """
+        Parse the xml text and return a dataframe of supported marts.
+
+        Parameters
+        ----------
+        text : str
+            a xml text
+
+        Returns
+        -------
+        marts : pd.DataFrame
+            a dataframe of supported marts with columns:
+                - Mart: the name of mart
+                - Version: the version of mart
+        """
+        marts = [e.attrib for e in ET.XML(text)]
+        marts = pd.DataFrame(marts)
+        marts = marts.loc[:, ["database", "displayName", "name"]]
+        marts.columns = ["Version", "DisplayName", "Mart"]
+        # get supported marts
+        return marts.loc[:, ["Mart", "Version"]] 
+
 
     def get_marts(self):
         """Get available marts and their names."""
         url = "https://{host}/biomart/martservice?type=registry&requestid=gseapy{i}".format(
             host=self.host, i=self._id
         )
+        if self._marts is not None:
+            return self._marts
         resp = requests.get(url)
         if resp.ok and resp.text.startswith("\n<MartRegistry>\n"):
-            marts = [e.attrib for e in ET.XML(resp.text)]
-            marts = pd.DataFrame(marts)
-            marts = marts.loc[:, ["database", "displayName", "name"]]
-            marts.columns = ["Version", "DisplayName", "Mart"]
-            # get supported marts
-            self._marts = marts["Mart"].to_list()
-            return marts.loc[:, ["Mart", "Version"]]
+            self._marts = self._get_mart(resp.text)
+            return self._marts
 
         return resp.text
 
     def get_datasets(self, mart: str = "ENSEMBL_MART_ENSEMBL"):
         """Get available datasets from mart you've selected"""
-        if self._marts is None:
-            self.get_marts()
-        if mart not in self._marts:
+
+        marts = self.get_marts()
+        if mart not in marts["Mart"].values:
             raise ValueError(
                 "Provided mart name (%s) is not valid. see 'names' attribute" % mart
             )
