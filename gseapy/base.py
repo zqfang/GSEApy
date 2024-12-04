@@ -329,19 +329,24 @@ class GSEAbase(object):
         subsets = list(genesets_dict.keys())
         entry1st = genesets_dict[subsets[0]]
         gene_dict = {g: i for i, g in enumerate(gene_list)}
-        if not self._gene_isupper:
+        ups = []
+        for s in subsets[:20]:
+            ups.append(self.check_uppercase(genesets_dict[s]))
+
+        if (not self._gene_isupper) and all(ups):
+            # set flag to True, means use uppercase version of gene symbols
+            self._gene_toupper = True
             gene_dict_upper = {g.upper(): i for i, g in enumerate(gene_list)}
+
+        # filter gene sets
         for subset in subsets:
             subset_list = set(genesets_dict.get(subset))  # remove duplicates
-            # drop genes not found in the gene_dict
-            gene_overlap = [g for g in subset_list if g in gene_dict]
-            # try uppercase version of gene symbols if overlap is too small
-            if (not self._gene_isupper) and len(gene_overlap) < self.min_size:
-                gene_overlap2 = [g for g in subset_list if g in gene_dict_upper]
-                # set flag to True, means use uppercase version of gene symbols
-                if len(gene_overlap2) > len(gene_overlap):
-                    gene_overlap = gene_overlap2
-                    self._gene_toupper = True
+            # drop genes not found in the gene list
+            if (not self._gene_isupper) and all(ups):
+                gene_overlap = [g for g in subset_list if g in gene_dict_upper]
+            else:
+                gene_overlap = [g for g in subset_list if g in gene_dict]
+
             tag_len = len(gene_overlap)
             if (self.min_size <= tag_len <= self.max_size) and tag_len < len(gene_list):
                 # tag_len should < gene_list

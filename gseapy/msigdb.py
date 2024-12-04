@@ -1,7 +1,9 @@
 import re
+from io import StringIO
+
 import pandas as pd
 import requests
-from io import StringIO
+
 
 class Msigdb:
     def __init__(self, dbver: str = "2023.1.Hs"):
