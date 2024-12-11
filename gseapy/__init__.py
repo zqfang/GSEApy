@@ -241,8 +241,8 @@ def ssgsea(
     :param bool verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
 
     :return: Return a ssGSEA obj.
-             All results store to  a dictionary, access enrichment score by obj.resultsOnSamples,
-             and normalized enrichment score by obj.res2d.
+             All results store to  a dictionary, access enrichment score or
+             normalized enrichment score by obj.res2d or obj.results.
              if permutation_num > 0, additional results contain::
 
                  | {
