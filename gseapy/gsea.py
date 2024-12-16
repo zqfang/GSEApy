@@ -518,6 +518,12 @@ class Prerank(GSEAbase):
         parse rnk input
         """
         rank_metric = self._load_data(self.rnk)  # gene id is the first column
+        # only two column dataframe is accepted
+        if rank_metric.shape[1] > 2:
+            raise ValueError(
+                "Input gene rankings should be a two column dataframe, "
+                + "with the first column as gene names and the second column as prerank values."
+            )
         if rank_metric.select_dtypes(np.number).shape[1] == 1:
             # return series
             return self._load_ranking(rank_metric)
