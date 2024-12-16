@@ -472,11 +472,15 @@ class Prerank(GSEAbase):
 
         """
         # load data
-        # sort ranking values from high to low
         rnk_cols = rank_metric.columns
+        # if case the input has more than two columns, only select the last two
+        # this happens when gene id is index, while gene name and ranking value are columns
+        if len(rnk_cols) > 2:
+            rank_metric = rank_metric.iloc[:, -2:]
+            rnk_cols = rank_metric.columns
         # if not ranking.is_monotonic_decreasing:
         #     ranking = ranking.sort_values(ascending=self.ascending)
-        rank_metric.sort_values(by=rnk_cols[1], ascending=self.ascending, inplace=True)
+        rank_metric.sort_values(by=rnk_cols[-1], ascending=self.ascending, inplace=True)
         # drop na values
         if rank_metric.isnull().any(axis=1).sum() > 0:
             self._logger.warning(
@@ -518,12 +522,6 @@ class Prerank(GSEAbase):
         parse rnk input
         """
         rank_metric = self._load_data(self.rnk)  # gene id is the first column
-        # only two column dataframe is accepted
-        if rank_metric.shape[1] > 2:
-            raise ValueError(
-                "Input gene rankings should be a two column dataframe, "
-                + "with the first column as gene names and the second column as prerank values."
-            )
         if rank_metric.select_dtypes(np.number).shape[1] == 1:
             # return series
             return self._load_ranking(rank_metric)
