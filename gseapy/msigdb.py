@@ -7,11 +7,12 @@ import requests
 
 class Msigdb:
     url = "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/"
+    _pattern = re.compile(r"(\w.+)\.(v\d.+)\.(entrez|symbols)\.gmt")
+
     def __init__(self, dbver: str = "2023.1.Hs"):
         """
         dbver: MSIGDB version number. default: 2023.1.Hs
         """
-        self._pattern = re.compile(r"(\w.+)\.(v\d.+)\.(entrez|symbols)\.gmt")
         self._db_version = self._get_db_version()
         if self._db_version is None:
             raise Exception("Failed to fetch available MSIGDB versions")
@@ -79,7 +80,7 @@ class Msigdb:
         if d is not None:
             categories = (
                 d.iloc[:, 0]
-                .apply(lambda s: self._pattern.match(s).groups()[0])
+                .apply(lambda s: cls._pattern.match(s).groups()[0])
                 .drop_duplicates()
             )
             return categories.to_list()
@@ -100,6 +101,6 @@ class Msigdb:
             d = pd.read_html(StringIO(resp.text))[0]
             # remove item : parent dictory and NA columns
             d = d.dropna(how="all").iloc[1:, 1:4]
-            d = d[d.iloc[:, 0].str.match(self._pattern)]
+            d = d[d.iloc[:, 0].str.match(cls._pattern)]
             return d.reset_index(drop=True)
         return None
