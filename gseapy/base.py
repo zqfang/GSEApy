@@ -175,9 +175,9 @@ class GSEAbase(object):
             # handle dataframe with gene_name as index.
             self._logger.debug("Input data is a DataFrame with gene names")
             # handle index is already gene_names
-            if rank_metric.index.dtype == "O":
+            if not isinstance(rank_metric.index, pd.RangeIndex):
                 rank_metric = rank_metric.reset_index()
-                # rank_metric.set_index(keys=rank_metric.columns[0], inplace=True)
+
             # if rank_metric.columns.dtype != "O":
             rank_metric.columns = rank_metric.columns.astype(str)
 
