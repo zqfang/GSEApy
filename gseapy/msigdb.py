@@ -6,18 +6,20 @@ import requests
 
 
 class Msigdb:
+    url = "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/"
+    _pattern = re.compile(r"(\w.+)\.(v\d.+)\.(entrez|symbols)\.gmt")
+
     def __init__(self, dbver: str = "2023.1.Hs"):
         """
         dbver: MSIGDB version number. default: 2023.1.Hs
         """
-        self.url = "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/"
-        self._pattern = re.compile(r"(\w.+)\.(v\d.+)\.(entrez|symbols)\.gmt")
         self._db_version = self._get_db_version()
         if self._db_version is None:
             raise Exception("Failed to fetch available MSIGDB versions")
         self.categoires = self.list_category(dbver)
 
-    def _get_db_version(self):
+    @classmethod
+    def _get_db_version(cls):
         """
         Get all available MSIGDB versions
 
@@ -25,7 +27,7 @@ class Msigdb:
             A pd.DataFrame of all available MSIGDB versions.
             If failed to fetch, return None.
         """
-        resp = requests.get(self.url)
+        resp = requests.get(cls.url)
         if resp.ok:
             d = pd.read_html(StringIO(resp.text))[0]
             # remove item : parent dictory and NA columns
@@ -34,8 +36,9 @@ class Msigdb:
             return d
         return None
 
+    @classmethod
     def get_gmt(
-        self, category: str = "h.all", dbver: str = "2023.1.Hs", entrez: bool = False
+        cls, category: str = "h.all", dbver: str = "2023.1.Hs", entrez: bool = False
     ):
         """
         :params category: choose one from .list_category()
@@ -46,7 +49,7 @@ class Msigdb:
         identifier = "symbols"
         if entrez:
             identifier = "entrez"
-        url = f"{self.url}/{dbver}/{category}.v{dbver}.{identifier}.gmt"
+        url = f"{cls.url}/{dbver}/{category}.v{dbver}.{identifier}.gmt"
         resp = requests.get(url)
         if resp.ok:
             d = {}
@@ -67,22 +70,24 @@ class Msigdb:
         """
         return self._db_version
 
-    def list_category(self, dbver: str = "2023.1.Hs"):
+    @classmethod
+    def list_category(cls, dbver: str = "2023.1.Hs"):
         """
         dbver: MSIGDB version number. default: 2023.1.Hs
         see a list of dbver, call .list_dbver()
         """
-        d = self.list_gmt(dbver)
+        d = cls.list_gmt(dbver)
         if d is not None:
             categories = (
                 d.iloc[:, 0]
-                .apply(lambda s: self._pattern.match(s).groups()[0])
+                .apply(lambda s: cls._pattern.match(s).groups()[0])
                 .drop_duplicates()
             )
             return categories.to_list()
         return None
 
-    def list_gmt(self, db: str):
+    @classmethod
+    def list_gmt(cls, db: str):
         """
         list all gmt files in MSIGDB database.
 
@@ -90,12 +95,12 @@ class Msigdb:
         :return: a pandas DataFrame object
         """
 
-        url = self.url + db
+        url = cls.url + db
         resp = requests.get(url)
         if resp.ok:
             d = pd.read_html(StringIO(resp.text))[0]
             # remove item : parent dictory and NA columns
             d = d.dropna(how="all").iloc[1:, 1:4]
-            d = d[d.iloc[:, 0].str.match(self._pattern)]
+            d = d[d.iloc[:, 0].str.match(cls._pattern)]
             return d.reset_index(drop=True)
         return None
