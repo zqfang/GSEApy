@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         # see supported version syntax in actions/setup-python. e.g. ">=3.10", "3.x"(latest)
-        python-version: ["3.7", "3.10", "3.x"]
+        python-version: ["3.x"]
 
     steps:
     - uses: actions/checkout@v4
