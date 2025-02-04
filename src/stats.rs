@@ -453,6 +453,9 @@ impl GSEAResult {
         // let end = Instant::now();
         let mut sorted_metric: Vec<(Vec<usize>, Vec<f64>)> =
             es.phenotype_permutation(gene_exp, group, method, false);
+        // save indices and rankings
+        self.rankings.push(sorted_metric[0].1.to_owned());
+        self.indices.push(sorted_metric[0].0.to_owned());
         // weight 
         sorted_metric.iter_mut().for_each(|x| {
             x.1.iter_mut().for_each(|x| {
@@ -504,10 +507,6 @@ impl GSEAResult {
             self.stat(&mut summ);
         }
         self.summaries = summ;
-        // save indices and ranking
-        let (idx, rnk) = sorted_metric.first().unwrap();
-        self.rankings.push(rnk.to_owned());
-        self.indices.push(idx.to_owned());
     }
 
     pub fn prerank(&mut self, genes: &[String], metric: &[f64], gmt: &HashMap<&str, &[String]>) {
