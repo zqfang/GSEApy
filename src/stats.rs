@@ -451,8 +451,15 @@ impl GSEAResult {
     ) {
         let mut es = EnrichmentScore::new(genes, self.nperm, self.seed, false, false);
         // let end = Instant::now();
-        let sorted_metric: Vec<(Vec<usize>, Vec<f64>)> =
+        let mut sorted_metric: Vec<(Vec<usize>, Vec<f64>)> =
             es.phenotype_permutation(gene_exp, group, method, false);
+        // weight 
+        sorted_metric.iter_mut().for_each(|x| {
+            x.1.iter_mut().for_each(|x| {
+                *x = x.abs().powf(self.weight);
+            });
+        });
+
         // let end1 = Instant::now();
         // println!("Permutation time: {:.2?}", end1.duration_since(end));
 
@@ -465,29 +472,22 @@ impl GSEAResult {
             if gidx.len() > self.max_size || gidx.len() < self.min_size {
                 continue;
             }
-            let run_es = es.running_enrichment_score(&sorted_metric[0].1, &tag_new);
-
-            // // get es
-            // let ess: Vec<f64> = run_es.par_iter().map(|r| es.select_es(r)).collect();
+            // get es
+            let run_es = es.running_enrichment_score(sorted_metric[0].1.as_slice(), &tag_new);
+            //let es0: f64 = es.select_es(&run_es);
             let ess: Vec<f64> = sorted_metric
                 .par_iter()
                 .map(|(indices, gm)| {
-                    // weight the metrics
-                    let weighted_gm: Vec<f64> =
-                        gm.iter().map(|x| x.abs().powf(self.weight)).collect();
                     // update tag_indicator since you've update metric
                     let tag_new: Vec<f64> = indices.iter().map(|&i| tag[i]).collect();
                     // calculate ES
-                    let r = es.fast_random_walk(&weighted_gm, &tag_new);
+                    let r = es.fast_random_walk(gm, &tag_new);
                     r
                 })
                 .collect();
+
             // let (ess, run_es) = es.enrichment_score_pheno(&weighted_metric, &tag);
-            let esnull: Vec<f64> = if ess.len() > 1 {
-                ess[1..].to_vec()
-            } else {
-                Vec::new()
-            };
+            let esnull: Vec<f64> = if ess.len() > 1 { ess[1..].to_vec() } else { Vec::new() };
             let gss = GSEASummary {
                 term: term.to_string(),
                 es: ess[0],
