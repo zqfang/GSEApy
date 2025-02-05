@@ -635,7 +635,7 @@ class GSEAbase(object):
         if isinstance(rank_metric, pd.DataFrame) and (indices is not None):
             self._metric_dict = {str(c): n for c, n in enumerate(rank_metric.columns)}
             metric = {
-                n: rank_metric.iloc[indices[i], i] # series with gene_name indexed
+                n: rank_metric.iloc[indices[i], i]  # series with gene_name indexed
                 for i, n in enumerate(rank_metric.columns)  # indices is a 2d list
             }
         else:
