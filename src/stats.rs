@@ -569,26 +569,14 @@ impl GSEAResult {
                 gene_metric[j].push(*e);
             });
         });
-
-        // sort first and then set weight,
+        // sort first and then weight inside prerank()
         let weighted_sorted_metric: Vec<(Vec<usize>, Vec<f64>)> = gene_metric
             .into_par_iter()
-            .map(|rank| {
-                let mut tmp = rank.as_slice().argsort(false);
-                tmp.1.iter_mut().for_each(|x| {
-                    *x = x.abs().powf(self.weight);
-                });
-                return tmp;
-            })
+            .map(|rank| rank.as_slice().argsort(false))
             .collect();
-        // save indices
-        weighted_sorted_metric.iter().for_each(|(idx, m)| {
-            self.indices.push(idx.to_owned());
-        });
-        // build genes permutations
-        let mut es = EnrichmentScore::new(genes, self.nperm, self.seed, false, false);
-        let gperm = es.gene_permutation(); // gene permutation
 
+        // just a apply function wrap prerank
+        self.summaries.clear();
         let mut _all = Vec::<GSEASummary>::new();
         // let end1 = Instant::now();
         weighted_sorted_metric
@@ -597,52 +585,17 @@ impl GSEAResult {
             .for_each(|(i, (indices, metric))| {
                 // update the order of genes
                 let _genes: Vec<String> =
-                    indices.into_iter().map(|j| genes[j].to_string()).collect();
-                let od_genes = DynamicEnum::from(&_genes);
-                // write summary
-                let mut summ = Vec::<GSEASummary>::new();
-                for (&term, &gset) in gmt.iter() {
-                    // update tag indicator
-                    let gtag = od_genes.isin(gset);
-                    let gidx = es.hit_index(&gtag);
-                    if gidx.len() > self.max_size || gidx.len() < self.min_size {
-                        continue;
-                    }
-                    // note: update first element of gperm to get correct order of the gene ranking
-                    let mut tag_indicators: Vec<Vec<f64>> =
-                        gperm.par_iter().map(|de| de.isin(&gidx)).collect();
-                    tag_indicators[0] = gtag; // update
-                                              // get runing enrichment score
-                    let run_es: Vec<f64> = es.running_enrichment_score(&metric, &tag_indicators[0]);
-                    // let es0 = es.select_es(&run_es);
-                    let ess: Vec<f64> = tag_indicators
-                        .par_iter()
-                        .map(|tag| es.fast_random_walk(&metric, tag))
-                        .collect();
-
-                    let esnull: Vec<f64> = if ess.len() > 1 {
-                        ess[1..].to_vec()
-                    } else {
-                        Vec::new()
-                    };
-                    let gsu = GSEASummary {
-                        term: term.to_string(),
-                        es: ess[0],
-                        run_es: run_es,
-                        hits: gidx,     // hit index of each sample after sorting
-                        esnull: esnull, // len(ess) == len(gperm) == nperm + 1
-                        index: Some(i),
-                        ..Default::default()
-                    };
-                    summ.push(gsu);
-                }
-                // calculate nes, pval, fdr
-                if self.nperm > 0 {
-                    self.stat(&mut summ);
-                }
-                _all.append(&mut summ);
+                    indices.iter().map(|&j| genes[j].to_string()).collect();
+                // save indices
+                self.indices.push(indices);
+                self.prerank(&_genes, &metric, gmt);
+                // concat into one vector
+                self.summaries.iter_mut().for_each(|x| {
+                        x.index = Some(i); // keep track of the sample index
+                        _all.push(x.clone());
+                    });
             });
-
+        // store 
         self.summaries = _all;
     }
 

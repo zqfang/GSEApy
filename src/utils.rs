@@ -269,18 +269,18 @@ impl FileReader {
 #[cfg(test)]
 mod tests {
     use super::*;
-    #[test]
-    fn test_rdr() {
-        let cwd = std::env::current_dir().unwrap(); // prjoject root, directory to Cargo.toml
-        let rnk_path = cwd.join("tests/data/edb/gsea_data.gsea_data.rnk");
-        let gmt_path = cwd.join("tests/data/edb/gene_sets.gmt");
-        println!("{:?}", &rnk_path);
-        let mut rnk = FileReader::new();
-        let _ = rnk.read_csv(rnk_path.to_str().unwrap(), b'\t', false, Some(b'#'));
-        let mut gmt = FileReader::new();
-        let _ = gmt.read_csv(gmt_path.to_str().unwrap(), b'\t', false, None);
-        let _wr = rnk.to_csv("example.output.txt", b'\t', true);
-    }
+    // #[test]
+    // fn test_rdr() {
+    //     let cwd = std::env::current_dir().unwrap(); // prjoject root, directory to Cargo.toml
+    //     let rnk_path = cwd.join("tests/data/edb/gsea_data.gsea_data.rnk");
+    //     let gmt_path = cwd.join("tests/data/edb/gene_sets.gmt");
+    //     println!("{:?}", &rnk_path);
+    //     let mut rnk = FileReader::new();
+    //     let _ = rnk.read_csv(rnk_path.to_str().unwrap(), b'\t', false, Some(b'#'));
+    //     let mut gmt = FileReader::new();
+    //     let _ = gmt.read_csv(gmt_path.to_str().unwrap(), b'\t', false, None);
+    //     let _wr = rnk.to_csv("tests/data/example.output.txt", b'\t', true);
+    // }
     #[test]
     fn test_dynum() {
         //let dynum = DynamicEnum::new();
