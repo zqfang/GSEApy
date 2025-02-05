@@ -9,11 +9,11 @@ class Msigdb:
     url = "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/"
     _pattern = re.compile(r"(\w.+)\.(v\d.+)\.(entrez|symbols)\.gmt")
 
-    def __init__(self, dbver: str = "2023.1.Hs"):
+    def __init__(self, dbver: str = "2024.1.Hs"):
         """
         dbver: MSIGDB version number. default: 2023.1.Hs
         """
-        self._db_version = self._get_db_version()
+        self._db_version = self.list_dbver()
         if self._db_version is None:
             raise Exception("Failed to fetch available MSIGDB versions")
         self.categoires = self.list_category(dbver)
@@ -59,7 +59,8 @@ class Msigdb:
             return d
         return None
 
-    def list_dbver(self):
+    @classmethod
+    def list_dbver(cls):
         # self._db_version.columns = ["dbver", "date"]
         """
         Return a pd.DataFrame of all available MSIGDB versions
@@ -68,7 +69,12 @@ class Msigdb:
             A pd.DataFrame of all available MSIGDB versions.
             If failed to fetch, return None.
         """
-        return self._db_version
+        if hasattr(cls, "_db_version") and cls._db_version is not None:
+            return cls._db_version
+        _db_version = cls._get_db_version()
+        if _db_version is None:
+            raise Exception("Failed to fetch available MSIGDB versions")
+        return _db_version
 
     @classmethod
     def list_category(cls, dbver: str = "2023.1.Hs"):
