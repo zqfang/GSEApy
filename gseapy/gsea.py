@@ -434,7 +434,7 @@ class Prerank(GSEAbase):
         max_size: int = 500,
         permutation_num: int = 1000,
         weight: float = 1.0,
-        ascending: bool = False,
+        ascending: Optional[bool] = False,
         threads: int = 1,
         figsize: Tuple[float, float] = (6.5, 6),
         format: str = "pdf",
@@ -478,9 +478,12 @@ class Prerank(GSEAbase):
         if len(rnk_cols) > 2:
             rank_metric = rank_metric.iloc[:, -2:]
             rnk_cols = rank_metric.columns
-        # if not ranking.is_monotonic_decreasing:
-        #     ranking = ranking.sort_values(ascending=self.ascending)
-        rank_metric.sort_values(by=rnk_cols[-1], ascending=self.ascending, inplace=True)
+        # if self.ascending is None and not rank_metric.iloc[:, -1].is_monotonic_decreasing:
+        #     rank_metric.sort_values(by=rnk_cols[-1], ascending=False, inplace=True)
+        if self.ascending is not None:
+            rank_metric.sort_values(
+                by=rnk_cols[-1], ascending=self.ascending, inplace=True
+            )
         # drop na values
         if rank_metric.isnull().any(axis=1).sum() > 0:
             self._logger.warning(

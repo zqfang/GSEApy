@@ -302,7 +302,7 @@ def prerank(
     max_size: int = 500,
     permutation_num: int = 1000,
     weight: float = 1.0,
-    ascending: bool = False,
+    ascending: Optional[bool] = None,
     threads: int = 4,
     figsize: Tuple[float, float] = (6.5, 6),
     format: str = "pdf",
@@ -330,7 +330,7 @@ def prerank(
 
     :param str weight: Refer to :func:`algorithm.enrichment_score`. Default:1.
 
-    :param bool ascending: Sorting order of rankings. Default: False.
+    :param bool ascending: Sorting order of rankings. Default: None. Don't sort. False for descending.
 
     :param int threads: Number of threads you are going to use. Default: 4.
 
