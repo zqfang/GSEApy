@@ -609,7 +609,9 @@ class Enrichr(object):
 
         # read input file
         genes_list = self.parse_genelists()  #
-        self._gene_isupper = self.check_uppercase(self._gls)
+
+        if not self._isezid:
+            self._gene_isupper = self.check_uppercase(self._gls)
 
         # self._logger.info("Connecting to Enrichr Server to get latest library names")
         gss = self.parse_genesets()
