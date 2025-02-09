@@ -292,7 +292,7 @@ class Enrichr(object):
         if not response.ok:
             self._logger.error("Error fetching enrichment results: %s" % self._gs)
 
-        data = response.json()
+        data = response.json(allow_nan=True)
         # Note: missig Overlap column
         colnames = [
             "Rank",
