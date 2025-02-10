@@ -188,7 +188,31 @@ impl GSVA {
         }
         (mat2, idxs)
     }
-
+    /// compute rank score in parallel without matrix transposition
+    fn compute_rank_score2(&self, mat: &[Vec<f64>]) -> (Vec<Vec<f64>>, Vec<Vec<usize>>) {
+        let n_samples = mat[0].len();
+        let n_genes = mat.len();
+    
+        (0..n_samples).into_par_iter().map(|sample_idx| {
+            let mut sample: Vec<f64> = Vec::with_capacity(n_genes);
+            for gene in mat {
+                sample.push(gene[sample_idx]);
+            }
+            
+            let (sorted_idx, sorted_vals) = sample.as_slice().argsort(false);
+            let rev_idx: Vec<f64> = (1..=n_genes)
+                .rev()
+                .map(|v| ((v as f64) - (n_genes as f64) / 2.0).abs())
+                .collect();
+    
+            let mut tmp = vec![0.0; n_genes];
+            sorted_idx.iter().enumerate().for_each(|(i, &j)| {
+                tmp[j] = rev_idx[i];
+            });
+    
+            (tmp, sorted_idx)
+        }).unzip()
+    }
     fn ks_sample(
         &self,
         gene_density: &[f64],
@@ -269,7 +293,6 @@ fn transpose(mat: &[Vec<f64>]) -> Vec<Vec<f64>> {
     return mat2;
 }
 
-/// gene_expr: [n_genes, n_samples]
 pub fn gsva(
     gene_name: Vec<String>,
     gene_expr: Vec<Vec<f64>>,
@@ -282,54 +305,46 @@ pub fn gsva(
     min_size: usize,
     max_size: usize,
 ) -> GSEAResult {
-    // # Randomize feature order to break ties randomly
-    // rng = default_rng(seed=seed)
-    // idx = np.arange(m.shape[1])
-    // rng.shuffle(idx)
     let es = GSVA::new(&gene_name, kcdf, tau, mx_diff, abs_rnk, rnaseq);
-    // run pipeline
-    // compute density
-    let mat = es.compute_density(&gene_expr);
-    let mat_density = transpose(&mat);
-    // compute rank score
-    let (mat_score, sort_idxs) = es.compute_rank_score(&mat_density);
+    let n_genes = gene_expr.len();
+    let n_samples = gene_expr[0].len();
 
-    // compute es
-    // let mut gmt = HashMap::<&str, Vec<usize>>::new();
-    let mut summ = Vec::<GSEASummary>::new();
-    for (term, gset) in gene_sets.iter() {
-        // get indx of fsets
-        let hits: Vec<usize> = es
-            .genes
-            .index_of_any(gset)
-            .iter_mut()
-            .map(|&mut v| *v)
-            .collect();
-        // genes.index_of(element)
-        // let hit = tag.iter().filter(|&x| x > &0.0).count();
-        if hits.len() > max_size || hits.len() < min_size {
-            continue;
-        }
-        let tmp = es.ks_matrix(&mat_score, &sort_idxs, &hits);
-        // println!("{:?}, {:?}", term, &tmp);
-        // flatten into 1d vector
-        tmp.iter().enumerate().for_each(|(i, &e)| {
-            let gsum = GSEASummary {
-                term: term.to_string(),
-                es: e,
-                index: Some(i),
-                ..Default::default()
-            };
-            summ.push(gsum);
-        });
-        // gmt.insert(term.as_str(), hits);
-    }
+    // Precompute gene set hits in parallel
+    let gene_set_hits: Vec<_> = gene_sets
+        .into_par_iter()
+        .filter_map(|(term, gset)| {
+            let hits = es.genes.index_of_any(&gset);
+            (!hits.is_empty() && hits.len() >= min_size && hits.len() <= max_size)
+                .then(|| (term, hits))
+        })
+        .collect();
 
-    let mut gsea = GSEAResult::new(tau, max_size, min_size, 0, 0);
-    gsea.summaries = summ;
-    gsea.indices = sort_idxs;
-    gsea.rankings = mat_score;
-    return gsea;
+    // Process samples in parallel without transposing
+    let (mat_score, sort_idxs) = es.compute_rank_score2(&es.compute_density(&gene_expr));
+
+    // Parallel KS score calculation
+    let summaries: Vec<_> = gene_set_hits
+        .par_iter()
+        .flat_map(|(term, hits)| {
+            let hits: Vec<usize> = hits.iter().copied().map(|&i| i).collect();
+            es.ks_matrix(&mat_score, &sort_idxs, &hits)
+                .into_par_iter()
+                .enumerate()
+                .map(|(i, es_val)| GSEASummary {
+                    term: term.clone(),
+                    es: es_val,
+                    index: Some(i),
+                    ..Default::default()
+                })
+                .collect::<Vec<_>>()
+        })
+        .collect();
+
+    let mut gs = GSEAResult::new(tau, max_size, min_size, 0, 0);
+    gs.summaries = summaries;
+    gs.indices = sort_idxs;
+    gs.rankings = mat_score;
+    return gs;
 }
 
 mod tests {
