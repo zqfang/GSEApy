@@ -291,7 +291,7 @@ class Enrichr(object):
         response = s.post(BGENR_URL, data=payload)
         if not response.ok:
             self._logger.error("Error fetching enrichment results: %s" % self._gs)
-        data = response.json()
+        data = json.loads(response.content)
         # Note: missig Overlap column
         colnames = [
             "Rank",
