@@ -322,21 +322,25 @@ pub fn gsva(
     // Process samples in parallel without transposing
     let (mat_score, sort_idxs) = es.compute_rank_score2(&es.compute_density(&gene_expr));
 
+    // Process chunks of samples in parallel to control memory usage
+    let chunk_size = (n_samples / rayon::current_num_threads()).max(1);
+
     // Parallel KS score calculation
     let summaries: Vec<_> = gene_set_hits
-        .par_iter()
-        .flat_map(|(term, hits)| {
-            let hits: Vec<usize> = hits.iter().copied().map(|&i| i).collect();
-            es.ks_matrix(&mat_score, &sort_idxs, &hits)
-                .into_par_iter()
-                .enumerate()
-                .map(|(i, es_val)| GSEASummary {
-                    term: term.clone(),
-                    es: es_val,
-                    index: Some(i),
-                    ..Default::default()
-                })
-                .collect::<Vec<_>>()
+        .par_chunks(chunk_size)  // Process gene sets in chunks of 100
+        .flat_map_iter(|chunk| {
+            chunk.iter().flat_map(|(term, hits)| {
+                let hits: Vec<usize> = hits.iter().copied().map(|&i| i).collect();
+                es.ks_matrix(&mat_score, &sort_idxs, &hits)
+                    .into_iter()
+                    .enumerate()
+                    .map(move |(i, es_val)| GSEASummary {
+                        term: term.clone(),
+                        es: es_val,
+                        index: Some(i),
+                        ..Default::default()
+                    })
+            })
         })
         .collect();
 
