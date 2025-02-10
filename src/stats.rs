@@ -562,41 +562,57 @@ impl GSEAResult {
         metric: &[Vec<f64>], // 2d vector [m_gene, n_sample];
         gmt: &HashMap<&str, &[String]>,
     ) {
-        // transpose [m_gene, n_sample] --> [n_sample, m_gene]
-        let mut gene_metric: Vec<Vec<f64>> = vec![vec![]; metric[0].len()];
-        metric.iter().for_each(|row| {
-            row.iter().enumerate().for_each(|(j, e)| {
-                gene_metric[j].push(*e);
-            });
-        });
-        // sort first and then weight inside prerank()
-        let weighted_sorted_metric: Vec<(Vec<usize>, Vec<f64>)> = gene_metric
-            .into_par_iter()
-            .map(|rank| rank.as_slice().argsort(false))
-            .collect();
-
-        // just a apply function wrap prerank
+        // Calculate number of samples
+        let n_samples = metric[0].len();
+        
+        // Pre-allocate vectors to store results
         self.summaries.clear();
-        let mut _all = Vec::<GSEASummary>::new();
-        // let end1 = Instant::now();
-        weighted_sorted_metric
-            .into_iter()
-            .enumerate()
-            .for_each(|(i, (indices, metric))| {
-                // update the order of genes
-                let _genes: Vec<String> =
-                    indices.iter().map(|&j| genes[j].to_string()).collect();
-                // save indices
+        self.indices.clear();
+        self.indices.reserve(n_samples);
+        
+        // Process chunks of samples in parallel to control memory usage
+        let chunk_size = (n_samples / rayon::current_num_threads()).max(1);
+        
+        // Create iterator over sample indices in chunks
+        (0..n_samples).chunks(chunk_size).into_iter().for_each(|chunk| {
+            let chunk_results: Vec<_> = chunk.collect::<Vec<_>>().into_par_iter().map(|sample_idx| {
+                // Create sample vector without transposing entire matrix
+                let mut sample_metric: Vec<f64> = Vec::with_capacity(metric.len());
+                for row in metric.iter() {
+                    sample_metric.push(row[sample_idx]);
+                }
+                
+                // Sort and weight the metrics
+                let (indices, sorted_metric) = sample_metric.as_slice().argsort(false);
+                
+                // Create ordered gene list (reuse allocation)
+                let sample_genes: Vec<String> = indices.iter()
+                    .map(|&j| genes[j].to_string())
+                    .collect();
+                
+                // Run prerank for this sample
+                let mut gsea_tmp = GSEAResult::new(
+                    self.weight,
+                    self.max_size,
+                    self.min_size,
+                    self.nperm,
+                    self.seed,
+                );
+                gsea_tmp.prerank(&sample_genes, &sorted_metric, gmt);
+                
+                // Return only what we need
+                (indices, gsea_tmp.summaries.into_iter().map(|mut s| {
+                    s.index = Some(sample_idx);
+                    s
+                }).collect::<Vec<_>>())
+            }).collect();
+            
+            // Process results for this chunk
+            for (indices, summaries) in chunk_results {
                 self.indices.push(indices);
-                self.prerank(&_genes, &metric, gmt);
-                // concat into one vector
-                self.summaries.iter_mut().for_each(|x| {
-                        x.index = Some(i); // keep track of the sample index
-                        _all.push(x.clone());
-                    });
-            });
-        // store 
-        self.summaries = _all;
+                self.summaries.extend(summaries);
+            }
+        });
     }
 
     pub fn ss_gsea(
