@@ -431,9 +431,9 @@ class GSEAbase(object):
         """load gene set dict"""
 
         genesets_dict = self.load_gmt_only(gmt)
+        subsets = list(genesets_dict.keys())
         if not subsets:  # Check if empty
             raise ValueError("Empty gene sets dictionary")
-        subsets = list(genesets_dict.keys())
         entry1st = genesets_dict[subsets[0]]
         gene_dict = {g: i for i, g in enumerate(gene_list)}
         # Check uppercase for up to 20 sets
