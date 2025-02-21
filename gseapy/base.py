@@ -365,7 +365,7 @@ class GSEAbase(object):
         except:
             return False
 
-    def check_uppercase(self, gene_list: List[str, int]):
+    def check_uppercase(self, gene_list: List[Union[str, int]]) -> bool:
         """
         Check whether a list of gene names are mostly in uppercase.
 
