@@ -566,10 +566,11 @@ class Enrichr(object):
         # check gene cases
         # self._gene_isupper = self.check_uppercase(self._gls)
         top10 = min(len(gmt), 10)  # list(gmt.keys())[:10]
+        top10_keys = list(gmt.keys())[:top10]
         _gls = self._gls
         ups = []
         _gene_toupper = False
-        for key in top10:
+        for key in top10_keys:
             ups.append(self.check_uppercase(gmt[key]))
         if all(ups) and (not self._gene_isupper):
             _gls = [x.upper() for x in self._gls]
