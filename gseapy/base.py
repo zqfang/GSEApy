@@ -345,20 +345,43 @@ class GSEAbase(object):
             df = df.replace({col: col_min_max for col in df.columns})
         return df
 
-    def check_uppercase(self, gene_list: List[str]):
+    def _is_entrez_id(self, idx: Union[int, str]) -> bool:
+        """
+        Check if an index is Entrez ID.
+
+        Parameters
+        ----------
+        idx : str or int
+            An index to be checked.
+
+        Returns
+        -------
+        bool
+            Whether the index is Entrez ID.
+        """
+        try:
+            int(idx)
+            return True
+        except:
+            return False
+
+    def check_uppercase(self, gene_list: List[str, int]):
         """
         Check whether a list of gene names are mostly in uppercase.
 
         Parameters
         ----------
-        gene_list : list
-            A list of gene names
+        gene_list : list, int
+            A list of gene names or Entrez IDs
 
         Returns
         -------
         bool
             Whether the list of gene names are mostly in uppercase
         """
+        # if all gene names are Entrez IDs, don't check uppercase
+        if all([self._is_entrez_id(g) for g in gene_list]):
+            return False
         is_upper = [s.isupper() for s in gene_list]
         if sum(is_upper) / len(is_upper) >= 0.9:
             return True
@@ -435,6 +458,8 @@ class GSEAbase(object):
         if not subsets:  # Check if empty
             raise ValueError("Empty gene sets dictionary")
         entry1st = genesets_dict[subsets[0]]
+        # gmt_is_entrez = all([self._is_entrez_id(x) for x in entry1st])
+        # gene_is_entrez = all([self._is_entrez_id(x) for x in gene_list])
         gene_dict = {g: i for i, g in enumerate(gene_list)}
         # Check uppercase for up to 20 sets
         sample_size = min(20, len(subsets))

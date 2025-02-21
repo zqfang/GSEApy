@@ -263,6 +263,8 @@ class Enrichr(object):
         bool
             Whether the list of gene names are mostly in uppercase
         """
+        if all([self._is_entrez_id(s) for s in gene_list]):
+            return False
         is_upper = [s.isupper() for s in gene_list]
         if sum(is_upper) / len(is_upper) >= 0.9:
             return True
@@ -563,7 +565,7 @@ class Enrichr(object):
         """
         # check gene cases
         # self._gene_isupper = self.check_uppercase(self._gls)
-        top10 = list(gmt.keys())[:10]
+        top10 = min(len(gmt), 10)  # list(gmt.keys())[:10]
         _gls = self._gls
         ups = []
         _gene_toupper = False
