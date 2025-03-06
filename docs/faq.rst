@@ -95,7 +95,7 @@ There is no augment ``organism`` in ``prerank``, ``gsea``, ``ssgea``, but you co
     # get libraries you'd like to use
     gss = gseapy.get_library_name(organism='Yeast')
     # get a custom gmt_dict
-    gmt_dict = gseapy.parser.gsea_gmt_parser('GO_Biological_Process_2018', organism='Yeast')
+    gmt_dict = gseapy.get_library('GO_Biological_Process_2018', organism='Yeast')
     # run 
     prn_res = gseapy.prerank( ..., gene_sets=gmt_dict, ...)
 
