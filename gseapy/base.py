@@ -271,6 +271,22 @@ class GSEAbase(object):
 
         return rank_metric.select_dtypes(include=[np.number]).reset_index()
 
+    def _reset_index(self, rank_metric: pd.DataFrame):
+        """
+        check gene ids type
+        """
+        # handle index is already gene_names
+        if rank_metric.index.dtype == "O":
+            # Try to check if all elements can be converted to numbers
+            try:
+                # is_string_numbers = True, don't reset index
+                pd.to_numeric(rank_metric.index)
+            except (ValueError, TypeError):
+                # Contains non-numeric strings, likely gene names
+                # is_string_numbers = False
+                rank_metric = rank_metric.reset_index()
+        return rank_metric
+
     def _load_data(self, exprs: Union[str, pd.Series, pd.DataFrame]) -> pd.DataFrame:
         """
         helper function to read data
@@ -281,9 +297,7 @@ class GSEAbase(object):
             # handle dataframe with gene_name as index.
             self._logger.debug("Input data is a DataFrame with gene names")
             # handle index is already gene_names
-            if not isinstance(rank_metric.index, pd.RangeIndex):
-                rank_metric = rank_metric.reset_index()
-
+            rank_metric = self._reset_index(rank_metric)
             # if rank_metric.columns.dtype != "O":
             rank_metric.columns = rank_metric.columns.astype(str)
 
