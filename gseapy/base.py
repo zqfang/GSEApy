@@ -273,7 +273,7 @@ class GSEAbase(object):
 
     def _reset_index(self, rank_metric: pd.DataFrame):
         """
-        check gene ids type
+        helper function to reset index if index is already gene_names
         """
         # handle index is already gene_names
         if rank_metric.index.dtype == "O":
