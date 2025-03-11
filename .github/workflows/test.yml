@@ -79,7 +79,9 @@ jobs:
           CIBW_BEFORE_ALL_LINUX: "curl https://sh.rustup.rs -sSf | sh -s -- -y"
           CIBW_ENVIRONMENT_LINUX: 'PATH="$PATH:$HOME/.cargo/bin"'
           # CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.9
-          CIBW_MANYLINUX_X86_64_IMAGE: quay.io/pypa/manylinux2014_x86_64:latest
-          CIBW_SKIP: cp36-* pp* *win32 *musl*
+          CIBW_MANYLINUX_X86_64_IMAGE: quay.io/pypa/manylinux2014_x86_64:latest         
+          # rust is not available for musl linux on i686. see https://github.com/rust-lang/rustup/issues/2984
+          # CIBW_MANYLINUX_I686_IMAGE: quay.io/pypa/manylinux2014_i686:latest
+          CIBW_SKIP: cp36-* pp* *win32 *musl* *-musllinux_i686
           CIBW_PRERELEASE_PYTHONS: True
 
