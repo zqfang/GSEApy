@@ -77,8 +77,8 @@ jobs:
           python -m cibuildwheel --output-dir wheelhouse
         env:
           CIBW_BEFORE_ALL_LINUX: >
-             yum install libatomic -y
-             curl https://sh.rustup.rs -sSf | sh -s -- -y
+            yum install libatomic -y &&
+            curl https://sh.rustup.rs -sSf | sh -s -- -y
           CIBW_ENVIRONMENT_LINUX: 'PATH="$PATH:$HOME/.cargo/bin"'
           # CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.9
           CIBW_MANYLINUX_X86_64_IMAGE: quay.io/pypa/manylinux2014_x86_64:latest         
