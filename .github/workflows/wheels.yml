@@ -31,7 +31,7 @@ jobs:
         with:
           path: ./dist/*
       - name: Upload to PyPI
-        run: twine upload ./dist/*
+        run: twine upload --skip-existing ./dist/*
         env:
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
           TWINE_USERNAME: __token__
@@ -70,7 +70,7 @@ jobs:
           CIBW_PRERELEASE_PYTHONS: True
           CIBW_BEFORE_BUILD: pip install -U setuptools-rust
       - name: Upload to PyPI
-        run: twine upload ./wheelhouse/*.whl
+        run: twine upload --skip-existing ./wheelhouse/*.whl
         env:
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
           TWINE_USERNAME: __token__
@@ -117,7 +117,7 @@ jobs:
       #   with:
       #     path: ./wheelhouse/*.whl
       - name: Upload to PyPI
-        run: twine upload ./wheelhouse/*.whl
+        run: twine upload --skip-existing ./wheelhouse/*.whl
         env:
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
           TWINE_USERNAME: __token__
@@ -184,7 +184,7 @@ jobs:
       #   with:
       #     path: ./wheelhouse/*.whl
       - name: Upload to PyPI
-        run: twine upload ./wheelhouse/*.whl
+        run: twine upload --skip-existing ./wheelhouse/*.whl
         env:
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
           TWINE_USERNAME: __token__
