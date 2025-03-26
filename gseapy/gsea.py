@@ -353,6 +353,7 @@ class GSEA(GSEAbase):
         gene_names = dat.index.to_list()
         if (not self._gene_isupper) and self._gene_toupper:
             gene_names = [x.upper() for x in gene_names]
+            dat.index = gene_names
             self._logger.info("Genes are converted to uppercase.")
 
         # compute ES, NES, pval, FDR, RES
@@ -367,7 +368,7 @@ class GSEA(GSEAbase):
                 ascending=self.ascending,
             )
             gsum = prerank_rs(
-                gene_names,  # gene list
+                dat2.index.to_list(),  # gene list
                 dat2.squeeze().values.tolist(),  # ranking values
                 gmt,  # must be a dict object
                 self.weight,
@@ -387,7 +388,7 @@ class GSEA(GSEAbase):
                 map(lambda x: True if x == self.pheno_pos else False, self.groups)
             )
             gsum = gsea_rs(
-                gene_names,
+                dat.index.to_list(),
                 dat.values.tolist(),  # each row is gene values across samples
                 gmt,
                 group,
