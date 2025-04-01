@@ -533,6 +533,7 @@ class Enrichr(object):
         elif isscalar(self.background):
             if isinstance(self.background, int) or self.background.isdigit():
                 self._bg = int(self.background)
+                self._logger.info("  Background input is a number: %s" % self._bg)
             elif isinstance(self.background, str):
                 # self.background = set(reduce(lambda x,y: x+y, gmt.values(),[]))
                 self._bg = self.get_background()
@@ -580,8 +581,6 @@ class Enrichr(object):
             )
 
         bg = self.parse_background(gmt)
-        self._logger.info(_gls[1:5])
-        self._logger.info(list(bg)[1:5])
         if isinstance(bg, set) and (not self._gene_isupper) and _gene_toupper:
             bg = {s.upper() for s in bg}  # convert bg to upper case, too
             # self._logger.info("  Background is converted to upper case: %s" % list(bg)[1:5])
