@@ -85,5 +85,6 @@ jobs:
           # rust is not available for musl linux on i686. see https://github.com/rust-lang/rustup/issues/2984
           CIBW_MANYLINUX_I686_IMAGE: quay.io/pypa/manylinux2014_i686:latest
           CIBW_SKIP: cp36-* cp37-* pp* *win32 *musl*
+          CIBW_PROJECT_REQUIRES_PYTHON: ">=3.8"
           CIBW_PRERELEASE_PYTHONS: True
 
