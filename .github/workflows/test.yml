@@ -84,6 +84,6 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: quay.io/pypa/manylinux2014_x86_64:latest         
           # rust is not available for musl linux on i686. see https://github.com/rust-lang/rustup/issues/2984
           CIBW_MANYLINUX_I686_IMAGE: quay.io/pypa/manylinux2014_i686:latest
-          CIBW_SKIP: cp36-* pp* *win32 *musl*
+          CIBW_SKIP: cp36-* cp37-* pp* *win32 *musl*
           CIBW_PRERELEASE_PYTHONS: True
 
