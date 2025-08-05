@@ -152,6 +152,8 @@ class GSEA(GSEAbase):
         if len(self.groups) == (df.shape[1] - 1):
             df = df.iloc[:, 1:]
         cls_dict = self._map_classes(df.columns)
+        # remove rows that are all zeros !
+        df = df.loc[df.abs().sum(axis=1) > 0, :]
         # drop gene which std == 0 in all samples
         # compatible to py3.7
         major, minor, _ = [int(i) for i in pd.__version__.split(".")]
@@ -166,8 +168,6 @@ class GSEA(GSEAbase):
                 df.T.groupby(by=cls_dict)[gene_idxs].std(numeric_only=True, ddof=0).T
             )
 
-        # remove rows that are all zeros !
-        df = df.loc[df.abs().sum(axis=1) > 0, :]
         # remove rows that std are zeros for sample size >= 3 in each group
         if all(map(lambda a: a[1] >= 3, Counter(cls_dict.values()).items())):
             df = df[df_std.abs().sum(axis=1) > 0]
