@@ -145,6 +145,28 @@ class Biomart:
         xml += self.footer
         return xml
 
+    def get_xml_body(self):
+        """Return only the XML body without the URL prefix.
+
+        This is suitable for POST requests where the XML is sent in the body
+        as the 'query' form field to the biomart endpoint.
+        """
+        # self.header starts with 'https://{host}/biomart/martservice?query=' then the XML header
+        # Split once on 'query=' to strip the URL and keep the XML portion intact
+        try:
+            xml_header = self.header.split("query=", 1)[1]
+        except Exception:
+            # Fallback: if format changes in the future, best effort to keep original behavior
+            xml_header = self.header
+        xml = xml_header
+        xml += self.dataset_xml
+        for line in self.filters_xml:
+            xml += line
+        for line in self.attributes_xml:
+            xml += line
+        xml += self.footer
+        return xml
+
     def _get_mart(self, text: str):
         """
         Parse the xml text and return a dataframe of supported marts.
@@ -333,16 +355,117 @@ class Biomart:
         for n, v in filters.items():
             self.add_filter(n, v)
         self._logger.debug("Build xml")
+        # Build XML for both GET (URL) and POST (body)
         self._xml = self.get_xml()
+        xml_body = self.get_xml_body()
+
+        endpoint = f"https://{self.host}/biomart/martservice"
         s = retry(num=5)
-        response = s.get(self._xml)
-        if response.ok:
-            if str(response.text).startswith("Query ERROR"):
-                self._logger.error(response.text)
-                return
-            df = pd.read_table(StringIO(response.text), header=None, names=attributes)
+
+        def _parse_response_text(text: str):
+            if str(text).startswith("Query ERROR"):
+                self._logger.error(text)
+                return None
+            df_local = pd.read_table(StringIO(text), header=None, names=attributes)
+            return df_local
+
+        def _try_post(xml_body_local: str):
+            try:
+                resp = s.post(endpoint, data={"query": xml_body_local})
+            except Exception as e:
+                self._logger.warning(f"POST request failed: {e}")
+                return None, None
+            if resp.ok:
+                df_local = _parse_response_text(resp.text)
+                if df_local is not None:
+                    return df_local, None
+                return None, resp.text
+            return None, resp.text
+
+        def _try_get(xml_url_local: str):
+            try:
+                resp = s.get(xml_url_local)
+            except Exception as e:
+                self._logger.warning(f"GET request failed: {e}")
+                return None, None
+            if resp.ok:
+                df_local = _parse_response_text(resp.text)
+                if df_local is not None:
+                    return df_local, None
+                return None, resp.text
+            return None, resp.text
+
+        # Strategy:
+        # 1) Prefer POST to avoid 414 (URL too long)
+        # 2) Fallback to GET for small queries
+        # 3) If still failing (e.g., payload too large), batch the largest list-like filter
+
+        # First attempt: POST once with the whole query
+        df = None
+        err_text = None
+
+        # Heuristic: if URL is short, it's safe to try GET directly too, but POST is fine for both
+        df, err_text = _try_post(xml_body)
+        if df is None and (err_text is None or "414" in str(err_text)):
+            # Try GET if POST didn't return a valid table (network issue) or explicit 414 indicates GET may also fail
+            df, err_text = _try_get(self._xml)
+
+        if df is not None:
             if filename is not None:
                 df.to_csv(filename, sep="\t", index=False)
             self.results = df
             return df
-        return response.text
+
+        # If we reached here, try batching on the largest list-like filter value
+        # Identify list-like filters
+        list_like_keys = []
+        for k, v in filters.items():
+            if isinstance(v, (list, tuple, set, pd.Series)):
+                list_like_keys.append((k, list(v)))
+        if not list_like_keys:
+            # No list-like filters to batch; return the last error text
+            return err_text if err_text is not None else "BioMart request failed."
+
+        # Choose the largest filter to batch
+        key_to_batch, values_to_batch = max(list_like_keys, key=lambda kv: len(kv[1]))
+        if len(values_to_batch) == 0:
+            return err_text if err_text is not None else "No values to query."
+
+        # Reasonable chunk size that works reliably with BioMart
+        chunk_size = 300
+        dfs: List[pd.DataFrame] = []
+        for i in range(0, len(values_to_batch), chunk_size):
+            sub_values = values_to_batch[i : i + chunk_size]
+            # Rebuild XML with chunked filter
+            self.reset()
+            self.add_dataset(dataset)
+            for at in attributes:
+                self.add_attribute(at)
+            for n, v in filters.items():
+                if n == key_to_batch:
+                    self.add_filter(n, sub_values)
+                else:
+                    self.add_filter(n, v)
+            xml_body_chunk = self.get_xml_body()
+
+            df_chunk, err_text_chunk = _try_post(xml_body_chunk)
+            if df_chunk is None:
+                # As a fallback, try GET for this chunk
+                xml_url_chunk = self.get_xml()
+                df_chunk, err_text_chunk = _try_get(xml_url_chunk)
+                if df_chunk is None:
+                    # If still failing, log and continue to next chunk
+                    self._logger.warning(
+                        f"BioMart chunk {i//chunk_size + 1} failed: {err_text_chunk}"
+                    )
+                    continue
+            dfs.append(df_chunk)
+
+        if not dfs:
+            return err_text if err_text is not None else "BioMart request failed in all chunks."
+
+        df_all = pd.concat(dfs, ignore_index=True).drop_duplicates()
+        if filename is not None:
+            df_all.to_csv(filename, sep="\t", index=False)
+        self.results = df_all
+        return df_all
