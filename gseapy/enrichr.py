@@ -28,7 +28,7 @@ class Enrichr(object):
         gene_sets: Union[List[str], str, Dict[str, str]],
         organism: str = "human",
         outdir: Optional[str] = "Enrichr",
-        background: Union[List[str], int, str] = "hsapiens_gene_ensembl",
+        background: Union[List[str], int, str] = None,
         cutoff: float = 0.05,
         format: str = "pdf",
         figsize: Tuple[float, float] = (6.5, 6),

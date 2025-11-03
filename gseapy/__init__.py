@@ -445,7 +445,7 @@ def replot(
 
 
 def enrichr(
-    gene_list: Iterable[str],
+    gene_list: Union[str, List[str], Tuple[str, ...], pd.Series, pd.DataFrame],
     gene_sets: Union[List[str], str, Dict[str, str]],
     organism: str = "human",
     outdir: Optional[str] = None,
@@ -459,10 +459,10 @@ def enrichr(
 ) -> Enrichr:
     """Enrichr API.
 
-    :param gene_list: str, list, tuple, series, dataframe. Also support input txt file with one gene id per row.
-                      The input `identifier` should be the same type to `gene_sets`.
+    :param gene_list: str, list, tuple, pd.Series, pd.DataFrame. Also supports input txt file path with one gene id per row.
+                      The gene identifiers in `gene_list` should match the type used in `gene_sets`.
 
-    :param gene_sets: str, list, tuple of Enrichr Library name(s).
+    :param gene_sets: str, list of Enrichr Library name(s), or custom defined gene_sets (dict, or gmt file).
                       or custom defined gene_sets (dict, or gmt file).
 
                       Examples:
@@ -481,20 +481,18 @@ def enrichr(
                       https://gseapy.readthedocs.io/en/latest/gseapy_example.html#2.-Enrichr-Example
 
 
-    :param organism: Enrichr supported organism. Select from (human, mouse, yeast, fly, fish, worm).
-                     This argument only affects the Enrichr library names you've chosen.
-                     No any affects to gmt or dict input of `gene_sets`.
+    :param organism: Organism for Enrichr library names (human, mouse, yeast, fly, fish, worm); does not affect custom gene sets (gmt or dict).
 
-                     see here for more details: https://maayanlab.cloud/modEnrichr/.
+                     Does not affect gmt or dict input of `gene_sets`.
 
     :param outdir:   Output file directory
 
-    :param background: int, list, str.
+    :param background: None | int | list | str.
                        Background genes. This argument works only if `gene_sets` has a type Dict or gmt file.
                        If your input are just Enrichr library names, this argument will be ignored.
 
 
-                       However, this argument is not straightforward when `gene_sets` is given a custom input (a gmt file or dict).
+                       However, determining or using the background genes is not straightforward when `gene_sets` is given as a custom input (a gmt file or dict), because the set of background genes must be explicitly defined and matched to the gene identifiers used in your custom gene sets.
 
                        By default, all genes listed in the `gene_sets` input will be used as background.
 
@@ -502,10 +500,10 @@ def enrichr(
 
                        (1) (Recommended) Input a list of background genes: ['gene1', 'gene2',...]
                            The background gene list is defined by your experment. e.g. the expressed genes in your RNA-seq.
-                           The gene identifer in gmt/dict should be the same type to the backgound genes.
+                           The gene identifer in gmt/dict should be the same type to the background genes.
 
                        (2) Specify a number: e.g. 20000. (the number of total expressed genes).
-                           This works, but not recommend. It assumes that all your genes could be found in background.
+                           This works, but not recommended. It assumes that all your genes could be found in background.
                            If genes exist in gmt but not included in background provided,
                            they will affect the significance of the statistical test.
 
@@ -521,7 +519,7 @@ def enrichr(
                                          filename=f'~/.cache/gseapy/{background}.background.genes.txt')
                             >>> df.dropna(subset=["entrezgene_id"], inplace=True)
 
-                           So only genes with entrezid above will be the background genes if not input specify by user.
+                           So only genes with entrezgene_id above will be the background genes if not input specify by user.
 
     :param cutoff:   Show enriched terms which Adjusted P-value < cutoff.
                      Only affects the output figure, not the final output file. Default: 0.05
