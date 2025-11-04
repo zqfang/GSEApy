@@ -1008,6 +1008,7 @@ class DotPlot(object):
             color="white", direction="in", left=True, right=True
         )
         cbar.ax.set_title(self.cbar_title, loc="left", fontweight="bold")
+        cbar.ax.title.set_position((0, 1.05))  # 1.05 = 5% above the top
         for key, spine in cbar.ax.spines.items():
             spine.set_visible(False)
 
