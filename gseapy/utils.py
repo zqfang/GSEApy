@@ -5,7 +5,12 @@ import sys
 
 import requests
 from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
+try:
+    # Prefer direct urllib3 import
+    from urllib3.util.retry import Retry
+except Exception:  # pragma: no cover
+    # Fallback for environments relying on requests' vendored urllib3
+    from requests.packages.urllib3.util.retry import Retry  # type: ignore
 
 DEFAULT_CACHE_PATH = os.path.join(os.path.expanduser("~"), ".cache/gseapy")
 
@@ -96,19 +101,21 @@ def log_close(logger):
         handler.close()
 
 
-def retry(num=5):
-    """ "retry connection.
+def retry(num=5, pool_maxsize: int = 50):
+    """retry connection with keep-alive and pooling.
 
-    define max tries num
-    if the backoff_factor is 0.1, then sleep() will sleep for
-    [0.1s, 0.2s, 0.4s, ...] between retries.
-    It will also force a retry if the status code returned is 500, 502, 503 or 504.
-
+    - Retries on common 5xx errors
+    - Enables connection pooling for both HTTP and HTTPS
+    - Sets a larger pool size to support concurrent requests
+    - Accepts gzip/deflate to speed up transfers
     """
     s = requests.Session()
     retries = Retry(total=num, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
-    s.mount("http://", HTTPAdapter(max_retries=retries))
-
+    adapter = HTTPAdapter(max_retries=retries, pool_connections=pool_maxsize, pool_maxsize=pool_maxsize)
+    s.mount("http://", adapter)
+    s.mount("https://", adapter)
+    # Encourage compressed responses
+    s.headers.update({"Accept-Encoding": "gzip, deflate"})
     return s
 
 

@@ -2,7 +2,8 @@ import logging
 import os
 from collections.abc import Iterable
 from io import StringIO
-from typing import Any, AnyStr, Dict, Iterable, List, Optional, Set, Tuple, Union
+from typing import Dict, List, Optional
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from xml.etree import cElementTree as ET
 
 import pandas as pd
@@ -13,6 +14,9 @@ from gseapy.utils import log_init, mkdirs, retry
 
 class Biomart:
     """query from BioMart"""
+
+    CHUNK_SIZE = 300  # Default chunk size for batching queries
+    MAX_WORKERS: Optional[int] = None  # Default to auto; set an int to override
 
     def __init__(self, host: str = "www.ensembl.org", verbose: bool = False):
         """simple API to BioMart services.
@@ -114,7 +118,9 @@ class Biomart:
         key: filter names
         value: Iterable[str]
         """
-        if isinstance(value, Iterable):
+        if isinstance(value, str):
+            pass  # keep string as is
+        elif isinstance(value, Iterable):
             value = ",".join([str(v) for v in list(value)])
         _filter = ""
         if name.lower().startswith("with"):
@@ -167,6 +173,51 @@ class Biomart:
         xml += self.footer
         return xml
 
+    def _build_xml_strings(
+        self,
+        dataset: str,
+        attributes: List[str],
+        filters: Dict[str, Iterable[str]],
+    ) -> Dict[str, str]:
+        """Build XML strings without mutating instance state.
+
+        Returns a dict with keys:
+          - body: XML suitable for POST body (no URL prefix)
+          - url: Full GET URL with query parameter
+        """
+        # Build dataset and tags locally to keep thread-safety
+        dataset_xml = f'<Dataset name="{dataset}" interface="default" >'
+
+        filter_tags: List[str] = []
+        for name, value in filters.items():
+            if isinstance(value, str):
+                v = value
+            elif isinstance(value, Iterable):
+                v = ",".join([str(vv) for vv in list(value)])
+            else:
+                v = str(value)
+            if name.lower().startswith("with"):
+                filter_tags.append(f'<Filter name="{name}" excluded="{v}"/>')
+            else:
+                filter_tags.append(f'<Filter name="{name}" value="{v}"/>')
+
+        attribute_tags = [f'<Attribute name="{a}"/>' for a in attributes]
+
+        # Header body portion (post-'query=') derived from self.header
+        try:
+            xml_header = self.header.split("query=", 1)[1]
+        except Exception:
+            xml_header = self.header
+        body = (
+            xml_header
+            + dataset_xml
+            + "".join(filter_tags)
+            + "".join(attribute_tags)
+            + self.footer
+        )
+        url = f"https://{self.host}/biomart/martservice?query=" + body
+        return {"body": body, "url": url}
+
     def _get_mart(self, text: str):
         """
         Parse the xml text and return a dataframe of supported marts.
@@ -185,7 +236,13 @@ class Biomart:
         """
         marts = [e.attrib for e in ET.XML(text)]
         marts = pd.DataFrame(marts)
-        marts = marts.loc[:, ["database", "displayName", "name"]]
+        required_columns = ["database", "displayName", "name"]
+        missing = [col for col in required_columns if col not in marts.columns]
+        if missing:
+            raise ValueError(
+                f"BioMart registry XML missing columns: {missing}. Schema may have changed."
+            )
+        marts = marts.loc[:, required_columns]
         marts.columns = ["Version", "DisplayName", "Mart"]
         # get supported marts
         return marts.loc[:, ["Mart", "Version"]]
@@ -261,16 +318,30 @@ class Biomart:
             if str(resp.text).startswith("Query ERROR"):
                 return resp.text
             filters = [text.split("\t") for text in resp.text.strip().split("\n")]
-            filters = pd.DataFrame(filters).iloc[:, [0, 1, 3, 5]]
-            filters.columns = ["Filter", "Description", "Additional", "InputType"]
-            return filters
+            df_filters = pd.DataFrame(filters)
+            # Check if there are enough columns before selecting
+            expected_indices = [0, 1, 3, 5]
+            if df_filters.shape[1] >= max(expected_indices) + 1:
+                df_filters = df_filters.iloc[:, expected_indices]
+                df_filters.columns = [
+                    "Filter",
+                    "Description",
+                    "Additional",
+                    "InputType",
+                ]
+                return df_filters
+            else:
+                self._logger.warning(
+                    f"Filter response has {df_filters.shape[1]} columns, expected at least {max(expected_indices)+1}. Returning raw DataFrame."
+                )
+                return df_filters
         return resp.text
 
     def query(
         self,
         dataset: str = "hsapiens_gene_ensembl",
-        attributes: Optional[List[str]] = [],
-        filters: Optional[Dict[str, Iterable[str]]] = {},
+        attributes: Optional[List[str]] = None,
+        filters: Optional[Dict[str, Iterable[str]]] = None,
         filename: Optional[str] = None,
     ):
         """mapping ids using BioMart.
@@ -288,7 +359,7 @@ class Biomart:
                                    attributes=['ensembl_gene_id', 'external_gene_name', 'entrezgene_id', 'go_id'],
                                    filters=queries)
         """
-        if not attributes:
+        if attributes is None or not attributes:
             attributes = [
                 "ensembl_gene_id",
                 "external_gene_name",
@@ -298,6 +369,8 @@ class Biomart:
         if isinstance(attributes, str):
             attributes = attributes.split(",")
 
+        if filters is None:
+            filters = {}
         if not isinstance(filters, dict):
             raise ValueError("filters only accept a dict object")
 
@@ -308,8 +381,9 @@ class Biomart:
             return
         elif isinstance(df, str):
             print(df)
-            return df
-
+        if "entrezgene_id" in df.columns:
+            if not pd.api.types.is_integer_dtype(df["entrezgene_id"]):
+                df["entrezgene_id"] = df["entrezgene_id"].astype(pd.Int32Dtype())
         if "entrezgene_id" in df.columns:
             df["entrezgene_id"] = df["entrezgene_id"].astype(pd.Int32Dtype())
 
@@ -324,8 +398,8 @@ class Biomart:
     def query_simple(
         self,
         dataset: str = "hsapiens_gene_ensembl",
-        attributes: List[str] = [],
-        filters: Dict[str, Iterable[str]] = {},
+        attributes: Optional[List[str]] = None,
+        filters: Optional[Dict[str, Iterable[str]]] = None,
         filename: Optional[str] = None,
     ):
         """
@@ -343,9 +417,13 @@ class Biomart:
             >>> results = bm.query_simple(dataset='mmusculus_gene_ensembl',
                                           attributes=['ensembl_gene_id',
                                                       'external_gene_name',
-                                                      'hsapiens_homolog_associated_gene_name',
-                                                      'hsapiens_homolog_ensembl_gene'])
+                                                      'hsapiens_homolog_associated_gene_name'])
         """
+        if attributes is None:
+            attributes = []
+        if filters is None:
+            filters = {}
+
         self.reset()
         self.add_dataset(dataset)
         self._logger.debug("Add attributes")
@@ -366,7 +444,14 @@ class Biomart:
             if str(text).startswith("Query ERROR"):
                 self._logger.error(text)
                 return None
-            df_local = pd.read_table(StringIO(text), header=None, names=attributes)
+            df_local = pd.read_table(StringIO(text), header=None)
+            # Validate column count before assigning names
+            if len(df_local.columns) == len(attributes):
+                df_local.columns = attributes
+            else:
+                self._logger.warning(
+                    f"Response column count ({len(df_local.columns)}) does not match attributes ({len(attributes)})."
+                )
             return df_local
 
         def _try_post(xml_body_local: str):
@@ -432,37 +517,54 @@ class Biomart:
             return err_text if err_text is not None else "No values to query."
 
         # Reasonable chunk size that works reliably with BioMart
-        chunk_size = 300
         dfs: List[pd.DataFrame] = []
+
+        # Determine chunk size; allow runtime override via instance/class attribute if present
+        chunk_size = getattr(self, "CHUNK_SIZE", 300)
+        # Build chunk specs first (immutable)
+        chunks = []
         for i in range(0, len(values_to_batch), chunk_size):
             sub_values = values_to_batch[i : i + chunk_size]
-            # Rebuild XML with chunked filter
-            self.reset()
-            self.add_dataset(dataset)
-            for at in attributes:
-                self.add_attribute(at)
-            for n, v in filters.items():
-                if n == key_to_batch:
-                    self.add_filter(n, sub_values)
-                else:
-                    self.add_filter(n, v)
-            xml_body_chunk = self.get_xml_body()
+            chunk_filters = {**filters, key_to_batch: sub_values}
+            xmls = self._build_xml_strings(dataset, attributes, chunk_filters)
+            chunks.append((i // chunk_size + 1, xmls["body"], xmls["url"]))
 
-            df_chunk, err_text_chunk = _try_post(xml_body_chunk)
+        def _fetch_chunk(idx: int, body_xml: str, url_xml: str):
+            df_chunk, err_text_chunk = _try_post(body_xml)
             if df_chunk is None:
-                # As a fallback, try GET for this chunk
-                xml_url_chunk = self.get_xml()
-                df_chunk, err_text_chunk = _try_get(xml_url_chunk)
-                if df_chunk is None:
-                    # If still failing, log and continue to next chunk
-                    self._logger.warning(
-                        f"BioMart chunk {i//chunk_size + 1} failed: {err_text_chunk}"
-                    )
-                    continue
-            dfs.append(df_chunk)
+                df_chunk, err_text_chunk = _try_get(url_xml)
+            if df_chunk is None:
+                self._logger.warning(f"BioMart chunk {idx} failed: {err_text_chunk}")
+            return df_chunk
+
+        # Parallelize chunk fetching with a modest concurrency to improve throughput
+        # Keep concurrency bounded to be nice to the BioMart service
+        max_workers = getattr(self, "MAX_WORKERS", None)
+        if max_workers is None:
+            # Enable moderate parallelism for very large inputs; otherwise keep sequential
+            max_workers = 1 if len(values_to_batch) < 2000 else 8
+
+        if max_workers > 1 and len(chunks) > 1:
+            with ThreadPoolExecutor(max_workers=max_workers) as ex:
+                futures = [
+                    ex.submit(_fetch_chunk, idx, body, url) for idx, body, url in chunks
+                ]
+                for fut in as_completed(futures):
+                    df_chunk = fut.result()
+                    if df_chunk is not None:
+                        dfs.append(df_chunk)
+        else:
+            for idx, body, url in chunks:
+                df_chunk = _fetch_chunk(idx, body, url)
+                if df_chunk is not None:
+                    dfs.append(df_chunk)
 
         if not dfs:
-            return err_text if err_text is not None else "BioMart request failed in all chunks."
+            return (
+                err_text
+                if err_text is not None
+                else "BioMart request failed in all chunks."
+            )
 
         df_all = pd.concat(dfs, ignore_index=True).drop_duplicates()
         if filename is not None:
