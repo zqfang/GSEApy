@@ -5,6 +5,7 @@ import sys
 
 import requests
 from requests.adapters import HTTPAdapter
+
 try:
     # Prefer direct urllib3 import
     from urllib3.util.retry import Retry
@@ -111,7 +112,9 @@ def retry(num=5, pool_maxsize: int = 50):
     """
     s = requests.Session()
     retries = Retry(total=num, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
-    adapter = HTTPAdapter(max_retries=retries, pool_connections=pool_maxsize, pool_maxsize=pool_maxsize)
+    adapter = HTTPAdapter(
+        max_retries=retries, pool_connections=pool_maxsize, pool_maxsize=pool_maxsize
+    )
     s.mount("http://", adapter)
     s.mount("https://", adapter)
     # Encourage compressed responses
