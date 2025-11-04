@@ -487,39 +487,50 @@ def enrichr(
 
     :param outdir:   Output file directory
 
-    :param background: None | int | list | str.
-                       Background genes. This argument works only if `gene_sets` has a type Dict or gmt file.
-                       If your input are just Enrichr library names, this argument will be ignored.
+    :param background: Background gene set for statistical testing. Type: None | int | list | str.
 
+                       **When is this used?**
+                       - Only applies to CUSTOM gene sets (gmt file or dict)
+                       - Ignored when using Enrichr library names (e.g., 'KEGG_2016')
 
-                       However, determining or using the background genes is not straightforward when `gene_sets` is given as a custom input (a gmt file or dict), because the set of background genes must be explicitly defined and matched to the gene identifiers used in your custom gene sets.
+                       **Default behavior:**
+                       - If None: All genes in your gene_sets will be used as background
 
-                       By default, all genes listed in the `gene_sets` input will be used as background.
+                       **Recommended usage (3 options):**
 
-                       There are 3 ways to tune this argument:
+                       Option 1: Gene list (RECOMMENDED)
+                           Provide your experiment-specific background genes:
 
-                       (1) (Recommended) Input a list of background genes: ['gene1', 'gene2',...]
-                           The background gene list is defined by your experment. e.g. the expressed genes in your RNA-seq.
-                           The gene identifer in gmt/dict should be the same type to the background genes.
+                           background=['gene1', 'gene2', 'gene3', ...]
 
-                       (2) Specify a number: e.g. 20000. (the number of total expressed genes).
-                           This works, but not recommended. It assumes that all your genes could be found in background.
-                           If genes exist in gmt but not included in background provided,
-                           they will affect the significance of the statistical test.
+                           Example: All expressed genes from your RNA-seq experiment
+                           Note: Gene identifiers must match those in your gene_sets
 
-                       (3) Set a Biomart dataset name: e.g. "hsapiens_gene_ensembl"
-                           The background will be all annotated genes from the `BioMart datasets` you've choosen.
-                           The program will try to retrieve the background information automatically.
+                       Option 2: Gene count (simple but less accurate)
+                           Specify total number of genes tested:
 
-                           Enrichr module use the code below to get the background genes:
-                            >>> from gseapy.parser import Biomart
-                            >>> bm = Biomart()
-                            >>> df = bm.query(dataset=background, #  e.g. 'hsapiens_gene_ensembl'
-                                         attributes=['ensembl_gene_id', 'external_gene_name', 'entrezgene_id'],
-                                         filename=f'~/.cache/gseapy/{background}.background.genes.txt')
-                            >>> df.dropna(subset=["entrezgene_id"], inplace=True)
+                           background=20000  # total genes in your experiment
 
-                           So only genes with entrezgene_id above will be the background genes if not input specify by user.
+                           Warning: Assumes all genes could be detected. May affect
+                           statistical accuracy if gene sets contain genes not in your
+                           actual background.
+
+                       Option 3: BioMart dataset (automatic download)
+                           Use a BioMart database name for genome-wide background:
+
+                           background='hsapiens_gene_ensembl'  # human genes
+                           background='mmusculus_gene_ensembl' # mouse genes
+
+                           The program downloads all annotated genes with Entrez IDs.
+                           First download may take a few minutes; results are cached.
+
+                           Cached location: ~/.cache/gseapy/{dataset}.background.genes.txt
+
+                       **Why does background matter?**
+                       Background genes define the "universe" for hypergeometric testing.
+                       Using the correct background (e.g., detected genes in your
+                       experiment) improves statistical accuracy compared to using all
+                       possible genes in a genome.
 
     :param cutoff:   Show enriched terms which Adjusted P-value < cutoff.
                      Only affects the output figure, not the final output file. Default: 0.05
@@ -582,37 +593,50 @@ def enrich(
 
     :param outdir:   Output file directory
 
-    :param background: None | int | list | str.
-                       Background genes. This argument works only if `gene_sets` has a type Dict or gmt file.
+    :param background: Background gene set for statistical testing. Type: None | int | list | str.
 
-                       However, this argument is not straightforward when `gene_sets` is given a custom input (a gmt file or dict).
+                       **When is this used?**
+                       - Only applies to CUSTOM gene sets (gmt file or dict)
+                       - Ignored when using Enrichr library names (e.g., 'KEGG_2016')
 
-                       By default, all genes listed in the `gene_sets` input will be used as background.
+                       **Default behavior:**
+                       - If None: All genes in your gene_sets will be used as background
 
-                       There are 3 ways to tune this argument:
+                       **Recommended usage (3 options):**
 
-                       (1) (Recommended) Input a list of background genes: ['gene1', 'gene2',...]
-                           The background gene list is defined by your experment. e.g. the expressed genes in your RNA-seq.
-                           The gene identifer in gmt/dict should be the same type to the backgound genes.
+                       Option 1: Gene list (RECOMMENDED)
+                           Provide your experiment-specific background genes:
 
-                       (2) Specify a number: e.g. 20000. (the number of total expressed genes).
-                           This works, but not recommend. It assumes that all your genes could be found in background.
-                           If genes exist in gmt but not included in background provided,
-                           they will affect the significance of the statistical test.
+                           background=['gene1', 'gene2', 'gene3', ...]
 
-                       (3) Set a Biomart dataset name: e.g. "hsapiens_gene_ensembl"
-                           The background will be all annotated genes from the `BioMart datasets` you've choosen.
-                           The program will try to retrieve the background information automatically.
+                           Example: All expressed genes from your RNA-seq experiment
+                           Note: Gene identifiers must match those in your gene_sets
 
-                           Enrichr module use the code below to get the background genes:
-                            >>> from gseapy.parser import Biomart
-                            >>> bm = Biomart()
-                            >>> df = bm.query(dataset=background, #  e.g. 'hsapiens_gene_ensembl'
-                                         attributes=['ensembl_gene_id', 'external_gene_name', 'entrezgene_id'],
-                                         filename=f'~/.cache/gseapy/{background}.background.genes.txt')
-                            >>> df.dropna(subset=["entrezgene_id"], inplace=True)
+                       Option 2: Gene count (simple but less accurate)
+                           Specify total number of genes tested:
 
-                           So only genes with entrezid above will be the background genes if not input specify by user.
+                           background=20000  # total genes in your experiment
+
+                           Warning: Assumes all genes could be detected. May affect
+                           statistical accuracy if gene sets contain genes not in your
+                           actual background.
+
+                       Option 3: BioMart dataset (automatic download)
+                           Use a BioMart database name for genome-wide background:
+
+                           background='hsapiens_gene_ensembl'  # human genes
+                           background='mmusculus_gene_ensembl' # mouse genes
+
+                           The program downloads all annotated genes with Entrez IDs.
+                           First download may take a few minutes; results are cached.
+
+                           Cached location: ~/.cache/gseapy/{dataset}.background.genes.txt
+
+                       **Why does background matter?**
+                       Background genes define the "universe" for hypergeometric testing.
+                       Using the correct background (e.g., detected genes in your
+                       experiment) improves statistical accuracy compared to using all
+                       possible genes in a genome.
 
     :param cutoff:   Show enriched terms which Adjusted P-value < cutoff.
                      Only affects the output figure, not the final output file. Default: 0.05
