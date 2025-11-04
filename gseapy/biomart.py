@@ -1,9 +1,9 @@
 import logging
 import os
 from collections.abc import Iterable
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from io import StringIO
 from typing import Dict, List, Optional
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from xml.etree import cElementTree as ET
 
 import pandas as pd
