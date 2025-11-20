@@ -41,6 +41,9 @@ def gsea(
     :param data: Gene expression data table, Pandas DataFrame, gct file.
 
     :param gene_sets: Enrichr Library name or .gmt gene sets file or dict of gene sets. Same input with GSEA.
+               NOTE: If multiple gene sets are provided, the FDR null distribution will be based on the combined gene sets.
+               This may lead to slight differences in FDR values compared to running GSEA separately for each gene set.
+               See github issue for more details: https://github.com/zqfang/GSEApy/issues/323
 
     :param cls: A list or a .cls file format required for GSEA.
 
@@ -318,6 +321,9 @@ def prerank(
     :param rnk: pre-ranked correlation table or pandas DataFrame. Same input with ``GSEA`` .rnk file.
 
     :param gene_sets: Enrichr Library name or .gmt gene sets file or dict of gene sets. Same input with GSEA.
+               NOTE: If multiple gene sets are provided, the FDR null distribution will be based on the combined gene sets.
+               This may lead to slight differences in FDR values compared to running GSEA separately for each gene set.
+               See github issue for more details: https://github.com/zqfang/GSEApy/issues/323
 
     :param outdir: results output directory. If None, nothing will write to disk.
 
@@ -582,8 +588,7 @@ def enrich(
     :param gene_list: str, list, tuple, series, dataframe. Also support input txt file with one gene id per row.
                       The input `identifier` should be the same type to `gene_sets`.
 
-    :param gene_sets: str, list, tuple of Enrichr Library name(s).
-                      or custom defined gene_sets (dict, or gmt file).
+    :param gene_sets: custom defined gene_sets (dict, or gmt file).
 
                       Examples:
 
