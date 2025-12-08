@@ -104,9 +104,9 @@ Installation
 
 .. code:: shell
 
-   # if you have conda (MacOS_x86-64 and Linux only)
+   # if you have conda/mamba
    $ conda install -c bioconda gseapy
-   # Windows and MacOS_ARM64(M1/2-Chip)
+   # or pip
    $ pip install gseapy
 
 

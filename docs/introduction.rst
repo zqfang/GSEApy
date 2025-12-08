@@ -60,10 +60,10 @@ Install gseapy package from bioconda or pypi.
 
 .. code:: shell
    
-   # if you have conda (MacOS_x86-64 and Linux only)
+   # if you have conda
    $ conda install -c bioconda gseapy
   
-   # or use pip to install the latest release
+   # or use pip
    $ pip install gseapy
 
 
