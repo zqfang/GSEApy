@@ -48,138 +48,161 @@ class SciPalette:
             return LinearSegmentedColormap.from_list(name, colors)
         return LinearSegmentedColormap.from_list(name, list(zip(positions, colors)))
 
-    def npg(self):
-        # Discrete Color Palettes
-        # Color palette inspired by plots in Nature Reviews Cancer
-        return self._db[self.npg.__name__]
+    @property
+    def npg(self) -> List[str]:
+        """Discrete Color Palettes inspired by plots in Nature Reviews Cancer"""
+        return list(self._db["npg"].values())
 
-    def aaas(self):
-        # Color palette inspired by plots in Science from AAAS
-        return self._db[self.aaas.__name__]
+    @property
+    def aaas(self) -> List[str]:
+        """Color palette inspired by plots in Science from AAAS"""
+        return list(self._db["aaas"].values())
 
-    def nejm(self):
-        # Color palette inspired by plots in The New England Journal of Medicine
-        return self._db[self.nejm.__name__]
+    @property
+    def nejm(self) -> List[str]:
+        """Color palette inspired by plots in The New England Journal of Medicine"""
+        return list(self._db["nejm"].values())
 
-    def lancet(self):
-        # Color palette inspired by plots in Lancet Oncology
-        return self._db[self.lancet.__name__]
+    @property
+    def lancet(self) -> List[str]:
+        """Color palette inspired by plots in Lancet Oncology"""
+        return list(self._db["lancet"].values())
 
-    def jama(self):
-        # Color palette inspired by plots in The Journal of the American Medical Association
-        return self._db[self.jama.__name__]
+    @property
+    def jama(self) -> List[str]:
+        """Color palette inspired by plots in The Journal of the American Medical Association"""
+        return list(self._db["jama"].values())
 
-    def jco(self):
-        # Color palette inspired by plots in Journal of Clinical Oncology
-        return self._db[self.jco.__name__]
+    @property
+    def jco(self) -> List[str]:
+        """Color palette inspired by plots in Journal of Clinical Oncology"""
+        return list(self._db["jco"].values())
 
-    def ucscgb(self):
-        # Color palette inspired by UCSC Genome Browser Chromosome Colors
-        return self._db[self.ucscgb.__name__]
+    @property
+    def ucscgb(self) -> List[str]:
+        """Color palette inspired by UCSC Genome Browser Chromosome Colors"""
+        return list(self._db["ucscgb"].values())
 
-    def d3js(self, category="c20a"):
+    def d3js(self, category: str = "c20a") -> List[str]:
         """
         choose category from (c10, c20a, c20b, c20c)
         """
-        if category in self._db[self.d3js.__name__]:
-            return self._db[self.d3js.__name__][category]
+        if category in self._db["d3js"]:
+            return list(self._db["d3js"][category].values())
+        return []
 
-    def igv(self):
-        # Color palette inspired by IGV
-        return self._db[self.igv.__name__]
+    @property
+    def igv(self) -> List[str]:
+        """Color palette inspired by IGV"""
+        return list(self._db["igv"].values())
 
-    def igv_alternating(self):
-        # Color palette inspired by IGV
-        return self._db[self.igv_alternating.__name__]
+    @property
+    def igv_alternating(self) -> List[str]:
+        """Color palette inspired by IGV"""
+        return list(self._db["igv_alternating"].values())
 
-    def locuszoom(self):
-        # Color palette inspired by LocusZoom
-        return self._db[self.locuszoom.__name__]
+    @property
+    def locuszoom(self) -> List[str]:
+        """Color palette inspired by LocusZoom"""
+        return list(self._db["locuszoom"].values())
 
-    def uchicago(self, category="default"):
+    def uchicago(self, category: str = "default") -> List[str]:
         """
         Color palette inspired by University of Chicago Color Palette
 
         choose category from (light, dark, default)
         """
-        if category in self._db[self.uchicago.__name__]:
-            return self._db[self.uchicago.__name__][category]
+        if category in self._db["uchicago"]:
+            return list(self._db["uchicago"][category].values())
+        return []
 
-    def hallmark(self, category="dark"):  # hallmark_dark
+    def hallmark(self, category: str = "dark") -> List[str]:
         """
         choose category from (dark, light)
         """
+        if category in self._db["hallmark"]:
+            return list(self._db["hallmark"][category].values())
+        return []
 
-        if category in self._db[self.hallmark.__name__]:
-            return self._db[self.hallmark.__name__][category]
+    @property
+    def cosmic(self) -> List[str]:
+        """Color palette inspired by COSMIC Hallmarks of Cancer"""
+        return list(self._db["cosmic"].values())
 
-    def cosmic(self):  # signature_substitutions
-        # Color palette inspired by COSMIC Hallmarks of Cancer
-        return self._db[self.cosmic.__name__]
+    @property
+    def simpsons(self) -> List[str]:
+        """Color palette inspired by The Simpsons"""
+        return list(self._db["simpsons"].values())
 
-    def simpsons(self):
-        # Color palette inspired by The Simpsons
-        return self._db[self.simpsons.__name__]
+    @property
+    def futurama(self) -> List[str]:
+        """Color palette inspired by Futurama"""
+        return list(self._db["futurama"].values())
 
-    def futurama(self):
-        # Color palette inspired by Futurama
-        return self._db[self.futurama.__name__]
+    @property
+    def rickandmorty(self) -> List[str]:
+        """Color palette inspired by Rick and Morty"""
+        return list(self._db["rickandmorty"].values())
 
-    def rickandmorty(self):
-        # Color palette inspired by Rick and Morty
-        return self._db[self.rickandmorty.__name__]
+    @property
+    def startrek(self) -> List[str]:
+        """Color palette inspired by Star Trek"""
+        return list(self._db["startrek"].values())
 
-    def startrek(self):
-        # Color palette inspired by Star Trek
-        return self._db[self.startrek.__name__]
+    @property
+    def tron(self) -> List[str]:
+        """Color palette inspired by Tron Legacy"""
+        return list(self._db["tron"].values())
 
-    def tron(self):
-        # Color palette inspired by Tron Legacy
-        return self._db[self.tron.__name__]
+    @property
+    def gsea(self) -> List[str]:
+        """Color palette inspired by heatmaps generated by GSEA GenePattern"""
+        return list(self._db["gsea"].values())
 
-    def gsea(self):
-        # Color palette inspired by heatmaps generated by GSEA GenePattern
-        return self._db[self.gsea.__name__]
-
-    def material(self, category="indigo"):
+    def material(self, category: str = "indigo") -> List[str]:
         """
         choose category from
         (red, pink, purple, deeppurple, blue, lightblue, indigo,
         cyan, teal, lime, green, yellow, amber, organge, deeporange,
         brown, gray, bluegray)
         """
-        if category in self._db[self.material.__name__]:
-            return self._db[self.material.__name__][category]
+        if category in self._db["material"]:
+            return list(self._db["material"][category].values())
+        return []
 
-    def zeileis(self):
+    @property
+    def zeileis(self) -> List[str]:
         """
-        # https://graphicdesign.stackexchange.com/questions/3682/where-can-i-find-a-large-palette-set-of-contrasting-colors-for-coloring-many-d
-        # update 1
-        # orig reference http://epub.wu.ac.at/1692/1/document.pdf
+        https://graphicdesign.stackexchange.com/questions/3682/where-can-i-find-a-large-palette-set-of-contrasting-colors-for-coloring-many-d
+        orig reference http://epub.wu.ac.at/1692/1/document.pdf
         """
-        return self._db[self.zeileis.__name__]
+        return list(self._db["zeileis"].values())
 
-    def godsnot(self):
+    @property
+    def godsnot(self) -> List[str]:
         """
         take from http://godsnotwheregodsnot.blogspot.de/2012/09/color-distribution-methodology.html
         or
         http://godsnotwheregodsnot.blogspot.com/2013/11/kmeans-color-quantization-seeding.html
-
         """
-        return self._db[self.godsnot.__name__]
+        return list(self._db["godsnot"].values())
 
-    def boynton(self):
-        return self._db[self.boynton.__name__]
+    @property
+    def boynton(self) -> List[str]:
+        return list(self._db["boynton"].values())
 
-    def kelly(self):
+    @property
+    def kelly(self) -> List[str]:
         """
         The set of 22 colours of maximum contrast proposed by Kenneth Kelly in the work:
         http://www.iscc-archive.org/pdf/PC54_1724_001.pdf
         """
-        return self._db[self.kelly.__name__]
+        return list(self._db["kelly"].values())
 
-    def watlington(self):
-        return self._db[self.watlington.__name__]
+    @property
+    def watlington(self) -> List[str]:
+        return list(self._db["watlington"].values())
 
-    def glasbey(self):
-        return self._db[self.glasbey.__name__]
+    @property
+    def glasbey(self) -> List[str]:
+        return list(self._db["glasbey"].values())
