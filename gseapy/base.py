@@ -8,6 +8,7 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import pandas as pd
+from pandas.api.types import is_object_dtype, is_string_dtype
 
 from gseapy.plot import GSEAPlot, TracePlot, gseaplot, heatmap
 from gseapy.utils import DEFAULT_CACHE_PATH, log_init, mkdirs, retry
@@ -276,7 +277,8 @@ class GSEAbase(object):
         helper function to reset index if index is already gene_names
         """
         # handle index is already gene_names
-        if rank_metric.index.dtype == "O":
+        # pandas 3.0 compatibility: check for both object and string dtypes
+        if is_object_dtype(rank_metric.index.dtype) or is_string_dtype(rank_metric.index.dtype):
             # Try to check if all elements can be converted to numbers
             try:
                 # is_string_numbers = True, don't reset index
@@ -298,8 +300,9 @@ class GSEAbase(object):
             self._logger.debug("Input data is a DataFrame with gene names")
             # handle index is already gene_names
             rank_metric = self._reset_index(rank_metric)
-            # if rank_metric.columns.dtype != "O":
-            rank_metric.columns = rank_metric.columns.astype(str)
+            # pandas 3.0 compatibility: check for both object and string dtypes
+            if not (is_object_dtype(rank_metric.columns.dtype) or is_string_dtype(rank_metric.columns.dtype)):
+                rank_metric.columns = rank_metric.columns.astype(str)
 
         elif isinstance(exprs, pd.Series):
             # change to DataFrame
@@ -309,7 +312,8 @@ class GSEAbase(object):
                     # rename col if name attr is none
                     exprs.name = "sample1"
                 elif hasattr(exprs.name, "dtype"):
-                    if exprs.name.dtype != "O":
+                    # pandas 3.0 compatibility: check for both object and string dtypes
+                    if not (is_object_dtype(exprs.name.dtype) or is_string_dtype(exprs.name.dtype)):
                         exprs.name = exprs.name.astype(str)
                 else:
                     exprs.name = str(exprs.name)
@@ -396,7 +400,7 @@ class GSEAbase(object):
         # if all gene names are Entrez IDs, don't check uppercase
         if all([self._is_entrez_id(g) for g in gene_list]):
             return False
-        is_upper = [s.isupper() for s in gene_list]
+        is_upper = [str(s).isupper() for s in gene_list]
         if sum(is_upper) / len(is_upper) >= 0.9:
             return True
         return False
@@ -484,7 +488,7 @@ class GSEAbase(object):
         if (not self._gene_isupper) and all(ups):
             # set flag to True, means use uppercase version of gene symbols
             self._gene_toupper = True
-            gene_dict_upper = {g.upper(): i for i, g in enumerate(gene_list)}
+            gene_dict_upper = {str(g).upper(): i for i, g in enumerate(gene_list)}
 
         # filter gene sets
         for subset in subsets:
