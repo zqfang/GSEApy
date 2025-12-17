@@ -4,7 +4,7 @@ import logging
 import os
 import xml.etree.ElementTree as ET
 from collections.abc import Iterable
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple
 
 import requests
 

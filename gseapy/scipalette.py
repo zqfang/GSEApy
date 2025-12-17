@@ -2,7 +2,7 @@ import importlib
 import json
 from typing import List
 
-from matplotlib.colors import LinearSegmentedColormap, ListedColormap
+from matplotlib.colors import LinearSegmentedColormap
 
 
 class SciPalette:

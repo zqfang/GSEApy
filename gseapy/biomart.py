@@ -332,7 +332,7 @@ class Biomart:
                 return df_filters
             else:
                 self._logger.warning(
-                    f"Filter response has {df_filters.shape[1]} columns, expected at least {max(expected_indices)+1}. Returning raw DataFrame."
+                    f"Filter response has {df_filters.shape[1]} columns, expected at least {max(expected_indices) + 1}. Returning raw DataFrame."
                 )
                 return df_filters
         return resp.text

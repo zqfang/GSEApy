@@ -1,15 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import sys
-from collections import Counter
 from math import ceil
-from typing import AnyStr, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Dict, Iterable, List
 
 import numpy as np
 from joblib import Parallel, delayed
-
-from gseapy.stats import multiple_testing_correction
 
 
 def enrichment_score(

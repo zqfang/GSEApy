@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-from scipy.stats import fisher_exact, hypergeom
+from scipy.stats import hypergeom
 
 
 def calc_pvalues(query, gene_sets, background=20000, **kwargs):

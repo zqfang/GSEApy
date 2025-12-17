@@ -1,10 +1,8 @@
 #! python
 # -*- coding: utf-8 -*-
 
-import os
 from typing import Dict, List, Optional, Union
 
-import numpy as np
 import pandas as pd
 
 from gseapy.base import GSEAbase
