@@ -278,7 +278,9 @@ class GSEAbase(object):
         """
         # handle index is already gene_names
         # pandas 3.0 compatibility: check for both object and string dtypes
-        if is_object_dtype(rank_metric.index.dtype) or is_string_dtype(rank_metric.index.dtype):
+        if is_object_dtype(rank_metric.index.dtype) or is_string_dtype(
+            rank_metric.index.dtype
+        ):
             # Try to check if all elements can be converted to numbers
             try:
                 # is_string_numbers = True, don't reset index
@@ -301,7 +303,10 @@ class GSEAbase(object):
             # handle index is already gene_names
             rank_metric = self._reset_index(rank_metric)
             # pandas 3.0 compatibility: check for both object and string dtypes
-            if not (is_object_dtype(rank_metric.columns.dtype) or is_string_dtype(rank_metric.columns.dtype)):
+            if not (
+                is_object_dtype(rank_metric.columns.dtype)
+                or is_string_dtype(rank_metric.columns.dtype)
+            ):
                 rank_metric.columns = rank_metric.columns.astype(str)
 
         elif isinstance(exprs, pd.Series):
@@ -313,7 +318,10 @@ class GSEAbase(object):
                     exprs.name = "sample1"
                 elif hasattr(exprs.name, "dtype"):
                     # pandas 3.0 compatibility: check for both object and string dtypes
-                    if not (is_object_dtype(exprs.name.dtype) or is_string_dtype(exprs.name.dtype)):
+                    if not (
+                        is_object_dtype(exprs.name.dtype)
+                        or is_string_dtype(exprs.name.dtype)
+                    ):
                         exprs.name = exprs.name.astype(str)
                 else:
                     exprs.name = str(exprs.name)
