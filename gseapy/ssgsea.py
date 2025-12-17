@@ -57,6 +57,7 @@ class SingleSampleGSEA(GSEAbase):
         self.ranking = None
         self._noplot = no_plot
         self.permutation_type = "gene_set"
+        assert self.min_size > 0
 
     def corplot(self):
         """NES Correlation plot

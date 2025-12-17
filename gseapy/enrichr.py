@@ -344,7 +344,7 @@ class Enrichr(object):
         """
         if all(self._is_entrez_id(s) for s in gene_list):
             return False
-        is_upper = [s.isupper() for s in gene_list]
+        is_upper = [str(s).isupper() for s in gene_list]
         return sum(is_upper) / len(is_upper) >= 0.9
 
     def _parse_enrichr_response(self, data: Dict, gene_set_key: str) -> pd.DataFrame:
@@ -627,7 +627,7 @@ class Enrichr(object):
         _gene_toupper = False
 
         if all(ups) and not self._gene_isupper:
-            _gls = [x.upper() for x in self._gls]
+            _gls = [str(x).upper() for x in self._gls]
             _gene_toupper = True
             self._logger.info(
                 "  Genes in GMT file are all in upper case, convert query to upper case."
@@ -635,7 +635,7 @@ class Enrichr(object):
 
         bg = self.parse_background(gmt)
         if isinstance(bg, set) and not self._gene_isupper and _gene_toupper:
-            bg = {s.upper() for s in bg}
+            bg = {str(s).upper() for s in bg}
 
         # Statistical testing
         hgtest = list(calc_pvalues(query=_gls, gene_sets=gmt, background=bg))

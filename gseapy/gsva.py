@@ -64,6 +64,7 @@ class GSVA(GSEAbase):
         # self.seed = seed
         self.ranking = None
         self.permutation_type = "gene_set"
+        assert self.min_size > 0
 
     def load_data(self) -> pd.DataFrame:
         # load data
