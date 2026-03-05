@@ -1,5 +1,7 @@
 from tempfile import TemporaryDirectory, mkdtemp
 
+import numpy as np
+import pandas as pd
 import pytest
 
 from gseapy.__init__ import enrich, enrichr, gsea, gsva, prerank, replot, ssgsea
@@ -125,6 +127,32 @@ def test_gsva(gsvaExpr, gsvaGMT):
     gsva(gsvaExpr, gsvaGMT, tmpdir.name, kcdf="Gaussian")
     gsva(gsvaExpr, gsvaGMT, tmpdir.name, kcdf="Poisson")
     gsva(gsvaExpr, gsvaGMT, tmpdir.name, kcdf=None)
+    tmpdir.cleanup()
+
+
+def test_gsva_uppercase_conversion():
+    """Test GSVA when gene sets are uppercase but expression genes are lowercase.
+
+    Regression test for: 'numpy.float64' object has no attribute 'upper'
+    This ensures str() is called before .upper() on gene names.
+    """
+    np.random.seed(42)
+    n_genes = 100
+    n_samples = 4
+    gene_names = ["gene%d" % i for i in range(n_genes)]
+    expr = pd.DataFrame(
+        np.random.randn(n_genes, n_samples),
+        index=gene_names,
+        columns=["s%d" % i for i in range(n_samples)],
+    )
+    # gene sets with UPPERCASE gene names trigger the _gene_toupper path
+    gene_sets = {
+        "SET_A": [g.upper() for g in gene_names[:30]],
+        "SET_B": [g.upper() for g in gene_names[20:60]],
+    }
+    tmpdir = TemporaryDirectory(dir="tests")
+    result = gsva(data=expr, gene_sets=gene_sets, outdir=tmpdir.name)
+    assert result.res2d is not None
     tmpdir.cleanup()
 
 
