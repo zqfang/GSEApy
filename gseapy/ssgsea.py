@@ -153,7 +153,7 @@ class SingleSampleGSEA(GSEAbase):
 
         gene_names = df.index.to_list()
         if (not self._gene_isupper) and self._gene_toupper:
-            gene_names = [x.upper() for x in gene_names]
+            gene_names = [str(x).upper() for x in gene_names]
             self._logger.info("Genes are converted to uppercase.")
 
         gsum = ssgsea_rs(
