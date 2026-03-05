@@ -973,10 +973,9 @@ class DotPlot(object):
             num=3,  #
             # fmt="{x:.2f}",
             color="gray",
-            func=lambda s: 100
-            * np.sqrt(s)
-            / plt.rcParams["lines.markersize"]
-            / self.scale,
+            func=lambda s: (
+                100 * np.sqrt(s) / plt.rcParams["lines.markersize"] / self.scale
+            ),
         )
         ax.legend(
             handles,
