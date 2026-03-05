@@ -104,7 +104,7 @@ class GSVA(GSEAbase):
         self._logger.info("Start to run GSVA...Might take a while................")
         gene_names = df.index.to_list()
         if (not self._gene_isupper) and self._gene_toupper:
-            gene_names = [x.upper() for x in gene_names]
+            gene_names = [str(x).upper() for x in gene_names]
             self._logger.info("Genes are converted to uppercase.")
         # run
         gsum = gsva_rs(
