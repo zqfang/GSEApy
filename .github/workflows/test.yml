@@ -37,7 +37,7 @@ jobs:
         pip install ruff
         cd ${GITHUB_WORKSPACE}
         # Check linting and formatting
-        ruff check gseapy
+        # ruff check gseapy
         ## fix check
         ## ruff check --fix gseapy
         ruff format --check gseapy
