@@ -1029,6 +1029,7 @@ class GSEAbase(object):
                 colors=colors,
                 legend_kws=legend_kws,
                 ofname=ofname,
+                figsize=figsize,
             )
             t.add_axes()
             t.savefig(ofname)
