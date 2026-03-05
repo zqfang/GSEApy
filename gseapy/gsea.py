@@ -279,7 +279,7 @@ class GSEA(GSEAbase):
         """
         check each cls group length
         """
-        metrics = ["signal_to_noise", "s2n", "abs_signal_to_noise", "abs_s2n", "t_test"]
+        # metrics = ["signal_to_noise", "s2n", "abs_signal_to_noise", "abs_s2n", "t_test"]
         s = []
         for c, v in sorted(counter.items(), key=lambda item: item[1]):
             if v < 3:
