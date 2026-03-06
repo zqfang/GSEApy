@@ -27,6 +27,7 @@ class GSEA(GSEAbase):
         data: Union[pd.DataFrame, str],
         gene_sets: Union[List[str], str, Dict[str, str]],
         classes: Union[List[str], str, Dict[str, str]],
+        organism: str = "human",
         outdir: Optional[str] = None,
         min_size: int = 15,
         max_size: int = 500,
@@ -59,6 +60,8 @@ class GSEA(GSEAbase):
             Phenotype labels file path or list of phenotype labels.
             If str, the file path to the phenotype labels file (e.g. .txt, .csv, .tsv).
             If dict, a dictionary of phenotype labels.
+        organism: str, optional
+            Organism for Enrichr library names (human, mouse, yeast, fly, fish, worm); does not affect custom gene sets (gmt or dict).
         outdir : str, optional
             Output directory. If not provided, the output will be saved.
         min_size : int, optional
@@ -101,6 +104,7 @@ class GSEA(GSEAbase):
             gene_sets=gene_sets,
             module="gsea",
             threads=threads,
+            organism=organism,
             verbose=verbose,
         )
         self.data = data
@@ -429,6 +433,7 @@ class Prerank(GSEAbase):
         self,
         rnk: Union[pd.DataFrame, pd.Series, str],
         gene_sets: Union[List[str], str, Dict[str, str]],
+        organism: str = "human",
         outdir: Optional[str] = None,
         pheno_pos="Pos",
         pheno_neg="Neg",
@@ -450,6 +455,7 @@ class Prerank(GSEAbase):
             gene_sets=gene_sets,
             module="prerank",
             threads=threads,
+            organism=organism,
             verbose=verbose,
         )
         self.rnk = rnk

@@ -90,7 +90,6 @@ class EnrichrAPI:
             "danio rerio": "FishEnrichr",
             "d. rerio": "FishEnrichr",
         }
-
         if organism not in self.db_map:
             valid_opts = ", ".join(sorted(set(self.db_map.keys())))
             raise ValueError(
@@ -125,6 +124,33 @@ class EnrichrAPI:
 
         # The API returns a dictionary with a 'statistics' key containing a list of library info
         return [library["libraryName"] for library in data.get("statistics", [])]
+
+    def download_libraries(self, libname: str) -> Dict[str, List[str]]:
+        """Download enrichr libraries"""
+        # queery string
+        url = f"{self.base_url}/geneSetLibrary?mode=text&libraryName={libname}"
+        # get
+        response = self._session.get(url, timeout=None, stream=True)
+        if not response.ok:
+            raise Exception(
+                "Error fetching gene set library, input name is correct for the organism you've set?."
+            )
+        # reformat to dict and save to disk
+        mkdirs(DEFAULT_CACHE_PATH)
+        genesets_dict = {}
+        outname = "Enrichr.%s.gmt" % libname  # pattern: database.library.gmt
+        gmtout = open(os.path.join(DEFAULT_CACHE_PATH, outname), "w")
+        for line in response.iter_lines(chunk_size=1024, decode_unicode="utf-8"):
+            line = line.strip().split("\t")
+            k = line[0]
+            v = map(lambda x: x.split(",")[0], line[2:])
+            v = list(filter(lambda x: True if len(x) else False, v))
+            genesets_dict[k] = v
+            outline = "%s\t%s\t%s\n" % (k, line[1], "\t".join(v))
+            gmtout.write(outline)
+        gmtout.close()
+
+        return genesets_dict
 
     def find_terms_by_gene(
         self, gene: str, include_json: bool = True, include_setup: bool = True

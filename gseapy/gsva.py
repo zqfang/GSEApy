@@ -17,6 +17,7 @@ class GSVA(GSEAbase):
         self,
         data: Union[pd.DataFrame, pd.Series, str],
         gene_sets: Union[List[str], str, Dict[str, str]],
+        organism: str = "human",
         outdir: Optional[str] = None,
         kcdf: Optional[str] = "Gaussian",
         weight: float = 1.0,
@@ -35,6 +36,7 @@ class GSVA(GSEAbase):
             module="gsva",
             threads=threads,
             verbose=verbose,
+            organism=organism,
         )
         self.data = data
         self.tau = weight
