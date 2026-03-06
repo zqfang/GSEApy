@@ -127,7 +127,7 @@ def main():
         gv.run()
     elif subcommand == "enrichr":
         # calling enrichr API
-        from .enrichr import Enrichr
+        from .enrichr_v0 import Enrichr
 
         enr = Enrichr(
             gene_list=args.gene_list,
