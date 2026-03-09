@@ -27,7 +27,7 @@ except ImportError:
 
 
 def find_version():
-    filepath = os.path.join("gseapy", "__main__.py")
+    filepath = os.path.join("gseapy", "__init__.py")
     with open(os.path.join(os.path.dirname(__file__), filepath), encoding="utf8") as fp:
         content = fp.read()
     version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]", content, re.M)
