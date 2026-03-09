@@ -133,7 +133,7 @@ class EnrichrAPI:
         response = self._session.get(url, timeout=None, stream=True)
         if not response.ok:
             raise Exception(
-                "Error fetching gene set library, input name is correct for the organism you've set?."
+                "Error fetching gene set library. Please verify that the library name and organism are correct."
             )
         # reformat to dict and save to disk
         mkdirs(DEFAULT_CACHE_PATH)
