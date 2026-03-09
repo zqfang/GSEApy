@@ -1,8 +1,12 @@
 import argparse as ap
 import os
 import sys
+from importlib.metadata import PackageNotFoundError, version
 
-from . import __version__
+try:
+    __version__ = version("gseapy")
+except PackageNotFoundError:
+    __version__ = "unknown"
 # ------------------------------------
 # Main function
 # ------------------------------------
