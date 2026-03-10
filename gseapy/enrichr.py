@@ -127,7 +127,7 @@ class EnrichrAPI:
 
     def download_libraries(self, libname: str) -> Dict[str, List[str]]:
         """Download enrichr libraries"""
-        # queery string
+        # query string
         url = f"{self.base_url}/geneSetLibrary?mode=text&libraryName={libname}"
         # get
         response = self._session.get(url, timeout=None, stream=True)
