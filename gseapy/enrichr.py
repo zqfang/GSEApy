@@ -139,16 +139,18 @@ class EnrichrAPI:
         mkdirs(DEFAULT_CACHE_PATH)
         genesets_dict = {}
         outname = "Enrichr.%s.gmt" % libname  # pattern: database.library.gmt
-        gmtout = open(os.path.join(DEFAULT_CACHE_PATH, outname), "w")
-        for line in response.iter_lines(chunk_size=1024, decode_unicode="utf-8"):
-            line = line.strip().split("\t")
-            k = line[0]
-            v = map(lambda x: x.split(",")[0], line[2:])
-            v = list(filter(lambda x: True if len(x) else False, v))
-            genesets_dict[k] = v
-            outline = "%s\t%s\t%s\n" % (k, line[1], "\t".join(v))
-            gmtout.write(outline)
-        gmtout.close()
+        output_path = os.path.join(DEFAULT_CACHE_PATH, outname)
+        temp_path = output_path + ".tmp"
+        with open(temp_path, "w") as gmtout:
+            for line in response.iter_lines(chunk_size=1024, decode_unicode="utf-8"):
+                line = line.strip().split("\t")
+                k = line[0]
+                v = map(lambda x: x.split(",")[0], line[2:])
+                v = list(filter(lambda x: True if len(x) else False, v))
+                genesets_dict[k] = v
+                outline = "%s\t%s\t%s\n" % (k, line[1], "\t".join(v))
+                gmtout.write(outline)
+        os.replace(temp_path, output_path)
 
         return genesets_dict
 
