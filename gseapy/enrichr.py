@@ -47,6 +47,10 @@ class EnrichrParseError(EnrichrError):
     pass
 
 
+_DEFAULT_MAX_SIZE = 100000
+"""Default maximum gene set size for Enrichr term size filtering."""
+
+
 class EnrichrAPI:
     """A Python client for the modEnrichr suite and Speedrichr REST APIs."""
 
@@ -338,7 +342,7 @@ class Enrichr(EnrichrAPI):
         no_plot: bool = False,
         verbose: bool = False,
         min_size: int = 0,
-        max_size: int = 100000,
+        max_size: int = _DEFAULT_MAX_SIZE,
     ):
         self.gene_list = gene_list
         self.gene_sets = gene_sets
@@ -735,7 +739,7 @@ class Enrichr(EnrichrAPI):
         Columns: Term, Overlap, P-value, Odds Ratio, Combined Score, Adjusted_P-value, Genes
         """
         # Filter gene sets by size
-        if self.min_size > 0 or self.max_size < 100000:
+        if self.min_size > 0 or self.max_size < _DEFAULT_MAX_SIZE:
             _gmt = {}
             for term, genes in gmt.items():
                 tag_len = len(genes)
@@ -858,6 +862,8 @@ class Enrichr(EnrichrAPI):
         """Filter enrichment results by gene set (term) size.
 
         For results with an 'Overlap' column in 'k/K' format, filter by K (gene set size).
+        If 'Overlap' is not available, falls back to filtering by the number of
+        overlapping genes in the 'Genes' column (k, not K).
         This helps remove overly broad (large gene set) or overly specific (small gene set)
         terms, similar to filtering GO terms by level.
 
@@ -871,7 +877,7 @@ class Enrichr(EnrichrAPI):
         pd.DataFrame
             Filtered DataFrame.
         """
-        if self.min_size <= 0 and self.max_size >= 100000:
+        if self.min_size <= 0 and self.max_size >= _DEFAULT_MAX_SIZE:
             return df
         if df.empty:
             return df
