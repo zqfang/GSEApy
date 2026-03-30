@@ -476,6 +476,8 @@ def enrichr(
     top_term: int = 10,
     no_plot: bool = False,
     verbose: bool = False,
+    min_size: int = 0,
+    max_size: int = 100000,
 ) -> Enrichr:
     """Enrichr API.
 
@@ -562,6 +564,12 @@ def enrichr(
 
     :param bool verbose: Increase output verbosity, print out progress of your job, Default: False.
 
+    :param int min_size: Minimum number of genes in a gene set to be included in the analysis.
+                         Useful for filtering out very specific (small) GO terms. Default: 0.
+
+    :param int max_size: Maximum number of genes in a gene set to be included in the analysis.
+                         Useful for filtering out very broad (large) GO terms. Default: 100000.
+
     :return: An Enrichr object, which obj.res2d stores your last query, obj.results stores your all queries.
 
     """
@@ -577,6 +585,8 @@ def enrichr(
         top_term,
         no_plot,
         verbose,
+        min_size=min_size,
+        max_size=max_size,
     )
     # set organism
     enr.set_organism()
@@ -597,6 +607,8 @@ def enrich(
     top_term: int = 10,
     no_plot: bool = False,
     verbose: bool = False,
+    min_size: int = 0,
+    max_size: int = 100000,
 ) -> Enrichr:
     """Perform over-representation analysis (hypergeometric test).
 
@@ -668,6 +680,12 @@ def enrich(
 
     :param bool verbose: Increase output verbosity, print out progress of your job, Default: False.
 
+    :param int min_size: Minimum number of genes in a gene set to be included in the analysis.
+                         Useful for filtering out very specific (small) GO terms. Default: 0.
+
+    :param int max_size: Maximum number of genes in a gene set to be included in the analysis.
+                         Useful for filtering out very broad (large) GO terms. Default: 100000.
+
     :return: An Enrichr object, which obj.res2d stores your last query, obj.results stores your all queries.
 
     """
@@ -688,6 +706,8 @@ def enrich(
         top_term,
         no_plot,
         verbose,
+        min_size=min_size,
+        max_size=max_size,
     )
     # set organism
     enr.set_organism()

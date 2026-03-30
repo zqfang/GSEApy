@@ -337,6 +337,8 @@ class Enrichr(EnrichrAPI):
         top_term: int = 10,
         no_plot: bool = False,
         verbose: bool = False,
+        min_size: int = 0,
+        max_size: int = 100000,
     ):
         self.gene_list = gene_list
         self.gene_sets = gene_sets
@@ -349,6 +351,8 @@ class Enrichr(EnrichrAPI):
         self.__no_plot = no_plot
         self.verbose = bool(verbose)
         self.module = "enrichr"
+        self.min_size = int(min_size)
+        self.max_size = int(max_size)
         self.res2d: Optional[pd.DataFrame] = None
         self.background = background
         self._bg: Union[Set[str], int, None] = None
@@ -730,6 +734,22 @@ class Enrichr(EnrichrAPI):
 
         Columns: Term, Overlap, P-value, Odds Ratio, Combined Score, Adjusted_P-value, Genes
         """
+        # Filter gene sets by size
+        if self.min_size > 0 or self.max_size < 100000:
+            _gmt = {}
+            for term, genes in gmt.items():
+                tag_len = len(genes)
+                if self.min_size <= tag_len <= self.max_size:
+                    _gmt[term] = genes
+            filsets_num = len(gmt) - len(_gmt)
+            if filsets_num > 0:
+                self._logger.info(
+                    "%04d gene_sets have been filtered out when"
+                    " min_size=%s and max_size=%s"
+                    % (filsets_num, self.min_size, self.max_size)
+                )
+            gmt = _gmt
+
         # Check gene case consistency
         top10 = min(len(gmt), 10)
         top10_keys = list(gmt.keys())[:top10]
@@ -834,6 +854,50 @@ class Enrichr(EnrichrAPI):
 
         return genes_list, gss
 
+    def _filter_res_by_term_size(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Filter enrichment results by gene set (term) size.
+
+        For results with an 'Overlap' column in 'k/K' format, filter by K (gene set size).
+        This helps remove overly broad (large gene set) or overly specific (small gene set)
+        terms, similar to filtering GO terms by level.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Enrichment results DataFrame.
+
+        Returns
+        -------
+        pd.DataFrame
+            Filtered DataFrame.
+        """
+        if self.min_size <= 0 and self.max_size >= 100000:
+            return df
+        if df.empty:
+            return df
+
+        if "Overlap" in df.columns:
+            # Parse gene set size from Overlap column (format: "k/K")
+            gset_sizes = df["Overlap"].str.split("/", expand=True)[1].astype(int)
+            mask = (gset_sizes >= self.min_size) & (gset_sizes <= self.max_size)
+            filtered = df.loc[mask].reset_index(drop=True)
+        elif "Genes" in df.columns:
+            # Fallback: count overlapping genes from Genes column
+            gene_counts = df["Genes"].str.split(";").apply(len)
+            mask = (gene_counts >= self.min_size) & (gene_counts <= self.max_size)
+            filtered = df.loc[mask].reset_index(drop=True)
+        else:
+            return df
+
+        filsets_num = len(df) - len(filtered)
+        if filsets_num > 0:
+            self._logger.info(
+                "%04d terms have been filtered out when"
+                " min_size=%s and max_size=%s"
+                % (filsets_num, self.min_size, self.max_size)
+            )
+        return filtered
+
     def run(self) -> None:
         """Run enrichr for one sample gene list against multiple libraries."""
         # Validate inputs
@@ -849,7 +913,9 @@ class Enrichr(EnrichrAPI):
             )
             res_online = self.enrich_online(genes_list, online_genesets)
             if res_online is not None:
-                self.results.append(res_online)
+                res_online = self._filter_res_by_term_size(res_online)
+                if not res_online.empty:
+                    self.results.append(res_online)
 
         ## Process local gene sets (dicts) separately to avoid unnecessary API calls
         for name, geneset in zip(self._gs_name, gss):

@@ -536,6 +536,178 @@ class TestEnrichValidation:
                 no_plot=True,
             )
 
+
+class TestEnrichTermSizeFilter:
+    """Tests for min_size and max_size filtering in enrichment analysis."""
+
+    @pytest.fixture
+    def varied_gene_sets(self):
+        """Gene sets of varying sizes for testing size filters."""
+        return {
+            "SMALL_SET": ["IGKC", "CD55"],
+            "MEDIUM_SET": ["IGKC", "CD55", "ABHD4", "PCSK6", "PGD"],
+            "LARGE_SET": [
+                "IGKC", "CD55", "ABHD4", "PCSK6", "PGD",
+                "ITGB2", "CARD6", "MNDA", "ATE1", "LGALS8",
+            ],
+        }
+
+    @pytest.fixture
+    def gene_list_for_filter(self):
+        """Gene list that overlaps with all varied gene sets."""
+        return [
+            "IGKC", "CD55", "ABHD4", "PCSK6", "PGD",
+            "ITGB2", "CARD6", "MNDA", "ATE1", "LGALS8",
+        ]
+
+    def test_enrich_min_size_filters_small_sets(
+        self, gene_list_for_filter, varied_gene_sets
+    ):
+        """enrich() with min_size should exclude gene sets smaller than the threshold."""
+        result = enrich(
+            gene_list=gene_list_for_filter,
+            gene_sets=varied_gene_sets,
+            outdir=None,
+            cutoff=1.0,
+            no_plot=True,
+            min_size=3,
+        )
+        assert result.res2d is not None
+        terms = set(result.res2d["Term"])
+        assert "SMALL_SET" not in terms
+        assert "MEDIUM_SET" in terms
+        assert "LARGE_SET" in terms
+
+    def test_enrich_max_size_filters_large_sets(
+        self, gene_list_for_filter, varied_gene_sets
+    ):
+        """enrich() with max_size should exclude gene sets larger than the threshold."""
+        result = enrich(
+            gene_list=gene_list_for_filter,
+            gene_sets=varied_gene_sets,
+            outdir=None,
+            cutoff=1.0,
+            no_plot=True,
+            max_size=5,
+        )
+        assert result.res2d is not None
+        terms = set(result.res2d["Term"])
+        assert "SMALL_SET" in terms
+        assert "MEDIUM_SET" in terms
+        assert "LARGE_SET" not in terms
+
+    def test_enrich_min_and_max_size_combined(
+        self, gene_list_for_filter, varied_gene_sets
+    ):
+        """enrich() with both min_size and max_size should filter both ends."""
+        result = enrich(
+            gene_list=gene_list_for_filter,
+            gene_sets=varied_gene_sets,
+            outdir=None,
+            cutoff=1.0,
+            no_plot=True,
+            min_size=3,
+            max_size=7,
+        )
+        assert result.res2d is not None
+        terms = set(result.res2d["Term"])
+        assert "SMALL_SET" not in terms
+        assert "MEDIUM_SET" in terms
+        assert "LARGE_SET" not in terms
+
+    def test_enrich_default_size_returns_all(
+        self, gene_list_for_filter, varied_gene_sets
+    ):
+        """enrich() with default min_size/max_size should return all terms."""
+        result = enrich(
+            gene_list=gene_list_for_filter,
+            gene_sets=varied_gene_sets,
+            outdir=None,
+            cutoff=1.0,
+            no_plot=True,
+        )
+        assert result.res2d is not None
+        terms = set(result.res2d["Term"])
+        assert "SMALL_SET" in terms
+        assert "MEDIUM_SET" in terms
+        assert "LARGE_SET" in terms
+
+    def test_enrich_size_filter_all_excluded(
+        self, gene_list_for_filter, varied_gene_sets
+    ):
+        """enrich() should handle the case where all gene sets are filtered out."""
+        result = enrich(
+            gene_list=gene_list_for_filter,
+            gene_sets=varied_gene_sets,
+            outdir=None,
+            cutoff=1.0,
+            no_plot=True,
+            min_size=100,
+        )
+        assert result.res2d is None
+
+
+class TestEnrichTermSizeFilterOnlineResults:
+    """Tests for _filter_res_by_term_size on result DataFrames."""
+
+    def test_filter_by_overlap_column(self):
+        """Should filter using gene set size from Overlap column (k/K format)."""
+        from gseapy.enrichr import Enrichr
+
+        enr = Enrichr(
+            gene_list=["A"],
+            gene_sets={"X": ["A"]},
+            outdir=None,
+            no_plot=True,
+            min_size=5,
+            max_size=50,
+        )
+        df = pd.DataFrame({
+            "Term": ["small", "medium", "large"],
+            "Overlap": ["1/3", "2/10", "5/100"],
+            "P-value": [0.01, 0.02, 0.03],
+            "Genes": ["A", "A;B", "A;B;C;D;E"],
+        })
+        filtered = enr._filter_res_by_term_size(df)
+        assert len(filtered) == 1
+        assert filtered["Term"].iloc[0] == "medium"
+        enr.close()
+
+    def test_filter_empty_dataframe(self):
+        """Should handle empty DataFrame gracefully."""
+        from gseapy.enrichr import Enrichr
+
+        enr = Enrichr(
+            gene_list=["A"],
+            gene_sets={"X": ["A"]},
+            outdir=None,
+            no_plot=True,
+            min_size=5,
+        )
+        df = pd.DataFrame()
+        filtered = enr._filter_res_by_term_size(df)
+        assert filtered.empty
+        enr.close()
+
+    def test_filter_no_size_constraints(self):
+        """Should return unmodified DataFrame when no size constraints set."""
+        from gseapy.enrichr import Enrichr
+
+        enr = Enrichr(
+            gene_list=["A"],
+            gene_sets={"X": ["A"]},
+            outdir=None,
+            no_plot=True,
+        )
+        df = pd.DataFrame({
+            "Term": ["A", "B"],
+            "Overlap": ["1/3", "5/100"],
+            "P-value": [0.01, 0.02],
+        })
+        filtered = enr._filter_res_by_term_size(df)
+        assert len(filtered) == 2
+        enr.close()
+
 class TestEnrichrAPI:
     """Tests for the EnrichrAPI class directly."""
 
@@ -959,6 +1131,27 @@ class TestCLIArgParsing:
         assert args.subcommand_name == "enrichr"
         assert args.gene_list == "genes.txt"
         assert args.library == "KEGG_2016"
+
+    def test_enrichr_defaults(self):
+        parser = prepare_argparser()
+        args = parser.parse_args([
+            "enrichr", "-i", "genes.txt", "-g", "KEGG_2016",
+        ])
+        assert args.organism == "human"
+        assert args.thresh == 0.05
+        assert args.bg is None
+        assert args.term == 10
+        assert args.mins == 0
+        assert args.maxs == 100000
+
+    def test_enrichr_custom_size_args(self):
+        parser = prepare_argparser()
+        args = parser.parse_args([
+            "enrichr", "-i", "genes.txt", "-g", "KEGG_2016",
+            "--mins", "5", "--maxs", "500",
+        ])
+        assert args.mins == 5
+        assert args.maxs == 500
 
     def test_replot_required_args(self):
         parser = prepare_argparser()

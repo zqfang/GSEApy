@@ -147,6 +147,8 @@ def main():
             top_term=args.term,
             no_plot=args.noplot,
             verbose=args.verbose,
+            min_size=args.mins,
+            max_size=args.maxs,
         )
         # set organism
         enr.set_organism()
@@ -969,6 +971,28 @@ def add_enrichr_parser(subparsers):
         default=10,
         metavar="int",
         help="Numbers of top terms shown in the plot. Default: 10",
+    )
+    enrichr_opt.add_argument(
+        "--mins",
+        "--min-size",
+        dest="mins",
+        action="store",
+        type=int,
+        default=0,
+        metavar="int",
+        help="Min size of gene sets to be included. "
+        "Useful for filtering out very specific (small) terms. Default: 0",
+    )
+    enrichr_opt.add_argument(
+        "--maxs",
+        "--max-size",
+        dest="maxs",
+        action="store",
+        type=int,
+        default=100000,
+        metavar="int",
+        help="Max size of gene sets to be included. "
+        "Useful for filtering out very broad (large) terms. Default: 100000",
     )
     # enrichr_opt.add_argument("--scale", dest = "scale", action="store", type=float, default=0.5, metavar='float',
     #                          help="scatter dot scale in the dotplot. Default: 0.5")
