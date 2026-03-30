@@ -381,6 +381,7 @@ class Biomart:
             return
         elif isinstance(df, str):
             print(df)
+            return
         if "entrezgene_id" in df.columns:
             if not pd.api.types.is_integer_dtype(df["entrezgene_id"]):
                 df["entrezgene_id"] = df["entrezgene_id"].astype(pd.Int32Dtype())

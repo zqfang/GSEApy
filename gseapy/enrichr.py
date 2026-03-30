@@ -612,6 +612,11 @@ class Enrichr(EnrichrAPI):
                 attributes=["ensembl_gene_id", "external_gene_name", "entrezgene_id"],
                 filename=db_file,
             )
+            if df is None:
+                raise ConnectionError(
+                    f"Failed to download background gene set '{self.background}' from BioMart. "
+                    "Check your internet connection or try again later."
+                )
         self._logger.info(
             f"Using all annotated genes with GO_ID as background: {self.background}"
         )
