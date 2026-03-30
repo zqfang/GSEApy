@@ -102,6 +102,45 @@ def test_prerank(prernk, geneGMT):
     )
 
 
+def test_prerank_fdr_per_library(prernk):
+    """FDR values for a term should be the same whether the gene set library
+    is provided alone or combined with other libraries (issue: FDR per library)."""
+    # Build two gene set dicts using genes from the rnk file so they overlap
+    rnk = pd.read_csv(prernk, header=None, names=["gene", "score"], sep="\t")
+    genes = rnk["gene"].tolist()
+    # Create two non-overlapping gene sets from the ranked list
+    lib1 = {"SetA": genes[0:20], "SetB": genes[20:40]}
+    lib2 = {"SetC": genes[200:220], "SetD": genes[220:240]}
+
+    # Run with lib1 only (as list of one dict, so terms get "0__" prefix)
+    res_single = prerank(prernk, [lib1], outdir=None, permutation_num=100, seed=42)
+
+    # Run with lib1 + lib2 combined (terms from lib1 get "0__" prefix)
+    res_multi = prerank(
+        prernk, [lib1, lib2], outdir=None, permutation_num=100, seed=42
+    )
+
+    single_df = res_single.res2d.copy()
+    multi_df = res_multi.res2d.copy()
+
+    # Terms from lib1 are prefixed "0__" in both single and multi runs
+    single_terms = set(single_df["Term"])
+    multi_lib1 = multi_df[multi_df["Term"].str.startswith("0__")].copy()
+    multi_terms = set(multi_lib1["Term"])
+
+    common_terms = single_terms & multi_terms
+    assert len(common_terms) > 0, "No common terms found between single and multi runs"
+
+    single_fdr = single_df.set_index("Term")["FDR q-val"]
+    multi_fdr = multi_lib1.set_index("Term")["FDR q-val"]
+
+    for term in common_terms:
+        assert np.isclose(single_fdr[term], multi_fdr[term], atol=1e-6), (
+            f"FDR mismatch for term '{term}': "
+            f"single={single_fdr[term]}, multi={multi_fdr[term]}"
+        )
+
+
 def test_ssgsea1(ssGCT, geneGMT):
     # Only tests of the command runs successfully,
     # doesnt't check the image
