@@ -73,6 +73,39 @@ def test_gsea(gseaGCT, gseaCLS, geneGMT):
     tmpdir.cleanup()
 
 
+def test_gsea_single_sample_phenotype(geneGMT):
+    """Regression test: GSEA must not panic when a phenotype group has only 1 sample.
+
+    Previously this caused a PanicException("called Option::unwrap() on a None value")
+    in the Rust argsort function because partial_cmp().unwrap() panics on NaN metric
+    values.  NaN metrics arise when stat(ddof=1) is called with a single-sample group.
+    """
+    np.random.seed(42)
+    n_genes = 50
+    gene_names = [f"GENE{i}" for i in range(n_genes)]
+    # 1 sample in positive group, 5 in negative group
+    n_samples = 6
+    expr = pd.DataFrame(
+        np.random.rand(n_genes, n_samples) + 1e-8,
+        index=gene_names,
+        columns=[f"S{i}" for i in range(n_samples)],
+    )
+    cls = ["pos"] + ["neg"] * 5
+    gs_res = gsea(
+        data=expr,
+        gene_sets=geneGMT,
+        cls=cls,
+        method="signal_to_noise",
+        outdir=None,
+        permutation_type="phenotype",
+        permutation_num=10,
+        min_size=1,
+        seed=7,
+    )
+    # Simply verify the run completed without panic
+    assert gs_res is not None
+
+
 def test_fdr_gsea(gseaGCT, gseaCLS, geneGMT):
     # Runs and verifies a reasonable result for pval
     # when method="t_test" and permutation_type="gene_set"

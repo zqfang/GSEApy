@@ -48,7 +48,15 @@ impl Statistic for &[f64] {
     fn stat(&self, ddof: usize) -> (f64, f64) {
         let sum: f64 = self.iter().sum();
         let count = self.len();
+        if count == 0 {
+            return (f64::NAN, f64::NAN);
+        }
         let mean = sum / (count as f64);
+        // When count <= ddof (e.g. single sample with ddof=1), variance is undefined;
+        // return 0.0 for std so callers using sigma_correction can handle it gracefully.
+        if count <= ddof {
+            return (mean, 0.0);
+        }
         let variance = self
             .iter()
             .map(|&value| {
@@ -64,7 +72,9 @@ impl Statistic for &[f64] {
         let sorted_col: Vec<(usize, &f64)> = indices
             .into_iter()
             .zip(self.iter())
-            .sorted_by(|&a, &b| a.1.partial_cmp(b.1).unwrap())
+            // Use total_cmp instead of partial_cmp to safely handle NaN values
+            // without panicking. NaN will be sorted consistently to one end.
+            .sorted_by(|&a, &b| a.1.total_cmp(b.1))
             .collect();
         //.sorted_by(|&a, &b| a.1.partial_cmp(b.1).unwrap()).collect();
 
