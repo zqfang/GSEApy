@@ -7,6 +7,15 @@ use rand::seq::SliceRandom;
 use rand::SeedableRng;
 use rayon::prelude::*;
 
+/// GeneCluster sigma correction for signal-to-noise metric.
+/// Ensures std is at least 0.2 * abs(mean); if still 0, use 0.2.
+/// Matches the original R/GSEA implementation.
+#[inline]
+fn sigma_correction(std: f64, mean: f64) -> f64 {
+    let s = std.max(0.2 * mean.abs());
+    if s == 0.0 { 0.2 } else { s }
+}
+
 pub trait EnrichmentScoreTrait {
     /// get run es only
     fn running_enrichment_score(&self, metric: &[f64], tag_indicator: &[f64]) -> Vec<f64>;
@@ -144,8 +153,14 @@ impl EnrichmentScoreTrait for EnrichmentScore {
                 let (neg_mean, neg_std) = neg.as_slice().stat(1);
                 // let end3 = Instant::now();
                 match method {
-                    Metric::Signal2Noise => (pos_mean - neg_mean) / (pos_std + neg_std),
-                    Metric::AbsSignal2Noise => ((pos_mean - neg_mean) / (pos_std + neg_std)).abs(),
+                    Metric::Signal2Noise | Metric::AbsSignal2Noise => {
+                        // Apply GeneCluster sigma correction (same as original R/GSEA implementation):
+                        // std = max(std, 0.2 * abs(mean)); if std is still 0, set to 0.2
+                        let pos_std_c = sigma_correction(pos_std, pos_mean);
+                        let neg_std_c = sigma_correction(neg_std, neg_mean);
+                        let s2n = (pos_mean - neg_mean) / (pos_std_c + neg_std_c);
+                        if method == Metric::AbsSignal2Noise { s2n.abs() } else { s2n }
+                    }
                     Metric::Ttest => {
                         (pos_mean - neg_mean)
                             / (pos_std * pos_std / pos_len + neg_std * neg_std / neg_len).sqrt()
