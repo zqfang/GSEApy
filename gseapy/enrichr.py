@@ -5,6 +5,7 @@ import io
 import json
 import logging
 import os
+import re
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 import numpy as np
@@ -683,6 +684,163 @@ class Enrichr(EnrichrAPI):
             if filtered_genes:
                 gmt_filtered[term] = filtered_genes
         return gmt_filtered
+
+    def _extract_go_ids(self, terms: "pd.Series") -> List[Optional[str]]:
+        """Extract GO IDs from a Series of term strings.
+
+        GO IDs are expected to appear in the format ``GO:XXXXXXX`` anywhere
+        within the term string, e.g. ``"response to stimulus (GO:0050896)"``.
+
+        Parameters
+        ----------
+        terms : pd.Series
+            Series of GO term strings from enrichment results.
+
+        Returns
+        -------
+        list of str or None
+            A list with a GO ID string for each term, or ``None`` when no
+            GO ID is found in that term.
+        """
+        go_ids = []
+        for term in terms:
+            match = re.search(r"(GO:\d+)", str(term))
+            go_ids.append(match.group(1) if match else None)
+        return go_ids
+
+    def _get_go_levels(self, go_ids: List[str]) -> Dict[str, int]:
+        """Fetch GO term levels from the QuickGO REST API.
+
+        The level of a GO term is defined here as the number of ``is_a``
+        ancestors it has in the Gene Ontology hierarchy (root = level 0,
+        direct children of root = level 1, etc.).
+
+        Parameters
+        ----------
+        go_ids : list of str
+            Unique GO IDs to look up (e.g. ``["GO:0008150", "GO:0009987"]``).
+
+        Returns
+        -------
+        dict
+            Mapping of GO ID → level (int).  IDs that could not be resolved
+            are omitted from the result.
+        """
+        unique_ids = list(dict.fromkeys(go_ids))  # deduplicate, preserve order
+        levels: Dict[str, int] = {}
+        batch_size = 100  # QuickGO supports comma-separated IDs
+        quickgo_url = "https://www.ebi.ac.uk/QuickGO/services/ontology/go/terms/{ids}/ancestors"
+
+        for i in range(0, len(unique_ids), batch_size):
+            batch = unique_ids[i : i + batch_size]
+            ids_str = ",".join(batch)
+            url = quickgo_url.format(ids=ids_str)
+            try:
+                resp = requests.get(
+                    url,
+                    params={"relations": "is_a"},
+                    headers={"Accept": "application/json"},
+                    timeout=30,
+                )
+                if not resp.ok:
+                    self._logger.warning(
+                        f"QuickGO API returned status {resp.status_code} for batch starting at index {i}."
+                    )
+                    continue
+                data = resp.json()
+                for result in data.get("results", []):
+                    go_id = result.get("id")
+                    ancestors = result.get("ancestors", [])
+                    if go_id:
+                        levels[go_id] = len(ancestors)
+            except Exception as exc:
+                self._logger.warning(
+                    f"Failed to retrieve GO levels for batch {batch[:3]}…: {exc}"
+                )
+
+        return levels
+
+    def go_filter(
+        self,
+        df: Optional[pd.DataFrame] = None,
+        min_level: int = 1,
+        max_level: int = 20,
+    ) -> pd.DataFrame:
+        """Filter enrichment results by GO term level (depth in the hierarchy).
+
+        Only terms whose GO level falls within ``[min_level, max_level]``
+        (inclusive) are retained.  The GO level is the number of ``is_a``
+        ancestors in the Gene Ontology hierarchy (root = level 0, direct
+        children of root = level 1, etc.) and is retrieved from the
+        `QuickGO <https://www.ebi.ac.uk/QuickGO/>`_ REST API.
+
+        This is analogous to the ``gofilter`` function in R's clusterProfiler.
+
+        .. note::
+           This method requires internet access to query the QuickGO API.
+           It only has an effect for GO enrichment libraries (i.e. libraries
+           whose ``Term`` entries contain a ``GO:XXXXXXX`` identifier).
+
+        Parameters
+        ----------
+        df : pd.DataFrame, optional
+            Enrichment result DataFrame.  If *None*, ``self.res2d`` is used.
+        min_level : int
+            Minimum GO level to keep (inclusive).  Raise this value to exclude
+            very general (high-level) terms.  Default: ``1``.
+        max_level : int
+            Maximum GO level to keep (inclusive).  Lower this value to exclude
+            very specific (low-level) terms.  Default: ``20``.
+
+        Returns
+        -------
+        pd.DataFrame
+            A filtered copy of *df* containing only rows whose GO term level
+            is within ``[min_level, max_level]``.  Rows without a recognisable
+            GO ID in the ``Term`` column are retained unchanged.
+
+        Examples
+        --------
+        >>> enr = gseapy.enrichr(gene_list, gene_sets="GO_Biological_Process_2021", ...)
+        >>> filtered = enr.go_filter(min_level=3, max_level=8)
+        """
+        if df is None:
+            df = self.res2d
+        if df is None or df.empty:
+            self._logger.warning("go_filter: No results to filter.")
+            return df
+
+        go_ids = self._extract_go_ids(df["Term"])
+        valid_ids = [gid for gid in go_ids if gid is not None]
+
+        if not valid_ids:
+            self._logger.warning(
+                "go_filter: No GO IDs found in the Term column. "
+                "This filter only applies to GO enrichment results."
+            )
+            return df
+
+        levels = self._get_go_levels(valid_ids)
+        if not levels:
+            self._logger.warning(
+                "go_filter: Could not retrieve GO levels from QuickGO API. "
+                "Returning unfiltered results."
+            )
+            return df
+
+        keep_mask = []
+        for go_id in go_ids:
+            if go_id is None:
+                keep_mask.append(True)
+                continue
+            level = levels.get(go_id)
+            if level is None:
+                # Level unknown - keep the term to avoid silent data loss
+                keep_mask.append(True)
+                continue
+            keep_mask.append(min_level <= level <= max_level)
+
+        return df.loc[keep_mask].reset_index(drop=True)
 
     def parse_background(
         self, gmt: Optional[Dict[str, List[str]]] = None
