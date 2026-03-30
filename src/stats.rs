@@ -213,26 +213,42 @@ impl GSEAResult {
         }
     }
     pub fn stat(&mut self, summary: &mut [GSEASummary]) {
-        // clear vector incase you re-run this command
-        self.nes_concat.clear();
-        self.nesnull_concat.clear();
+        // Group summaries by library prefix to compute FDR/FWER per library.
+        // When multiple gene set libraries are combined (terms prefixed as "library__term"),
+        // FDR should be computed separately for each library so that results for a given
+        // term are not affected by how many other libraries are included in the run.
+        let mut lib_groups: HashMap<String, Vec<usize>> = HashMap::new();
+        for (i, g) in summary.iter().enumerate() {
+            let prefix = match g.term.find("__") {
+                Some(idx) => g.term[..idx].to_string(),
+                None => String::new(),
+            };
+            lib_groups.entry(prefix).or_default().push(i);
+        }
 
-        summary.iter_mut().for_each(|g| {
-            // calculate stats here
-            g.pval();
-            let mut nesnull = g.normalize(); // update esnull to normalized nesnull
-            self.nes_concat.push(g.nes);
-            self.nesnull_concat.append(&mut nesnull);
-            // g.esnull.clear();
-        });
-        // FWER p
-        let fwerps: Vec<f64> = self.fwer_pval();
-        // FDR q
-        let fdrs = self.fdr();
+        for (_lib, indices) in &lib_groups {
+            // clear vector incase you re-run this command
+            self.nes_concat.clear();
+            self.nesnull_concat.clear();
 
-        for (p, q, g) in izip!(fwerps, fdrs, summary) {
-            g.fdr = q;
-            g.fwerp = p;
+            for &i in indices {
+                let g = &mut summary[i];
+                // calculate stats here
+                g.pval();
+                let mut nesnull = g.normalize(); // update esnull to normalized nesnull
+                self.nes_concat.push(g.nes);
+                self.nesnull_concat.append(&mut nesnull);
+                // g.esnull.clear();
+            }
+            // FWER p
+            let fwerps: Vec<f64> = self.fwer_pval();
+            // FDR q
+            let fdrs = self.fdr();
+
+            for (j, &i) in indices.iter().enumerate() {
+                summary[i].fdr = fdrs[j];
+                summary[i].fwerp = fwerps[j];
+            }
         }
         // clear vector to save some space
         self.nes_concat.clear();
