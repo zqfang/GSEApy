@@ -18,7 +18,7 @@ def gsea(
     data: Union[pd.DataFrame, str],
     gene_sets: Union[List[str], str, Dict[str, str]],
     cls: Union[List[str], str],
-    /,
+    *,
     organism: str = "human",
     outdir: Optional[str] = None,
     min_size: int = 15,
@@ -35,7 +35,6 @@ def gsea(
     no_plot: bool = False,
     seed: int = 123,
     verbose: bool = False,
-    *args,
     **kwargs,
 ) -> GSEA:
     """Run Gene Set Enrichment Analysis.
@@ -170,7 +169,7 @@ def gsea(
 def ssgsea(
     data: Union[pd.Series, pd.DataFrame, str],
     gene_sets: Union[List[str], str, Dict[str, str]],
-    /,
+    *,
     organism: str = "human",
     outdir: Optional[str] = None,
     sample_norm_method: Optional[str] = "rank",
@@ -187,7 +186,6 @@ def ssgsea(
     no_plot: bool = True,
     seed: int = 123,
     verbose: bool = False,
-    *args,
     **kwargs,
 ) -> SingleSampleGSEA:
     """Run Gene Set Enrichment Analysis with single sample GSEA tool
@@ -308,7 +306,7 @@ def ssgsea(
 def prerank(
     rnk: Union[pd.DataFrame, pd.Series, str],
     gene_sets: Union[List[str], str, Dict[str, str]],
-    /,
+    *,
     organism: str = "human",
     outdir: Optional[str] = None,
     pheno_pos: str = "Pos",
@@ -325,7 +323,6 @@ def prerank(
     no_plot: bool = False,
     seed: int = 123,
     verbose: bool = False,
-    *arg,
     **kwargs,
 ) -> Prerank:
     """Run Gene Set Enrichment Analysis with pre-ranked correlation defined by user.
@@ -469,7 +466,7 @@ def replot(
 def enrichr(
     gene_list: Union[str, List[str], Tuple[str, ...], pd.Series, pd.DataFrame],
     gene_sets: Union[List[str], str, Dict[str, str]],
-    /,
+    *,
     organism: str = "human",
     outdir: Optional[str] = None,
     background: Union[List[str], int, str] = None,
@@ -591,7 +588,7 @@ def enrichr(
 def enrich(
     gene_list: Iterable[str],
     gene_sets: Union[List[str], str, Dict[str, str]],
-    /,
+    *,
     background: Union[List[str], int, str] = None,
     outdir: Optional[str] = None,
     cutoff: float = 0.05,
@@ -702,7 +699,7 @@ def enrich(
 def gsva(
     data: Union[pd.DataFrame, pd.Series, str],
     gene_sets: Union[List[str], str, Dict[str, str]],
-    /,
+    *,
     organism: str = "human",
     outdir: Optional[str] = None,
     kcdf: Optional[str] = "Gaussian",
