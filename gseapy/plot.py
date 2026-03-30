@@ -749,13 +749,13 @@ class DotPlot(object):
             and (self.x in df.columns)
             and (not all(df[self.x].map(self.isfloat)))
         ):
-            # if x is numeric column
-            # get top term of each group
-            df = (
-                df.groupby(self.x)
-                .apply(lambda _x: _x.sort_values(by=self.colname).tail(self.n_terms))
-                .reset_index(drop=True)
-            )
+            # x is a categorical column; get top terms of each group
+            # Use a loop+concat to avoid pandas 3.0 dropping the groupby key column
+            groups = [
+                group.sort_values(by=self.colname).tail(self.n_terms)
+                for _, group in df.groupby(self.x)
+            ]
+            df = pd.concat(groups).reset_index(drop=True)
         else:
             df = df.sort_values(by=self.colname).tail(self.n_terms)  # acending
         # get scatter area
