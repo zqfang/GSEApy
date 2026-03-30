@@ -305,10 +305,16 @@ def ranking_metric_tensor(
     pos_cor_std = perm_cor_tensor[:, pos, :].std(axis=1, ddof=1)
     neg_cor_std = perm_cor_tensor[:, neg, :].std(axis=1, ddof=1)
 
-    if method in ["signal_to_noise", "s2n"]:
-        cor_mat = (pos_cor_mean - neg_cor_mean) / (pos_cor_std + neg_cor_std)
-    elif method in ["abs_signal_to_noise", "abs_s2n"]:
-        cor_mat = np.abs((pos_cor_mean - neg_cor_mean) / (pos_cor_std + neg_cor_std))
+    if method in ["signal_to_noise", "s2n", "abs_signal_to_noise", "abs_s2n"]:
+        # Apply GeneCluster sigma correction (same as original R/GSEA implementation):
+        # std = max(std, 0.2 * abs(mean)); if std is still 0, set to 0.2
+        pos_std = np.maximum(pos_cor_std, 0.2 * np.abs(pos_cor_mean))
+        pos_std = np.where(pos_std == 0, 0.2, pos_std)
+        neg_std = np.maximum(neg_cor_std, 0.2 * np.abs(neg_cor_mean))
+        neg_std = np.where(neg_std == 0, 0.2, neg_std)
+        cor_mat = (pos_cor_mean - neg_cor_mean) / (pos_std + neg_std)
+        if method in ["abs_signal_to_noise", "abs_s2n"]:
+            cor_mat = np.abs(cor_mat)
     elif method == "t_test":
         denom = np.sqrt((pos_cor_std**2) / n_pos + (neg_cor_std**2) / n_neg)
         cor_mat = (pos_cor_mean - neg_cor_mean) / denom
