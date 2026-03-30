@@ -884,10 +884,12 @@ class DotPlot(object):
         # df = df.assign(colmap=self.data[self.colname].round().astype("int"))
         # make area bigger to better visualization
         # area = df["Hits_ratio"] * plt.rcParams["lines.linewidth"] * 100
+        # dot area should be linearly proportional to Hits_ratio (not diameter)
+        # since matplotlib scatter's `s` parameter is in points^2 (area),
+        # we scale Hits_ratio by (scale * markersize)^2 to get the area
         df = self.data.assign(
-            area=(
-                self.data["Hits_ratio"] * self.scale * plt.rcParams["lines.markersize"]
-            ).pow(2)
+            area=self.data["Hits_ratio"]
+            * (self.scale * plt.rcParams["lines.markersize"]) ** 2
         )
         colmap = df[self.colname].astype(int)
         vmin = np.percentile(colmap.min(), 2)
@@ -968,13 +970,15 @@ class DotPlot(object):
         # scatter size legend
         # we use the *func* argument to supply the inverse of the function
         # used to calculate the sizes from above. The *fmt* ensures to string you want
+        # area = Hits_ratio * (scale * markersize)^2, so:
+        # Hits_ratio = area / (scale * markersize)^2, expressed as percentage:
         handles, labels = sc.legend_elements(
             prop="sizes",
             num=3,  #
             # fmt="{x:.2f}",
             color="gray",
             func=lambda s: (
-                100 * np.sqrt(s) / plt.rcParams["lines.markersize"] / self.scale
+                100 * s / (plt.rcParams["lines.markersize"] * self.scale) ** 2
             ),
         )
         ax.legend(
