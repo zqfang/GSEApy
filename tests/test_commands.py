@@ -102,6 +102,57 @@ def test_prerank(prernk, geneGMT):
     )
 
 
+def test_prerank_reproducibility(geneGMT):
+    """Regression test: prerank must produce identical results for the same seed.
+
+    The Xoshiro256++ RNG in src/rng.rs guarantees stable output across
+    rand crate versions.  Two runs with the same seed must be byte-identical.
+    """
+    rnk = pd.DataFrame(
+        {
+            "gene_name": ["TP53", "NFE2L2", "CTNNB1", "KEAP1", "BRCA2"],
+            "rank": [0, 1, 2, 3, 4],
+        }
+    )
+    gene_sets = {
+        "P53_SET": ["TP53", "NFE2L2", "MDM2", "CDKN1A", "GADD45A"],
+        "WNT_SET": ["CTNNB1", "AXN1", "TCF7L1", "AXIN2", "MYC"],
+    }
+    r1 = prerank(
+        rnk=rnk.copy(),
+        gene_sets=gene_sets,
+        min_size=1,
+        no_plot=True,
+        verbose=False,
+        seed=123,
+        permutation_num=100,
+    )
+    r2 = prerank(
+        rnk=rnk.copy(),
+        gene_sets=gene_sets,
+        min_size=1,
+        no_plot=True,
+        verbose=False,
+        seed=123,
+        permutation_num=100,
+    )
+    # Results must be identical across runs with the same seed
+    assert r1.res2d is not None and r2.res2d is not None
+    pd.testing.assert_frame_equal(r1.res2d, r2.res2d)
+
+    # A different seed must produce at least one different NES value
+    r3 = prerank(
+        rnk=rnk.copy(),
+        gene_sets=gene_sets,
+        min_size=1,
+        no_plot=True,
+        verbose=False,
+        seed=456,
+        permutation_num=100,
+    )
+    assert not r3.res2d["NES"].equals(r1.res2d["NES"])
+
+
 def test_ssgsea1(ssGCT, geneGMT):
     # Only tests of the command runs successfully,
     # doesnt't check the image

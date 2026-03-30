@@ -4,6 +4,7 @@ use std::env;
 // import own modules
 mod algorithm;
 mod gsva;
+mod rng;
 mod stats;
 mod utils;
 // export module fn, struct, trait ...
