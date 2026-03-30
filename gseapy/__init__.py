@@ -2,7 +2,6 @@ import warnings
 from typing import Dict, Iterable, List, Optional, Tuple, Union
 
 import pandas as pd
-from .__main__ import __version__
 from .biomart import Biomart
 from .enrichr import Enrichr
 from .gsea import GSEA, Prerank, Replot
@@ -12,11 +11,15 @@ from .parser import get_library, get_library_name, read_gmt
 from .plot import barplot, dotplot, enrichment_map, gseaplot, gseaplot2, heatmap
 from .ssgsea import SingleSampleGSEA
 
+__version__ = "1.2.0"
+
 
 def gsea(
     data: Union[pd.DataFrame, str],
     gene_sets: Union[List[str], str, Dict[str, str]],
     cls: Union[List[str], str],
+    *,
+    organism: str = "human",
     outdir: Optional[str] = None,
     min_size: int = 15,
     max_size: int = 500,
@@ -32,7 +35,6 @@ def gsea(
     no_plot: bool = False,
     seed: int = 123,
     verbose: bool = False,
-    *args,
     **kwargs,
 ) -> GSEA:
     """Run Gene Set Enrichment Analysis.
@@ -45,6 +47,8 @@ def gsea(
                See github issue for more details: https://github.com/zqfang/GSEApy/issues/323
 
     :param cls: A list or a .cls file format required for GSEA.
+
+    :param str organism: Organism for Enrichr library names (human, mouse, yeast, fly, fish, worm); does not affect custom gene sets (gmt or dict).
 
     :param str outdir: Results output directory. If None, nothing will write to disk.
 
@@ -137,24 +141,25 @@ def gsea(
         weight = kwargs["weighted_score_type"]
 
     gs = GSEA(
-        data,
-        gene_sets,
-        cls,
-        outdir,
-        min_size,
-        max_size,
-        permutation_num,
-        weight,
-        permutation_type,
-        method,
-        ascending,
-        threads,
-        figsize,
-        format,
-        graph_num,
-        no_plot,
-        seed,
-        verbose,
+        data=data,
+        gene_sets=gene_sets,
+        classes=cls,
+        organism=organism,
+        outdir=outdir,
+        min_size=min_size,
+        max_size=max_size,
+        permutation_num=permutation_num,
+        weight=weight,
+        permutation_type=permutation_type,
+        method=method,
+        ascending=ascending,
+        threads=threads,
+        figsize=figsize,
+        format=format,
+        graph_num=graph_num,
+        no_plot=no_plot,
+        seed=seed,
+        verbose=verbose,
     )
     gs.run()
 
@@ -164,6 +169,8 @@ def gsea(
 def ssgsea(
     data: Union[pd.Series, pd.DataFrame, str],
     gene_sets: Union[List[str], str, Dict[str, str]],
+    *,
+    organism: str = "human",
     outdir: Optional[str] = None,
     sample_norm_method: Optional[str] = "rank",
     correl_norm_type: Optional[str] = "rank",
@@ -179,7 +186,6 @@ def ssgsea(
     no_plot: bool = True,
     seed: int = 123,
     verbose: bool = False,
-    *args,
     **kwargs,
 ) -> SingleSampleGSEA:
     """Run Gene Set Enrichment Analysis with single sample GSEA tool
@@ -187,6 +193,8 @@ def ssgsea(
     :param data: Expression table, pd.Series, pd.DataFrame, GCT file, or .rnk file format.
 
     :param gene_sets: Enrichr Library name or .gmt gene sets file or dict of gene sets. Same input with GSEA.
+
+    :param str organism: Organism for Enrichr library names (human, mouse, yeast, fly, fish, worm); does not affect custom gene sets (gmt or dict).
 
     :param outdir: Results output directory. If None, nothing will write to disk.
 
@@ -274,6 +282,7 @@ def ssgsea(
     ss = SingleSampleGSEA(
         data=data,
         gene_sets=gene_sets,
+        organism=organism,
         outdir=outdir,
         sample_norm_method=sample_norm_method,
         correl_norm_type=correl_norm_type,
@@ -297,6 +306,8 @@ def ssgsea(
 def prerank(
     rnk: Union[pd.DataFrame, pd.Series, str],
     gene_sets: Union[List[str], str, Dict[str, str]],
+    *,
+    organism: str = "human",
     outdir: Optional[str] = None,
     pheno_pos: str = "Pos",
     pheno_neg: str = "Neg",
@@ -312,7 +323,6 @@ def prerank(
     no_plot: bool = False,
     seed: int = 123,
     verbose: bool = False,
-    *arg,
     **kwargs,
 ) -> Prerank:
     """Run Gene Set Enrichment Analysis with pre-ranked correlation defined by user.
@@ -323,6 +333,9 @@ def prerank(
                NOTE: If multiple gene sets are provided, the FDR null distribution will be based on the combined gene sets.
                This may lead to slight differences in FDR values compared to running GSEA separately for each gene set.
                See github issue for more details: https://github.com/zqfang/GSEApy/issues/323
+
+
+    :param str organism: Organism for Enrichr library names (human, mouse, yeast, fly, fish, worm); does not affect custom gene sets (gmt or dict).
 
     :param outdir: results output directory. If None, nothing will write to disk.
 
@@ -380,23 +393,24 @@ def prerank(
         weight = kwargs["weighted_score_type"]
 
     pre = Prerank(
-        rnk,
-        gene_sets,
-        outdir,
-        pheno_pos,
-        pheno_neg,
-        min_size,
-        max_size,
-        permutation_num,
-        weight,
-        ascending,
-        threads,
-        figsize,
-        format,
-        graph_num,
-        no_plot,
-        seed,
-        verbose,
+        rnk=rnk,
+        gene_sets=gene_sets,
+        organism=organism,
+        outdir=outdir,
+        pheno_pos=pheno_pos,
+        pheno_neg=pheno_neg,
+        min_size=min_size,
+        max_size=max_size,
+        permutation_num=permutation_num,
+        weight=weight,
+        ascending=ascending,
+        threads=threads,
+        figsize=figsize,
+        format=format,
+        graph_num=graph_num,
+        no_plot=no_plot,
+        seed=seed,
+        verbose=verbose,
     )
     pre.run()
     return pre
@@ -452,6 +466,7 @@ def replot(
 def enrichr(
     gene_list: Union[str, List[str], Tuple[str, ...], pd.Series, pd.DataFrame],
     gene_sets: Union[List[str], str, Dict[str, str]],
+    *,
     organism: str = "human",
     outdir: Optional[str] = None,
     background: Union[List[str], int, str] = None,
@@ -573,6 +588,7 @@ def enrichr(
 def enrich(
     gene_list: Iterable[str],
     gene_sets: Union[List[str], str, Dict[str, str]],
+    *,
     background: Union[List[str], int, str] = None,
     outdir: Optional[str] = None,
     cutoff: float = 0.05,
@@ -683,6 +699,8 @@ def enrich(
 def gsva(
     data: Union[pd.DataFrame, pd.Series, str],
     gene_sets: Union[List[str], str, Dict[str, str]],
+    *,
+    organism: str = "human",
     outdir: Optional[str] = None,
     kcdf: Optional[str] = "Gaussian",
     weight: float = 1.0,
@@ -700,6 +718,8 @@ def gsva(
     :param data: Expression table, pd.Series, pd.DataFrame, GCT file
 
     :param gene_sets: Enrichr Library name or .gmt gene sets file or dict of gene sets. Same input with GSEA.
+
+    :param str organism: Organism for Enrichr library names (human, mouse, yeast, fly, fish, worm); does not affect custom gene sets (gmt or dict).
 
     :param outdir: Results output directory. If None, nothing will write to disk.
 
@@ -738,6 +758,7 @@ def gsva(
     gv = GSVA(
         data=data,
         gene_sets=gene_sets,
+        organism=organism,
         outdir=outdir,
         kcdf=kcdf,
         weight=weight,

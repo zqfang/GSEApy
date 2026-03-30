@@ -17,6 +17,7 @@ class SingleSampleGSEA(GSEAbase):
         self,
         data: Union[pd.DataFrame, pd.Series, str],
         gene_sets: Union[List[str], str, Dict[str, str]],
+        organism: str = "human",
         outdir: Optional[str] = None,
         sample_norm_method: Optional[str] = "rank",
         correl_norm_type: Optional[str] = None,
@@ -39,6 +40,7 @@ class SingleSampleGSEA(GSEAbase):
             gene_sets=gene_sets,
             module="ssgsea",
             threads=threads,
+            organism=organism,
             verbose=verbose,
         )
         self.data = data

@@ -1,16 +1,18 @@
 import argparse as ap
 import os
 import sys
+from importlib.metadata import PackageNotFoundError, version
 
+try:
+    __version__ = version("gseapy")
+except PackageNotFoundError:
+    __version__ = "unknown"
 # ------------------------------------
 # Main function
 # ------------------------------------
 
 # there is a bug in add_argument(required=True), for hacking, don't set metavar='' when required=True,
 # or args = argparser.parse_args() will throw bugs!!!
-
-
-__version__ = "1.1.13"
 
 
 def main():
@@ -39,47 +41,49 @@ def main():
         from .gsea import GSEA
 
         gs = GSEA(
-            args.data,
-            args.gmt,
-            args.cls,
-            args.outdir,
-            args.mins,
-            args.maxs,
-            args.n,
-            args.weight,
-            args.type,
-            args.method,
-            args.ascending,
-            args.threads,
-            args.figsize,
-            args.format,
-            args.graph,
-            args.noplot,
-            args.seed,
-            args.verbose,
+            data=args.data,
+            gene_sets=args.gmt,
+            classes=args.cls,
+            organism=args.organism,
+            outdir=args.outdir,
+            min_size=args.mins,
+            max_size=args.maxs,
+            permutation_num=args.n,
+            weight=args.weight,
+            permutation_type=args.type,
+            method=args.method,
+            ascending=args.ascending,
+            threads=args.threads,
+            figsize=args.figsize,
+            format=args.format,
+            graph_num=args.graph,
+            no_plot=args.noplot,
+            seed=args.seed,
+            verbose=args.verbose,
         )
         gs.run()
     elif subcommand == "prerank":
         from .gsea import Prerank
 
         pre = Prerank(
-            args.rnk,
-            args.gmt,
-            args.outdir,
-            args.label[0],
-            args.label[1],
-            args.mins,
-            args.maxs,
-            args.n,
-            args.weight,
-            args.ascending,
-            args.threads,
-            args.figsize,
-            args.format,
-            args.graph,
-            args.noplot,
-            args.seed,
-            args.verbose,
+            rnk=args.rnk,
+            gene_sets=args.gmt,
+            organism=args.organism,
+            outdir=args.outdir,
+            pheno_pos=args.label[0],
+            pheno_neg=args.label[1],
+            min_size=args.mins,
+            max_size=args.maxs,
+            permutation_num=args.n,
+            weight=args.weight,
+            ascending=args.ascending,
+            threads=args.threads,
+            figsize=args.figsize,
+            format=args.format,
+            graph_num=args.graph,
+            no_plot=args.noplot,
+            seed=args.seed,
+            verbose=args.verbose,
         )
         pre.run()
 
@@ -89,6 +93,7 @@ def main():
         ss = SingleSampleGSEA(
             data=args.data,
             gene_sets=args.gmt,
+            organism=args.organism,
             outdir=args.outdir,
             sample_norm_method=args.norm,
             correl_norm_type=args.correl,
@@ -113,6 +118,7 @@ def main():
         gv = GSVA(
             data=args.data,
             gene_sets=args.gmt,
+            organism=args.organism,
             outdir=args.outdir,
             kcdf=args.kcdf,
             weight=args.weight,
@@ -127,7 +133,7 @@ def main():
         gv.run()
     elif subcommand == "enrichr":
         # calling enrichr API
-        from .enrichr_v0 import Enrichr
+        from .enrichr import Enrichr
 
         enr = Enrichr(
             gene_list=args.gene_list,
@@ -338,6 +344,15 @@ def add_gsea_parser(subparsers):
         help="Gene set database in GMT format. Same with GSEA.",
     )
     group_input.add_argument(
+        "--org",
+        "--organism",
+        action="store",
+        dest="organism",
+        type=str,
+        default="human",
+        help="Enrichr supported organism name. Default: human. See here: https://amp.pharm.mssm.edu/modEnrichr.",
+    )
+    group_input.add_argument(
         "-t",
         "--permu-type",
         action="store",
@@ -477,6 +492,15 @@ def add_prerank_parser(subparsers):
         help="Gene set database in GMT format. Same with GSEA.",
     )
     prerank_input.add_argument(
+        "--org",
+        "--organism",
+        action="store",
+        dest="organism",
+        type=str,
+        default="human",
+        help="Enrichr supported organism name. Default: human. See here: https://amp.pharm.mssm.edu/modEnrichr.",
+    )
+    prerank_input.add_argument(
         "-l",
         "--label",
         action="store",
@@ -588,6 +612,15 @@ def add_singlesample_parser(subparsers):
         type=str,
         required=True,
         help="Gene set database in GMT format. Same with GSEA.",
+    )
+    group_input.add_argument(
+        "--org",
+        "--organism",
+        action="store",
+        dest="organism",
+        type=str,
+        default="human",
+        help="Enrichr supported organism name. Default: human. See here: https://amp.pharm.mssm.edu/modEnrichr.",
     )
     # group for output files
     group_output = argparser_gsea.add_argument_group("Output arguments")
@@ -723,6 +756,16 @@ def add_gsva_parser(subparsers):
         required=True,
         help="Gene set database in GMT format. Same with GSEA.",
     )
+    group_input.add_argument(
+        "--org",
+        "--organism",
+        action="store",
+        dest="organism",
+        type=str,
+        default="human",
+        help="Enrichr supported organism name. Default: human. See here: https://amp.pharm.mssm.edu/modEnrichr.",
+    )
+
     # group for output files
     group_output = argparser_gsva.add_argument_group("Output arguments")
     # add_output_option(group_output)

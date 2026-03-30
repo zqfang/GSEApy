@@ -95,10 +95,10 @@ def test_prerank(prernk, geneGMT):
     # Only tests of the command runs successfully,
     # doesnt't check the image
     tmpdir = TemporaryDirectory(dir="tests")
-    prerank(prernk, geneGMT, tmpdir.name, permutation_num=10)
+    prerank(prernk, geneGMT, outdir=tmpdir.name, permutation_num=10)
     tmpdir.cleanup()
     prerank(
-        prernk, ["KEGG_2016", "GO_Biological_Process_2021"], None, permutation_num=20
+        prernk, ["KEGG_2016", "GO_Biological_Process_2021"], outdir=None, permutation_num=20
     )
 
 
@@ -106,7 +106,7 @@ def test_ssgsea1(ssGCT, geneGMT):
     # Only tests of the command runs successfully,
     # doesnt't check the image
     tmpdir = TemporaryDirectory(dir="tests")
-    ssgsea(ssGCT, geneGMT, tmpdir.name, permutation_num=100)
+    ssgsea(ssGCT, geneGMT, outdir=tmpdir.name, permutation_num=100)
     tmpdir.cleanup()
 
 
@@ -114,19 +114,19 @@ def test_ssgsea2(ssGCT, geneGMT):
     # Only tests of the command runs successfully,
     # doesnt't check the image
     tmpdir = TemporaryDirectory(dir="tests")
-    ssgsea(ssGCT, geneGMT, tmpdir.name, permutation_num=0)
+    ssgsea(ssGCT, geneGMT, outdir=tmpdir.name, permutation_num=0)
     tmpdir.cleanup()
-    ssgsea(ssGCT, geneGMT, None, permutation_num=0, correl_norm_type="symrank")
-    ssgsea(ssGCT, geneGMT, None, permutation_num=0, correl_norm_type="zscore")
+    ssgsea(ssGCT, geneGMT, outdir=None, permutation_num=0, correl_norm_type="symrank")
+    ssgsea(ssGCT, geneGMT, outdir=None, permutation_num=0, correl_norm_type="zscore")
 
 
 def test_gsva(gsvaExpr, gsvaGMT):
     # Only tests of the command runs successfully,
     # doesnt't check the image
     tmpdir = TemporaryDirectory(dir="tests")
-    gsva(gsvaExpr, gsvaGMT, tmpdir.name, kcdf="Gaussian")
-    gsva(gsvaExpr, gsvaGMT, tmpdir.name, kcdf="Poisson")
-    gsva(gsvaExpr, gsvaGMT, tmpdir.name, kcdf=None)
+    gsva(gsvaExpr, gsvaGMT, outdir=tmpdir.name, kcdf="Gaussian")
+    gsva(gsvaExpr, gsvaGMT, outdir=tmpdir.name, kcdf="Poisson")
+    gsva(gsvaExpr, gsvaGMT, outdir=tmpdir.name, kcdf=None)
     tmpdir.cleanup()
 
 
@@ -734,3 +734,202 @@ def test_replot(edbDIR):
     tmpdir = TemporaryDirectory(dir="tests")
     replot(edbDIR, tmpdir.name)
     tmpdir.cleanup()
+
+
+# ---------------------------------------------------------------------------
+# CLI argument parsing tests
+# ---------------------------------------------------------------------------
+
+from gseapy.__main__ import prepare_argparser
+
+
+class TestCLIArgParsing:
+    """Tests that CLI argument parsing produces correct argument values."""
+
+    def test_gsea_required_args(self):
+        parser = prepare_argparser()
+        args = parser.parse_args([
+            "gsea",
+            "-d", "expr.txt",
+            "-c", "test.cls",
+            "-g", "gene_sets.gmt",
+        ])
+        assert args.subcommand_name == "gsea"
+        assert args.data == "expr.txt"
+        assert args.cls == "test.cls"
+        assert args.gmt == "gene_sets.gmt"
+
+    def test_gsea_defaults(self):
+        parser = prepare_argparser()
+        args = parser.parse_args([
+            "gsea", "-d", "expr.txt", "-c", "test.cls", "-g", "sets.gmt",
+        ])
+        assert args.organism == "human"
+        assert args.type == "phenotype"
+        assert args.n == 1000
+        assert args.mins == 15
+        assert args.maxs == 500
+        assert args.weight == 1.0
+        assert args.method == "signal_to_noise"
+        assert args.ascending is False
+        assert args.seed == 123
+        assert args.threads == 4
+        assert args.noplot is False
+        assert args.verbose is False
+        assert args.format == "pdf"
+
+    def test_gsea_custom_args(self):
+        parser = prepare_argparser()
+        args = parser.parse_args([
+            "gsea",
+            "-d", "expr.txt",
+            "-c", "test.cls",
+            "-g", "sets.gmt",
+            "--org", "mouse",
+            "-t", "gene_set",
+            "-n", "500",
+            "--min-size", "5",
+            "--max-size", "1000",
+            "-w", "2.0",
+            "-m", "t_test",
+            "-a",
+            "-s", "42",
+            "-p", "8",
+            "--no-plot",
+            "-f", "png",
+        ])
+        assert args.organism == "mouse"
+        assert args.type == "gene_set"
+        assert args.n == 500
+        assert args.mins == 5
+        assert args.maxs == 1000
+        assert args.weight == 2.0
+        assert args.method == "t_test"
+        assert args.ascending is True
+        assert args.seed == 42
+        assert args.threads == 8
+        assert args.noplot is True
+        assert args.format == "png"
+
+    def test_gsea_missing_required(self):
+        parser = prepare_argparser()
+        with pytest.raises(SystemExit):
+            parser.parse_args(["gsea", "-d", "expr.txt"])
+
+    def test_prerank_required_args(self):
+        parser = prepare_argparser()
+        args = parser.parse_args([
+            "prerank", "-r", "ranked.rnk", "-g", "sets.gmt",
+        ])
+        assert args.subcommand_name == "prerank"
+        assert args.rnk == "ranked.rnk"
+        assert args.gmt == "sets.gmt"
+
+    def test_prerank_defaults(self):
+        parser = prepare_argparser()
+        args = parser.parse_args([
+            "prerank", "-r", "ranked.rnk", "-g", "sets.gmt",
+        ])
+        assert args.organism == "human"
+        assert args.label == ("Pos", "Neg")
+        assert args.n == 1000
+        assert args.mins == 15
+        assert args.maxs == 500
+        assert args.weight == 1.0
+        assert args.ascending is False
+        assert args.seed == 123
+
+    def test_prerank_custom_label(self):
+        parser = prepare_argparser()
+        args = parser.parse_args([
+            "prerank", "-r", "ranked.rnk", "-g", "sets.gmt",
+            "-l", "Up", "Down",
+        ])
+        assert args.label == ["Up", "Down"]
+
+    def test_ssgsea_required_args(self):
+        parser = prepare_argparser()
+        args = parser.parse_args([
+            "ssgsea", "-d", "expr.txt", "-g", "sets.gmt",
+        ])
+        assert args.subcommand_name == "ssgsea"
+        assert args.data == "expr.txt"
+        assert args.gmt == "sets.gmt"
+
+    def test_ssgsea_defaults(self):
+        parser = prepare_argparser()
+        args = parser.parse_args([
+            "ssgsea", "-d", "expr.txt", "-g", "sets.gmt",
+        ])
+        assert args.organism == "human"
+        assert args.norm == "rank"
+        assert args.correl == "rank"
+        assert args.n == 0
+        assert args.weight == 0.25
+        assert args.mins == 15
+        assert args.maxs == 2000
+
+    def test_ssgsea_custom_args(self):
+        parser = prepare_argparser()
+        args = parser.parse_args([
+            "ssgsea", "-d", "expr.txt", "-g", "sets.gmt",
+            "--sn", "log", "-c", "zscore", "-n", "100",
+        ])
+        assert args.norm == "log"
+        assert args.correl == "zscore"
+        assert args.n == 100
+
+    def test_gsva_required_args(self):
+        parser = prepare_argparser()
+        args = parser.parse_args([
+            "gsva", "-d", "expr.txt", "-g", "sets.gmt",
+        ])
+        assert args.subcommand_name == "gsva"
+        assert args.data == "expr.txt"
+        assert args.gmt == "sets.gmt"
+
+    def test_gsva_defaults(self):
+        parser = prepare_argparser()
+        args = parser.parse_args([
+            "gsva", "-d", "expr.txt", "-g", "sets.gmt",
+        ])
+        assert args.organism == "human"
+        assert args.kcdf == "Gaussian"
+        assert args.weight == 1.0
+        assert args.mx_diff is True
+        assert args.abs_rnk is False
+        assert args.mins == 15
+        assert args.maxs == 2000
+
+    def test_gsva_custom_args(self):
+        parser = prepare_argparser()
+        args = parser.parse_args([
+            "gsva", "-d", "expr.txt", "-g", "sets.gmt",
+            "-k", "Poisson", "-m", "-a", "-w", "0.5",
+        ])
+        assert args.kcdf == "Poisson"
+        assert args.mx_diff is False
+        assert args.abs_rnk is True
+        assert args.weight == 0.5
+
+    def test_enrichr_required_args(self):
+        parser = prepare_argparser()
+        args = parser.parse_args([
+            "enrichr", "-i", "genes.txt", "-g", "KEGG_2016",
+        ])
+        assert args.subcommand_name == "enrichr"
+        assert args.gene_list == "genes.txt"
+        assert args.library == "KEGG_2016"
+
+    def test_replot_required_args(self):
+        parser = prepare_argparser()
+        args = parser.parse_args([
+            "replot", "-i", "gsea_results_dir",
+        ])
+        assert args.subcommand_name == "replot"
+        assert args.indir == "gsea_results_dir"
+
+    def test_no_subcommand(self):
+        parser = prepare_argparser()
+        args = parser.parse_args([])
+        assert args.subcommand_name is None

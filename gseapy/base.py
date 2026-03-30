@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 from pandas.api.types import is_object_dtype, is_string_dtype
 
+from gseapy.enrichr import EnrichrAPI
 from gseapy.plot import GSEAPlot, TracePlot, gseaplot, heatmap
 from gseapy.utils import DEFAULT_CACHE_PATH, log_init, mkdirs, retry
 
@@ -188,7 +189,7 @@ class GSEAbase(object):
         gene_sets: Union[List[str], str, Dict[str, str]] = "KEGG_2016",
         module: str = "base",
         threads: int = 1,
-        enrichr_url: str = "http://maayanlab.cloud",
+        organism: str = "human",
         verbose: bool = False,
     ):
         self.outdir = outdir
@@ -200,7 +201,6 @@ class GSEAbase(object):
         self.ascending = False
         self.verbose = verbose
         self._threads = threads
-        self.ENRICHR_URL = enrichr_url
         self.pheno_pos = ""
         self.pheno_neg = ""
         self.permutation_num = 0
@@ -210,6 +210,8 @@ class GSEAbase(object):
         self._set_cores()
         # init logger
         self.prepare_outdir()
+        #
+        self._enrichrapi = EnrichrAPI(organism)
 
     def __del__(self):
         if hasattr(self, "_logger"):
@@ -573,49 +575,13 @@ class GSEAbase(object):
 
     def get_libraries(self) -> List[str]:
         """return active enrichr library name.Offical API"""
-
-        lib_url = self.ENRICHR_URL + "/Enrichr/datasetStatistics"
-        # "LIBRARY_LIST_URL": "https://maayanlab.cloud/speedrichr/api/listlibs",
-        s = retry(num=5)
-        response = s.get(lib_url, verify=True)
-        if not response.ok:
-            raise Exception("Error getting the Enrichr libraries")
-        libs_json = json.loads(response.text)
-        libs = [lib["libraryName"] for lib in libs_json["statistics"]]
-
+        libs = self._enrichrapi.get_libraries()
         return sorted(libs)
 
     def _download_libraries(self, libname: str) -> Dict[str, List[str]]:
         """Download enrichr libraries. Only Support Enrichr libraries now"""
         self._logger.info("Downloading and generating Enrichr library gene sets......")
-        s = retry(5)
-        # queery string
-        ENRICHR_URL = self.ENRICHR_URL + "/Enrichr/geneSetLibrary"
-        query_string = "?mode=text&libraryName=%s"
-        # get
-        response = s.get(
-            ENRICHR_URL + query_string % libname, timeout=None, stream=True
-        )
-        if not response.ok:
-            raise Exception(
-                "Error fetching gene set library, input name is correct for the organism you've set?."
-            )
-        # reformat to dict and save to disk
-        mkdirs(DEFAULT_CACHE_PATH)
-        genesets_dict = {}
-        outname = "Enrichr.%s.gmt" % libname  # pattern: database.library.gmt
-        gmtout = open(os.path.join(DEFAULT_CACHE_PATH, outname), "w")
-        for line in response.iter_lines(chunk_size=1024, decode_unicode="utf-8"):
-            line = line.strip().split("\t")
-            k = line[0]
-            v = map(lambda x: x.split(",")[0], line[2:])
-            v = list(filter(lambda x: True if len(x) else False, v))
-            genesets_dict[k] = v
-            outline = "%s\t%s\t%s\n" % (k, line[1], "\t".join(v))
-            gmtout.write(outline)
-        gmtout.close()
-
-        return genesets_dict
+        return self._enrichrapi.download_libraries(libname)
 
     def _heatmat(self, df: pd.DataFrame, classes: List[str]):
         """only use for gsea heatmap"""
