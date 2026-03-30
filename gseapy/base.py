@@ -537,7 +537,7 @@ class GSEAbase(object):
             )
             self._logger.error(
                 "The first 5 genes look like this : [ %s ]"
-                % (", ".join(list(gene_list)[:5]))
+                % (", ".join([str(g) for g in list(gene_list)[:5]]))
             )
             raise LookupError(msg)
 
