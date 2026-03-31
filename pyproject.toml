@@ -1,16 +1,95 @@
 [build-system]
-# requires = ["maturin==0.12.5"]
-# build-backend = "maturin"
-requires = ["setuptools>=41.0.0", "wheel", "setuptools_rust>=0.10.2", "toml"]
+requires = ["setuptools>=61.0.0", "wheel", "setuptools_rust>=1.0.0"]
 build-backend = "setuptools.build_meta"
-[tool.black]
-target-version = ['py38', 'py39', 'py310', 'py311']
 
-[tool.isort]
-profile = "black"
-multi_line_output = 3
-include_trailing_comma = true
-reverse_relative = true
+[project]
+name = "gseapy"
+dynamic = ["version", "readme"]
+description = "Gene Set Enrichment Analysis in Python"
+license = { text = "MIT" }
+authors = [{ name = "Zhuoqing Fang", email = "fzq518@gmail.com" }]
+keywords = [
+    "Gene Ontology",
+    "GO",
+    "Biology",
+    "Enrichment",
+    "Bioinformatics",
+    "Computational Biology",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Software Development :: Libraries",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "numpy>=1.13.0",
+    "scipy",
+    "pandas",
+    "matplotlib>=2.2",
+    "requests",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "pytest",
+    "pytest-cov",
+    "lxml"
+]
+test = [
+    "pytest",
+    "pytest-cov",
+    "pyyaml",
+    "lxml"
+]
+docs = [
+    "sphinx",
+    "numpydoc",
+    "sphinx-rtd-theme",
+]
+
+[project.scripts]
+gseapy = "gseapy.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/zqfang/gseapy"
+Documentation = "https://gseapy.readthedocs.io/en/latest/"
+Source = "https://github.com/zqfang/GSEApy"
+Tracker = "https://github.com/zqfang/GSEApy/issues"
+
+[tool.setuptools.dynamic]
+version = { attr = "gseapy.__version__" }
+readme = { file = ["README.rst"] }
+
+[tool.setuptools.packages.find]
+include = ["gseapy*"]
+
+[tool.setuptools.package-data]
+gseapy = ["data/palette.json"]
+
+[tool.uv]
+# Development workflow:
+#   uv sync --extra dev      → install editable + dev deps
+#   uv run pytest            → run tests
+#   uv run ruff format gseapy → format code
+#   uv build                 → build wheel + sdist
+
+[tool.ruff]
+target-version = "py38"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["gseapy"]
 
 [tool.pytest.ini_options]
 markers = [

@@ -1,40 +1,25 @@
 # modified from https://github.com/Qiskit/rustworkx/blob/main/.github/workflows/wheels.yml
 name: Wheel Builds
-# on:
-#   push:
-#     tags:
-#       - '*'
 
 on:
   release:
-    types:
-      - published
+    types: [published]
+
 jobs:
   sdist:
     name: Build sdist
     runs-on: ubuntu-latest
-    # needs: ["build_wheels"]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        name: Install Python
-        with:
-          python-version: '3.x'
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-      - name: Install deps
-        run: pip install -U twine setuptools-rust
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: astral-sh/setup-uv@v4
       - name: Build sdist
-        run: python setup.py sdist
+        run: uv build --sdist
       - uses: actions/upload-artifact@v4
         with:
-          path: ./dist/*
-      - name: Upload to PyPI
-        run: twine upload --skip-existing ./dist/*
-        env:
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-          TWINE_USERNAME: __token__
+          name: dist-sdist
+          path: dist/*.tar.gz
+
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -44,125 +29,63 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        name: Install Python
-        with:
-          python-version: '3.x'
       - uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable
       - name: Install cibuildwheel
-        run: |
-          python -m pip install cibuildwheel twine wheel
+        run: python -m pip install cibuildwheel
       - name: Build wheels
-        run: |
-          python -m cibuildwheel --output-dir wheelhouse
+        run: python -m cibuildwheel --output-dir wheelhouse
         env:
           CIBW_BEFORE_ALL_LINUX: >
             yum install libatomic -y &&
             curl https://sh.rustup.rs -sSf | sh -s -- -y
           CIBW_ENVIRONMENT_LINUX: 'PATH="$PATH:$HOME/.cargo/bin"'
-          # CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.9
           CIBW_MANYLINUX_X86_64_IMAGE: quay.io/pypa/manylinux2014_x86_64:latest
-          # rust is not available for musl linux on i686. see https://github.com/rust-lang/rustup/issues/2984
-          # CIBW_MANYLINUX_I686_IMAGE: quay.io/pypa/manylinux2014_i686:latest
           CIBW_SKIP: pp* *win32 *musl*
           CIBW_PROJECT_REQUIRES_PYTHON: ">=3.8"
-          CIBW_PRERELEASE_PYTHONS: True
+          CIBW_PRERELEASE_PYTHONS: "true"
           CIBW_BEFORE_BUILD: pip install -U setuptools-rust
-      - name: Upload to PyPI
-        run: twine upload --skip-existing ./wheelhouse/*.whl
-        env:
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-          TWINE_USERNAME: __token__
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-wheels-${{ matrix.os }}
+          path: wheelhouse/*.whl
+
   build_wheels_aarch64:
-    name: Build linux aarch64 wheels on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest]
+    name: Build linux aarch64 wheels
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        name: Install Python
-        with:
-          python-version: '3.x'
       - uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
         with:
-          platforms: all
+          platforms: aarch64
       - name: Install cibuildwheel
-        run: |
-          python -m pip install cibuildwheel twine
+        run: python -m pip install cibuildwheel
       - name: Build wheels
-        run: |
-          python -m cibuildwheel --output-dir wheelhouse
+        run: python -m cibuildwheel --output-dir wheelhouse
         env:
           CIBW_BEFORE_ALL_LINUX: >
             yum install libatomic -y &&
             curl https://sh.rustup.rs -sSf | sh -s -- -y
           CIBW_ENVIRONMENT_LINUX: 'PATH="$PATH:$HOME/.cargo/bin"'
-          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.9
-          # Pin images explicitly to avoid quay.io manylinux_2_28_* date-tag issues
           CIBW_MANYLINUX_AARCH64_IMAGE: quay.io/pypa/manylinux2014_aarch64:latest
-          # (optional) keep x86_64 pinned too for consistency
           CIBW_MANYLINUX_X86_64_IMAGE: quay.io/pypa/manylinux2014_x86_64:latest
+          CIBW_ARCHS_LINUX: aarch64
           CIBW_SKIP: pp* *win32 *musl*
           CIBW_PROJECT_REQUIRES_PYTHON: ">=3.8"
-          CIBW_PRERELEASE_PYTHONS: True
+          CIBW_PRERELEASE_PYTHONS: "true"
           CIBW_BEFORE_BUILD: pip install -U setuptools-rust
-          # CIBW_TEST_REQUIRES: numpy scipy pandas requests
-          # CIBW_TEST_COMMAND: python -m unittest discover {project}/tests/
-          CIBW_ARCHS_LINUX: aarch64
-      # - uses: actions/upload-artifact@v4
-      #   with:
-      #     path: ./wheelhouse/*.whl
-      - name: Upload to PyPI
-        run: twine upload --skip-existing ./wheelhouse/*.whl
-        env:
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-          TWINE_USERNAME: __token__
-  ## mac arm64 build shipped with cibuildwhell@2.17.0. not extra builds for arm64 now
-  # build-mac-arm-wheels:
-  #   name: Build wheels on macos for arm
-  #   runs-on: macos-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Build wheels
-  #       uses: joerick/cibuildwheel@v2.17.0
-  #       env:
-  #         CIBW_BEFORE_ALL: rustup target add aarch64-apple-darwin
-  #         CIBW_ARCHS_MACOS: arm64
-  #         CIBW_PRERELEASE_PYTHONS: True
-  #         CIBW_BEFORE_BUILD: pip install -U setuptools-rust
-  #         CIBW_ENVIRONMENT: CARGO_BUILD_TARGET="aarch64-apple-darwin" PYO3_CROSS_LIB_DIR="/Library/Frameworks/Python.framework/Versions/$(python -c 'import sys; print(str(sys.version_info[0])+"."+str(sys.version_info[1]))')/lib/python$(python -c 'import sys; print(str(sys.version_info[0])+"."+str(sys.version_info[1]))')"
-  #     # - uses: actions/upload-artifact@v4
-  #     #   with:
-  #     #     path: ./wheelhouse/*.whl
-  #     - uses: actions/setup-python@v5
-  #       name: Install Python
-  #       with:
-  #         python-version: '3.10'
-  #     - name: Install twine
-  #       run: |
-  #         python -m pip install twine
-  #     - name: Upload to PyPI
-  #       run: twine upload ./wheelhouse/*.whl
-  #       env:
-  #         TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-  #         TWINE_USERNAME: __token__
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-wheels-aarch64
+          path: wheelhouse/*.whl
 
-  build-win32-wheels:
+  build_wheels_win32:
     name: Build wheels on win32
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        name: Install Python
         with:
           python-version: '3.x'
           architecture: 'x86'
@@ -173,24 +96,29 @@ jobs:
       - name: Force win32 rust
         run: rustup default stable-i686-pc-windows-msvc
       - name: Install cibuildwheel
-        run: |
-          python -m pip install cibuildwheel twine
+        run: python -m pip install cibuildwheel
       - name: Build wheels
-        run: |
-          python -m cibuildwheel --output-dir wheelhouse
+        run: python -m cibuildwheel --output-dir wheelhouse
         env:
-          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.9
           CIBW_SKIP: pp* *amd64 *musl*
           CIBW_PROJECT_REQUIRES_PYTHON: ">=3.8"
-          CIBW_PRERELEASE_PYTHONS: True
+          CIBW_PRERELEASE_PYTHONS: "true"
           CIBW_BEFORE_BUILD: pip install -U setuptools-rust
-          # CIBW_TEST_REQUIRES: numpy scipy pandas requests
-          # CIBW_TEST_COMMAND: python -m unittest discover {project}/tests/
-      # - uses: actions/upload-artifact@v4
-      #   with:
-      #     path: ./wheelhouse/*.whl
-      - name: Upload to PyPI
-        run: twine upload --skip-existing ./wheelhouse/*.whl
-        env:
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-          TWINE_USERNAME: __token__
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-wheels-win32
+          path: wheelhouse/*.whl
+
+  publish:
+    name: Publish to PyPI
+    needs: [sdist, build_wheels, build_wheels_aarch64, build_wheels_win32]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: dist-*
+          path: dist
+          merge-multiple: true
+      - uses: astral-sh/setup-uv@v4
+      - name: Publish to PyPI
+        run: uv publish dist/* --token ${{ secrets.PYPI_API_TOKEN }}
