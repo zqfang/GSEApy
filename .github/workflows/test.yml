@@ -39,7 +39,7 @@ jobs:
       - uses: actions/setup-python@v5
         name: Install Python
         with:
-          python-version: '3.x'
+          python-version: '3.13'
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
