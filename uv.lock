@@ -1185,6 +1185,7 @@ test = [
     { name = "pytest-cov", version = "5.0.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
     { name = "pytest-cov", version = "7.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
     { name = "pyyaml" },
+    { name = "ruff" },
 ]
 
 [package.metadata]
@@ -1202,6 +1203,7 @@ requires-dist = [
     { name = "pyyaml", marker = "extra == 'test'" },
     { name = "requests" },
     { name = "ruff", marker = "extra == 'dev'" },
+    { name = "ruff", marker = "extra == 'test'" },
     { name = "scipy" },
     { name = "sphinx", marker = "extra == 'docs'" },
     { name = "sphinx-rtd-theme", marker = "extra == 'docs'" },
