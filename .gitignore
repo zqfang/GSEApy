@@ -33,6 +33,7 @@ docs/_build
 tests/*.ipynb
 tests/*.pdf
 tests/*.csv
+tests/*.out
 tests/benchmark
 gseapy_example.ipynb
 target

@@ -26,7 +26,7 @@ extension-module = ["pyo3"]
 
 [dependencies]
 pyo3 = { version = "0.25.1", features = ["extension-module"], optional = true }
-rand = {version = "*", features = ['small_rng']}
+rand = {version = "0.9", features = ["small_rng"]}
 rayon = "*"
 csv = "*"
 itertools = "*"

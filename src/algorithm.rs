@@ -2,7 +2,7 @@
 
 use crate::utils::DynamicEnum;
 use crate::utils::{Metric, Statistic};
-use rand::rngs::SmallRng; // use SmallRng intestad of StdRng to speedup shuffling
+use rand::rngs::SmallRng;
 use rand::seq::SliceRandom;
 use rand::SeedableRng;
 use rayon::prelude::*;
@@ -177,9 +177,7 @@ impl EnrichmentScoreTrait for EnrichmentScore {
 /// associate and memeber function
 impl EnrichmentScore {
     pub fn new(gene: &[String], nperm: usize, seed: u64, single: bool, scale: bool) -> Self {
-        // let rng = ThreadRng::default();
         let rng = SmallRng::seed_from_u64(seed);
-        //let rng = thread_rng();
         EnrichmentScore {
             // metric: gene_metric,
             gene: DynamicEnum::from(gene),
