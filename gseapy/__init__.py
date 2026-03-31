@@ -10,6 +10,7 @@ from .msigdb import Msigdb
 from .parser import get_library, get_library_name, read_gmt
 from .plot import barplot, dotplot, enrichment_map, gseaplot, gseaplot2, heatmap
 from .ssgsea import SingleSampleGSEA
+from .utils import GOFilter
 
 __version__ = "1.2.0"
 
@@ -781,10 +782,6 @@ def gofilter(
 ) -> pd.DataFrame:
     """Filter GO enrichment results by GO term level (depth in the hierarchy).
 
-    This is a convenience wrapper around :meth:`Enrichr.go_filter` for users
-    who already have an enrichment result DataFrame and do not need an
-    ``Enrichr`` instance.
-
     Only terms whose GO level falls within ``[min_level, max_level]``
     (inclusive) are retained.  The GO level equals the number of ``is_a``
     ancestors in the Gene Ontology hierarchy (root = level 0, direct children
@@ -827,17 +824,7 @@ def gofilter(
     ... )
     >>> filtered = gseapy.gofilter(enr.res2d, min_level=3, max_level=8)
     """
-    enr_obj = Enrichr(
-        gene_list=["_dummy_gene_"],
-        gene_sets={"_dummy_set_": ["_dummy_gene_"]},
-        outdir=None,
-        no_plot=True,
-    )
-    try:
-        result = enr_obj.go_filter(df=df, min_level=min_level, max_level=max_level)
-    finally:
-        enr_obj.close()
-    return result
+    return GOFilter().filter(df, min_level=min_level, max_level=max_level)
 
 
 __all__ = [
@@ -861,6 +848,7 @@ __all__ = [
     "GSVA",
     "SingleSampleGSEA",
     "Enrichr",
+    "GOFilter",
     "Biomart",
     "Msigdb",
     "get_library",

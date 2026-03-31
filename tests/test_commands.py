@@ -736,16 +736,9 @@ class TestEnrichrClass:
 
     def test_extract_go_ids_with_go_id(self):
         """_extract_go_ids should return the GO ID when present in the term string."""
-        from gseapy.enrichr import Enrichr
+        from gseapy.utils import GOFilter
 
-        enr = Enrichr(
-            gene_list=["A"],
-            gene_sets={"X": ["A"]},
-            outdir=None,
-            no_plot=True,
-        )
-        import pandas as pd
-
+        gf = GOFilter()
         terms = pd.Series(
             [
                 "response to stimulus (GO:0050896)",
@@ -753,24 +746,16 @@ class TestEnrichrClass:
                 "cell cycle",
             ]
         )
-        result = enr._extract_go_ids(terms)
+        result = gf._extract_go_ids(terms)
         assert result[0] == "GO:0050896"
         assert result[1] == "GO:0006281"
         assert result[2] is None
-        enr.close()
 
     def test_go_filter_no_go_ids_returns_unchanged(self):
-        """go_filter should return the input unchanged when no GO IDs are found."""
-        from gseapy.enrichr import Enrichr
+        """GOFilter.filter should return the input unchanged when no GO IDs are found."""
+        from gseapy.utils import GOFilter
 
-        enr = Enrichr(
-            gene_list=["A"],
-            gene_sets={"X": ["A"]},
-            outdir=None,
-            no_plot=True,
-        )
-        import pandas as pd
-
+        gf = GOFilter()
         df = pd.DataFrame(
             {
                 "Gene_set": ["KEGG"],
@@ -780,42 +765,26 @@ class TestEnrichrClass:
                 "Genes": ["GENE1;GENE2"],
             }
         )
-        result = enr.go_filter(df=df, min_level=2, max_level=8)
+        result = gf.filter(df, min_level=2, max_level=8)
         # No GO IDs → unchanged
         assert len(result) == len(df)
-        enr.close()
 
     def test_go_filter_empty_df_returns_unchanged(self):
-        """go_filter should return an empty DataFrame when given one."""
-        from gseapy.enrichr import Enrichr
+        """GOFilter.filter should return an empty DataFrame when given one."""
+        from gseapy.utils import GOFilter
 
-        enr = Enrichr(
-            gene_list=["A"],
-            gene_sets={"X": ["A"]},
-            outdir=None,
-            no_plot=True,
-        )
-        import pandas as pd
-
+        gf = GOFilter()
         empty_df = pd.DataFrame(columns=["Gene_set", "Term", "P-value"])
-        result = enr.go_filter(df=empty_df)
+        result = gf.filter(empty_df)
         assert result.empty
-        enr.close()
 
     def test_go_filter_with_mocked_levels(self):
-        """go_filter should correctly filter by min/max level using mocked API."""
+        """GOFilter.filter should correctly filter by min/max level using mocked API."""
         from unittest.mock import patch
 
-        import pandas as pd
+        from gseapy.utils import GOFilter
 
-        from gseapy.enrichr import Enrichr
-
-        enr = Enrichr(
-            gene_list=["A"],
-            gene_sets={"X": ["A"]},
-            outdir=None,
-            no_plot=True,
-        )
+        gf = GOFilter()
         df = pd.DataFrame(
             {
                 "Gene_set": ["GO_BP"] * 3,
@@ -835,21 +804,17 @@ class TestEnrichrClass:
             "GO:0009987": 1,
             "GO:0006281": 5,
         }
-        with patch.object(enr, "_get_go_levels", return_value=mocked_levels):
+        with patch.object(gf, "_get_go_levels", return_value=mocked_levels):
             # Keep only levels 1-5 → exclude the root (level 0)
-            result = enr.go_filter(df=df, min_level=1, max_level=5)
+            result = gf.filter(df, min_level=1, max_level=5)
             assert len(result) == 2
             assert "GO:0008150" not in result["Term"].values
             assert any("GO:0009987" in t for t in result["Term"].values)
             assert any("GO:0006281" in t for t in result["Term"].values)
 
-        enr.close()
-
     def test_gofilter_function(self):
-        """gseapy.gofilter convenience function should delegate to Enrichr.go_filter."""
+        """gseapy.gofilter convenience function should delegate to GOFilter.filter."""
         from unittest.mock import patch
-
-        import pandas as pd
 
         import gseapy
 
@@ -868,7 +833,7 @@ class TestEnrichrClass:
         mocked_levels = {"GO:0008150": 0, "GO:0006281": 5}
 
         with patch(
-            "gseapy.enrichr.Enrichr._get_go_levels", return_value=mocked_levels
+            "gseapy.utils.GOFilter._get_go_levels", return_value=mocked_levels
         ):
             result = gseapy.gofilter(df, min_level=1, max_level=20)
             # Root term (level 0) should be excluded
@@ -909,7 +874,9 @@ class TestEnrichOnline:
 
     @pytest.mark.network
     def test_go_filter_online(self, genelist):
-        """go_filter should return a non-empty subset of GO results."""
+        """GOFilter should return a non-empty subset of GO results."""
+        import gseapy
+
         result = enrichr(
             gene_list=genelist,
             gene_sets="GO_Biological_Process_2021",
@@ -920,7 +887,7 @@ class TestEnrichOnline:
         )
         assert result.res2d is not None
         all_results = result.res2d
-        filtered = result.go_filter(min_level=3, max_level=10)
+        filtered = gseapy.gofilter(result.res2d, min_level=3, max_level=10)
         # The filtered set should be a subset of the original
         assert len(filtered) <= len(all_results)
         # Filtered result should only contain terms with GO IDs at the right levels
