@@ -10,6 +10,7 @@ from .msigdb import Msigdb
 from .parser import get_library, get_library_name, read_gmt
 from .plot import barplot, dotplot, enrichment_map, gseaplot, gseaplot2, heatmap
 from .ssgsea import SingleSampleGSEA
+from .utils import GOFilter
 
 __version__ = "1.2.0"
 
@@ -774,6 +775,58 @@ def gsva(
     return gv
 
 
+def gofilter(
+    df: pd.DataFrame,
+    min_level: int = 1,
+    max_level: int = 20,
+) -> pd.DataFrame:
+    """Filter GO enrichment results by GO term level (depth in the hierarchy).
+
+    Only terms whose GO level falls within ``[min_level, max_level]``
+    (inclusive) are retained.  The GO level equals the number of ``is_a``
+    ancestors in the Gene Ontology hierarchy (root = level 0, direct children
+    of root = level 1, etc.) and is retrieved from the
+    `QuickGO <https://www.ebi.ac.uk/QuickGO/>`_ REST API.
+
+    This is analogous to the ``gofilter`` function in R's clusterProfiler
+    (https://rdrr.io/bioc/clusterProfiler/man/gofilter.html).
+
+    .. note::
+       Requires internet access to query the QuickGO API.
+       Only has an effect when the ``Term`` column contains ``GO:XXXXXXX``
+       identifiers (e.g. results from GO enrichment libraries).
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Enrichment result DataFrame, e.g. ``enr.res2d`` or ``enr.results``.
+    min_level : int
+        Minimum GO level to keep (inclusive).  Increase this value to exclude
+        very general (high-level) terms.  Default: ``1``.
+    max_level : int
+        Maximum GO level to keep (inclusive).  Decrease this value to exclude
+        very specific (low-level) terms.  Default: ``20``.
+
+    Returns
+    -------
+    pd.DataFrame
+        A filtered copy of *df*.
+
+    Examples
+    --------
+    >>> import gseapy
+    >>> enr = gseapy.enrichr(
+    ...     gene_list=my_genes,
+    ...     gene_sets="GO_Biological_Process_2021",
+    ...     organism="human",
+    ...     outdir=None,
+    ...     no_plot=True,
+    ... )
+    >>> filtered = gseapy.gofilter(enr.results, min_level=3, max_level=8)
+    """
+    return GOFilter().filter(df, min_level=min_level, max_level=max_level)
+
+
 __all__ = [
     "dotplot",
     "barplot",
@@ -788,12 +841,14 @@ __all__ = [
     "ssgsea",
     "enrichr",
     "enrich",
+    "gofilter",
     "Replot",
     "Prerank",
     "GSEA",
     "GSVA",
     "SingleSampleGSEA",
     "Enrichr",
+    "GOFilter",
     "Biomart",
     "Msigdb",
     "get_library",
