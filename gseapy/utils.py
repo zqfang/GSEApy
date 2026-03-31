@@ -142,9 +142,7 @@ class GOFilter:
     >>> filtered = gf.filter(enr.results, min_level=3, max_level=8)
     """
 
-    _QUICKGO_URL = (
-        "https://www.ebi.ac.uk/QuickGO/services/ontology/go/terms/{ids}/ancestors"
-    )
+    _QUICKGO_URL = "https://www.ebi.ac.uk/QuickGO/services/ontology/go/terms/{ids}/ancestors"
     _BATCH_SIZE = 100  # QuickGO accepts comma-separated IDs in one request
 
     def __init__(self):
@@ -278,8 +276,7 @@ class GOFilter:
         levels = self._get_go_levels(valid_ids)
         if not levels:
             self._logger.warning(
-                "GOFilter.filter: Could not retrieve GO levels from QuickGO API. "
-                "Returning unfiltered results."
+                "GOFilter.filter: Could not retrieve GO levels from QuickGO API. Returning unfiltered results."
             )
             return df
 
