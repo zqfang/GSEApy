@@ -73,6 +73,53 @@ def test_gsea(gseaGCT, gseaCLS, geneGMT):
     tmpdir.cleanup()
 
 
+def test_gsea_single_sample_phenotype():
+    """Regression test: GSEA must not panic when a phenotype group has only 1 sample.
+
+    Previously two bugs caused crashes with such input:
+    1. PanicException("called Option::unwrap() on a None value") – argsort used
+       partial_cmp().unwrap() which panics on NaN f64.  NaN metric values arise
+       when stat(ddof=1) is called with a single-sample group (variance denominator
+       becomes 0).
+    2. _check_classes() used `==` instead of `=`, so the permutation_type was
+       never actually changed from "phenotype" to "gene_set" for small groups.
+
+    Both bugs are now fixed; this test verifies the run completes successfully.
+    """
+    np.random.seed(42)
+    n_genes = 50
+    gene_names = [f"GENE{i}" for i in range(n_genes)]
+    # Use an inline gene_sets dict so gene names match the expression data.
+    gene_sets = {
+        "SetA": gene_names[:15],
+        "SetB": gene_names[15:30],
+        "SetC": gene_names[30:45],
+    }
+    # 1 sample in the positive group, 5 in the negative group
+    n_samples = 6
+    expr = pd.DataFrame(
+        # Add 1e-8 to avoid all-zero rows which are filtered out by _filter_data
+        np.random.rand(n_genes, n_samples) + 1e-8,
+        index=gene_names,
+        columns=[f"S{i}" for i in range(n_samples)],
+    )
+    cls = ["pos"] + ["neg"] * 5
+    gs_res = gsea(
+        data=expr,
+        gene_sets=gene_sets,
+        cls=cls,
+        method="signal_to_noise",
+        outdir=None,
+        permutation_type="phenotype",
+        permutation_num=10,
+        min_size=5,
+        seed=7,
+    )
+    # Verify the run completed without panic and produced results
+    assert gs_res is not None
+    assert gs_res.res2d is not None
+
+
 def test_fdr_gsea(gseaGCT, gseaCLS, geneGMT):
     # Runs and verifies a reasonable result for pval
     # when method="t_test" and permutation_type="gene_set"

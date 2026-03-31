@@ -35,6 +35,8 @@ tests/*.pdf
 tests/*.csv
 tests/*.out
 tests/benchmark
+# generated test output artifacts
+tests/data/*.rs.out
 gseapy_example.ipynb
 target
 Cargo.lock

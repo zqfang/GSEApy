@@ -93,7 +93,8 @@ impl GSVA {
         let mut x0 = row.to_vec();
         let n = row.len() as f64;
         // To speedup, sort f64 in acending order in place, then do a binary search
-        x0.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap()); // if descending -> b.partial_cmp(a)
+        // Use total_cmp to safely handle any NaN values without panicking.
+        x0.sort_unstable_by(|a, b| a.total_cmp(b)); // if descending -> b.total_cmp(a)
                                                                // binary_search assumes that the elements are sorted in less-to-greater order.
                                                                // partition_point return the index of the first element of the second partition)
                                                                // since partition_point is just a wrapper of self.binary_search_by(|x| if pred(x) { Less } else { Greater }).unwrap_or_else(|i| i)
