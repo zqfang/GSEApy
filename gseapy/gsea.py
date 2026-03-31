@@ -299,7 +299,7 @@ class GSEA(GSEAbase):
                         f"Number of {c}: {v}, it must be >= 3 for permutation type: phenotype !"
                     )
                     self._logger.warning("Permutation type change to gene_set.")
-                    self.permutation_type == "gene_set"
+                    self.permutation_type = "gene_set"
             s.append(c)
         return s
 

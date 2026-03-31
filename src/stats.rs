@@ -1081,8 +1081,8 @@ mod tests {
         // This must not panic even with a single sample per phenotype group.
         let mut gsea = GSEAResult::new(1.0, 500, 1, 5, 42);
         gsea.gsea(&genes, &group, &gene_exp, &gmt2, Metric::Signal2Noise);
-        // Just verify we get results without panicking
-        assert!(!gsea.summaries.is_empty() || gsea.summaries.is_empty()); // always true
+        // Verify the run completed without panicking; SetA has 3 genes which meets min_size=1
+        assert!(!gsea.summaries.is_empty());
     }
 
     /// Regression test: argsort must not panic when the metric contains NaN values.
