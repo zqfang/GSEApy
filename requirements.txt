@@ -1,9 +1,11 @@
-pip>=19.1
-wheel
-numpy>=1.9.0
+# Runtime dependencies — canonical source is pyproject.toml [project.dependencies]
+# Kept for backwards compatibility with tools that consume requirements.txt directly.
+#
+# Preferred installs:
+#   pip install -e ".[dev]"      # editable + dev deps
+#   uv sync --extra dev          # editable + dev deps via uv
+numpy>=1.13.0
 scipy
-matplotlib>=1.4.3
-pandas>=0.16
+pandas
+matplotlib>=2.2
 requests
-setuptools-rust>=0.10.2
-

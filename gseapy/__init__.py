@@ -1,7 +1,9 @@
 import warnings
+from importlib.metadata import PackageNotFoundError, version
 from typing import Dict, Iterable, List, Optional, Tuple, Union
 
 import pandas as pd
+
 from .biomart import Biomart
 from .enrichr import Enrichr
 from .gsea import GSEA, Prerank, Replot
@@ -12,7 +14,10 @@ from .plot import barplot, dotplot, enrichment_map, gseaplot, gseaplot2, heatmap
 from .ssgsea import SingleSampleGSEA
 from .utils import GOFilter
 
-__version__ = "1.2.0"
+try:
+    __version__ = version("gseapy")
+except PackageNotFoundError:
+    __version__ = "unknown"
 
 
 def gsea(
@@ -136,9 +141,7 @@ def gsea(
         warnings.warn("processes is deprecated; use threads", DeprecationWarning, 2)
         threads = kwargs["processes"]
     if "weighted_score_type" in kwargs:
-        warnings.warn(
-            "weighted_score_type is deprecated; use weight", DeprecationWarning, 2
-        )
+        warnings.warn("weighted_score_type is deprecated; use weight", DeprecationWarning, 2)
         weight = kwargs["weighted_score_type"]
 
     gs = GSEA(
@@ -275,9 +278,7 @@ def ssgsea(
         warnings.warn("processes is deprecated; use threads", DeprecationWarning, 2)
         threads = kwargs["processes"]
     if "weighted_score_type" in kwargs:
-        warnings.warn(
-            "weighted_score_type is deprecated; use weight", DeprecationWarning, 2
-        )
+        warnings.warn("weighted_score_type is deprecated; use weight", DeprecationWarning, 2)
         weight = kwargs["weighted_score_type"]
 
     ss = SingleSampleGSEA(
@@ -388,9 +389,7 @@ def prerank(
         threads = kwargs["processes"]
 
     if "weighted_score_type" in kwargs:
-        warnings.warn(
-            "weighted_score_type is deprecated; use weight", DeprecationWarning, 2
-        )
+        warnings.warn("weighted_score_type is deprecated; use weight", DeprecationWarning, 2)
         weight = kwargs["weighted_score_type"]
 
     pre = Prerank(
@@ -453,9 +452,7 @@ def replot(
 
     """
     if "weighted_score_type" in kwargs:
-        warnings.warn(
-            "weighted_score_type is deprecated; use weight", DeprecationWarning, 2
-        )
+        warnings.warn("weighted_score_type is deprecated; use weight", DeprecationWarning, 2)
         weight = kwargs["weighted_score_type"]
 
     rep = Replot(indir, outdir, weight, min_size, max_size, figsize, format, verbose)

@@ -132,9 +132,7 @@ class SingleSampleGSEA(GSEAbase):
         self._gene_isupper = self.check_uppercase(gene_list=normdat.index.values)
         gmt = self.load_gmt(gene_list=normdat.index.values, gmt=self.gene_sets)
         self.gmt = gmt
-        self._logger.info(
-            "%04d gene_sets used for further statistical testing....." % len(gmt)
-        )
+        self._logger.info("%04d gene_sets used for further statistical testing....." % len(gmt))
         # start analysis
         self._logger.info("Start to run ssGSEA...Might take a while................")
         if self.permutation_num > 0:
@@ -144,9 +142,7 @@ class SingleSampleGSEA(GSEAbase):
             )
         self.runSamplesPermu(df=normdat, gmt=gmt)
 
-    def runSamplesPermu(
-        self, df: pd.DataFrame, gmt: Optional[Dict[str, List[str]]] = None
-    ):
+    def runSamplesPermu(self, df: pd.DataFrame, gmt: Optional[Dict[str, List[str]]] = None):
         """Single Sample GSEA workflow with permutation procedure"""
 
         assert self.min_size <= self.max_size

@@ -108,23 +108,26 @@ Installation
    $ conda install -c bioconda gseapy
    # or pip
    $ pip install gseapy
+   # or uv
+   $ uv add gseapy
 
 
-| If pip install failed, use
+| If pip install failed, install Rust first and build from source:
 
 .. code:: shell
 
-   # you need to install rust first to compile the code
+   # install rust toolchain
    curl https://sh.rustup.rs -sSf | sh -s -- -y
-   # export rust compiler 
    export PATH="$PATH:$HOME/.cargo/bin"
-   # install
-   $ pip install git+git://github.com/zqfang/gseapy.git#egg=gseapy
+   # then install via pip or uv
+   $ pip install gseapy
+   # or
+   $ uv add gseapy
 
 
 Dependency
 --------------
-* Python 3.7+
+* Python 3.8+
 
 Mandatory
 ~~~~~~~~~
@@ -277,16 +280,28 @@ Or use ``get_library_name`` function inside python console.
 
 
 
-Dev 
+Dev
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: shell
 
+   # clone and set up dev environment (requires Rust toolchain)
+   $ git clone https://github.com/zqfang/GSEApy.git
+   $ cd GSEApy
+   $ uv sync --extra dev
 
-        # test rust extension only 
-        cargo test --features=extension-module
-        # test whole package
-        python setup.py test
+   # run tests
+   $ uv run pytest
+
+   # lint and format
+   $ uv run ruff format gseapy
+   $ uv run ruff check gseapy
+
+   # test rust extension only
+   $ cargo test --features=extension-module
+
+   # build wheel + sdist locally
+   $ uv build
 
 
 

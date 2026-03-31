@@ -94,9 +94,7 @@ class Biomart:
         # if host not work, select next
         i = 0
         while i < len(hosts):
-            url = "http{}://{}/biomart/martservice?type=registry".format(
-                secure, hosts[i]
-            )
+            url = "http{}://{}/biomart/martservice?type=registry".format(secure, hosts[i])
             request = requests.get(url)
             # '<html>\n\n<head>\n  <title>Service unavailable</title>\n
             # "\n<MartRegistry>\n"
@@ -104,11 +102,7 @@ class Biomart:
                 self.host = hosts[i]
                 self._marts = self._get_mart(request.text)
                 break
-            self._logger.warning(
-                "host {} is not reachable, try {} ".format(
-                    hosts[i], hosts[(i + 1) % len(hosts)]
-                )
-            )
+            self._logger.warning("host {} is not reachable, try {} ".format(hosts[i], hosts[(i + 1) % len(hosts)]))
             i += 1
         if i == len(hosts):
             self._logger.warning("hosts is not reachable. Please try again later.")
@@ -208,13 +202,7 @@ class Biomart:
             xml_header = self.header.split("query=", 1)[1]
         except Exception:
             xml_header = self.header
-        body = (
-            xml_header
-            + dataset_xml
-            + "".join(filter_tags)
-            + "".join(attribute_tags)
-            + self.footer
-        )
+        body = xml_header + dataset_xml + "".join(filter_tags) + "".join(attribute_tags) + self.footer
         url = f"https://{self.host}/biomart/martservice?query=" + body
         return {"body": body, "url": url}
 
@@ -239,9 +227,7 @@ class Biomart:
         required_columns = ["database", "displayName", "name"]
         missing = [col for col in required_columns if col not in marts.columns]
         if missing:
-            raise ValueError(
-                f"BioMart registry XML missing columns: {missing}. Schema may have changed."
-            )
+            raise ValueError(f"BioMart registry XML missing columns: {missing}. Schema may have changed.")
         marts = marts.loc[:, required_columns]
         marts.columns = ["Version", "DisplayName", "Mart"]
         # get supported marts
@@ -249,9 +235,7 @@ class Biomart:
 
     def get_marts(self):
         """Get available marts and their names."""
-        url = "https://{host}/biomart/martservice?type=registry&requestid=gseapy{i}".format(
-            host=self.host, i=self._id
-        )
+        url = "https://{host}/biomart/martservice?type=registry&requestid=gseapy{i}".format(host=self.host, i=self._id)
         if self._marts is not None:
             return self._marts
         resp = requests.get(url)
@@ -266,22 +250,14 @@ class Biomart:
 
         marts = self.get_marts()
         if mart not in marts["Mart"].values:
-            raise ValueError(
-                "Provided mart name (%s) is not valid. see 'names' attribute" % mart
-            )
+            raise ValueError("Provided mart name (%s) is not valid. see 'names' attribute" % mart)
 
-        url = "https://{host}/biomart/martservice?type=datasets&mart={mart}".format(
-            host=self.host, mart=mart
-        )
+        url = "https://{host}/biomart/martservice?type=datasets&mart={mart}".format(host=self.host, mart=mart)
         resp = requests.get(url)
         if resp.ok:
             if resp.text.startswith("Problem"):
                 return resp.text
-            datasets = [
-                record.split("\t")
-                for record in resp.text.split("\n")
-                if len(record) > 1
-            ]
+            datasets = [record.split("\t") for record in resp.text.split("\n") if len(record) > 1]
             datasets = pd.DataFrame(datasets).iloc[:, 1:3]
             datasets.columns = ["Dataset", "Description"]
             return datasets
@@ -307,10 +283,8 @@ class Biomart:
         # filters = super(Biomart, self).filters(dataset)
         # if dataset not in [x for k in self.valid_attributes.keys() for x in self.valid_attributes[k]]:
         #     raise ValueError("provided dataset (%s) is not found. see valid_attributes" % dataset)
-        url = (
-            "https://{host}/biomart/martservice?type=filters&dataset={dataset}".format(
-                host=self.host, dataset=dataset
-            )
+        url = "https://{host}/biomart/martservice?type=filters&dataset={dataset}".format(
+            host=self.host, dataset=dataset
         )
 
         resp = requests.get(url)
@@ -374,9 +348,7 @@ class Biomart:
         if not isinstance(filters, dict):
             raise ValueError("filters only accept a dict object")
 
-        df = self.query_simple(
-            dataset=dataset, filters=filters, attributes=attributes, filename=None
-        )
+        df = self.query_simple(dataset=dataset, filters=filters, attributes=attributes, filename=None)
         if df is None:
             return
         elif isinstance(df, str):
@@ -547,9 +519,7 @@ class Biomart:
 
         if max_workers > 1 and len(chunks) > 1:
             with ThreadPoolExecutor(max_workers=max_workers) as ex:
-                futures = [
-                    ex.submit(_fetch_chunk, idx, body, url) for idx, body, url in chunks
-                ]
+                futures = [ex.submit(_fetch_chunk, idx, body, url) for idx, body, url in chunks]
                 for fut in as_completed(futures):
                     df_chunk = fut.result()
                     if df_chunk is not None:
@@ -561,11 +531,7 @@ class Biomart:
                     dfs.append(df_chunk)
 
         if not dfs:
-            return (
-                err_text
-                if err_text is not None
-                else "BioMart request failed in all chunks."
-            )
+            return err_text if err_text is not None else "BioMart request failed in all chunks."
 
         df_all = pd.concat(dfs, ignore_index=True).drop_duplicates()
         if filename is not None:

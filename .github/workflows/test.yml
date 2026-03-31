@@ -1,6 +1,4 @@
-# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-
+# This workflow installs dependencies via uv, lints with ruff, and runs pytest.
 name: GSEApy
 
 on:
@@ -12,51 +10,22 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        # see supported version syntax in actions/setup-python. e.g. ">=3.10", "3.x"(latest)
-        python-version: ["3.x"]
-
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
       with:
-        python-version: ${{ matrix.python-version }}
+        version: latest
+
     - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install --upgrade setuptools
-        python -m pip install wheel
-        python -m pip install lxml
-        pip install -r requirements.txt
-        pip install -e .
+      run: uv sync --extra test
+
     - name: Run linting
-      run: |
-        # Install ruff
-        pip install ruff
-        cd ${GITHUB_WORKSPACE}
-        # Check linting and formatting
-        # ruff check gseapy
-        ## fix check
-        ## ruff check --fix gseapy
-        ruff format --check gseapy
-        ## fix format
-        ## ruff format gseapy
-    
-    # - name: Test with covarege
-    #   run: |
-    #     cd ${GITHUB_WORKSPACE}
-    #     pip install coverage
-    #     pip install coveralls
-    #     python setup.py install
-    #     # coverage run setup.py test
+      run: uv run ruff format --check gseapy
+
     - name: Test with pytest
-      run: |
-        cd ${GITHUB_WORKSPACE}
-        pip install pytest
-        pip install pytest-cov
-        pytest
+      run: uv run pytest tests
 
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
@@ -70,26 +39,21 @@ jobs:
       - uses: actions/setup-python@v5
         name: Install Python
         with:
-          python-version: '3.x'
+          python-version: '3.13'
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
       - name: Install cibuildwheel
-        run: |
-          python -m pip install cibuildwheel twine wheel
+        run: python -m pip install cibuildwheel twine wheel
       - name: Build wheels
-        run: |
-          python -m cibuildwheel --output-dir wheelhouse
+        run: python -m cibuildwheel --output-dir wheelhouse
         env:
           CIBW_BEFORE_ALL_LINUX: >
             yum install libatomic -y &&
             curl https://sh.rustup.rs -sSf | sh -s -- -y
           CIBW_ENVIRONMENT_LINUX: 'PATH="$PATH:$HOME/.cargo/bin"'
-          # CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.9
-          CIBW_MANYLINUX_X86_64_IMAGE: quay.io/pypa/manylinux2014_x86_64:latest         
-          # rust is not available for musl linux on i686. see https://github.com/rust-lang/rustup/issues/2984
+          CIBW_MANYLINUX_X86_64_IMAGE: quay.io/pypa/manylinux2014_x86_64:latest
           CIBW_MANYLINUX_I686_IMAGE: quay.io/pypa/manylinux2014_i686:latest
           CIBW_SKIP: cp36-* cp37-* pp* *win32 *musl*
           CIBW_PROJECT_REQUIRES_PYTHON: ">=3.8"
           CIBW_PRERELEASE_PYTHONS: True
-

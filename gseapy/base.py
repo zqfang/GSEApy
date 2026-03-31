@@ -1,7 +1,6 @@
 #! python
 # -*- coding: utf-8 -*-
 
-import json
 import logging
 import os
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
@@ -12,7 +11,7 @@ from pandas.api.types import is_object_dtype, is_string_dtype
 
 from gseapy.enrichr import EnrichrAPI
 from gseapy.plot import GSEAPlot, TracePlot, gseaplot, heatmap
-from gseapy.utils import DEFAULT_CACHE_PATH, log_init, mkdirs, retry
+from gseapy.utils import DEFAULT_CACHE_PATH, log_init, mkdirs
 
 
 class GMT:
@@ -226,9 +225,7 @@ class GSEAbase(object):
         logfile = None
         if isinstance(self.outdir, str):
             mkdirs(self.outdir)
-            logfile = os.path.join(
-                self.outdir, "gseapy.%s.%s.log" % (self.module, id(self))
-            )
+            logfile = os.path.join(self.outdir, "gseapy.%s.%s.log" % (self.module, id(self)))
         self._logfile = logfile
         self._logger = log_init(
             name=str(self.module) + str(id(self)),
@@ -257,17 +254,13 @@ class GSEAbase(object):
         header, sep = "infer", "\t"
         # GCT input format?
         if path.endswith(".gct"):
-            rank_metric = pd.read_csv(
-                path, skiprows=1, comment="#", index_col=0, sep=sep
-            )
+            rank_metric = pd.read_csv(path, skiprows=1, comment="#", index_col=0, sep=sep)
         else:
             if path.endswith(".csv"):
                 sep = ","
             if path.endswith(".rnk"):
                 header = None
-            rank_metric = pd.read_csv(
-                path, comment="#", index_col=0, sep=sep, header=header
-            )
+            rank_metric = pd.read_csv(path, comment="#", index_col=0, sep=sep, header=header)
             if rank_metric.shape[1] == 1:
                 # rnk file like input
                 rank_metric.columns = rank_metric.columns.astype(str)
@@ -280,9 +273,7 @@ class GSEAbase(object):
         """
         # handle index is already gene_names
         # pandas 3.0 compatibility: check for both object and string dtypes
-        if is_object_dtype(rank_metric.index.dtype) or is_string_dtype(
-            rank_metric.index.dtype
-        ):
+        if is_object_dtype(rank_metric.index.dtype) or is_string_dtype(rank_metric.index.dtype):
             # Try to check if all elements can be converted to numbers
             try:
                 # is_string_numbers = True, don't reset index
@@ -305,10 +296,7 @@ class GSEAbase(object):
             # handle index is already gene_names
             rank_metric = self._reset_index(rank_metric)
             # pandas 3.0 compatibility: check for both object and string dtypes
-            if not (
-                is_object_dtype(rank_metric.columns.dtype)
-                or is_string_dtype(rank_metric.columns.dtype)
-            ):
+            if not (is_object_dtype(rank_metric.columns.dtype) or is_string_dtype(rank_metric.columns.dtype)):
                 rank_metric.columns = rank_metric.columns.astype(str)
 
         elif isinstance(exprs, pd.Series):
@@ -320,10 +308,7 @@ class GSEAbase(object):
                     exprs.name = "sample1"
                 elif hasattr(exprs.name, "dtype"):
                     # pandas 3.0 compatibility: check for both object and string dtypes
-                    if not (
-                        is_object_dtype(exprs.name.dtype)
-                        or is_string_dtype(exprs.name.dtype)
-                    ):
+                    if not (is_object_dtype(exprs.name.dtype) or is_string_dtype(exprs.name.dtype)):
                         exprs.name = exprs.name.astype(str)
                 else:
                     exprs.name = str(exprs.name)
@@ -359,9 +344,7 @@ class GSEAbase(object):
         df = exprs.select_dtypes(include=[np.number])
         # microarray data may contained multiple probs of same gene, average them
         if df.index.duplicated().sum() > 0:
-            self._logger.warning(
-                "Found duplicated gene names, values averaged by gene names!"
-            )
+            self._logger.warning("Found duplicated gene names, values averaged by gene names!")
             df = df.groupby(level=0).mean()
         # check whether contains infinity values
         if np.isinf(df).values.sum() > 0:
@@ -433,9 +416,7 @@ class GSEAbase(object):
             rank_metric.loc[mask, id_col] = rank_metric.loc[mask, id_col] + dups
         return rank_metric
 
-    def load_gmt_only(
-        self, gmt: Union[List[str], str, Dict[str, str]]
-    ) -> Dict[str, List[str]]:
+    def load_gmt_only(self, gmt: Union[List[str], str, Dict[str, str]]) -> Dict[str, List[str]]:
         """parse gene_sets.
         gmt: List, Dict, Strings
 
@@ -476,9 +457,7 @@ class GSEAbase(object):
             raise Exception("Error parsing gmt parameter for gene sets")
         return genesets_dict
 
-    def load_gmt(
-        self, gene_list: Iterable[str], gmt: Union[List[str], str, Dict[str, str]]
-    ) -> Dict[str, List[str]]:
+    def load_gmt(self, gene_list: Iterable[str], gmt: Union[List[str], str, Dict[str, str]]) -> Dict[str, List[str]]:
         """load gene set dict"""
 
         genesets_dict = self.load_gmt_only(gmt)
@@ -531,13 +510,9 @@ class GSEAbase(object):
             )
             self._logger.error(msg)
             dict_head = "{ %s: [%s]}" % (subsets[0], ", ".join(entry1st))
+            self._logger.error("The first entry of your gene_sets (gmt) look like this : %s" % dict_head)
             self._logger.error(
-                "The first entry of your gene_sets (gmt) look like this : %s"
-                % dict_head
-            )
-            self._logger.error(
-                "The first 5 genes look like this : [ %s ]"
-                % (", ".join([str(g) for g in list(gene_list)[:5]]))
+                "The first 5 genes look like this : [ %s ]" % (", ".join([str(g) for g in list(gene_list)[:5]]))
             )
             raise LookupError(msg)
 
@@ -562,8 +537,7 @@ class GSEAbase(object):
         # if file already download
         if os.path.isfile(tempath):
             self._logger.info(
-                "Enrichr library gene sets already downloaded in: %s, use local file"
-                % DEFAULT_CACHE_PATH
+                "Enrichr library gene sets already downloaded in: %s, use local file" % DEFAULT_CACHE_PATH
             )
             return self.parse_gmt(tempath)
 
@@ -695,11 +669,7 @@ class GSEAbase(object):
 
         for i, gs in enumerate(gsea_summary):
             # reformat gene list.
-            name = (
-                self._metric_dict[str(gs.index)]
-                if (gs.index is not None)
-                else self.module
-            )
+            name = self._metric_dict[str(gs.index)] if (gs.index is not None) else self.module
             _genes = metric[name].index.values[gs.hits]
             genes = ";".join([str(g).strip() for g in _genes])
             RES = np.array(gs.run_es)
@@ -818,17 +788,13 @@ class GSEAbase(object):
             dc += ["NES"]
         # re-order by NES
         # for pandas > 1.1, use df.sort_values(by='B', key=abs) will sort by abs value
-        self.res2d = res_df.reindex(
-            res_df["NES"].abs().sort_values(ascending=False).index
-        ).reset_index(drop=True)
+        self.res2d = res_df.reindex(res_df["NES"].abs().sort_values(ascending=False).index).reset_index(drop=True)
         self.res2d.drop(dc, axis=1, inplace=True)
 
         if self._outdir is not None:
             out = os.path.join(
                 self.outdir,
-                "gseapy.{b}.{c}.report.csv".format(
-                    b=self.permutation_type, c=self.module
-                ),
+                "gseapy.{b}.{c}.report.csv".format(b=self.permutation_type, c=self.module),
             )
             self.res2d.to_csv(out, index=False, float_format="%.6e")
             with open(os.path.join(self.outdir, "gene_sets.gmt"), "w") as gout:

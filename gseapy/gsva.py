@@ -84,9 +84,7 @@ class GSVA(GSEAbase):
         # kernel
         if self.kernel:
             if self.rnaseq:
-                self._logger.info(
-                    "Estimating ECDFs with Poisson kernels. Clip negative values to 0 !"
-                )
+                self._logger.info("Estimating ECDFs with Poisson kernels. Clip negative values to 0 !")
                 df = df.clip(lower=0)
             else:
                 self._logger.info("Estimating ECDFs with Gaussian kernels.")
@@ -99,9 +97,7 @@ class GSVA(GSEAbase):
         self._gene_isupper = self.check_uppercase(gene_list=df.index.values)
         gmt = self.load_gmt(gene_list=df.index.values, gmt=self.gene_sets)
         self.gmt = gmt
-        self._logger.info(
-            "%04d gene_sets used for further statistical testing....." % len(gmt)
-        )
+        self._logger.info("%04d gene_sets used for further statistical testing....." % len(gmt))
         # start analysis
         self._logger.info("Start to run GSVA...Might take a while................")
         gene_names = df.index.to_list()

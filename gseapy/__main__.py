@@ -180,12 +180,8 @@ def prepare_argparser():
 
     # top-level parser
     argparser = ap.ArgumentParser(description=description, epilog=epilog)
-    argparser.add_argument(
-        "--version", action="version", version="%(prog)s " + __version__
-    )
-    subparsers = argparser.add_subparsers(
-        dest="subcommand_name"
-    )  # help="sub-command help")
+    argparser.add_argument("--version", action="version", version="%(prog)s " + __version__)
+    subparsers = argparser.add_subparsers(dest="subcommand_name")  # help="sub-command help")
 
     # command for 'gsea'
     add_gsea_parser(subparsers)
@@ -310,9 +306,7 @@ def add_output_group(parser, required=True):
 def add_gsea_parser(subparsers):
     """Add main function 'gsea' argument parsers."""
 
-    argparser_gsea = subparsers.add_parser(
-        "gsea", help="Main GSEApy Function: run GSEApy instead of GSEA."
-    )
+    argparser_gsea = subparsers.add_parser("gsea", help="Main GSEApy Function: run GSEApy instead of GSEA.")
 
     # group for input files
     group_input = argparser_gsea.add_argument_group("Input files arguments")
@@ -467,9 +461,7 @@ def add_gsea_parser(subparsers):
 def add_prerank_parser(subparsers):
     """Add function 'prerank' argument parsers."""
 
-    argparser_prerank = subparsers.add_parser(
-        "prerank", help="Run GSEApy Prerank tool on preranked gene list."
-    )
+    argparser_prerank = subparsers.add_parser("prerank", help="Run GSEApy Prerank tool on preranked gene list.")
 
     # group for input files
     prerank_input = argparser_prerank.add_argument_group("Input files arguments")
@@ -627,9 +619,7 @@ def add_singlesample_parser(subparsers):
     add_output_option(group_output)
 
     # group for General options.
-    group_opt = argparser_gsea.add_argument_group(
-        "Single Sample GSEA advanced arguments"
-    )
+    group_opt = argparser_gsea.add_argument_group("Single Sample GSEA advanced arguments")
     group_opt.add_argument(
         "--sn",
         "--sample-norm",
@@ -857,9 +847,7 @@ def add_gsva_parser(subparsers):
 def add_plot_parser(subparsers):
     """Add function 'plot' argument parsers."""
 
-    argparser_replot = subparsers.add_parser(
-        "replot", help="Reproduce GSEA desktop output figures."
-    )
+    argparser_replot = subparsers.add_parser("replot", help="Reproduce GSEA desktop output figures.")
 
     group_replot = argparser_replot.add_argument_group("Input arguments")
 
@@ -891,9 +879,7 @@ def add_plot_parser(subparsers):
 def add_enrichr_parser(subparsers):
     """Add function 'enrichr' argument parsers."""
 
-    argparser_enrichr = subparsers.add_parser(
-        "enrichr", help="Using Enrichr API to perform GO analysis."
-    )
+    argparser_enrichr = subparsers.add_parser("enrichr", help="Using Enrichr API to perform GO analysis.")
 
     # group for required options.
     enrichr_opt = argparser_enrichr.add_argument_group("Input arguments")
@@ -983,9 +969,7 @@ def add_enrichr_parser(subparsers):
 def add_biomart_parser(subparsers):
     """Add function 'biomart' argument parsers."""
 
-    argparser_biomart = subparsers.add_parser(
-        "biomart", help="Using BioMart API to convert gene ids."
-    )
+    argparser_biomart = subparsers.add_parser("biomart", help="Using BioMart API to convert gene ids.")
 
     # group for required options.
     biomart_opt = argparser_biomart.add_argument_group("Input arguments")
@@ -1011,9 +995,7 @@ def add_biomart_parser(subparsers):
         metavar="ATTR",
         help="Which attribute(s) to retrieve. Separate each attr by comma.",
     )
-    biomart_opt.add_argument(
-        "-o", "--ofile", dest="ofile", type=str, required=True, help="Output file name"
-    )
+    biomart_opt.add_argument("-o", "--ofile", dest="ofile", type=str, required=True, help="Output file name")
     biomart_opt.add_argument(
         "-d",
         "--dataset",

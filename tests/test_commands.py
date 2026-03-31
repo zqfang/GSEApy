@@ -251,7 +251,7 @@ def test_enrichr(genelist, geneGMT):
     enrichr(
         genelist,
         gene_sets=["KEGG_2016", geneGMT],
-        background="hsapiens_gene_ensembl",
+        background="tests/data/background.txt", # test local
         outdir=None,
         cutoff=0.5,
     )

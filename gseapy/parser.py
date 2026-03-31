@@ -133,10 +133,7 @@ def get_library(
             logging.info("Downloading and generating Enrichr library gene sets...")
             genesets_dict = download_library(name, organism=organism)
         else:
-            raise ValueError(
-                "Sorry. The input: %s could be be found given organism: %s"
-                % (name, organism)
-            )
+            raise ValueError("Sorry. The input: %s could be be found given organism: %s" % (name, organism))
 
     # filtering gene_sets
     total = len(genesets_dict)
@@ -163,8 +160,7 @@ def get_library(
     filsets_num = total - len(genesets_dict)
     if filsets_num > 0:
         logging.info(
-            "%04d gene_sets have been filtered out when max_size=%s and min_size=%s"
-            % (filsets_num, max_size, min_size)
+            "%04d gene_sets have been filtered out when max_size=%s and min_size=%s" % (filsets_num, max_size, min_size)
         )
 
     if filsets_num == len(genesets_dict):
@@ -243,9 +239,7 @@ def get_library_name(organism: str = "Human") -> List[str]:
     return sorted(libs)
 
 
-def download_library(
-    name: str, organism: str = "human", filename: str = None
-) -> Dict[str, List[str]]:
+def download_library(name: str, organism: str = "human", filename: str = None) -> Dict[str, List[str]]:
     """download enrichr libraries.
 
     :param str name: the enrichr library name. see `gseapy.get_library_name()`.
@@ -303,13 +297,9 @@ def download_library(
     ENRICHR_URL = ENRICHR_URL + "/%s/geneSetLibrary" % database
     query_string = "?mode=text&libraryName=%s"
     # get
-    response = requests.get(
-        ENRICHR_URL + query_string % name, timeout=None, stream=True
-    )
+    response = requests.get(ENRICHR_URL + query_string % name, timeout=None, stream=True)
     if not response.ok:
-        raise Exception(
-            "Error fetching gene set library, input name is correct for the organism you've set?."
-        )
+        raise Exception("Error fetching gene set library, input name is correct for the organism you've set?.")
     # reformat to dict
     genesets_dict = {}
     for line in response.iter_lines(chunk_size=1024, decode_unicode="utf-8"):

@@ -52,9 +52,7 @@ def zscore(data2d: pd.DataFrame, axis: Optional[int] = 0):
         # z_scored = (data2d - data2d.values.mean()) / data2d.values.std(ddof=1)
         return data2d
     assert axis in [0, 1]
-    z_scored = data2d.apply(
-        lambda x: (x - x.mean()) / x.std(ddof=1), axis=operator.xor(1, axis)
-    )
+    z_scored = data2d.apply(lambda x: (x - x.mean()) / x.std(ddof=1), axis=operator.xor(1, axis))
     return z_scored
 
 
@@ -172,19 +170,13 @@ class Heatmap(object):
         yticks, ylabels = self._skip_ticks(df.index.values, tickevery=ystep)
         ax.set_ylim([0, len(df)])
         ax.set(xticks=xticks, yticks=yticks)
-        ax.set_xticklabels(
-            xlabels if self.xticklabels else "", fontsize=14, rotation=90
-        )
+        ax.set_xticklabels(xlabels if self.xticklabels else "", fontsize=14, rotation=90)
         ax.set_yticklabels(ylabels if self.yticklabels else "", fontsize=14)
         ax.set_title(self.title, fontsize=20, fontweight="bold")
-        ax.tick_params(
-            axis="both", which="both", bottom=False, top=False, right=False, left=False
-        )
+        ax.tick_params(axis="both", which="both", bottom=False, top=False, right=False, left=False)
         # cax=fig.add_axes([0.93,0.25,0.05,0.20])
         cbar = self.fig.colorbar(matrix, shrink=0.3, aspect=10)  #  ticks=[-1, 0, 1]
-        cbar.ax.yaxis.set_tick_params(
-            color="white", direction="in", left=True, right=True
-        )
+        cbar.ax.yaxis.set_tick_params(color="white", direction="in", left=True, right=True)
         # Add colorbar, make sure to specify tick locations to match desired ticklabels
         cbar.locator = cbar_locator  # LinearLocator(3)
         cbar.update_ticks()
@@ -393,13 +385,9 @@ class GSEAPlot(object):
         )
         ax1.set_xlabel("Gene Rank", fontsize=16, fontweight="bold")
         ax1.spines["top"].set_visible(False)
-        ax1.tick_params(
-            axis="both", which="both", top=False, right=False, left=False, labelsize=14
-        )
+        ax1.tick_params(axis="both", which="both", top=False, right=False, left=False, labelsize=14)
         ax1.locator_params(axis="y", nbins=5)
-        ax1.yaxis.set_major_formatter(
-            plt.FuncFormatter(lambda tick_loc, tick_num: "{:.1f}".format(tick_loc))
-        )
+        ax1.yaxis.set_major_formatter(plt.FuncFormatter(lambda tick_loc, tick_num: "{:.1f}".format(tick_loc)))
 
     def axes_hits(self, rect, bottom: bool = False):
         """
@@ -422,9 +410,7 @@ class GSEAPlot(object):
             alpha=0,
         )  # alpha 0 to transparency
         # add hits line
-        ax2.vlines(
-            self._hit_indices, 0, 1, linewidth=0.5, transform=trans2, color="black"
-        )
+        ax2.vlines(self._hit_indices, 0, 1, linewidth=0.5, transform=trans2, color="black")
 
         ax2.tick_params(
             axis="both",
@@ -503,9 +489,7 @@ class GSEAPlot(object):
         )
         ax4.locator_params(axis="y", nbins=5)
         # FuncFormatter need two argument, I don't know why. this lambda function used to format yaxis tick labels.
-        ax4.yaxis.set_major_formatter(
-            plt.FuncFormatter(lambda tick_loc, tick_num: "{:.1f}".format(tick_loc))
-        )
+        ax4.yaxis.set_major_formatter(plt.FuncFormatter(lambda tick_loc, tick_num: "{:.1f}".format(tick_loc)))
 
         self.ax = ax4
 
@@ -536,12 +520,7 @@ class GSEAPlot(object):
         if self.rankings is None:
             rank_height_ratio = 0
             cmap_height_ratio = 0
-        base = 0.8 / (
-            stat_height_ratio
-            + hits_height_ratio
-            + cmap_height_ratio
-            + rank_height_ratio
-        )
+        base = 0.8 / (stat_height_ratio + hits_height_ratio + cmap_height_ratio + rank_height_ratio)
         # for i, hit in enumerate(self.hits):
         #     height = hits_height_ratio * base
         if self.rankings is not None:
@@ -552,9 +531,7 @@ class GSEAPlot(object):
             self.axes_cmap([left, bottom, width, height])
             bottom += height
         height = hits_height_ratio * base
-        self.axes_hits(
-            [left, bottom, width, height], bottom=False if bottom > 0.1 else True
-        )
+        self.axes_hits([left, bottom, width, height], bottom=False if bottom > 0.1 else True)
         bottom += height
         height = stat_height_ratio * base
         self.axes_stat([left, bottom, width, height])
@@ -730,9 +707,7 @@ class DotPlot(object):
         if self.colname in ["Adjusted P-value", "P-value", "NOM p-val", "FDR q-val"]:
             # if all values are zeros, raise error
             if not any(df[self.colname].abs() > 0):
-                raise ValueError(
-                    f"Can not detetermine colormap. All values in {self.colname} are 0s"
-                )
+                raise ValueError(f"Can not detetermine colormap. All values in {self.colname} are 0s")
             df = df.sort_values(by=self.colname)
             # add a tiny value to 0s
             p = df[self.colname].astype(float)
@@ -744,26 +719,17 @@ class DotPlot(object):
             self.cbar_title = r"$\log_{10} \frac{1}{ " + _t + " }$"
 
         # get top terms; sort ascending
-        if (
-            (self.x is not None)
-            and (self.x in df.columns)
-            and (not all(df[self.x].map(self.isfloat)))
-        ):
+        if (self.x is not None) and (self.x in df.columns) and (not all(df[self.x].map(self.isfloat))):
             # x is a categorical column; get top terms of each group
             # Use a loop+concat to avoid pandas 3.0 dropping the groupby key column
-            groups = [
-                group.sort_values(by=self.colname).tail(self.n_terms)
-                for _, group in df.groupby(self.x)
-            ]
+            groups = [group.sort_values(by=self.colname).tail(self.n_terms) for _, group in df.groupby(self.x)]
             df = pd.concat(groups).reset_index(drop=True)
         else:
             df = df.sort_values(by=self.colname).tail(self.n_terms)  # acending
         # get scatter area
         if df.columns.isin(["Overlap", "Tag %"]).any():
             ol = df.columns[df.columns.isin(["Overlap", "Tag %"])]
-            temp = (
-                df[ol].squeeze(axis=1).str.split("/", expand=True).astype(int)
-            )  # axis=1, in case you have only 1 row
+            temp = df[ol].squeeze(axis=1).str.split("/", expand=True).astype(int)  # axis=1, in case you have only 1 row
             df = df.assign(Hits_ratio=temp.iloc[:, 0] / temp.iloc[:, 1])
         else:
             df = df.assign(Hits_ratio=1.0)  # if Overlap column missing
@@ -782,9 +748,7 @@ class DotPlot(object):
         idx = Z0["leaves"][::-1]  # reverse the order to make the view better
         return idx
 
-    def get_x_order(
-        self, method: str = "single", metric: str = "euclidean"
-    ) -> List[str]:
+    def get_x_order(self, method: str = "single", metric: str = "euclidean") -> List[str]:
         """See scipy.cluster.hierarchy.linkage()
         Perform hierarchical/agglomerative clustering.
         Return categorical order.
@@ -799,9 +763,7 @@ class DotPlot(object):
         idx = self._hierarchical_clustering(mat.T, method, metric)
         return list(mat.columns[idx])
 
-    def get_y_order(
-        self, method: str = "single", metric: str = "euclidean"
-    ) -> List[str]:
+    def get_y_order(self, method: str = "single", metric: str = "euclidean") -> List[str]:
         """See scipy.cluster.hierarchy.linkage()
         Perform hierarchical/agglomerative clustering.
         Return categorical order.
@@ -887,10 +849,7 @@ class DotPlot(object):
         # dot area should be linearly proportional to Hits_ratio (not diameter)
         # since matplotlib scatter's `s` parameter is in points^2 (area),
         # we scale Hits_ratio by (scale * markersize)^2 to get the area
-        df = self.data.assign(
-            area=self.data["Hits_ratio"]
-            * (self.scale * plt.rcParams["lines.markersize"]) ** 2
-        )
+        df = self.data.assign(area=self.data["Hits_ratio"] * (self.scale * plt.rcParams["lines.markersize"]) ** 2)
         colmap = df[self.colname].astype(int)
         vmin = np.percentile(colmap.min(), 2)
         vmax = np.percentile(colmap.max(), 98)
@@ -977,9 +936,7 @@ class DotPlot(object):
             num=3,  #
             # fmt="{x:.2f}",
             color="gray",
-            func=lambda s: (
-                100 * s / (plt.rcParams["lines.markersize"] * self.scale) ** 2
-            ),
+            func=lambda s: 100 * s / (plt.rcParams["lines.markersize"] * self.scale) ** 2,
         )
         ax.legend(
             handles,
@@ -1010,9 +967,7 @@ class DotPlot(object):
             # cax=cax,
         )
         # cbar.ax.tick_params(direction='in')
-        cbar.ax.yaxis.set_tick_params(
-            color="white", direction="in", left=True, right=True
-        )
+        cbar.ax.yaxis.set_tick_params(color="white", direction="in", left=True, right=True)
         cbar.ax.set_title(self.cbar_title, loc="left", fontweight="bold")
         cbar.ax.title.set_position((0, 1.05))  # 1.05 = 5% above the top
         for key, spine in cbar.ax.spines.items():
@@ -1041,9 +996,7 @@ class DotPlot(object):
         if ax is None:
             ax = self.get_ax()
         x, xlabel = self.set_x()
-        bar = self.data.plot.barh(
-            x=self.y, y=self.colname, alpha=0.75, fontsize=16, ax=ax
-        )
+        bar = self.data.plot.barh(x=self.y, y=self.colname, alpha=0.75, fontsize=16, ax=ax)
         if self.hue in ["Adjusted P-value", "P-value", "FDR q-val", "NOM p-val"]:
             xlabel = r"$- \log_{10}$ (%s)" % self.hue
         else:
@@ -1415,9 +1368,7 @@ class TracePlot(object):
             raise ValueError("ax must be matplotlib axes or None")
         # self.fig.suptitle(self.term, fontsize=16, wrap=True, fontweight="bold")
 
-    def axes_hits(
-        self, tags: Sequence[int], rect: List[float], color="#0033FF", bottom=False
-    ):
+    def axes_hits(self, tags: Sequence[int], rect: List[float], color="#0033FF", bottom=False):
         """
         hits: 1d array of this
         rect : sequence of float
@@ -1474,9 +1425,7 @@ class TracePlot(object):
                 alpha=0.5,
             )
             ax44.tick_params(axis="y", labelcolor="#808080")
-            ax44.set_ylabel(
-                "Ranked metric", fontsize=16, fontweight="bold", color="#808080"
-            )
+            ax44.set_ylabel("Ranked metric", fontsize=16, fontweight="bold", color="#808080")
         if self.colors is None:
             cycle = plt.rcParams["axes.prop_cycle"].by_key()["color"]
         else:
@@ -1507,9 +1456,7 @@ class TracePlot(object):
         )
         ax4.locator_params(axis="y", nbins=5)
         # FuncFormatter need two argument, I don't know why. this lambda function used to format yaxis tick labels.
-        ax4.yaxis.set_major_formatter(
-            plt.FuncFormatter(lambda tick_loc, tick_num: "{:.1f}".format(tick_loc))
-        )
+        ax4.yaxis.set_major_formatter(plt.FuncFormatter(lambda tick_loc, tick_num: "{:.1f}".format(tick_loc)))
         if isinstance(self.legend_kws, dict):
             ax4.legend(**self.legend_kws)
         else:
@@ -1606,11 +1553,7 @@ def gseaplot2(
     if isinstance(terms, str):
         terms = [terms]
     # make the inputs are legal
-    assert (
-        hasattr(terms, "__len__")
-        and hasattr(hits, "__len__")
-        and hasattr(RESs, "__len__")
-    )
+    assert hasattr(terms, "__len__") and hasattr(hits, "__len__") and hasattr(RESs, "__len__")
     assert len(terms) == len(hits) == len(RESs)
 
     trace = TracePlot(
