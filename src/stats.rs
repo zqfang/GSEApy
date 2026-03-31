@@ -8,7 +8,7 @@ use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-#[pyclass]
+#[pyclass(from_py_object)]
 #[allow(dead_code)]
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GSEASummary {
@@ -159,7 +159,7 @@ impl GSEASummary {
     }
 }
 
-#[pyclass]
+#[pyclass(skip_from_py_object)]
 #[allow(dead_code)]
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GSEAResult {

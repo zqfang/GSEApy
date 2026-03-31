@@ -12,7 +12,7 @@ use rand::Rng;
 use std::collections::HashMap;
 use std::hash::Hash;
 
-#[pyclass(eq, eq_int)]
+#[pyclass(eq, eq_int, from_py_object)]
 #[derive(Copy, Clone, PartialEq)]
 pub enum Metric {
     Signal2Noise = 0,
@@ -23,7 +23,7 @@ pub enum Metric {
     DiffOfClasses = 5,
 }
 
-#[pyclass(eq, eq_int)]
+#[pyclass(eq, eq_int, from_py_object)]
 #[derive(Copy, Clone, PartialEq)]
 pub enum CorrelType {
     Rank = 0,
