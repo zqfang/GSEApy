@@ -822,7 +822,7 @@ def gofilter(
     ...     outdir=None,
     ...     no_plot=True,
     ... )
-    >>> filtered = gseapy.gofilter(enr.res2d, min_level=3, max_level=8)
+    >>> filtered = gseapy.gofilter(enr.results, min_level=3, max_level=8)
     """
     return GOFilter().filter(df, min_level=min_level, max_level=max_level)
 

@@ -58,7 +58,7 @@ def log_init(name, log_level=logging.INFO, filename=None):
     :filename: if given a filename, write log to a file (only works in commandline)
 
     """
-    # inside python console enviroment. only need one root logger
+    # inside python console environment. only need one root logger
     if hasattr(sys, "ps1"):
         name = "gseapy"
     logger = logging.getLogger(name)
@@ -143,7 +143,7 @@ class GOFilter:
     ...                      gene_sets="GO_Biological_Process_2021",
     ...                      organism="human", no_plot=True, outdir=None)
     >>> gf = gseapy.GOFilter()
-    >>> filtered = gf.filter(enr.res2d, min_level=3, max_level=8)
+    >>> filtered = gf.filter(enr.results, min_level=3, max_level=8)
     """
 
     _QUICKGO_URL = (
@@ -152,7 +152,7 @@ class GOFilter:
     _BATCH_SIZE = 100  # QuickGO accepts comma-separated IDs in one request
 
     def __init__(self):
-        self._logger = logging.getLogger(__name__)
+        self._logger = log_init(__name__)
 
     def _extract_go_ids(self, terms: "pd.Series") -> List[Optional[str]]:
         """Extract GO IDs from a Series of term strings.
