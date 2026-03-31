@@ -37,9 +37,7 @@ class Msigdb:
         return None
 
     @classmethod
-    def get_gmt(
-        cls, category: str = "h.all", dbver: str = "2023.1.Hs", entrez: bool = False
-    ):
+    def get_gmt(cls, category: str = "h.all", dbver: str = "2023.1.Hs", entrez: bool = False):
         """
         :params category: choose one from .list_category()
         :params dbver: choose one from .list_dbver()
@@ -84,11 +82,7 @@ class Msigdb:
         """
         d = cls.list_gmt(dbver)
         if d is not None:
-            categories = (
-                d.iloc[:, 0]
-                .apply(lambda s: cls._pattern.match(s).groups()[0])
-                .drop_duplicates()
-            )
+            categories = d.iloc[:, 0].apply(lambda s: cls._pattern.match(s).groups()[0]).drop_duplicates()
             return categories.to_list()
         return None
 

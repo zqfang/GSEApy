@@ -85,9 +85,7 @@ def log_init(name, log_level=logging.INFO, filename=None):
     if (not hasattr(sys, "ps1")) and filename:
         fhandler = logging.FileHandler(filename=filename, mode="w")
         fhandler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter(
-            "%(asctime)s %(name)s::[%(levelname)-8s] %(message)s"
-        )
+        formatter = logging.Formatter("%(asctime)s %(name)s::[%(levelname)-8s] %(message)s")
         fhandler.setFormatter(formatter)
         logger.addHandler(fhandler)
     # logger.handlers.clear()
@@ -112,9 +110,7 @@ def retry(num=5, pool_maxsize: int = 50):
     """
     s = requests.Session()
     retries = Retry(total=num, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
-    adapter = HTTPAdapter(
-        max_retries=retries, pool_connections=pool_maxsize, pool_maxsize=pool_maxsize
-    )
+    adapter = HTTPAdapter(max_retries=retries, pool_connections=pool_maxsize, pool_maxsize=pool_maxsize)
     s.mount("http://", adapter)
     s.mount("https://", adapter)
     # Encourage compressed responses

@@ -4,9 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gseapy"
-dynamic = ["version", "readme"]
+version = "1.12.0"
+dynamic = ["readme"]
 description = "Gene Set Enrichment Analysis in Python"
-license = { text = "MIT" }
+license = { file = "LICENSE" }
 authors = [{ name = "Zhuoqing Fang", email = "fzq518@gmail.com" }]
 keywords = [
     "Gene Ontology",
@@ -66,7 +67,6 @@ Source = "https://github.com/zqfang/GSEApy"
 Tracker = "https://github.com/zqfang/GSEApy/issues"
 
 [tool.setuptools.dynamic]
-version = { attr = "gseapy.__version__" }
 readme = { file = ["README.rst"] }
 
 [tool.setuptools.packages.find]
@@ -76,6 +76,8 @@ include = ["gseapy*"]
 gseapy = ["data/palette.json"]
 
 [tool.uv]
+# Always try to use the latest version found on the system
+python-preference = "only-managed"
 # Development workflow:
 #   uv sync --extra dev      → install editable + dev deps
 #   uv run pytest            → run tests
@@ -84,7 +86,7 @@ gseapy = ["data/palette.json"]
 
 [tool.ruff]
 target-version = "py38"
-line-length = 88
+line-length = 120
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]
@@ -93,6 +95,8 @@ select = ["E", "F", "I"]
 known-first-party = ["gseapy"]
 
 [tool.pytest.ini_options]
+addopts = "--doctest-modules"
+testpaths = ["tests", "gseapy"]
 markers = [
     "network: marks tests that require network access (deselect with '-m \"not network\"')",
 ]

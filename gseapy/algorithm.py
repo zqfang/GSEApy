@@ -154,9 +154,7 @@ def enrichment_score_tensor(
         # for 1d ndarray of gene_mat, set assume_unique=True,
         # means the input arrays are both assumed to be unique,
         # which can speed up the calculation.
-        tag_indicator = np.vstack(
-            [np.in1d(gene_mat, gene_sets[key], assume_unique=True) for key in keys]
-        )
+        tag_indicator = np.vstack([np.in1d(gene_mat, gene_sets[key], assume_unique=True) for key in keys])
         tag_indicator = tag_indicator.astype(int)
         # index of hits
         hit_ind = [np.flatnonzero(tag).tolist() for tag in tag_indicator]
@@ -172,9 +170,7 @@ def enrichment_score_tensor(
         # missing hits
         no_tag_tensor = 1 - perm_tag_tensor
         # calculate numerator, denominator of each gene hits
-        rank_alpha = (
-            perm_tag_tensor * cor_mat[np.newaxis, :, np.newaxis]
-        ) ** weighted_score_type
+        rank_alpha = (perm_tag_tensor * cor_mat[np.newaxis, :, np.newaxis]) ** weighted_score_type
 
     elif cor_mat.ndim == 2:
         # GSEA
@@ -186,21 +182,15 @@ def enrichment_score_tensor(
         # genestes->M, genes->N, perm-> axis=2
         # don't use assume_unique=True in 2d array when use np.isin().
         # elements in gene_mat are not unique, or will cause unwanted results
-        tag_indicator = np.vstack(
-            [np.in1d(genes, gene_sets[key], assume_unique=True) for key in keys]
-        )
+        tag_indicator = np.vstack([np.in1d(genes, gene_sets[key], assume_unique=True) for key in keys])
         tag_indicator = tag_indicator.astype(int)
-        perm_tag_tensor = np.stack(
-            [tag.take(genes_ind).T for tag in tag_indicator], axis=0
-        )
+        perm_tag_tensor = np.stack([tag.take(genes_ind).T for tag in tag_indicator], axis=0)
         # index of hits
         hit_ind = [np.flatnonzero(tag).tolist() for tag in perm_tag_tensor[:, :, -1]]
         # nohits
         no_tag_tensor = 1 - perm_tag_tensor
         # calculate numerator, denominator of each gene hits
-        rank_alpha = (
-            perm_tag_tensor * cor_mat[np.newaxis, :, :]
-        ) ** weighted_score_type
+        rank_alpha = (perm_tag_tensor * cor_mat[np.newaxis, :, :]) ** weighted_score_type
     else:
         logging.error("Program die because of unsupported input")
         raise ValueError("Correlation vector or matrix (cor_mat) is not supported")
@@ -210,9 +200,7 @@ def enrichment_score_tensor(
     axis = 1
     P_GW_denominator = np.sum(rank_alpha, axis=axis, keepdims=True)
     P_NG_denominator = np.sum(no_tag_tensor, axis=axis, keepdims=True)
-    REStensor = np.cumsum(
-        rank_alpha / P_GW_denominator - no_tag_tensor / P_NG_denominator, axis=axis
-    )
+    REStensor = np.cumsum(rank_alpha / P_GW_denominator - no_tag_tensor / P_NG_denominator, axis=axis)
     # ssGSEA: scale es by gene numbers ?
     # https://gist.github.com/gaoce/39e0907146c752c127728ad74e123b33
     if scale:
@@ -400,9 +388,7 @@ def gsea_compute_tensor(
         cor_mat = []
         # split permutation array into smaller blocks to save memory
         temp_rnk = Parallel(n_jobs=processes)(
-            delayed(ranking_metric_tensor)(
-                data, method, b, pheno_pos, pheno_neg, classes, ascending, se, skip
-            )
+            delayed(ranking_metric_tensor)(data, method, b, pheno_pos, pheno_neg, classes, ascending, se, skip)
             for b, skip, se in zip(num_bases, skip_last, random_seeds)
         )
 
@@ -438,9 +424,7 @@ def gsea_compute_tensor(
     ## if permutation_type == "phenotype": n = 0
     ## NOTE for GSEA: cor_mat is 2d array, it won't permute again when call enrichment_score_tensor
     temp_esnu = Parallel(n_jobs=processes)(
-        delayed(enrichment_score_tensor)(
-            genes_mat, cor_mat, gmtrim, w, n, rs, single, scale
-        )
+        delayed(enrichment_score_tensor)(genes_mat, cor_mat, gmtrim, w, n, rs, single, scale)
         for gmtrim, rs in zip(gmt_block, random_seeds)
     )
 
@@ -550,9 +534,7 @@ def gsea_compute(
         # np.random.seed(seed)
         random_seeds = np.random.randint(np.iinfo(np.int32).max, size=len(subsets))
         temp_esnu = Parallel(n_jobs=processes)(
-            delayed(enrichment_score)(
-                gl, cor_vec, gmt.get(subset), w, n, rs, single, scale
-            )
+            delayed(enrichment_score)(gl, cor_vec, gmt.get(subset), w, n, rs, single, scale)
             for subset, rs in zip(subsets, random_seeds)
         )
         # esn is a list, don't need to use append method.

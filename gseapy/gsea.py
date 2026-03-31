@@ -169,9 +169,7 @@ class GSEA(GSEAbase):
         else:
             gene_idxs = df.index.to_list()
             # df_std = df.groupby(by=cls_dict, axis=1).std(numeric_only=True, ddof=0)
-            df_std = (
-                df.T.groupby(by=cls_dict)[gene_idxs].std(numeric_only=True, ddof=0).T
-            )
+            df_std = df.T.groupby(by=cls_dict)[gene_idxs].std(numeric_only=True, ddof=0).T
 
         # remove rows that std are zeros for sample size >= 3 in each group
         if all(map(lambda a: a[1] >= 3, Counter(cls_dict.values()).items())):
@@ -263,9 +261,7 @@ class GSEA(GSEAbase):
                 s2n = np.abs(s2n)
             ser = pd.Series(s2n, index=df_mean.index)
         elif method == "t_test":
-            ser = (df_mean[pos] - df_mean[neg]) / np.sqrt(
-                df_std[pos] ** 2 / n_pos + df_std[neg] ** 2 / n_neg
-            )
+            ser = (df_mean[pos] - df_mean[neg]) / np.sqrt(df_std[pos] ** 2 / n_pos + df_std[neg] ** 2 / n_neg)
         elif method == "ratio_of_classes":
             ser = df_mean[pos] / df_mean[neg]
         elif method == "diff_of_classes":
@@ -295,9 +291,7 @@ class GSEA(GSEAbase):
         for c, v in sorted(counter.items(), key=lambda item: item[1]):
             if v < 3:
                 if self.permutation_type == "phenotype":
-                    self._logger.warning(
-                        f"Number of {c}: {v}, it must be >= 3 for permutation type: phenotype !"
-                    )
+                    self._logger.warning(f"Number of {c}: {v}, it must be >= 3 for permutation type: phenotype !")
                     self._logger.warning("Permutation type change to gene_set.")
                     self.permutation_type == "gene_set"
             s.append(c)
@@ -357,9 +351,7 @@ class GSEA(GSEAbase):
         self._gene_isupper = self.check_uppercase(gene_list=dat.index.values)
         gmt = self.load_gmt(gene_list=dat.index.values, gmt=self.gene_sets)
         self.gmt = gmt
-        self._logger.info(
-            "%04d gene_sets used for further statistical testing....." % len(gmt)
-        )
+        self._logger.info("%04d gene_sets used for further statistical testing....." % len(gmt))
         self._logger.info("Start to run GSEA...Might take a while..................")
         # gene symbols
         gene_names = dat.index.to_list()
@@ -396,9 +388,7 @@ class GSEA(GSEAbase):
             indices[0] = idx
             gsum.indices = indices  # only accept [[]]
         else:  # phenotype permutation
-            group = list(
-                map(lambda x: True if x == self.pheno_pos else False, self.groups)
-            )
+            group = list(map(lambda x: True if x == self.pheno_pos else False, self.groups))
             gsum = gsea_rs(
                 dat.index.to_list(),
                 dat.values.tolist(),  # each row is gene values across samples
@@ -414,9 +404,7 @@ class GSEA(GSEAbase):
             )
 
         if self._outdir is not None:
-            self._logger.info(
-                "Start to generate GSEApy reports and figures............"
-            )
+            self._logger.info("Start to generate GSEApy reports and figures............")
         self.ranking = pd.Series(gsum.rankings[0], index=dat.index[gsum.indices[0]])
         # reorder datarame for heatmap
         # self._heatmat(df=dat.loc[dat2.index], classes=cls_vector)
@@ -425,9 +413,7 @@ class GSEA(GSEAbase):
         self.to_df(gsum.summaries, gmt, self.ranking)
         if self._outdir is not None:
             self.to_cls(outdir=self.outdir)
-            self.ranking.to_csv(
-                os.path.join(self.outdir, "gsea_data.rnk"), sep="\t", header=False
-            )
+            self.ranking.to_csv(os.path.join(self.outdir, "gsea_data.rnk"), sep="\t", header=False)
         self._logger.info("Congratulations. GSEApy ran successfully.................\n")
 
         return
@@ -497,14 +483,10 @@ class Prerank(GSEAbase):
         # if self.ascending is None and not rank_metric.iloc[:, -1].is_monotonic_decreasing:
         #     rank_metric.sort_values(by=rnk_cols[-1], ascending=False, inplace=True)
         if self.ascending is not None:
-            rank_metric.sort_values(
-                by=rnk_cols[-1], ascending=self.ascending, inplace=True
-            )
+            rank_metric.sort_values(by=rnk_cols[-1], ascending=self.ascending, inplace=True)
         # drop na values
         if rank_metric.isnull().any(axis=1).sum() > 0:
-            self._logger.warning(
-                "Input gene rankings contains NA values(gene name and ranking value), drop them all!"
-            )
+            self._logger.warning("Input gene rankings contains NA values(gene name and ranking value), drop them all!")
             # print out NAs
             NAs = rank_metric[rank_metric.isnull().any(axis=1)]
             self._logger.debug("NAs list:\n" + NAs.to_string())
@@ -525,11 +507,7 @@ class Prerank(GSEAbase):
         # check duplicate values and warning
         dups = rankser.duplicated().sum()
         if dups > 0:
-            msg = (
-                "Duplicated values found in preranked stats: {:.2%} of genes\n".format(
-                    dups / rankser.size
-                )
-            )
+            msg = "Duplicated values found in preranked stats: {:.2%} of genes\n".format(dups / rankser.size)
             msg += "The order of those genes will be arbitrary, which may produce unexpected results."
             self._logger.warning(msg)
 
@@ -578,9 +556,7 @@ class Prerank(GSEAbase):
         self._gene_isupper = self.check_uppercase(gene_list=dat2.index.values)
         gmt = self.load_gmt(gene_list=dat2.index.values, gmt=self.gene_sets)
         self.gmt = gmt
-        self._logger.info(
-            "%04d gene_sets used for further statistical testing....." % len(gmt)
-        )
+        self._logger.info("%04d gene_sets used for further statistical testing....." % len(gmt))
         self._logger.info("Start to run GSEA...Might take a while..................")
         gene_names = dat2.index.to_list()
         if (not self._gene_isupper) and self._gene_toupper:
@@ -610,9 +586,7 @@ class Prerank(GSEAbase):
             indices=gsum.indices if isinstance(dat2, pd.DataFrame) else None,
         )
         if self._outdir is not None:
-            self.ranking.to_csv(
-                os.path.join(self.outdir, "prerank_data.rnk"), sep="\t", header=False
-            )
+            self.ranking.to_csv(os.path.join(self.outdir, "prerank_data.rnk"), sep="\t", header=False)
 
         self._logger.info("Congratulations. GSEApy runs successfully................\n")
 
@@ -722,9 +696,7 @@ class Replot(GSEAbase):
             )[-1]
             # plotting
             term = enrich_term.replace("/", "_").replace(":", "_")
-            outfile = "{0}/{1}.{2}.{3}".format(
-                self.outdir, term, self.module, self.format
-            )
+            outfile = "{0}/{1}.{2}.{3}".format(self.outdir, term, self.module, self.format)
             gseaplot(
                 rank_metric=correl_vector,
                 term=enrich_term,
@@ -739,6 +711,4 @@ class Replot(GSEAbase):
                 ofname=outfile,
             )
 
-        self._logger.info(
-            "Congratulations! Your plots have been reproduced successfully!\n"
-        )
+        self._logger.info("Congratulations! Your plots have been reproduced successfully!\n")

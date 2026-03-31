@@ -25,7 +25,7 @@ jobs:
       run: uv run ruff format --check gseapy
 
     - name: Test with pytest
-      run: uv run pytest
+      run: uv run pytest tests
 
   build_wheels:
     name: Build wheels on ${{ matrix.os }}

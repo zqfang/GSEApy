@@ -92,9 +92,7 @@ class EnrichrAPI:
         }
         if organism not in self.db_map:
             valid_opts = ", ".join(sorted(set(self.db_map.keys())))
-            raise ValueError(
-                f"Invalid organism '{organism}'. Valid options are: {valid_opts}"
-            )
+            raise ValueError(f"Invalid organism '{organism}'. Valid options are: {valid_opts}")
 
         instance = self.db_map[organism]
 
@@ -154,9 +152,7 @@ class EnrichrAPI:
 
         return genesets_dict
 
-    def find_terms_by_gene(
-        self, gene: str, include_json: bool = True, include_setup: bool = True
-    ) -> Dict[str, Any]:
+    def find_terms_by_gene(self, gene: str, include_json: bool = True, include_setup: bool = True) -> Dict[str, Any]:
         """Finds terms that contain a given gene across Enrichr libraries."""
         url = f"{self.base_url}/genemap"
         params = {
@@ -172,9 +168,7 @@ class EnrichrAPI:
     # Standard Enrichment API
     # ------------------------------------------------------------------------
 
-    def add_list(
-        self, genes: List[str], description: str = "Gene list"
-    ) -> Dict[str, Any]:
+    def add_list(self, genes: List[str], description: str = "Gene list") -> Dict[str, Any]:
         """Analyzes a gene set and returns a userListId."""
         url = f"{self.base_url}/addList"
         payload = {
@@ -193,9 +187,7 @@ class EnrichrAPI:
         response.raise_for_status()
         return response.json()
 
-    def get_enrichment(
-        self, user_list_id: int, gene_set_library: Union[str, List[str]]
-    ) -> Dict[str, Any]:
+    def get_enrichment(self, user_list_id: int, gene_set_library: Union[str, List[str]]) -> Dict[str, Any]:
         """Gets enrichment results for one or more gene set libraries."""
         url = f"{self.base_url}/enrich"
         libraries = self._ensure_list(gene_set_library)
@@ -209,9 +201,7 @@ class EnrichrAPI:
 
         return all_results
 
-    def get_results_dataframe(
-        self, user_list_id: int, gene_set_library: Union[str, List[str]]
-    ) -> pd.DataFrame:
+    def get_results_dataframe(self, user_list_id: int, gene_set_library: Union[str, List[str]]) -> pd.DataFrame:
         """Fetches enrichment analysis results and returns a combined pandas DataFrame."""
         url = f"{self.base_url}/export"
         libraries = self._ensure_list(gene_set_library)
@@ -242,9 +232,7 @@ class EnrichrAPI:
     # Background Enrichment API (Speedrichr)
     # ------------------------------------------------------------------------
 
-    def add_list_speedrichr(
-        self, genes: List[str], description: str = "Gene list with background"
-    ) -> Dict[str, Any]:
+    def add_list_speedrichr(self, genes: List[str], description: str = "Gene list with background") -> Dict[str, Any]:
         """Uploads a gene set to Speedrichr for background analysis."""
         url = f"{self.speedrichr_url}/addList"
         payload = {
@@ -288,9 +276,7 @@ class EnrichrAPI:
             cols = ["Gene_set"] + cols  # reorder columns to put Gene_set first
             df = df[cols]
             all_results.append(df)
-        all_results = (
-            pd.concat(all_results, ignore_index=True) if all_results else pd.DataFrame()
-        )
+        all_results = pd.concat(all_results, ignore_index=True) if all_results else pd.DataFrame()
         return all_results
 
     def _parse_json_response(self, data: Dict, gene_set_key: str) -> pd.DataFrame:
@@ -398,9 +384,7 @@ class Enrichr(EnrichrAPI):
         """Initialize EnrichrAPI base with the selected organism, setting base_url."""
         if self.organism not in self.db_map:
             valid_opts = ", ".join(sorted(set(self.db_map.keys())))
-            raise ValueError(
-                f"Invalid organism '{self.organism}'. Valid options are: {valid_opts}"
-            )
+            raise ValueError(f"Invalid organism '{self.organism}'. Valid options are: {valid_opts}")
         instance = self.db_map[self.organism]
         # Set the dynamic base URL
         self.base_url = f"https://maayanlab.cloud/{instance}"
@@ -427,9 +411,7 @@ class Enrichr(EnrichrAPI):
                     gss.append(self._parse_gmt(g))
                     self._gs_name.append(os.path.basename(g))
                 else:
-                    self._logger.warning(
-                        f"User defined gene sets is not found: {g}, skip."
-                    )
+                    self._logger.warning(f"User defined gene sets is not found: {g}, skip.")
             else:
                 gss.append(g)
                 _name = g
@@ -453,15 +435,11 @@ class Enrichr(EnrichrAPI):
         elif isinstance(gene_sets, dict):
             gss = self._gs2dict([gene_sets.copy()])
         else:
-            raise EnrichrValidationError(
-                "Error parsing enrichr libraries, please provided corrected one"
-            )
+            raise EnrichrValidationError("Error parsing enrichr libraries, please provided corrected one")
 
         # now, gss[LIST] contains dict or strings.
         if len(gss) < 1:
-            raise EnrichrValidationError(
-                "No GeneSets are valid !!! Check your gene_sets input."
-            )
+            raise EnrichrValidationError("No GeneSets are valid !!! Check your gene_sets input.")
         gss_exist = []
         gss_name = []
         enrichr_library = []
@@ -484,9 +462,7 @@ class Enrichr(EnrichrAPI):
 
         self._gs_name = gss_name  # update names
         if len(gss_exist) < 1:
-            raise EnrichrValidationError(
-                "No GeneSets are valid !!! Check your gene_sets input."
-            )
+            raise EnrichrValidationError("No GeneSets are valid !!! Check your gene_sets input.")
         return gss_exist
 
     def parse_genelists(self) -> str:
@@ -496,16 +472,10 @@ class Enrichr(EnrichrAPI):
         elif isinstance(self.gene_list, pd.DataFrame):
             # input type is bed file
             if self.gene_list.shape[1] >= 3:
-                genes = (
-                    self.gene_list.iloc[:, :3]
-                    .apply(lambda x: "\t".join([str(i) for i in x]), axis=1)
-                    .to_list()
-                )
+                genes = self.gene_list.iloc[:, :3].apply(lambda x: "\t".join([str(i) for i in x]), axis=1).to_list()
             # input type with weight values
             elif self.gene_list.shape[1] == 2:
-                genes = self.gene_list.apply(
-                    lambda x: ",".join([str(i) for i in x]), axis=1
-                ).to_list()
+                genes = self.gene_list.apply(lambda x: ",".join([str(i) for i in x]), axis=1).to_list()
             else:
                 genes = self.gene_list.squeeze().to_list()
         elif isinstance(self.gene_list, pd.Series):
@@ -571,9 +541,7 @@ class Enrichr(EnrichrAPI):
             if not response.ok:
                 self._logger.debug(f"URL: {url}")
                 self._logger.debug(f"Payload: {payload}")
-                raise EnrichrAPIError(
-                    f"Error sending gene list, status code: {response.status_code}"
-                )
+                raise EnrichrAPIError(f"Error sending gene list, status code: {response.status_code}")
             job_id = json.loads(response.text)
             # response.text format:
             # {"userListId": 667152768, "shortId": "27c3f180"}
@@ -600,14 +568,10 @@ class Enrichr(EnrichrAPI):
 
         bg_id = self.add_background(background)
 
-        res = self.get_background_enrichment(
-            job_id["userListId"], bg_id["backgroundid"], gene_set_libraries
-        )
+        res = self.get_background_enrichment(job_id["userListId"], bg_id["backgroundid"], gene_set_libraries)
         return (job_id["shortId"], res)
 
-    def get_results(
-        self, gene_list: str, gene_set_libraries: List[str]
-    ) -> Tuple[str, pd.DataFrame]:
+    def get_results(self, gene_list: str, gene_set_libraries: List[str]) -> Tuple[str, pd.DataFrame]:
         """Get enrichment results from Enrichr API."""
         payload = {"list": (None, gene_list), "description": (None, self.descriptions)}
         job_id = self.send_genes(payload, f"{self.base_url}/addList")
@@ -624,9 +588,7 @@ class Enrichr(EnrichrAPI):
             return set(bg)
 
         # package included data
-        db_file = os.path.join(
-            DEFAULT_CACHE_PATH, f"{self.background}.background.genes.txt"
-        )
+        db_file = os.path.join(DEFAULT_CACHE_PATH, f"{self.background}.background.genes.txt")
         if os.path.exists(db_file):
             df = pd.read_csv(db_file, sep="\t")
         else:
@@ -645,9 +607,7 @@ class Enrichr(EnrichrAPI):
                     f"Failed to download background gene set '{self.background}' from BioMart. "
                     "Check your internet connection or try again later."
                 )
-        self._logger.info(
-            f"Using all annotated genes with GO_ID as background: {self.background}"
-        )
+        self._logger.info(f"Using all annotated genes with GO_ID as background: {self.background}")
         # input id type: entrez or gene_name
         if self._isezid:
             df.dropna(subset=["entrezgene_id"], inplace=True)
@@ -658,9 +618,7 @@ class Enrichr(EnrichrAPI):
 
         return set(bg)
 
-    def filter_gmt(
-        self, gmt: Dict[str, List[str]], background: Set[str]
-    ) -> Dict[str, List[str]]:
+    def filter_gmt(self, gmt: Dict[str, List[str]], background: Set[str]) -> Dict[str, List[str]]:
         """Filter GMT to only include genes that exist in background.
 
         This substantially affects the significance of the hypergeometric test.
@@ -684,9 +642,7 @@ class Enrichr(EnrichrAPI):
                 gmt_filtered[term] = filtered_genes
         return gmt_filtered
 
-    def parse_background(
-        self, gmt: Optional[Dict[str, List[str]]] = None
-    ) -> Union[Set[str], int]:
+    def parse_background(self, gmt: Optional[Dict[str, List[str]]] = None) -> Union[Set[str], int]:
         """Parse and set background genes."""
         self._bg = set()
         if self.background is None:
@@ -695,9 +651,7 @@ class Enrichr(EnrichrAPI):
                 bg = set()
                 for _, genes in gmt.items():
                     bg = bg.union(set(genes))
-                self._logger.info(
-                    f"  Background is not set! Use all {len(bg)} genes in {self._gs}."
-                )
+                self._logger.info(f"  Background is not set! Use all {len(bg)} genes in {self._gs}.")
                 self._bg = bg
         elif np.isscalar(self.background):
             if isinstance(self.background, int) or self.background.isdigit():
@@ -740,9 +694,7 @@ class Enrichr(EnrichrAPI):
         if all(ups) and not self._gene_isupper:
             _gls = [str(x).upper() for x in self._gls]
             _gene_toupper = True
-            self._logger.info(
-                "  Genes in GMT file are all in upper case, convert query to upper case."
-            )
+            self._logger.info("  Genes in GMT file are all in upper case, convert query to upper case.")
 
         bg = self.parse_background(gmt)
         if isinstance(bg, set) and not self._gene_isupper and _gene_toupper:
@@ -752,9 +704,7 @@ class Enrichr(EnrichrAPI):
         hgtest = list(calc_pvalues(query=_gls, gene_sets=gmt, background=bg))
         if len(hgtest) > 0:
             terms, pvals, oddr, olsz, gsetsz, genes = hgtest
-            fdrs, _ = multiple_testing_correction(
-                ps=pvals, alpha=self.cutoff, method="benjamini-hochberg"
-            )
+            fdrs, _ = multiple_testing_correction(ps=pvals, alpha=self.cutoff, method="benjamini-hochberg")
             # Build result DataFrame (dict maintains insertion order in Python 3.7+)
             res = pd.DataFrame(
                 {
@@ -771,9 +721,7 @@ class Enrichr(EnrichrAPI):
             return res
         return None
 
-    def enrich_online(
-        self, genes_list: str, geneset_libraries: List[str]
-    ) -> Optional[pd.DataFrame]:
+    def enrich_online(self, genes_list: str, geneset_libraries: List[str]) -> Optional[pd.DataFrame]:
         """Perform online enrichment analysis using Enrichr API."""
 
         # Online mode - API enrichment
@@ -781,9 +729,7 @@ class Enrichr(EnrichrAPI):
         bg = self.parse_background()
         # Whether user input background
         if isinstance(bg, set) and len(bg) > 0:
-            _shortID, res = self.get_results_with_background(
-                genes_list, list(bg), geneset_libraries
-            )
+            _shortID, res = self.get_results_with_background(genes_list, list(bg), geneset_libraries)
         else:
             _shortID, res = self.get_results(genes_list, geneset_libraries)
         return res
@@ -794,9 +740,7 @@ class Enrichr(EnrichrAPI):
             return
 
         outfile = f"{self.outdir}/{name}.{self.organism}.{self.module}.reports.txt"
-        res.to_csv(
-            outfile, index=False, encoding="utf-8", float_format="%.6e", sep="\t"
-        )
+        res.to_csv(outfile, index=False, encoding="utf-8", float_format="%.6e", sep="\t")
         self._logger.info(f"Save enrichment results for {name}")
 
         # Generate plots
@@ -828,9 +772,7 @@ class Enrichr(EnrichrAPI):
                 f"Hint: Current organism = {self.organism}, is this correct?\n"
                 "Hint: use get_library_name() to view full list of supported names."
             )
-            raise LookupError(
-                "Not validated Enrichr library! Please provide correct organism and library name!"
-            )
+            raise LookupError("Not validated Enrichr library! Please provide correct organism and library name!")
 
         return genes_list, gss
 
@@ -844,9 +786,7 @@ class Enrichr(EnrichrAPI):
         online_genesets = [g for g in gss if isinstance(g, str)]
         # run online enrichment for all string libraries together to minimize API calls
         if online_genesets:
-            self._logger.info(
-                f"Online enrichment analysis with libraries: {', '.join(online_genesets)}"
-            )
+            self._logger.info(f"Online enrichment analysis with libraries: {', '.join(online_genesets)}")
             res_online = self.enrich_online(genes_list, online_genesets)
             if res_online is not None:
                 self.results.append(res_online)
@@ -858,9 +798,7 @@ class Enrichr(EnrichrAPI):
                 self._logger.info(f"Off-line enrichment analysis with library: {name}")
                 if self._isezid:
                     geneset = {k: list(map(int, v)) for k, v in geneset.items()}
-                self._gs = (
-                    name  # assign the name of local gene set for background parsing
-                )
+                self._gs = name  # assign the name of local gene set for background parsing
                 res_local = self.enrich_local(geneset)
                 if res_local is not None:
                     self.results.append(res_local)
