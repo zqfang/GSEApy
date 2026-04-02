@@ -862,7 +862,13 @@ impl GSEAResult {
         self.summaries = _all;
     }
 }
-/// prerank_multilevel: add the fgsea multilevel p-value method here
+/// Extension of `GSEAResult` providing the fgsea multilevel p-value variant.
+///
+/// The classical `prerank()` method uses gene permutation to estimate p-values,
+/// producing a minimum p-value of `1/nperm`. `prerank_multilevel()` uses the
+/// adaptive multilevel splitting + MCMC algorithm to compute arbitrarily precise
+/// p-values with quantified error bounds (`log2err`), while keeping the existing
+/// GSEA_R-style NES and FDR computed from the permutation null.
 impl GSEAResult {
     /// Preranked GSEA using the fgsea multilevel algorithm for p-value computation.
     ///
@@ -934,7 +940,9 @@ impl GSEAResult {
             let esnull: Vec<f64> = if let Some(ref gperm) = gperm {
                 gperm
                     .par_iter()
-                    .skip(1) // index 0 is the original (observed) order
+                    // Index 0 in gperm is the original (unshuffled) gene order;
+                    // indices 1..nperm are shuffled permutations used as the null.
+                    .skip(1)
                     .map(|de| {
                         let tag_new: Vec<f64> = de.isin(&gidx);
                         es.fast_random_walk(&weighted_metric, &tag_new)

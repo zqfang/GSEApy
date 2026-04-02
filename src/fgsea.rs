@@ -159,6 +159,8 @@ pub fn calc_es_int(ranks: &[i64], p: &[usize], ns: i64) -> ScoreT {
 
 /// Trigamma function ψ₁(x) — second derivative of ln Γ(x).
 /// Computed by recurrence (shift x ≥ 8) + asymptotic expansion.
+/// The threshold 8.0 is chosen so that the asymptotic series converges to
+/// machine precision with 6 Bernoulli terms (error < 1e-14 for x ≥ 8).
 fn trigamma(mut x: f64) -> f64 {
     let mut result = 0.0;
     while x < 8.0 {
@@ -195,6 +197,7 @@ pub fn get_var_per_level(k: usize, n: usize) -> f64 {
 
 #[inline]
 fn sample_range(rng: &mut SmallRng, from: usize, to: usize) -> usize {
+    debug_assert!(from <= to, "sample_range: from ({from}) > to ({to})");
     if from == to {
         return from;
     }
@@ -251,6 +254,9 @@ pub fn combination(a: usize, b: usize, k: usize, rng: &mut SmallRng) -> Vec<usiz
 
 /// Scale a non-negative float metric to i64 integers.
 /// After scaling, sum(result) ≤ MAX_NS = 1 << 30.
+/// Input values should be non-negative (e.g., |x|^weight weighted metrics).
+/// Very large float inputs are handled safely: the scale factor is floored to an
+/// integer (≥ 1) so individual elements do not overflow i64.
 pub fn scale_ranks(ranks: &[f64]) -> Vec<i64> {
     let cur_ns: f64 = ranks.iter().sum();
     if cur_ns == 0.0 {
@@ -885,7 +891,7 @@ pub fn compute_pvalue_multilevel(
     seed: u64,
     eps: f64,
 ) -> (f64, f64) {
-    if observed_es == 0.0 || pathway_size == 0 {
+    if observed_es.abs() < 1e-15 || pathway_size == 0 {
         return (1.0, f64::NAN);
     }
     if pathway_size >= int_ranks_pos.len() {
