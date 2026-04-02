@@ -234,6 +234,8 @@ fn gsva_rs(
 ///
 /// Computes enrichment scores for each gene set and uses adaptive multilevel
 /// splitting + MCMC to produce precise p-values with quantified error bounds.
+/// FDR is computed with Benjamini-Hochberg (BH) correction on the multilevel
+/// p-values, exactly as the fgsea R package does. No permutation null is used.
 ///
 /// Arguments:
 /// - genes: gene names in rank-descending order
@@ -242,13 +244,12 @@ fn gsva_rs(
 /// - weight: GSEA weight parameter (default 1.0)
 /// - min_size: minimum gene set size to test
 /// - max_size: maximum gene set size to test
-/// - nperm: number of permutations for NES/FDR normalization (0 to skip)
-/// - sample_size: MCMC sample size per level (default 101)
+/// - sample_size: MCMC sample size per level (default 101, fgsea default)
 /// - eps: convergence threshold for multilevel algorithm (default 1e-50)
 /// - threads: number of parallel threads
 /// - seed: random seed
 #[pyfunction]
-#[pyo3(signature = (genes, metric, gene_sets, weight=1.0, min_size=15, max_size=500, nperm=1000, sample_size=101, eps=1e-50, threads=4, seed=0))]
+#[pyo3(signature = (genes, metric, gene_sets, weight=1.0, min_size=15, max_size=500, sample_size=101, eps=1e-50, threads=4, seed=0))]
 fn prerank_fgsea_rs(
     genes: Vec<String>,
     metric: Vec<f64>,
@@ -256,7 +257,6 @@ fn prerank_fgsea_rs(
     weight: f64,
     min_size: usize,
     max_size: usize,
-    nperm: usize,
     sample_size: usize,
     eps: f64,
     threads: usize,
@@ -267,7 +267,8 @@ fn prerank_fgsea_rs(
     for (k, v) in gene_sets.iter() {
         gmt.insert(k.as_str(), v.as_slice());
     }
-    let mut gsea = GSEAResult::new(weight, max_size, min_size, nperm, seed);
+    // nperm is not used by prerank_multilevel; pass 0
+    let mut gsea = GSEAResult::new(weight, max_size, min_size, 0, seed);
     gsea.prerank_multilevel(&genes, &metric, &gmt, sample_size, eps);
     Ok(gsea)
 }

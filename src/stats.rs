@@ -864,21 +864,63 @@ impl GSEAResult {
 }
 /// Extension of `GSEAResult` providing the fgsea multilevel p-value variant.
 ///
-/// The classical `prerank()` method uses gene permutation to estimate p-values,
-/// producing a minimum p-value of `1/nperm`. `prerank_multilevel()` uses the
-/// adaptive multilevel splitting + MCMC algorithm to compute arbitrarily precise
-/// p-values with quantified error bounds (`log2err`), while keeping the existing
-/// GSEA_R-style NES and FDR computed from the permutation null.
+/// Unlike the classical `prerank()` method, `prerank_multilevel()` does **not** use
+/// a permutation null distribution. Instead:
+/// - p-values are computed with the adaptive multilevel splitting + MCMC algorithm,
+///   giving arbitrarily precise values with a quantified error bound (`log2err`).
+/// - FDR is computed via Benjamini-Hochberg (BH) correction on the multilevel p-values,
+///   matching the fgsea package convention.
+/// - NES is set equal to ES (no null-distribution normalization).
+/// - FWER is not applicable and is set to 1.0.
 impl GSEAResult {
+    /// Benjamini-Hochberg FDR correction.
+    ///
+    /// `pvals`: p-values in arbitrary order (each must be in `[0, 1]`).
+    /// Returns a `Vec<f64>` of BH-adjusted q-values in the **same order** as the
+    /// input, with each q-value guaranteed to be in `[0, 1]` and monotone with
+    /// respect to the input p-value ordering (smaller p ⇒ smaller or equal q).
+    fn bh_correction(pvals: &[f64]) -> Vec<f64> {
+        let m = pvals.len();
+        if m == 0 {
+            return Vec::new();
+        }
+        // Build (pval, original_index) pairs sorted ascending by p-value
+        let mut order: Vec<usize> = (0..m).collect();
+        order.sort_unstable_by(|&a, &b| {
+            pvals[a].partial_cmp(&pvals[b]).unwrap_or(std::cmp::Ordering::Equal)
+        });
+
+        // BH adjustment: q[rank] = p[rank] * m / rank
+        // Enforce monotonicity by scanning from the largest rank downward and
+        // keeping track of the running minimum.  All input p-values are in
+        // [0, 1] so `p * m / rank` is also in [0, m] — the min() pass keeps
+        // q within [0, 1].
+        let mut adjusted = vec![1.0f64; m];
+        let mut min_so_far = 1.0f64;
+        for (rank_minus1, &orig_idx) in order.iter().enumerate().rev() {
+            let rank = (rank_minus1 + 1) as f64;
+            // p * m / rank is non-negative; cap at 1.0 to stay in [0,1]
+            let q = (pvals[orig_idx] * m as f64 / rank).min(1.0);
+            min_so_far = min_so_far.min(q);
+            adjusted[orig_idx] = min_so_far;
+        }
+        adjusted
+    }
+
     /// Preranked GSEA using the fgsea multilevel algorithm for p-value computation.
     ///
-    /// This method computes enrichment scores and uses the adaptive multilevel
-    /// splitting + MCMC approach to produce arbitrarily precise p-values with
-    /// a quantified error bound (`log2err`).
+    /// This method is a port of `fgseaMultilevel` from the fgsea R/C++ package.
+    /// It uses adaptive multilevel splitting + MCMC to compute arbitrarily precise
+    /// p-values with a quantified error bound (`log2err`), and applies
+    /// Benjamini-Hochberg (BH) correction to obtain FDR q-values — exactly as
+    /// the fgsea package does.
     ///
-    /// NES, FDR, and FWERP are still computed from a classical gene permutation
-    /// null distribution (controlled by `self.nperm`), consistent with the
-    /// existing GSEA_R-style output.
+    /// Unlike `prerank()`, no permutation null is used; consequently:
+    /// - `pval`: multilevel p-value (can be far below `1/nperm`)
+    /// - `fdr`: BH-corrected q-value over all tested gene sets
+    /// - `log2err`: uncertainty of the p-value in bits (NaN at extreme boundary)
+    /// - `nes`: equal to `es` (no null-distribution normalization)
+    /// - `fwerp`: set to 1.0 (not applicable without permutation null)
     ///
     /// Parameters
     /// ----------
@@ -904,16 +946,8 @@ impl GSEAResult {
         // Build the gene index structure for ES computation.
         let es = EnrichmentScore::new(genes, 0, self.seed, false, false);
 
-        // Run gene permutations for NES / FDR / FWER normalization (if nperm > 0).
-        let gperm = if self.nperm > 0 {
-            let mut es_perm =
-                EnrichmentScore::new(genes, self.nperm, self.seed, false, false);
-            Some(es_perm.gene_permutation())
-        } else {
-            None
-        };
-
-        let mut summ = Vec::<GSEASummary>::new();
+        // Collect per-gene-set results first; BH correction requires all p-values.
+        let mut summ: Vec<GSEASummary> = Vec::new();
 
         for (&term, &gset) in gmt.iter() {
             let gtag = es.gene.isin(gset);
@@ -936,50 +970,28 @@ impl GSEAResult {
                 eps,
             );
 
-            // Build null distribution from gene permutations for NES / FDR / FWER
-            let esnull: Vec<f64> = if let Some(ref gperm) = gperm {
-                gperm
-                    .par_iter()
-                    // Index 0 in gperm is the original (unshuffled) gene order;
-                    // indices 1..nperm are shuffled permutations used as the null.
-                    .skip(1)
-                    .map(|de| {
-                        let tag_new: Vec<f64> = de.isin(&gidx);
-                        es.fast_random_walk(&weighted_metric, &tag_new)
-                    })
-                    .collect()
-            } else {
-                Vec::new()
-            };
-
             summ.push(GSEASummary {
                 term: term.to_string(),
                 es: observed_es,
+                // NES = ES (no null-distribution normalization in the multilevel approach)
+                nes: observed_es,
+                pval: ml_pval,
+                log2err: ml_log2err,
+                // fwer is not applicable without a permutation null
+                fwerp: 1.0,
                 run_es,
                 hits: gidx,
-                pval: ml_pval,   // set multilevel p-value; stat() will overwrite this
-                log2err: ml_log2err,
-                esnull,
+                // no permutation null — esnull is empty
+                esnull: Vec::new(),
                 ..Default::default()
             });
         }
 
-        // Compute NES, FDR, FWER from the permutation null distribution.
-        // stat() also sets pval from permutation — we restore the multilevel values below.
-        if self.nperm > 0 {
-            // Save multilevel pvals before stat() overwrites them
-            let ml_pvals: Vec<(f64, f64)> = summ
-                .iter()
-                .map(|s| (s.pval, s.log2err))
-                .collect();
-
-            self.stat(&mut summ);
-
-            // Restore multilevel pval and log2err
-            for (i, (ml_p, ml_err)) in ml_pvals.iter().enumerate() {
-                summ[i].pval = *ml_p;
-                summ[i].log2err = *ml_err;
-            }
+        // Apply Benjamini-Hochberg correction across all gene sets for FDR.
+        let pvals: Vec<f64> = summ.iter().map(|s| s.pval).collect();
+        let fdrs = Self::bh_correction(&pvals);
+        for (s, fdr) in summ.iter_mut().zip(fdrs.iter()) {
+            s.fdr = *fdr;
         }
 
         self.summaries = summ;
@@ -1169,6 +1181,82 @@ mod tests {
                 "term: {:?}, es: {:.7?}, nes: {:.7?}, pval: {:.2e}, fdr: {:.2e}",
                 g.term, g.es, g.nes, g.pval, g.fdr
             );
+        });
+    }
+
+    #[test]
+    fn test_bh_correction() {
+        // Floating-point tolerance used across the BH tests
+        const EPSILON: f64 = 1e-12;
+        // Known BH correction example
+        // p-values from Benjamini & Hochberg 1995 example
+        let pvals = vec![0.001, 0.008, 0.039, 0.041, 0.042, 0.06, 0.074, 0.205, 0.212, 0.216];
+        let adj = GSEAResult::bh_correction(&pvals);
+        // All adjusted values should be ≤ 1.0 and ≥ original p-values
+        for (p, q) in pvals.iter().zip(adj.iter()) {
+            assert!(*q >= *p - EPSILON, "BH q {q} < p {p}");
+            assert!(*q <= 1.0 + EPSILON, "BH q {q} > 1");
+        }
+        // Smallest p-value should produce the smallest q-value
+        let min_q = adj.iter().cloned().fold(f64::MAX, f64::min);
+        assert!(adj[0] == min_q, "smallest p should have smallest q");
+        // Monotonicity: q-values sorted in the same rank order as p-values (ascending p → ascending q)
+        let mut order: Vec<usize> = (0..pvals.len()).collect();
+        order.sort_unstable_by(|&a, &b| pvals[a].partial_cmp(&pvals[b]).unwrap());
+        for w in order.windows(2) {
+            assert!(adj[w[0]] <= adj[w[1]] + EPSILON,
+                "BH monotonicity violated: adj[{}]={} > adj[{}]={}", w[0], adj[w[0]], w[1], adj[w[1]]);
+        }
+    }
+
+    #[test]
+    fn test_prerank_multilevel() {
+        const EPSILON: f64 = 1e-12;
+        let cwd = std::env::current_dir().unwrap();
+        let rnk_path = cwd.join("tests/data/mds.2k.rnk");
+        let gmt_path = cwd.join("tests/data/c2.cp.kegg.v7.5.1.symbols.gmt");
+        let mut rnk = FileReader::new();
+        let _ = rnk.read_csv(rnk_path.to_str().unwrap(), b'\t', false, Some(b'#'));
+        let mut gmt = FileReader::new();
+        let _ = gmt.read_table(gmt_path.to_str().unwrap(), '\t', false);
+        let weight = 1.0;
+        let mut gene: Vec<String> = Vec::new();
+        let mut gene_metric: Vec<f64> = Vec::new();
+        for r in rnk.record.iter() {
+            gene.push(r[0].clone());
+            gene_metric.push(r[1].parse::<f64>().unwrap());
+        }
+        let mut gmt2 = HashMap::<&str, &[String]>::new();
+        gmt.record.iter().for_each(|r| {
+            gmt2.insert(r[0].as_str(), &r[2..]);
+        });
+        gene_metric.iter_mut().for_each(|x| *x = x.abs().powf(weight));
+        let (gidx, metric) = gene_metric.as_slice().argsort(false);
+        gene = gidx.iter().map(|&i| gene[i].clone()).collect();
+
+        let mut gsea = GSEAResult::new(weight, 500, 5, 0, 123);
+        gsea.prerank_multilevel(&gene, &metric, &gmt2, 51, 1e-10);
+
+        // Basic sanity checks
+        assert!(!gsea.summaries.is_empty(), "expected some gene sets");
+        for s in &gsea.summaries {
+            assert!(s.pval >= 0.0 && s.pval <= 1.0, "pval out of [0,1]: {}", s.pval);
+            assert!(s.fdr >= 0.0 && s.fdr <= 1.0, "fdr out of [0,1]: {}", s.fdr);
+            // NES == ES (no permutation null normalization)
+            assert!((s.nes - s.es).abs() < EPSILON, "nes should equal es");
+            // esnull should be empty (no permutation null)
+            assert!(s.esnull.is_empty(), "esnull should be empty");
+            // fwerp should be 1.0
+            assert!((s.fwerp - 1.0).abs() < EPSILON, "fwerp should be 1.0");
+        }
+        // BH property: FDR >= p-value for each gene set
+        for s in &gsea.summaries {
+            assert!(s.fdr >= s.pval - EPSILON, "fdr {:.2e} < pval {:.2e}", s.fdr, s.pval);
+        }
+        println!("prerank_multilevel: {} gene sets", gsea.summaries.len());
+        gsea.summaries.iter().take(5).for_each(|g| {
+            println!("  term={}, es={:.4}, pval={:.2e}, fdr={:.2e}, log2err={:.2}",
+                g.term, g.es, g.pval, g.fdr, g.log2err);
         });
     }
 }
