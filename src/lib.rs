@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::env;
 // import own modules
 mod algorithm;
+mod fgsea;
 mod gsva;
 mod stats;
 mod utils;
@@ -229,15 +230,58 @@ fn gsva_rs(
     Ok(gs)
 }
 
+/// Preranked GSEA using the fgsea multilevel p-value algorithm.
+///
+/// Computes enrichment scores for each gene set and uses adaptive multilevel
+/// splitting + MCMC to produce precise p-values with quantified error bounds.
+///
+/// Arguments:
+/// - genes: gene names in rank-descending order
+/// - metric: gene-level ranking metric (same order as genes)
+/// - gene_sets: a hashmap (dict) of GMT gene sets
+/// - weight: GSEA weight parameter (default 1.0)
+/// - min_size: minimum gene set size to test
+/// - max_size: maximum gene set size to test
+/// - nperm: number of permutations for NES/FDR normalization (0 to skip)
+/// - sample_size: MCMC sample size per level (default 101)
+/// - eps: convergence threshold for multilevel algorithm (default 1e-50)
+/// - threads: number of parallel threads
+/// - seed: random seed
+#[pyfunction]
+#[pyo3(signature = (genes, metric, gene_sets, weight=1.0, min_size=15, max_size=500, nperm=1000, sample_size=101, eps=1e-50, threads=4, seed=0))]
+fn prerank_fgsea_rs(
+    genes: Vec<String>,
+    metric: Vec<f64>,
+    gene_sets: HashMap<String, Vec<String>>,
+    weight: f64,
+    min_size: usize,
+    max_size: usize,
+    nperm: usize,
+    sample_size: usize,
+    eps: f64,
+    threads: usize,
+    seed: u64,
+) -> PyResult<GSEAResult> {
+    env::set_var("RAYON_NUM_THREADS", threads.to_string());
+    let mut gmt = HashMap::<&str, &[String]>::new();
+    for (k, v) in gene_sets.iter() {
+        gmt.insert(k.as_str(), v.as_slice());
+    }
+    let mut gsea = GSEAResult::new(weight, max_size, min_size, nperm, seed);
+    gsea.prerank_multilevel(&genes, &metric, &gmt, sample_size, eps);
+    Ok(gsea)
+}
+
 /// Python module for GSEA (Gene Set Enrichment Analysis) and ssGSEA
 /// 
-/// This module provides four functions:
+/// This module provides five functions:
 /// 
 /// - `gsea_rs`: performs GSEA
 /// - `prerank_rs`: performs GSEA preranking
 /// - `prerank2d_rs`: performs GSEA preranking with multiple input datasets
 /// - `ssgsea_rs`: performs ssGSEA
 /// - `gsva_rs`: performs GSVA
+/// - `prerank_fgsea_rs`: performs preranked GSEA with the fgsea multilevel p-value algorithm
 #[pymodule]
 fn gse(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     // m.add_class::<GSEAResult>()?;
@@ -250,5 +294,6 @@ fn gse(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(prerank2d_rs, m)?)?;
     m.add_function(wrap_pyfunction!(ssgsea_rs, m)?)?;
     m.add_function(wrap_pyfunction!(gsva_rs, m)?)?;
+    m.add_function(wrap_pyfunction!(prerank_fgsea_rs, m)?)?;
     Ok(())
 }

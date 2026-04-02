@@ -1,6 +1,7 @@
 #![allow(dead_code, unused)]
 
 use crate::algorithm::{EnrichmentScore, EnrichmentScoreTrait};
+use crate::fgsea::{compute_pvalue_multilevel, scale_ranks};
 use crate::utils::{CorrelType, DynamicEnum, Metric, Statistic};
 use itertools::{izip, Itertools};
 use pyo3::prelude::*;
@@ -24,6 +25,8 @@ pub struct GSEASummary {
     pub fwerp: f64, // FWER Pvalue
     #[pyo3(get, set)]
     pub fdr: f64, // FDR q value. adjusted FDR
+    #[pyo3(get, set)]
+    pub log2err: f64, // log2 error bound for multilevel p-value (NaN when not applicable)
     #[pyo3(get, set)]
     pub run_es: Vec<f64>,
     #[pyo3(get, set)]
@@ -55,6 +58,7 @@ impl GSEASummary {
             pval: pval,
             fwerp: fwerpval,
             fdr: fdr,
+            log2err: f64::NAN,
             run_es: run_es.to_vec(),
             hits: hits.to_vec(),
             esnull: esnull.to_vec(),
@@ -74,6 +78,7 @@ impl GSEASummary {
             pval: 1.0,
             fwerp: 1.0,
             fdr: 1.0,
+            log2err: f64::NAN,
             run_es: Vec::<f64>::new(),
             hits: Vec::<usize>::new(),
             esnull: Vec::<f64>::new(),
@@ -855,6 +860,123 @@ impl GSEAResult {
             });
 
         self.summaries = _all;
+    }
+}
+/// prerank_multilevel: add the fgsea multilevel p-value method here
+impl GSEAResult {
+    /// Preranked GSEA using the fgsea multilevel algorithm for p-value computation.
+    ///
+    /// This method computes enrichment scores and uses the adaptive multilevel
+    /// splitting + MCMC approach to produce arbitrarily precise p-values with
+    /// a quantified error bound (`log2err`).
+    ///
+    /// NES, FDR, and FWERP are still computed from a classical gene permutation
+    /// null distribution (controlled by `self.nperm`), consistent with the
+    /// existing GSEA_R-style output.
+    ///
+    /// Parameters
+    /// ----------
+    /// - `genes`: gene names in rank-descending order.
+    /// - `metric`: gene-level ranking metric (descending, all values real).
+    /// - `gmt`: gene set dictionary.
+    /// - `sample_size`: MCMC sample size per level (default 101 in fgsea).
+    /// - `eps`: convergence threshold for the multilevel algorithm (e.g. 1e-50).
+    pub fn prerank_multilevel(
+        &mut self,
+        genes: &[String],
+        metric: &[f64],
+        gmt: &HashMap<&str, &[String]>,
+        sample_size: usize,
+        eps: f64,
+    ) {
+        // Build integer-scaled ranks for the multilevel algorithm.
+        // We use |x|^weight (same weighting as prerank) then scale to integers.
+        let weighted_metric: Vec<f64> =
+            metric.iter().map(|x| x.abs().powf(self.weight)).collect();
+        let int_ranks = scale_ranks(&weighted_metric);
+
+        // Build the gene index structure for ES computation.
+        let es = EnrichmentScore::new(genes, 0, self.seed, false, false);
+
+        // Run gene permutations for NES / FDR / FWER normalization (if nperm > 0).
+        let gperm = if self.nperm > 0 {
+            let mut es_perm =
+                EnrichmentScore::new(genes, self.nperm, self.seed, false, false);
+            Some(es_perm.gene_permutation())
+        } else {
+            None
+        };
+
+        let mut summ = Vec::<GSEASummary>::new();
+
+        for (&term, &gset) in gmt.iter() {
+            let gtag = es.gene.isin(gset);
+            let gidx = es.hit_index(&gtag);
+            if gidx.len() > self.max_size || gidx.len() < self.min_size {
+                continue;
+            }
+
+            // Compute observed ES (float domain, signed)
+            let run_es = es.running_enrichment_score(&weighted_metric, &gtag);
+            let observed_es = es.fast_random_walk(&weighted_metric, &gtag);
+
+            // Compute multilevel p-value and log2 error bound
+            let (ml_pval, ml_log2err) = compute_pvalue_multilevel(
+                &int_ranks,
+                gidx.len(),
+                observed_es,
+                sample_size,
+                self.seed,
+                eps,
+            );
+
+            // Build null distribution from gene permutations for NES / FDR / FWER
+            let esnull: Vec<f64> = if let Some(ref gperm) = gperm {
+                gperm
+                    .par_iter()
+                    .skip(1) // index 0 is the original (observed) order
+                    .map(|de| {
+                        let tag_new: Vec<f64> = de.isin(&gidx);
+                        es.fast_random_walk(&weighted_metric, &tag_new)
+                    })
+                    .collect()
+            } else {
+                Vec::new()
+            };
+
+            summ.push(GSEASummary {
+                term: term.to_string(),
+                es: observed_es,
+                run_es,
+                hits: gidx,
+                pval: ml_pval,   // set multilevel p-value; stat() will overwrite this
+                log2err: ml_log2err,
+                esnull,
+                ..Default::default()
+            });
+        }
+
+        // Compute NES, FDR, FWER from the permutation null distribution.
+        // stat() also sets pval from permutation — we restore the multilevel values below.
+        if self.nperm > 0 {
+            // Save multilevel pvals before stat() overwrites them
+            let ml_pvals: Vec<(f64, f64)> = summ
+                .iter()
+                .map(|s| (s.pval, s.log2err))
+                .collect();
+
+            self.stat(&mut summ);
+
+            // Restore multilevel pval and log2err
+            for (i, (ml_p, ml_err)) in ml_pvals.iter().enumerate() {
+                summ[i].pval = *ml_p;
+                summ[i].log2err = *ml_err;
+            }
+        }
+
+        self.summaries = summ;
+        self.indices.push((0..genes.len()).collect_vec());
+        self.rankings.push(metric.to_owned());
     }
 }
 #[cfg(test)]
