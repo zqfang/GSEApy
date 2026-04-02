@@ -232,10 +232,14 @@ fn gsva_rs(
 
 /// Preranked GSEA using the fgsea multilevel p-value algorithm.
 ///
-/// Computes enrichment scores for each gene set and uses adaptive multilevel
-/// splitting + MCMC to produce precise p-values with quantified error bounds.
-/// FDR is computed with Benjamini-Hochberg (BH) correction on the multilevel
-/// p-values, exactly as the fgsea R package does. No permutation null is used.
+/// Ports `fgseaMultilevel` from the fgsea R/C++ package. Two-phase computation:
+///
+/// 1. **NES**: `n_perm_simple` simple gene permutations build a per-gene-set null ES
+///    distribution. `NES = ES / mean(positive null ESs)` for ES ≥ 0, or
+///    `ES / |mean(negative null ESs)|` for ES < 0 — identical to fgsea.
+/// 2. **p-value**: adaptive multilevel splitting + MCMC gives arbitrarily precise
+///    values with quantified error bound `log2err`.
+/// 3. **FDR**: Benjamini-Hochberg correction on the multilevel p-values.
 ///
 /// Arguments:
 /// - genes: gene names in rank-descending order
@@ -244,12 +248,14 @@ fn gsva_rs(
 /// - weight: GSEA weight parameter (default 1.0)
 /// - min_size: minimum gene set size to test
 /// - max_size: maximum gene set size to test
-/// - sample_size: MCMC sample size per level (default 101, fgsea default)
+/// - sample_size: MCMC sample size per level (fgsea default: 101)
+/// - n_perm_simple: simple permutations for NES normalization (fgsea default: 1000;
+///   set to 0 to skip NES normalization)
 /// - eps: convergence threshold for multilevel algorithm (default 1e-50)
 /// - threads: number of parallel threads
 /// - seed: random seed
 #[pyfunction]
-#[pyo3(signature = (genes, metric, gene_sets, weight=1.0, min_size=15, max_size=500, sample_size=101, eps=1e-50, threads=4, seed=0))]
+#[pyo3(signature = (genes, metric, gene_sets, weight=1.0, min_size=15, max_size=500, sample_size=101, n_perm_simple=1000, eps=1e-50, threads=4, seed=0))]
 fn prerank_fgsea_rs(
     genes: Vec<String>,
     metric: Vec<f64>,
@@ -258,6 +264,7 @@ fn prerank_fgsea_rs(
     min_size: usize,
     max_size: usize,
     sample_size: usize,
+    n_perm_simple: usize,
     eps: f64,
     threads: usize,
     seed: u64,
@@ -267,9 +274,8 @@ fn prerank_fgsea_rs(
     for (k, v) in gene_sets.iter() {
         gmt.insert(k.as_str(), v.as_slice());
     }
-    // nperm is not used by prerank_multilevel; pass 0
     let mut gsea = GSEAResult::new(weight, max_size, min_size, 0, seed);
-    gsea.prerank_multilevel(&genes, &metric, &gmt, sample_size, eps);
+    gsea.prerank_multilevel(&genes, &metric, &gmt, sample_size, n_perm_simple, eps);
     Ok(gsea)
 }
 
