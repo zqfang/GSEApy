@@ -31,6 +31,20 @@ pub enum CorrelType {
     ZScore = 2,
 }
 
+/// GSEA score type, mirroring fgsea's `scoreType` parameter.
+///
+/// - `Std`: standard GSEA — returns the extreme with the greatest absolute value
+///   (positive or negative).
+/// - `Pos`: one-tailed, only the maximum (positive) enrichment score is considered.
+/// - `Neg`: one-tailed, only the minimum (negative) enrichment score is considered.
+#[pyclass(eq, eq_int)]
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub enum ScoreType {
+    Std = 0,
+    Pos = 1,
+    Neg = 2,
+}
+
 pub trait Statistic {
     fn mean(&self) -> f64;
     fn stat(&self, ddof: usize) -> (f64, f64);
