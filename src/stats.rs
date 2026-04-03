@@ -1308,4 +1308,91 @@ mod tests {
             assert!((s.nes - s.es).abs() < EPSILON, "with n_perm_simple=0, nes should equal es");
         }
     }
+
+    /// Verify that classical prerank() and prerank_multilevel() produce identical ES
+    /// and NES values when given the same input, same permutation count and same seed.
+    ///
+    /// ES is a deterministic function of the sorted metric and gene-set membership, so
+    /// it must be bit-for-bit equal.  NES is derived from the same gene-permutation
+    /// null distribution in both methods (prerank uses gperm[1..nperm], while
+    /// prerank_multilevel skips index 0 of the same gperm), so with nperm == n_perm_simple
+    /// and the same seed the NES values must also be exactly equal.
+    #[test]
+    fn test_prerank_vs_fgsea() {
+        let cwd = std::env::current_dir().unwrap();
+        let rnk_path = cwd.join("tests/data/mds.2k.rnk");
+        let gmt_path = cwd.join("tests/data/c2.cp.kegg.v7.5.1.symbols.gmt");
+
+        // --- load data -------------------------------------------------------
+        let mut rnk = FileReader::new();
+        let _ = rnk.read_csv(rnk_path.to_str().unwrap(), b'\t', false, Some(b'#'));
+        let mut gmt_file = FileReader::new();
+        let _ = gmt_file.read_table(gmt_path.to_str().unwrap(), '\t', false);
+
+        let weight = 1.0f64;
+        let mut raw_gene: Vec<String> = Vec::new();
+        let mut raw_metric: Vec<f64> = Vec::new();
+        for r in rnk.record.iter() {
+            raw_gene.push(r[0].clone());
+            raw_metric.push(r[1].parse::<f64>().unwrap());
+        }
+        let mut gmt2 = HashMap::<&str, &[String]>::new();
+        gmt_file.record.iter().for_each(|r| {
+            gmt2.insert(r[0].as_str(), &r[2..]);
+        });
+
+        // sort descending by |metric|^weight (same pre-processing as prerank)
+        let mut wm: Vec<f64> = raw_metric.iter().map(|x| x.abs().powf(weight)).collect();
+        let (gidx, metric) = wm.as_slice().argsort(false);
+        let gene: Vec<String> = gidx.iter().map(|&i| raw_gene[i].clone()).collect();
+
+        // Use a small permutation count so the test runs quickly.
+        let n_perm = 50usize;
+        let seed = 42u64;
+
+        // --- classical prerank -----------------------------------------------
+        let mut gsea_classical = GSEAResult::new(weight, 500, 5, n_perm, seed);
+        gsea_classical.prerank(&gene, &metric, &gmt2);
+
+        // --- fgsea multilevel (same n_perm, same seed) -----------------------
+        let mut gsea_fgsea = GSEAResult::new(weight, 500, 5, 0, seed);
+        gsea_fgsea.prerank_multilevel(&gene, &metric, &gmt2, 51, n_perm, 1e-10);
+
+        // Build maps: term → summary
+        let classical_map: HashMap<&str, &GSEASummary> = gsea_classical
+            .summaries.iter().map(|s| (s.term.as_str(), s)).collect();
+        let fgsea_map: HashMap<&str, &GSEASummary> = gsea_fgsea
+            .summaries.iter().map(|s| (s.term.as_str(), s)).collect();
+
+        // Only compare terms present in both results (size filters are identical).
+        let common_terms: Vec<&str> = classical_map.keys()
+            .filter(|&&t| fgsea_map.contains_key(t)).copied().collect();
+
+        assert!(!common_terms.is_empty(), "no gene sets in common between prerank and fgsea");
+
+        for term in &common_terms {
+            let c = classical_map[term];
+            let f = fgsea_map[term];
+
+            // ES is deterministic — must be bit-for-bit equal.
+            assert_eq!(c.es, f.es,
+                "ES mismatch for '{}': classical={:.8}, fgsea={:.8}", term, c.es, f.es);
+
+            // NES normalises by the mean of same-sign null ESs drawn from the same
+            // gene-permutation sequence, so it must also be exactly equal.
+            assert_eq!(c.nes, f.nes,
+                "NES mismatch for '{}': classical={:.8}, fgsea={:.8}", term, c.nes, f.nes);
+        }
+
+        println!("test_prerank_vs_fgsea: {} terms compared", common_terms.len());
+        // Print a few for visual inspection
+        let mut sample: Vec<&str> = common_terms.clone();
+        sample.sort();
+        for term in sample.iter().take(5) {
+            let c = classical_map[term];
+            let f = fgsea_map[term];
+            println!("  {} | classical es={:.6} nes={:.6} | fgsea es={:.6} nes={:.6}",
+                term, c.es, c.nes, f.es, f.nes);
+        }
+    }
 }
