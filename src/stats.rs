@@ -934,7 +934,6 @@ impl GSEAResult {
         metric: &[f64],
         gmt: &HashMap<&str, &[String]>,
         sample_size: usize,
-        n_perm_simple: usize,
         eps: f64,
     ) {
         // Build integer-scaled ranks for the multilevel algorithm.
@@ -948,15 +947,11 @@ impl GSEAResult {
         // gene_permutation() returns:
         //   index 0 = original gene order (observed)
         //   index 1..n_perm_simple = shuffled orders (null)
-        let mut es = EnrichmentScore::new(genes, n_perm_simple, self.seed, false, false);
-        let gperm = if n_perm_simple > 0 {
-            Some(es.gene_permutation())
-        } else {
-            None
-        };
+        let mut es = EnrichmentScore::new(genes, self.nperm, self.seed, false, false);
+        let gperm = es.gene_permutation(); // gene permutation, only record gene idx here
 
         // Collect per-gene-set results; BH correction requires all p-values.
-        let mut summ: Vec<GSEASummary> = Vec::new();
+        let mut summ = Vec::<GSEASummary>::new();
 
         for (&term, &gset) in gmt.iter() {
             let gtag = es.gene.isin(gset);
@@ -965,9 +960,17 @@ impl GSEAResult {
                 continue;
             }
 
+            let tag_indicators: Vec<Vec<f64>> = gperm.par_iter().map(|de| de.isin(&gidx)).collect();
+            let (ess, run_es) = es.enrichment_score_gene(&weighted_metric, &tag_indicators);
+            let esnull: Vec<f64> = if ess.len() > 1 {
+                ess[1..].to_vec()
+            } else {
+                Vec::new()
+            };
+
             // Compute observed ES (float domain, signed).
             let run_es = es.running_enrichment_score(&weighted_metric, &gtag);
-            let observed_es = es.fast_random_walk(&weighted_metric, &gtag);
+            let observed_es = ess[0]; 
 
             // Compute multilevel p-value and log2 error bound.
             let (ml_pval, ml_log2err) = compute_pvalue_multilevel(
@@ -978,22 +981,6 @@ impl GSEAResult {
                 self.seed,
                 eps,
             );
-
-            // Build null ES distribution from simple permutations for NES normalization.
-            // Mirrors fgsea's `fgseaSimpleImpl`: for each random gene set of the same
-            // size, compute ES; NES = ES / mean(same-sign null ESs).
-            let esnull: Vec<f64> = if let Some(ref gperm) = gperm {
-                gperm
-                    .par_iter()
-                    .skip(1) // index 0 is original order; 1..n_perm_simple are shuffled
-                    .map(|de| {
-                        let tag_new: Vec<f64> = de.isin(&gidx);
-                        es.fast_random_walk(&weighted_metric, &tag_new)
-                    })
-                    .collect()
-            } else {
-                Vec::new()
-            };
 
             summ.push(GSEASummary {
                 term: term.to_string(),
@@ -1101,7 +1088,7 @@ mod tests {
         // set number of threads of rayon at the main()
         // rayon::ThreadPoolBuilder::new()
         //     .num_threads(1)
-        //     .build_global()
+        //     .build_global()ƒ
         //     .unwrap();
 
         let mut gct = FileReader::new();
@@ -1268,8 +1255,8 @@ mod tests {
 
         // n_perm_simple=100 for fast testing; use 1000 in practice
         let n_perm_simple = 100usize;
-        let mut gsea = GSEAResult::new(weight, 500, 5, 0, 123);
-        gsea.prerank_multilevel(&gene, &metric, &gmt2, 51, n_perm_simple, 1e-10);
+        let mut gsea = GSEAResult::new(weight, 500, 5, n_perm_simple, 123);
+        gsea.prerank_multilevel(&gene, &metric, &gmt2, 51, 1e-10);
 
         // Basic sanity checks
         assert!(!gsea.summaries.is_empty(), "expected some gene sets");
@@ -1303,7 +1290,7 @@ mod tests {
 
         // Also test n_perm_simple=0 fallback: NES should equal ES
         let mut gsea0 = GSEAResult::new(weight, 500, 5, 0, 123);
-        gsea0.prerank_multilevel(&gene, &metric, &gmt2, 51, 0, 1e-10);
+        gsea0.prerank_multilevel(&gene, &metric, &gmt2, 51, 1e-10);
         for s in &gsea0.summaries {
             assert!((s.nes - s.es).abs() < EPSILON, "with n_perm_simple=0, nes should equal es");
         }
@@ -1355,8 +1342,8 @@ mod tests {
         gsea_classical.prerank(&gene, &metric, &gmt2);
 
         // --- fgsea multilevel (same n_perm, same seed) -----------------------
-        let mut gsea_fgsea = GSEAResult::new(weight, 500, 5, 0, seed);
-        gsea_fgsea.prerank_multilevel(&gene, &metric, &gmt2, 51, n_perm, 1e-10);
+        let mut gsea_fgsea = GSEAResult::new(weight, 500, 5, n_perm, seed);
+        gsea_fgsea.prerank_multilevel(&gene, &metric, &gmt2, 51, 1e-10);
 
         // Build maps: term → summary
         let classical_map: HashMap<&str, &GSEASummary> = gsea_classical

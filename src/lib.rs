@@ -255,7 +255,7 @@ fn gsva_rs(
 /// - threads: number of parallel threads
 /// - seed: random seed
 #[pyfunction]
-#[pyo3(signature = (genes, metric, gene_sets, weight=1.0, min_size=15, max_size=500, sample_size=101, n_perm_simple=1000, eps=1e-50, threads=4, seed=0))]
+#[pyo3(signature = (genes, metric, gene_sets, weight=1.0, min_size=15, max_size=500, sample_size=101, nperm = 1000, eps=1e-50, threads=4, seed=0))]
 fn prerank_fgsea_rs(
     genes: Vec<String>,
     metric: Vec<f64>,
@@ -264,7 +264,7 @@ fn prerank_fgsea_rs(
     min_size: usize,
     max_size: usize,
     sample_size: usize,
-    n_perm_simple: usize,
+    nperm: usize,
     eps: f64,
     threads: usize,
     seed: u64,
@@ -274,8 +274,8 @@ fn prerank_fgsea_rs(
     for (k, v) in gene_sets.iter() {
         gmt.insert(k.as_str(), v.as_slice());
     }
-    let mut gsea = GSEAResult::new(weight, max_size, min_size, 0, seed);
-    gsea.prerank_multilevel(&genes, &metric, &gmt, sample_size, n_perm_simple, eps);
+    let mut gsea = GSEAResult::new(weight, max_size, min_size, nperm, seed);
+    gsea.prerank_multilevel(&genes, &metric, &gmt, sample_size, eps);
     Ok(gsea)
 }
 
