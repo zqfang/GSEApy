@@ -104,7 +104,7 @@ pub fn calc_gsea_stat(
         ScoreType::Pos => max_p,
         ScoreType::Neg => min_p,
         ScoreType::Std => {
-            if max_p == -min_p {
+            if (max_p + min_p).abs() < 1e-12 {
                 0.0
             } else if max_p > -min_p {
                 max_p
@@ -138,7 +138,7 @@ pub fn calc_gsea_stat(
                 le
             }
             ScoreType::Std => {
-                if max_p > -min_p {
+                if max_p > -min_p + 1e-12 {
                     let peak = tops
                         .iter()
                         .enumerate()
@@ -146,7 +146,7 @@ pub fn calc_gsea_stat(
                         .map(|(i, _)| i)
                         .unwrap_or(0);
                     selected[..=peak].to_vec()
-                } else if max_p < -min_p {
+                } else if -min_p > max_p + 1e-12 {
                     let peak = bottoms
                         .iter()
                         .enumerate()
