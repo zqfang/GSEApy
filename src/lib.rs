@@ -3,13 +3,15 @@ use std::collections::HashMap;
 use std::env;
 // import own modules
 mod algorithm;
+mod fgsea;
 mod gsva;
 mod stats;
 mod utils;
 // export module fn, struct, trait ...
+use algorithm::{calc_gsea_stat, GseaStatResult};
 use gsva::gsva;
 use stats::{GSEAResult, GSEASummary};
-use utils::{CorrelType, Metric};
+use utils::{CorrelType, Metric, ScoreType};
 
 /// Prerank RUST
 /// Arguments:
@@ -229,15 +231,114 @@ fn gsva_rs(
     Ok(gs)
 }
 
+/// Preranked GSEA using the fgsea multilevel p-value algorithm.
+///
+/// Ports `fgseaMultilevel` from the fgsea R/C++ package. Two-phase computation:
+///
+/// 1. **NES**: `n_perm_simple` simple gene permutations build a per-gene-set null ES
+///    distribution. `NES = ES / mean(positive null ESs)` for ES ≥ 0, or
+///    `ES / |mean(negative null ESs)|` for ES < 0 — identical to fgsea.
+/// 2. **p-value**: adaptive multilevel splitting + MCMC gives arbitrarily precise
+///    values with quantified error bound `log2err`.
+/// 3. **FDR**: Benjamini-Hochberg correction on the multilevel p-values.
+///
+/// Arguments:
+/// - genes: gene names in rank-descending order
+/// - metric: gene-level ranking metric (same order as genes)
+/// - gene_sets: a hashmap (dict) of GMT gene sets
+/// - weight: GSEA weight parameter (default 1.0)
+/// - min_size: minimum gene set size to test
+/// - max_size: maximum gene set size to test
+/// - sample_size: MCMC sample size per level (fgsea default: 101)
+/// - n_perm_simple: simple permutations for NES normalization (fgsea default: 1000;
+///   set to 0 to skip NES normalization)
+/// - eps: convergence threshold for multilevel algorithm (default 1e-50)
+/// - threads: number of parallel threads
+/// - seed: random seed
+#[pyfunction]
+#[pyo3(signature = (genes, metric, gene_sets, weight=1.0, min_size=15, max_size=500, sample_size=101, nperm = 1000, eps=1e-50, threads=4, seed=0))]
+fn prerank_fgsea_rs(
+    genes: Vec<String>,
+    metric: Vec<f64>,
+    gene_sets: HashMap<String, Vec<String>>,
+    weight: f64,
+    min_size: usize,
+    max_size: usize,
+    sample_size: usize,
+    nperm: usize,
+    eps: f64,
+    threads: usize,
+    seed: u64,
+) -> PyResult<GSEAResult> {
+    env::set_var("RAYON_NUM_THREADS", threads.to_string());
+    let mut gmt = HashMap::<&str, &[String]>::new();
+    for (k, v) in gene_sets.iter() {
+        gmt.insert(k.as_str(), v.as_slice());
+    }
+    let mut gsea = GSEAResult::new(weight, max_size, min_size, nperm, seed);
+    gsea.prerank_multilevel(&genes, &metric, &gmt, sample_size, eps);
+    Ok(gsea)
+}
+
+/// Compute the GSEA enrichment score and optional curve data for a single gene set.
+///
+/// This is a direct port of fgsea's `calcGseaStat()` — an O(k) algorithm where k is
+/// the gene set size.  It is useful both for computing the scalar ES and for generating
+/// enrichment-plot curves (`tops` / `bottoms`) without iterating over all N genes.
+///
+/// Parameters
+/// ----------
+/// stats : list of float
+///     Gene-level ranking metric, **sorted descending**, length N.
+///     Values are raised to the power `gsea_param` internally.
+/// selected_stats : list of int
+///     **0-based** indices of gene-set members in `stats`, **sorted ascending**.
+/// gsea_param : float, optional
+///     Weight exponent p (default 1.0).  Use 0 for unweighted ES.
+/// score_type : ScoreType, optional
+///     Which extreme to return: ``Std`` (default, sign-aware max |ES|),
+///     ``Pos`` (maximum), or ``Neg`` (minimum).
+/// return_all_extremes : bool, optional
+///     If True, populate ``tops`` and ``bottoms`` in the result (needed for
+///     enrichment-plot curves).  Default False.
+/// return_leading_edge : bool, optional
+///     If True, populate ``leading_edge`` in the result.  Default False.
+///
+/// Returns
+/// -------
+/// GseaStatResult
+///     Object with fields ``es``, ``tops``, ``bottoms``, ``leading_edge``.
+#[pyfunction]
+#[pyo3(signature = (stats, selected_stats, gsea_param=1.0, score_type=ScoreType::Std, return_all_extremes=false, return_leading_edge=false))]
+fn calc_gsea_stat_rs(
+    stats: Vec<f64>,
+    selected_stats: Vec<usize>,
+    gsea_param: f64,
+    score_type: ScoreType,
+    return_all_extremes: bool,
+    return_leading_edge: bool,
+) -> PyResult<GseaStatResult> {
+    Ok(calc_gsea_stat(
+        &stats,
+        &selected_stats,
+        gsea_param,
+        score_type,
+        return_all_extremes,
+        return_leading_edge,
+    ))
+}
+
 /// Python module for GSEA (Gene Set Enrichment Analysis) and ssGSEA
 /// 
-/// This module provides four functions:
+/// This module provides five functions:
 /// 
 /// - `gsea_rs`: performs GSEA
 /// - `prerank_rs`: performs GSEA preranking
 /// - `prerank2d_rs`: performs GSEA preranking with multiple input datasets
 /// - `ssgsea_rs`: performs ssGSEA
 /// - `gsva_rs`: performs GSVA
+/// - `prerank_fgsea_rs`: performs preranked GSEA with the fgsea multilevel p-value algorithm
+/// - `calc_gsea_stat_rs`: O(k) enrichment score + optional curve data for a single gene set
 #[pymodule]
 fn gse(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     // m.add_class::<GSEAResult>()?;
@@ -245,10 +346,14 @@ fn gse(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<GSEAResult>()?;
     m.add_class::<Metric>()?;
     m.add_class::<CorrelType>()?;
+    m.add_class::<ScoreType>()?;
+    m.add_class::<GseaStatResult>()?;
     m.add_function(wrap_pyfunction!(gsea_rs, m)?)?;
     m.add_function(wrap_pyfunction!(prerank_rs, m)?)?;
     m.add_function(wrap_pyfunction!(prerank2d_rs, m)?)?;
     m.add_function(wrap_pyfunction!(ssgsea_rs, m)?)?;
     m.add_function(wrap_pyfunction!(gsva_rs, m)?)?;
+    m.add_function(wrap_pyfunction!(prerank_fgsea_rs, m)?)?;
+    m.add_function(wrap_pyfunction!(calc_gsea_stat_rs, m)?)?;
     Ok(())
 }

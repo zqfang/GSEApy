@@ -384,7 +384,7 @@ mod tests {
         let gsumm = gsva(
             gene_name, gene_exp, gene_sets, true, false, true, false, 1.0, 1, 1000,
         );
-        let file = File::create("tests/data/gsva.rs.out").expect("Cannot write filename");
+        let file = File::create("tests/gsva.rs.out").expect("Cannot write filename");
         let mut wrt = csv::WriterBuilder::new().delimiter(b'\t').from_writer(file);
         let _ = wrt.write_record(gct.header.get_vec().iter());
         let mut record = Vec::<String>::new();

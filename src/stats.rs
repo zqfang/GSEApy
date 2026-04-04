@@ -1,6 +1,7 @@
 #![allow(dead_code, unused)]
 
 use crate::algorithm::{EnrichmentScore, EnrichmentScoreTrait};
+use crate::fgsea::{compute_pvalue_multilevel, scale_ranks};
 use crate::utils::{CorrelType, DynamicEnum, Metric, Statistic};
 use itertools::{izip, Itertools};
 use pyo3::prelude::*;
@@ -24,6 +25,8 @@ pub struct GSEASummary {
     pub fwerp: f64, // FWER Pvalue
     #[pyo3(get, set)]
     pub fdr: f64, // FDR q value. adjusted FDR
+    #[pyo3(get, set)]
+    pub log2err: f64, // log2 error bound for multilevel p-value (NaN when not applicable)
     #[pyo3(get, set)]
     pub run_es: Vec<f64>,
     #[pyo3(get, set)]
@@ -55,6 +58,7 @@ impl GSEASummary {
             pval: pval,
             fwerp: fwerpval,
             fdr: fdr,
+            log2err: f64::NAN,
             run_es: run_es.to_vec(),
             hits: hits.to_vec(),
             esnull: esnull.to_vec(),
@@ -74,6 +78,7 @@ impl GSEASummary {
             pval: 1.0,
             fwerp: 1.0,
             fdr: 1.0,
+            log2err: f64::NAN,
             run_es: Vec::<f64>::new(),
             hits: Vec::<usize>::new(),
             esnull: Vec::<f64>::new(),
@@ -857,6 +862,162 @@ impl GSEAResult {
         self.summaries = _all;
     }
 }
+/// Extension of `GSEAResult` providing the fgsea multilevel p-value variant.
+///
+/// `prerank_multilevel()` ports `fgseaMultilevel` from the fgsea R/C++ package:
+///
+/// - **p-value**: adaptive multilevel splitting + MCMC algorithm (arbitrarily precise,
+///   with quantified error bound `log2err`).
+/// - **NES**: `ES / mean(null ES with same sign)`, derived from `n_perm_simple` simple
+///   gene permutations — identical to the fgsea normalization.
+/// - **FDR**: Benjamini-Hochberg correction on the multilevel p-values.
+/// - **FWER**: not applicable (set to 1.0).
+impl GSEAResult {
+    /// Benjamini-Hochberg FDR correction.
+    ///
+    /// `pvals`: p-values in arbitrary order (each must be in `[0, 1]`).
+    /// Returns a `Vec<f64>` of BH-adjusted q-values in the **same order** as the
+    /// input, with each q-value guaranteed to be in `[0, 1]` and monotone with
+    /// respect to the input p-value ordering (smaller p ⇒ smaller or equal q).
+    fn bh_correction(pvals: &[f64]) -> Vec<f64> {
+        let m = pvals.len();
+        if m == 0 {
+            return Vec::new();
+        }
+        // Build (pval, original_index) pairs sorted ascending by p-value
+        let mut order: Vec<usize> = (0..m).collect();
+        order.sort_unstable_by(|&a, &b| {
+            pvals[a].partial_cmp(&pvals[b]).unwrap_or(std::cmp::Ordering::Equal)
+        });
+
+        // BH adjustment: q[rank] = p[rank] * m / rank
+        // Enforce monotonicity by scanning from the largest rank downward and
+        // keeping track of the running minimum.  All input p-values are in
+        // [0, 1] so `p * m / rank` is also in [0, m] — the min() pass keeps
+        // q within [0, 1].
+        let mut adjusted = vec![1.0f64; m];
+        let mut min_so_far = 1.0f64;
+        for (rank_minus1, &orig_idx) in order.iter().enumerate().rev() {
+            let rank = (rank_minus1 + 1) as f64;
+            // p * m / rank is non-negative; cap at 1.0 to stay in [0,1]
+            let q = (pvals[orig_idx] * m as f64 / rank).min(1.0);
+            min_so_far = min_so_far.min(q);
+            adjusted[orig_idx] = min_so_far;
+        }
+        adjusted
+    }
+
+    /// Preranked GSEA using the fgsea multilevel algorithm for p-value computation.
+    ///
+    /// This method ports `fgseaMultilevel` from the fgsea R/C++ package.
+    ///
+    /// **Two-phase computation (matching fgsea):**
+    /// 1. *NES*: `n_perm_simple` simple gene permutations build a per-gene-set null ES
+    ///    distribution. `NES = ES / mean(positive null ESs)` when ES ≥ 0, or
+    ///    `ES / |mean(negative null ESs)|` when ES < 0.
+    /// 2. *p-value*: adaptive multilevel splitting + MCMC yields arbitrarily precise
+    ///    values with quantified error bound `log2err`.
+    /// 3. *FDR*: Benjamini-Hochberg correction across all tested gene sets.
+    ///
+    /// Parameters
+    /// ----------
+    /// - `genes`: gene names in rank-descending order.
+    /// - `metric`: gene-level ranking metric (descending, all values real).
+    /// - `gmt`: gene set dictionary.
+    /// - `sample_size`: MCMC sample size per level (fgsea default: 101).
+    /// - `n_perm_simple`: number of simple gene permutations for NES normalization
+    ///   (fgsea default: 1000; set to 0 to skip, in which case `nes = es`).
+    /// - `eps`: convergence threshold for the multilevel algorithm (e.g. 1e-50).
+    pub fn prerank_multilevel(
+        &mut self,
+        genes: &[String],
+        metric: &[f64],
+        gmt: &HashMap<&str, &[String]>,
+        sample_size: usize,
+        eps: f64,
+    ) {
+        // Build integer-scaled ranks for the multilevel algorithm.
+        let weighted_metric: Vec<f64> =
+            metric.iter().map(|x| x.abs().powf(self.weight)).collect();
+        let int_ranks = scale_ranks(&weighted_metric);
+
+        // Build the gene index structure.
+        // When n_perm_simple > 0, create EnrichmentScore with that many permutations
+        // so gene_permutation() generates the null ES distribution for NES.
+        // gene_permutation() returns:
+        //   index 0 = original gene order (observed)
+        //   index 1..n_perm_simple = shuffled orders (null)
+        let mut es = EnrichmentScore::new(genes, self.nperm, self.seed, false, false);
+        let gperm = es.gene_permutation(); // gene permutation, only record gene idx here
+
+        // Collect per-gene-set results; BH correction requires all p-values.
+        let mut summ = Vec::<GSEASummary>::new();
+
+        for (&term, &gset) in gmt.iter() {
+            let gtag = es.gene.isin(gset);
+            let gidx = es.hit_index(&gtag);
+            if gidx.len() > self.max_size || gidx.len() < self.min_size {
+                continue;
+            }
+
+            let tag_indicators: Vec<Vec<f64>> = gperm.par_iter().map(|de| de.isin(&gidx)).collect();
+            let (ess, run_es) = es.enrichment_score_gene(&weighted_metric, &tag_indicators);
+            let esnull: Vec<f64> = if ess.len() > 1 {
+                ess[1..].to_vec()
+            } else {
+                Vec::new()
+            };
+
+            // Compute observed ES (float domain, signed).
+            let run_es = es.running_enrichment_score(&weighted_metric, &gtag);
+            let observed_es = ess[0]; 
+
+            // Compute multilevel p-value and log2 error bound.
+            let (ml_pval, ml_log2err) = compute_pvalue_multilevel(
+                &int_ranks,
+                gidx.len(),
+                observed_es,
+                sample_size,
+                self.seed,
+                eps,
+            );
+
+            summ.push(GSEASummary {
+                term: term.to_string(),
+                es: observed_es,
+                pval: ml_pval,
+                log2err: ml_log2err,
+                fwerp: 1.0,
+                run_es,
+                hits: gidx,
+                esnull, // temporary; used by normalize() below
+                ..Default::default()
+            });
+        }
+
+        // Compute NES from null distribution (fgsea formula).
+        // normalize() reads s.esnull, sets s.nes = ES / mean(same-sign null ESs).
+        for s in summ.iter_mut() {
+            if !s.esnull.is_empty() {
+                let _normalized_esnull = s.normalize(); // sets s.nes from s.esnull
+                s.esnull = Vec::new(); // drop null distribution — not part of fgsea output
+            } else {
+                s.nes = s.es; // fallback when n_perm_simple = 0
+            }
+        }
+
+        // Apply Benjamini-Hochberg correction across all gene sets for FDR.
+        let pvals: Vec<f64> = summ.iter().map(|s| s.pval).collect();
+        let fdrs = Self::bh_correction(&pvals);
+        for (s, fdr) in summ.iter_mut().zip(fdrs.iter()) {
+            s.fdr = *fdr;
+        }
+
+        self.summaries = summ;
+        self.indices.push((0..genes.len()).collect_vec());
+        self.rankings.push(metric.to_owned());
+    }
+}
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -927,7 +1088,7 @@ mod tests {
         // set number of threads of rayon at the main()
         // rayon::ThreadPoolBuilder::new()
         //     .num_threads(1)
-        //     .build_global()
+        //     .build_global()ƒ
         //     .unwrap();
 
         let mut gct = FileReader::new();
@@ -1040,5 +1201,185 @@ mod tests {
                 g.term, g.es, g.nes, g.pval, g.fdr
             );
         });
+    }
+
+    #[test]
+    fn test_bh_correction() {
+        // Floating-point tolerance used across the BH tests
+        const EPSILON: f64 = 1e-12;
+        // Known BH correction example
+        // p-values from Benjamini & Hochberg 1995 example
+        let pvals = vec![0.001, 0.008, 0.039, 0.041, 0.042, 0.06, 0.074, 0.205, 0.212, 0.216];
+        let adj = GSEAResult::bh_correction(&pvals);
+        // All adjusted values should be ≤ 1.0 and ≥ original p-values
+        for (p, q) in pvals.iter().zip(adj.iter()) {
+            assert!(*q >= *p - EPSILON, "BH q {q} < p {p}");
+            assert!(*q <= 1.0 + EPSILON, "BH q {q} > 1");
+        }
+        // Smallest p-value should produce the smallest q-value
+        let min_q = adj.iter().cloned().fold(f64::MAX, f64::min);
+        assert!(adj[0] == min_q, "smallest p should have smallest q");
+        // Monotonicity: q-values sorted in the same rank order as p-values (ascending p → ascending q)
+        let mut order: Vec<usize> = (0..pvals.len()).collect();
+        order.sort_unstable_by(|&a, &b| pvals[a].partial_cmp(&pvals[b]).unwrap());
+        for w in order.windows(2) {
+            assert!(adj[w[0]] <= adj[w[1]] + EPSILON,
+                "BH monotonicity violated: adj[{}]={} > adj[{}]={}", w[0], adj[w[0]], w[1], adj[w[1]]);
+        }
+    }
+
+    #[test]
+    fn test_prerank_multilevel() {
+        const EPSILON: f64 = 1e-12;
+        let cwd = std::env::current_dir().unwrap();
+        let rnk_path = cwd.join("tests/data/mds.2k.rnk");
+        let gmt_path = cwd.join("tests/data/c2.cp.kegg.v7.5.1.symbols.gmt");
+        let mut rnk = FileReader::new();
+        let _ = rnk.read_csv(rnk_path.to_str().unwrap(), b'\t', false, Some(b'#'));
+        let mut gmt = FileReader::new();
+        let _ = gmt.read_table(gmt_path.to_str().unwrap(), '\t', false);
+        let weight = 1.0;
+        let mut gene: Vec<String> = Vec::new();
+        let mut gene_metric: Vec<f64> = Vec::new();
+        for r in rnk.record.iter() {
+            gene.push(r[0].clone());
+            gene_metric.push(r[1].parse::<f64>().unwrap());
+        }
+        let mut gmt2 = HashMap::<&str, &[String]>::new();
+        gmt.record.iter().for_each(|r| {
+            gmt2.insert(r[0].as_str(), &r[2..]);
+        });
+        gene_metric.iter_mut().for_each(|x| *x = x.abs().powf(weight));
+        let (gidx, metric) = gene_metric.as_slice().argsort(false);
+        gene = gidx.iter().map(|&i| gene[i].clone()).collect();
+
+        // n_perm_simple=100 for fast testing; use 1000 in practice
+        let n_perm_simple = 100usize;
+        let mut gsea = GSEAResult::new(weight, 500, 5, n_perm_simple, 123);
+        gsea.prerank_multilevel(&gene, &metric, &gmt2, 51, 1e-10);
+
+        // Basic sanity checks
+        assert!(!gsea.summaries.is_empty(), "expected some gene sets");
+        for s in &gsea.summaries {
+            assert!(s.pval >= 0.0 && s.pval <= 1.0, "pval out of [0,1]: {}", s.pval);
+            assert!(s.fdr >= 0.0 && s.fdr <= 1.0, "fdr out of [0,1]: {}", s.fdr);
+            // esnull should be cleared from output after NES is computed
+            assert!(s.esnull.is_empty(), "esnull should be empty in output");
+            // fwerp should be 1.0 (not applicable without permutation null)
+            assert!((s.fwerp - 1.0).abs() < EPSILON, "fwerp should be 1.0");
+        }
+        // BH property: FDR >= p-value for each gene set
+        for s in &gsea.summaries {
+            assert!(s.fdr >= s.pval - EPSILON, "fdr {:.2e} < pval {:.2e}", s.fdr, s.pval);
+        }
+        // NES should differ from raw ES when n_perm_simple > 0 (permutation normalisation)
+        // (at least one gene set should have NES != ES due to normalisation)
+        let any_nes_differs = gsea.summaries.iter().any(|s| (s.nes - s.es).abs() > 1e-6);
+        assert!(any_nes_differs, "NES should differ from ES when n_perm_simple > 0");
+
+        // NES sign should match ES sign for all gene sets
+        for s in &gsea.summaries {
+            assert!(s.nes * s.es >= 0.0, "NES and ES should have the same sign: nes={}, es={}", s.nes, s.es);
+        }
+
+        println!("prerank_multilevel: {} gene sets", gsea.summaries.len());
+        gsea.summaries.iter().take(5).for_each(|g| {
+            println!("  term={}, es={:.4}, nes={:.4}, pval={:.2e}, fdr={:.2e}, log2err={:.2}",
+                g.term, g.es, g.nes, g.pval, g.fdr, g.log2err);
+        });
+
+        // Also test n_perm_simple=0 fallback: NES should equal ES
+        let mut gsea0 = GSEAResult::new(weight, 500, 5, 0, 123);
+        gsea0.prerank_multilevel(&gene, &metric, &gmt2, 51, 1e-10);
+        for s in &gsea0.summaries {
+            assert!((s.nes - s.es).abs() < EPSILON, "with n_perm_simple=0, nes should equal es");
+        }
+    }
+
+    /// Verify that classical prerank() and prerank_multilevel() produce identical ES
+    /// and NES values when given the same input, same permutation count and same seed.
+    ///
+    /// ES is a deterministic function of the sorted metric and gene-set membership, so
+    /// it must be bit-for-bit equal.  NES is derived from the same gene-permutation
+    /// null distribution in both methods (prerank uses gperm[1..nperm], while
+    /// prerank_multilevel skips index 0 of the same gperm), so with nperm == n_perm_simple
+    /// and the same seed the NES values must also be exactly equal.
+    #[test]
+    fn test_prerank_vs_fgsea() {
+        let cwd = std::env::current_dir().unwrap();
+        let rnk_path = cwd.join("tests/data/mds.2k.rnk");
+        let gmt_path = cwd.join("tests/data/c2.cp.kegg.v7.5.1.symbols.gmt");
+
+        // --- load data -------------------------------------------------------
+        let mut rnk = FileReader::new();
+        let _ = rnk.read_csv(rnk_path.to_str().unwrap(), b'\t', false, Some(b'#'));
+        let mut gmt_file = FileReader::new();
+        let _ = gmt_file.read_table(gmt_path.to_str().unwrap(), '\t', false);
+
+        let weight = 1.0f64;
+        let mut raw_gene: Vec<String> = Vec::new();
+        let mut raw_metric: Vec<f64> = Vec::new();
+        for r in rnk.record.iter() {
+            raw_gene.push(r[0].clone());
+            raw_metric.push(r[1].parse::<f64>().unwrap());
+        }
+        let mut gmt2 = HashMap::<&str, &[String]>::new();
+        gmt_file.record.iter().for_each(|r| {
+            gmt2.insert(r[0].as_str(), &r[2..]);
+        });
+
+        // sort descending by |metric|^weight (same pre-processing as prerank)
+        let mut wm: Vec<f64> = raw_metric.iter().map(|x| x.abs().powf(weight)).collect();
+        let (gidx, metric) = wm.as_slice().argsort(false);
+        let gene: Vec<String> = gidx.iter().map(|&i| raw_gene[i].clone()).collect();
+
+        // Use a small permutation count so the test runs quickly.
+        let n_perm = 50usize;
+        let seed = 42u64;
+
+        // --- classical prerank -----------------------------------------------
+        let mut gsea_classical = GSEAResult::new(weight, 500, 5, n_perm, seed);
+        gsea_classical.prerank(&gene, &metric, &gmt2);
+
+        // --- fgsea multilevel (same n_perm, same seed) -----------------------
+        let mut gsea_fgsea = GSEAResult::new(weight, 500, 5, n_perm, seed);
+        gsea_fgsea.prerank_multilevel(&gene, &metric, &gmt2, 51, 1e-10);
+
+        // Build maps: term → summary
+        let classical_map: HashMap<&str, &GSEASummary> = gsea_classical
+            .summaries.iter().map(|s| (s.term.as_str(), s)).collect();
+        let fgsea_map: HashMap<&str, &GSEASummary> = gsea_fgsea
+            .summaries.iter().map(|s| (s.term.as_str(), s)).collect();
+
+        // Only compare terms present in both results (size filters are identical).
+        let common_terms: Vec<&str> = classical_map.keys()
+            .filter(|&&t| fgsea_map.contains_key(t)).copied().collect();
+
+        assert!(!common_terms.is_empty(), "no gene sets in common between prerank and fgsea");
+
+        for term in &common_terms {
+            let c = classical_map[term];
+            let f = fgsea_map[term];
+
+            // ES is deterministic — must be bit-for-bit equal.
+            assert_eq!(c.es, f.es,
+                "ES mismatch for '{}': classical={:.8}, fgsea={:.8}", term, c.es, f.es);
+
+            // NES normalises by the mean of same-sign null ESs drawn from the same
+            // gene-permutation sequence, so it must also be exactly equal.
+            assert_eq!(c.nes, f.nes,
+                "NES mismatch for '{}': classical={:.8}, fgsea={:.8}", term, c.nes, f.nes);
+        }
+
+        println!("test_prerank_vs_fgsea: {} terms compared", common_terms.len());
+        // Print a few for visual inspection
+        let mut sample: Vec<&str> = common_terms.clone();
+        sample.sort();
+        for term in sample.iter().take(5) {
+            let c = classical_map[term];
+            let f = fgsea_map[term];
+            println!("  {} | classical es={:.6} nes={:.6} | fgsea es={:.6} nes={:.6}",
+                term, c.es, c.nes, f.es, f.nes);
+        }
     }
 }
