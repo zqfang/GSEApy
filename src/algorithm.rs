@@ -185,6 +185,13 @@ fn sigma_correction(std: f64, mean: f64) -> f64 {
 pub trait EnrichmentScoreTrait {
     /// get run es only
     fn running_enrichment_score(&self, metric: &[f64], tag_indicator: &[f64]) -> Vec<f64>;
+    /// O(k) drop-in replacement for `running_enrichment_score`.
+    ///
+    /// Internally calls `calc_gsea_stat` (gsea_param = 1.0, ScoreType::Std) to obtain the
+    /// compressed tops/bottoms representation, then reconstructs the full O(N) running-ES
+    /// staircase.  The returned vector is element-wise identical to the one produced by
+    /// `running_enrichment_score` to within floating-point precision (ε ≈ 1e-12).
+    fn reconstruct_run_es_from_tops(&self, metric: &[f64], tag_indicator: &[f64]) -> Vec<f64>;
     /// fast GSEA only ES value return
     fn fast_random_walk(&self, metric: &[f64], tag_indicator: &[f64]) -> f64;
     /// fast ssGSEA. only ES value return
@@ -232,6 +239,46 @@ impl EnrichmentScoreTrait for EnrichmentScore {
         return run_es;
     }
 
+    /// O(k) drop-in replacement for `running_enrichment_score`.
+    ///
+    /// Derives hit positions from `tag_indicator`, calls `calc_gsea_stat` with
+    /// `gsea_param = 1.0` to obtain the compressed `tops` vector, then reconstructs
+    /// the full O(N) running-ES staircase using the hit/miss step relationships:
+    ///
+    /// - At hit position `selected[i]`:                `run_es = tops[i]`
+    /// - At miss position `p` after hit `selected[i-1]`:
+    ///   `run_es = tops[i-1] - (p - selected[i-1]) * inv_miss`
+    /// - Before the first hit (`p < selected[0]`):     `run_es = -(p+1) * inv_miss`
+    fn reconstruct_run_es_from_tops(&self, metric: &[f64], tag_indicator: &[f64]) -> Vec<f64> {
+        let n = metric.len();
+        let selected: Vec<usize> = tag_indicator
+            .iter()
+            .enumerate()
+            .filter_map(|(i, &t)| if t > 0.0 { Some(i) } else { None })
+            .collect();
+        let k = selected.len();
+        let result = calc_gsea_stat(metric, &selected, 1.0, ScoreType::Std, true, false);
+        let tops = &result.tops;
+        let inv_miss = 1.0 / (n - k) as f64;
+        let mut run_es = vec![0.0f64; n];
+        let mut last_top = 0.0f64;
+        let mut last_hit_pos: i64 = -1;
+        let mut hit_i = 0usize;
+        for p in 0..n {
+            if hit_i < k && p == selected[hit_i] {
+                run_es[p] = tops[hit_i];
+                last_top = tops[hit_i];
+                last_hit_pos = p as i64;
+                hit_i += 1;
+            } else {
+                let misses = p as i64 - last_hit_pos;
+                run_es[p] = last_top - misses as f64 * inv_miss;
+            }
+        }
+        run_es
+    }
+
+    /// fast GSEA only ES value return
     /// see here: https://github.com/ctlab/fgsea/blob/master/src/esCalculation.cpp
     fn fast_random_walk(&self, metric: &[f64], tag_indicator: &[f64]) -> f64 {
         // tag_indicator and metric must be sorted
@@ -761,15 +808,15 @@ mod tests {
         // --- O(k) compressed form ---
         let result = calc_gsea_stat(&stats, &selected, gsea_param, ScoreType::Std, true, false);
 
-        // --- Reconstruct full O(N) vector from tops ---
+        // --- Reconstruct full O(N) vector from tops (test-local helper) ---
         let recon_run_es = reconstruct_run_es_from_tops(&result.tops, &selected, n);
 
-        // Element-wise comparison
-        assert_eq!(
-            ref_run_es.len(),
-            recon_run_es.len(),
-            "vector length mismatch"
-        );
+        // --- Production drop-in replacement ---
+        let method_run_es = es_obj.reconstruct_run_es_from_tops(&stats, &tag);
+
+        // Element-wise comparison against both reconstructions
+        assert_eq!(ref_run_es.len(), recon_run_es.len(), "vector length mismatch");
+        assert_eq!(ref_run_es.len(), method_run_es.len(), "method vector length mismatch");
         for (p, (&r, &c)) in ref_run_es.iter().zip(recon_run_es.iter()).enumerate() {
             assert!(
                 (r - c).abs() < 1e-12,
@@ -779,6 +826,17 @@ mod tests {
                 r,
                 c,
                 (r - c).abs()
+            );
+        }
+        for (p, (&r, &m)) in ref_run_es.iter().zip(method_run_es.iter()).enumerate() {
+            assert!(
+                (r - m).abs() < 1e-12,
+                "method mismatch at position {}: running_enrichment_score={:.15}, \
+                 reconstruct_run_es_from_tops={:.15}, diff={:.3e}",
+                p,
+                r,
+                m,
+                (r - m).abs()
             );
         }
 
@@ -832,16 +890,29 @@ mod tests {
         }
         let ref_run_es = es_obj.running_enrichment_score(&stats, &tag);
 
+        // Test-local helper (takes pre-computed tops)
         let result = calc_gsea_stat(&stats, &selected, 1.0, ScoreType::Std, true, false);
         let recon = reconstruct_run_es_from_tops(&result.tops, &selected, n);
+
+        // Production drop-in replacement
+        let method_run_es = es_obj.reconstruct_run_es_from_tops(&stats, &tag);
 
         for (p, (&r, &c)) in ref_run_es.iter().zip(recon.iter()).enumerate() {
             assert!(
                 (r - c).abs() < 1e-12,
-                "large test: mismatch at p={}: ref={:.15} recon={:.15}",
+                "large test (helper): mismatch at p={}: ref={:.15} recon={:.15}",
                 p,
                 r,
                 c
+            );
+        }
+        for (p, (&r, &m)) in ref_run_es.iter().zip(method_run_es.iter()).enumerate() {
+            assert!(
+                (r - m).abs() < 1e-12,
+                "large test (method): mismatch at p={}: ref={:.15} method={:.15}",
+                p,
+                r,
+                m
             );
         }
     }
