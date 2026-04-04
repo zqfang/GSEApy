@@ -616,6 +616,40 @@ impl EnrichmentScore {
 mod tests {
     use super::*;
 
+    /// Reconstruct the full O(N) running-ES vector from the O(k) tops/bottoms arrays
+    /// produced by `calc_gsea_stat`.
+    ///
+    /// The enrichment-score curve is a staircase:
+    /// - At a hit position `selected[i]`:          run_es = tops[i]
+    /// - At any miss position p after hit i−1:     run_es = tops[i-1] − (p − selected[i-1]) * inv_miss
+    /// - Before the first hit (p < selected[0]):   run_es = −(p + 1) * inv_miss
+    ///
+    /// This is the inverse of the O(k) compression: `bottoms[i]` should equal the
+    /// reconstructed value at `selected[i] − 1` (the last miss before hit i).
+    fn reconstruct_run_es_from_tops(tops: &[f64], selected: &[usize], n: usize) -> Vec<f64> {
+        let k = selected.len();
+        let inv_miss = 1.0 / (n - k) as f64;
+        let mut run_es = vec![0.0f64; n];
+        let mut hit_i = 0usize;
+        // last_top and last_hit_pos track the ES and position of the previous hit.
+        // We use i64 for last_hit_pos so we can represent "before any hit" as -1.
+        let mut last_top = 0.0f64;
+        let mut last_hit_pos: i64 = -1;
+
+        for p in 0..n {
+            if hit_i < k && p == selected[hit_i] {
+                run_es[p] = tops[hit_i];
+                last_top = tops[hit_i];
+                last_hit_pos = p as i64;
+                hit_i += 1;
+            } else {
+                let misses = p as i64 - last_hit_pos;
+                run_es[p] = last_top - misses as f64 * inv_miss;
+            }
+        }
+        run_es
+    }
+
     /// Verify that `calc_gsea_stat` (O(k)) produces the same ES as `fast_random_walk`
     /// for the standard score type with gsea_param = 1.0.
     ///
@@ -695,5 +729,120 @@ mod tests {
         assert!((result.bottoms[1] - 0.0).abs() < 1e-12);
         // ES = 0.5 (or 0.0, maxP == -minP → 0; but here min_p = 0.0 and max_p = 0.5 → 0.5)
         assert!((result.es - 0.5).abs() < 1e-12);
+    }
+
+    /// Compare the full O(N) running-ES vector from `running_enrichment_score` with the
+    /// vector reconstructed from `calc_gsea_stat`'s tops/bottoms arrays.
+    ///
+    /// The two representations must agree at every position to within floating-point
+    /// precision (ε = 1e-12).  We also explicitly verify that `bottoms[i]` equals the
+    /// reconstructed running-ES at position `selected[i] - 1` (the last miss before
+    /// each hit), ensuring the staircase knots are correctly placed.
+    #[test]
+    fn test_run_es_full_vector_matches_reconstruction() {
+        // N = 12, k = 4 hits at positions [1, 4, 7, 10]; 8 misses.
+        // stats are sorted descending and all positive (gsea_param = 1).
+        let stats: Vec<f64> = vec![
+            12.0, 10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.5, 1.5, 0.5,
+        ];
+        let selected: Vec<usize> = vec![1, 4, 7, 10];
+        let n = stats.len();
+        let gsea_param = 1.0;
+
+        // --- O(N) reference: running_enrichment_score ---
+        let genes: Vec<String> = (0..n).map(|i| format!("g{}", i)).collect();
+        let es_obj = EnrichmentScore::new(&genes, 0, 0, false, false);
+        let mut tag: Vec<f64> = vec![0.0f64; n];
+        for &i in &selected {
+            tag[i] = 1.0;
+        }
+        let ref_run_es = es_obj.running_enrichment_score(&stats, &tag);
+
+        // --- O(k) compressed form ---
+        let result = calc_gsea_stat(&stats, &selected, gsea_param, ScoreType::Std, true, false);
+
+        // --- Reconstruct full O(N) vector from tops ---
+        let recon_run_es = reconstruct_run_es_from_tops(&result.tops, &selected, n);
+
+        // Element-wise comparison
+        assert_eq!(
+            ref_run_es.len(),
+            recon_run_es.len(),
+            "vector length mismatch"
+        );
+        for (p, (&r, &c)) in ref_run_es.iter().zip(recon_run_es.iter()).enumerate() {
+            assert!(
+                (r - c).abs() < 1e-12,
+                "run_es mismatch at position {}: running_enrichment_score={:.15}, \
+                 reconstructed={:.15}, diff={:.3e}",
+                p,
+                r,
+                c,
+                (r - c).abs()
+            );
+        }
+
+        // Explicit spot checks for bottoms:
+        // bottoms[i] = run_es just before hit i, i.e. at selected[i] - 1
+        for (i, &hit_pos) in selected.iter().enumerate() {
+            if hit_pos > 0 {
+                let before_hit = ref_run_es[hit_pos - 1];
+                assert!(
+                    (result.bottoms[i] - before_hit).abs() < 1e-12,
+                    "bottoms[{}] mismatch: bottoms={:.15}, run_es[{}]={:.15}",
+                    i,
+                    result.bottoms[i],
+                    hit_pos - 1,
+                    before_hit
+                );
+            }
+        }
+
+        // Tops must equal run_es at hit positions
+        for (i, &hit_pos) in selected.iter().enumerate() {
+            assert!(
+                (result.tops[i] - ref_run_es[hit_pos]).abs() < 1e-12,
+                "tops[{}] mismatch: tops={:.15}, run_es[{}]={:.15}",
+                i,
+                result.tops[i],
+                hit_pos,
+                ref_run_es[hit_pos]
+            );
+        }
+    }
+
+    /// Verify the full-vector reconstruction with a larger, randomised example
+    /// to guard against edge cases (hits at first/last position, dense gene sets).
+    #[test]
+    fn test_run_es_full_vector_large() {
+        // N = 20, k = 6 hits at positions spread across the ranking.
+        // Include hits at position 0 and 19 to test boundary conditions.
+        let stats: Vec<f64> = (0..20u32)
+            .rev()
+            .map(|i| i as f64 + 1.0)
+            .collect(); // [20,19,...,1]
+        let selected: Vec<usize> = vec![0, 3, 7, 11, 15, 19];
+        let n = stats.len();
+
+        let genes: Vec<String> = (0..n).map(|i| format!("g{}", i)).collect();
+        let es_obj = EnrichmentScore::new(&genes, 0, 0, false, false);
+        let mut tag = vec![0.0f64; n];
+        for &i in &selected {
+            tag[i] = 1.0;
+        }
+        let ref_run_es = es_obj.running_enrichment_score(&stats, &tag);
+
+        let result = calc_gsea_stat(&stats, &selected, 1.0, ScoreType::Std, true, false);
+        let recon = reconstruct_run_es_from_tops(&result.tops, &selected, n);
+
+        for (p, (&r, &c)) in ref_run_es.iter().zip(recon.iter()).enumerate() {
+            assert!(
+                (r - c).abs() < 1e-12,
+                "large test: mismatch at p={}: ref={:.15} recon={:.15}",
+                p,
+                r,
+                c
+            );
+        }
     }
 }
