@@ -1471,34 +1471,20 @@ mod tests {
             let s1 = map_1d[term];
             let s2 = map_2d[term];
 
-            if (s1.es - s2.es).abs() > 1e-12 {
-                eprintln!(
-                    "ES mismatch '{}': prerank={:.8} prerank2d={:.8}",
-                    term, s1.es, s2.es
-                );
-                mismatch_count += 1;
-            }
-            if (s1.nes - s2.nes).abs() > 1e-12 {
-                eprintln!(
-                    "NES mismatch '{}': prerank={:.8} prerank2d={:.8}",
-                    term, s1.nes, s2.nes
-                );
-                mismatch_count += 1;
-            }
-            if (s1.pval - s2.pval).abs() > 1e-12 {
-                eprintln!(
-                    "pval mismatch '{}': prerank={:.8} prerank2d={:.8}",
-                    term, s1.pval, s2.pval
-                );
-                mismatch_count += 1;
-            }
-            if (s1.fdr - s2.fdr).abs() > 1e-12 {
-                eprintln!(
-                    "FDR mismatch '{}': prerank={:.8} prerank2d={:.8}",
-                    term, s1.fdr, s2.fdr
-                );
-                mismatch_count += 1;
-            }
+            // Compare scalar fields using a helper closure to avoid repetition
+            let mut check = |field: &str, v1: f64, v2: f64| {
+                if (v1 - v2).abs() > 1e-12 {
+                    eprintln!(
+                        "{} mismatch '{}': prerank={:.8} prerank2d={:.8}",
+                        field, term, v1, v2
+                    );
+                    mismatch_count += 1;
+                }
+            };
+            check("ES",   s1.es,   s2.es);
+            check("NES",  s1.nes,  s2.nes);
+            check("pval", s1.pval, s2.pval);
+            check("FDR",  s1.fdr,  s2.fdr);
 
             // hits (gene set member indices in the sorted gene list) must be identical
             assert_eq!(
