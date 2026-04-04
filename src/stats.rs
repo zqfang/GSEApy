@@ -1382,4 +1382,147 @@ mod tests {
                 term, c.es, c.nes, f.es, f.nes);
         }
     }
+
+    /// Compare prerank2() (used by prerank2d_rs) with prerank() (used by prerank_rs).
+    ///
+    /// For a single-sample 2-D metric that is identical to the 1-D metric used by
+    /// prerank_rs, both methods must produce exactly the same ES, NES, pval and fdr
+    /// for every gene set.
+    ///
+    /// prerank_rs (ground truth): receives genes pre-sorted by metric value descending.
+    /// prerank2d_rs: receives unsorted genes with a 2-D metric (one column); sorting
+    ///               happens internally inside prerank2().
+    #[test]
+    fn test_prerank2d_vs_prerank() {
+        // ── 1. Load test data ──────────────────────────────────────────────────
+        let cwd = std::env::current_dir().unwrap();
+        let rnk_path = cwd.join("tests/data/mds.2k.rnk");
+        let gmt_path = cwd.join("tests/data/c2.cp.kegg.v7.5.1.symbols.gmt");
+
+        let mut rnk = FileReader::new();
+        let _ = rnk.read_csv(rnk_path.to_str().unwrap(), b'\t', false, Some(b'#'));
+        let mut gmt_file = FileReader::new();
+        let _ = gmt_file.read_table(gmt_path.to_str().unwrap(), '\t', false);
+
+        // Raw genes and metrics in original file order (unsorted)
+        let mut raw_genes: Vec<String> = Vec::new();
+        let mut raw_metric: Vec<f64> = Vec::new();
+        for r in rnk.record.iter() {
+            raw_genes.push(r[0].clone());
+            raw_metric.push(r[1].parse::<f64>().unwrap());
+        }
+
+        let mut gmt2 = HashMap::<&str, &[String]>::new();
+        gmt_file.record.iter().for_each(|r| {
+            gmt2.insert(r[0].as_str(), &r[2..]);
+        });
+
+        let weight = 1.0f64;
+        let nperm = 100usize;
+        let seed = 42u64;
+        let min_size = 5usize;
+        let max_size = 500usize;
+
+        // ── 2. prerank_rs equivalent ───────────────────────────────────────────
+        // Sort genes by raw metric value descending, matching Python's behaviour
+        // when it loads a .rnk file and passes a pre-sorted Series to prerank_rs.
+        let (sort_idx, sorted_metric) = raw_metric.as_slice().argsort(false);
+        let sorted_genes: Vec<String> = sort_idx.iter().map(|&i| raw_genes[i].clone()).collect();
+
+        let mut gsea_1d = GSEAResult::new(weight, max_size, min_size, nperm, seed);
+        gsea_1d.prerank(&sorted_genes, &sorted_metric, &gmt2);
+
+        // ── 3. prerank2d_rs equivalent ─────────────────────────────────────────
+        // Build a 2-D metric with a single column: metric_2d[gene_i] = [raw_metric[i]].
+        // prerank2() sorts each column internally, replicating what prerank_rs expects
+        // its caller to have done before the call.
+        let metric_2d: Vec<Vec<f64>> = raw_metric.iter().map(|&v| vec![v]).collect();
+
+        let mut gsea_2d = GSEAResult::new(weight, max_size, min_size, nperm, seed);
+        gsea_2d.prerank2(&raw_genes, &metric_2d, &gmt2);
+
+        // ── 4. Compare results ─────────────────────────────────────────────────
+        let map_1d: HashMap<&str, &GSEASummary> =
+            gsea_1d.summaries.iter().map(|s| (s.term.as_str(), s)).collect();
+        let map_2d: HashMap<&str, &GSEASummary> =
+            gsea_2d.summaries.iter().map(|s| (s.term.as_str(), s)).collect();
+
+        // Sanity: both runs must test the same gene sets
+        assert_eq!(
+            map_1d.len(), map_2d.len(),
+            "gene set count differs: prerank={} prerank2d={}",
+            map_1d.len(), map_2d.len()
+        );
+
+        let mut common_terms: Vec<&str> = map_1d
+            .keys()
+            .filter(|&&t| map_2d.contains_key(t))
+            .copied()
+            .collect();
+        assert!(!common_terms.is_empty(), "no common gene sets between prerank and prerank2d");
+        assert_eq!(
+            common_terms.len(), map_1d.len(),
+            "some gene sets are missing in prerank2d output"
+        );
+
+        common_terms.sort();
+        let mut mismatch_count = 0usize;
+        for term in &common_terms {
+            let s1 = map_1d[term];
+            let s2 = map_2d[term];
+
+            if (s1.es - s2.es).abs() > 1e-12 {
+                eprintln!(
+                    "ES mismatch '{}': prerank={:.8} prerank2d={:.8}",
+                    term, s1.es, s2.es
+                );
+                mismatch_count += 1;
+            }
+            if (s1.nes - s2.nes).abs() > 1e-12 {
+                eprintln!(
+                    "NES mismatch '{}': prerank={:.8} prerank2d={:.8}",
+                    term, s1.nes, s2.nes
+                );
+                mismatch_count += 1;
+            }
+            if (s1.pval - s2.pval).abs() > 1e-12 {
+                eprintln!(
+                    "pval mismatch '{}': prerank={:.8} prerank2d={:.8}",
+                    term, s1.pval, s2.pval
+                );
+                mismatch_count += 1;
+            }
+            if (s1.fdr - s2.fdr).abs() > 1e-12 {
+                eprintln!(
+                    "FDR mismatch '{}': prerank={:.8} prerank2d={:.8}",
+                    term, s1.fdr, s2.fdr
+                );
+                mismatch_count += 1;
+            }
+
+            // hits (gene set member indices in the sorted gene list) must be identical
+            assert_eq!(
+                s1.hits, s2.hits,
+                "hits mismatch for '{}': prerank={:?} prerank2d={:?}",
+                term, s1.hits, s2.hits
+            );
+        }
+
+        assert_eq!(
+            mismatch_count, 0,
+            "{} numerical mismatches found between prerank and prerank2d (see stderr)",
+            mismatch_count
+        );
+
+        // Print a sample for visual inspection
+        println!("test_prerank2d_vs_prerank: {} gene sets compared", common_terms.len());
+        for term in common_terms.iter().take(5) {
+            let s1 = map_1d[term];
+            let s2 = map_2d[term];
+            println!(
+                "  {} | 1d es={:.6} nes={:.6} pval={:.4e} | 2d es={:.6} nes={:.6} pval={:.4e}",
+                term, s1.es, s1.nes, s1.pval, s2.es, s2.nes, s2.pval
+            );
+        }
+    }
 }
