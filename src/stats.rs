@@ -1,7 +1,7 @@
 #![allow(dead_code, unused)]
 
 use crate::algorithm::{EnrichmentScore, EnrichmentScoreTrait};
-use crate::fgsea::{compute_pvalue_multilevel, scale_ranks};
+use crate::fgsea::{compute_pvalue_multilevel_batch, scale_ranks};
 use crate::utils::{CorrelType, DynamicEnum, Metric, Statistic};
 use itertools::{izip, Itertools};
 use pyo3::prelude::*;
@@ -911,12 +911,17 @@ impl GSEAResult {
     ///
     /// This method ports `fgseaMultilevel` from the fgsea R/C++ package.
     ///
-    /// **Two-phase computation (matching fgsea):**
+    /// **Three-phase computation (matching fgsea):**
     /// 1. *NES*: `n_perm_simple` simple gene permutations build a per-gene-set null ES
     ///    distribution. `NES = ES / mean(positive null ESs)` when ES ≥ 0, or
     ///    `ES / |mean(negative null ESs)|` when ES < 0.
     /// 2. *p-value*: adaptive multilevel splitting + MCMC yields arbitrarily precise
     ///    values with quantified error bound `log2err`.
+    ///    Pathways of the **same size** share a single MCMC ruler (batch optimisation):
+    ///    one pos-ruler (original ranks) and one neg-ruler (reversed ranks) are built
+    ///    per unique pathway-size group and queried for every pathway in that group.
+    ///    This mirrors the reference fgsea C++/Python implementation and avoids
+    ///    redundant MCMC work when many pathways have the same gene-set size.
     /// 3. *FDR*: Benjamini-Hochberg correction across all tested gene sets.
     ///
     /// Parameters
@@ -950,8 +955,18 @@ impl GSEAResult {
         let mut es = EnrichmentScore::new(genes, self.nperm, self.seed, false, false);
         let gperm = es.gene_permutation(); // gene permutation, only record gene idx here
 
-        // Collect per-gene-set results; BH correction requires all p-values.
-        let mut summ = Vec::<GSEASummary>::new();
+        // ----------------------------------------------------------------
+        // Phase 1: collect per-pathway ES, null distribution, and run_es.
+        // ----------------------------------------------------------------
+        struct PathwayData {
+            term: String,
+            observed_es: f64,
+            esnull: Vec<f64>,
+            run_es: Vec<f64>,
+            hits: Vec<usize>,
+        }
+
+        let mut pathways: Vec<PathwayData> = Vec::new();
 
         for (&term, &gset) in gmt.iter() {
             let gtag = es.gene.isin(gset);
@@ -960,40 +975,101 @@ impl GSEAResult {
                 continue;
             }
 
-            let tag_indicators: Vec<Vec<f64>> = gperm.par_iter().map(|de| de.isin(&gidx)).collect();
-            let (ess, run_es) = es.enrichment_score_gene(&weighted_metric, &tag_indicators);
+            let tag_indicators: Vec<Vec<f64>> =
+                gperm.par_iter().map(|de| de.isin(&gidx)).collect();
+            let (ess, _) = es.enrichment_score_gene(&weighted_metric, &tag_indicators);
             let esnull: Vec<f64> = if ess.len() > 1 {
                 ess[1..].to_vec()
             } else {
                 Vec::new()
             };
 
-            // Compute observed ES (float domain, signed).
             let run_es = es.running_enrichment_score(&weighted_metric, &gtag);
-            let observed_es = ess[0]; 
+            let observed_es = ess[0];
 
-            // Compute multilevel p-value and log2 error bound.
-            let (ml_pval, ml_log2err) = compute_pvalue_multilevel(
-                &int_ranks,
-                gidx.len(),
-                observed_es,
-                sample_size,
-                self.seed,
-                eps,
-            );
-
-            summ.push(GSEASummary {
+            pathways.push(PathwayData {
                 term: term.to_string(),
-                es: observed_es,
+                observed_es,
+                esnull,
+                run_es,
+                hits: gidx,
+            });
+        }
+
+        // ----------------------------------------------------------------
+        // Phase 2: batch multilevel p-value computation grouped by size.
+        //
+        // Key optimisation (mirrors reference fgsea C++ Python binding):
+        // The null ES distribution depends only on `pathway_size` and the
+        // ranking metric, not on the specific gene set.  We therefore build
+        // ONE pos-ruler and ONE neg-ruler per unique pathway size and query
+        // every pathway in that size group from the shared ruler.
+        //
+        // Different size groups are processed in parallel (rayon).
+        // Each group gets a deterministic seed derived from the base seed and
+        // the pathway size so that results are reproducible and independent
+        // across groups.
+        // ----------------------------------------------------------------
+
+        // Group pathway indices by size
+        let mut size_groups: HashMap<usize, Vec<usize>> = HashMap::new();
+        for (i, pw) in pathways.iter().enumerate() {
+            size_groups
+                .entry(pw.hits.len())
+                .or_default()
+                .push(i);
+        }
+
+        // Process each size group (potentially in parallel) and collect (pval, log2err)
+        let size_groups_vec: Vec<(usize, Vec<usize>)> = size_groups.into_iter().collect();
+
+        // Gather ES values per group, run batch, collect results
+        // We run groups in parallel; each group is independent.
+        let group_results: Vec<(Vec<usize>, Vec<(f64, f64)>)> = size_groups_vec
+            .par_iter()
+            .map(|(size, indices)| {
+                // Derive a unique but deterministic seed for this pathway size.
+                let group_seed = self.seed.wrapping_add(*size as u64);
+                let es_values: Vec<f64> =
+                    indices.iter().map(|&i| pathways[i].observed_es).collect();
+                let results = compute_pvalue_multilevel_batch(
+                    &int_ranks,
+                    *size,
+                    &es_values,
+                    sample_size,
+                    group_seed,
+                    eps,
+                );
+                (indices.clone(), results)
+            })
+            .collect();
+
+        // Map batch results back to per-pathway (pval, log2err)
+        let mut pval_log2err: Vec<(f64, f64)> = vec![(1.0, f64::NAN); pathways.len()];
+        for (indices, results) in group_results {
+            for (&idx, result) in indices.iter().zip(results.iter()) {
+                pval_log2err[idx] = *result;
+            }
+        }
+
+        // ----------------------------------------------------------------
+        // Phase 3: assemble GSEASummary structs, normalise for NES, apply BH.
+        // ----------------------------------------------------------------
+        let mut summ: Vec<GSEASummary> = pathways
+            .into_iter()
+            .zip(pval_log2err.into_iter())
+            .map(|(pw, (ml_pval, ml_log2err))| GSEASummary {
+                term: pw.term,
+                es: pw.observed_es,
                 pval: ml_pval,
                 log2err: ml_log2err,
                 fwerp: 1.0,
-                run_es,
-                hits: gidx,
-                esnull, // temporary; used by normalize() below
+                run_es: pw.run_es,
+                hits: pw.hits,
+                esnull: pw.esnull, // temporary; used by normalize() below
                 ..Default::default()
-            });
-        }
+            })
+            .collect();
 
         // Compute NES from null distribution (fgsea formula).
         // normalize() reads s.esnull, sets s.nes = ES / mean(same-sign null ESs).

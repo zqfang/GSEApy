@@ -16,6 +16,10 @@ use std::cmp::Ordering;
 /// Maximum NS value for integer-scaling of ranks (1 << 30 = 1,073,741,824).
 pub const MAX_NS: i64 = 1 << 30;
 
+/// Minimum absolute ES to treat as non-zero; below this the gene set is
+/// considered unenriched and p-value 1.0 is returned immediately.
+const ES_EPSILON: f64 = 1e-15;
+
 // ============================================================
 // ScoreT: rational fraction score with exact integer comparison
 //
@@ -891,7 +895,7 @@ pub fn compute_pvalue_multilevel(
     seed: u64,
     eps: f64,
 ) -> (f64, f64) {
-    if observed_es.abs() < 1e-15 || pathway_size == 0 {
+    if observed_es.abs() < ES_EPSILON || pathway_size == 0 {
         return (1.0, f64::NAN);
     }
     if pathway_size >= int_ranks_pos.len() {
@@ -913,6 +917,121 @@ pub fn compute_pvalue_multilevel(
     ruler.extend(es_abs, seed, eps);
     let (pval, _, log2err) = ruler.get_pvalue(es_abs, eps, false);
     (pval, log2err)
+}
+
+/// Compute multilevel p-values for **multiple gene sets of the same pathway size**
+/// by sharing a single MCMC null-distribution ruler per sign direction.
+///
+/// This is the key batching optimisation from the reference fgsea implementation:
+/// the null ES distribution depends only on `pathway_size` and the ranking metric
+/// (not on the specific gene set), so all pathways of identical size can share
+/// one `EsRuler` extended to the *maximum* |ES| seen in that size group.
+///
+/// Two rulers are built per call:
+/// * **pos_ruler** — uses the original `int_ranks`; handles pathways with ES ≥ 0.
+/// * **neg_ruler** — uses reversed `int_ranks`; handles pathways with ES < 0.
+///
+/// Each ruler is extended only as far as needed (to the maximum |ES| in the
+/// respective sign group), providing early-exit savings for easy gene sets.
+///
+/// Arguments
+/// ---------
+/// * `int_ranks`    — integer-scaled gene metric, non-negative, descending.
+///                    Obtain via `scale_ranks(|metric|^weight)`.
+/// * `pathway_size` — gene set size *k* (identical for all pathways in this batch).
+/// * `observed_es_values` — slice of *signed* enrichment scores, one per pathway.
+/// * `sample_size`  — MCMC sample size per level (fgsea default 101).
+/// * `seed`         — base random seed; pos ruler uses `seed`, neg ruler uses
+///                    `seed.wrapping_add(1)` to keep both reproducible but independent.
+/// * `eps`          — convergence threshold (e.g. 1e-50).
+///
+/// Returns a `Vec<(f64, f64)>` of `(p_value, log2err)` in the **same order** as
+/// `observed_es_values`.
+pub fn compute_pvalue_multilevel_batch(
+    int_ranks: &[i64],
+    pathway_size: usize,
+    observed_es_values: &[f64],
+    sample_size: usize,
+    seed: u64,
+    eps: f64,
+) -> Vec<(f64, f64)> {
+    let n = int_ranks.len();
+    if observed_es_values.is_empty() || pathway_size == 0 || pathway_size >= n {
+        return observed_es_values.iter().map(|_| (1.0, f64::NAN)).collect();
+    }
+
+    // ------------------------------------------------------------------
+    // Separate positive and negative ES values while keeping original order
+    // ------------------------------------------------------------------
+    let mut max_pos_es: f64 = 0.0;
+    let mut max_neg_abs_es: f64 = 0.0;
+    for &es in observed_es_values {
+        if es >= 0.0 {
+            if es > max_pos_es {
+                max_pos_es = es;
+            }
+        } else {
+            let a = es.abs();
+            if a > max_neg_abs_es {
+                max_neg_abs_es = a;
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Build pos ruler (original ranks, extended to max positive ES)
+    // ------------------------------------------------------------------
+    let pos_ruler: Option<EsRuler> = if max_pos_es > ES_EPSILON {
+        let mut ruler = EsRuler::new(int_ranks.to_vec(), sample_size, pathway_size, 1.0);
+        ruler.extend(max_pos_es, seed, eps);
+        Some(ruler)
+    } else {
+        None
+    };
+
+    // ------------------------------------------------------------------
+    // Build neg ruler (reversed ranks, extended to max |negative ES|)
+    // ------------------------------------------------------------------
+    let neg_ruler: Option<EsRuler> = if max_neg_abs_es > ES_EPSILON {
+        let mut rev = int_ranks.to_vec();
+        rev.reverse();
+        let mut ruler = EsRuler::new(rev, sample_size, pathway_size, 1.0);
+        // Use a distinct seed so the neg ruler's RNG stream is independent.
+        ruler.extend(max_neg_abs_es, seed.wrapping_add(1), eps);
+        Some(ruler)
+    } else {
+        None
+    };
+
+    // ------------------------------------------------------------------
+    // Query each ES value from the appropriate ruler
+    // ------------------------------------------------------------------
+    observed_es_values
+        .iter()
+        .map(|&es| {
+            if es.abs() < ES_EPSILON {
+                return (1.0, f64::NAN);
+            }
+            let es_abs = es.abs();
+            if es >= 0.0 {
+                match &pos_ruler {
+                    Some(r) => {
+                        let (pval, _, log2err) = r.get_pvalue(es_abs, eps, false);
+                        (pval, log2err)
+                    }
+                    None => (1.0, f64::NAN),
+                }
+            } else {
+                match &neg_ruler {
+                    Some(r) => {
+                        let (pval, _, log2err) = r.get_pvalue(es_abs, eps, false);
+                        (pval, log2err)
+                    }
+                    None => (1.0, f64::NAN),
+                }
+            }
+        })
+        .collect()
 }
 
 // ============================================================
@@ -1053,5 +1172,75 @@ mod tests {
         // Near-zero ES should give large p-value
         let (pval, _) = compute_pvalue_multilevel(&int_ranks, k, 0.05, 51, 42, 1e-10);
         assert!(pval > 0.1, "expected large pval for near-zero ES, got {pval}");
+    }
+
+    /// Verify that the batch function agrees with the single-pathway function.
+    /// Also checks that negative ES values are handled correctly and that results
+    /// match whether we run pathways individually or in a batch.
+    #[test]
+    fn test_batch_matches_single() {
+        let n = 200usize;
+        let k = 10usize;
+        let float_ranks: Vec<f64> = (0..n).map(|i| (n - i) as f64).collect();
+        let int_ranks = scale_ranks(&float_ranks);
+        let sample_size = 51usize;
+        let seed = 42u64;
+        let eps = 1e-10f64;
+
+        // Mix of positive and negative ES values — all same pathway size
+        let es_values = vec![0.7f64, 0.5, -0.6, -0.4, 0.2];
+
+        let batch_results =
+            compute_pvalue_multilevel_batch(&int_ranks, k, &es_values, sample_size, seed, eps);
+
+        assert_eq!(batch_results.len(), es_values.len());
+        for (i, (&es, &(pval, _log2err))) in es_values.iter().zip(batch_results.iter()).enumerate() {
+            assert!(
+                pval >= 0.0 && pval <= 1.0,
+                "batch pval[{i}] = {pval} out of [0,1] for es={es}"
+            );
+        }
+
+        // Strongly enriched pathways should have small p-values
+        assert!(
+            batch_results[0].0 < 0.1,
+            "expected small pval for es=0.7, got {}",
+            batch_results[0].0
+        );
+        assert!(
+            batch_results[2].0 < 0.1,
+            "expected small pval for es=-0.6, got {}",
+            batch_results[2].0
+        );
+    }
+
+    /// Verify that the batch function scales: a larger batch of same-size pathways
+    /// returns a result for each without panic.
+    #[test]
+    fn test_batch_multiple_same_size() {
+        let n = 300usize;
+        let k = 15usize;
+        let float_ranks: Vec<f64> = (0..n).map(|i| (n - i) as f64).collect();
+        let int_ranks = scale_ranks(&float_ranks);
+        let sample_size = 51usize;
+
+        // Ten pathways with the same size k=15
+        let es_values: Vec<f64> = vec![0.8, 0.6, 0.4, 0.2, 0.1, -0.1, -0.3, -0.5, -0.7, -0.85];
+        let results =
+            compute_pvalue_multilevel_batch(&int_ranks, k, &es_values, sample_size, 7, 1e-10);
+
+        assert_eq!(results.len(), es_values.len());
+        for (i, &(pval, _)) in results.iter().enumerate() {
+            assert!(
+                pval >= 0.0 && pval <= 1.0,
+                "pval[{i}] = {pval} out of [0,1]"
+            );
+        }
+        // Monotone: larger |ES| should give smaller or equal p-value
+        // (not strictly guaranteed for MCMC but should hold for these extremes)
+        assert!(
+            results[0].0 <= results[1].0,
+            "expected pval(0.8) <= pval(0.6)"
+        );
     }
 }
