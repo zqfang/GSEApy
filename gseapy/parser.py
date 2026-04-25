@@ -301,8 +301,9 @@ def download_library(name: str, organism: str = "human", filename: str = None) -
     if not response.ok:
         raise Exception("Error fetching gene set library, input name is correct for the organism you've set?.")
     # reformat to dict
+    response.encoding = "utf-8"
     genesets_dict = {}
-    for line in response.iter_lines(chunk_size=1024, decode_unicode="utf-8"):
+    for line in response.iter_lines(chunk_size=1024, decode_unicode=True):
         line = line.strip().split("\t")
         k = line[0]
         v = map(lambda x: x.split(",")[0], line[2:])
