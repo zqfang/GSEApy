@@ -250,7 +250,7 @@ fn gsva_rs(
 /// - min_size: minimum gene set size to test
 /// - max_size: maximum gene set size to test
 /// - sample_size: MCMC sample size per level (fgsea default: 101)
-/// - n_perm_simple: simple permutations for NES normalization (fgsea default: 1000;
+/// - nperm: gene permutations for NES normalization (fgsea default: 1000;
 ///   set to 0 to skip NES normalization)
 /// - eps: convergence threshold for multilevel algorithm (default 1e-50)
 /// - threads: number of parallel threads
@@ -308,25 +308,25 @@ fn prerank_fgsea_rs(
 /// -------
 /// GseaStatResult
 ///     Object with fields ``es``, ``tops``, ``bottoms``, ``leading_edge``.
-#[pyfunction]
-#[pyo3(signature = (stats, selected_stats, gsea_param=1.0, score_type=ScoreType::Std, return_all_extremes=false, return_leading_edge=false))]
-fn calc_gsea_stat_rs(
-    stats: Vec<f64>,
-    selected_stats: Vec<usize>,
-    gsea_param: f64,
-    score_type: ScoreType,
-    return_all_extremes: bool,
-    return_leading_edge: bool,
-) -> PyResult<GseaStatResult> {
-    Ok(calc_gsea_stat(
-        &stats,
-        &selected_stats,
-        gsea_param,
-        score_type,
-        return_all_extremes,
-        return_leading_edge,
-    ))
-}
+// #[pyfunction]
+// #[pyo3(signature = (stats, selected_stats, gsea_param=1.0, score_type=ScoreType::Std, return_all_extremes=false, return_leading_edge=false))]
+// fn calc_gsea_stat_rs(
+//     stats: Vec<f64>,
+//     selected_stats: Vec<usize>,
+//     gsea_param: f64,
+//     score_type: ScoreType,
+//     return_all_extremes: bool,
+//     return_leading_edge: bool,
+// ) -> PyResult<GseaStatResult> {
+//     Ok(calc_gsea_stat(
+//         &stats,
+//         &selected_stats,
+//         gsea_param,
+//         score_type,
+//         return_all_extremes,
+//         return_leading_edge,
+//     ))
+// }
 
 /// Python module for GSEA (Gene Set Enrichment Analysis) and ssGSEA
 /// 
@@ -354,6 +354,6 @@ fn gse(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(ssgsea_rs, m)?)?;
     m.add_function(wrap_pyfunction!(gsva_rs, m)?)?;
     m.add_function(wrap_pyfunction!(prerank_fgsea_rs, m)?)?;
-    m.add_function(wrap_pyfunction!(calc_gsea_stat_rs, m)?)?;
+    // m.add_function(wrap_pyfunction!(calc_gsea_stat_rs, m)?)?;
     Ok(())
 }

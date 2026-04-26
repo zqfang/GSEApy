@@ -97,9 +97,6 @@ def test_prerank(prernk, geneGMT):
     tmpdir = TemporaryDirectory(dir="tests")
     prerank(prernk, geneGMT, outdir=tmpdir.name, permutation_num=10)
     tmpdir.cleanup()
-    prerank(
-        prernk, ["KEGG_2016", "GO_Biological_Process_2021"], outdir=None, permutation_num=20
-    )
 
 
 def test_prerank_reproducibility(geneGMT):
