@@ -12,7 +12,7 @@ use rayon::prelude::*;
 ///
 /// `tops` and `bottoms` are populated only when `return_all_extremes = true`.
 /// `leading_edge` is populated only when `return_leading_edge = true`.
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Clone)]
 pub struct GseaStatResult {
     /// Enrichment score (scalar summary statistic).

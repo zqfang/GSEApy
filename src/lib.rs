@@ -8,7 +8,7 @@ mod gsva;
 mod stats;
 mod utils;
 // export module fn, struct, trait ...
-use algorithm::{calc_gsea_stat, GseaStatResult};
+use algorithm::GseaStatResult;
 use gsva::gsva;
 use stats::{GSEAResult, GSEASummary};
 use utils::{CorrelType, Metric, ScoreType};

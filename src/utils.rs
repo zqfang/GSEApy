@@ -37,7 +37,7 @@ pub enum CorrelType {
 ///   (positive or negative).
 /// - `Pos`: one-tailed, only the maximum (positive) enrichment score is considered.
 /// - `Neg`: one-tailed, only the minimum (negative) enrichment score is considered.
-#[pyclass(eq, eq_int)]
+#[pyclass(eq, eq_int, from_py_object)]
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub enum ScoreType {
     Std = 0,
