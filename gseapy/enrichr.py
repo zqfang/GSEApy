@@ -143,6 +143,8 @@ class EnrichrAPI:
         with open(temp_path, "w") as gmtout:
             for line in response.iter_lines(chunk_size=1024, decode_unicode=True):
                 line = line.strip().split("\t")
+                if len(line) < 2:
+                    continue
                 k = line[0]
                 v = map(lambda x: x.split(",")[0], line[2:])
                 v = list(filter(lambda x: True if len(x) else False, v))

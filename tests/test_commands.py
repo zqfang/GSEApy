@@ -1165,8 +1165,12 @@ class TestDownloadLibraryEncoding:
     """
 
     @staticmethod
-    def _make_mock_response(body_bytes: bytes, encoding=None):
-        """Build a minimal mock requests.Response that streams body_bytes."""
+    def _make_mock_response(body_bytes: bytes, encoding=None, pass_empty: bool = False):
+        """Build a minimal mock requests.Response that streams body_bytes.
+
+        When pass_empty=True, empty lines are yielded (simulating real
+        requests.iter_lines behaviour when the server sends blank lines).
+        """
         from unittest.mock import MagicMock
 
         mock_resp = MagicMock()
@@ -1193,7 +1197,7 @@ class TestDownloadLibraryEncoding:
         def _iter_lines(chunk_size=512, decode_unicode=False):
             lines = body_bytes.split(b"\n")
             for raw in lines:
-                if not raw:
+                if not raw and not pass_empty:
                     continue
                 if decode_unicode and _state["encoding"]:
                     yield raw.decode(_state["encoding"])
@@ -1265,12 +1269,30 @@ class TestDownloadLibraryEncoding:
         result = download_library("FakeLib", organism="human")
         assert result["TERM_D"] == ["GENE1"]
 
+    def test_blank_lines_in_response_skipped(self, monkeypatch):
+        """Blank lines in the server response must not raise IndexError."""
+        import requests as req
+
+        from gseapy.parser import download_library
+
+        # Simulate a body where an empty line appears between real lines
+        body = b"TERM_E\tdesc\tGENE1\tGENE2\n\nTERM_F\tdesc2\tGENE3\n\n"
+        mock_resp = self._make_mock_response(body, encoding=None, pass_empty=True)
+
+        monkeypatch.setattr(req, "get", lambda *a, **kw: mock_resp)
+
+        result = download_library("FakeLib", organism="human")
+        assert "TERM_E" in result
+        assert result["TERM_E"] == ["GENE1", "GENE2"]
+        assert "TERM_F" in result
+        assert result["TERM_F"] == ["GENE3"]
+
 
 class TestEnrichrAPIDownloadLibrariesEncoding:
     """Tests that EnrichrAPI.download_libraries handles missing charset correctly."""
 
     @staticmethod
-    def _make_session_mock(body_bytes: bytes, encoding=None):
+    def _make_session_mock(body_bytes: bytes, encoding=None, pass_empty: bool = False):
         """Build a mock session whose get() returns a streaming response."""
         from unittest.mock import MagicMock
 
@@ -1292,7 +1314,7 @@ class TestEnrichrAPIDownloadLibrariesEncoding:
 
         def _iter_lines(chunk_size=512, decode_unicode=False):
             for raw in body_bytes.split(b"\n"):
-                if not raw:
+                if not raw and not pass_empty:
                     continue
                 if decode_unicode and _state["encoding"]:
                     yield raw.decode(_state["encoding"])
@@ -1357,3 +1379,24 @@ class TestEnrichrAPIDownloadLibrariesEncoding:
 
         result = api.download_libraries("FakeLib")
         assert result["TERM_Z"] == ["GENE1", "GENE2"]
+
+    def test_blank_lines_in_response_skipped(self, tmp_path, monkeypatch):
+        """Blank lines emitted by iter_lines must not raise IndexError."""
+        import importlib
+
+        enrichr_mod = importlib.import_module("gseapy.enrichr")
+        EnrichrAPI = enrichr_mod.EnrichrAPI
+
+        # Trailing newline produces an empty string that would cause IndexError
+        # without the `len(line) < 2` guard in download_libraries.
+        body = b"TERM_W\tdesc\tGENE1\tGENE2\n\nTERM_X\tdesc2\tGENE3\n\n"
+        api = EnrichrAPI(organism="human")
+        api._session = self._make_session_mock(body, encoding=None, pass_empty=True)
+
+        monkeypatch.setattr(enrichr_mod, "DEFAULT_CACHE_PATH", str(tmp_path))
+
+        result = api.download_libraries("FakeLib")
+        assert "TERM_W" in result
+        assert result["TERM_W"] == ["GENE1", "GENE2"]
+        assert "TERM_X" in result
+        assert result["TERM_X"] == ["GENE3"]
