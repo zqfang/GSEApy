@@ -1148,3 +1148,255 @@ class TestCLIArgParsing:
         parser = prepare_argparser()
         args = parser.parse_args([])
         assert args.subcommand_name is None
+
+
+# ---------------------------------------------------------------------------
+# Tests for download_library encoding fix (issue #353)
+# ---------------------------------------------------------------------------
+
+
+class TestDownloadLibraryEncoding:
+    """Tests that download_library handles responses with no charset header.
+
+    When a server returns a response without a charset in Content-Type,
+    requests sets response.encoding = None.  Without the fix, iter_lines
+    would yield raw bytes and line.split("\\t") would raise:
+        TypeError: a bytes-like object is required, not 'str'
+    """
+
+    @staticmethod
+    def _make_mock_response(body_bytes: bytes, encoding=None, pass_empty: bool = False):
+        """Build a minimal mock requests.Response that streams body_bytes.
+
+        When pass_empty=True, empty lines are yielded (simulating real
+        requests.iter_lines behaviour when the server sends blank lines).
+        """
+        from unittest.mock import MagicMock
+
+        mock_resp = MagicMock()
+        mock_resp.ok = True
+        mock_resp.encoding = encoding
+
+        # iter_lines must honour the encoding attribute that callers set.
+        # We replicate the real requests behaviour: decode only when encoding
+        # is set.  The test explicitly sets it to None first, then the code
+        # under test sets it to "utf-8" — so we capture assignment.
+        _state = {"encoding": encoding}
+
+        def _set_encoding(value):
+            _state["encoding"] = value
+
+        def _get_encoding():
+            return _state["encoding"]
+
+        type(mock_resp).encoding = property(
+            lambda self: _get_encoding(),
+            lambda self, v: _set_encoding(v),
+        )
+
+        def _iter_lines(chunk_size=512, decode_unicode=False):
+            lines = body_bytes.split(b"\n")
+            for raw in lines:
+                if not raw and not pass_empty:
+                    continue
+                if decode_unicode and _state["encoding"]:
+                    yield raw.decode(_state["encoding"])
+                else:
+                    yield raw
+
+        mock_resp.iter_lines = _iter_lines
+        return mock_resp
+
+    def test_no_charset_header_does_not_raise(self, tmp_path, monkeypatch):
+        """download_library must not raise TypeError when response.encoding is None."""
+        import requests as req
+
+        from gseapy.parser import download_library
+
+        # Tab-separated GMT-style body: term <tab> description <tab> gene1 <tab> gene2
+        body = b"TERM_A\tdescription\tGENE1\tGENE2\nTERM_B\tdesc2\tGENE3\n"
+        mock_resp = self._make_mock_response(body, encoding=None)
+
+        monkeypatch.setattr(req, "get", lambda *a, **kw: mock_resp)
+
+        # Should not raise TypeError
+        result = download_library("FakeLib", organism="human")
+        assert "TERM_A" in result
+        assert result["TERM_A"] == ["GENE1", "GENE2"]
+        assert "TERM_B" in result
+        assert result["TERM_B"] == ["GENE3"]
+
+    def test_with_charset_header_still_works(self, monkeypatch):
+        """download_library must work when the server already provides encoding."""
+        import requests as req
+
+        from gseapy.parser import download_library
+
+        body = b"PATHWAY_1\tdesc\tAKT1\tBRCA1\tTP53\n"
+        mock_resp = self._make_mock_response(body, encoding="utf-8")
+
+        monkeypatch.setattr(req, "get", lambda *a, **kw: mock_resp)
+
+        result = download_library("FakeLib", organism="human")
+        assert "PATHWAY_1" in result
+        assert set(result["PATHWAY_1"]) == {"AKT1", "BRCA1", "TP53"}
+
+    def test_comma_separated_genes_stripped(self, monkeypatch):
+        """Genes like 'GENE1,123' should be trimmed to just 'GENE1'."""
+        import requests as req
+
+        from gseapy.parser import download_library
+
+        body = b"TERM_C\tdesc\tGENE1,100\tGENE2,200\n"
+        mock_resp = self._make_mock_response(body, encoding=None)
+
+        monkeypatch.setattr(req, "get", lambda *a, **kw: mock_resp)
+
+        result = download_library("FakeLib", organism="human")
+        assert result["TERM_C"] == ["GENE1", "GENE2"]
+
+    def test_empty_gene_fields_removed(self, monkeypatch):
+        """Trailing empty tab fields should be filtered out."""
+        import requests as req
+
+        from gseapy.parser import download_library
+
+        body = b"TERM_D\tdesc\tGENE1\t\t\n"
+        mock_resp = self._make_mock_response(body, encoding=None)
+
+        monkeypatch.setattr(req, "get", lambda *a, **kw: mock_resp)
+
+        result = download_library("FakeLib", organism="human")
+        assert result["TERM_D"] == ["GENE1"]
+
+    def test_blank_lines_in_response_skipped(self, monkeypatch):
+        """Blank lines in the server response must not raise IndexError."""
+        import requests as req
+
+        from gseapy.parser import download_library
+
+        # Simulate a body where an empty line appears between real lines
+        body = b"TERM_E\tdesc\tGENE1\tGENE2\n\nTERM_F\tdesc2\tGENE3\n\n"
+        mock_resp = self._make_mock_response(body, encoding=None, pass_empty=True)
+
+        monkeypatch.setattr(req, "get", lambda *a, **kw: mock_resp)
+
+        result = download_library("FakeLib", organism="human")
+        assert "TERM_E" in result
+        assert result["TERM_E"] == ["GENE1", "GENE2"]
+        assert "TERM_F" in result
+        assert result["TERM_F"] == ["GENE3"]
+
+
+class TestEnrichrAPIDownloadLibrariesEncoding:
+    """Tests that EnrichrAPI.download_libraries handles missing charset correctly."""
+
+    @staticmethod
+    def _make_session_mock(body_bytes: bytes, encoding=None, pass_empty: bool = False):
+        """Build a mock session whose get() returns a streaming response."""
+        from unittest.mock import MagicMock
+
+        mock_resp = MagicMock()
+        mock_resp.ok = True
+
+        _state = {"encoding": encoding}
+
+        def _set_encoding(value):
+            _state["encoding"] = value
+
+        def _get_encoding():
+            return _state["encoding"]
+
+        type(mock_resp).encoding = property(
+            lambda self: _get_encoding(),
+            lambda self, v: _set_encoding(v),
+        )
+
+        def _iter_lines(chunk_size=512, decode_unicode=False):
+            for raw in body_bytes.split(b"\n"):
+                if not raw and not pass_empty:
+                    continue
+                if decode_unicode and _state["encoding"]:
+                    yield raw.decode(_state["encoding"])
+                else:
+                    yield raw
+
+        mock_resp.iter_lines = _iter_lines
+
+        mock_session = MagicMock()
+        mock_session.get.return_value = mock_resp
+        return mock_session
+
+    def test_no_charset_does_not_raise(self, tmp_path, monkeypatch):
+        """download_libraries must not raise TypeError when encoding is None."""
+        import importlib
+
+        enrichr_mod = importlib.import_module("gseapy.enrichr")
+        EnrichrAPI = enrichr_mod.EnrichrAPI
+
+        body = b"TERM_A\tdescription\tGENE1\tGENE2\nTERM_B\tdesc2\tGENE3\n"
+        api = EnrichrAPI(organism="human")
+        api._session = self._make_session_mock(body, encoding=None)
+
+        # Redirect cache writes to tmp_path so the test is hermetic
+        monkeypatch.setattr(enrichr_mod, "DEFAULT_CACHE_PATH", str(tmp_path))
+
+        result = api.download_libraries("FakeLib")
+        assert "TERM_A" in result
+        assert result["TERM_A"] == ["GENE1", "GENE2"]
+        assert "TERM_B" in result
+        assert result["TERM_B"] == ["GENE3"]
+
+    def test_with_charset_still_works(self, tmp_path, monkeypatch):
+        """download_libraries must work when encoding is already set."""
+        import importlib
+
+        enrichr_mod = importlib.import_module("gseapy.enrichr")
+        EnrichrAPI = enrichr_mod.EnrichrAPI
+
+        body = b"PATHWAY_X\tdesc\tTP53\tMYC\n"
+        api = EnrichrAPI(organism="human")
+        api._session = self._make_session_mock(body, encoding="utf-8")
+
+        monkeypatch.setattr(enrichr_mod, "DEFAULT_CACHE_PATH", str(tmp_path))
+
+        result = api.download_libraries("FakeLib")
+        assert "PATHWAY_X" in result
+        assert set(result["PATHWAY_X"]) == {"TP53", "MYC"}
+
+    def test_comma_separated_genes_stripped(self, tmp_path, monkeypatch):
+        """Genes like 'GENE1,entrezid' should be trimmed to just 'GENE1'."""
+        import importlib
+
+        enrichr_mod = importlib.import_module("gseapy.enrichr")
+        EnrichrAPI = enrichr_mod.EnrichrAPI
+
+        body = b"TERM_Z\tdesc\tGENE1,111\tGENE2,222\n"
+        api = EnrichrAPI(organism="human")
+        api._session = self._make_session_mock(body, encoding=None)
+
+        monkeypatch.setattr(enrichr_mod, "DEFAULT_CACHE_PATH", str(tmp_path))
+
+        result = api.download_libraries("FakeLib")
+        assert result["TERM_Z"] == ["GENE1", "GENE2"]
+
+    def test_blank_lines_in_response_skipped(self, tmp_path, monkeypatch):
+        """Blank lines emitted by iter_lines must not raise IndexError."""
+        import importlib
+
+        enrichr_mod = importlib.import_module("gseapy.enrichr")
+        EnrichrAPI = enrichr_mod.EnrichrAPI
+
+        # Trailing newline produces an empty string that would cause IndexError
+        # without the `len(line) < 2` guard in download_libraries.
+        body = b"TERM_W\tdesc\tGENE1\tGENE2\n\nTERM_X\tdesc2\tGENE3\n\n"
+        api = EnrichrAPI(organism="human")
+        api._session = self._make_session_mock(body, encoding=None, pass_empty=True)
+
+        monkeypatch.setattr(enrichr_mod, "DEFAULT_CACHE_PATH", str(tmp_path))
+
+        result = api.download_libraries("FakeLib")
+        assert "TERM_W" in result
+        assert result["TERM_W"] == ["GENE1", "GENE2"]
+        assert "TERM_X" in result
+        assert result["TERM_X"] == ["GENE3"]
