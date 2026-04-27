@@ -123,11 +123,8 @@ jobs:
           pattern: dist-*
           path: dist
           merge-multiple: true
-      - uses: actions/setup-python@v5
-      - name: Install twine
-        run: pip install twine
+      - uses: astral-sh/setup-uv@v5
       - name: Publish to PyPI
         env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-        run: twine upload --skip-existing dist/*
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+        run: uv publish --check-url https://pypi.org/simple/ dist/*
