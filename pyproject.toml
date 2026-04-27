@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=75", "wheel>=0.44", "setuptools_rust>=1.10", "build>=1.2.2"]
+requires = ["setuptools>=77", "setuptools_rust>=1.10"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,7 +7,8 @@ name = "gseapy"
 version = "1.2.1"
 dynamic = ["readme"]
 description = "Gene Set Enrichment Analysis in Python"
-license = {text = "BSD-3-Clause"}
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
 authors = [{ name = "Zhuoqing Fang", email = "fzq518@gmail.com" }]
 keywords = [
     "Gene Ontology",
@@ -27,7 +28,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Bio-Informatics",
     "Topic :: Software Development :: Libraries",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
     "numpy>=1.13.0",
     "scipy",
@@ -86,7 +87,7 @@ python-preference = "only-managed"
 #   uv build                 → build wheel + sdist
 
 [tool.ruff]
-target-version = "py38"
+target-version = "py39"
 line-length = 120
 
 [tool.ruff.lint]

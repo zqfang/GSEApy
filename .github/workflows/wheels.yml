@@ -42,7 +42,7 @@ jobs:
           CIBW_ENVIRONMENT_LINUX: 'PATH="$PATH:$HOME/.cargo/bin"'
           CIBW_MANYLINUX_X86_64_IMAGE: quay.io/pypa/manylinux2014_x86_64:latest
           CIBW_SKIP: pp* *win32 *musl*
-          CIBW_PROJECT_REQUIRES_PYTHON: ">=3.8"
+          CIBW_PROJECT_REQUIRES_PYTHON: ">=3.9"
           CIBW_PRERELEASE_PYTHONS: "true"
           CIBW_BEFORE_BUILD: >
             python -m pip install -U pip setuptools wheel build setuptools-rust
@@ -74,7 +74,7 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: quay.io/pypa/manylinux2014_x86_64:latest
           CIBW_ARCHS_LINUX: aarch64
           CIBW_SKIP: pp* *win32 *musl*
-          CIBW_PROJECT_REQUIRES_PYTHON: ">=3.8"
+          CIBW_PROJECT_REQUIRES_PYTHON: ">=3.9"
           CIBW_PRERELEASE_PYTHONS: "true"
           CIBW_BEFORE_BUILD: >
             python -m pip install -U pip setuptools wheel build setuptools-rust
@@ -104,7 +104,7 @@ jobs:
         run: python -m cibuildwheel --output-dir wheelhouse
         env:
           CIBW_SKIP: pp* *amd64 *musl*
-          CIBW_PROJECT_REQUIRES_PYTHON: ">=3.8"
+          CIBW_PROJECT_REQUIRES_PYTHON: ">=3.9"
           CIBW_PRERELEASE_PYTHONS: "true"
           CIBW_BEFORE_BUILD: >
             python -m pip install -U pip setuptools wheel build setuptools-rust
