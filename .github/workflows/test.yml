@@ -55,8 +55,8 @@ jobs:
           CIBW_ENVIRONMENT_LINUX: 'PATH="$PATH:$HOME/.cargo/bin"'
           CIBW_MANYLINUX_X86_64_IMAGE: quay.io/pypa/manylinux2014_x86_64:latest
           CIBW_MANYLINUX_I686_IMAGE: quay.io/pypa/manylinux2014_i686:latest
-          CIBW_SKIP: cp36-* cp37-* pp* *win32 *musl*
-          CIBW_PROJECT_REQUIRES_PYTHON: ">=3.8"
+          CIBW_SKIP: cp36-* cp37-* cp38-* pp* *win32 *musl*
+          CIBW_PROJECT_REQUIRES_PYTHON: ">=3.9"
           CIBW_PRERELEASE_PYTHONS: True
           CIBW_BEFORE_BUILD: >
             python -m pip install -U pip setuptools wheel build setuptools-rust
