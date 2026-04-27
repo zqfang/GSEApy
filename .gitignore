@@ -40,3 +40,4 @@ gseapy_example.ipynb
 target
 Cargo.lock
 .jupyter
+uv.lock
