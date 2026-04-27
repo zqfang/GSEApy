@@ -7,7 +7,8 @@ name = "gseapy"
 version = "1.2.1"
 dynamic = ["readme"]
 description = "Gene Set Enrichment Analysis in Python"
-license = { text = "BSD-3-Clause"}
+# license = "BSD-3-Clause"
+license-files = ["LICENSE"]
 authors = [{ name = "Zhuoqing Fang", email = "fzq518@gmail.com" }]
 keywords = [
     "Gene Ontology",
@@ -65,8 +66,6 @@ Documentation = "https://gseapy.readthedocs.io/en/latest/"
 Source = "https://github.com/zqfang/GSEApy"
 Tracker = "https://github.com/zqfang/GSEApy/issues"
 
-[tool.setuptools]
-license-files = ["LICENSE"]
 
 [tool.setuptools.dynamic]
 readme = { file = ["README.rst"] }
