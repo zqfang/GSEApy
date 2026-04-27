@@ -6,6 +6,7 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -57,3 +58,11 @@ jobs:
           CIBW_SKIP: cp36-* cp37-* pp* *win32 *musl*
           CIBW_PROJECT_REQUIRES_PYTHON: ">=3.8"
           CIBW_PRERELEASE_PYTHONS: True
+          CIBW_BEFORE_BUILD: >
+            python -m pip install -U pip setuptools wheel build setuptools-rust
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}
+          path: wheelhouse/*.whl
+          retention-days: 7

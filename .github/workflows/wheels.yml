@@ -4,6 +4,7 @@ name: Wheel Builds
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 jobs:
   sdist:
