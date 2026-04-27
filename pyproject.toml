@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0.0", "wheel", "setuptools_rust>=1.0.0"]
+requires = ["setuptools>=75", "wheel>=0.44", "setuptools_rust>=1.10", "build>=1.2.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -64,6 +64,9 @@ Homepage = "https://github.com/zqfang/gseapy"
 Documentation = "https://gseapy.readthedocs.io/en/latest/"
 Source = "https://github.com/zqfang/GSEApy"
 Tracker = "https://github.com/zqfang/GSEApy/issues"
+
+[tool.setuptools]
+license-files = ["LICENSE"]
 
 [tool.setuptools.dynamic]
 readme = { file = ["README.rst"] }

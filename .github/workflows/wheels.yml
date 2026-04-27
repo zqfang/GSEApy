@@ -43,7 +43,8 @@ jobs:
           CIBW_SKIP: pp* *win32 *musl*
           CIBW_PROJECT_REQUIRES_PYTHON: ">=3.8"
           CIBW_PRERELEASE_PYTHONS: "true"
-          CIBW_BEFORE_BUILD: pip install -U setuptools-rust
+          CIBW_BEFORE_BUILD: >
+            python -m pip install -U pip setuptools wheel build setuptools-rust
       - uses: actions/upload-artifact@v4
         with:
           name: dist-wheels-${{ matrix.os }}
@@ -74,7 +75,8 @@ jobs:
           CIBW_SKIP: pp* *win32 *musl*
           CIBW_PROJECT_REQUIRES_PYTHON: ">=3.8"
           CIBW_PRERELEASE_PYTHONS: "true"
-          CIBW_BEFORE_BUILD: pip install -U setuptools-rust
+          CIBW_BEFORE_BUILD: >
+            python -m pip install -U pip setuptools wheel build setuptools-rust
       - uses: actions/upload-artifact@v4
         with:
           name: dist-wheels-aarch64
@@ -103,7 +105,8 @@ jobs:
           CIBW_SKIP: pp* *amd64 *musl*
           CIBW_PROJECT_REQUIRES_PYTHON: ">=3.8"
           CIBW_PRERELEASE_PYTHONS: "true"
-          CIBW_BEFORE_BUILD: pip install -U setuptools-rust
+          CIBW_BEFORE_BUILD: >
+            python -m pip install -U pip setuptools wheel build setuptools-rust
       - uses: actions/upload-artifact@v4
         with:
           name: dist-wheels-win32
@@ -121,4 +124,4 @@ jobs:
           merge-multiple: true
       - uses: astral-sh/setup-uv@v4
       - name: Publish to PyPI
-        run: uv publish dist/* --token ${{ secrets.PYPI_API_TOKEN }}
+        run: uv publish dist/* --token ${{ secrets.PYPI_API_TOKEN }} --skip-existing
