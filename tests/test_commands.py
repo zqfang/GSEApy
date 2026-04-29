@@ -1214,7 +1214,7 @@ class TestDownloadLibraryEncoding:
         body = b"TERM_A\tdescription\tGENE1\tGENE2\nTERM_B\tdesc2\tGENE3\n"
         mock_resp = self._make_mock_response(body, encoding=None)
 
-        monkeypatch.setattr(req, "get", lambda *a, **kw: mock_resp)
+        monkeypatch.setattr(req.Session, "get", lambda *a, **kw: mock_resp)
 
         # Should not raise TypeError
         result = download_library("FakeLib", organism="human")
@@ -1232,7 +1232,7 @@ class TestDownloadLibraryEncoding:
         body = b"PATHWAY_1\tdesc\tAKT1\tBRCA1\tTP53\n"
         mock_resp = self._make_mock_response(body, encoding="utf-8")
 
-        monkeypatch.setattr(req, "get", lambda *a, **kw: mock_resp)
+        monkeypatch.setattr(req.Session, "get", lambda *a, **kw: mock_resp)
 
         result = download_library("FakeLib", organism="human")
         assert "PATHWAY_1" in result
@@ -1247,7 +1247,7 @@ class TestDownloadLibraryEncoding:
         body = b"TERM_C\tdesc\tGENE1,100\tGENE2,200\n"
         mock_resp = self._make_mock_response(body, encoding=None)
 
-        monkeypatch.setattr(req, "get", lambda *a, **kw: mock_resp)
+        monkeypatch.setattr(req.Session, "get", lambda *a, **kw: mock_resp)
 
         result = download_library("FakeLib", organism="human")
         assert result["TERM_C"] == ["GENE1", "GENE2"]
@@ -1261,7 +1261,7 @@ class TestDownloadLibraryEncoding:
         body = b"TERM_D\tdesc\tGENE1\t\t\n"
         mock_resp = self._make_mock_response(body, encoding=None)
 
-        monkeypatch.setattr(req, "get", lambda *a, **kw: mock_resp)
+        monkeypatch.setattr(req.Session, "get", lambda *a, **kw: mock_resp)
 
         result = download_library("FakeLib", organism="human")
         assert result["TERM_D"] == ["GENE1"]
@@ -1276,7 +1276,7 @@ class TestDownloadLibraryEncoding:
         body = b"TERM_E\tdesc\tGENE1\tGENE2\n\nTERM_F\tdesc2\tGENE3\n\n"
         mock_resp = self._make_mock_response(body, encoding=None, pass_empty=True)
 
-        monkeypatch.setattr(req, "get", lambda *a, **kw: mock_resp)
+        monkeypatch.setattr(req.Session, "get", lambda *a, **kw: mock_resp)
 
         result = download_library("FakeLib", organism="human")
         assert "TERM_E" in result

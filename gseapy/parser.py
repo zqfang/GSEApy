@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-import json
 import logging
 import os
 import xml.etree.ElementTree as ET
 from collections.abc import Iterable
 from typing import Dict, List, Optional, Tuple
 
-import requests
-
+from gseapy.enrichr import EnrichrAPI
 from gseapy.utils import DEFAULT_CACHE_PATH, unique
 
 
@@ -82,11 +80,34 @@ def read_gmt(path: str) -> Dict[str, List[str]]:
     :param str path: the path to a gmt file.
     :return: a dict object
     """
-    if path.lower().endswith("gmt"):
-        return get_library(name=path, min_size=0, max_size=100000, gene_list=None)
-    else:
+    if not path.lower().endswith("gmt"):
         raise ValueError("Please input a gmt file")
-    return
+    genesets_dict = {}
+    with open(path) as genesets:
+        for line in genesets:
+            entries = line.strip().split("\t")
+            if len(entries) < 3:
+                continue
+            key = entries[0]
+            genesets_dict[key] = entries[2:]
+    return genesets_dict
+
+
+def write_gmt(gene_sets: Dict[str, List[str]], filename: str, name: Optional[str] = None) -> None:
+    """Write gene sets to a gmt file.
+
+    :param dict gene_sets: a dict object contains gene sets.
+    :param str filename: the path to save the gmt file.
+    :param str setname: the name of gene set database.
+    """
+    if name is None:
+        name = ""
+    if filename is not None:
+        gmtout = open(filename, "w")
+        for k, v in gene_sets.items():
+            outline = "%s\t%s\t%s\n" % (k, name, "\t".join(v))
+            gmtout.write(outline)
+        gmtout.close()
 
 
 def get_library(
@@ -121,11 +142,7 @@ def get_library(
     genesets_dict = {}
     if name.lower().endswith(".gmt"):
         logging.info("User Defined gene sets is given.......continue..........")
-        with open(name) as genesets:
-            for line in genesets:
-                entries = line.strip().split("\t")
-                key = entries[0]
-                genesets_dict[key] = entries[2:]
+        genesets_dict = read_gmt(name)
     else:
         # get gene sets from enrichr libary
         names = get_library_name(organism=organism)
@@ -170,12 +187,7 @@ def get_library(
         )
 
     if save is not None:
-        gmtout = open(save, "w")
-        for k, v in genesets_dict.items():
-            outline = "%s\t%s\t%s\n" % (k, name, "\t".join(v))
-            gmtout.write(outline)
-        gmtout.close()
-
+        write_gmt(genesets_dict, save, name)
     return genesets_dict
 
 
@@ -187,56 +199,7 @@ def get_library_name(organism: str = "Human") -> List[str]:
     :return: a list of enrichr libraries from selected database
 
     """
-    default = [
-        "human",
-        "mouse",
-        "hs",
-        "mm",
-        "homo sapiens",
-        "mus musculus",
-        "h. sapiens",
-        "m. musculus",
-    ]
-    _organisms = {
-        "Fly": ["fly", "d. melanogaster", "drosophila melanogaster"],
-        "Yeast": ["yeast", "s. cerevisiae", "saccharomyces cerevisiae"],
-        "Worm": ["worm", "c. elegans", "caenorhabditis elegans", "nematode"],
-        "Fish": ["fish", "d. rerio", "danio rerio", "zebrafish"],
-    }
-    ENRICHR_URL = "http://maayanlab.cloud"
-    database = ""
-    if organism.lower() in default:
-        database = "Enrichr"
-    else:
-        for k, v in _organisms.items():
-            if organism.lower() in v:
-                database = k + "Enrichr"
-                break
-
-    if not database.endswith("Enrichr"):
-        raise LookupError(
-            """No supported database. Please input one of these:
-                            ('Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm') """
-        )
-    # make a get request to get the gmt names and meta data from Enrichr
-    # old code
-    # response = requests.get('http://amp.pharm.mssm.edu/Enrichr/geneSetLibrary?mode=meta')
-    # gmt_data = response.json()
-    # # generate list of lib names
-    # libs = []
-    # # get library names
-    # for inst_gmt in gmt_data['libraries']:
-    #     # only include active gmts
-    #     if inst_gmt['isActive'] == True:
-    #         libs.append(inst_gmt['libraryName'])
-    lib_url = "%s/%s/datasetStatistics" % (ENRICHR_URL, database)
-    response = requests.get(lib_url, verify=True)
-    if not response.ok:
-        raise Exception("Error getting the Enrichr libraries")
-    libs_json = json.loads(response.text)
-    libs = [lib["libraryName"] for lib in libs_json["statistics"]]
-
-    return sorted(libs)
+    return sorted(EnrichrAPI(organism).get_libraries())
 
 
 def download_library(name: str, organism: str = "human", filename: str = None) -> Dict[str, List[str]]:
@@ -247,76 +210,11 @@ def download_library(name: str, organism: str = "human", filename: str = None) -
     :param str filename: the file name to save if not None.
     :return dict: gene_sets of the enrichr library from selected organism
 
-
     """
-
-    default = [
-        "human",
-        "mouse",
-        "hs",
-        "mm",
-        "homo sapiens",
-        "mus musculus",
-        "h. sapiens",
-        "m. musculus",
-    ]
-    _organisms = {
-        "Fly": ["fly", "d. melanogaster", "drosophila melanogaster"],
-        "Yeast": ["yeast", "s. cerevisiae", "saccharomyces cerevisiae"],
-        "Worm": ["worm", "c. elegans", "caenorhabditis elegans", "nematode"],
-        "Fish": ["fish", "d. rerio", "danio rerio", "zebrafish"],
-    }
-    ENRICHR_URL = "http://maayanlab.cloud"
-    database = ""
-    if organism.lower() in default:
-        database = "Enrichr"
-    else:
-        for k, v in _organisms.items():
-            if organism.lower() in v:
-                database = k + "Enrichr"
-                break
-
-    if not database.endswith("Enrichr"):
-        raise LookupError(
-            """No supported database. Please input one of these:
-                            ('Human', 'Mouse', 'Yeast', 'Fly', 'Fish', 'Worm') """
-        )
-
-    tmpname = "%s.%s.gmt" % (database, name)
-    tempath = os.path.join(DEFAULT_CACHE_PATH, tmpname)
-    if os.path.isfile(tempath):
-        logging.info("Library is already downloaded in: %s, use local file" % tempath)
-        genesets_dict = {}
-        with open(tempath) as genesets:
-            for line in genesets:
-                entries = line.strip().split("\t")
-                key = entries[0]
-                genesets_dict[key] = entries[2:]
-        return genesets_dict
-    # queery string
-    ENRICHR_URL = ENRICHR_URL + "/%s/geneSetLibrary" % database
-    query_string = "?mode=text&libraryName=%s"
-    # get
-    response = requests.get(ENRICHR_URL + query_string % name, timeout=None, stream=True)
-    if not response.ok:
-        raise Exception("Error fetching gene set library, input name is correct for the organism you've set?.")
-    # reformat to dict
-    response.encoding = "utf-8"
-    genesets_dict = {}
-    for line in response.iter_lines(chunk_size=1024, decode_unicode=True):
-        line = line.strip().split("\t")
-        if len(line) < 2:
-            continue
-        k = line[0]
-        v = map(lambda x: x.split(",")[0], line[2:])
-        v = list(filter(lambda x: True if len(x) else False, v))
-        genesets_dict[k] = v
+    api = EnrichrAPI(organism)
+    genesets_dict = api.download_libraries(name)
 
     if filename is not None:
-        gmtout = open(filename, "w")
-        for k, v in genesets_dict.items():
-            outline = "%s\t%s\t%s\n" % (k, name, "\t".join(v))
-            gmtout.write(outline)
-        gmtout.close()
+        write_gmt(genesets_dict, filename, name)
 
     return genesets_dict
