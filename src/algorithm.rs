@@ -185,12 +185,14 @@ fn sigma_correction(std: f64, mean: f64) -> f64 {
 pub trait EnrichmentScoreTrait {
     /// get run es only
     fn running_enrichment_score(&self, metric: &[f64], tag_indicator: &[f64]) -> Vec<f64>;
-    /// O(k) drop-in replacement for `running_enrichment_score`.
+    /// Full O(N) running-ES vector, reconstructed from the compressed per-hit `tops`.
     ///
-    /// Internally calls `calc_gsea_stat` (gsea_param = 1.0, ScoreType::Std) to obtain the
-    /// compressed tops/bottoms representation, then reconstructs the full O(N) running-ES
-    /// staircase.  The returned vector is element-wise identical to the one produced by
-    /// `running_enrichment_score` to within floating-point precision (ε ≈ 1e-12).
+    /// Element-wise identical to `running_enrichment_score` (ε ≈ 1e-12) including when
+    /// gene-set members fall on negative metric values, because the per-hit `tops` are
+    /// computed with the **raw signed** weight `metric[hit] / NR` (NR = Σ signed
+    /// `metric[hit]`) — matching the classic signed walk, NOT fgsea's `|metric|`-weighted
+    /// `calc_gsea_stat`.  Cost is O(N) (the result is a length-N vector), same order as
+    /// `running_enrichment_score`; the only saving is the O(k) `tops` intermediate.
     fn reconstruct_run_es_from_tops(&self, metric: &[f64], tag_indicator: &[f64]) -> Vec<f64>;
     /// fast GSEA only ES value return
     fn fast_random_walk(&self, metric: &[f64], tag_indicator: &[f64]) -> f64;
@@ -239,12 +241,15 @@ impl EnrichmentScoreTrait for EnrichmentScore {
         return run_es;
     }
 
-    /// O(k) drop-in replacement for `running_enrichment_score`.
+    /// Reconstruct the full O(N) running-ES vector from compressed per-hit `tops`.
     ///
-    /// Derives hit positions from `tag_indicator`, calls `calc_gsea_stat` with
-    /// `gsea_param = 1.0` to obtain the compressed `tops` vector, then reconstructs
-    /// the full O(N) running-ES staircase using the hit/miss step relationships:
+    /// The per-hit `tops` are computed here with the **raw signed** weight
+    /// `metric[hit] / NR` (NR = Σ signed `metric[hit]`), so the result matches
+    /// `running_enrichment_score` exactly — including gene-set members on negative
+    /// metric values.  We deliberately do *not* reuse `calc_gsea_stat`, which weights
+    /// by `|metric|^p` (fgsea convention) and would diverge whenever a hit is negative.
     ///
+    /// Staircase relationships used for the expansion:
     /// - At hit position `selected[i]`:                `run_es = tops[i]`
     /// - At miss position `p` after hit `selected[i-1]`:
     ///   `run_es = tops[i-1] - (p - selected[i-1]) * inv_miss`
@@ -257,9 +262,23 @@ impl EnrichmentScoreTrait for EnrichmentScore {
             .filter_map(|(i, &t)| if t > 0.0 { Some(i) } else { None })
             .collect();
         let k = selected.len();
-        let result = calc_gsea_stat(metric, &selected, 1.0, ScoreType::Std, true, false);
-        let tops = &result.tops;
         let inv_miss = 1.0 / (n - k) as f64;
+        // NR = Σ signed metric over hits (matches running_enrichment_score's norm_tag).
+        // If NR == 0 this divides by zero exactly as the O(N) reference does — kept
+        // identical on purpose rather than falling back to uniform weights.
+        let inv_nr = 1.0 / selected.iter().map(|&i| metric[i]).sum::<f64>();
+        // Compressed per-hit tops: running ES *at* each hit position. O(k).
+        //   tops[i] = (Σ_{j<=i} metric[selected[j]] / NR) - (selected[i] - i) * inv_miss
+        let mut cum = 0.0f64;
+        let tops: Vec<f64> = selected
+            .iter()
+            .enumerate()
+            .map(|(i, &pos)| {
+                cum += metric[pos] * inv_nr;
+                cum - (pos as f64 - i as f64) * inv_miss
+            })
+            .collect();
+        // Expand to the full O(N) staircase.
         let mut run_es = vec![0.0f64; n];
         let mut last_top = 0.0f64;
         let mut last_hit_pos: i64 = -1;
@@ -915,5 +934,74 @@ mod tests {
                 m
             );
         }
+    }
+
+    /// Regression test for the signed-vs-abs weight bug.
+    ///
+    /// When gene-set members fall on **negative** metric values, the classic walk
+    /// (`running_enrichment_score`) weights hits by the raw signed metric, whereas
+    /// `calc_gsea_stat` weights by `|metric|`.  The earlier implementation of
+    /// `reconstruct_run_es_from_tops` borrowed `calc_gsea_stat`'s abs-weighted tops and
+    /// therefore diverged grossly here — this test pins the signed-weight fix.
+    ///
+    /// Counterexample from review: stats = [3, 1, -2, -5], hits at [0, 2].
+    /// Signed reference run_es = [3.0, 2.5, 0.5, 0.0];
+    /// the old abs-weighted reconstruction produced [0.6, 0.1, 0.5, 0.0].
+    #[test]
+    fn test_run_es_negative_hits() {
+        let stats: Vec<f64> = vec![3.0, 1.0, -2.0, -5.0];
+        let selected: Vec<usize> = vec![0, 2];
+        let n = stats.len();
+
+        let genes: Vec<String> = (0..n).map(|i| format!("g{}", i)).collect();
+        let es_obj = EnrichmentScore::new(&genes, 0, 0, false, false);
+        let mut tag = vec![0.0f64; n];
+        for &i in &selected {
+            tag[i] = 1.0;
+        }
+
+        let ref_run_es = es_obj.running_enrichment_score(&stats, &tag);
+        let method_run_es = es_obj.reconstruct_run_es_from_tops(&stats, &tag);
+
+        // The signed reference is exactly [3.0, 2.5, 0.5, 0.0].
+        let expected = [3.0, 2.5, 0.5, 0.0];
+        for (p, (&r, &e)) in ref_run_es.iter().zip(expected.iter()).enumerate() {
+            assert!(
+                (r - e).abs() < 1e-12,
+                "reference run_es wrong at p={}: got {:.15}, expected {:.15}",
+                p,
+                r,
+                e
+            );
+        }
+
+        // The fixed reconstruction must match the signed reference element-wise.
+        for (p, (&r, &m)) in ref_run_es.iter().zip(method_run_es.iter()).enumerate() {
+            assert!(
+                (r - m).abs() < 1e-12,
+                "negative-hit mismatch at p={}: running_enrichment_score={:.15}, \
+                 reconstruct_run_es_from_tops={:.15}, diff={:.3e}",
+                p,
+                r,
+                m,
+                (r - m).abs()
+            );
+        }
+
+        // Guard: the abs-weighted curve (what calc_gsea_stat yields) must genuinely
+        // differ here, otherwise this test wouldn't be exercising the bug.
+        let abs_tops = calc_gsea_stat(&stats, &selected, 1.0, ScoreType::Std, true, false).tops;
+        let abs_recon = reconstruct_run_es_from_tops(&abs_tops, &selected, n);
+        let max_diff = ref_run_es
+            .iter()
+            .zip(abs_recon.iter())
+            .map(|(&r, &a)| (r - a).abs())
+            .fold(0.0f64, f64::max);
+        assert!(
+            max_diff > 1e-6,
+            "expected abs-weighted reconstruction to diverge from the signed reference, \
+             but max diff was only {:.3e}",
+            max_diff
+        );
     }
 }

@@ -1,0 +1,4 @@
+iterations	1000
+seed	42
+gseaParam	1
+scoreType	std

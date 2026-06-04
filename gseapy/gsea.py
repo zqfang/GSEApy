@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 
 from gseapy.base import GSEAbase
-from gseapy.gse import Metric, gsea_rs, prerank2d_rs, prerank_rs
+from gseapy.gse import Metric, fgsea_rs, gsea_rs, prerank2d_rs, prerank_rs
 from gseapy.parser import gsea_cls_parser
 from gseapy.plot import gseaplot
 
@@ -442,6 +442,9 @@ class Prerank(GSEAbase):
         no_plot: bool = False,
         seed: int = 123,
         verbose: bool = False,
+        method: str = "permutation",
+        sample_size: int = 101,
+        eps: float = 1e-50,
     ):
         super(Prerank, self).__init__(
             outdir=outdir,
@@ -466,6 +469,11 @@ class Prerank(GSEAbase):
         self.ranking = None
         self._noplot = no_plot
         self.permutation_type = "gene_set"
+        if method not in ("permutation", "multilevel"):
+            raise ValueError("method must be one of {'permutation', 'multilevel'}, got %r" % method)
+        self.method = method
+        self.sample_size = int(sample_size)
+        self.eps = float(eps)
         assert self.min_size > 0
 
     def _load_ranking(self, rank_metric: pd.DataFrame) -> pd.Series:
@@ -563,22 +571,43 @@ class Prerank(GSEAbase):
             gene_names = [str(x).upper() for x in gene_names]
             self._logger.info("Genes are converted to uppercase.")
         # compute ES, NES, pval, FDR, RES
-        if isinstance(dat2, pd.DataFrame):
-            _prerank = prerank2d_rs
-        else:
-            _prerank = prerank_rs
         # run
-        gsum = _prerank(
-            gene_names,  # gene list
-            dat2.values.tolist(),  # ranking values
-            gmt,  # must be a dict object
-            self.weight,
-            self.min_size,
-            self.max_size,
-            self.permutation_num,
-            self._threads,
-            self.seed,
-        )
+        if self.method == "multilevel":
+            # fgsea multilevel p-value (faithful C++ port). Single ranking only.
+            if isinstance(dat2, pd.DataFrame):
+                raise NotImplementedError(
+                    "method='multilevel' (fgsea) only supports a single preranked list "
+                    "(pd.Series / .rnk); got a multi-column DataFrame."
+                )
+            gsum = fgsea_rs(
+                gene_names,  # gene list
+                dat2.values.tolist(),  # ranking values
+                gmt,  # must be a dict object
+                self.weight,
+                self.min_size,
+                self.max_size,
+                self.sample_size,
+                self.permutation_num,  # nperm for the simple-permutation NES normalization
+                self.eps,
+                self._threads,
+                self.seed,
+            )
+        else:
+            if isinstance(dat2, pd.DataFrame):
+                _prerank = prerank2d_rs
+            else:
+                _prerank = prerank_rs
+            gsum = _prerank(
+                gene_names,  # gene list
+                dat2.values.tolist(),  # ranking values
+                gmt,  # must be a dict object
+                self.weight,
+                self.min_size,
+                self.max_size,
+                self.permutation_num,
+                self._threads,
+                self.seed,
+            )
         self.to_df(
             gsea_summary=gsum.summaries,
             gmt=gmt,

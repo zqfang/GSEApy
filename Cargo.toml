@@ -2,7 +2,7 @@
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [package]
 name = "gseapy"
-version = "1.2.1"
+version = "1.3.0"
 authors = ["Zhuoqing Fang <fzq518@gmail.com>"]
 description = "Gene Set Enrichment Analysis in Rust."
 license-file = "LICENSE.md"
@@ -32,6 +32,9 @@ csv = "*"
 itertools = "*"
 statrs = "*"
 serde = { version = "*", features = ["derive"] }
+# fgsea multilevel core (faithful C++ port): boost::mt19937 bit-for-bit + digamma/trigamma
+rand_mt = { version = "6.0.3", default-features = false }
+special = "0.13.1"
 # regex = "*"
 # ndarray = "*"
 # ndarray-rand = "*"

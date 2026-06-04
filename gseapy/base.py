@@ -663,6 +663,7 @@ class GSEAbase(object):
                 "matched_genes",
                 "hits",
                 "RES",
+                "log2err",
             ],
         )
         # res = OrderedDict()
@@ -709,6 +710,7 @@ class GSEAbase(object):
                     genes,
                     gs.hits,
                     gs.run_es,
+                    getattr(gs, "log2err", float("nan")),
                 ],
                 index=res_df.columns,
             )
@@ -768,13 +770,16 @@ class GSEAbase(object):
         # Replace 0 p-values with the minimum detectable value (1/permutation_num)
         # This avoids exact zeros from permutation testing, which would cause issues
         # in downstream analysis and visualization (e.g. log-scale plots).
-        if self.permutation_num > 0:
+        if (not hasattr(self, "eps")) and self.permutation_num > 0:
             min_pval = 1.0 / self.permutation_num
             for col in ["NOM p-val", "FDR q-val", "FWER p-val"]:
                 if col in res_df.columns:
                     res_df[col] = res_df[col].astype(float).clip(lower=min_pval)
         # trim
         dc = ["RES", "hits", "matched_genes"]
+        # log2err is only meaningful for the fgsea multilevel path; drop it otherwise
+        if "log2err" in res_df.columns and res_df["log2err"].isna().all():
+            dc.append("log2err")
         if self.permutation_num == 0:
             dc += [
                 "NOM p-val",

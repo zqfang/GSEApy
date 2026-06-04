@@ -41,3 +41,4 @@ target
 Cargo.lock
 .jupyter
 uv.lock
+CLAUDE.md

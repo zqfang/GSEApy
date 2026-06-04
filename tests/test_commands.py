@@ -99,6 +99,44 @@ def test_prerank(prernk, geneGMT):
     tmpdir.cleanup()
 
 
+def test_prerank_multilevel(prernk, geneGMT):
+    """method='multilevel' runs the fgsea multilevel p-value backend and exposes
+    a log2err column with valid p-values/NES; results are reproducible by seed.
+
+    Numerical fidelity of the multilevel core vs the original fgsea C++ is locked
+    down separately by the Rust ground-truth tests in
+    src/fgsea/validation_tests.rs (data under tests/data/fgsea/)."""
+    res = prerank(
+        prernk,
+        geneGMT,
+        method="multilevel",
+        min_size=1,
+        permutation_num=1000,
+        outdir=None,
+        no_plot=True,
+        seed=123,
+    )
+    df = res.res2d
+    assert df is not None and len(df) > 0
+    assert "log2err" in df.columns
+    pvals = df["NOM p-val"].astype(float)
+    assert ((pvals >= 0) & (pvals <= 1)).all()
+    assert df["NES"].notna().all()
+
+    # reproducible across runs with the same seed
+    res2 = prerank(
+        prernk,
+        geneGMT,
+        method="multilevel",
+        min_size=1,
+        permutation_num=1000,
+        outdir=None,
+        no_plot=True,
+        seed=123,
+    )
+    pd.testing.assert_frame_equal(df, res2.res2d)
+
+
 def test_prerank_reproducibility(geneGMT):
     """Regression test: prerank must produce identical results for the same seed.
 

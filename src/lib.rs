@@ -257,7 +257,7 @@ fn gsva_rs(
 /// - seed: random seed
 #[pyfunction]
 #[pyo3(signature = (genes, metric, gene_sets, weight=1.0, min_size=15, max_size=500, sample_size=101, nperm = 1000, eps=1e-50, threads=4, seed=0))]
-fn prerank_fgsea_rs(
+fn fgsea_rs(
     genes: Vec<String>,
     metric: Vec<f64>,
     gene_sets: HashMap<String, Vec<String>>,
@@ -279,6 +279,7 @@ fn prerank_fgsea_rs(
     gsea.prerank_multilevel(&genes, &metric, &gmt, sample_size, eps);
     Ok(gsea)
 }
+
 
 /// Compute the GSEA enrichment score and optional curve data for a single gene set.
 ///
@@ -353,7 +354,7 @@ fn gse(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(prerank2d_rs, m)?)?;
     m.add_function(wrap_pyfunction!(ssgsea_rs, m)?)?;
     m.add_function(wrap_pyfunction!(gsva_rs, m)?)?;
-    m.add_function(wrap_pyfunction!(prerank_fgsea_rs, m)?)?;
+    m.add_function(wrap_pyfunction!(fgsea_rs, m)?)?;
     // m.add_function(wrap_pyfunction!(calc_gsea_stat_rs, m)?)?;
     Ok(())
 }
