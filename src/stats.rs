@@ -1,7 +1,7 @@
 #![allow(dead_code, unused)]
 
 use crate::algorithm::{EnrichmentScore, EnrichmentScoreTrait};
-use crate::fgsea::{compute_pvalue_multilevel, scale_ranks};
+use crate::fgsea::{calcGseaStatCumulativeBatch, compute_pvalue_multilevel, scale_ranks};
 use crate::utils::{CorrelType, DynamicEnum, Metric, Statistic};
 use itertools::{izip, Itertools};
 use pyo3::prelude::*;
