@@ -771,10 +771,10 @@ class GSEAbase(object):
         # This avoids exact zeros from permutation testing, which would cause issues
         # in downstream analysis and visualization (e.g. log-scale plots).
         # if self.permutation_num > 0:
-            # min_pval = 1.0 / self.permutation_num
-            # for col in ["NOM p-val", "FDR q-val", "FWER p-val"]:
-            #     if col in res_df.columns:
-            #         res_df[col] = res_df[col].astype(float).clip(lower=min_pval)
+        # min_pval = 1.0 / self.permutation_num
+        # for col in ["NOM p-val", "FDR q-val", "FWER p-val"]:
+        #     if col in res_df.columns:
+        #         res_df[col] = res_df[col].astype(float).clip(lower=min_pval)
         # trim
         dc = ["RES", "hits", "matched_genes"]
         # log2err is only meaningful for the fgsea multilevel path; drop it otherwise
