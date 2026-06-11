@@ -1,7 +1,7 @@
 #![allow(dead_code, unused)]
 
 use crate::algorithm::{EnrichmentScore, EnrichmentScoreTrait};
-use crate::fgsea::{compute_pvalue_multilevel, scale_ranks};
+use crate::fgsea::{calcGseaStatCumulativeBatch, compute_pvalue_multilevel, scale_ranks};
 use crate::utils::{CorrelType, DynamicEnum, Metric, Statistic};
 use itertools::{izip, Itertools};
 use pyo3::prelude::*;
@@ -941,17 +941,16 @@ impl GSEAResult {
             metric.iter().map(|x| x.abs().powf(self.weight)).collect();
         let int_ranks = scale_ranks(&weighted_metric);
 
-        // Build the gene index structure.
-        // When n_perm_simple > 0, create EnrichmentScore with that many permutations
-        // so gene_permutation() generates the null ES distribution for NES.
-        // gene_permutation() returns:
-        //   index 0 = original gene order (observed)
-        //   index 1..n_perm_simple = shuffled orders (null)
-        let mut es = EnrichmentScore::new(genes, self.nperm, self.seed, false, false);
-        let gperm = es.gene_permutation(); // gene permutation, only record gene idx here
+        // Observed ES + running-ES curve per gene set. No gene-label permutation
+        // null is built here: NES normalization uses fgsea's random-gene-set null
+        // (calcGseaStatCumulativeBatch), computed in one batch after this loop.
+        let es = EnrichmentScore::new(genes, 0, self.seed, false, false);
 
         // Collect per-gene-set results; BH correction requires all p-values.
         let mut summ = Vec::<GSEASummary>::new();
+        // Parallel arrays (aligned 1:1 with `summ`) feeding the fgsea NES null.
+        let mut pathway_sizes = Vec::<i32>::new();
+        let mut pathway_scores = Vec::<f64>::new();
 
         for (&term, &gset) in gmt.iter() {
             let gtag = es.gene.isin(gset);
@@ -960,19 +959,11 @@ impl GSEAResult {
                 continue;
             }
 
-            let tag_indicators: Vec<Vec<f64>> = gperm.par_iter().map(|de| de.isin(&gidx)).collect();
-            let (ess, run_es) = es.enrichment_score_gene(&weighted_metric, &tag_indicators);
-            let esnull: Vec<f64> = if ess.len() > 1 {
-                ess[1..].to_vec()
-            } else {
-                Vec::new()
-            };
-
-            // Compute observed ES (float domain, signed).
+            // Observed enrichment score (signed) and running-ES curve.
+            let observed_es = es.fast_random_walk(&weighted_metric, &gtag);
             let run_es = es.running_enrichment_score(&weighted_metric, &gtag);
-            let observed_es = ess[0]; 
 
-            // Compute multilevel p-value and log2 error bound.
+            // Multilevel p-value and log2 error bound (faithful fgsea core).
             let (ml_pval, ml_log2err) = compute_pvalue_multilevel(
                 &int_ranks,
                 gidx.len(),
@@ -982,6 +973,8 @@ impl GSEAResult {
                 eps,
             );
 
+            pathway_sizes.push(gidx.len() as i32);
+            pathway_scores.push(observed_es);
             summ.push(GSEASummary {
                 term: term.to_string(),
                 es: observed_es,
@@ -990,19 +983,53 @@ impl GSEAResult {
                 fwerp: 1.0,
                 run_es,
                 hits: gidx,
-                esnull, // temporary; used by normalize() below
                 ..Default::default()
             });
         }
 
-        // Compute NES from null distribution (fgsea formula).
-        // normalize() reads s.esnull, sets s.nes = ES / mean(same-sign null ESs).
-        for s in summ.iter_mut() {
-            if !s.esnull.is_empty() {
-                let _normalized_esnull = s.normalize(); // sets s.nes from s.esnull
-                s.esnull = Vec::new(); // drop null distribution — not part of fgsea output
-            } else {
-                s.nes = s.es; // fallback when n_perm_simple = 0
+        // NES via fgsea's random-gene-set null (calcGseaStatCumulativeBatch):
+        // for each of `nperm` random size-k samples, the per-size prefix ES is
+        // accumulated, giving geZeroSum/geZero = mean positive null ES and
+        // leZeroSum/leZero = mean negative null ES. NES = ES / mean(same-sign null),
+        // exactly as fgsea's `fgseaMultilevel`. The RNG is boost-MT19937 (rand_mt),
+        // so NES is bit-exact with fgsea for matching stats, sizes, nPermSimple
+        // (= nperm), seed, weight (= gseaParam), and scoreType ("std").
+        if self.nperm > 0 && !summ.is_empty() {
+            let batch = calcGseaStatCumulativeBatch(
+                metric, // signed gene-level stats, sorted descending
+                self.weight, // gseaParam
+                &pathway_scores,
+                &pathway_sizes,
+                self.nperm as i32,
+                self.seed as i32,
+                "std",
+            );
+            for (j, s) in summ.iter_mut().enumerate() {
+                let ge_mean = if batch.geZero[j] > 0.0 {
+                    batch.geZeroSum[j] / batch.geZero[j]
+                } else {
+                    0.0
+                };
+                let le_mean = if batch.leZero[j] > 0.0 {
+                    batch.leZeroSum[j] / batch.leZero[j]
+                } else {
+                    0.0
+                };
+                s.nes = if s.es >= 0.0 {
+                    if ge_mean != 0.0 {
+                        s.es / ge_mean
+                    } else {
+                        s.es
+                    }
+                } else if le_mean != 0.0 {
+                    s.es / le_mean.abs()
+                } else {
+                    s.es
+                };
+            }
+        } else {
+            for s in summ.iter_mut() {
+                s.nes = s.es; // no simple-permutation null requested (nperm == 0)
             }
         }
 

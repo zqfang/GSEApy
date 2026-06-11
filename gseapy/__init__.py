@@ -325,6 +325,9 @@ def prerank(
     no_plot: bool = False,
     seed: int = 123,
     verbose: bool = False,
+    method: str = "permutation",
+    sample_size: int = 101,
+    eps: float = 1e-50,
     **kwargs,
 ) -> Prerank:
     """Run Gene Set Enrichment Analysis with pre-ranked correlation defined by user.
@@ -365,6 +368,34 @@ def prerank(
     :param seed: Random seed. expect an integer. Default:None.
 
     :param bool verbose: Bool, increase output verbosity, print out progress of your job, Default: False.
+
+    :param str method: P-value / significance estimation procedure. Default: 'permutation'.
+                       Choose from:
+
+                       1. 'permutation'
+
+                          Classic gene-set permutation: the null distribution of ES is built by
+                          permuting gene-set membership ``permutation_num`` times. NES, nominal
+                          p-value and FDR are derived from this null. Supports both a single
+                          preranked list and a multi-column ranking DataFrame.
+
+                       2. 'multilevel'
+
+                          fgsea multilevel procedure (a faithful port of the fgsea C++ core).
+                          Estimates arbitrarily small p-values via adaptive multilevel sampling
+                          instead of plain permutation, so it can resolve significance well below
+                          ``1 / permutation_num``. NES is computed from fgsea's random-gene-set
+                          null (``NES = ES / mean(same-sign null ES)``), which differs by design
+                          from the classic permutation NES. Supports a single preranked list only
+                          (a multi-column DataFrame raises ``NotImplementedError``).
+
+    :param int sample_size: Only used when ``method='multilevel'``. Sample size for the multilevel
+                            split step of the fgsea algorithm; larger values give more accurate
+                            (but slower) tail p-value estimates. Default: 101.
+
+    :param float eps: Only used when ``method='multilevel'``. Lower boundary for the estimated
+                      p-value; p-values smaller than ``eps`` are reported as ``eps``. Set to 0 to
+                      estimate p-values as small as machine precision allows. Default: 1e-50.
 
     :return: Return a Prerank obj. All results store to  a dictionary, obj.results,
              where contains::
@@ -411,6 +442,9 @@ def prerank(
         no_plot=no_plot,
         seed=seed,
         verbose=verbose,
+        method=method,
+        sample_size=sample_size,
+        eps=eps,
     )
     pre.run()
     return pre
