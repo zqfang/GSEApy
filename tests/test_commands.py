@@ -1,10 +1,16 @@
+import textwrap
 from tempfile import TemporaryDirectory, mkdtemp
 
+import matplotlib
 import numpy as np
 import pandas as pd
 import pytest
 
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt  # noqa: E402
+
 from gseapy.__init__ import enrich, enrichr, gsea, gsva, prerank, replot, ssgsea
+from gseapy.plot import DotPlot, dotplot
 
 
 @pytest.fixture
@@ -1435,3 +1441,93 @@ class TestEnrichrAPIDownloadLibrariesEncoding:
         assert result["TERM_W"] == ["GENE1", "GENE2"]
         assert "TERM_X" in result
         assert result["TERM_X"] == ["GENE3"]
+
+
+@pytest.fixture
+def dotplot_df():
+    """Minimal enrichment result DataFrame for DotPlot tests."""
+    return pd.DataFrame(
+        {
+            "Term": [
+                "A very long gene set name exceeding limit",
+                "Short term",
+                "Another pathway with a long descriptive name",
+            ],
+            "Adjusted P-value": [0.01, 0.02, 0.03],
+            "Overlap": ["5/100", "3/50", "8/200"],
+            "Combined Score": [10.0, 5.0, 7.0],
+        }
+    )
+
+
+class TestDotPlotWrapWidth:
+    """Tests for the wrap_width parameter added to DotPlot / dotplot / barh."""
+
+    def teardown_method(self):
+        plt.close("all")
+
+    def test_dotplot_no_wrap_width_labels_unchanged(self, dotplot_df):
+        """Without wrap_width, y-axis labels must be the original term strings."""
+        ax = dotplot(dotplot_df, cutoff=0.05, top_term=10)
+        labels = [t.get_text() for t in ax.get_yticklabels()]
+        for label in labels:
+            assert "\n" not in label
+
+    def test_dotplot_wrap_width_wraps_long_labels(self, dotplot_df):
+        """With wrap_width set, labels longer than wrap_width must contain newlines."""
+        wrap_width = 20
+        ax = dotplot(dotplot_df, cutoff=0.05, top_term=10, wrap_width=wrap_width)
+        labels = [t.get_text() for t in ax.get_yticklabels()]
+        # At least one term is longer than wrap_width and should be wrapped
+        long_terms = [
+            t for t in dotplot_df["Term"] if len(t) > wrap_width
+        ]
+        assert long_terms, "fixture should have at least one long term"
+        wrapped_labels = [l for l in labels if "\n" in l]
+        assert wrapped_labels, "expected at least one wrapped label"
+
+    def test_dotplot_wrap_width_matches_textwrap(self, dotplot_df):
+        """Wrapped labels must exactly match textwrap.fill output."""
+        wrap_width = 20
+        ax = dotplot(dotplot_df, cutoff=0.05, top_term=10, wrap_width=wrap_width)
+        label_texts = [t.get_text() for t in ax.get_yticklabels()]
+        for label in label_texts:
+            unwrapped = label.replace("\n", " ")
+            expected = textwrap.fill(unwrapped, width=wrap_width)
+            assert label == expected
+
+    def test_dotplot_wrap_width_short_labels_unchanged(self, dotplot_df):
+        """Labels already shorter than wrap_width must not gain newlines."""
+        wrap_width = 50  # all terms are shorter than 50 chars
+        ax = dotplot(dotplot_df, cutoff=0.05, top_term=10, wrap_width=wrap_width)
+        labels = [t.get_text() for t in ax.get_yticklabels()]
+        for label in labels:
+            assert "\n" not in label
+
+    def test_barh_wrap_width_wraps_long_labels(self, dotplot_df):
+        """DotPlot.barh() with wrap_width should wrap long y-axis labels."""
+        wrap_width = 20
+        dp = DotPlot(dotplot_df, wrap_width=wrap_width)
+        ax = dp.barh()
+        labels = [t.get_text() for t in ax.get_yticklabels()]
+        long_terms = [t for t in dotplot_df["Term"] if len(t) > wrap_width]
+        assert long_terms, "fixture should have at least one long term"
+        wrapped_labels = [l for l in labels if "\n" in l]
+        assert wrapped_labels, "expected at least one wrapped label in barh"
+
+    def test_barh_no_wrap_width_labels_unchanged(self, dotplot_df):
+        """DotPlot.barh() without wrap_width should leave labels as-is."""
+        dp = DotPlot(dotplot_df)
+        ax = dp.barh()
+        labels = [t.get_text() for t in ax.get_yticklabels()]
+        for label in labels:
+            assert "\n" not in label
+
+    def test_wrap_yticklabels_noop_when_none(self, dotplot_df):
+        """_wrap_yticklabels must be a no-op when wrap_width is None."""
+        dp = DotPlot(dotplot_df, wrap_width=None)
+        ax = dp.barh()
+        labels_before = [t.get_text() for t in ax.get_yticklabels()]
+        dp._wrap_yticklabels(ax)
+        labels_after = [t.get_text() for t in ax.get_yticklabels()]
+        assert labels_before == labels_after
