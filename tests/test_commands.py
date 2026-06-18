@@ -1487,14 +1487,19 @@ class TestDotPlotWrapWidth:
         assert wrapped_labels, "expected at least one wrapped label"
 
     def test_dotplot_wrap_width_matches_textwrap(self, dotplot_df):
-        """Wrapped labels must exactly match textwrap.fill output."""
+        """Each y-axis label must equal textwrap.fill of its original term."""
         wrap_width = 20
         ax = dotplot(dotplot_df, cutoff=0.05, top_term=10, wrap_width=wrap_width)
         label_texts = [t.get_text() for t in ax.get_yticklabels()]
+        # Build a lookup from (possibly wrapped) label back to expected wrapped text
+        term_to_wrapped = {
+            t: textwrap.fill(t, width=wrap_width) for t in dotplot_df["Term"]
+        }
         for label in label_texts:
-            unwrapped = label.replace("\n", " ")
-            expected = textwrap.fill(unwrapped, width=wrap_width)
-            assert label == expected
+            # Find the original term whose wrapped form matches this label
+            assert label in term_to_wrapped.values(), (
+                f"Label {label!r} does not match any textwrap.fill output"
+            )
 
     def test_dotplot_wrap_width_short_labels_unchanged(self, dotplot_df):
         """Labels already shorter than wrap_width must not gain newlines."""
