@@ -572,6 +572,11 @@ class Prerank(GSEAbase):
             self._logger.info("Genes are converted to uppercase.")
         # compute ES, NES, pval, FDR, RES
         # run
+        # Explicit flag for column trimming in to_df: only the multilevel path
+        # produces a meaningful log2err (and no meaningful FWER p-val). The data
+        # itself can't be used to discriminate -- the permutation path emits
+        # log2err=0.0 (GSEASummary derives Default), not NaN.
+        self._is_multilevel = self.method == "multilevel"
         if self.method == "multilevel":
             # fgsea multilevel p-value (faithful C++ port). Single ranking only.
             if isinstance(dat2, pd.DataFrame):

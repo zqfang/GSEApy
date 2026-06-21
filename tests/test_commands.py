@@ -105,6 +105,30 @@ def test_prerank(prernk, geneGMT):
     tmpdir.cleanup()
 
 
+def test_prerank_permutation_keeps_fwer_drops_log2err(prernk, geneGMT):
+    """Regression: the permutation path must keep its meaningful FWER p-val column
+    and drop the (meaningless) log2err column.
+
+    log2err can't be used to discriminate the two paths: the permutation path emits
+    log2err=0.0 (GSEASummary derives Default), not NaN, so a notna()-based check
+    would misclassify it as multilevel and wrongly drop FWER p-val. The path is
+    selected by an explicit flag instead.
+    """
+    res = prerank(
+        prernk,
+        geneGMT,
+        method="permutation",
+        min_size=1,
+        permutation_num=100,
+        outdir=None,
+        no_plot=True,
+        seed=123,
+    )
+    cols = res.res2d.columns
+    assert "FWER p-val" in cols, "permutation path must keep FWER p-val"
+    assert "log2err" not in cols, "permutation path must drop log2err"
+
+
 def test_prerank_multilevel(prernk, geneGMT):
     """method='multilevel' runs the fgsea multilevel p-value backend and exposes
     a log2err column with valid p-values/NES; results are reproducible by seed.
@@ -141,6 +165,36 @@ def test_prerank_multilevel(prernk, geneGMT):
         seed=123,
     )
     pd.testing.assert_frame_equal(df, res2.res2d)
+
+
+def test_prerank_multilevel_pvalues_are_numeric(prernk, geneGMT):
+    """Regression: multilevel p-values must keep float dtype so very small values
+    (e.g. ~1e-39) are preserved rather than collapsed to 0.0.
+
+    The numeric columns of res2d were previously left as object dtype (the frame
+    is assembled row-wise from mixed-type Series). pandas' object-column formatter
+    then rounded tiny multilevel p-values to "0.0" on display, and
+    to_csv(float_format=...) was silently ignored. The columns must be real floats.
+    """
+    res = prerank(
+        prernk,
+        geneGMT,
+        method="multilevel",
+        min_size=1,
+        permutation_num=1000,
+        outdir=None,
+        no_plot=True,
+        seed=123,
+    )
+    df = res.res2d
+    # numeric columns must be float dtype, not object
+    for col in ["ES", "NES", "NOM p-val", "FDR q-val", "log2err"]:
+        assert df[col].dtype == float, f"{col} should be float dtype, got {df[col].dtype}"
+
+    # tiny p-values must survive as nonzero floats (not rounded/cast to 0.0)
+    pvals = df["NOM p-val"]
+    assert pvals.dtype == float
+    assert (pvals > 0).all(), "multilevel p-values should be strictly positive"
 
 
 def test_prerank_reproducibility(geneGMT):
@@ -1094,6 +1148,10 @@ class TestCLIArgParsing:
         assert args.weight == 1.0
         assert args.ascending is False
         assert args.seed == 123
+        # multilevel-related defaults
+        assert args.method == "permutation"
+        assert args.sample_size == 101
+        assert args.eps == 1e-50
 
     def test_prerank_custom_label(self):
         parser = prepare_argparser()
@@ -1102,6 +1160,26 @@ class TestCLIArgParsing:
             "-l", "Up", "Down",
         ])
         assert args.label == ["Up", "Down"]
+
+    def test_prerank_multilevel_args(self):
+        parser = prepare_argparser()
+        args = parser.parse_args([
+            "prerank", "-r", "ranked.rnk", "-g", "sets.gmt",
+            "-m", "multilevel",
+            "--sample-size", "201",
+            "--eps", "1e-30",
+        ])
+        assert args.method == "multilevel"
+        assert args.sample_size == 201
+        assert args.eps == 1e-30
+
+    def test_prerank_method_rejects_invalid(self):
+        parser = prepare_argparser()
+        with pytest.raises(SystemExit):
+            parser.parse_args([
+                "prerank", "-r", "ranked.rnk", "-g", "sets.gmt",
+                "-m", "bogus",
+            ])
 
     def test_ssgsea_required_args(self):
         parser = prepare_argparser()

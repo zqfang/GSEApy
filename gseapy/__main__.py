@@ -84,6 +84,9 @@ def main():
             no_plot=args.noplot,
             seed=args.seed,
             verbose=args.verbose,
+            method=args.method,
+            sample_size=args.sample_size,
+            eps=args.eps,
         )
         pre.run()
 
@@ -575,6 +578,39 @@ def add_prerank_parser(subparsers):
         default=4,
         metavar="procs",
         help="Number of threads you are going to use. Default: 4",
+    )
+    prerank_opt.add_argument(
+        "-m",
+        "--method",
+        action="store",
+        dest="method",
+        type=str,
+        metavar="",
+        choices=("permutation", "multilevel"),
+        default="permutation",
+        help="P-value estimation method. 'permutation' is the classic gene-set \
+                           permutation test; 'multilevel' uses the fgsea multilevel algorithm, \
+                           which resolves very low p-values (e.g. 1e-50) that permutation cannot. \
+                           Choose from {'permutation', 'multilevel'}. Default: 'permutation'",
+    )
+    prerank_opt.add_argument(
+        "--sample-size",
+        dest="sample_size",
+        action="store",
+        type=int,
+        default=101,
+        metavar="int",
+        help="Sample size for the multilevel algorithm (method='multilevel' only). Default: 101",
+    )
+    prerank_opt.add_argument(
+        "--eps",
+        dest="eps",
+        action="store",
+        type=float,
+        default=1e-50,
+        metavar="float",
+        help="Boundary for calculating the p-value (method='multilevel' only). \
+                           P-values below this value are not estimated. Default: 1e-50",
     )
 
     return

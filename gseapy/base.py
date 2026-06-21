@@ -647,32 +647,29 @@ class GSEAbase(object):
         rank_metric: Must be sorted in descending order already
         """
 
-        res_df = pd.DataFrame(
-            index=range(len(gsea_summary)),
-            columns=[
-                "name",
-                "term",
-                "es",
-                "nes",
-                "pval",
-                "fdr",
-                "fwerp",
-                "tag %",
-                "gene %",
-                "lead_genes",
-                "matched_genes",
-                "hits",
-                "RES",
-                "log2err",
-            ],
-        )
-        # res = OrderedDict()
+        columns = [
+            "name",
+            "term",
+            "es",
+            "nes",
+            "pval",
+            "fdr",
+            "fwerp",
+            "tag %",
+            "gene %",
+            "lead_genes",
+            "matched_genes",
+            "hits",
+            "RES",
+            "log2err",
+        ]
 
-        for i, gs in enumerate(gsea_summary):
+        records = []
+        for gs in gsea_summary:
             # reformat gene list.
             name = self._metric_dict[str(gs.index)] if (gs.index is not None) else self.module
-            _genes = metric[name].index.values[gs.hits]
-            genes = ";".join([str(g).strip() for g in _genes])
+            ranking = metric[name]
+            genes = ";".join(str(g).strip() for g in ranking.index.values[gs.hits])
             RES = np.array(gs.run_es)
             lead_genes = ""
             tag_frac = ""
@@ -682,39 +679,47 @@ class GSEAbase(object):
                 if float(gs.es) >= 0:
                     # RES -> ndarray, ind -> list
                     es_i = RES.argmax()
-                    ldg_pos = list(filter(lambda x: x <= es_i, gs.hits))
-                    gene_frac = (es_i + 1) / len(metric[name])
+                    ldg_pos = [x for x in gs.hits if x <= es_i]
+                    gene_frac = (es_i + 1) / len(ranking)
                 else:
                     es_i = RES.argmin()
-                    ldg_pos = list(filter(lambda x: x >= es_i, gs.hits))
-                    ldg_pos.reverse()
-                    gene_frac = (len(metric[name]) - es_i) / len(metric[name])
+                    ldg_pos = [x for x in gs.hits if x >= es_i][::-1]
+                    gene_frac = (len(ranking) - es_i) / len(ranking)
 
                 # tag_frac = len(ldg_pos) / len(gmt[gs.term])
                 gene_frac = "{0:.2%}".format(gene_frac)
-                lead_genes = ";".join(list(map(str, metric[name].iloc[ldg_pos].index)))
+                lead_genes = ";".join(map(str, ranking.iloc[ldg_pos].index))
                 tag_frac = "%s/%s" % (len(ldg_pos), len(gmt[gs.term]))
 
-            e = pd.Series(
-                [
-                    name,
-                    gs.term,
-                    gs.es,
-                    gs.nes,
-                    gs.pval,
-                    gs.fdr,
-                    gs.fwerp,
-                    tag_frac,
-                    gene_frac,
-                    lead_genes,
-                    genes,
-                    gs.hits,
-                    gs.run_es,
-                    getattr(gs, "log2err", float("nan")),
-                ],
-                index=res_df.columns,
+            records.append(
+                {
+                    "name": name,
+                    "term": gs.term,
+                    "es": gs.es,
+                    "nes": gs.nes,
+                    "pval": gs.pval,
+                    "fdr": gs.fdr,
+                    "fwerp": gs.fwerp,
+                    "tag %": tag_frac,
+                    "gene %": gene_frac,
+                    "lead_genes": lead_genes,
+                    "matched_genes": genes,
+                    "hits": gs.hits,
+                    "RES": gs.run_es,
+                    "log2err": getattr(gs, "log2err", float("nan")),
+                }
             )
-            res_df.iloc[i, :] = e
+
+        # Build the frame in one shot so pandas infers proper per-column dtypes
+        # (numeric -> float, lists/strings -> object) instead of the all-object
+        # frame a row-by-row assignment would produce. The explicit numeric cast
+        # then guarantees float dtype even when a path leaves a column empty;
+        # without it, pandas' object-column formatter rounds tiny values (e.g. the
+        # fgsea multilevel p-values, ~1e-39) to "0.0" on display, and
+        # to_csv(float_format=...) is silently ignored on object columns.
+        res_df = pd.DataFrame.from_records(records, columns=columns)
+        for col in ["es", "nes", "pval", "fdr", "fwerp", "log2err"]:
+            res_df[col] = pd.to_numeric(res_df[col], errors="coerce")
         return res_df
 
     def to_df(
@@ -777,8 +782,18 @@ class GSEAbase(object):
         #         res_df[col] = res_df[col].astype(float).clip(lower=min_pval)
         # trim
         dc = ["RES", "hits", "matched_genes"]
-        # log2err is only meaningful for the fgsea multilevel path; drop it otherwise
-        if "log2err" in res_df.columns and res_df["log2err"].isna().all():
+        # The fgsea multilevel path and the permutation path are mutually exclusive
+        # and disagree on which statistics are meaningful:
+        #   - multilevel produces a real log2err but no meaningful FWER p-val
+        #   - permutation produces a real FWER p-val but no log2err
+        # Drop whichever column is not meaningful for the active path. The flag is
+        # set explicitly by the caller; the data can't be used to discriminate
+        # because the permutation path emits log2err=0.0 (not NaN).
+        is_multilevel = getattr(self, "_is_multilevel", False)
+        if is_multilevel:
+            if "FWER p-val" in res_df.columns:
+                dc.append("FWER p-val")
+        elif "log2err" in res_df.columns:
             dc.append("log2err")
         if self.permutation_num == 0:
             dc += [
@@ -794,6 +809,8 @@ class GSEAbase(object):
         # re-order by NES
         # for pandas > 1.1, use df.sort_values(by='B', key=abs) will sort by abs value
         self.res2d = res_df.reindex(res_df["NES"].abs().sort_values(ascending=False).index).reset_index(drop=True)
+        # de-duplicate while preserving order (e.g. FWER p-val may be added twice)
+        dc = list(dict.fromkeys(dc))
         self.res2d.drop(dc, axis=1, inplace=True)
 
         if self._outdir is not None:
