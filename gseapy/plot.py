@@ -181,7 +181,7 @@ class Heatmap(object):
         # Add colorbar, make sure to specify tick locations to match desired ticklabels
         cbar.locator = cbar_locator  # LinearLocator(3)
         cbar.update_ticks()
-        cbar.ax.set_title(self.cbar_title, loc="left", fontweight="bold")
+        cbar.ax.set_title(self.cbar_title, loc="left", fontweight="bold", pad=12)
         for key, spine in cbar.ax.spines.items():
             spine.set_visible(False)
         # cbar = colorbar(matrix)
@@ -975,8 +975,10 @@ class DotPlot(object):
         )
         # cbar.ax.tick_params(direction='in')
         cbar.ax.yaxis.set_tick_params(color="white", direction="in", left=True, right=True)
-        cbar.ax.set_title(self.cbar_title, loc="left", fontweight="bold")
-        cbar.ax.title.set_position((0, 1.05))  # 1.05 = 5% above the top
+        # pad (in points) keeps the title clear of the (tall) colorbar; more
+        # robust than set_position(), whose axes-fraction offset is a tiny
+        # absolute gap on a tall, narrow colorbar -> title crowds the bar.
+        cbar.ax.set_title(self.cbar_title, loc="left", fontweight="bold", pad=12)
         for key, spine in cbar.ax.spines.items():
             spine.set_visible(False)
 
