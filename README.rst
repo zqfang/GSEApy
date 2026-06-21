@@ -35,6 +35,8 @@ GSEApy: Gene Set Enrichment Analysis in Python.
 
 `Tutorial for general usage <https://gseapy.readthedocs.io/en/latest/gseapy_example.html>`_
 
+* A faithful Rust port of fgsea's multilevel algorithm that resolves p-values far below `1/permutation_num`.
+
 
 Citation
 ------------------------------------
@@ -55,7 +57,7 @@ GSEApy has 7 sub-commands available: ``gsea``, ``prerank``, ``ssgsea``, ``gsva``
 
 
 :gsea:    The ``gsea`` module produces `GSEA  <http://www.broadinstitute.org/cancer/software/gsea/wiki/index.php/Main_Page>`_ results.  The input requries a txt file(FPKM, Expected Counts, TPM, et.al), a cls file, and gene_sets file in gmt format.
-:prerank: The ``prerank`` module produces **Prerank tool** results.  The input expects a pre-ranked gene list dataset with correlation values, provided in .rnk format, and gene_sets file in gmt format.  ``prerank`` module is an API to `GSEA` pre-rank tools.
+:prerank: The ``prerank`` module produces **Prerank tool** results.  The input expects a pre-ranked gene list dataset with correlation values, provided in .rnk format, and gene_sets file in gmt format.  ``prerank`` module is an API to `GSEA` pre-rank tools. It also supports the **fgsea** multilevel p-value method (a faithful Rust port of `fgsea <https://github.com/ctlab/fgsea>`_) via ``method='multilevel'``, which resolves p-values far below ``1/permutation_num``.
 :ssgsea: The ``ssgsea`` module performs **single sample GSEA(ssGSEA)** analysis.  The input expects a pd.Series (indexed by gene name), or a pd.DataFrame (include ``GCT`` file) with expression values and a ``GMT`` file. For multiple sample input, ssGSEA reconigzes gct format, too. ssGSEA enrichment score for the gene set is described by `D. Barbie et al 2009 <http://www.nature.com/nature/journal/v462/n7269/abs/nature08460.html>`_.
 :gsva: The ``gsva`` module performs `GSVA <https://github.com/rcastelo/GSVA>`_ method by `Hänzelmann et al <https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-14-7>`_. The input is same to ssgsea.
 :replot: The ``replot`` module reproduce GSEA desktop version results.  The only input for GSEApy is the location to ``GSEA`` Desktop output results.
@@ -162,6 +164,9 @@ For command line usage:
   # An example to run Prerank using gseapy prerank module
   $ gseapy prerank -r gsea_data.rnk -g gene_sets.gmt -o test
 
+  # An example to run Prerank with the fgsea multilevel p-value method
+  $ gseapy prerank -r gsea_data.rnk -g gene_sets.gmt --method multilevel --sample-size 101 --eps 1e-50 -o test
+
   # An example to run ssGSEA using gseapy ssgsea module
   $ gseapy ssgsea -d expression.txt -g gene_sets.gmt -o test
 
@@ -188,6 +193,9 @@ Run gseapy inside python console:
 
     # run prerank
     gseapy.prerank(rnk='gsea_data.rnk', gene_sets='gene_sets.gmt', outdir='test')
+
+    # run prerank with the fgsea multilevel p-value method
+    gseapy.prerank(rnk='gsea_data.rnk', gene_sets='gene_sets.gmt', method='multilevel', outdir='test')
 
     # run ssGSEA
     gseapy.ssgsea(data="expression.txt", gene_sets= "gene_sets.gmt", outdir='test')
