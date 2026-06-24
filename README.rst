@@ -91,7 +91,7 @@ GSEApy vs GSEA(Broad) output
 Using the same data for ``GSEAPreranked``, and ``GSEApy`` reproduce similar results.
 
 
-.. image:: docs/Preank.py.vs.broad.jpg
+.. image:: https://raw.githubusercontent.com/zqfang/GSEApy/master/docs/Preank.py.vs.broad.jpg
     :width: 400
 
 
