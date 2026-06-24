@@ -31,11 +31,9 @@ GSEApy: Gene Set Enrichment Analysis in Python.
 
 **Release notes** : https://github.com/zqfang/GSEApy/releases
 
-`Tutorial for scRNA-seq datasets <https://gseapy.readthedocs.io/en/latest/singlecell_example.html#>`_
-
 `Tutorial for general usage <https://gseapy.readthedocs.io/en/latest/gseapy_example.html>`_
 
-* A faithful Rust port of fgsea's multilevel algorithm that resolves p-values far below `1/permutation_num`.
+* **A faithful Rust port of fgsea's multilevel algorithm that resolves p-values far below `1/permutation_num`.**
 
 
 Citation
