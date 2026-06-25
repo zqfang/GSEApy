@@ -37,6 +37,7 @@ tests/*.out
 tests/data/*.out
 tests/benchmark
 gseapy_example.ipynb
+gseapy_tutorial.ipynb
 target
 Cargo.lock
 .jupyter
