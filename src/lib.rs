@@ -1,6 +1,6 @@
+use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use std::collections::HashMap;
-use std::env;
 // import own modules
 mod algorithm;
 mod fgsea;
@@ -12,6 +12,24 @@ use algorithm::GseaStatResult;
 use gsva::gsva;
 use stats::{GSEAResult, GSEASummary};
 use utils::{CorrelType, Metric, ScoreType};
+
+/// Build a dedicated, per-call rayon thread pool sized to `threads`.
+///
+/// We intentionally do **not** touch the global pool or the `RAYON_NUM_THREADS`
+/// environment variable. The env var is read only once, when rayon lazily
+/// initializes its global pool, so mutating it from here would silently ignore
+/// `threads` on every call after the first in a long-lived process (e.g. a
+/// Python console). It is also process-global state and racy to mutate while
+/// other threads read the environment. A fresh local pool, driven via
+/// `pool.install(..)`, honors `threads` on every call and keeps the parallelism
+/// fully scoped to this invocation. Nested `par_iter` calls inside the closure
+/// automatically use the installed pool.
+fn build_pool(threads: usize) -> PyResult<rayon::ThreadPool> {
+    rayon::ThreadPoolBuilder::new()
+        .num_threads(threads)
+        .build()
+        .map_err(|e| PyRuntimeError::new_err(format!("failed to build thread pool: {e}")))
+}
 
 /// Prerank RUST
 /// Arguments:
@@ -26,6 +44,7 @@ use utils::{CorrelType, Metric, ScoreType};
 /// - seed: random seed
 #[pyfunction]
 fn prerank_rs(
+    py: Python<'_>,
     genes: Vec<String>,
     metric: Vec<f64>,
     gene_sets: HashMap<String, Vec<String>>,
@@ -36,17 +55,15 @@ fn prerank_rs(
     threads: usize,
     seed: u64,
 ) -> PyResult<GSEAResult> {
-    // rayon::ThreadPoolBuilder::new()
-    //     .num_threads(threads)
-    //     .build_global()
-    //     .unwrap_or_default();
-    env::set_var("RAYON_NUM_THREADS", threads.to_string());
+    let pool = build_pool(threads)?;
     let mut gmt = HashMap::<&str, &[String]>::new();
     for (k, v) in gene_sets.iter() {
         gmt.insert(k.as_str(), v.as_slice());
     }
     let mut gsea = GSEAResult::new(weight, max_size, min_size, nperm, seed);
-    gsea.prerank(&genes, &metric, &gmt);
+    // Release the GIL: the compute is pure Rust and does not touch Python objects,
+    // so other Python threads can run while we crunch numbers.
+    py.detach(|| pool.install(|| gsea.prerank(&genes, &metric, &gmt)));
     Ok(gsea)
 }
 
@@ -63,6 +80,7 @@ fn prerank_rs(
 /// - seed: random seed
 #[pyfunction]
 fn prerank2d_rs(
+    py: Python<'_>,
     genes: Vec<String>,
     metric: Vec<Vec<f64>>,
     gene_sets: HashMap<String, Vec<String>>,
@@ -73,17 +91,13 @@ fn prerank2d_rs(
     threads: usize,
     seed: u64,
 ) -> PyResult<GSEAResult> {
-    // rayon::ThreadPoolBuilder::new()
-    //     .num_threads(threads)
-    //     .build_global()
-    //     .unwrap_or_default();
-    env::set_var("RAYON_NUM_THREADS", threads.to_string());
+    let pool = build_pool(threads)?;
     let mut gmt = HashMap::<&str, &[String]>::new();
     for (k, v) in gene_sets.iter() {
         gmt.insert(k.as_str(), v.as_slice());
     }
     let mut gsea = GSEAResult::new(weight, max_size, min_size, nperm, seed);
-    gsea.prerank2(&genes, &metric, &gmt);
+    py.detach(|| pool.install(|| gsea.prerank2(&genes, &metric, &gmt)));
     Ok(gsea)
 }
 
@@ -101,6 +115,7 @@ fn prerank2d_rs(
 /// - seed: random seed
 #[pyfunction]
 fn gsea_rs(
+    py: Python<'_>,
     gene_name: Vec<String>,
     gene_exp: Vec<Vec<f64>>,
     gene_sets: HashMap<String, Vec<String>>,
@@ -113,12 +128,7 @@ fn gsea_rs(
     threads: usize,
     seed: u64,
 ) -> PyResult<GSEAResult> {
-    // rayon::ThreadPoolBuilder::new()
-    //     .num_threads(threads)
-    //     .build_global()
-    //     .unwrap_or_default();
-    // set number of threads
-    env::set_var("RAYON_NUM_THREADS", threads.to_string());
+    let pool = build_pool(threads)?;
 
     // get gene sets dict
     let mut gmt = HashMap::<&str, &[String]>::new();
@@ -127,7 +137,7 @@ fn gsea_rs(
     }
 
     let mut gsea = GSEAResult::new(weight, max_size, min_size, nperm, seed);
-    gsea.gsea(&gene_name, &group, &gene_exp, &gmt, method);
+    py.detach(|| pool.install(|| gsea.gsea(&gene_name, &group, &gene_exp, &gmt, method)));
     Ok(gsea)
 }
 
@@ -147,6 +157,7 @@ fn gsea_rs(
 #[pyfunction]
 #[pyo3(signature = (gene_name, gene_exp, gene_sets, weight = 1.0, min_size = 5, max_size = 500, nperm = None, ctype = CorrelType::Rank, threads = 4,seed = 0))]
 fn ssgsea_rs(
+    py: Python<'_>,
     gene_name: Vec<String>,
     gene_exp: Vec<Vec<f64>>,
     gene_sets: HashMap<String, Vec<String>>,
@@ -158,11 +169,7 @@ fn ssgsea_rs(
     threads: usize,
     seed: u64,
 ) -> PyResult<GSEAResult> {
-    // rayon::ThreadPoolBuilder::new()
-    //     .num_threads(threads)
-    //     .build_global()
-    //     .unwrap_or_default();
-    env::set_var("RAYON_NUM_THREADS", threads.to_string());
+    let pool = build_pool(threads)?;
 
     let mut gmt = HashMap::<&str, &[String]>::new();
     for (k, v) in gene_sets.iter() {
@@ -170,11 +177,15 @@ fn ssgsea_rs(
     }
     let _nperm = nperm.unwrap_or(0);
     let mut gsea = GSEAResult::new(weight, max_size, min_size, _nperm, seed);
-    if _nperm > 0 {
-        gsea.ss_gsea_permuate(&gene_name, &gene_exp, &gmt, ctype);
-    } else {
-        gsea.ss_gsea(&gene_name, &gene_exp, &gmt, ctype);
-    }
+    py.detach(|| {
+        pool.install(|| {
+            if _nperm > 0 {
+                gsea.ss_gsea_permuate(&gene_name, &gene_exp, &gmt, ctype);
+            } else {
+                gsea.ss_gsea(&gene_name, &gene_exp, &gmt, ctype);
+            }
+        })
+    });
     Ok(gsea)
 }
 /// Run GSVA (Gene Set Variation Analysis)
@@ -212,6 +223,7 @@ fn ssgsea_rs(
 ///     A GSEAResult object containing the GSVA results
 #[pyfunction]
 fn gsva_rs(
+    py: Python<'_>,
     gene_name: Vec<String>,
     gene_expr: Vec<Vec<f64>>,
     gene_sets: HashMap<String, Vec<String>>,
@@ -224,10 +236,15 @@ fn gsva_rs(
     max_size: usize,
     threads: usize
 ) -> PyResult<GSEAResult> {
-    env::set_var("RAYON_NUM_THREADS", threads.to_string());
-    let gs = gsva(
-        gene_name, gene_expr, gene_sets, kcdf, rnaseq, mx_diff, abs_rnk, tau, min_size, max_size
-    );
+    let pool = build_pool(threads)?;
+    let gs = py.detach(|| {
+        pool.install(|| {
+            gsva(
+                gene_name, gene_expr, gene_sets, kcdf, rnaseq, mx_diff, abs_rnk, tau, min_size,
+                max_size,
+            )
+        })
+    });
     Ok(gs)
 }
 
@@ -258,6 +275,7 @@ fn gsva_rs(
 #[pyfunction]
 #[pyo3(signature = (genes, metric, gene_sets, weight=1.0, min_size=15, max_size=500, sample_size=101, nperm = 1000, eps=1e-50, threads=4, seed=0))]
 fn fgsea_rs(
+    py: Python<'_>,
     genes: Vec<String>,
     metric: Vec<f64>,
     gene_sets: HashMap<String, Vec<String>>,
@@ -270,13 +288,15 @@ fn fgsea_rs(
     threads: usize,
     seed: u64,
 ) -> PyResult<GSEAResult> {
-    env::set_var("RAYON_NUM_THREADS", threads.to_string());
+    let pool = build_pool(threads)?;
     let mut gmt = HashMap::<&str, &[String]>::new();
     for (k, v) in gene_sets.iter() {
         gmt.insert(k.as_str(), v.as_slice());
     }
     let mut gsea = GSEAResult::new(weight, max_size, min_size, nperm, seed);
-    gsea.prerank_multilevel(&genes, &metric, &gmt, sample_size, eps);
+    py.detach(|| {
+        pool.install(|| gsea.prerank_multilevel(&genes, &metric, &gmt, sample_size, eps))
+    });
     Ok(gsea)
 }
 
@@ -357,4 +377,52 @@ fn gse(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(fgsea_rs, m)?)?;
     // m.add_function(wrap_pyfunction!(calc_gsea_stat_rs, m)?)?;
     Ok(())
+}
+
+#[cfg(all(test, feature = "extension-module"))]
+mod thread_pool_tests {
+    //! Tests for the per-call thread-pool fix (replaces the old
+    //! `env::set_var("RAYON_NUM_THREADS", ..)` global-state hack).
+    use super::build_pool;
+    use rayon::prelude::*;
+
+    /// Every call gets a pool with *exactly* the requested number of threads.
+    #[test]
+    fn pool_honors_requested_thread_count() {
+        for n in [1usize, 2, 3] {
+            let pool = build_pool(n).expect("pool should build");
+            let observed = pool.install(rayon::current_num_threads);
+            assert_eq!(observed, n, "pool should expose exactly {n} threads");
+        }
+    }
+
+    /// The core regression: two differently-sized pools coexist in one process.
+    /// This is impossible with `build_global()` (callable once) or
+    /// `RAYON_NUM_THREADS` (read once at lazy global-pool init) — the exact bug
+    /// that made `threads=` a no-op after the first call in a Python session.
+    #[test]
+    fn pools_are_independent_per_call() {
+        let small = build_pool(1).expect("pool should build");
+        let big = build_pool(4).expect("pool should build");
+        assert_eq!(small.install(rayon::current_num_threads), 1);
+        assert_eq!(big.install(rayon::current_num_threads), 4);
+        // ...and the first pool is unchanged by the second's creation.
+        assert_eq!(small.install(rayon::current_num_threads), 1);
+    }
+
+    /// Nested `par_iter` inside `install` inherits the installed pool — this is
+    /// why wrapping only the top-level compute call is sufficient, even though
+    /// the `par_iter` calls live deep in stats.rs / algorithm.rs / gsva.rs.
+    #[test]
+    fn nested_parallel_iter_uses_installed_pool() {
+        let pool = build_pool(2).expect("pool should build");
+        let observed = pool.install(|| {
+            (0..1_000)
+                .into_par_iter()
+                .map(|_| rayon::current_num_threads())
+                .max()
+                .unwrap()
+        });
+        assert_eq!(observed, 2, "nested par_iter should run on the 2-thread pool");
+    }
 }
