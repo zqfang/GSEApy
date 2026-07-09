@@ -1,11 +1,28 @@
 # -*- coding: utf-8 -*-
+"""DEPRECATED / OUTDATED — legacy pure-Python GSEA engine.
+
+This module is the original NumPy implementation of the enrichment-score and
+permutation machinery. It has been superseded by the Rust extension
+``gseapy.gse`` (see ``src/stats.rs`` / ``src/algorithm.rs``) and is no longer
+imported by any part of the package. It is retained only as a readable
+reference for the algorithm; it is not maintained and may diverge from the
+Rust implementation that actually runs. Do not use it in new code.
+"""
 
 import logging
+import warnings
 from math import ceil
 from typing import Dict, Iterable, List
 
 import numpy as np
 from joblib import Parallel, delayed
+
+warnings.warn(
+    "gseapy.algorithm is deprecated and unused; the active engine is the Rust "
+    "extension gseapy.gse. This module is kept only as a reference.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 
 def enrichment_score(

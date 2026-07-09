@@ -39,7 +39,5 @@ tests/benchmark
 gseapy_example.ipynb
 gseapy_tutorial.ipynb
 target
-Cargo.lock
 .jupyter
-uv.lock
 CLAUDE.md

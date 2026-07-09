@@ -112,7 +112,15 @@ def retry(num=5, pool_maxsize: int = 50):
     - Accepts gzip/deflate to speed up transfers
     """
     s = requests.Session()
-    retries = Retry(total=num, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
+    # allowed_methods must include POST: urllib3's default set excludes it, so
+    # without this every POST (Enrichr add_list / add_background / BioMart query)
+    # is silently NOT retried despite using the retry session.
+    retries = Retry(
+        total=num,
+        backoff_factor=1,
+        status_forcelist=[500, 502, 503, 504],
+        allowed_methods=frozenset(["GET", "POST", "HEAD", "OPTIONS", "PUT", "DELETE", "TRACE"]),
+    )
     adapter = HTTPAdapter(max_retries=retries, pool_connections=pool_maxsize, pool_maxsize=pool_maxsize)
     s.mount("http://", adapter)
     s.mount("https://", adapter)

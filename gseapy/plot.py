@@ -437,8 +437,8 @@ class GSEAPlot(object):
         mat = self.rankings
         if self.rankings is None:
             mat = self.RES
-        vmin = np.percentile(mat.min(), 2)
-        vmax = np.percentile(mat.max(), 98)
+        vmin = np.percentile(mat, 2)
+        vmax = np.percentile(mat, 98)
         midnorm = MidpointNormalize(vmin=vmin, vcenter=0, vmax=vmax)
         # colormap
         ax3 = self.fig.add_axes(rect)
@@ -855,9 +855,9 @@ class DotPlot(object):
         # since matplotlib scatter's `s` parameter is in points^2 (area),
         # we scale Hits_ratio by (scale * markersize)^2 to get the area
         df = self.data.assign(area=self.data["Hits_ratio"] * (self.scale * plt.rcParams["lines.markersize"]) ** 2)
-        colmap = df[self.colname].astype(int)
-        vmin = np.percentile(colmap.min(), 2)
-        vmax = np.percentile(colmap.max(), 98)
+        colmap = df[self.colname].astype(float)
+        vmin = np.percentile(colmap, 2)
+        vmax = np.percentile(colmap, 98)
         # vmin = np.percentile(df.colmap.min(), 2)
         # vmax = np.percentile(df.colmap.max(), 98)
         ax = self.get_ax()
@@ -1094,7 +1094,7 @@ class DotPlot(object):
         term_loc = self.data.columns.get_loc(self.y)  # "Terms"
         if "Genes" in self.data.columns:
             gene_loc = self.data.columns.get_loc("Genes")
-        elif "Lead_genes":
+        elif "Lead_genes" in self.data.columns:
             gene_loc = self.data.columns.get_loc("Lead_genes")
         else:
             raise KeyError("Sorry, could not locate enriched gene list")
