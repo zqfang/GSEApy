@@ -304,8 +304,15 @@ impl GSEAResult {
                     } else {
                         0.0
                     }; // obs.count.col
-                       // FDR
-                    fdrs_all.push((phi_norm / phi_obs).clamp(f64::MIN, 1.0));
+                       // FDR is undefined when phi_obs == 0 (0/0 -> NaN); by
+                       // convention set it to the maximum (1.0). Otherwise clamp
+                       // to the valid [0, 1] range.
+                    let fdr = if phi_obs == 0.0 {
+                        1.0
+                    } else {
+                        (phi_norm / phi_obs).clamp(0.0, 1.0)
+                    };
+                    fdrs_all.push(fdr);
                 }
                 fdrs_all.as_slice().mean()
             })
@@ -320,7 +327,7 @@ impl GSEAResult {
 
         // To speedup, sort f64 in acending order in place, then do a binary search
         self.nesnull_concat
-            .sort_unstable_by(|a, b| a.partial_cmp(b).unwrap()); // if descending -> b.partial_cmp(a)
+            .sort_unstable_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal)); // NaN-safe; if descending -> b.partial_cmp(a)
         let (indices, nes_sorted) = self.nes_concat.as_slice().argsort(true); // ascending order
 
         // binary_search assumes that the elements are sorted in less-to-greater order.
@@ -366,8 +373,13 @@ impl GSEAResult {
                 } else {
                     0.0
                 }; // obs.count.col
-                   // FDR
-                (phi_norm / phi_obs).clamp(f64::MIN, 1.0)
+                   // FDR is undefined when phi_obs == 0 (0/0 -> NaN); by
+                   // convention set it to the maximum (1.0), else clamp to [0, 1].
+                if phi_obs == 0.0 {
+                    1.0
+                } else {
+                    (phi_norm / phi_obs).clamp(0.0, 1.0)
+                }
             })
             .collect();
 
