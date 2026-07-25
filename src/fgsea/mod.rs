@@ -76,8 +76,22 @@ pub fn scale_ranks(ranks: &[f64]) -> Vec<i64> {
 /// * `seed` — random seed.
 /// * `eps` — convergence threshold (fgsea default 1e-50; 0 disables early exit).
 ///
-/// Returns `(p_value, log2err)`. Sign handling, abs of ranks, and positive/negative
-/// ruler selection all happen inside `fgseaMultilevelCpp`.
+/// Returns `(conditional_p_value, is_cp_ge_half, log2err)`. Sign handling, abs of ranks,
+/// and positive/negative ruler selection all happen inside `fgseaMultilevelCpp`.
+///
+/// **The returned p-value is conditional** on the null ES sharing the sign of
+/// `observed_es`. It is fgsea's raw `cppMPval`, not a usable p-value on its own. The
+/// caller must divide it by `denomProb = (modeFraction + 1) / (nPermSimple + 1)`, the
+/// same-sign fraction of the simple-permutation null, exactly as `fgseaMultilevel` does:
+///
+/// ```r
+/// result[, pval := pmin(1, cpp.res$cppMPval / denomProb)]
+/// ```
+///
+/// `is_cp_ge_half` is fgsea's `cppIsCpGeHalf`; when false the p-value was likely
+/// overestimated and fgsea reports `log2err` as NA. The returned `log2err` is the core's
+/// own estimate for the *uncorrected* value; fgsea recomputes it from the corrected
+/// p-value via `multilevelError`, so callers should generally ignore it.
 pub fn compute_pvalue_multilevel(
     int_ranks: &[i64],
     pathway_size: usize,
@@ -85,9 +99,9 @@ pub fn compute_pvalue_multilevel(
     sample_size: usize,
     seed: u64,
     eps: f64,
-) -> (f64, f64) {
+) -> (f64, bool, f64) {
     if observed_es.abs() < 1e-15 || pathway_size == 0 || pathway_size >= int_ranks.len() {
-        return (1.0, f64::NAN);
+        return (1.0, true, f64::NAN);
     }
 
     // Scaled ranks sum to <= 1<<30, so every element fits in i32; fgseaMultilevelCpp
@@ -106,5 +120,5 @@ pub fn compute_pvalue_multilevel(
         false, // logStatus
     );
 
-    (res.cppMPval[0], res.log2err[0])
+    (res.cppMPval[0], res.cppIsCpGeHalf[0], res.log2err[0])
 }
