@@ -4,7 +4,7 @@ use crate::stats::{GSEAResult, GSEASummary};
 use crate::utils::{DynamicEnum, Statistic};
 use rayon::prelude::*;
 use statrs::distribution::{ContinuousCDF, DiscreteCDF, Normal, Poisson};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 pub struct GSVA {
     genes: DynamicEnum<String>,
@@ -296,7 +296,7 @@ fn transpose(mat: &[Vec<f64>]) -> Vec<Vec<f64>> {
 pub fn gsva(
     gene_name: Vec<String>,
     gene_expr: Vec<Vec<f64>>,
-    gene_sets: HashMap<String, Vec<String>>,
+    gene_sets: BTreeMap<String, Vec<String>>,
     kcdf: bool,
     rnaseq: bool,
     mx_diff: bool,
@@ -374,7 +374,7 @@ mod tests {
             }
             gene_exp.push(vv);
         }
-        let mut gene_sets = HashMap::<String, Vec<String>>::new();
+        let mut gene_sets = BTreeMap::<String, Vec<String>>::new();
         gmt.record.iter().for_each(|r| {
             gene_sets.insert(r[0].to_string(), r[2..].to_vec());
         });

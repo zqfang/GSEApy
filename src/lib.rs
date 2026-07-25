@@ -1,6 +1,6 @@
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 // import own modules
 mod algorithm;
 mod fgsea;
@@ -47,7 +47,7 @@ fn prerank_rs(
     py: Python<'_>,
     genes: Vec<String>,
     metric: Vec<f64>,
-    gene_sets: HashMap<String, Vec<String>>,
+    gene_sets: BTreeMap<String, Vec<String>>,
     weight: f64,
     min_size: usize,
     max_size: usize,
@@ -56,7 +56,7 @@ fn prerank_rs(
     seed: u64,
 ) -> PyResult<GSEAResult> {
     let pool = build_pool(threads)?;
-    let mut gmt = HashMap::<&str, &[String]>::new();
+    let mut gmt = BTreeMap::<&str, &[String]>::new();
     for (k, v) in gene_sets.iter() {
         gmt.insert(k.as_str(), v.as_slice());
     }
@@ -83,7 +83,7 @@ fn prerank2d_rs(
     py: Python<'_>,
     genes: Vec<String>,
     metric: Vec<Vec<f64>>,
-    gene_sets: HashMap<String, Vec<String>>,
+    gene_sets: BTreeMap<String, Vec<String>>,
     weight: f64,
     min_size: usize,
     max_size: usize,
@@ -92,7 +92,7 @@ fn prerank2d_rs(
     seed: u64,
 ) -> PyResult<GSEAResult> {
     let pool = build_pool(threads)?;
-    let mut gmt = HashMap::<&str, &[String]>::new();
+    let mut gmt = BTreeMap::<&str, &[String]>::new();
     for (k, v) in gene_sets.iter() {
         gmt.insert(k.as_str(), v.as_slice());
     }
@@ -118,7 +118,7 @@ fn gsea_rs(
     py: Python<'_>,
     gene_name: Vec<String>,
     gene_exp: Vec<Vec<f64>>,
-    gene_sets: HashMap<String, Vec<String>>,
+    gene_sets: BTreeMap<String, Vec<String>>,
     group: Vec<bool>,
     method: Metric,
     weight: f64,
@@ -131,7 +131,7 @@ fn gsea_rs(
     let pool = build_pool(threads)?;
 
     // get gene sets dict
-    let mut gmt = HashMap::<&str, &[String]>::new();
+    let mut gmt = BTreeMap::<&str, &[String]>::new();
     for (k, v) in gene_sets.iter() {
         gmt.insert(k.as_str(), v.as_slice());
     }
@@ -160,7 +160,7 @@ fn ssgsea_rs(
     py: Python<'_>,
     gene_name: Vec<String>,
     gene_exp: Vec<Vec<f64>>,
-    gene_sets: HashMap<String, Vec<String>>,
+    gene_sets: BTreeMap<String, Vec<String>>,
     weight: f64,
     min_size: usize,
     max_size: usize,
@@ -171,7 +171,7 @@ fn ssgsea_rs(
 ) -> PyResult<GSEAResult> {
     let pool = build_pool(threads)?;
 
-    let mut gmt = HashMap::<&str, &[String]>::new();
+    let mut gmt = BTreeMap::<&str, &[String]>::new();
     for (k, v) in gene_sets.iter() {
         gmt.insert(k.as_str(), v.as_slice());
     }
@@ -226,7 +226,7 @@ fn gsva_rs(
     py: Python<'_>,
     gene_name: Vec<String>,
     gene_expr: Vec<Vec<f64>>,
-    gene_sets: HashMap<String, Vec<String>>,
+    gene_sets: BTreeMap<String, Vec<String>>,
     kcdf: bool,
     rnaseq: bool,
     mx_diff: bool,
@@ -278,7 +278,7 @@ fn fgsea_rs(
     py: Python<'_>,
     genes: Vec<String>,
     metric: Vec<f64>,
-    gene_sets: HashMap<String, Vec<String>>,
+    gene_sets: BTreeMap<String, Vec<String>>,
     weight: f64,
     min_size: usize,
     max_size: usize,
@@ -289,7 +289,7 @@ fn fgsea_rs(
     seed: u64,
 ) -> PyResult<GSEAResult> {
     let pool = build_pool(threads)?;
-    let mut gmt = HashMap::<&str, &[String]>::new();
+    let mut gmt = BTreeMap::<&str, &[String]>::new();
     for (k, v) in gene_sets.iter() {
         gmt.insert(k.as_str(), v.as_slice());
     }
