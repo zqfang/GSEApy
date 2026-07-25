@@ -10,7 +10,7 @@ use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use special::Gamma;
 use statrs::function::beta::beta_reg;
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 /// The `p`-quantile of a Beta(`a`, `b`) distribution -- R's `qbeta(p, a, b)`.
 ///
@@ -531,7 +531,7 @@ impl GSEAResult {
         genes: &[String],
         group: &[bool],
         gene_exp: &[Vec<f64>],
-        gmt: &HashMap<&str, &[String]>,
+        gmt: &BTreeMap<&str, &[String]>,
         method: Metric,
     ) {
         let mut es = EnrichmentScore::new(genes, self.nperm, self.seed, false, false);
@@ -594,7 +594,7 @@ impl GSEAResult {
         self.summaries = summ;
     }
 
-    pub fn prerank(&mut self, genes: &[String], metric: &[f64], gmt: &HashMap<&str, &[String]>) {
+    pub fn prerank(&mut self, genes: &[String], metric: &[f64], gmt: &BTreeMap<&str, &[String]>) {
         // NOTE: input must not contain duplcated genes
 
         let weighted_metric: Vec<f64> = metric.iter().map(|x| x.abs().powf(self.weight)).collect();
@@ -645,7 +645,7 @@ impl GSEAResult {
         &mut self,
         genes: &[String],
         metric: &[Vec<f64>], // 2d vector [m_gene, n_sample];
-        gmt: &HashMap<&str, &[String]>,
+        gmt: &BTreeMap<&str, &[String]>,
     ) {
         // Calculate number of samples
         let n_samples = metric[0].len();
@@ -704,7 +704,7 @@ impl GSEAResult {
         &mut self,
         genes: &[String],
         gene_exp: &[Vec<f64>], // 2d vector [m_gene, n_sample];
-        gmt: &HashMap<&str, &[String]>,
+        gmt: &BTreeMap<&str, &[String]>,
         correl_type: CorrelType,
     ) {
         // transpose [m_gene, n_sample] --> [n_sample, m_gene]
@@ -815,7 +815,7 @@ impl GSEAResult {
         &mut self,
         genes: &[String],
         gene_exp: &[Vec<f64>], // 2d vector [m_gene, n_sample];
-        gmt: &HashMap<&str, &[String]>,
+        gmt: &BTreeMap<&str, &[String]>,
         correl_type: CorrelType,
     ) {
         // transpose [m_gene, n_sample] --> [n_sample, m_gene]
@@ -996,7 +996,7 @@ impl GSEAResult {
         &mut self,
         genes: &[String],
         metric: &[f64],
-        gmt: &HashMap<&str, &[String]>,
+        gmt: &BTreeMap<&str, &[String]>,
         sample_size: usize,
         eps: f64,
     ) {
@@ -1250,7 +1250,7 @@ mod tests {
         }
 
         // hashmap
-        let mut gmt2 = HashMap::<&str, &[String]>::new();
+        let mut gmt2 = BTreeMap::<&str, &[String]>::new();
         gmt.record.iter().for_each(|r| {
             gmt2.insert(r[0].as_str(), &r[2..]);
         });
@@ -1309,7 +1309,7 @@ mod tests {
             gene_exp.push(vv);
         }
 
-        let mut gmt2 = HashMap::<&str, &[String]>::new();
+        let mut gmt2 = BTreeMap::<&str, &[String]>::new();
         gmt.record.iter().for_each(|r| {
             gmt2.insert(r[0].as_str(), &r[2..]);
         });
@@ -1358,7 +1358,7 @@ mod tests {
 
         let sample_names = &gct.header.get_vec()[2..];
 
-        let mut gmt2 = HashMap::<&str, &[String]>::new();
+        let mut gmt2 = BTreeMap::<&str, &[String]>::new();
         gmt.record.iter().for_each(|r| {
             gmt2.insert(r[0].as_str(), &r[2..]);
         });
@@ -1441,7 +1441,7 @@ mod tests {
             gene.push(r[0].clone());
             gene_metric.push(r[1].parse::<f64>().unwrap());
         }
-        let mut gmt2 = HashMap::<&str, &[String]>::new();
+        let mut gmt2 = BTreeMap::<&str, &[String]>::new();
         gmt.record.iter().for_each(|r| {
             gmt2.insert(r[0].as_str(), &r[2..]);
         });
@@ -1530,7 +1530,7 @@ mod tests {
     fn test_prerank_multilevel_null_calibration() {
         let weight = 1.0;
         let (gene, metric, _rnk, gmt) = load_prerank_fixture();
-        let mut gmt2 = HashMap::<&str, &[String]>::new();
+        let mut gmt2 = BTreeMap::<&str, &[String]>::new();
         gmt.record.iter().for_each(|r| { gmt2.insert(r[0].as_str(), &r[2..]); });
 
         // Deterministic label shuffle (LCG): keeps the metric distribution intact but
@@ -1567,7 +1567,7 @@ mod tests {
     fn test_prerank_multilevel_eps_floor() {
         let weight = 1.0;
         let (gene, metric, _rnk, gmt) = load_prerank_fixture();
-        let mut gmt2 = HashMap::<&str, &[String]>::new();
+        let mut gmt2 = BTreeMap::<&str, &[String]>::new();
         gmt.record.iter().for_each(|r| { gmt2.insert(r[0].as_str(), &r[2..]); });
 
         let eps = 1e-3;
@@ -1587,42 +1587,37 @@ mod tests {
         assert!(clamped > 0, "expected at least one gene set to hit the eps floor");
     }
 
-    /// Verify that classical prerank() and prerank_multilevel() produce identical ES
-    /// and NES values when given the same input, same permutation count and same seed.
+    /// Classical `prerank()` and `prerank_multilevel()` must agree exactly on ES, and
+    /// only approximately on NES.
     ///
     /// ES is a deterministic function of the sorted metric and gene-set membership, so
-    /// it must be bit-for-bit equal.  NES is derived from the same gene-permutation
-    /// null distribution in both methods (prerank uses gperm[1..nperm], while
-    /// prerank_multilevel skips index 0 of the same gperm), so with nperm == n_perm_simple
-    /// and the same seed the NES values must also be exactly equal.
+    /// it is bit-for-bit equal between the two paths.
+    ///
+    /// NES is **not**, and must not be asserted equal: the two paths normalise against
+    /// deliberately different null distributions. `prerank` divides by the mean
+    /// same-sign ES of a *gene-label permutation* null, while `prerank_multilevel`
+    /// divides by the mean same-sign ES of fgsea's *random-gene-set* null
+    /// (`calcGseaStatCumulativeBatch`), which is what makes it fgsea-faithful. They
+    /// estimate the same quantity from different samples, so they agree in sign and
+    /// track each other closely, but never to the bit — measured over these 177 gene
+    /// sets, zero have equal NES while the correlation is 0.997.
+    ///
+    /// An earlier version of this test asserted exact NES equality. That was valid when
+    /// `prerank_multilevel` reused the classical `gperm` matrix, but stopped being true
+    /// once the fgsea random-gene-set null landed; the assertion was left behind and had
+    /// been failing ever since, reporting an arbitrary gene set each run because the
+    /// comparison iterated a `HashMap`.
     #[test]
     fn test_prerank_vs_fgsea() {
-        let cwd = std::env::current_dir().unwrap();
-        let rnk_path = cwd.join("tests/data/mds.2k.rnk");
-        let gmt_path = cwd.join("tests/data/c2.cp.kegg.v7.5.1.symbols.gmt");
-
-        // --- load data -------------------------------------------------------
-        let mut rnk = FileReader::new();
-        let _ = rnk.read_csv(rnk_path.to_str().unwrap(), b'\t', false, Some(b'#'));
-        let mut gmt_file = FileReader::new();
-        let _ = gmt_file.read_table(gmt_path.to_str().unwrap(), '\t', false);
-
         let weight = 1.0f64;
-        let mut raw_gene: Vec<String> = Vec::new();
-        let mut raw_metric: Vec<f64> = Vec::new();
-        for r in rnk.record.iter() {
-            raw_gene.push(r[0].clone());
-            raw_metric.push(r[1].parse::<f64>().unwrap());
-        }
-        let mut gmt2 = HashMap::<&str, &[String]>::new();
+        // The shared fixture keeps the metric SIGNED. An earlier version of this test
+        // sorted by |metric| instead, which made every null enrichment score one-signed
+        // and hid exactly the sign-handling this comparison is meant to exercise.
+        let (gene, metric, _rnk, gmt_file) = load_prerank_fixture();
+        let mut gmt2 = BTreeMap::<&str, &[String]>::new();
         gmt_file.record.iter().for_each(|r| {
             gmt2.insert(r[0].as_str(), &r[2..]);
         });
-
-        // sort descending by |metric|^weight (same pre-processing as prerank)
-        let mut wm: Vec<f64> = raw_metric.iter().map(|x| x.abs().powf(weight)).collect();
-        let (gidx, metric) = wm.as_slice().argsort(false);
-        let gene: Vec<String> = gidx.iter().map(|&i| raw_gene[i].clone()).collect();
 
         // Use a small permutation count so the test runs quickly.
         let n_perm = 50usize;
@@ -1643,10 +1638,18 @@ mod tests {
             .summaries.iter().map(|s| (s.term.as_str(), s)).collect();
 
         // Only compare terms present in both results (size filters are identical).
-        let common_terms: Vec<&str> = classical_map.keys()
+        // Sorted so that any failure names the same gene set on every run.
+        let mut common_terms: Vec<&str> = classical_map.keys()
             .filter(|&&t| fgsea_map.contains_key(t)).copied().collect();
+        common_terms.sort_unstable();
 
         assert!(!common_terms.is_empty(), "no gene sets in common between prerank and fgsea");
+
+        // NES pairs, collected for the distribution-level checks below. Gene sets whose
+        // NES is NaN are skipped: prerank_multilevel reports NaN when fewer than 10
+        // permutations share the observed ES's sign, which fgsea also treats as
+        // uninformative rather than as a value to compare.
+        let mut pairs: Vec<(f64, f64)> = Vec::new();
 
         for term in &common_terms {
             let c = classical_map[term];
@@ -1656,17 +1659,51 @@ mod tests {
             assert_eq!(c.es, f.es,
                 "ES mismatch for '{}': classical={:.8}, fgsea={:.8}", term, c.es, f.es);
 
-            // NES normalises by the mean of same-sign null ESs drawn from the same
-            // gene-permutation sequence, so it must also be exactly equal.
-            assert_eq!(c.nes, f.nes,
-                "NES mismatch for '{}': classical={:.8}, fgsea={:.8}", term, c.nes, f.nes);
+            if c.nes.is_nan() || f.nes.is_nan() {
+                continue;
+            }
+
+            // Both nulls are same-sign normalised, so NES cannot flip sign relative to
+            // ES. A disagreement here means one path picked the wrong side of the null.
+            assert_eq!(c.nes.is_sign_positive(), f.nes.is_sign_positive(),
+                "NES sign mismatch for '{}': classical={:.8}, fgsea={:.8}", term, c.nes, f.nes);
+
+            pairs.push((c.nes, f.nes));
         }
 
-        println!("test_prerank_vs_fgsea: {} terms compared", common_terms.len());
+        assert!(pairs.len() > 100, "expected >100 comparable gene sets, got {}", pairs.len());
+
+        // The two NES estimates must track each other tightly. Bounds are deliberately
+        // loose -- they exist to catch one path regressing to a different statistic, not
+        // to police Monte-Carlo noise at only 50 permutations. Measured here: median
+        // relative difference 0.033, correlation 0.997.
+        let mut rel: Vec<f64> = pairs.iter()
+            .map(|(c, f)| (f - c).abs() / c.abs())
+            .collect();
+        rel.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        let median_rel = rel[rel.len() / 2];
+
+        let n = pairs.len() as f64;
+        let mean_c = pairs.iter().map(|p| p.0).sum::<f64>() / n;
+        let mean_f = pairs.iter().map(|p| p.1).sum::<f64>() / n;
+        let cov: f64 = pairs.iter().map(|(c, f)| (c - mean_c) * (f - mean_f)).sum::<f64>();
+        let var_c: f64 = pairs.iter().map(|(c, _)| (c - mean_c).powi(2)).sum::<f64>();
+        let var_f: f64 = pairs.iter().map(|(_, f)| (f - mean_f).powi(2)).sum::<f64>();
+        let corr = cov / (var_c.sqrt() * var_f.sqrt());
+
+        println!("test_prerank_vs_fgsea: {} terms compared, {} with comparable NES; \
+                  median rel diff {:.4}, correlation {:.6}",
+                 common_terms.len(), pairs.len(), median_rel, corr);
+
+        assert!(median_rel < 0.10,
+            "classical and fgsea NES have diverged: median relative difference {:.4}, \
+             expected < 0.10", median_rel);
+        assert!(corr > 0.99,
+            "classical and fgsea NES are no longer tracking: correlation {:.6}, \
+             expected > 0.99", corr);
+
         // Print a few for visual inspection
-        let mut sample: Vec<&str> = common_terms.clone();
-        sample.sort();
-        for term in sample.iter().take(5) {
+        for term in common_terms.iter().take(5) {
             let c = classical_map[term];
             let f = fgsea_map[term];
             println!("  {} | classical es={:.6} nes={:.6} | fgsea es={:.6} nes={:.6}",
