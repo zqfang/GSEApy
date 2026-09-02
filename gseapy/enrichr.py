@@ -708,6 +708,11 @@ class Enrichr(EnrichrAPI):
         if len(hgtest) > 0:
             terms, pvals, oddr, olsz, gsetsz, genes = hgtest
             fdrs, _ = multiple_testing_correction(ps=pvals, alpha=self.cutoff, method="benjamini-hochberg")
+            # hypergeom.sf() can underflow to exactly 0.0, and np.log(0.0) is
+            # -inf, which makes "Combined Score" inf. Floor to the smallest
+            # positive subnormal, not finfo.tiny, so only an exact 0.0 moves.
+            # "P-value" below is the unfloored value.
+            pvals_floor = np.clip(np.asarray(pvals, dtype=float), np.nextafter(0, 1), None)
             # Build result DataFrame (dict maintains insertion order in Python 3.7+)
             res = pd.DataFrame(
                 {
@@ -717,7 +722,7 @@ class Enrichr(EnrichrAPI):
                     "P-value": pvals,
                     "Adjusted P-value": fdrs,
                     "Odds Ratio": oddr,
-                    "Combined Score": -1 * np.log(pvals) * oddr,
+                    "Combined Score": -1 * np.log(pvals_floor) * oddr,
                     "Genes": [";".join(map(str, g)) for g in genes],
                 }
             )
