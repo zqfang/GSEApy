@@ -9,7 +9,7 @@ def calc_pvalues(query, gene_sets, background=20000, **kwargs):
     :param set query: set of identifiers for which the p value is calculated
     :param dict gene_sets: gmt file dict after background was set
     :param set background: total number of genes in your annotated database.
-    :returns: pvalues
+    :returns: pvalues for every nonempty background-filtered category, including zero-hit terms
               x: overlapped gene number
               n: length of gene_set which belongs to each terms
               hits: overlapped gene names.
@@ -78,9 +78,11 @@ def calc_pvalues(query, gene_sets, background=20000, **kwargs):
             category = category.intersection(background)
         hits = query.intersection(category)
         x = len(hits)  # overlap hits
-        if x < 1:
-            continue
         m = len(category)
+        # Exclude empty terms independently of the query, but retain nonempty
+        # zero-hit terms (p=1) for the multiple-testing correction.
+        if m == 0:
+            continue
         # pVal = hypergeom.sf(hitCount-1,popTotal,bgHits,queryTotal)
         # p(X >= hitCounts)
         pval = hypergeom.sf(x - 1, bg, m, k)
