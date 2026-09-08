@@ -688,13 +688,13 @@ class Enrichr(EnrichrAPI):
         Columns: Term, Overlap, P-value, Odds Ratio, Combined Score, Adjusted_P-value, Genes
         """
         # Check gene case consistency
-        top10 = min(len(gmt), 10)
-        top10_keys = list(gmt.keys())[:top10]
         _gls = self._gls
-        ups = [self.check_uppercase(gmt[key]) for key in top10_keys]
+        # Sampling the first ten terms makes matching depend on library order.
+        # Skip empty terms and stop checking as soon as a mixed-case term occurs.
+        ups = (self.check_uppercase(genes) for genes in gmt.values() if genes)
         _gene_toupper = False
 
-        if all(ups) and not self._gene_isupper:
+        if not self._gene_isupper and all(ups):
             _gls = [str(x).upper() for x in self._gls]
             _gene_toupper = True
             self._logger.info("  Genes in GMT file are all in upper case, convert query to upper case.")
