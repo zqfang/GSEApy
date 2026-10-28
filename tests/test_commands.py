@@ -1,5 +1,6 @@
 import textwrap
 from tempfile import TemporaryDirectory, mkdtemp
+from unittest.mock import Mock
 
 import matplotlib
 import numpy as np
@@ -709,6 +710,60 @@ class TestEnrichrAPI:
         urls = {EnrichrAPI(organism=a).base_url for a in human_aliases}
         assert len(urls) == 1  # all should map to the same URL
 
+    def test_runs_with_and_without_background_have_matching_columns(self, monkeypatch):
+        """Enrichr results have matching columns with and without background."""
+
+        import importlib
+
+        enrichr_module = importlib.import_module("gseapy.enrichr")
+        session = Mock()
+        monkeypatch.setattr(enrichr_module, "retry", lambda: session)
+
+        base_url = "https://maayanlab.cloud/Enrichr"
+        speed_url = "https://maayanlab.cloud/speedrichr/api"
+
+        export = (
+            "Term\tP-value\tAdjusted P-value\tOld P-value\tOld Adjusted P-value\t"
+            "Odds Ratio\tCombined Score\tGenes\n"
+            "pathway\t0.01\t0.02\t0.03\t0.04\t2.0\t3.0\tTP53;BRCA1\n"
+        )
+
+        responses = {
+            f"{base_url}/datasetStatistics": Mock(
+                json=lambda: {"statistics": [{"libraryName": "library"}]}
+            ),
+            f"{base_url}/addList": Mock(text='{"userListId": 1, "shortId": "standard"}'),
+            f"{base_url}/export": Mock(text=export),
+            f"{speed_url}/addList": Mock(text='{"userListId": 2, "shortId": "background"}'),
+            f"{speed_url}/addbackground": Mock(json=lambda: {"backgroundid": "bg"}),
+            f"{speed_url}/backgroundenrich": Mock(
+                json=lambda: {
+                    "library": [
+                        [1, "pathway", 0.05, 4.0, 5.0, ["TP53", "BRCA1"], 0.06, 0.07, 0.08]
+                    ]
+                }
+            ),
+        }
+
+        session.get.side_effect = lambda url, **kwargs: responses[url]
+        session.post.side_effect = lambda url, **kwargs: responses[url]
+
+        kwargs = {
+            "gene_list": ["TP53", "BRCA1"],
+            "gene_sets": "library",
+            "outdir": None,
+            "no_plot": True,
+        }
+
+        without_background = enrichr(**kwargs).res2d
+        with_background = enrichr(
+            **kwargs, background=["TP53", "BRCA1", "EGFR"]
+        ).res2d
+
+        assert with_background is not None
+        assert without_background is not None
+        assert with_background.columns.tolist() == without_background.columns.tolist()
+
 
 class TestEnrichrClass:
     """Tests for the Enrichr class instantiation and helpers."""
@@ -983,24 +1038,6 @@ class TestEnrichrClass:
             # Root term (level 0) should be excluded
             assert len(result) == 1
             assert "GO:0006281" in result["Term"].values[0]
-
-    def test_runs_with_and_without_background_have_matching_columns(self):
-        """Enrichr results have matching columns with and without background."""
-
-        kwargs = dict(
-            gene_list=["A", "B"],
-            gene_sets={"X": ["A"]},
-            outdir=None,
-            no_plot=True,
-        )
-
-        without_background = enrichr(**kwargs, background=None).res2d
-        with_background = enrichr(
-            **kwargs, background=["A", "B", "C"]
-        ).res2d
-
-        assert with_background.columns.tolist()  # Make sure it's not empty
-        assert with_background.columns.tolist() == without_background.columns.tolist()
 
 
 class TestEnrichOnline:
