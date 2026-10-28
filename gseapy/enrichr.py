@@ -293,7 +293,7 @@ class EnrichrAPI:
             "Genes",
             "Adjusted P-value",
             "Old P-value",
-            "Old adjusted P-value",
+            "Old Adjusted P-value",
         ]
         res = pd.DataFrame(data[gene_set_key], columns=colnames)
         res["Genes"] = res["Genes"].apply(";".join)
@@ -302,7 +302,7 @@ class EnrichrAPI:
             "P-value",
             "Adjusted P-value",
             "Old P-value",
-            "Old adjusted P-value",
+            "Old Adjusted P-value",
             "Odds Ratio",
             "Combined Score",
             "Genes",

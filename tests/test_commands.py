@@ -984,6 +984,24 @@ class TestEnrichrClass:
             assert len(result) == 1
             assert "GO:0006281" in result["Term"].values[0]
 
+    def test_runs_with_and_without_background_have_matching_columns(self):
+        """Enrichr results have matching columns with and without background."""
+
+        kwargs = dict(
+            gene_list=["A", "B"],
+            gene_sets={"X": ["A"]},
+            outdir=None,
+            no_plot=True,
+        )
+
+        without_background = enrichr(**kwargs, background=None).res2d
+        with_background = enrichr(
+            **kwargs, background=["A", "B", "C"]
+        ).res2d
+
+        assert with_background.columns.tolist()  # Make sure it's not empty
+        assert with_background.columns.tolist() == without_background.columns.tolist()
+
 
 class TestEnrichOnline:
     """Tests for Enrichr online API calls (these require network access)."""
