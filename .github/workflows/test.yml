@@ -45,7 +45,7 @@ jobs:
         with:
           toolchain: stable
       - name: Install cibuildwheel
-        run: python -m pip install cibuildwheel twine wheel
+        run: python -m pip install "cibuildwheel>=4.3.1,<5" twine wheel
       - name: Build wheels
         run: python -m cibuildwheel --output-dir wheelhouse
         env:
@@ -55,9 +55,8 @@ jobs:
           CIBW_ENVIRONMENT_LINUX: 'PATH="$PATH:$HOME/.cargo/bin"'
           CIBW_MANYLINUX_X86_64_IMAGE: quay.io/pypa/manylinux2014_x86_64:latest
           CIBW_MANYLINUX_I686_IMAGE: quay.io/pypa/manylinux2014_i686:latest
-          CIBW_SKIP: cp36-* cp37-* cp38-* pp* *win32 *musl*
+          CIBW_SKIP: "*win32 *musl*"
           CIBW_PROJECT_REQUIRES_PYTHON: ">=3.9"
-          CIBW_PRERELEASE_PYTHONS: True
           CIBW_BEFORE_BUILD: >
             python -m pip install -U pip setuptools wheel build setuptools-rust
       - name: Upload wheels
