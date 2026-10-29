@@ -726,7 +726,9 @@ class Enrichr(EnrichrAPI):
                     "Genes": [";".join(map(str, g)) for g in genes],
                 }
             )
-            return res
+            # Hide zero-hit terms only after correcting across the full family.
+            res = res.loc[np.asarray(olsz) > 0].reset_index(drop=True)
+            return res if not res.empty else None
         return None
 
     def enrich_online(self, genes_list: str, geneset_libraries: List[str]) -> Optional[pd.DataFrame]:
