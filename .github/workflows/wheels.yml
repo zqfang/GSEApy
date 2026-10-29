@@ -32,7 +32,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - name: Install cibuildwheel
-        run: python -m pip install cibuildwheel
+        run: python -m pip install "cibuildwheel>=4.3.1,<5"
       - name: Build wheels
         run: python -m cibuildwheel --output-dir wheelhouse
         env:
@@ -41,9 +41,8 @@ jobs:
             curl https://sh.rustup.rs -sSf | sh -s -- -y
           CIBW_ENVIRONMENT_LINUX: 'PATH="$PATH:$HOME/.cargo/bin"'
           CIBW_MANYLINUX_X86_64_IMAGE: quay.io/pypa/manylinux2014_x86_64:latest
-          CIBW_SKIP: pp* *win32 *musl*
+          CIBW_SKIP: "*win32 *musl*"
           CIBW_PROJECT_REQUIRES_PYTHON: ">=3.9"
-          CIBW_PRERELEASE_PYTHONS: "true"
           CIBW_BEFORE_BUILD: >
             python -m pip install -U pip setuptools wheel build setuptools-rust
       - uses: actions/upload-artifact@v4
@@ -62,7 +61,7 @@ jobs:
         with:
           platforms: aarch64
       - name: Install cibuildwheel
-        run: python -m pip install cibuildwheel
+        run: python -m pip install "cibuildwheel>=4.3.1,<5"
       - name: Build wheels
         run: python -m cibuildwheel --output-dir wheelhouse
         env:
@@ -73,9 +72,8 @@ jobs:
           CIBW_MANYLINUX_AARCH64_IMAGE: quay.io/pypa/manylinux2014_aarch64:latest
           CIBW_MANYLINUX_X86_64_IMAGE: quay.io/pypa/manylinux2014_x86_64:latest
           CIBW_ARCHS_LINUX: aarch64
-          CIBW_SKIP: pp* *win32 *musl*
+          CIBW_SKIP: "*win32 *musl*"
           CIBW_PROJECT_REQUIRES_PYTHON: ">=3.9"
-          CIBW_PRERELEASE_PYTHONS: "true"
           CIBW_BEFORE_BUILD: >
             python -m pip install -U pip setuptools wheel build setuptools-rust
       - uses: actions/upload-artifact@v4
@@ -99,13 +97,12 @@ jobs:
       - name: Force win32 rust
         run: rustup default stable-i686-pc-windows-msvc
       - name: Install cibuildwheel
-        run: python -m pip install cibuildwheel
+        run: python -m pip install "cibuildwheel>=4.3.1,<5"
       - name: Build wheels
         run: python -m cibuildwheel --output-dir wheelhouse
         env:
-          CIBW_SKIP: pp* *amd64 *musl*
+          CIBW_SKIP: "*amd64 *musl*"
           CIBW_PROJECT_REQUIRES_PYTHON: ">=3.9"
-          CIBW_PRERELEASE_PYTHONS: "true"
           CIBW_BEFORE_BUILD: >
             python -m pip install -U pip setuptools wheel build setuptools-rust
       - uses: actions/upload-artifact@v4
