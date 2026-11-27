@@ -349,11 +349,9 @@ class GSEAbase(object):
         # check whether contains infinity values
         if np.isinf(df).values.sum() > 0:
             self._logger.warning("Input gene rankings contains inf values!")
-            col_min_max = {
-                np.inf: df[np.isfinite(df)].max(),  # column-wise max
-                -np.inf: df[np.isfinite(df)].min(),  # column-wise min
-            }
-            df = df.replace({col: col_min_max for col in df.columns})
+            finite = df.where(np.isfinite(df))
+            df = df.mask(np.isposinf(df), finite.max(), axis=1)
+            df = df.mask(np.isneginf(df), finite.min(), axis=1)
         return df
 
     def _is_entrez_id(self, idx: Union[int, str]) -> bool:
